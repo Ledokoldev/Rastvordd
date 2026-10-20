@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Rastvordd.Sim;
 using SVec = System.Numerics.Vector2;
@@ -26,11 +27,15 @@ namespace Rastvordd.Client
         readonly Dictionary<int, ActorView2D> _actorViews = new();
         readonly Dictionary<int, TracerView2D> _projViews = new();
         readonly Dictionary<int, BagView2D> _bagViews = new();
-        readonly List<TreeView2D> _trees = new();
+        readonly Dictionary<int, NodeView2D> _nodeViews = new();
+        readonly Dictionary<int, PickupView2D> _pickupViews = new();
+        readonly Dictionary<int, DeployView2D> _deployViews = new();
         readonly List<FlashView2D> _fx = new();
+        readonly List<FloatText2D> _texts = new();
+        GhostView2D _ghost;
 
-        bool _reloadEdge, _interactEdge, _healEdge, _respawnEdge;
-        int _slot = -1;
+        bool _reloadEdge, _interactEdge, _healEdge, _respawnEdge, _eatEdge, _debugEdge;
+        int _slot = -1, _craftReq = -1;
         SVec _aim;
         Vector2 _screenDir;
         float _peek;
@@ -41,6 +46,25 @@ namespace Rastvordd.Client
         string _shotPath;
         int _shotFrame = -1, _frame;
         SVec? _autoAim;
+        readonly Dictionary<int, List<string>> _script = new();
+        int _autoFireFrames;
+
+        void RunScript()
+        {
+            if (!_script.TryGetValue(_frame, out var actions)) return;
+            foreach (var a in actions)
+            {
+                if (a == "kit") _debugEdge = true;
+                else if (a == "interact") _interactEdge = true;
+                else if (a == "eat") _eatEdge = true;
+                else if (a == "fire") _autoFireFrames = 4;
+                else if (a == "hold") _autoFireFrames = 100000;
+                else if (a == "release") _autoFireFrames = 0;
+                else if (a == "craftmenu") _hud.ToggleCraft();
+                else if (a.StartsWith("slot")) _slot = int.Parse(a.Substring(4)) - 1;
+                else if (a.StartsWith("craft")) _craftReq = int.Parse(a.Substring(5));
+            }
+        }
 
         public override void _Ready()
         {
@@ -60,10 +84,16 @@ namespace Rastvordd.Client
 
             _hud = new Hud();
             AddChild(_hud);
+            _hud.CraftRequested += i => _craftReq = i;
+
+            _ghost = new GhostView2D { Visible = false };
+            _world.AddChild(_ghost);
 
             _cur = _server.BuildSnapshot(_myId);
             Input.MouseMode = Input.MouseModeEnum.Hidden;
-            _hud.Toast("Вайп начался. Ты на пляже с самопалом. РТ — на юго-востоке.");
+            _hud.Toast("Вайп начался. Ты голый на пляже с булыжником. Бей деревья и камни, Q — крафт.");
+            if (OS.GetCmdlineUserArgs().Contains("--kit")) _debugEdge = true;
+            if (OS.GetCmdlineUserArgs().Contains("--craft")) _hud.ToggleCraft();
         }
 
         void ParseArgs()
@@ -84,6 +114,17 @@ namespace Rastvordd.Client
                 {
                     var p = arg.Substring(9).Split(',');
                     _autoScreen = new Vector2(float.Parse(p[0], inv), float.Parse(p[1], inv));
+                }
+                else if (arg.StartsWith("--do="))
+                {
+                    // отладочный сценарий: --do=10:kit,20:slot5,30:fire,60:interact,70:craft3
+                    foreach (var step in arg.Substring(5).Split(','))
+                    {
+                        var kv = step.Split(':');
+                        int frame = int.Parse(kv[0]);
+                        if (!_script.TryGetValue(frame, out var list)) _script[frame] = list = new List<string>();
+                        list.Add(kv[1]);
+                    }
                 }
                 else if (arg.StartsWith("--aim="))
                 {
@@ -128,16 +169,7 @@ namespace Rastvordd.Client
 
         void BuildMap(MapInfo map)
         {
-            foreach (var w in map.Walls)
-            {
-                if (w.Kind == WallKind.Tree)
-                {
-                    var t = new TreeView2D(w);
-                    _world.AddChild(t);
-                    _trees.Add(t);
-                }
-                else _world.AddChild(new WallView2D(w));
-            }
+            foreach (var w in map.Walls) _world.AddChild(new WallView2D(w));
         }
 
         // ---------- ввод ----------
@@ -155,6 +187,15 @@ namespace Rastvordd.Client
                     case Key.Key1: _slot = 0; break;
                     case Key.Key2: _slot = 1; break;
                     case Key.Key3: _slot = 2; break;
+                    case Key.Key4: _slot = 3; break;
+                    case Key.Key5: _slot = 4; break;
+                    case Key.Key6: _slot = 5; break;
+                    case Key.F: _eatEdge = true; break;
+                    case Key.F9: _debugEdge = true; break;
+                    case Key.Q:
+                        _hud.ToggleCraft();
+                        Input.MouseMode = _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
+                        break;
                     case Key.Tab: _hud.ToggleInventory(); break;
                     case Key.F12: SaveScreenshot($"user://shot_{Time.GetTicksMsec()}.png"); break;
                     case Key.Escape:
@@ -180,7 +221,10 @@ namespace Rastvordd.Client
             {
                 Move = move,
                 Aim = _aim,
-                Fire = Input.IsMouseButtonPressed(MouseButton.Left),
+                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
+                Eat = _eatEdge,
+                DebugKit = _debugEdge,
+                Craft = _craftReq,
                 Sprint = Input.IsPhysicalKeyPressed(Key.Shift),
                 Reload = _reloadEdge,
                 Interact = _interactEdge,
@@ -213,6 +257,7 @@ namespace Rastvordd.Client
         public override void _Process(double delta)
         {
             _frame++;
+            RunScript();
             UpdateAim((float)delta);
 
             _acc += delta;
@@ -227,8 +272,9 @@ namespace Rastvordd.Client
                 _server.Submit(_myId, BuildCmd());
                 _server.Tick();
                 _cur = _server.BuildSnapshot(_myId);
-                _reloadEdge = _interactEdge = _healEdge = _respawnEdge = false;
-                _slot = -1;
+                _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = false;
+                _slot = _craftReq = -1;
+                if (_autoFireFrames > 0) _autoFireFrames--;
                 HandleEvents();
                 _acc -= World.Dt;
                 steps++;
@@ -261,7 +307,25 @@ namespace Rastvordd.Client
                 switch (e.Kind)
                 {
                     case SimEventKind.Shot:
-                        Flash(e.Pos + e.Dir * 0.3f, new Color(1, 0.8f, 0.4f), 7, 0.05f);
+                        if (e.Text != "weapon_bow") Flash(e.Pos + e.Dir * 0.3f, new Color(1, 0.8f, 0.4f), 7, 0.05f);
+                        break;
+                    case SimEventKind.Swing:
+                        if (_actorViews.TryGetValue(e.ActorId, out var swinger)) swinger.StartSwing();
+                        break;
+                    case SimEventKind.HitNode:
+                        if (_nodeViews.TryGetValue(e.OtherId, out var nv)) nv.Hit();
+                        break;
+                    case SimEventKind.Gather:
+                        FloatText(e.Pos, $"+{(int)e.Value} {e.Text}", new Color(1, 0.95f, 0.75f));
+                        break;
+                    case SimEventKind.Info:
+                        _hud.Toast(e.Text);
+                        break;
+                    case SimEventKind.Crafted:
+                        _hud.Toast("Скрафчено: " + e.Text);
+                        break;
+                    case SimEventKind.Placed:
+                        _hud.Toast("Установлено: " + e.Text);
                         break;
                     case SimEventKind.HitActor:
                         Flash(e.Pos, new Color(0.85f, 0.1f, 0.08f), 5, 0.15f);
@@ -279,10 +343,17 @@ namespace Rastvordd.Client
                         if (e.ActorId == _myId) _hud.Toast("Залутано: " + e.Text);
                         break;
                     case SimEventKind.Respawn:
-                        if (e.ActorId == _myId) _hud.Toast("Проснулся на пляже. Голый, но с самопалом.");
+                        if (e.ActorId == _myId) _hud.Toast("Проснулся на пляже. Голый, с булыжником.");
                         break;
                 }
             }
+        }
+
+        void FloatText(SVec pos, string text, Color c)
+        {
+            var t = new FloatText2D { Position = Iso.Px(pos), Text = text, Color = c, ZIndex = 5 };
+            _world.AddChild(t);
+            _texts.Add(t);
         }
 
         void Flash(SVec pos, Color c, float radius, float life)
@@ -319,7 +390,7 @@ namespace Rastvordd.Client
                     if (d.LengthSquared() > 0.04f) facing = Mathf.Atan2(d.Y, d.X);
                     _selfPx = Iso.Px(pos);
                 }
-                view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt);
+                view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId);
             }
             foreach (var kv in _actorViews)
                 if (!seen.Contains(kv.Key)) kv.Value.Visible = false;
@@ -331,7 +402,7 @@ namespace Rastvordd.Client
                 seen.Add(p.Id);
                 if (!_projViews.TryGetValue(p.Id, out var v))
                 {
-                    v = new TracerView2D { Dir = new Vector2(p.Dir.X, p.Dir.Y) };
+                    v = new TracerView2D { Dir = new Vector2(p.Dir.X, p.Dir.Y), Arrow = p.Arrow };
                     _world.AddChild(v);
                     _projViews[p.Id] = v;
                 }
@@ -360,10 +431,10 @@ namespace Rastvordd.Client
             foreach (var kv in _bagViews)
                 if (!seen.Contains(kv.Key)) kv.Value.Visible = false;
 
-            // кроны над игроком становятся прозрачными
-            var head = _selfPx + new Vector2(0, -Iso.H(1.4f));
-            foreach (var t in _trees)
-                t.SetFade(head.DistanceSquaredTo(t.CanopyCenter) < t.CanopyR * t.CanopyR * 1.4f && _selfPx.Y < t.Position.Y + 4, dt);
+            RenderWorldObjects(dt);
+
+            for (int i = _texts.Count - 1; i >= 0; i--)
+                if (!_texts[i].Tick(dt)) { _texts[i].QueueFree(); _texts.RemoveAt(i); }
 
             for (int i = _fx.Count - 1; i >= 0; i--)
             {
@@ -372,6 +443,80 @@ namespace Rastvordd.Client
                 if (f.Life <= 0) { f.QueueFree(); _fx.RemoveAt(i); continue; }
                 f.QueueRedraw();
             }
+        }
+
+        /// <summary>Ресурсы, пикапы и постройки из снапшота + призрак установки.</summary>
+        void RenderWorldObjects(float dt)
+        {
+            var head = _selfPx + new Vector2(0, -Iso.H(1.4f));
+            var seen = new HashSet<int>();
+            foreach (var n in _cur.Nodes)
+            {
+                seen.Add(n.Id);
+                if (!_nodeViews.TryGetValue(n.Id, out var v))
+                {
+                    v = n.Kind == NodeKind.Tree
+                        ? new TreeView2D(Iso.Px(n.Pos), n.Radius)
+                        : new OreView2D(Iso.Px(n.Pos), n.Kind, n.Radius, n.Id);
+                    _world.AddChild(v);
+                    _nodeViews[n.Id] = v;
+                }
+                if (Mathf.Abs(v.Fill - n.Fill) > 0.01f) { v.Fill = n.Fill; v.QueueRedraw(); }
+                v.Tick(dt);
+                // кроны над игроком становятся прозрачными
+                if (v is TreeView2D t)
+                    t.SetFade(head.DistanceSquaredTo(t.CanopyCenter) < t.CanopyR * t.CanopyR * 1.4f && _selfPx.Y < t.Base.Y + 4, dt);
+            }
+            RemoveMissing(_nodeViews, seen);
+
+            seen.Clear();
+            foreach (var p in _cur.Pickups)
+            {
+                seen.Add(p.Id);
+                if (!_pickupViews.TryGetValue(p.Id, out var v))
+                {
+                    v = new PickupView2D(p.Kind) { Position = Iso.Px(p.Pos) };
+                    _world.AddChild(v);
+                    _pickupViews[p.Id] = v;
+                }
+                if (v.Available != p.Available) { v.Available = p.Available; v.QueueRedraw(); }
+            }
+            RemoveMissing(_pickupViews, seen);
+
+            seen.Clear();
+            foreach (var d in _cur.Deployables)
+            {
+                seen.Add(d.Id);
+                if (!_deployViews.TryGetValue(d.Id, out var v))
+                {
+                    v = new DeployView2D(d.Kind) { Position = Iso.Px(d.Pos) };
+                    _world.AddChild(v);
+                    _deployViews[d.Id] = v;
+                }
+                if (v.Burning != d.Burning) { v.Burning = d.Burning; v.QueueRedraw(); }
+                v.Tick(dt);
+            }
+            RemoveMissing(_deployViews, seen);
+
+            // призрак установки
+            var self = _cur.Self;
+            _ghost.Visible = self.HeldDeploy && !self.Dead && !_hud.CraftOpen;
+            if (_ghost.Visible)
+            {
+                var me = new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
+                _ghost.Position = Iso.Px(_aim);
+                bool ok = SVec.Distance(me, _aim) <= World.PlaceRange;
+                if (_ghost.Ok != ok) { _ghost.Ok = ok; _ghost.QueueRedraw(); }
+            }
+        }
+
+        static void RemoveMissing<T>(Dictionary<int, T> views, HashSet<int> seen) where T : Node
+        {
+            List<int> gone = null;
+            foreach (var kv in views)
+                if (!seen.Contains(kv.Key)) (gone ??= new List<int>()).Add(kv.Key);
+            if (gone == null) return;
+            foreach (var id in gone) { views[id].QueueFree(); views.Remove(id); }
         }
 
         void UpdateCamera(float dt)

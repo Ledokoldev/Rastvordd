@@ -1,17 +1,28 @@
+using System;
+using System.Collections.Generic;
 using Godot;
 using Rastvordd.Sim;
 
 namespace Rastvordd.Client
 {
-    /// <summary>Интерфейс поверх мира: HP, патроны, подсказки, инвентарь, смерть, затемнение вне обзора.</summary>
+    /// <summary>Интерфейс поверх мира: HP, еда, вода, пояс, крафт, подсказки, инвентарь, смерть, затемнение вне обзора.</summary>
     public partial class Hud : CanvasLayer
     {
-        Label _hpLabel, _ammoLabel, _hintLabel, _toastLabel, _promptLabel, _invLabel, _deathLabel, _modeLabel;
-        ColorRect _hpFill, _damageRect, _deathRect, _vision;
-        PanelContainer _invPanel;
+        const int BarW = 260;
+
+        Label _hpLabel, _foodLabel, _waterLabel, _ammoLabel, _hintLabel, _toastLabel, _promptLabel, _invLabel, _deathLabel, _modeLabel, _queueLabel;
+        ColorRect _hpFill, _foodFill, _waterFill, _damageRect, _deathRect, _vision;
+        PanelContainer _invPanel, _craftPanel;
+        VBoxContainer _recipeBox;
+        readonly List<Button> _recipeButtons = new();
+        HBoxContainer _belt;
+        readonly List<(PanelContainer panel, Label label, StyleBoxFlat style)> _beltSlots = new();
         ShaderMaterial _visionMat;
         float _toastTime, _damageFlash;
+
         public Crosshair Crosshair { get; private set; }
+        public bool CraftOpen => _craftPanel.Visible;
+        public event Action<int> CraftRequested;
 
         const string VisionShader = @"
 shader_type canvas_item;
@@ -41,16 +52,12 @@ void fragment() {
             _damageRect = FullRect(new Color(0.8f, 0, 0, 0));
 
             _hintLabel = MakeLabel(this, new Vector2(16, 12), 15, new Color(1, 1, 1, 0.75f));
-            _hintLabel.Text = "WASD — ходьба · Shift — бег · ЛКМ — стрелять · ПКМ — прицелиться · R — перезарядка · E — лутать · H — бинт\n1/2/3 — оружие · Tab — инвентарь · колесо — зум · Esc — курсор";
+            _hintLabel.Text = "WASD — ходьба · Shift — бег · ЛКМ — удар/выстрел/поставить · ПКМ — прицелиться · R — перезарядка\nE — взаимодействие · 1–6 — пояс · Q — крафт · Tab — инвентарь · F — съесть · H — бинт · F9 — отладочный набор";
             _modeLabel = MakeLabel(this, new Vector2(16, 58), 15, new Color(1, 0.9f, 0.6f, 0.85f));
 
-            var hpBack = new ColorRect { Color = new Color(0, 0, 0, 0.55f), Size = new Vector2(260, 26), MouseFilter = Control.MouseFilterEnum.Ignore };
-            hpBack.SetAnchorsPreset(Control.LayoutPreset.BottomLeft);
-            hpBack.Position = new Vector2(20, -50);
-            AddChild(hpBack);
-            _hpFill = new ColorRect { Color = new Color(0.45f, 0.75f, 0.3f), Size = new Vector2(260, 26), MouseFilter = Control.MouseFilterEnum.Ignore };
-            hpBack.AddChild(_hpFill);
-            _hpLabel = MakeLabel(hpBack, new Vector2(8, 2), 16, Colors.White);
+            (_hpFill, _hpLabel) = MakeBar(-50, 26, new Color(0.45f, 0.75f, 0.3f), 16);
+            (_foodFill, _foodLabel) = MakeBar(-76, 18, new Color(0.85f, 0.55f, 0.2f), 13);
+            (_waterFill, _waterLabel) = MakeBar(-98, 18, new Color(0.3f, 0.55f, 0.85f), 13);
 
             _ammoLabel = MakeLabel(this, Vector2.Zero, 22, Colors.White);
             _ammoLabel.HorizontalAlignment = HorizontalAlignment.Right;
@@ -59,11 +66,15 @@ void fragment() {
             _toastLabel = MakeLabel(this, Vector2.Zero, 20, Colors.White);
             _toastLabel.HorizontalAlignment = HorizontalAlignment.Center;
 
+            BuildBelt();
+
             _invPanel = new PanelContainer { Visible = false, MouseFilter = Control.MouseFilterEnum.Ignore };
             AddChild(_invPanel);
             _invLabel = new Label();
             _invLabel.AddThemeFontSizeOverride("font_size", 17);
             _invPanel.AddChild(_invLabel);
+
+            BuildCraftPanel();
 
             _deathRect = FullRect(new Color(0.25f, 0, 0, 0.55f));
             _deathRect.Visible = false;
@@ -73,6 +84,75 @@ void fragment() {
 
             Crosshair = new Crosshair { MouseFilter = Control.MouseFilterEnum.Ignore };
             AddChild(Crosshair);
+        }
+
+        (ColorRect fill, Label label) MakeBar(float y, float h, Color color, int font)
+        {
+            var back = new ColorRect { Color = new Color(0, 0, 0, 0.55f), Size = new Vector2(BarW, h), MouseFilter = Control.MouseFilterEnum.Ignore };
+            back.SetAnchorsPreset(Control.LayoutPreset.BottomLeft);
+            back.Position = new Vector2(20, y);
+            AddChild(back);
+            var fill = new ColorRect { Color = color, Size = new Vector2(BarW, h), MouseFilter = Control.MouseFilterEnum.Ignore };
+            back.AddChild(fill);
+            var label = MakeLabel(back, new Vector2(8, h > 20 ? 2 : -1), font, Colors.White);
+            return (fill, label);
+        }
+
+        void BuildBelt()
+        {
+            _belt = new HBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+            _belt.AddThemeConstantOverride("separation", 6);
+            AddChild(_belt);
+            for (int i = 0; i < Actor.BeltSize; i++)
+            {
+                var style = new StyleBoxFlat { BgColor = new Color(0, 0, 0, 0.55f), BorderColor = new Color(1, 1, 1, 0.25f) };
+                style.SetBorderWidthAll(2);
+                style.SetCornerRadiusAll(4);
+                style.ContentMarginLeft = style.ContentMarginRight = 6;
+                style.ContentMarginTop = style.ContentMarginBottom = 4;
+                var panel = new PanelContainer { CustomMinimumSize = new Vector2(104, 54), MouseFilter = Control.MouseFilterEnum.Ignore };
+                panel.AddThemeStyleboxOverride("panel", style);
+                var label = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart, MouseFilter = Control.MouseFilterEnum.Ignore };
+                label.AddThemeFontSizeOverride("font_size", 12);
+                panel.AddChild(label);
+                _belt.AddChild(panel);
+                _beltSlots.Add((panel, label, style));
+            }
+        }
+
+        void BuildCraftPanel()
+        {
+            _craftPanel = new PanelContainer { Visible = false, Position = new Vector2(20, 110) };
+            AddChild(_craftPanel);
+            var box = new VBoxContainer();
+            box.AddThemeConstantOverride("separation", 4);
+            _craftPanel.AddChild(box);
+            var title = new Label { Text = "КРАФТ  (Q — закрыть)" };
+            title.AddThemeFontSizeOverride("font_size", 18);
+            box.AddChild(title);
+            _recipeBox = new VBoxContainer();
+            _recipeBox.AddThemeConstantOverride("separation", 3);
+            box.AddChild(_recipeBox);
+            _queueLabel = new Label();
+            _queueLabel.AddThemeFontSizeOverride("font_size", 14);
+            _queueLabel.AddThemeColorOverride("font_color", new Color(1, 0.9f, 0.6f));
+            box.AddChild(_queueLabel);
+        }
+
+        void EnsureRecipeButtons(List<RecipeInfo> recipes)
+        {
+            if (_recipeButtons.Count == recipes.Count) return;
+            foreach (var b in _recipeButtons) b.QueueFree();
+            _recipeButtons.Clear();
+            foreach (var r in recipes)
+            {
+                int index = r.Index;
+                var b = new Button { Alignment = HorizontalAlignment.Left, FocusMode = Control.FocusModeEnum.None };
+                b.AddThemeFontSizeOverride("font_size", 14);
+                b.Pressed += () => CraftRequested?.Invoke(index);
+                _recipeBox.AddChild(b);
+                _recipeButtons.Add(b);
+            }
         }
 
         ColorRect FullRect(Color c)
@@ -109,6 +189,7 @@ void fragment() {
 
         public void FlashDamage() => _damageFlash = 0.45f;
         public void ToggleInventory() => _invPanel.Visible = !_invPanel.Visible;
+        public void ToggleCraft() => _craftPanel.Visible = !_craftPanel.Visible;
 
         public void SetVision(Vector2 playerPx, Vector2 facing, float nearPx, float farPx, float cosHalf, bool enabled)
         {
@@ -120,24 +201,68 @@ void fragment() {
             _visionMat.SetShaderParameter("darkness", enabled ? 0.3f : 0f);
         }
 
+        static void SetBar(ColorRect fill, float value, float max)
+        {
+            fill.Size = new Vector2(BarW * Mathf.Clamp(value / max, 0, 1), fill.Size.Y);
+        }
+
         public void UpdateHud(SelfInfo s, float dt, string modeText)
         {
-            _hpFill.Size = new Vector2(260 * Mathf.Clamp(s.Hp / s.MaxHp, 0, 1), 26);
+            SetBar(_hpFill, s.Hp, s.MaxHp);
             _hpFill.Color = s.Hp > 50 ? new Color(0.45f, 0.75f, 0.3f) : s.Hp > 25 ? new Color(0.85f, 0.65f, 0.2f) : new Color(0.85f, 0.2f, 0.15f);
             _hpLabel.Text = $"HP {Mathf.CeilToInt(s.Hp)}   · бинты: {s.Bandages}";
+            SetBar(_foodFill, s.Food, 100);
+            _foodLabel.Text = $"Еда {Mathf.CeilToInt(s.Food)}";
+            SetBar(_waterFill, s.Water, 100);
+            _waterLabel.Text = $"Вода {Mathf.CeilToInt(s.Water)}";
 
-            var bar = new System.Text.StringBuilder();
-            for (int i = 0; i < s.Hotbar.Length; i++)
-                bar.Append(i == s.Current ? $"[{i + 1} {s.Hotbar[i]}]  " : $"{i + 1} {s.Hotbar[i]}  ");
-            _ammoLabel.Text = $"{bar}\n{s.WeaponName}   {s.Ammo} / {s.Magazine}   ·  запас {s.Reserve}";
+            _ammoLabel.Text = s.HoldingGun ? $"{s.WeaponName}   {s.Ammo} / {s.Magazine}   ·  запас {s.Reserve}" : s.WeaponName;
+
+            for (int i = 0; i < _beltSlots.Count; i++)
+            {
+                var (_, label, style) = _beltSlots[i];
+                var slot = s.Belt[i];
+                string text = $"{i + 1}";
+                if (slot.HasValue)
+                {
+                    var b = slot.Value;
+                    text += $"  {b.Name}";
+                    if (b.IsGun) text += $"\n{b.Ammo}/{b.Magazine}";
+                    else if (b.Count > 1) text += $"\n×{b.Count}";
+                }
+                label.Text = text;
+                bool sel = i == s.Current;
+                style.BorderColor = sel ? new Color(1, 0.85f, 0.4f) : new Color(1, 1, 1, 0.25f);
+                style.BgColor = sel ? new Color(0.25f, 0.2f, 0.08f, 0.75f) : new Color(0, 0, 0, 0.55f);
+            }
 
             _modeLabel.Text = modeText;
-            _promptLabel.Text = s.NearLoot && !s.Dead ? "[E] Залутать" : "";
+            _promptLabel.Text = s.InteractHint ?? "";
 
             var inv = new System.Text.StringBuilder("ИНВЕНТАРЬ\n\n");
             if (s.Inventory.Count == 0) inv.Append("пусто");
             foreach (var (name, count) in s.Inventory) inv.Append($"{name} ×{count}\n");
             _invLabel.Text = inv.ToString();
+
+            if (_craftPanel.Visible)
+            {
+                EnsureRecipeButtons(s.Recipes);
+                for (int i = 0; i < s.Recipes.Count; i++)
+                {
+                    var r = s.Recipes[i];
+                    string bench = r.NeedsBench ? (s.NearBench ? " · верстак ✓" : " · нужен верстак") : "";
+                    _recipeButtons[i].Text = $"{r.Name} — {r.CostText} · {r.Time:0} с{bench}";
+                    _recipeButtons[i].Disabled = !r.CanCraft;
+                }
+                var q = new System.Text.StringBuilder();
+                if (s.CraftQueue.Count > 0) q.Append("Очередь: ");
+                for (int i = 0; i < s.CraftQueue.Count; i++)
+                {
+                    var (name, progress) = s.CraftQueue[i];
+                    q.Append(i == 0 ? $"{name} {Mathf.RoundToInt(progress * 100)}%" : $" · {name}");
+                }
+                _queueLabel.Text = q.ToString();
+            }
 
             _deathRect.Visible = s.Dead;
 
@@ -148,13 +273,15 @@ void fragment() {
 
             var vs = GetViewport().GetVisibleRect().Size;
             Place(_ammoLabel, vs, 1, 1, new Vector2(-20, -20));
-            Place(_promptLabel, vs, 0.5f, 1, new Vector2(0, -130));
+            Place(_belt, vs, 0.5f, 1, new Vector2(0, -16));
+            Place(_promptLabel, vs, 0.5f, 1, new Vector2(0, -90));
             Place(_toastLabel, vs, 0.5f, 0, new Vector2(0, 90));
             Place(_invPanel, vs, 1, 0.5f, new Vector2(-30, 0));
             Place(_deathLabel, vs, 0.5f, 0.5f, Vector2.Zero);
 
             Crosshair.HitFlash = Mathf.Max(0, Crosshair.HitFlash - dt);
             Crosshair.ReloadProgress = s.ReloadProgress;
+            Crosshair.Visible = !CraftOpen;
             Crosshair.QueueRedraw();
         }
     }

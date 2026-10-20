@@ -21,9 +21,12 @@ namespace Rastvordd.Client
 
     public partial class ActorView2D : Node2D
     {
+        const float SwingTime = 0.28f;
+
         readonly Body2D _body;
-        readonly Gun2D _gun;
+        readonly Held2D _held;
         bool _back = false, _dead;
+        float _swing;
 
         public ActorView2D(bool isNpc, bool isSelf)
         {
@@ -34,10 +37,12 @@ namespace Rastvordd.Client
                 Hair = isNpc ? new Color(0.2f, 0.22f, 0.16f) : new Color(0.28f, 0.18f, 0.1f),
                 Helmet = isNpc,
             };
-            _gun = new Gun2D { Position = new Vector2(1, -Iso.H(1.05f)) };
+            _held = new Held2D { Position = new Vector2(1, -Iso.H(1.05f)) };
             AddChild(_body);
-            AddChild(_gun);
+            AddChild(_held);
         }
+
+        public void StartSwing() => _swing = SwingTime;
 
         public override void _Draw()
         {
@@ -47,7 +52,7 @@ namespace Rastvordd.Client
             DrawSetTransform(Vector2.Zero, 0, Vector2.One);
         }
 
-        public void SetState(Vector2 pos, float facing, bool dead, bool reloading, float speed, float dt)
+        public void SetState(Vector2 pos, float facing, bool dead, bool reloading, float speed, float dt, string heldId)
         {
             Position = pos;
             bool right = Mathf.Cos(facing) >= 0;
@@ -57,27 +62,38 @@ namespace Rastvordd.Client
             {
                 _dead = dead;
                 _body.Dead = dead;
-                _gun.Visible = !dead;
+                _held.Visible = !dead;
                 _body.Rotation = dead ? (right ? Mathf.Pi / 2 : -Mathf.Pi / 2) : 0;
                 _body.Position = dead ? new Vector2(0, -4) : Vector2.Zero;
                 QueueRedraw();
             }
             if (dead) { _body.QueueRedraw(); return; }
 
+            if (_held.ItemId != heldId) { _held.ItemId = heldId; _held.QueueRedraw(); }
+
             _body.Scale = new Vector2(right ? 1 : -1, 1);
             if (back != _back)
             {
                 _back = back;
-                MoveChild(_gun, back ? 0 : 1);   // смотрит вверх — оружие за спиной, вниз — перед телом
+                MoveChild(_held, back ? 0 : 1);   // смотрит вверх — предмет за спиной, вниз — перед телом
             }
             _body.Back = back;
             _body.Moving = speed > 0.3f;
             _body.Phase += dt * (4f + speed * 1.6f);
             _body.QueueRedraw();
 
-            _gun.Rotation = facing + (reloading ? (right ? 0.9f : -0.9f) : 0);
-            _gun.Scale = new Vector2(1, right ? 1 : -1);
-            _gun.Position = new Vector2(right ? 2 : -2, -Iso.H(1.05f) + (_body.Moving ? -Mathf.Abs(Mathf.Sin(_body.Phase)) : 0));
+            // замах: предмет уходит назад и резко бьёт вперёд
+            float swingOffset = 0;
+            if (_swing > 0)
+            {
+                _swing -= dt;
+                float t = 1f - Mathf.Clamp(_swing / SwingTime, 0, 1);
+                swingOffset = t < 0.35f ? Mathf.Lerp(0, -1.3f, t / 0.35f) : Mathf.Lerp(-1.3f, 0.5f, (t - 0.35f) / 0.65f);
+                if (!right) swingOffset = -swingOffset;
+            }
+            _held.Rotation = facing + swingOffset + (reloading ? (right ? 0.9f : -0.9f) : 0);
+            _held.Scale = new Vector2(1, right ? 1 : -1);
+            _held.Position = new Vector2(right ? 2 : -2, -Iso.H(1.05f) + (_body.Moving ? -Mathf.Abs(Mathf.Sin(_body.Phase)) : 0));
         }
     }
 
@@ -128,18 +144,71 @@ namespace Rastvordd.Client
         }
     }
 
-    public partial class Gun2D : Node2D
+    /// <summary>Предмет в руках: рисуется по id, вращается за прицелом.</summary>
+    public partial class Held2D : Node2D
     {
+        public string ItemId;
+
+        static readonly Color Metal = new Color(0.14f, 0.14f, 0.15f);
+        static readonly Color Steel = new Color(0.55f, 0.56f, 0.58f);
+        static readonly Color Wood = new Color(0.45f, 0.3f, 0.16f);
+        static readonly Color Skin = new Color(0.86f, 0.68f, 0.55f);
+        static readonly Color StoneC = new Color(0.55f, 0.54f, 0.5f);
+
         public override void _Draw()
         {
-            var metal = new Color(0.14f, 0.14f, 0.15f);
-            DrawRect(new Rect2(2, -2.5f, 24, 5), metal);                     // ствол и корпус
-            DrawRect(new Rect2(26, -1.5f, 4, 3), metal.Lightened(0.2f));     // дуло
-            DrawRect(new Rect2(-3, -2, 7, 6), new Color(0.42f, 0.28f, 0.15f)); // приклад
-            DrawRect(new Rect2(11, 2.5f, 4, 5), metal);                      // магазин
-            var skin = new Color(0.86f, 0.68f, 0.55f);
-            DrawCircle(new Vector2(4, 1), 2.6f, skin);
-            DrawCircle(new Vector2(13, 0), 2.4f, skin);
+            switch (ItemId)
+            {
+                case null:
+                    DrawCircle(new Vector2(6, 0), 2.6f, Skin);
+                    break;
+                case "tool_rock":
+                    DrawCircle(new Vector2(9, 0), 5, StoneC);
+                    DrawCircle(new Vector2(8, -1.5f), 2, StoneC.Lightened(0.2f));
+                    DrawCircle(new Vector2(5, 1), 2.6f, Skin);
+                    break;
+                case "tool_hatchet":
+                    DrawLine(new Vector2(0, 0), new Vector2(19, 0), Wood, 3);
+                    DrawColoredPolygon(new[] { new Vector2(14, -1), new Vector2(21, -7), new Vector2(23, -1), new Vector2(18, 1) }, StoneC);
+                    DrawCircle(new Vector2(4, 0), 2.6f, Skin);
+                    break;
+                case "tool_pickaxe":
+                    DrawLine(new Vector2(0, 0), new Vector2(19, 0), Wood, 3);
+                    DrawColoredPolygon(new[] { new Vector2(19, -9), new Vector2(22, -2), new Vector2(22, 2), new Vector2(19, 9), new Vector2(18, 0) }, StoneC);
+                    DrawCircle(new Vector2(4, 0), 2.6f, Skin);
+                    break;
+                case "weapon_spear":
+                    DrawLine(new Vector2(-8, 0), new Vector2(30, 0), Wood, 2.5f);
+                    DrawColoredPolygon(new[] { new Vector2(30, -2.5f), new Vector2(37, 0), new Vector2(30, 2.5f) }, Wood.Lightened(0.3f));
+                    DrawCircle(new Vector2(2, 0), 2.6f, Skin);
+                    DrawCircle(new Vector2(12, 0), 2.4f, Skin);
+                    break;
+                case "weapon_bow":
+                    DrawArc(new Vector2(6, 0), 11, -1.3f, 1.3f, 16, Wood, 2.5f);
+                    DrawLine(new Vector2(6 + 11 * Mathf.Cos(-1.3f), 11 * Mathf.Sin(-1.3f)), new Vector2(6 + 11 * Mathf.Cos(1.3f), 11 * Mathf.Sin(1.3f)), new Color(0.85f, 0.85f, 0.8f), 1);
+                    DrawCircle(new Vector2(16.5f, 0), 2.6f, Skin);
+                    break;
+                case "weapon_pipe":
+                    DrawRect(new Rect2(2, -2, 18, 4), Metal);
+                    DrawRect(new Rect2(-3, -2, 6, 6), Wood);
+                    DrawCircle(new Vector2(4, 1), 2.6f, Skin);
+                    DrawCircle(new Vector2(12, 0), 2.4f, Skin);
+                    break;
+                case "weapon_ak":
+                    DrawRect(new Rect2(2, -2.5f, 24, 5), Metal);
+                    DrawRect(new Rect2(26, -1.5f, 4, 3), Metal.Lightened(0.2f));
+                    DrawRect(new Rect2(-3, -2, 7, 6), new Color(0.42f, 0.28f, 0.15f));
+                    DrawRect(new Rect2(11, 2.5f, 4, 5), Metal);
+                    DrawCircle(new Vector2(4, 1), 2.6f, Skin);
+                    DrawCircle(new Vector2(13, 0), 2.4f, Skin);
+                    break;
+                default:
+                    // устанавливаемое — несём коробку
+                    DrawRect(new Rect2(4, -6, 14, 12), ItemId == "deploy_furnace" ? StoneC : Wood);
+                    DrawRect(new Rect2(4, -6, 14, 12), new Color(0, 0, 0, 0.3f), false, 1);
+                    DrawCircle(new Vector2(4, 0), 2.6f, Skin);
+                    break;
+            }
         }
     }
 
@@ -170,9 +239,7 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            DrawSetTransform(new Vector2(0, 2), 0, new Vector2(1, 1));
-            DrawRect(new Rect2(_front.Position.X + 3, -4, _front.Size.X, 6), new Color(0, 0, 0, 0.2f));
-            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+            DrawRect(new Rect2(_front.Position.X + 3, -2, _front.Size.X, 6), new Color(0, 0, 0, 0.2f));
             DrawRect(_front, _frontC);
             DrawRect(_top, _topC);
             DrawRect(_top, _topC.Darkened(0.2f), false, 1);
@@ -189,17 +256,35 @@ namespace Rastvordd.Client
         }
     }
 
-    public partial class TreeView2D : Node2D
+    /// <summary>Ресурс на карте; при ударе слегка трясётся.</summary>
+    public abstract partial class NodeView2D : Node2D
+    {
+        public Vector2 Base;
+        public float Fill = 1;
+        float _shake;
+
+        public void Hit() => _shake = 0.18f;
+
+        public void Tick(float dt)
+        {
+            if (_shake <= 0) return;
+            _shake -= dt;
+            Position = Base + new Vector2(Mathf.Sin(_shake * 90) * 2.5f * (_shake / 0.18f), 0);
+            if (_shake <= 0) Position = Base;
+        }
+    }
+
+    public partial class TreeView2D : NodeView2D
     {
         readonly float _trunkW;
         public float CanopyR = Iso.PPM * 1.3f;
-        public Vector2 CanopyCenter => Position + new Vector2(0, -Iso.H(3.1f));
+        public Vector2 CanopyCenter => Base + new Vector2(0, -Iso.H(3.1f));
         float _alpha = 1;
 
-        public TreeView2D(WallInfo w)
+        public TreeView2D(Vector2 basePx, float radiusM)
         {
-            Position = new Vector2((w.Min.X + w.Max.X) * 0.5f * Iso.PPM, w.Max.Y * Iso.PPM);
-            _trunkW = (w.Max.X - w.Min.X) * Iso.PPM * 0.7f;
+            Base = Position = basePx;
+            _trunkW = radiusM * 2 * Iso.PPM * 0.7f;
         }
 
         /// <summary>Крона полупрозрачна, если под ней игрок — чтобы не терять персонажа.</summary>
@@ -226,6 +311,134 @@ namespace Rastvordd.Client
         }
     }
 
+    public partial class OreView2D : NodeView2D
+    {
+        readonly NodeKind _kind;
+        readonly Vector2[] _shape;
+        readonly Vector2[] _specks;
+
+        public OreView2D(Vector2 basePx, NodeKind kind, float radiusM, int seed)
+        {
+            Base = Position = basePx;
+            _kind = kind;
+            var rng = new RandomNumberGenerator { Seed = (ulong)seed };
+            float r = radiusM * Iso.PPM;
+            // неровная глыба: вид 3/4 — сплюснутый многоугольник, поднятый над землёй
+            _shape = new Vector2[9];
+            for (int i = 0; i < _shape.Length; i++)
+            {
+                float a = Mathf.Pi + Mathf.Pi * i / (_shape.Length - 1);   // верхняя полуокружность
+                float k = rng.RandfRange(0.8f, 1.1f);
+                _shape[i] = new Vector2(Mathf.Cos(a) * r * k, Mathf.Sin(a) * r * 1.1f * k);
+            }
+            _specks = new Vector2[6];
+            for (int i = 0; i < _specks.Length; i++)
+                _specks[i] = new Vector2(rng.RandfRange(-r * 0.6f, r * 0.6f), rng.RandfRange(-r * 0.9f, -r * 0.15f));
+        }
+
+        public override void _Draw()
+        {
+            float s = 0.55f + 0.45f * Mathf.Sqrt(Mathf.Clamp(Fill, 0, 1));
+            DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.4f));
+            DrawCircle(new Vector2(4, 0), 24 * s, new Color(0, 0, 0, 0.22f));
+            DrawSetTransform(Vector2.Zero, 0, new Vector2(s, s));
+            var body = new Color(0.5f, 0.49f, 0.46f);
+            DrawColoredPolygon(_shape, body);
+            // освещённая верхушка
+            var top = new Vector2[_shape.Length];
+            for (int i = 0; i < top.Length; i++) top[i] = _shape[i] * 0.7f + new Vector2(-2, -3);
+            DrawColoredPolygon(top, body.Lightened(0.15f));
+            var speck = _kind switch
+            {
+                NodeKind.Metal => new Color(0.78f, 0.45f, 0.22f),
+                NodeKind.Sulfur => new Color(0.9f, 0.82f, 0.25f),
+                _ => body.Darkened(0.25f),
+            };
+            foreach (var p in _specks) DrawCircle(p, _kind == NodeKind.Stone ? 1.5f : 2.6f, speck);
+            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+        }
+    }
+
+    public partial class PickupView2D : Node2D
+    {
+        public bool Available = true;
+        readonly PickupKind _kind;
+
+        public PickupView2D(PickupKind kind) { _kind = kind; }
+
+        public override void _Draw()
+        {
+            switch (_kind)
+            {
+                case PickupKind.Hemp:
+                    if (!Available) { DrawLine(new Vector2(-2, 0), new Vector2(-2, -4), new Color(0.4f, 0.35f, 0.2f), 2); break; }
+                    var g = new Color(0.36f, 0.55f, 0.24f);
+                    for (int i = -3; i <= 3; i++)
+                        DrawLine(new Vector2(i, 0), new Vector2(i * 3.2f, -18 - (3 - Mathf.Abs(i)) * 3), i % 2 == 0 ? g : g.Darkened(0.2f), 2);
+                    break;
+                case PickupKind.Berries:
+                    var leaf = new Color(0.2f, 0.36f, 0.18f);
+                    DrawCircle(new Vector2(0, -8), 10, Available ? leaf : leaf.Darkened(0.35f));
+                    DrawCircle(new Vector2(-5, -11), 6, Available ? leaf.Lightened(0.1f) : leaf.Darkened(0.3f));
+                    if (Available)
+                        foreach (var p in new[] { new Vector2(-4, -6), new Vector2(3, -10), new Vector2(5, -4), new Vector2(-1, -13), new Vector2(-7, -9) })
+                            DrawCircle(p, 1.8f, new Color(0.75f, 0.12f, 0.15f));
+                    break;
+                case PickupKind.WaterBarrel:
+                    var blue = new Color(0.2f, 0.36f, 0.55f);
+                    DrawRect(new Rect2(-8, -22, 16, 22), blue);
+                    DrawRect(new Rect2(-8, -16, 16, 2), blue.Darkened(0.3f));
+                    DrawRect(new Rect2(-8, -7, 16, 2), blue.Darkened(0.3f));
+                    DrawSetTransform(new Vector2(0, -22), 0, new Vector2(1, 0.4f));
+                    DrawCircle(Vector2.Zero, 8, blue.Lightened(0.2f));
+                    DrawCircle(Vector2.Zero, 5.5f, new Color(0.15f, 0.28f, 0.4f));
+                    DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                    break;
+            }
+        }
+    }
+
+    public partial class DeployView2D : Node2D
+    {
+        public bool Burning;
+        readonly DeployKind _kind;
+        float _flicker;
+
+        public DeployView2D(DeployKind kind) { _kind = kind; }
+
+        public void Tick(float dt)
+        {
+            if (!Burning) return;
+            _flicker += dt;
+            QueueRedraw();
+        }
+
+        public override void _Draw()
+        {
+            if (_kind == DeployKind.Workbench)
+            {
+                var wood = new Color(0.5f, 0.34f, 0.18f);
+                DrawRect(new Rect2(-20, -20, 4, 20), wood.Darkened(0.3f));
+                DrawRect(new Rect2(16, -20, 4, 20), wood.Darkened(0.3f));
+                DrawRect(new Rect2(-22, -24, 44, 6), wood.Darkened(0.15f));   // передняя кромка
+                DrawRect(new Rect2(-22, -36, 44, 12), wood);                  // столешница
+                DrawRect(new Rect2(-14, -34, 10, 4), new Color(0.5f, 0.5f, 0.52f));   // инструменты
+                DrawRect(new Rect2(4, -33, 12, 3), new Color(0.35f, 0.35f, 0.38f));
+                return;
+            }
+            var stone = new Color(0.45f, 0.44f, 0.42f);
+            DrawRect(new Rect2(-14, -26, 28, 26), stone);
+            DrawRect(new Rect2(-14, -32, 28, 8), stone.Lightened(0.12f));
+            DrawRect(new Rect2(-6, -16, 12, 10), new Color(0.08f, 0.07f, 0.07f));   // топка
+            if (Burning)
+            {
+                float k = 0.75f + 0.25f * Mathf.Sin(_flicker * 13) * Mathf.Sin(_flicker * 7.3f);
+                DrawRect(new Rect2(-5, -14, 10, 8), new Color(1f, 0.55f, 0.15f, k));
+                DrawCircle(new Vector2(0, -10), 18, new Color(1f, 0.55f, 0.2f, 0.12f * k));
+            }
+        }
+    }
+
     public partial class BagView2D : Node2D
     {
         public bool IsCrate, Empty;
@@ -244,10 +457,17 @@ namespace Rastvordd.Client
     public partial class TracerView2D : Node2D
     {
         public Vector2 Dir;
+        public bool Arrow;
 
         public override void _Draw()
         {
             var tip = new Vector2(0, -Iso.GunH);
+            if (Arrow)
+            {
+                DrawLine(tip - Dir * 14, tip, new Color(0.55f, 0.4f, 0.22f), 2);
+                DrawLine(tip - Dir * 3, tip, new Color(0.75f, 0.75f, 0.75f), 2);
+                return;
+            }
             var tail = tip - Dir * 16;
             DrawLine(tail, tip, new Color(1, 0.8f, 0.35f, 0.5f), 4);
             DrawLine(tail + Dir * 6, tip, new Color(1, 0.95f, 0.7f), 2);
@@ -263,6 +483,47 @@ namespace Rastvordd.Client
         {
             float k = Mathf.Clamp(Life / Max, 0, 1);
             DrawCircle(new Vector2(0, -Iso.GunH), Radius * (0.6f + 0.4f * k), new Color(Color, k));
+        }
+    }
+
+    /// <summary>Всплывающая надпись над точкой мира: «+16 Дерево».</summary>
+    public partial class FloatText2D : Node2D
+    {
+        public string Text;
+        public Color Color = Colors.White;
+        public float Life = 1.2f;
+        const float MaxLife = 1.2f;
+
+        public bool Tick(float dt)
+        {
+            Life -= dt;
+            QueueRedraw();
+            return Life > 0;
+        }
+
+        public override void _Draw()
+        {
+            float t = 1f - Life / MaxLife;
+            var font = ThemeDB.FallbackFont;
+            var pos = new Vector2(-80, -Iso.H(2.2f) - t * 22);
+            var c = new Color(Color, Mathf.Clamp(Life / 0.4f, 0, 1));
+            DrawStringOutline(font, pos, Text, HorizontalAlignment.Center, 160, 13, 4, new Color(0, 0, 0, c.A * 0.8f));
+            DrawString(font, pos, Text, HorizontalAlignment.Center, 160, 13, c);
+        }
+    }
+
+    /// <summary>Призрак установки под курсором: зелёный — можно поставить, красный — далеко.</summary>
+    public partial class GhostView2D : Node2D
+    {
+        public bool Ok;
+
+        public override void _Draw()
+        {
+            var c = Ok ? new Color(0.4f, 1f, 0.45f, 0.45f) : new Color(1f, 0.3f, 0.25f, 0.45f);
+            DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.55f));
+            DrawCircle(Vector2.Zero, 0.65f * Iso.PPM, c);
+            DrawArc(Vector2.Zero, 0.65f * Iso.PPM, 0, Mathf.Tau, 32, new Color(c, 0.9f), 1.5f, true);
+            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
         }
     }
 }

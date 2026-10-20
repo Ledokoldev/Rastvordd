@@ -1,0 +1,6 @@
+.godot/
+.mono/
+bin/
+obj/
+*.user
+screenshots/

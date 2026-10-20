@@ -108,8 +108,9 @@ void fragment() {
         public void FlashDamage() => _damageFlash = 0.45f;
         public void ToggleInventory() => _invPanel.Visible = !_invPanel.Visible;
 
-        public void SetVision(Vector2 playerPx, Vector2 facing, float nearPx, float farPx, bool enabled)
+        public void SetVision(Vector2 playerPx, Vector2 facing, float nearPx, float farPx, float cosHalf, bool enabled)
         {
+            _visionMat.SetShaderParameter("cos_half", cosHalf);
             _visionMat.SetShaderParameter("player_px", playerPx);
             _visionMat.SetShaderParameter("facing_dir", facing);
             _visionMat.SetShaderParameter("near_px", nearPx);

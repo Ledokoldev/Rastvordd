@@ -22,6 +22,11 @@ namespace Rastvordd.Sim
         float _lostTime, _reaction, _strafeTimer, _strafeSign = 1, _burstTimer, _pauseTimer;
         Vector2 _patrolTarget, _aimError, _lastPos;
         float _patrolWait, _stuckTime, _avoidAngle, _avoidTimer;
+        float _notice;       // 0..1: насколько NPC уверен, что видит врага. В бой — только при 1
+        float _trackTime;    // сколько секунд ведёт цель: первые выстрелы неточные
+        bool _provoked;      // в него стреляли — реагирует сразу
+
+        const float SightRange = 26f, SightCone = 110f, MaxFireRange = 30f;
 
         public NpcBrain(Actor me, World w, int seed)
         {
@@ -46,11 +51,12 @@ namespace Rastvordd.Sim
 
             var home = _w.NpcHomes[_me.Id];
             Actor target = Perceive();
+            if (target == null) _notice = MathF.Max(0, _notice - World.Dt * 0.4f);
 
             switch (_state)
             {
                 case State.Patrol:
-                    if (target != null) { EnterCombat(target); break; }
+                    if (target != null) { Notice(target, ref cmd); break; }
                     if (HeardNoise(out var noisePos)) { _lastKnown = noisePos; _state = State.Search; _lostTime = 0; break; }
                     if (Vector2.Distance(_me.Pos, _patrolTarget) < 0.8f)
                     {
@@ -79,7 +85,7 @@ namespace Rastvordd.Sim
                     break;
 
                 case State.Search:
-                    if (target != null) { EnterCombat(target); break; }
+                    if (target != null) { Notice(target, ref cmd); break; }
                     _lostTime += World.Dt;
                     if (_lostTime > 8f || Vector2.Distance(_me.Pos, home) > 30f)
                     {
@@ -95,9 +101,24 @@ namespace Rastvordd.Sim
             return cmd;
         }
 
+        /// <summary>Заметил кого-то: сначала присматривается, в бой — когда уверен или в него стреляли.</summary>
+        void Notice(Actor target, ref InputCmd cmd)
+        {
+            float dist = Vector2.Distance(_me.Pos, target.Pos);
+            float rate = dist < 8 ? 2.2f : dist < 16 ? 1.1f : 0.6f;
+            if (target.Vel.Length() > World.WalkSpeed + 0.3f) rate *= 1.5f;   // бегущего заметить проще
+            _notice += World.Dt * rate;
+            if (_provoked || _notice >= 1f) { EnterCombat(target); return; }
+            cmd.Aim = target.Pos;   // поворачивается и присматривается
+        }
+
         void EnterCombat(Actor target)
         {
-            if (_state != State.Combat) _reaction = R(0.35f, 0.9f) * (1.3f - _skill);
+            if (_state != State.Combat)
+            {
+                _reaction = R(0.5f, 1.0f) * (1.4f - _skill);
+                _trackTime = 0;
+            }
             _state = State.Combat;
             _targetId = target.Id;
             _lastKnown = target.Pos;
@@ -107,12 +128,13 @@ namespace Rastvordd.Sim
         {
             Actor best = null;
             float bestD = float.MaxValue;
+            _provoked = false;
             foreach (var a in _w.Actors)
             {
                 if (a.Dead || a.Team == Team.Npc) continue;
                 bool shotAtMe = _me.LastAttacker == a.Id && _w.Time - _me.LastDamagedTime < 1.5f;
-                float range = 32f;
-                if (!shotAtMe && !_w.CanSee(_me, a.Pos, range, 140)) continue;
+                if (shotAtMe) _provoked = true;
+                if (!shotAtMe && !_w.CanSee(_me, a.Pos, SightRange, SightCone)) continue;
                 if (shotAtMe && !_w.HasLineOfSight(_me.Pos, a.Pos)) { _lastKnown = a.Pos; continue; }
                 float d = Vector2.Distance(_me.Pos, a.Pos);
                 if (d < bestD) { bestD = d; best = a; }
@@ -153,19 +175,22 @@ namespace Rastvordd.Sim
             if (_me.Hp < 35 && dist < 20) move -= dir * 0.6f;
             cmd.Move = AvoidWalls(move);
 
-            // ошибка прицела медленно «плывёт», чем выше скилл, тем меньше
-            var errTarget = new Vector2(R(-1, 1), R(-1, 1)) * (1.6f - _skill) * MathF.Min(1.5f, dist / 12f);
+            // ошибка прицела «плывёт»: тем меньше, чем выше скилл и чем дольше NPC ведёт цель
+            _trackTime += World.Dt;
+            float warmup = 1f + 2.5f * MathF.Exp(-_trackTime / 1.2f);
+            var errTarget = new Vector2(R(-1, 1), R(-1, 1)) * (1.8f - _skill) * warmup * Math.Clamp(dist / 10f, 0.6f, 1.8f);
             _aimError = Vector2.Lerp(_aimError, errTarget, 0.08f);
-            cmd.Aim = target.Pos + target.Vel * (dist / 150f) * _skill + _aimError;
+            var lead = _skill > 0.6f ? target.Vel * (dist / 150f) : Vector2.Zero;
+            cmd.Aim = target.Pos + lead + _aimError;
 
             _reaction -= World.Dt;
-            if (_reaction > 0) return;
+            if (_reaction > 0 || dist > MaxFireRange) return;
 
             // очереди с паузами
             if (_pauseTimer > 0) { _pauseTimer -= World.Dt; return; }
             _burstTimer += World.Dt;
             cmd.Fire = true;
-            if (_burstTimer > R(0.3f, 0.8f)) { _burstTimer = 0; _pauseTimer = R(0.25f, 0.7f); }
+            if (_burstTimer > R(0.25f, 0.5f)) { _burstTimer = 0; _pauseTimer = R(0.5f, 1.0f); }
         }
 
         Vector2 Steer(Vector2 to)

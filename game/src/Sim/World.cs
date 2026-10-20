@@ -29,6 +29,7 @@ namespace Rastvordd.Sim
         public const float SprintSpeed = 6.8f;
         public const float Accel = 40f;
         public const float NpcRespawnTime = 45f;
+        public const float NpcDamageScale = 0.75f;
 
         public float Time;
         public uint Tick;
@@ -223,6 +224,10 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Видит ли наблюдатель цель: конус обзора, дальность, стены. Вплотную чувствуется всегда.</summary>
+        /// <summary>Обзор персонажа: выглядывание увеличивает дальность и сужает конус.</summary>
+        public static float ViewRange(Actor a) => 50f + 30f * a.Peek;
+        public static float ViewCone(Actor a) => 130f - 70f * a.Peek;
+
         public bool CanSee(Actor viewer, Vector2 target, float range = 45f, float coneDeg = 120f)
         {
             var d = target - viewer.Pos;
@@ -272,8 +277,18 @@ namespace Rastvordd.Sim
             // движение
             var move = cmd.Move;
             if (move.LengthSquared() > 1) move = Vector2.Normalize(move);
-            bool sprint = cmd.Sprint && move.LengthSquared() > 0.01f;
-            float speed = sprint ? SprintSpeed : WalkSpeed;
+            a.Peek = Math.Clamp(cmd.Peek, 0f, 1f);
+            float speed = WalkSpeed * (1f - 0.45f * a.Peek);   // выглядываешь — идёшь медленнее
+            bool sprint = false;
+            var toAimDir = cmd.Aim - a.Pos;
+            if (cmd.Sprint && move.LengthSquared() > 0.01f && a.Peek < 0.3f && toAimDir.LengthSquared() > 0.01f)
+            {
+                // спринт только вперёд: чем сильнее смотришь в сторону от бега, тем ближе к шагу
+                float off = MathF.Abs(Geo.AngleDiff(MathF.Atan2(move.Y, move.X), MathF.Atan2(toAimDir.Y, toAimDir.X))) * 180f / MathF.PI;
+                float k = 1f - Math.Clamp((off - 30f) / 30f, 0f, 1f);
+                speed = WalkSpeed + (SprintSpeed - WalkSpeed) * k;
+                sprint = k > 0.5f;
+            }
             a.Vel = Geo.MoveToward(a.Vel, move * speed, Accel * Dt);
             a.Pos += a.Vel * Dt;
             for (int pass = 0; pass < 2; pass++)
@@ -342,7 +357,8 @@ namespace Rastvordd.Sim
             Projectiles.Add(new Projectile
             {
                 Id = NextId(), OwnerId = a.Id, Pos = muzzle, Dir = dir,
-                Speed = def.BulletSpeed, RangeLeft = def.Range, Damage = def.Damage,
+                Speed = def.BulletSpeed, RangeLeft = def.Range,
+                Damage = def.Damage * (a.Team == Team.Npc ? NpcDamageScale : 1f),
             });
             a.LastShotTime = Time;
             Noises.Add(new Noise { Pos = a.Pos, Radius = def.NoiseRadius, SourceId = a.Id, Time = Time });

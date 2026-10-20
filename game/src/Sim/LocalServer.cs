@@ -162,13 +162,13 @@ namespace Rastvordd.Sim
         bool IsVisibleTo(Actor viewer, Actor target)
         {
             if (viewer.Dead) return Vector2.Distance(viewer.Pos, target.Pos) < 30;
-            if (World.CanSee(viewer, target.Pos, 50, 130)) return true;
+            if (World.CanSee(viewer, target.Pos, World.ViewRange(viewer), World.ViewCone(viewer))) return true;
             // выстрел выдаёт стрелка, если между нами нет стен
             bool shotRecently = World.Time - target.LastShotTime < 0.6f;
             return shotRecently && Vector2.Distance(viewer.Pos, target.Pos) < 60 && World.HasLineOfSight(viewer.Pos, target.Pos);
         }
 
         bool IsPointVisible(Actor viewer, Vector2 p) =>
-            Vector2.Distance(viewer.Pos, p) < 3 || World.CanSee(viewer, p, 50, 130);
+            Vector2.Distance(viewer.Pos, p) < 3 || World.CanSee(viewer, p, World.ViewRange(viewer), World.ViewCone(viewer));
     }
 }

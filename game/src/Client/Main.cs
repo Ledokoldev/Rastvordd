@@ -32,6 +32,10 @@ namespace Rastvordd.Client
         bool _reloadEdge, _interactEdge, _healEdge, _respawnEdge;
         int _slot = -1;
         SVec _aim;
+        Vector2 _screenDir;
+        float _peek;
+        float? _forcedPeek;
+        Vector2 _autoScreen = new Vector2(800, 450);
         Vector2 _selfPx;
 
         string _shotPath;
@@ -75,6 +79,12 @@ namespace Rastvordd.Client
                     _server.World.Find(_myId).Pos = new SVec(float.Parse(p[0], inv), float.Parse(p[1], inv));
                 }
                 else if (arg.StartsWith("--zoom=")) _zoom = float.Parse(arg.Substring(7), inv);
+                else if (arg.StartsWith("--peek=")) _forcedPeek = float.Parse(arg.Substring(7), inv);
+                else if (arg.StartsWith("--screen="))
+                {
+                    var p = arg.Substring(9).Split(',');
+                    _autoScreen = new Vector2(float.Parse(p[0], inv), float.Parse(p[1], inv));
+                }
                 else if (arg.StartsWith("--aim="))
                 {
                     var p = arg.Substring(6).Split(',');
@@ -177,12 +187,23 @@ namespace Rastvordd.Client
                 Heal = _healEdge,
                 Respawn = _respawnEdge,
                 SelectSlot = _slot,
+                Peek = _peek,
             };
         }
 
         /// <summary>Курсор указывает на высоту груди/оружия, поэтому точка на земле — чуть ниже курсора.</summary>
-        void UpdateAim()
+        void UpdateAim(float dt)
         {
+            // положение курсора относительно центра экрана: -1..1 по каждой оси
+            var vs = GetViewport().GetVisibleRect().Size;
+            var screen = _autoAim.HasValue ? _autoScreen : GetViewport().GetMousePosition();
+            _screenDir = ((screen - vs / 2) / (vs / 2)).Clamp(-Vector2.One, Vector2.One);
+
+            // выглядывание: курсор у края экрана
+            float edge = Mathf.Max(Mathf.Abs(_screenDir.X), Mathf.Abs(_screenDir.Y));
+            float peekTarget = _forcedPeek ?? Mathf.Clamp((edge - 0.6f) / 0.33f, 0, 1);
+            _peek = Mathf.MoveToward(_peek, peekTarget, dt * 3f);
+
             if (_autoAim.HasValue) { _aim = _autoAim.Value; return; }
             var m = GetGlobalMousePosition();
             _aim = new SVec(m.X / Iso.PPM, (m.Y + Iso.GunH) / Iso.PPM);
@@ -193,7 +214,7 @@ namespace Rastvordd.Client
         public override void _Process(double delta)
         {
             _frame++;
-            UpdateAim();
+            UpdateAim((float)delta);
 
             _acc += delta;
             int steps = 0;
@@ -356,27 +377,30 @@ namespace Rastvordd.Client
 
         void UpdateCamera(float dt)
         {
-            var aimPx = Iso.Px(_aim);
-            var look = aimPx - _selfPx;
-            float max = 7 * Iso.PPM;
-            if (look.Length() > max) look = look.Normalized() * max;
-            var target = _selfPx + look * 0.35f + new Vector2(0, -Iso.H(1f));
+            // смещение зависит от положения курсора на экране (не в мире), поэтому камера не «убегает»
+            // сдвиг — доля половины экрана, чтобы персонаж всегда оставался в кадре (не ближе 20% к краю)
+            var halfWorld = GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X;
+            var target = _selfPx + _screenDir * halfWorld * (0.2f + 0.55f * _peek) + new Vector2(0, -Iso.H(1f));
             _cam.Position = _frame <= 2 ? target : _cam.Position.Lerp(target, 1 - Mathf.Exp(-8 * dt));
-            var z = _cam.Zoom.X + (_zoom - _cam.Zoom.X) * (1 - Mathf.Exp(-10 * dt));
+            float zoomTarget = _zoom * (1f - 0.22f * _peek);   // выглядывая, камера чуть отдаляется
+            var z = _cam.Zoom.X + (zoomTarget - _cam.Zoom.X) * (1 - Mathf.Exp(-10 * dt));
             _cam.Zoom = new Vector2(z, z);
         }
 
         void UpdateHud(float dt)
         {
             var s = _cur.Self;
-            _hud.UpdateHud(s, dt, "Вид 3/4 · 2D · заглушки вместо спрайтов");
+            _hud.UpdateHud(s, dt, _peek > 0.05f
+                ? $"Выглядываешь {Mathf.RoundToInt(_peek * 100)}% · обзор уже, видно дальше, шаг медленнее"
+                : "Вид 3/4 · 2D · заглушки · курсор к краю экрана — выглянуть");
 
             var canvas = GetViewport().GetCanvasTransform();
             float zoom = _cam.Zoom.X;
             var chestPx = canvas * (_selfPx + new Vector2(0, -Iso.GunH));
             var dir = new Vector2(_aim.X, _aim.Y) - new Vector2(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
             _hud.SetVision(chestPx, dir.LengthSquared() > 0.01f ? dir.Normalized() : Vector2.Right,
-                           2.5f * Iso.PPM * zoom, 50 * Iso.PPM * zoom, !s.Dead);
+                           2.5f * Iso.PPM * zoom, (50 + 30 * _peek) * Iso.PPM * zoom,
+                           Mathf.Cos(Mathf.DegToRad((130 - 70 * _peek) * 0.5f)), !s.Dead);
 
             // прицел: круг = реальный разброс на дистанции до курсора
             var mouse = _autoAim.HasValue ? canvas * (Iso.Px(_aim) - new Vector2(0, Iso.GunH)) : GetViewport().GetMousePosition();

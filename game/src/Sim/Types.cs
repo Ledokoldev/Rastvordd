@@ -14,6 +14,7 @@ namespace Rastvordd.Sim
         public bool Interact;
         public bool Heal;
         public bool Respawn;
+        public float Peek;        // 0..1: насколько игрок выглядывает (курсор у края экрана)
         public int SelectSlot;    // -1 — без смены оружия
 
         public static InputCmd Empty => new InputCmd { SelectSlot = -1 };
@@ -112,6 +113,7 @@ namespace Rastvordd.Sim
         public float LastShotTime = -100;
         public float LastDamagedTime = -100;
         public float HealCooldown;
+        public float Peek;
         public bool FireHeldLastTick;
         public readonly List<WeaponState> Weapons = new();
         public int Current;

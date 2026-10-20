@@ -17,7 +17,9 @@ namespace Rastvordd.Client
         DecalLayer _decals;
         readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
-        bool _overview;
+        bool _overview, _perf;
+        double _perfTime, _simTime;
+        int _perfFrames;
         float? _forcedDay;
         int _myId;
         Snapshot _cur;
@@ -122,6 +124,7 @@ namespace Rastvordd.Client
                     _server.World.Find(_myId).Pos = new SVec(float.Parse(p[0], inv), float.Parse(p[1], inv));
                 }
                 else if (arg == "--overview") _overview = true;
+                else if (arg == "--perf") _perf = true;
                 else if (arg.StartsWith("--day=")) _forcedDay = float.Parse(arg.Substring(6), inv);
                 else if (arg.StartsWith("--zoom=")) _zoom = float.Parse(arg.Substring(7), inv);
                 else if (arg.StartsWith("--peek=")) _forcedPeek = float.Parse(arg.Substring(7), inv);
@@ -266,7 +269,9 @@ namespace Rastvordd.Client
                 foreach (var p in _cur.Projectiles) _prevProjs[p.Id] = p;
 
                 _server.Submit(_myId, BuildCmd());
+                var t0 = Time.GetTicksUsec();
                 _server.Tick();
+                _simTime += (Time.GetTicksUsec() - t0) / 1000.0;
                 _cur = _server.BuildSnapshot(_myId);
                 _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = false;
                 _slot = _craftReq = -1;
@@ -285,6 +290,15 @@ namespace Rastvordd.Client
             _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime);
             UpdateHud(dt);
 
+            if (_perf)
+            {
+                _perfTime += delta; _perfFrames++;
+                if (_perfTime >= 3)
+                {
+                    GD.Print($"perf: {_perfFrames / _perfTime:F0} fps, sim {_simTime / (_perfTime * 30):F2} ms/tick, nodes {_server.World.Nodes.Count}, views {_world.GetChildCount()}");
+                    _perfTime = 0; _perfFrames = 0; _simTime = 0;
+                }
+            }
             if (_shotPath != null && _frame == _shotFrame)
             {
                 SaveScreenshot(_shotPath);

@@ -142,15 +142,19 @@ void fragment() {
         static void BuildMasks(MapInfo map, out Image ma, out Image mb, out Image mc)
         {
             int n = map.N;
-            ma = Image.CreateEmpty(n, n, false, Image.Format.Rgba8);
-            mb = Image.CreateEmpty(n, n, false, Image.Format.Rgba8);
-            mc = Image.CreateEmpty(n, n, false, Image.Format.Rgba8);
+            const int S = 2;              // маска в 2 раза плотнее сетки биомов (1 м) — ровнее края площадок и троп
+            int ms = n * S;
+            float step = map.Cell / S;
+            ma = Image.CreateEmpty(ms, ms, false, Image.Format.Rgba8);
+            mb = Image.CreateEmpty(ms, ms, false, Image.Format.Rgba8);
+            mc = Image.CreateEmpty(ms, ms, false, Image.Format.Rgba8);
             var path = new[] { new Vector2(0, 60), new Vector2(8, 30), new Vector2(18, 8), new Vector2(20, 2), new Vector2(20, -6) };
             const int R = 2;   // радиус размытия, клеток
 
-            for (int y = 0; y < n; y++)
-            for (int x = 0; x < n; x++)
+            for (int my = 0; my < ms; my++)
+            for (int mx = 0; mx < ms; mx++)
             {
+                int x = mx / S, y = my / S;
                 var acc = new float[7];
                 int cnt = 0;
                 for (int dy = -R; dy <= R; dy++)
@@ -162,7 +166,7 @@ void fragment() {
                 }
                 for (int i = 0; i < 7; i++) acc[i] /= cnt;
 
-                var p = new Vector2((x + 0.5f) * map.Cell - map.HalfSize, (y + 0.5f) * map.Cell - map.HalfSize);
+                var p = new Vector2((mx + 0.5f) * step - map.HalfSize, (my + 0.5f) * step - map.HalfSize);
                 float pad = Box(p, new Vector2(5, -35), new Vector2(35, -5), 1.5f);
                 float gravel = Box(p, new Vector2(2, -38), new Vector2(38, -2), 3f) * (1 - pad);
                 float d = float.MaxValue;
@@ -171,10 +175,10 @@ void fragment() {
 
                 // площадка/тропа «вытесняют» биом под собой
                 float k = 1 - Mathf.Max(pad, Mathf.Max(gravel, dirt));
-                ma.SetPixel(x, y, new Color(acc[(int)Biome.Forest] * k, acc[(int)Biome.Arid] * k, acc[(int)Biome.Tundra] * k, acc[(int)Biome.Beach] * k));
-                mb.SetPixel(x, y, new Color(acc[(int)Biome.Swamp] * k, dirt, gravel, pad));
+                ma.SetPixel(mx, my, new Color(acc[(int)Biome.Forest] * k, acc[(int)Biome.Arid] * k, acc[(int)Biome.Tundra] * k, acc[(int)Biome.Beach] * k));
+                mb.SetPixel(mx, my, new Color(acc[(int)Biome.Swamp] * k, dirt, gravel, pad));
                 float h = map.Heights[y * n + x];
-                mc.SetPixel(x, y, new Color(acc[(int)Biome.Water], Mathf.Clamp(h * 0.5f + 0.5f, 0, 1), 0, 1));
+                mc.SetPixel(mx, my, new Color(acc[(int)Biome.Water], Mathf.Clamp(h * 0.5f + 0.5f, 0, 1), 0, 1));
             }
         }
 

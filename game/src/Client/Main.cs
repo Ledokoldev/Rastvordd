@@ -17,6 +17,7 @@ namespace Rastvordd.Client
         DecalLayer _decals;
         readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
+        Ambient _ambient;
         bool _overview, _perf;
         double _perfTime, _simTime;
         int _perfFrames;
@@ -90,6 +91,7 @@ namespace Rastvordd.Client
             AddChild(flatDecals);
             _decals = new DecalLayer(_map, flatDecals, _world);
             Sfx.Init(_world);
+            _ambient = new Ambient(this, _map);
             _daylight = new CanvasModulate();
             AddChild(_daylight);
 
@@ -287,6 +289,7 @@ namespace Rastvordd.Client
             Render(alpha, dt);
             UpdateCamera(dt);
             if (!_overview) _decals.Update(_cam.Position);
+            _ambient.Update(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _forcedDay ?? _cur.DayTime, dt);
             _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime);
             UpdateHud(dt);
 

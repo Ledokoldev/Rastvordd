@@ -141,6 +141,45 @@ def main() -> None:
             base[at + i] += rng.uniform(-1, 1) * amp * math.exp(-i / (0.003 * SR))
     save("furnace_loop", base, 0.5)
 
+    # ---------- фон (петли по 8 с) ----------
+    L = n(8.0)
 
-if __name__ == "__main__":
-    main()
+    def loopable(x: list[float], fade: int) -> list[float]:
+        # склеиваем конец с началом, чтобы петля не щёлкала
+        out = x[:len(x) - fade]
+        for i in range(fade):
+            k = i / fade
+            out[i] = out[i] * k + x[len(x) - fade + i] * (1 - k)
+        return out
+
+    wind = lowpass(noise(L + n(1)), 350)
+    gust = [0.55 + 0.45 * math.sin(2 * math.pi * (i / SR) / 4.0) * math.sin(2 * math.pi * (i / SR) / 2.7 + 1) for i in range(L + n(1))]
+    save("amb_wind", loopable([w * g for w, g in zip(wind, gust)], n(1)), 0.5)
+
+    surf = lowpass(noise(L + n(1)), 900)
+    waves = [max(0.0, math.sin(2 * math.pi * (i / SR) / 4.0)) ** 2 * 0.9 + 0.1 for i in range(L + n(1))]
+    save("amb_surf", loopable([s * w for s, w in zip(surf, waves)], n(1)), 0.55)
+
+    birds = [0.0] * L
+    for _ in range(14):
+        at = rng.randrange(0, L - n(0.4))
+        f0 = rng.uniform(2200, 4200)
+        for k in range(rng.randint(2, 5)):
+            st = at + k * n(0.09)
+            for i in range(n(0.07)):
+                if st + i >= L:
+                    break
+                t = i / n(0.07)
+                f = f0 * (1 + 0.3 * math.sin(math.pi * t))
+                birds[st + i] += math.sin(2 * math.pi * f * i / SR) * math.sin(math.pi * t) * 0.6
+    save("amb_birds", birds, 0.35)
+
+    crick = [0.0] * L
+    for i in range(L):
+        t = i / SR
+        pulse = 1.0 if (t * 14) % 1 < 0.45 and (t * 0.6) % 1 < 0.7 else 0.0
+        crick[i] = math.sin(2 * math.pi * 4800 * t) * pulse
+    save("amb_crickets", lowpass(crick, 6000), 0.25)
+
+
+if __name__ == "__main__":    main()

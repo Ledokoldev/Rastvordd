@@ -83,6 +83,7 @@ namespace Rastvordd.Client
                     Position = Iso.Px(p).Floor(),
                     FlipH = rng.Randf() < 0.5f,
                     TextureFilter = CanvasItem.TextureFilterEnum.Nearest,
+                    Material = VisionFx.ObjectMat,
                     Modulate = new Color(1, 1, 1, flat ? 0.85f : 1f) * (0.9f + rng.Randf() * 0.15f),
                 };
                 (flat ? _flatParent : _sortedParent).AddChild(s);

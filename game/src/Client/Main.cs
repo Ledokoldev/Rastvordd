@@ -15,6 +15,7 @@ namespace Rastvordd.Client
         LocalServer _server;
         MapInfo _map;
         DecalLayer _decals;
+        VisionRays _rays;
         readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
         Ambient _ambient;
@@ -83,6 +84,7 @@ namespace Rastvordd.Client
             _myId = _server.Connect("Игрок");
             ParseArgs();
 
+            VisionFx.Register();
             _map = _server.GetMap();
             BuildGround(_map);
             _world = new Node2D { YSortEnabled = true };
@@ -628,11 +630,15 @@ namespace Rastvordd.Client
 
             var canvas = GetViewport().GetCanvasTransform();
             float zoom = _cam.Zoom.X;
-            var chestPx = canvas * (_selfPx + new Vector2(0, -Iso.GunH));
-            var dir = new Vector2(_aim.X, _aim.Y) - new Vector2(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
-            _hud.SetVision(chestPx, dir.LengthSquared() > 0.01f ? dir.Normalized() : Vector2.Right,
-                           2.5f * Iso.PPM * zoom, (50 + 30 * _peek) * (1f - 0.4f * World.NightFactorAt(_forcedDay ?? _cur.DayTime)) * Iso.PPM * zoom,
-                           Mathf.Cos(Mathf.DegToRad((130 - 70 * _peek) * 0.5f)), !s.Dead);
+            // обзор «вилкой» из ног персонажа; за стенами и стволами — серо (лучи как на сервере)
+            var feetPx = canvas * _selfPx;
+            var selfM = new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
+            var dir = new Vector2(_aim.X - selfM.X, _aim.Y - selfM.Y);
+            float range = (50 + 30 * _peek) * (1f - 0.4f * World.NightFactorAt(_forcedDay ?? _cur.DayTime));
+            _rays ??= new VisionRays(_map);
+            _rays.Update(selfM, range, _cur.Nodes);
+            VisionFx.Update(_selfPx, dir.LengthSquared() > 0.01f ? dir.Normalized() : Vector2.Right,
+                            Mathf.Cos(Mathf.DegToRad((130 - 70 * _peek) * 0.5f)), range, _rays.Texture, !s.Dead);
 
             // прицел: круг = реальный разброс на дистанции до курсора
             var mouse = _autoAim.HasValue ? canvas * (Iso.Px(_aim) - new Vector2(0, Iso.GunH)) : GetViewport().GetMousePosition();

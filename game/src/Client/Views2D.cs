@@ -264,6 +264,7 @@ namespace Rastvordd.Client
         public WallView2D(WallInfo w, Biome biome = Biome.Grassland)
         {
             _biome = biome;
+            Material = VisionFx.ObjectMat;
             _kind = w.Kind;
             TextureFilter = TextureFilterEnum.Nearest;
             TextureRepeat = TextureRepeatEnum.Enabled;
@@ -370,6 +371,7 @@ namespace Rastvordd.Client
         public TreeView2D(Vector2 basePx, float radiusM, int seed = 0, Biome biome = Biome.Grassland)
         {
             Base = Position = basePx;
+            Material = VisionFx.ObjectMat;
             _trunkW = radiusM * 2 * Iso.PPM * 0.7f;
             _tex = Art.Tree(seed, biome);
             _tuft = Art.Get(biome is Biome.Arid or Biome.Tundra or Biome.Beach ? "decals/decal_grass_tuft_2" : "decals/decal_grass_tuft_1");
@@ -424,6 +426,7 @@ namespace Rastvordd.Client
         public OreView2D(Vector2 basePx, NodeKind kind, float radiusM, int seed, Biome biome = Biome.Grassland)
         {
             Base = Position = basePx;
+            Material = VisionFx.ObjectMat;
             _kind = kind;
             _tex = Art.Node(kind, seed, biome);
             TextureFilter = TextureFilterEnum.Nearest;
@@ -483,6 +486,7 @@ namespace Rastvordd.Client
         {
             _kind = kind;
             _biome = biome;
+            Material = VisionFx.ObjectMat;
             TextureFilter = TextureFilterEnum.Nearest;
         }
 
@@ -550,6 +554,7 @@ namespace Rastvordd.Client
         public DeployView2D(DeployKind kind)
         {
             _kind = kind;
+            Material = VisionFx.ObjectMat;
             TextureFilter = TextureFilterEnum.Nearest;
             if (kind == DeployKind.Furnace)
             {
@@ -624,7 +629,11 @@ namespace Rastvordd.Client
     {
         public bool IsCrate, Empty;
 
-        public BagView2D() => TextureFilter = TextureFilterEnum.Nearest;
+        public BagView2D()
+        {
+            TextureFilter = TextureFilterEnum.Nearest;
+            Material = VisionFx.ObjectMat;
+        }
 
         public override void _Draw()
         {

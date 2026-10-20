@@ -26,21 +26,31 @@ namespace Rastvordd.Client
 
         const string VisionShader = @"
 shader_type canvas_item;
+// Обзор «вилкой»: видно только внутри конуса и до первого препятствия (лучи из VisionRays).
+// Всё остальное — серое: обесцвеченное и чуть темнее, без резкой рамки.
+uniform sampler2D screen_tex : hint_screen_texture, filter_nearest;
+uniform sampler2D rays : filter_linear, repeat_enable;   // R = дальность луча в метрах, u = угол (-pi..pi -> 0..1)
 uniform vec2 player_px;
 uniform vec2 facing_dir = vec2(1.0, 0.0);
 uniform float cos_half = 0.42;
-uniform float near_px = 80.0;
-uniform float far_px = 1600.0;
-uniform float darkness = 0.3;
+uniform float px_per_m = 64.0;
+uniform float range_m = 50.0;
+uniform float strength = 1.0;
 void fragment() {
-    vec2 d = FRAGCOORD.xy - player_px;
+    vec2 d = (FRAGCOORD.xy - player_px) / px_per_m;
     float dist = length(d);
-    float c = dot(d / max(dist, 0.001), facing_dir);
-    // ровные края без размытия (как в Project Zomboid), лёгкое сглаживание только против лесенки
-    float aa = 1.5 / max(dist, 1.0);
-    float cone = smoothstep(cos_half - aa, cos_half + aa, c) * (1.0 - smoothstep(far_px - 1.0, far_px + 1.0, dist));
-    float nearv = 1.0 - smoothstep(near_px - 1.0, near_px + 1.0, dist);
-    COLOR = vec4(0.02, 0.03, 0.07, (1.0 - max(cone, nearv)) * darkness);
+    float c = dot(d / max(dist, 0.0001), facing_dir);
+    float aa = 1.5 / max(dist * px_per_m, 1.0);
+    float cone = smoothstep(cos_half - aa, cos_half + aa, c);
+    float rd = texture(rays, vec2(atan(d.y, d.x) / 6.2831853 + 0.5, 0.5)).r;
+    float open = 1.0 - smoothstep(rd - 0.03, rd + 0.03, dist);
+    float vis = cone * open * (1.0 - smoothstep(range_m - 0.5, range_m, dist));
+    // сам персонаж (нарисован вверх от ног) никогда не затеняется
+    if (abs(d.x) < 0.55 && d.y > -2.0 && d.y < 0.3) vis = 1.0;
+    vec3 col = texture(screen_tex, SCREEN_UV).rgb;
+    float l = dot(col, vec3(0.3, 0.59, 0.11));
+    vec3 hidden = mix(col, vec3(l), 0.65) * 0.8 + vec3(0.006, 0.01, 0.02);
+    COLOR = vec4(mix(col, hidden, (1.0 - vis) * strength), 1.0);
 }";
 
         public override void _Ready()
@@ -48,6 +58,7 @@ void fragment() {
             _visionMat = new ShaderMaterial { Shader = new Shader { Code = VisionShader } };
             _vision = FullRect(new Color(0, 0, 0, 0));
             _vision.Material = _visionMat;
+            _vision.Visible = false;   // обзор теперь в шейдерах мира (VisionFx), персонажи не затеняются
 
             _damageRect = FullRect(new Color(0.8f, 0, 0, 0));
 
@@ -201,14 +212,15 @@ void fragment() {
         public void ToggleInventory() => _invPanel.Visible = !_invPanel.Visible;
         public void ToggleCraft() => _craftPanel.Visible = !_craftPanel.Visible;
 
-        public void SetVision(Vector2 playerPx, Vector2 facing, float nearPx, float farPx, float cosHalf, bool enabled)
+        public void SetVision(Vector2 playerPx, Vector2 facing, float pxPerM, float rangeM, float cosHalf, Texture2D rays, bool enabled)
         {
             _visionMat.SetShaderParameter("cos_half", cosHalf);
             _visionMat.SetShaderParameter("player_px", playerPx);
             _visionMat.SetShaderParameter("facing_dir", facing);
-            _visionMat.SetShaderParameter("near_px", nearPx);
-            _visionMat.SetShaderParameter("far_px", farPx);
-            _visionMat.SetShaderParameter("darkness", enabled ? 0.3f : 0f);
+            _visionMat.SetShaderParameter("px_per_m", pxPerM);
+            _visionMat.SetShaderParameter("range_m", rangeM);
+            _visionMat.SetShaderParameter("rays", rays);
+            _visionMat.SetShaderParameter("strength", enabled ? 1f : 0f);
         }
 
         static void SetBar(ColorRect fill, float value, float max)

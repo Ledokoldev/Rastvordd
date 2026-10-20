@@ -1018,9 +1018,130 @@
       "cat": "plants",
       "h": 1.2,
       "desc": "a dried-out wild hemp plant with yellowed brittle leaves growing from cracked dry earth"
+    },
+    {
+      "id": "clutter_tire",
+      "cat": "clutter",
+      "h": 0.45,
+      "desc": "an old worn car tire lying flat on the ground. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_planks",
+      "cat": "clutter",
+      "h": 0.35,
+      "desc": "a few broken weathered wooden planks lying on the ground with rusty nails. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_bones",
+      "cat": "clutter",
+      "h": 0.35,
+      "desc": "a scatter of bleached animal bones and a skull lying on the ground. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_bucket",
+      "cat": "clutter",
+      "h": 0.45,
+      "desc": "a rusty dented metal bucket tipped over on its side. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_canister",
+      "cat": "clutter",
+      "h": 0.5,
+      "desc": "a red rusty jerry can fuel canister lying on its side. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_pallet",
+      "cat": "clutter",
+      "h": 0.3,
+      "desc": "a broken wooden shipping pallet lying flat on the ground. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_cone",
+      "cat": "clutter",
+      "h": 0.6,
+      "desc": "a faded orange traffic cone, a little dirty and cracked. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_fence",
+      "cat": "clutter",
+      "h": 0.9,
+      "desc": "a short broken section of a wooden picket fence with a missing plank, leaning. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_bicycle",
+      "cat": "clutter",
+      "h": 0.7,
+      "desc": "a rusty abandoned bicycle wreck lying on the ground, bent wheel. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_mattress",
+      "cat": "clutter",
+      "h": 0.3,
+      "desc": "a dirty stained old mattress lying on the ground with torn fabric. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_stump",
+      "cat": "clutter",
+      "h": 0.5,
+      "desc": "an old tree stump with roots, moss and an axe mark. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_log",
+      "cat": "clutter",
+      "h": 0.45,
+      "desc": "a fallen mossy log lying on the ground. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_mushrooms",
+      "cat": "clutter",
+      "h": 0.3,
+      "desc": "a cluster of brown and red-capped forest mushrooms. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "clutter_sign",
+      "cat": "clutter",
+      "h": 1.4,
+      "desc": "a leaning rusty bent road sign on a pole, faded paint, no readable text. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "flowers_poppy",
+      "cat": "clutter",
+      "h": 0.45,
+      "desc": "a bright patch of red poppy flowers among green grass. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "flowers_dandelion",
+      "cat": "clutter",
+      "h": 0.35,
+      "desc": "a bright patch of yellow dandelions and white dandelion puffs among green grass. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "flowers_heather",
+      "cat": "clutter",
+      "h": 0.4,
+      "desc": "a bright patch of purple heather flowers. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "flowers_chamomile",
+      "cat": "clutter",
+      "h": 0.35,
+      "desc": "a bright patch of white chamomile daisies with yellow centers among grass. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "flowers_lupine",
+      "cat": "clutter",
+      "h": 0.7,
+      "desc": "a clump of tall blue and violet lupine flowers. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "flowers_snowdrop",
+      "cat": "clutter",
+      "h": 0.3,
+      "desc": "a small patch of white snowdrop flowers and green leaves poking out of snow. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
     }
   ],
   "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",
   "weapon_framing": "A single game sprite of a weapon or tool for a survival game: the item alone, strict side view, horizontal, pointing to the right (muzzle or business end on the right), centered, transparent background, no hands, no text, no frame, no border, no cast shadow.",
-  "sheet_framing": "A character sprite sheet for a 2D top-down survival game in 3/4 view like Project Zomboid: a grid of 4 columns and 2 rows of equally spaced frames on a transparent background. Top row: the same person walking diagonally toward the camera and to the right (front 3/4 view, facing down-right), 4 frames of one walk cycle. Bottom row: the same person walking diagonally away from the camera and to the right (back 3/4 view, facing up-right), 4 frames of one walk cycle. Identical character, proportions, clothing and lighting in every frame, full body visible, feet on the same baseline within each row, arms relaxed with empty hands, no weapon, no text, no labels, no grid lines, no frame borders, no cast shadow."
+  "sheet_framing": "A character sprite sheet for a 2D top-down survival game in 3/4 view like Project Zomboid: a grid of 4 columns and 2 rows of equally spaced frames on a transparent background. Top row: the same person walking diagonally toward the camera and to the right (front 3/4 view, facing down-right), 4 frames of one walk cycle. Bottom row: the same person walking diagonally away from the camera and to the right (back 3/4 view, facing up-right), 4 frames of one walk cycle. Identical character, proportions, clothing and lighting in every frame, full body visible, feet on the same baseline within each row, arms relaxed with empty hands, no weapon, no text, no labels, no grid lines, no frame borders, no cast shadow.",
+  "clutter_style": "Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
 }

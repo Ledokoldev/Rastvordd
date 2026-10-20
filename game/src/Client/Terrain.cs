@@ -62,7 +62,7 @@ void fragment() {
         float rip = texture(detail_noise, m / 3.0 + vec2(TIME * 0.05, TIME * 0.03)).r;
         col *= 0.92 + floor(rip * 4.0) / 4.0 * 0.14;
         if (best - second < 0.06) col = mix(col, vec3(0.62, 0.66, 0.6), 0.55);   // пена у кромки
-        COLOR = vec4(col, 1.0);
+        COLOR = vec4(vis_apply(col, vis_at((m - vec2(map_size * 0.5)) * px_per_m)), 1.0);
     } else {
         if (id == 1) col = texture(t_forest, tuv).rgb;
         else if (id == 2) col = texture(t_dry, tuv).rgb;
@@ -98,7 +98,7 @@ void fragment() {
         col *= mix(0.8, 1.14, clamp(lit, 0.0, 1.0));
 
         if (best - second < 0.03) col *= 0.86;   // кромка на стыке поверхностей
-        COLOR = vec4(col, 1.0);
+        COLOR = vec4(vis_apply(col, vis_at((m - vec2(map_size * 0.5)) * px_per_m)), 1.0);
     }
 }";
 
@@ -110,7 +110,7 @@ void fragment() {
             MouseFilter = MouseFilterEnum.Ignore;
 
             BuildMasks(map, out var ma, out var mb, out var mc);
-            var mat = new ShaderMaterial { Shader = new Shader { Code = Code } };
+            var mat = new ShaderMaterial { Shader = new Shader { Code = Code.Replace("shader_type canvas_item;", "shader_type canvas_item;\n" + VisionFx.Lib) } };
             mat.SetShaderParameter("mask_a", ImageTexture.CreateFromImage(ma));
             mat.SetShaderParameter("mask_b", ImageTexture.CreateFromImage(mb));
             mat.SetShaderParameter("mask_c", ImageTexture.CreateFromImage(mc));

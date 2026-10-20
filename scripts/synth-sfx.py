@@ -152,9 +152,17 @@ def main() -> None:
             out[i] = out[i] * k + x[len(x) - fade + i] * (1 - k)
         return out
 
-    wind = lowpass(noise(L + n(1)), 350)
-    gust = [0.55 + 0.45 * math.sin(2 * math.pi * (i / SR) / 4.0) * math.sin(2 * math.pi * (i / SR) / 2.7 + 1) for i in range(L + n(1))]
-    save("amb_wind", loopable([w * g for w, g in zip(wind, gust)], n(1)), 0.5)
+    # ветер: выше и тоньше прибоя (полоса 500–1600 Гц) + еле слышный плавающий свист, порывы медленные и неровные
+    LL = L + n(1)
+    band = lowpass(highpass(noise(LL), 500), 1600)
+    gust = [0.35 + 0.65 * (0.5 + 0.5 * math.sin(2 * math.pi * (i / SR) / 6.3)) * (0.6 + 0.4 * math.sin(2 * math.pi * (i / SR) / 2.1 + 2)) for i in range(LL)]
+    whistle, ph = [], 0.0
+    for i in range(LL):
+        t = i / SR
+        f = 780 + 160 * math.sin(2 * math.pi * t / 5.1) + 60 * math.sin(2 * math.pi * t / 1.7)
+        ph += 2 * math.pi * f / SR
+        whistle.append(math.sin(ph) * 0.08 * gust[i])
+    save("amb_wind", loopable([b * g + w for b, g, w in zip(band, gust, whistle)], n(1)), 0.45)
 
     surf = lowpass(noise(L + n(1)), 900)
     waves = [max(0.0, math.sin(2 * math.pi * (i / SR) / 4.0)) ** 2 * 0.9 + 0.1 for i in range(L + n(1))]

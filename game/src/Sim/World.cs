@@ -4,7 +4,8 @@ using System.Numerics;
 
 namespace Rastvordd.Sim
 {
-    public enum WallKind { Concrete, Crate, Rock }
+    /// <summary>Concrete/Crate/Rock — стены РТ и укрытия-блоки; остальное — пропсы-спрайты (машины, блоки, хлам), тоже укрытия.</summary>
+    public enum WallKind { Concrete, Crate, Rock, Car, Barrier, Junk, Barrel, WoodCrate }
 
     public sealed class MapWall
     {
@@ -158,7 +159,6 @@ namespace Rastvordd.Sim
 
         void PlaceObject(int cat, Vector2 p)
         {
-            const float t = 0.35f, h = 2.6f;
             switch (cat)
             {
                 case 0: AddNode(NodeKind.Tree, p); break;
@@ -169,16 +169,30 @@ namespace Rastvordd.Sim
                 case 5: AddPickup(PickupKind.Berries, p); break;
                 case 6: AddPickup(PickupKind.WaterBarrel, p); break;
                 case 7:
-                    float w = Range(0.8f, 2.2f), d = Range(0.7f, 1.4f);
-                    AddWall(p.X - w / 2, p.Y - d / 2, p.X + w / 2, p.Y + d / 2, 1.0f, WallKind.Crate);
+                    // мелкие укрытия: ящик, бочка, хлам
+                    int r7 = Rng.Next(3);
+                    AddProp(r7 == 0 ? WallKind.WoodCrate : r7 == 1 ? WallKind.Barrel : WallKind.Junk, p);
                     break;
                 default:
-                    bool horiz = Rng.Next(2) == 0;
-                    float len = Range(3f, 7f);
-                    if (horiz) AddWall(p.X - len / 2, p.Y - t, p.X + len / 2, p.Y + t, h, WallKind.Concrete);
-                    else AddWall(p.X - t, p.Y - len / 2, p.X + t, p.Y + len / 2, h, WallKind.Concrete);
+                    // крупные укрытия: сгоревшая машина, бетонный блок, хлам
+                    int r8 = Rng.Next(10);
+                    AddProp(r8 < 3 ? WallKind.Car : r8 < 8 ? WallKind.Barrier : WallKind.Junk, p);
                     break;
             }
+        }
+
+        /// <summary>Пропс-укрытие: размер «следа» на земле под спрайт, высота ниже 2 м — обзор не закрывает.</summary>
+        void AddProp(WallKind kind, Vector2 p)
+        {
+            var (w, d, ht) = kind switch
+            {
+                WallKind.Car => (3.3f, 1.5f, 1.5f),
+                WallKind.Barrier => (1.2f, 0.5f, 0.9f),
+                WallKind.Barrel => (0.55f, 0.5f, 1.0f),
+                WallKind.WoodCrate => (0.75f, 0.65f, 0.8f),
+                _ => (0.9f, 0.6f, 0.8f),
+            };
+            AddWall(p.X - w / 2, p.Y - d, p.X + w / 2, p.Y, ht, kind);
         }
 
         static int NodeCategory(NodeKind k) => k switch { NodeKind.Tree => 0, NodeKind.Stone => 1, NodeKind.Metal => 2, _ => 3 };
@@ -350,7 +364,15 @@ namespace Rastvordd.Sim
         // ---------- время суток ----------
         public const float DayLength = 1200f;   // 20 минут на сутки
         /// <summary>0..1: 0 — полночь, 0.25 — рассвет, 0.5 — полдень, 0.75 — закат. Вайп начинается утром.</summary>
-        public float TimeOfDay => (Time / DayLength + 0.36f) % 1f;
+        public float TimeOfDay => ((Time + TimeOffset) / DayLength + 0.36f) % 1f;
+        public float TimeOffset;
+
+        /// <summary>Отладка (клавиша N): день ↔ ночь — прыжок к полудню или полуночи.</summary>
+        void ToggleDayNight()
+        {
+            float target = NightFactorAt(TimeOfDay) > 0.5f ? 0.5f : 0.0f;
+            TimeOffset += ((target - TimeOfDay + 1f) % 1f) * DayLength;
+        }
         /// <summary>0 днём, 1 глубокой ночью, плавно на рассвете и закате.</summary>
         public static float NightFactorAt(float t)
         {
@@ -458,6 +480,7 @@ namespace Rastvordd.Sim
             }
             if (cmd.Eat) Eat(a);
             if (cmd.DebugKit && a.Team == Team.Player) GiveDebugKit(a);
+            if (cmd.ToggleTime && a.Team == Team.Player) ToggleDayNight();
 
             if (cmd.Craft >= 0 && cmd.Craft < Recipes.All.Count) QueueCraft(a, Recipes.All[cmd.Craft]);
             StepCrafting(a);

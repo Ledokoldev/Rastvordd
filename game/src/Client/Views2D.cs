@@ -280,6 +280,31 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
+            // пропсы-укрытия — спрайтом, по центру «следа», основанием на передний край
+            string prop = _kind switch
+            {
+                WallKind.Car => "props/car_wreck",
+                WallKind.Barrier => "props/concrete_barrier",
+                WallKind.Junk => "props/junk_pile",
+                WallKind.Barrel => "props/barrel_oil",
+                WallKind.WoodCrate => "props/crate_wood",
+                _ => null,
+            };
+            if (prop != null)
+            {
+                var tex = Art.Get(prop);
+                if (tex != null)
+                {
+                    float s = _kind == WallKind.Car ? 1.4f : 1f;
+                    float depth = _top.Size.Y;
+                    DrawSetTransform(new Vector2(0, -depth * 0.5f), 0, new Vector2(1, 0.45f));
+                    DrawCircle(new Vector2(3, 0), tex.GetWidth() * 0.5f * s, new Color(0, 0, 0, 0.22f));
+                    DrawSetTransform(Vector2.Zero, 0, new Vector2(s, s));
+                    DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 2));
+                    DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                    return;
+                }
+            }
             DrawRect(new Rect2(_front.Position.X + 3, -2, _front.Size.X, 6), new Color(0, 0, 0, 0.2f));
             var (frontTex, topTex) = _kind switch
             {
@@ -368,7 +393,7 @@ namespace Rastvordd.Client
             {
                 DrawTexture(_tex, new Vector2(-_tex.GetWidth() / 2, -_tex.GetHeight() + 2), new Color(1, 1, 1, _alpha));
                 // пучки травы у корней — дерево «вросло» в землю
-                if (_tuft != null)
+                if (_tuft != null && false)   // пучки у корней отключены: в пикселе это кляксы
                     for (int i = 0; i < 2; i++)
                     {
                         float ox = ((_seed * (i + 3) * 37) % 17) - 8;

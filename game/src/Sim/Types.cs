@@ -16,6 +16,7 @@ namespace Rastvordd.Sim
         public bool Eat;
         public bool Respawn;
         public bool DebugKit;
+        public bool ToggleTime;   // отладка: день/ночь
         public float Peek;        // 0..1: насколько игрок прицеливается (ПКМ)
         public int SelectSlot;    // -1 — без смены слота пояса
         public int Craft;         // индекс рецепта, -1 — ничего

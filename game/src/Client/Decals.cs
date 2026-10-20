@@ -21,19 +21,15 @@ namespace Rastvordd.Client
 
         static readonly string[] Flat = { "decal_pebbles", "decal_leaves", "decal_puddle", "decal_debris" };
 
-        // веса по биому: tuft1, tuft2, fern, flowers | pebbles, leaves, puddle, debris; и сколько штук на кусок
+        // мелкие декали (9–18 px) в пикселе превращались в кляксы — убраны; остались только крупные кусты
         static readonly Dictionary<Biome, (int count, int[] w)> Fill = new()
         {
-            [Biome.Grassland] = (20, new[] { 30, 25, 3, 18, 10, 8, 2, 4 }),
-            [Biome.Forest] = (22, new[] { 15, 8, 30, 3, 6, 35, 2, 1 }),
-            [Biome.Swamp] = (18, new[] { 20, 25, 15, 2, 2, 8, 30, 3 }),
-            [Biome.Tundra] = (8, new[] { 5, 30, 5, 0, 45, 5, 0, 10 }),
-            [Biome.Arid] = (9, new[] { 0, 40, 0, 2, 40, 3, 0, 15 }),
-            [Biome.Beach] = (7, new[] { 0, 25, 0, 0, 40, 0, 0, 35 }),
+            [Biome.Grassland] = (1, new[] { 1 }),
+            [Biome.Forest] = (2, new[] { 1 }),
+            [Biome.Swamp] = (2, new[] { 1 }),
         };
 
-        static readonly string[] Ids = { "decal_grass_tuft_1", "decal_grass_tuft_2", "decal_fern", "decal_flowers", "decal_pebbles", "decal_leaves", "decal_puddle", "decal_debris" };
-
+        static readonly string[] Ids = { "plants/bush_1" };
         public DecalLayer(MapInfo map, Node2D flatParent, Node2D sortedParent)
         {
             _map = map;
@@ -75,10 +71,10 @@ namespace Rastvordd.Client
                 if (p.X > 4 && p.X < 36 && p.Y > -36 && p.Y < -4) continue;   // не на площадке РТ
                 int r = rng.RandiRange(0, sum - 1), id = 0;
                 for (; id < fill.w.Length; id++) { if (r < fill.w[id]) break; r -= fill.w[id]; }
-                var tex = Art.Get("decals/" + Ids[Mathf.Min(id, Ids.Length - 1)]);
+                var tex = Art.Get(Ids[Mathf.Min(id, Ids.Length - 1)]);
                 if (tex == null) continue;
 
-                bool flat = id >= 4;
+                bool flat = false;
                 var s = new Sprite2D
                 {
                     Texture = tex,

@@ -18,7 +18,8 @@ namespace Rastvordd.Client
         readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
         Ambient _ambient;
-        bool _overview, _perf;
+        bool _overview, _perf, _timeEdge;
+        int _pressNAt = -1;
         double _perfTime, _simTime;
         int _perfFrames;
         float? _forcedDay;
@@ -127,6 +128,7 @@ namespace Rastvordd.Client
                 }
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
+                else if (arg == "--press-n") _pressNAt = 5;
                 else if (arg.StartsWith("--day=")) _forcedDay = float.Parse(arg.Substring(6), inv);
                 else if (arg.StartsWith("--zoom=")) _zoom = float.Parse(arg.Substring(7), inv);
                 else if (arg.StartsWith("--peek=")) _forcedPeek = float.Parse(arg.Substring(7), inv);
@@ -192,6 +194,7 @@ namespace Rastvordd.Client
                     case Key.Key5: _slot = 4; break;
                     case Key.Key6: _slot = 5; break;
                     case Key.F: _eatEdge = true; break;
+                    case Key.N: _timeEdge = true; break;
                     case Key.F9: _debugEdge = true; break;
                     case Key.Q:
                         _hud.ToggleCraft();
@@ -233,6 +236,7 @@ namespace Rastvordd.Client
                 Respawn = _respawnEdge,
                 SelectSlot = _slot,
                 Peek = _peek,
+                ToggleTime = _timeEdge,
             };
         }
 
@@ -258,6 +262,7 @@ namespace Rastvordd.Client
         public override void _Process(double delta)
         {
             _frame++;
+            if (_frame == _pressNAt) _timeEdge = true;
             RunScript();
             UpdateAim((float)delta);
 
@@ -275,7 +280,7 @@ namespace Rastvordd.Client
                 _server.Tick();
                 _simTime += (Time.GetTicksUsec() - t0) / 1000.0;
                 _cur = _server.BuildSnapshot(_myId);
-                _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = false;
+                _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = _timeEdge = false;
                 _slot = _craftReq = -1;
                 if (_autoFireFrames > 0) _autoFireFrames--;
                 HandleEvents();

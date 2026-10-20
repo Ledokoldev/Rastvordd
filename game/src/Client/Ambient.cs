@@ -50,7 +50,7 @@ namespace Rastvordd.Client
                         water = Mathf.Max(water, 1f - (r - 6) / 24f);
                 }
 
-            Fade(_wind, ref _gWind, open ? 0.55f : 0.28f, dt);
+            Fade(_wind, ref _gWind, open ? 0.45f : 0f, dt);   // ветер — только на открытых местах
             Fade(_surf, ref _gSurf, water * 0.6f, dt);
             Fade(_birds, ref _gBirds, green ? 0.4f * (1 - night) : 0, dt);
             Fade(_crickets, ref _gCrickets, green ? 0.3f * night : 0, dt);

@@ -155,8 +155,33 @@ namespace Rastvordd.Client
         static readonly Color Skin = new Color(0.86f, 0.68f, 0.55f);
         static readonly Color StoneC = new Color(0.55f, 0.54f, 0.5f);
 
+        public Held2D() => TextureFilter = TextureFilterEnum.Nearest;
+
+        /// <summary>Длина предмета в руках, метры (по ней масштабируется спрайт).</summary>
+        static float HeldLength(string id) => id switch
+        {
+            "tool_rock" => 0.3f,
+            "tool_hatchet" or "tool_pickaxe" => 0.65f,
+            "weapon_spear" => 1.6f,
+            "weapon_bow" => 0.9f,
+            "weapon_pipe" => 0.5f,
+            "weapon_ak" => 0.95f,
+            _ => 0.7f,
+        };
+
         public override void _Draw()
         {
+            var tex = Art.HeldSprite(ItemId);
+            if (tex != null)
+            {
+                float len = HeldLength(ItemId) * Iso.PPM;
+                float s = len / (tex.GetWidth() * 0.9f);
+                DrawSetTransform(new Vector2(len * 0.3f, 0), 0, new Vector2(s, s));
+                DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() / 2));
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                DrawCircle(new Vector2(3, 0.5f), 2.4f, Skin);
+                return;
+            }
             switch (ItemId)
             {
                 case null:
@@ -223,6 +248,8 @@ namespace Rastvordd.Client
         public WallView2D(WallInfo w)
         {
             _kind = w.Kind;
+            TextureFilter = TextureFilterEnum.Nearest;
+            TextureRepeat = TextureRepeatEnum.Enabled;
             float cx = (w.Min.X + w.Max.X) * 0.5f * Iso.PPM;
             Position = new Vector2(cx, w.Max.Y * Iso.PPM);
             float x0 = w.Min.X * Iso.PPM - cx, wd = (w.Max.X - w.Min.X) * Iso.PPM;
@@ -240,6 +267,21 @@ namespace Rastvordd.Client
         public override void _Draw()
         {
             DrawRect(new Rect2(_front.Position.X + 3, -2, _front.Size.X, 6), new Color(0, 0, 0, 0.2f));
+            var (frontTex, topTex) = _kind switch
+            {
+                WallKind.Crate => (Art.Get("walls/wallface_wood"), Art.Get("tiles/floor_wood")),
+                WallKind.Rock => (Art.Get("walls/wallface_stone"), Art.Get("tiles/ground_gravel")),
+                _ => (Art.Get("walls/wallface_concrete"), Art.Get("tiles/ground_concrete")),
+            };
+            if (frontTex != null && topTex != null)
+            {
+                // лицевая сторона темнее (в тени), верх светлее — так читается высота
+                DrawTextureRect(frontTex, _front, true, new Color(0.78f, 0.78f, 0.78f));
+                DrawTextureRect(topTex, _top, true, new Color(1.05f, 1.05f, 1.05f));
+                DrawLine(new Vector2(_top.Position.X, _top.End.Y), _top.End, new Color(0, 0, 0, 0.35f), 1);
+                DrawRect(_top, new Color(0, 0, 0, 0.25f), false, 1);
+                return;
+            }
             DrawRect(_front, _frontC);
             DrawRect(_top, _topC);
             DrawRect(_top, _topC.Darkened(0.2f), false, 1);
@@ -277,14 +319,18 @@ namespace Rastvordd.Client
     public partial class TreeView2D : NodeView2D
     {
         readonly float _trunkW;
+        readonly Texture2D _tex;
         public float CanopyR = Iso.PPM * 1.3f;
-        public Vector2 CanopyCenter => Base + new Vector2(0, -Iso.H(3.1f));
+        public Vector2 CanopyCenter => Base + new Vector2(0, _tex != null ? -_tex.GetHeight() * 0.62f : -Iso.H(3.1f));
         float _alpha = 1;
 
-        public TreeView2D(Vector2 basePx, float radiusM)
+        public TreeView2D(Vector2 basePx, float radiusM, int seed = 0)
         {
             Base = Position = basePx;
             _trunkW = radiusM * 2 * Iso.PPM * 0.7f;
+            _tex = Art.Tree(seed);
+            if (_tex != null) CanopyR = _tex.GetWidth() * 0.42f;
+            TextureFilter = TextureFilterEnum.Nearest;
         }
 
         /// <summary>Крона полупрозрачна, если под ней игрок — чтобы не терять персонажа.</summary>
@@ -301,6 +347,11 @@ namespace Rastvordd.Client
             DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.45f));
             DrawCircle(new Vector2(10, 0), CanopyR * 0.9f, new Color(0, 0, 0, 0.2f));
             DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+            if (_tex != null)
+            {
+                DrawTexture(_tex, new Vector2(-_tex.GetWidth() / 2, -_tex.GetHeight() + 2), new Color(1, 1, 1, _alpha));
+                return;
+            }
             float trunkH = Iso.H(2.6f);
             DrawRect(new Rect2(-_trunkW / 2, -trunkH, _trunkW, trunkH), new Color(0.38f, 0.27f, 0.17f));
             var c = new Vector2(0, -Iso.H(3.1f));
@@ -316,11 +367,14 @@ namespace Rastvordd.Client
         readonly NodeKind _kind;
         readonly Vector2[] _shape;
         readonly Vector2[] _specks;
+        readonly Texture2D _tex;
 
         public OreView2D(Vector2 basePx, NodeKind kind, float radiusM, int seed)
         {
             Base = Position = basePx;
             _kind = kind;
+            _tex = Art.Node(kind, seed);
+            TextureFilter = TextureFilterEnum.Nearest;
             var rng = new RandomNumberGenerator { Seed = (ulong)seed };
             float r = radiusM * Iso.PPM;
             // неровная глыба: вид 3/4 — сплюснутый многоугольник, поднятый над землёй
@@ -342,6 +396,13 @@ namespace Rastvordd.Client
             DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.4f));
             DrawCircle(new Vector2(4, 0), 24 * s, new Color(0, 0, 0, 0.22f));
             DrawSetTransform(Vector2.Zero, 0, new Vector2(s, s));
+            if (_tex != null)
+            {
+                // при добыче глыба уменьшается
+                DrawTexture(_tex, new Vector2(-_tex.GetWidth() / 2, -_tex.GetHeight() + 3));
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                return;
+            }
             var body = new Color(0.5f, 0.49f, 0.46f);
             DrawColoredPolygon(_shape, body);
             // освещённая верхушка
@@ -364,10 +425,29 @@ namespace Rastvordd.Client
         public bool Available = true;
         readonly PickupKind _kind;
 
-        public PickupView2D(PickupKind kind) { _kind = kind; }
+        public PickupView2D(PickupKind kind)
+        {
+            _kind = kind;
+            TextureFilter = TextureFilterEnum.Nearest;
+        }
 
         public override void _Draw()
         {
+            // спрайт: у собранного куста ягод — просто куст, собранная конопля — пенёк (заглушка ниже)
+            var tex = _kind switch
+            {
+                PickupKind.Hemp => Available ? Art.Get("plants/hemp_plant") : null,
+                PickupKind.Berries => Art.Get(Available ? "plants/berry_bush" : "plants/bush_1"),
+                _ => Art.Get("props/barrel_water"),
+            };
+            if (tex != null)
+            {
+                DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.4f));
+                DrawCircle(new Vector2(2, 0), tex.GetWidth() * 0.4f, new Color(0, 0, 0, 0.22f));
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 2));
+                return;
+            }
             switch (_kind)
             {
                 case PickupKind.Hemp:
@@ -404,7 +484,11 @@ namespace Rastvordd.Client
         readonly DeployKind _kind;
         float _flicker;
 
-        public DeployView2D(DeployKind kind) { _kind = kind; }
+        public DeployView2D(DeployKind kind)
+        {
+            _kind = kind;
+            TextureFilter = TextureFilterEnum.Nearest;
+        }
 
         public void Tick(float dt)
         {
@@ -415,6 +499,30 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
+            var tex = Art.Get(_kind == DeployKind.Workbench ? "props/workbench" : "props/furnace");
+            if (tex != null)
+            {
+                DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.4f));
+                DrawCircle(new Vector2(2, 0), tex.GetWidth() * 0.45f, new Color(0, 0, 0, 0.25f));
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 2));
+                if (_kind == DeployKind.Furnace && Burning)
+                {
+                    // огонь в топке: 4 кадра по кругу (~10 к/с) + мерцающее свечение
+                    float k = 0.75f + 0.25f * Mathf.Sin(_flicker * 13) * Mathf.Sin(_flicker * 7.3f);
+                    DrawCircle(new Vector2(-1, -11), 16, new Color(1f, 0.55f, 0.2f, 0.16f * k));
+                    DrawCircle(new Vector2(-1, -11), 7, new Color(1f, 0.6f, 0.25f, 0.35f * k));
+                    var fire = Art.Get($"fx/fire_{(int)(_flicker * 10) % 4 + 1}");
+                    if (fire != null)
+                    {
+                        float fs = 0.6f;
+                        DrawSetTransform(new Vector2(-1, -6), 0, new Vector2(fs, fs));
+                        DrawTexture(fire, new Vector2(-fire.GetWidth() / 2, -fire.GetHeight()));
+                        DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                    }
+                }
+                return;
+            }
             if (_kind == DeployKind.Workbench)
             {
                 var wood = new Color(0.5f, 0.34f, 0.18f);
@@ -443,8 +551,22 @@ namespace Rastvordd.Client
     {
         public bool IsCrate, Empty;
 
+        public BagView2D() => TextureFilter = TextureFilterEnum.Nearest;
+
         public override void _Draw()
         {
+            var tex = Art.Get(IsCrate ? "props/crate_military" : "props/loot_bag");
+            if (tex != null)
+            {
+                // ящики и сумки делаем чуть крупнее реального — иначе их не видно
+                float s = IsCrate ? 1.4f : 1.3f;
+                DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.4f));
+                DrawCircle(new Vector2(2, 0), tex.GetWidth() * 0.5f * s, new Color(0, 0, 0, 0.25f));
+                DrawSetTransform(Vector2.Zero, 0, new Vector2(s, s));
+                DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 1), Empty ? new Color(0.45f, 0.45f, 0.45f) : Colors.White);
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                return;
+            }
             float w = IsCrate ? 34 : 18, d = IsCrate ? 18 : 12, h = IsCrate ? 16 : 10;
             var top = IsCrate ? (Empty ? new Color(0.22f, 0.25f, 0.18f) : new Color(0.36f, 0.48f, 0.26f)) : new Color(0.55f, 0.4f, 0.22f);
             var front = top.Darkened(0.3f);

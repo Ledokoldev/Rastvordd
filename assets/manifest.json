@@ -656,6 +656,60 @@
       "cat": "icons",
       "icon": 128,
       "desc": "a small campfire of logs ringed with stones, unlit"
+    },
+    {
+      "id": "weapon_torch",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a burning wooden torch wrapped with oily rags, small flame at the tip"
+    },
+    {
+      "id": "weapon_club",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a heavy wooden club with a knotted thick end"
+    },
+    {
+      "id": "weapon_bone_knife",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a primitive knife carved from an animal bone with a cloth-wrapped grip"
+    },
+    {
+      "id": "weapon_salvaged_sword",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a crude sword cut from a rusty sheet of metal with a taped handle"
+    },
+    {
+      "id": "weapon_crossbow",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a homemade wooden crossbow with a metal bow and a loaded bolt"
+    },
+    {
+      "id": "weapon_nailgun",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a scavenged pneumatic nail gun used as a weapon, scratched yellow paint"
+    },
+    {
+      "id": "weapon_waterpipe",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a single-shot shotgun improvised from a water pipe, wood and tape"
+    },
+    {
+      "id": "weapon_slingshot",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a homemade wooden slingshot with a rubber band"
+    },
+    {
+      "id": "weapon_cleaver",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a big rusty butcher cleaver made from salvaged metal"
     }
   ],
   "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

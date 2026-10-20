@@ -16,7 +16,7 @@ namespace Rastvordd.Client
         VBoxContainer _recipeBox;
         readonly List<Button> _recipeButtons = new();
         HBoxContainer _belt;
-        readonly List<(PanelContainer panel, Label label, StyleBoxFlat style)> _beltSlots = new();
+        readonly List<(PanelContainer panel, Label label, StyleBoxFlat style, TextureRect icon)> _beltSlots = new();
         ShaderMaterial _visionMat;
         float _toastTime, _damageFlash;
 
@@ -112,11 +112,20 @@ void fragment() {
                 style.ContentMarginTop = style.ContentMarginBottom = 4;
                 var panel = new PanelContainer { CustomMinimumSize = new Vector2(104, 54), MouseFilter = Control.MouseFilterEnum.Ignore };
                 panel.AddThemeStyleboxOverride("panel", style);
+                var icon = new TextureRect
+                {
+                    ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                    TextureFilter = CanvasItem.TextureFilterEnum.Nearest, MouseFilter = Control.MouseFilterEnum.Ignore,
+                    Modulate = new Color(1, 1, 1, 0.9f),
+                };
+                panel.AddChild(icon);
                 var label = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart, MouseFilter = Control.MouseFilterEnum.Ignore };
+                label.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.9f));
+                label.AddThemeConstantOverride("outline_size", 4);
                 label.AddThemeFontSizeOverride("font_size", 12);
                 panel.AddChild(label);
                 _belt.AddChild(panel);
-                _beltSlots.Add((panel, label, style));
+                _beltSlots.Add((panel, label, style, icon));
             }
         }
 
@@ -147,7 +156,8 @@ void fragment() {
             foreach (var r in recipes)
             {
                 int index = r.Index;
-                var b = new Button { Alignment = HorizontalAlignment.Left, FocusMode = Control.FocusModeEnum.None };
+                var b = new Button { Alignment = HorizontalAlignment.Left, FocusMode = Control.FocusModeEnum.None, Icon = Art.Icon(r.Output), TextureFilter = CanvasItem.TextureFilterEnum.Nearest };
+                b.AddThemeConstantOverride("icon_max_width", 32);
                 b.AddThemeFontSizeOverride("font_size", 14);
                 b.Pressed += () => CraftRequested?.Invoke(index);
                 _recipeBox.AddChild(b);
@@ -220,13 +230,14 @@ void fragment() {
 
             for (int i = 0; i < _beltSlots.Count; i++)
             {
-                var (_, label, style) = _beltSlots[i];
+                var (_, label, style, icon) = _beltSlots[i];
                 var slot = s.Belt[i];
                 string text = $"{i + 1}";
+                icon.Texture = slot.HasValue ? Art.Icon(slot.Value.Id) : null;
                 if (slot.HasValue)
                 {
                     var b = slot.Value;
-                    text += $"  {b.Name}";
+                    if (icon.Texture == null) text += $"  {b.Name}";
                     if (b.IsGun) text += $"\n{b.Ammo}/{b.Magazine}";
                     else if (b.Count > 1) text += $"\n×{b.Count}";
                 }

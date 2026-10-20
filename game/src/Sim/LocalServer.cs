@@ -34,6 +34,7 @@ namespace Rastvordd.Sim
     public struct RecipeInfo
     {
         public int Index;
+        public string Output;      // id предмета (для иконки)
         public string Name;
         public string CostText;
         public bool CanCraft;
@@ -232,6 +233,7 @@ namespace Rastvordd.Sim
                 s.Recipes.Add(new RecipeInfo
                 {
                     Index = i,
+                    Output = r.Output,
                     Name = Items.Name(r.Output) + (r.Count > 1 ? $" ×{r.Count}" : ""),
                     CostText = string.Join(", ", cost),
                     CanCraft = World.CanCraft(me, r),

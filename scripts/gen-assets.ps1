@@ -1,4 +1,4 @@
-# Пакетная генерация ассетов через Codex (gpt-image) по assets/manifest.json.
+﻿# Пакетная генерация ассетов через Codex (gpt-image) по assets/manifest.json.
 # Уже существующие файлы пропускаются. Пример:
 #   powershell -File scripts/gen-assets.ps1 -Parallel 3
 #   powershell -File scripts/gen-assets.ps1 -Only tree_pine_1,node_metal_1 -Force
@@ -40,7 +40,7 @@ foreach ($t in $todo) {
     $pf = Join-Path $logDir "$($t.Id).prompt.txt"
     Set-Content -Path $pf -Value $t.Prompt -Encoding UTF8
     $log = Join-Path $logDir "$($t.Id).log"
-    $p = Start-Process -FilePath $codex -ArgumentList @("exec", "-C", "`"$root`"", "-s", "workspace-write", "-") `
+    $p = Start-Process -FilePath $codex -ArgumentList @("exec", "-C", "`"$root`"", "-s", "workspace-write", "-c", "model_reasoning_effort=`"medium`"", "-") `
         -RedirectStandardInput $pf -RedirectStandardOutput $log -RedirectStandardError "$log.err" -NoNewWindow -PassThru
     $running += $p
     Write-Host "→ $($t.Id)"

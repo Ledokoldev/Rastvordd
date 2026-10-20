@@ -144,27 +144,33 @@ namespace Rastvordd.Client
 
             ground.AddChild(new ColorRect { Color = new Color(0.13f, 0.28f, 0.36f), Position = new Vector2(-half - 3000, -half - 3000), Size = new Vector2(size + 6000, size + 6000) });
 
-            var noise = new NoiseTexture2D
+            // тайлы земли (пиксель-арт); если их нет — простые цвета
+            void Tile(string art, Color fallback, Vector2 pos, Vector2 sz)
             {
-                Width = 512, Height = 512, Seamless = true,
-                Noise = new FastNoiseLite { Frequency = 0.01f, FractalOctaves = 4 },
-                ColorRamp = new Gradient { Colors = new[] { new Color(0.44f, 0.5f, 0.3f), new Color(0.56f, 0.6f, 0.37f) } },
-            };
-            ground.AddChild(new TextureRect
-            {
-                Texture = noise, StretchMode = TextureRect.StretchModeEnum.Tile,
-                Position = new Vector2(-half, -half), Size = new Vector2(size, size),
-            });
+                var tex = Art.Get(art);
+                if (tex == null) { ground.AddChild(new ColorRect { Color = fallback, Position = pos, Size = sz }); return; }
+                ground.AddChild(new TextureRect
+                {
+                    Texture = tex, StretchMode = TextureRect.StretchModeEnum.Tile,
+                    Position = pos, Size = sz, TextureFilter = CanvasItem.TextureFilterEnum.Nearest,
+                    MouseFilter = Control.MouseFilterEnum.Ignore,
+                });
+            }
+
+            Tile("tiles/ground_grass", new Color(0.48f, 0.53f, 0.33f), new Vector2(-half, -half), new Vector2(size, size));
 
             var sand = new Color(0.78f, 0.72f, 0.55f);
             float b = 4 * Iso.PPM;
-            ground.AddChild(new ColorRect { Color = sand, Position = new Vector2(-half, -half), Size = new Vector2(size, b) });
-            ground.AddChild(new ColorRect { Color = sand, Position = new Vector2(-half, half - b), Size = new Vector2(size, b) });
-            ground.AddChild(new ColorRect { Color = sand, Position = new Vector2(-half, -half), Size = new Vector2(b, size) });
-            ground.AddChild(new ColorRect { Color = sand, Position = new Vector2(half - b, -half), Size = new Vector2(b, size) });
+            Tile("tiles/ground_sand", sand, new Vector2(-half, -half), new Vector2(size, b));
+            Tile("tiles/ground_sand", sand, new Vector2(-half, half - b), new Vector2(size, b));
+            Tile("tiles/ground_sand", sand, new Vector2(-half, -half), new Vector2(b, size));
+            Tile("tiles/ground_sand", sand, new Vector2(half - b, -half), new Vector2(b, size));
+            // пляж на спавне шире
+            Tile("tiles/ground_sand", sand, Iso.Px(new SVec(-60, 38)), new Vector2(18, 22) * Iso.PPM);
 
-            // площадка РТ
-            ground.AddChild(new ColorRect { Color = new Color(0.45f, 0.45f, 0.43f), Position = Iso.Px(new SVec(5, -35)), Size = new Vector2(30, 30) * Iso.PPM });
+            // площадка РТ и подъездная грунтовка
+            Tile("tiles/ground_concrete", new Color(0.45f, 0.45f, 0.43f), Iso.Px(new SVec(5, -35)), new Vector2(30, 30) * Iso.PPM);
+            Tile("tiles/ground_dirt", new Color(0.4f, 0.32f, 0.22f), Iso.Px(new SVec(17, -5)), new Vector2(6, 12) * Iso.PPM);
         }
 
         void BuildMap(MapInfo map)
@@ -456,7 +462,7 @@ namespace Rastvordd.Client
                 if (!_nodeViews.TryGetValue(n.Id, out var v))
                 {
                     v = n.Kind == NodeKind.Tree
-                        ? new TreeView2D(Iso.Px(n.Pos), n.Radius)
+                        ? new TreeView2D(Iso.Px(n.Pos), n.Radius, n.Id)
                         : new OreView2D(Iso.Px(n.Pos), n.Kind, n.Radius, n.Id);
                     _world.AddChild(v);
                     _nodeViews[n.Id] = v;

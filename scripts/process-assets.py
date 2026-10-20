@@ -103,7 +103,14 @@ def process(a: dict, src: pathlib.Path) -> tuple[Image.Image, Image.Image]:
     h_hd = max(8, round(a["h"] * PX_HD))
     hd = im.resize((max(1, round(im.width * h_hd / im.height)), h_hd), Image.LANCZOS)
     h_px = max(4, round(a["h"] * PX_PIXEL))
+    global _global_palette
+    keep = _global_palette
+    if a["cat"] in OWN_PALETTE_CATS:
+        # трава и растения: своя палитра — в общей мало зелёного, и они превращались в тёмные кляксы
+        _global_palette = None
+        im = ImageEnhance.Brightness(ImageEnhance.Color(im).enhance(1.2)).enhance(1.12)
     px = pixelize(im, (max(1, round(im.width * h_px / im.height)), h_px))
+    _global_palette = keep
     return hd, px
 
 
@@ -160,6 +167,7 @@ def sheet(items: list[tuple[str, Image.Image]], scale: int, path: pathlib.Path, 
     print(f"preview: {path}")
 
 
+OWN_PALETTE_CATS = ("grass", "plants")
 WORLD_CATS = ("trees", "plants", "nodes", "props", "tiles", "walls", "decals", "fx")
 
 

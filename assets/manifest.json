@@ -1,0 +1,663 @@
+{
+  "style": "Gloomy post-apocalyptic mood like Rust and Project Zomboid, desaturated palette, highly detailed hand-painted digital art, soft overcast light from the top-left, no outline.",
+  "framing": "A single game sprite for a 2D top-down survival game drawn in 3/4 view (camera from the south, looking down about 50 degrees, like Project Zomboid). The whole object fully visible and centered, its base at the bottom center. Transparent background, no ground, no cast shadow, no text, no frame, no border.",
+  "tile_framing": "A seamless tileable square game texture filling the entire image edge to edge, orthographic with no perspective, even flat lighting everywhere, no vignette, no objects cut off by the edges, no text, no frame.",
+  "assets": [
+    {
+      "id": "tree_oak_dead",
+      "cat": "trees",
+      "h": 5.5,
+      "desc": "a dead, leafless oak tree with grey-brown bark, dark moss, a few dry brown leaves and faint rust-orange lichen"
+    },
+    {
+      "id": "tree_pine_1",
+      "cat": "trees",
+      "h": 6.5,
+      "desc": "a tall dark-green spruce/pine tree with dense dusty needles, slightly sick yellowing tips, rough brown trunk visible at the bottom"
+    },
+    {
+      "id": "tree_pine_2",
+      "cat": "trees",
+      "h": 6.0,
+      "desc": "a weathered pine tree with a few broken branches, dark muted green needles, thick bark trunk"
+    },
+    {
+      "id": "tree_birch",
+      "cat": "trees",
+      "h": 5.5,
+      "desc": "a thin birch tree with peeling white-grey bark streaked with dirt and sparse olive-yellow autumn leaves"
+    },
+    {
+      "id": "tree_leafy",
+      "cat": "trees",
+      "h": 5.0,
+      "desc": "a broad leafy deciduous tree with a full dusty dark-olive-green crown and a gnarled brown trunk"
+    },
+    {
+      "id": "bush_1",
+      "cat": "plants",
+      "h": 1.2,
+      "desc": "a dense wild shrub with muted dark-green and brownish leaves, a few dry twigs"
+    },
+    {
+      "id": "hemp_plant",
+      "cat": "plants",
+      "h": 1.4,
+      "desc": "a wild hemp plant with tall stalks and characteristic serrated green leaves, slightly wilted, growing as a small clump"
+    },
+    {
+      "id": "berry_bush",
+      "cat": "plants",
+      "h": 1.0,
+      "desc": "a low wild berry bush with dark leaves and clusters of small red and dark-purple berries"
+    },
+    {
+      "id": "node_stone_1",
+      "cat": "nodes",
+      "h": 1.3,
+      "desc": "a large grey granite boulder with cracks, chips and patches of lichen, a harvestable stone resource"
+    },
+    {
+      "id": "node_stone_2",
+      "cat": "nodes",
+      "h": 1.1,
+      "desc": "a cluster of two or three grey weathered rocks with moss in the crevices, a harvestable stone resource"
+    },
+    {
+      "id": "node_metal_1",
+      "cat": "nodes",
+      "h": 1.3,
+      "desc": "a dark grey boulder with thick veins of rusty orange-brown metal ore and metallic glints, a harvestable metal ore resource"
+    },
+    {
+      "id": "node_metal_2",
+      "cat": "nodes",
+      "h": 1.1,
+      "desc": "a rounded dark rock streaked with reddish-brown iron ore and specks of shiny metal"
+    },
+    {
+      "id": "node_sulfur_1",
+      "cat": "nodes",
+      "h": 1.3,
+      "desc": "a pale grey boulder crusted with bright yellow sulfur crystal deposits, a harvestable sulfur ore resource"
+    },
+    {
+      "id": "node_sulfur_2",
+      "cat": "nodes",
+      "h": 1.1,
+      "desc": "a crumbly light rock with powdery and crystalline yellow sulfur patches"
+    },
+    {
+      "id": "barrel_water",
+      "cat": "props",
+      "h": 1.0,
+      "desc": "an old faded blue plastic water drum with scratches, dirt streaks and a rusty metal lid"
+    },
+    {
+      "id": "barrel_oil",
+      "cat": "props",
+      "h": 1.0,
+      "desc": "a dented rusty red oil barrel with peeling paint and a faded hazard sticker"
+    },
+    {
+      "id": "crate_wood",
+      "cat": "props",
+      "h": 0.8,
+      "desc": "a weathered wooden supply crate made of grey planks with rusty nails and metal corner braces"
+    },
+    {
+      "id": "crate_military",
+      "cat": "props",
+      "h": 0.7,
+      "desc": "a military loot crate, olive-green painted metal with chipped paint, worn yellow stripes and heavy latches"
+    },
+    {
+      "id": "loot_bag",
+      "cat": "props",
+      "h": 0.5,
+      "desc": "a dropped dirty canvas duffel bag / sack with straps, lying on the ground, stuffed with loot"
+    },
+    {
+      "id": "furnace",
+      "cat": "props",
+      "h": 1.4,
+      "desc": "a crude survival furnace built from stacked stones and clay with a small metal chimney and a dark opening at the front, unlit"
+    },
+    {
+      "id": "furnace_lit",
+      "cat": "props",
+      "h": 1.4,
+      "desc": "a crude survival furnace built from stacked stones and clay with a small metal chimney, bright orange fire glowing in the front opening, a few sparks"
+    },
+    {
+      "id": "workbench",
+      "cat": "props",
+      "h": 1.0,
+      "desc": "a sturdy improvised workbench made of planks and scrap metal with a vice, scattered tools, a saw and a lamp"
+    },
+    {
+      "id": "concrete_barrier",
+      "cat": "props",
+      "h": 0.9,
+      "desc": "a cracked concrete jersey road barrier with faded red-white paint and exposed rebar"
+    },
+    {
+      "id": "car_wreck",
+      "cat": "props",
+      "h": 1.5,
+      "desc": "a burnt-out rusty abandoned sedan car wreck with broken windows and flat tires, seen from the 3/4 top-down view"
+    },
+    {
+      "id": "junk_pile",
+      "cat": "props",
+      "h": 0.8,
+      "desc": "a pile of junk: old tires, rusty sheet metal, broken pipes and a cracked plastic crate"
+    },
+    {
+      "id": "ground_grass",
+      "cat": "tiles",
+      "tile": 4,
+      "desc": "ground viewed straight down from above: dry muted olive-green grass with small patches of brown dirt, tiny pebbles and dead leaves"
+    },
+    {
+      "id": "ground_dirt",
+      "cat": "tiles",
+      "tile": 4,
+      "desc": "ground viewed straight down from above: trampled dark-brown muddy dirt with pebbles, footprints and sparse dead grass"
+    },
+    {
+      "id": "ground_sand",
+      "cat": "tiles",
+      "tile": 4,
+      "desc": "ground viewed straight down from above: grey-beige beach sand with small shells, pebbles and bits of washed-up debris"
+    },
+    {
+      "id": "ground_gravel",
+      "cat": "tiles",
+      "tile": 4,
+      "desc": "ground viewed straight down from above: grey crushed gravel with a few weeds"
+    },
+    {
+      "id": "ground_asphalt",
+      "cat": "tiles",
+      "tile": 4,
+      "desc": "ground viewed straight down from above: old cracked dark-grey asphalt with weeds growing in the cracks and stains"
+    },
+    {
+      "id": "ground_concrete",
+      "cat": "tiles",
+      "tile": 4,
+      "desc": "floor viewed straight down from above: stained, cracked weathered concrete slabs with dirt in the seams"
+    },
+    {
+      "id": "floor_wood",
+      "cat": "tiles",
+      "tile": 3,
+      "desc": "floor viewed straight down from above: worn, dirty grey-brown wooden floor planks with nails and scratches"
+    },
+    {
+      "id": "wallface_twig",
+      "cat": "walls",
+      "tile": 3,
+      "desc": "front elevation viewed straight-on: a primitive wall woven from sticks, twigs and branches tied with rope"
+    },
+    {
+      "id": "wallface_wood",
+      "cat": "walls",
+      "tile": 3,
+      "desc": "front elevation viewed straight-on: a crude wall of rough weathered horizontal wooden planks nailed to posts"
+    },
+    {
+      "id": "wallface_stone",
+      "cat": "walls",
+      "tile": 3,
+      "desc": "front elevation viewed straight-on: a wall of stacked rough grey stone blocks with crumbling mortar"
+    },
+    {
+      "id": "wallface_metal",
+      "cat": "walls",
+      "tile": 3,
+      "desc": "front elevation viewed straight-on: a wall of rusty corrugated sheet metal panels with rivets and welded patches"
+    },
+    {
+      "id": "wallface_concrete",
+      "cat": "walls",
+      "tile": 3,
+      "desc": "front elevation viewed straight-on: a weathered grey concrete wall with water stains, cracks and faded graffiti remnants"
+    },
+    {
+      "id": "fire_1",
+      "cat": "fx",
+      "h": 0.6,
+      "desc": "a small bright wood fire flame, orange and yellow tongues of fire with a hot white core and a few embers, frame 1 of a looping flicker animation, slightly different flame shape"
+    },
+    {
+      "id": "fire_2",
+      "cat": "fx",
+      "h": 0.6,
+      "desc": "a small bright wood fire flame, orange and yellow tongues of fire with a hot white core and a few embers, frame 2 of a looping flicker animation, slightly different flame shape"
+    },
+    {
+      "id": "fire_3",
+      "cat": "fx",
+      "h": 0.6,
+      "desc": "a small bright wood fire flame, orange and yellow tongues of fire with a hot white core and a few embers, frame 3 of a looping flicker animation, slightly different flame shape"
+    },
+    {
+      "id": "fire_4",
+      "cat": "fx",
+      "h": 0.6,
+      "desc": "a small bright wood fire flame, orange and yellow tongues of fire with a hot white core and a few embers, frame 4 of a looping flicker animation, slightly different flame shape"
+    },
+    {
+      "id": "icon_wood",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a small pile of chopped firewood logs"
+    },
+    {
+      "id": "icon_stone",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a heap of rough grey stones"
+    },
+    {
+      "id": "icon_metal_ore",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a few chunks of dark rock with rusty orange metal ore veins"
+    },
+    {
+      "id": "icon_sulfur_ore",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a few chunks of pale rock crusted with yellow sulfur crystals"
+    },
+    {
+      "id": "icon_metal_fragments",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a pile of jagged scrap metal fragments, dull grey with rust spots"
+    },
+    {
+      "id": "icon_sulfur",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a small heap of bright yellow sulfur powder"
+    },
+    {
+      "id": "icon_charcoal",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a few black lumps of charcoal"
+    },
+    {
+      "id": "icon_cloth",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a folded roll of rough beige hemp cloth tied with twine"
+    },
+    {
+      "id": "icon_gunpowder",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a small pile of dark grey gunpowder"
+    },
+    {
+      "id": "icon_scrap",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a handful of scrap: bent bolts, gears, springs and a rusty nut"
+    },
+    {
+      "id": "icon_hqm",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a few shiny refined steel ingots, high quality metal"
+    },
+    {
+      "id": "icon_berries",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a handful of wild red and dark purple berries on a leaf"
+    },
+    {
+      "id": "icon_canned",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a dented tin can of beans with a faded torn label"
+    },
+    {
+      "id": "icon_water_bottle",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a scratched plastic water bottle half full of slightly murky water"
+    },
+    {
+      "id": "icon_mushroom",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "two brown forest mushrooms"
+    },
+    {
+      "id": "icon_meat_cooked",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a piece of charred cooked meat on a bone"
+    },
+    {
+      "id": "icon_bandage",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a rolled dirty cloth bandage"
+    },
+    {
+      "id": "icon_medkit",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a battered first aid kit box with a faded red cross"
+    },
+    {
+      "id": "icon_syringe",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a medical syringe with green liquid"
+    },
+    {
+      "id": "icon_ammo_pistol",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a handful of brass pistol cartridges"
+    },
+    {
+      "id": "icon_ammo_rifle",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a few long brass rifle cartridges"
+    },
+    {
+      "id": "icon_ammo_shotgun",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a few red handmade shotgun shells"
+    },
+    {
+      "id": "icon_arrow",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "two wooden arrows with stone tips and feather fletching"
+    },
+    {
+      "id": "icon_satchel",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a satchel charge: a canvas bag tied with rope with a stick of dynamite and a fuse"
+    },
+    {
+      "id": "icon_beancan",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a beancan grenade: a tin can packed with explosives and a wick"
+    },
+    {
+      "id": "icon_c4",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a military C4 timed explosive charge block with wires and a small display"
+    },
+    {
+      "id": "icon_rocket",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a single homemade rocket for a rocket launcher"
+    },
+    {
+      "id": "weapon_rock",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a plain fist-sized grey rock used as a primitive tool"
+    },
+    {
+      "id": "weapon_hatchet",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a primitive stone hatchet: sharpened stone head tied to a wooden handle with rope"
+    },
+    {
+      "id": "weapon_pickaxe",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a primitive stone pickaxe: pointed stone head lashed to a wooden handle"
+    },
+    {
+      "id": "weapon_spear",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a long sharpened wooden spear"
+    },
+    {
+      "id": "weapon_bow",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a handmade wooden hunting bow with a taut string"
+    },
+    {
+      "id": "weapon_pipe",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a crude single-shot homemade pistol built from a metal pipe, tape and wood"
+    },
+    {
+      "id": "weapon_doublebarrel",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a sawn-off double barrel shotgun with a worn wooden stock"
+    },
+    {
+      "id": "weapon_revolver",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a rusty homemade revolver built from scrap metal and pipe"
+    },
+    {
+      "id": "weapon_smg",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a homemade submachine gun welded from sheet metal and pipes, with a side magazine"
+    },
+    {
+      "id": "weapon_ak",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a worn AK-47 assault rifle with a chipped wooden stock and taped magazine"
+    },
+    {
+      "id": "weapon_bolt",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a bolt-action sniper rifle with a scope and a worn wooden stock"
+    },
+    {
+      "id": "weapon_rocket_launcher",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a crude homemade rocket launcher tube made of a metal pipe with a grip and sight"
+    },
+    {
+      "id": "weapon_metal_hatchet",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a metal hatchet with a rusty steel head and wooden handle"
+    },
+    {
+      "id": "weapon_metal_pickaxe",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a metal pickaxe with a rusty steel head and wooden handle"
+    },
+    {
+      "id": "weapon_machete",
+      "cat": "weapons",
+      "weapon": 128,
+      "desc": "a rusty machete made from a sharpened metal sheet with a taped handle"
+    },
+    {
+      "id": "icon_burlap_shirt",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a crude burlap shirt sewn from sacks"
+    },
+    {
+      "id": "icon_burlap_trousers",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "crude burlap trousers sewn from sacks"
+    },
+    {
+      "id": "icon_burlap_shoes",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "primitive burlap shoes wrapped with string"
+    },
+    {
+      "id": "icon_hoodie",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a dirty worn dark hoodie"
+    },
+    {
+      "id": "icon_pants",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "worn dirty cargo pants"
+    },
+    {
+      "id": "icon_boots",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a pair of worn leather boots"
+    },
+    {
+      "id": "icon_gloves",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a pair of worn leather work gloves"
+    },
+    {
+      "id": "icon_bandana",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a dirty patterned bandana face mask"
+    },
+    {
+      "id": "icon_wood_armor",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "improvised chest armor made of wooden planks tied with rope"
+    },
+    {
+      "id": "icon_roadsign_vest",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "improvised chest armor made of rusty road signs riveted together, faded traffic sign paint visible"
+    },
+    {
+      "id": "icon_roadsign_kilt",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "an improvised kilt armor made of rusty road sign pieces"
+    },
+    {
+      "id": "icon_coffeecan_helmet",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "an improvised helmet made from a big rusty coffee can with eye holes"
+    },
+    {
+      "id": "icon_metal_facemask",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a welded metal face mask helmet made of scrap with narrow eye slits"
+    },
+    {
+      "id": "icon_metal_chestplate",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a welded metal chest plate armor made of scrap steel with straps"
+    },
+    {
+      "id": "icon_hide_vest",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a primitive vest made of animal hide"
+    },
+    {
+      "id": "icon_backpack",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a worn canvas hiking backpack"
+    },
+    {
+      "id": "icon_tool_cupboard",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a wooden tool cupboard cabinet full of tools, the base building claim cabinet"
+    },
+    {
+      "id": "icon_wood_door",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a crude wooden door made of planks with metal hinges"
+    },
+    {
+      "id": "icon_metal_door",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a rusty sheet metal door with a handle"
+    },
+    {
+      "id": "icon_key_lock",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a rusty padlock with a key"
+    },
+    {
+      "id": "icon_code_lock",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a rugged electronic code lock keypad"
+    },
+    {
+      "id": "icon_sleeping_bag",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a rolled-out dirty sleeping bag"
+    },
+    {
+      "id": "icon_wood_box",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a large wooden storage box with a lid"
+    },
+    {
+      "id": "icon_furnace",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a crude survival stone furnace with a chimney"
+    },
+    {
+      "id": "icon_workbench",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "an improvised workbench with a vice and tools"
+    },
+    {
+      "id": "icon_campfire",
+      "cat": "icons",
+      "icon": 128,
+      "desc": "a small campfire of logs ringed with stones, unlit"
+    }
+  ],
+  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",
+  "weapon_framing": "A single game sprite of a weapon or tool for a survival game: the item alone, strict side view, horizontal, pointing to the right (muzzle or business end on the right), centered, transparent background, no hands, no text, no frame, no border, no cast shadow."
+}

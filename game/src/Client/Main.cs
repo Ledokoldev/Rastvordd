@@ -13,6 +13,11 @@ namespace Rastvordd.Client
     public partial class Main : Node2D
     {
         LocalServer _server;
+        MapInfo _map;
+        DecalLayer _decals;
+        CanvasModulate _daylight;
+        bool _overview;
+        float? _forcedDay;
         int _myId;
         Snapshot _cur;
         readonly Dictionary<int, ActorSnap> _prevActors = new();
@@ -73,10 +78,16 @@ namespace Rastvordd.Client
             _myId = _server.Connect("Игрок");
             ParseArgs();
 
-            BuildGround(_server.GetMap());
+            _map = _server.GetMap();
+            BuildGround(_map);
             _world = new Node2D { YSortEnabled = true };
             AddChild(_world);
-            BuildMap(_server.GetMap());
+            BuildMap(_map);
+            var flatDecals = new Node2D { ZIndex = -9 };
+            AddChild(flatDecals);
+            _decals = new DecalLayer(_map, flatDecals, _world);
+            _daylight = new CanvasModulate();
+            AddChild(_daylight);
 
             _cam = new Camera2D { Zoom = new Vector2(_zoom, _zoom) };
             AddChild(_cam);
@@ -108,6 +119,8 @@ namespace Rastvordd.Client
                     var p = arg.Substring(8).Split(',');
                     _server.World.Find(_myId).Pos = new SVec(float.Parse(p[0], inv), float.Parse(p[1], inv));
                 }
+                else if (arg == "--overview") _overview = true;
+                else if (arg.StartsWith("--day=")) _forcedDay = float.Parse(arg.Substring(6), inv);
                 else if (arg.StartsWith("--zoom=")) _zoom = float.Parse(arg.Substring(7), inv);
                 else if (arg.StartsWith("--peek=")) _forcedPeek = float.Parse(arg.Substring(7), inv);
                 else if (arg.StartsWith("--screen="))
@@ -142,35 +155,10 @@ namespace Rastvordd.Client
             var ground = new Node2D { ZIndex = -10 };
             AddChild(ground);
 
-            ground.AddChild(new ColorRect { Color = new Color(0.13f, 0.28f, 0.36f), Position = new Vector2(-half - 3000, -half - 3000), Size = new Vector2(size + 6000, size + 6000) });
+            ground.AddChild(new ColorRect { Color = new Color(0.07f, 0.15f, 0.21f), Position = new Vector2(-half - 3000, -half - 3000), Size = new Vector2(size + 6000, size + 6000) });
 
-            // тайлы земли (пиксель-арт); если их нет — простые цвета
-            void Tile(string art, Color fallback, Vector2 pos, Vector2 sz)
-            {
-                var tex = Art.Get(art);
-                if (tex == null) { ground.AddChild(new ColorRect { Color = fallback, Position = pos, Size = sz }); return; }
-                ground.AddChild(new TextureRect
-                {
-                    Texture = tex, StretchMode = TextureRect.StretchModeEnum.Tile,
-                    Position = pos, Size = sz, TextureFilter = CanvasItem.TextureFilterEnum.Nearest,
-                    MouseFilter = Control.MouseFilterEnum.Ignore,
-                });
-            }
-
-            Tile("tiles/ground_grass", new Color(0.48f, 0.53f, 0.33f), new Vector2(-half, -half), new Vector2(size, size));
-
-            var sand = new Color(0.78f, 0.72f, 0.55f);
-            float b = 4 * Iso.PPM;
-            Tile("tiles/ground_sand", sand, new Vector2(-half, -half), new Vector2(size, b));
-            Tile("tiles/ground_sand", sand, new Vector2(-half, half - b), new Vector2(size, b));
-            Tile("tiles/ground_sand", sand, new Vector2(-half, -half), new Vector2(b, size));
-            Tile("tiles/ground_sand", sand, new Vector2(half - b, -half), new Vector2(b, size));
-            // пляж на спавне шире
-            Tile("tiles/ground_sand", sand, Iso.Px(new SVec(-60, 38)), new Vector2(18, 22) * Iso.PPM);
-
-            // площадка РТ и подъездная грунтовка
-            Tile("tiles/ground_concrete", new Color(0.45f, 0.45f, 0.43f), Iso.Px(new SVec(5, -35)), new Vector2(30, 30) * Iso.PPM);
-            Tile("tiles/ground_dirt", new Color(0.4f, 0.32f, 0.22f), Iso.Px(new SVec(17, -5)), new Vector2(6, 12) * Iso.PPM);
+            // вся суша — один шейдер с переходами и рельефом светотенью
+            ground.AddChild(new TerrainView(map, 1337));
         }
 
         void BuildMap(MapInfo map)
@@ -291,6 +279,8 @@ namespace Rastvordd.Client
             float dt = (float)delta;
             Render(alpha, dt);
             UpdateCamera(dt);
+            if (!_overview) _decals.Update(_cam.Position);
+            _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime);
             UpdateHud(dt);
 
             if (_shotPath != null && _frame == _shotFrame)
@@ -313,7 +303,7 @@ namespace Rastvordd.Client
                 switch (e.Kind)
                 {
                     case SimEventKind.Shot:
-                        if (e.Text != "weapon_bow") Flash(e.Pos + e.Dir * 0.3f, new Color(1, 0.8f, 0.4f), 7, 0.05f);
+                        if (e.Text != "weapon_bow") Flash(e.Pos + e.Dir * 0.3f, new Color(1, 0.8f, 0.4f), 7, 0.06f, true);
                         break;
                     case SimEventKind.Swing:
                         if (_actorViews.TryGetValue(e.ActorId, out var swinger)) swinger.StartSwing();
@@ -362,9 +352,16 @@ namespace Rastvordd.Client
             _texts.Add(t);
         }
 
-        void Flash(SVec pos, Color c, float radius, float life)
+        void Flash(SVec pos, Color c, float radius, float life, bool light = false)
         {
             var f = new FlashView2D { Position = Iso.Px(pos), Color = c, Radius = radius, Life = life, Max = life };
+            if (light)
+            {
+                // вспышка выстрела освещает округу — ночью это выдаёт стрелка
+                var l = Art.FireLight(7f, 1.8f);
+                l.Position = new Vector2(0, -Iso.GunH);
+                f.AddChild(l);
+            }
             _world.AddChild(f);
             _fx.Add(f);
         }
@@ -462,7 +459,7 @@ namespace Rastvordd.Client
                 if (!_nodeViews.TryGetValue(n.Id, out var v))
                 {
                     v = n.Kind == NodeKind.Tree
-                        ? new TreeView2D(Iso.Px(n.Pos), n.Radius, n.Id)
+                        ? new TreeView2D(Iso.Px(n.Pos), n.Radius, n.Id, TerrainView.BiomeAt(_map, n.Pos))
                         : new OreView2D(Iso.Px(n.Pos), n.Kind, n.Radius, n.Id);
                     _world.AddChild(v);
                     _nodeViews[n.Id] = v;
@@ -525,8 +522,33 @@ namespace Rastvordd.Client
             foreach (var id in gone) { views[id].QueueFree(); views.Remove(id); }
         }
 
+        /// <summary>Цвет освещения по времени суток: ночь синяя, рассвет и закат тёплые.</summary>
+        static Color DayColor(float t)
+        {
+            var night = new Color(0.2f, 0.24f, 0.4f);
+            (float at, Color c)[] keys =
+            {
+                (0f, night), (0.2f, night), (0.27f, new Color(0.9f, 0.66f, 0.58f)), (0.34f, new Color(0.97f, 0.94f, 0.9f)),
+                (0.5f, new Color(1f, 1f, 0.98f)), (0.68f, new Color(1f, 0.95f, 0.88f)), (0.76f, new Color(0.92f, 0.6f, 0.5f)),
+                (0.84f, night), (1f, night),
+            };
+            for (int i = 0; i < keys.Length - 1; i++)
+                if (t <= keys[i + 1].at)
+                    return keys[i].c.Lerp(keys[i + 1].c, (t - keys[i].at) / (keys[i + 1].at - keys[i].at));
+            return night;
+        }
+
         void UpdateCamera(float dt)
         {
+            if (_overview)
+            {
+                // отладка: вся карта в кадре
+                var vs = GetViewport().GetVisibleRect().Size;
+                float oz = Mathf.Min(vs.X, vs.Y) / (_map.HalfSize * 2 * Iso.PPM);
+                _cam.Position = Vector2.Zero;
+                _cam.Zoom = new Vector2(oz, oz);
+                return;
+            }
             // смещение зависит от положения курсора на экране (не в мире), поэтому камера не «убегает»
             // сдвиг — доля половины экрана, чтобы персонаж всегда оставался в кадре (не ближе 20% к краю)
             var halfWorld = GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X;
@@ -540,16 +562,19 @@ namespace Rastvordd.Client
         void UpdateHud(float dt)
         {
             var s = _cur.Self;
+            float day = _forcedDay ?? _cur.DayTime;
+            int mins = (int)(day * 24 * 60);
+            string clock = $"{mins / 60:00}:{mins % 60:00}" + (World.NightFactorAt(day) > 0.5f ? " · ночь, обзор короче" : "");
             _hud.UpdateHud(s, dt, _peek > 0.05f
-                ? "Прицеливание · обзор уже, видно дальше, разброс меньше, шаг медленнее"
-                : "Вид 3/4 · 2D · заглушки · ПКМ — прицелиться");
+                ? $"{clock} · прицеливание: обзор уже, видно дальше, разброс меньше"
+                : $"{clock} · ПКМ — прицелиться");
 
             var canvas = GetViewport().GetCanvasTransform();
             float zoom = _cam.Zoom.X;
             var chestPx = canvas * (_selfPx + new Vector2(0, -Iso.GunH));
             var dir = new Vector2(_aim.X, _aim.Y) - new Vector2(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
             _hud.SetVision(chestPx, dir.LengthSquared() > 0.01f ? dir.Normalized() : Vector2.Right,
-                           2.5f * Iso.PPM * zoom, (50 + 30 * _peek) * Iso.PPM * zoom,
+                           2.5f * Iso.PPM * zoom, (50 + 30 * _peek) * (1f - 0.4f * World.NightFactorAt(_forcedDay ?? _cur.DayTime)) * Iso.PPM * zoom,
                            Mathf.Cos(Mathf.DegToRad((130 - 70 * _peek) * 0.5f)), !s.Dead);
 
             // прицел: круг = реальный разброс на дистанции до курсора

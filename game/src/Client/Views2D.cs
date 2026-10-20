@@ -319,16 +319,19 @@ namespace Rastvordd.Client
     public partial class TreeView2D : NodeView2D
     {
         readonly float _trunkW;
-        readonly Texture2D _tex;
+        readonly Texture2D _tex, _tuft;
+        readonly int _seed;
         public float CanopyR = Iso.PPM * 1.3f;
         public Vector2 CanopyCenter => Base + new Vector2(0, _tex != null ? -_tex.GetHeight() * 0.62f : -Iso.H(3.1f));
         float _alpha = 1;
 
-        public TreeView2D(Vector2 basePx, float radiusM, int seed = 0)
+        public TreeView2D(Vector2 basePx, float radiusM, int seed = 0, Biome biome = Biome.Grassland)
         {
             Base = Position = basePx;
             _trunkW = radiusM * 2 * Iso.PPM * 0.7f;
-            _tex = Art.Tree(seed);
+            _tex = Art.Tree(seed, biome);
+            _tuft = Art.Get(biome is Biome.Arid or Biome.Tundra or Biome.Beach ? "decals/decal_grass_tuft_2" : "decals/decal_grass_tuft_1");
+            _seed = seed;
             if (_tex != null) CanopyR = _tex.GetWidth() * 0.42f;
             TextureFilter = TextureFilterEnum.Nearest;
         }
@@ -350,6 +353,13 @@ namespace Rastvordd.Client
             if (_tex != null)
             {
                 DrawTexture(_tex, new Vector2(-_tex.GetWidth() / 2, -_tex.GetHeight() + 2), new Color(1, 1, 1, _alpha));
+                // пучки травы у корней — дерево «вросло» в землю
+                if (_tuft != null)
+                    for (int i = 0; i < 2; i++)
+                    {
+                        float ox = ((_seed * (i + 3) * 37) % 17) - 8;
+                        DrawTexture(_tuft, new Vector2(ox - _tuft.GetWidth() / 2, -_tuft.GetHeight() + 3 + i));
+                    }
                 return;
             }
             float trunkH = Iso.H(2.6f);
@@ -484,14 +494,23 @@ namespace Rastvordd.Client
         readonly DeployKind _kind;
         float _flicker;
 
+        readonly PointLight2D _light;
+
         public DeployView2D(DeployKind kind)
         {
             _kind = kind;
             TextureFilter = TextureFilterEnum.Nearest;
+            if (kind == DeployKind.Furnace)
+            {
+                _light = Art.FireLight(6f, 0f);
+                _light.Position = new Vector2(-1, -10);
+                AddChild(_light);
+            }
         }
 
         public void Tick(float dt)
         {
+            if (_light != null) _light.Energy = Burning ? 0.9f + 0.25f * Mathf.Sin(_flicker * 11) * Mathf.Sin(_flicker * 5.7f) : 0f;
             if (!Burning) return;
             _flicker += dt;
             QueueRedraw();

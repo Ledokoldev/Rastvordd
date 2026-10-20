@@ -710,6 +710,78 @@
       "cat": "weapons",
       "weapon": 128,
       "desc": "a big rusty butcher cleaver made from salvaged metal"
+    },
+    {
+      "id": "decal_grass_tuft_1",
+      "cat": "decals",
+      "h": 0.5,
+      "desc": "a small tuft of tall wild grass blades, muted green with dry yellow tips"
+    },
+    {
+      "id": "decal_grass_tuft_2",
+      "cat": "decals",
+      "h": 0.4,
+      "desc": "a small clump of dry yellowed grass and a few weeds"
+    },
+    {
+      "id": "decal_pebbles",
+      "cat": "decals",
+      "h": 0.25,
+      "desc": "a few small grey pebbles and gravel bits lying on the ground, seen from above"
+    },
+    {
+      "id": "decal_leaves",
+      "cat": "decals",
+      "h": 0.25,
+      "desc": "a small scatter of dead brown and orange fallen leaves on the ground, seen from above"
+    },
+    {
+      "id": "decal_flowers",
+      "cat": "decals",
+      "h": 0.35,
+      "desc": "a small patch of pale wild flowers, faded white and yellow, among grass"
+    },
+    {
+      "id": "decal_puddle",
+      "cat": "decals",
+      "h": 0.2,
+      "desc": "a small muddy rain puddle on the ground seen from above, dark water reflecting a grey sky"
+    },
+    {
+      "id": "decal_fern",
+      "cat": "decals",
+      "h": 0.5,
+      "desc": "a small wild fern plant with dark green fronds"
+    },
+    {
+      "id": "decal_debris",
+      "cat": "decals",
+      "h": 0.2,
+      "desc": "scattered small trash and debris on the ground seen from above: a rusty can, a bottle cap, torn paper"
+    },
+    {
+      "id": "ground_forest",
+      "cat": "tiles",
+      "tile": 4,
+      "desc": "ground viewed straight down from above: dark forest floor covered with fallen pine needles, small twigs, moss patches and a few cones"
+    },
+    {
+      "id": "ground_dry",
+      "cat": "tiles",
+      "tile": 4,
+      "desc": "ground viewed straight down from above: dry cracked pale-brown earth with sparse dead yellow grass, arid wasteland"
+    },
+    {
+      "id": "ground_snow",
+      "cat": "tiles",
+      "tile": 4,
+      "desc": "ground viewed straight down from above: an even layer of old slightly grey snow, mostly clean and uniform, with only faint footprints, a few tiny twigs and very subtle soft shading, low contrast"
+    },
+    {
+      "id": "ground_swamp",
+      "cat": "tiles",
+      "tile": 4,
+      "desc": "ground viewed straight down from above: wet dark swamp mud with small murky puddles, rotting reeds and dark green algae"
     }
   ],
   "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

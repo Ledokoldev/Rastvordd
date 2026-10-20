@@ -24,7 +24,7 @@ namespace Rastvordd.Sim
     public sealed class World
     {
         public const float Dt = 1f / 30f;
-        public const float HalfSize = 60f;
+        public const float HalfSize = 200f;
         public const float WalkSpeed = 4.5f;
         public const float SprintSpeed = 6.8f;
         public const float Accel = 40f;
@@ -52,6 +52,7 @@ namespace Rastvordd.Sim
         public readonly List<Noise> Noises = new();
         public readonly Dictionary<int, Vector2> NpcHomes = new();
         public readonly List<Vector2> PlayerSpawns = new();
+        public readonly TerrainMap Terrain;
         readonly List<(NodeKind kind, float left)> _nodeRespawns = new();
 
         int _nextId = 1;
@@ -59,6 +60,7 @@ namespace Rastvordd.Sim
         public World(int seed)
         {
             Rng = new Random(seed);
+            Terrain = new TerrainMap(HalfSize, seed);
             BuildMap();
         }
 
@@ -75,7 +77,6 @@ namespace Rastvordd.Sim
         }
 
         static bool InMonument(Vector2 p) => p.X > 2 && p.X < 38 && p.Y > -38 && p.Y < 2;
-        static bool InSpawn(Vector2 p) => p.X < -40 && p.Y > 32;
 
         void BuildMap()
         {
@@ -108,61 +109,96 @@ namespace Rastvordd.Sim
                                       new Vector2(10, -15), new Vector2(22, -20), new Vector2(20, 2) })
                 NpcHomes[-NpcHomes.Count - 1] = p;   // ключи временные, заменяются при спавне
 
-            // у спавна — немного ресурсов для старта
-            foreach (var p in new[] { new Vector2(-36, 38), new Vector2(-33, 42), new Vector2(-38, 30), new Vector2(-30, 35), new Vector2(-34, 47), new Vector2(-28, 44) })
-                AddNode(NodeKind.Tree, p);
-            AddNode(NodeKind.Stone, new Vector2(-31, 31));
-            AddNode(NodeKind.Stone, new Vector2(-38, 50));
-            AddNode(NodeKind.Metal, new Vector2(-27, 38));
-            AddPickup(PickupKind.Hemp, new Vector2(-40, 34));
-            AddPickup(PickupKind.Hemp, new Vector2(-36, 52));
-            AddPickup(PickupKind.Berries, new Vector2(-32, 50));
-            AddPickup(PickupKind.WaterBarrel, new Vector2(-44, 36));
+            // раскладка по биомам: плотность и что встречается
+            ScatterByBiome();
 
-            // остальная карта
-            for (int i = 0; i < 170; i++)
+            // спавны — на пляжах
+            for (int tries = 0; tries < 20000 && PlayerSpawns.Count < 16; tries++)
             {
-                var p = RandomFreePoint(1.5f);
-                int roll = Rng.Next(100);
-                if (roll < 42) AddNode(NodeKind.Tree, p);
-                else if (roll < 54) AddNode(NodeKind.Stone, p);
-                else if (roll < 62) AddNode(NodeKind.Metal, p);
-                else if (roll < 67) AddNode(NodeKind.Sulfur, p);
-                else if (roll < 77) AddPickup(PickupKind.Hemp, p);
-                else if (roll < 85) AddPickup(PickupKind.Berries, p);
-                else if (roll < 87) AddPickup(PickupKind.WaterBarrel, p);
-                else if (roll < 92)
-                {
+                var p = new Vector2(Range(-HalfSize, HalfSize), Range(-HalfSize, HalfSize));
+                if (Terrain.BiomeAt(p) == Biome.Beach && IsFree(p, 1.5f)) PlayerSpawns.Add(p);
+            }
+            if (PlayerSpawns.Count == 0) PlayerSpawns.Add(new Vector2(0, 40));
+        }
+
+        // площадь на один объект (м²) и веса: дерево, камень, металл, сера, конопля, ягоды, бочка воды, ящик-укрытие, руины
+        static readonly Dictionary<Biome, (float area, int[] w)> BiomeFill = new()
+        {
+            [Biome.Forest] = (40, new[] { 75, 6, 4, 1, 5, 7, 1, 0, 1 }),
+            [Biome.Grassland] = (120, new[] { 22, 15, 8, 4, 20, 10, 3, 8, 10 }),
+            [Biome.Arid] = (110, new[] { 8, 25, 15, 25, 3, 2, 3, 8, 11 }),
+            [Biome.Tundra] = (80, new[] { 40, 20, 20, 8, 2, 3, 2, 2, 3 }),
+            [Biome.Beach] = (220, new[] { 4, 30, 5, 0, 10, 0, 10, 25, 16 }),
+            [Biome.Swamp] = (100, new[] { 35, 5, 5, 0, 20, 30, 2, 0, 3 }),
+        };
+
+        void ScatterByBiome()
+        {
+            const float probeArea = 30f;
+            int probes = (int)(HalfSize * HalfSize * 4 / probeArea);
+            for (int i = 0; i < probes; i++)
+            {
+                var p = new Vector2(Range(-HalfSize, HalfSize), Range(-HalfSize, HalfSize));
+                var b = Terrain.BiomeAt(p);
+                if (!BiomeFill.TryGetValue(b, out var fill) || InMonument(p)) continue;
+                if (Rng.NextDouble() > probeArea / fill.area) continue;
+                if (!IsFree(p, 1.5f)) continue;
+                PlaceObject(PickWeighted(fill.w), p);
+            }
+        }
+
+        int PickWeighted(int[] w)
+        {
+            int sum = 0;
+            foreach (var x in w) sum += x;
+            int r = Rng.Next(sum);
+            for (int i = 0; i < w.Length; i++) { if (r < w[i]) return i; r -= w[i]; }
+            return 0;
+        }
+
+        void PlaceObject(int cat, Vector2 p)
+        {
+            const float t = 0.35f, h = 2.6f;
+            switch (cat)
+            {
+                case 0: AddNode(NodeKind.Tree, p); break;
+                case 1: AddNode(NodeKind.Stone, p); break;
+                case 2: AddNode(NodeKind.Metal, p); break;
+                case 3: AddNode(NodeKind.Sulfur, p); break;
+                case 4: AddPickup(PickupKind.Hemp, p); break;
+                case 5: AddPickup(PickupKind.Berries, p); break;
+                case 6: AddPickup(PickupKind.WaterBarrel, p); break;
+                case 7:
                     float w = Range(0.8f, 2.2f), d = Range(0.7f, 1.4f);
                     AddWall(p.X - w / 2, p.Y - d / 2, p.X + w / 2, p.Y + d / 2, 1.0f, WallKind.Crate);
-                }
-                else
-                {
+                    break;
+                default:
                     bool horiz = Rng.Next(2) == 0;
                     float len = Range(3f, 7f);
                     if (horiz) AddWall(p.X - len / 2, p.Y - t, p.X + len / 2, p.Y + t, h, WallKind.Concrete);
                     else AddWall(p.X - t, p.Y - len / 2, p.X + t, p.Y + len / 2, h, WallKind.Concrete);
-                }
+                    break;
             }
-
-            for (int i = 0; i < 6; i++)
-                PlayerSpawns.Add(new Vector2(Range(-55, -45), Range(40, 55)));
         }
 
-        Vector2 RandomFreePoint(float clearance)
+        static int NodeCategory(NodeKind k) => k switch { NodeKind.Tree => 0, NodeKind.Stone => 1, NodeKind.Metal => 2, _ => 3 };
+
+        /// <summary>Свободная точка на суше; для респавна узла — в биоме, где такой узел встречается.</summary>
+        Vector2 RandomFreePoint(float clearance, NodeKind? kind = null)
         {
-            for (int tries = 0; tries < 50; tries++)
+            for (int tries = 0; tries < 200; tries++)
             {
                 var p = new Vector2(Range(-HalfSize + 5, HalfSize - 5), Range(-HalfSize + 5, HalfSize - 5));
-                if (InMonument(p) || InSpawn(p)) continue;
+                if (InMonument(p) || !BiomeFill.TryGetValue(Terrain.BiomeAt(p), out var fill)) continue;
+                if (kind.HasValue && fill.w[NodeCategory(kind.Value)] == 0) continue;
                 if (IsFree(p, clearance)) return p;
             }
-            return new Vector2(Range(-HalfSize + 5, HalfSize - 5), Range(-HalfSize + 5, HalfSize - 5));
+            return new Vector2(0, 40);
         }
-
         /// <summary>Свободна ли точка (ни стен, ни узлов, ни установленного, ни людей).</summary>
         public bool IsFree(Vector2 p, float r)
         {
+            if (!Terrain.IsLand(p)) return false;
             foreach (var w in Walls)
                 if (Vector2.Distance(Vector2.Clamp(p, w.Wall.Min, w.Wall.Max), p) < r) return false;
             foreach (var n in Nodes) if (Vector2.Distance(n.Pos, p) < n.Radius + r) return false;
@@ -309,7 +345,19 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Обзор персонажа: прицеливание увеличивает дальность и сужает конус.</summary>
-        public static float ViewRange(Actor a) => 50f + 30f * a.Peek;
+        public float ViewRange(Actor a) => (50f + 30f * a.Peek) * (1f - 0.4f * NightFactorAt(TimeOfDay));
+
+        // ---------- время суток ----------
+        public const float DayLength = 1200f;   // 20 минут на сутки
+        /// <summary>0..1: 0 — полночь, 0.25 — рассвет, 0.5 — полдень, 0.75 — закат. Вайп начинается утром.</summary>
+        public float TimeOfDay => (Time / DayLength + 0.36f) % 1f;
+        /// <summary>0 днём, 1 глубокой ночью, плавно на рассвете и закате.</summary>
+        public static float NightFactorAt(float t)
+        {
+            float dawn = Math.Clamp((t - 0.2f) / 0.1f, 0f, 1f);
+            float dusk = Math.Clamp((t - 0.75f) / 0.1f, 0f, 1f);
+            return 1f - dawn + dusk;
+        }
         public static float ViewCone(Actor a) => 130f - 70f * a.Peek;
 
         /// <summary>Видит ли наблюдатель цель: конус обзора, дальность, стены. Вплотную чувствуется всегда.</summary>
@@ -391,8 +439,10 @@ namespace Rastvordd.Sim
                 sprint = k > 0.5f;
             }
             a.Vel = Geo.MoveToward(a.Vel, move * speed, Accel * Dt);
+            var before = a.Pos;
             a.Pos += a.Vel * Dt;
             ResolveCollisions(a);
+            KeepOnLand(a, before);
 
             // взгляд
             if (toAimDir.LengthSquared() > 0.04f) a.Facing = MathF.Atan2(toAimDir.Y, toAimDir.X);
@@ -427,6 +477,17 @@ namespace Rastvordd.Sim
                 foreach (var d in Deployables) a.Pos = PushOutCircle(a.Pos, a.Radius, d.Pos, d.Radius);
             }
             a.Pos = Vector2.Clamp(a.Pos, new Vector2(-HalfSize + a.Radius), new Vector2(HalfSize - a.Radius));
+        }
+
+        /// <summary>В воду не заходим: пробуем скользить вдоль берега по одной оси, иначе стоим.</summary>
+        void KeepOnLand(Actor a, Vector2 before)
+        {
+            if (Terrain.IsLand(a.Pos)) return;
+            var slideX = new Vector2(a.Pos.X, before.Y);
+            var slideY = new Vector2(before.X, a.Pos.Y);
+            if (Terrain.IsLand(slideX)) { a.Pos = slideX; a.Vel = new Vector2(a.Vel.X, 0); }
+            else if (Terrain.IsLand(slideY)) { a.Pos = slideY; a.Vel = new Vector2(0, a.Vel.Y); }
+            else { a.Pos = before; a.Vel = Vector2.Zero; }
         }
 
         static Vector2 PushOutCircle(Vector2 p, float r, Vector2 c, float cr)
@@ -810,7 +871,7 @@ namespace Rastvordd.Sim
                 left -= Dt;
                 if (left <= 0)
                 {
-                    AddNode(kind, RandomFreePoint(1.5f));
+                    AddNode(kind, RandomFreePoint(1.5f, kind));
                     _nodeRespawns.RemoveAt(i);
                 }
                 else _nodeRespawns[i] = (kind, left);

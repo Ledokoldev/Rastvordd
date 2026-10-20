@@ -68,6 +68,7 @@ namespace Rastvordd.Sim
     {
         public uint Tick;
         public float Time;
+        public float DayTime;      // 0..1, см. World.TimeOfDay
         public SelfInfo Self;
         public List<ActorSnap> Actors = new();
         public List<ProjSnap> Projectiles = new();
@@ -84,6 +85,11 @@ namespace Rastvordd.Sim
     {
         public float HalfSize;
         public List<WallInfo> Walls = new();
+        // рельеф и биомы (сетка N×N, клетка Cell метров) — отправляются один раз при подключении
+        public int N;
+        public float Cell;
+        public Biome[] Biomes;
+        public float[] Heights;
     }
 
     /// <summary>
@@ -112,7 +118,8 @@ namespace Rastvordd.Sim
 
         public MapInfo GetMap()
         {
-            var m = new MapInfo { HalfSize = World.HalfSize };
+            var t = World.Terrain;
+            var m = new MapInfo { HalfSize = World.HalfSize, N = t.N, Cell = TerrainMap.Cell, Biomes = t.Biomes, Heights = t.Height };
             foreach (var w in World.Walls)
                 m.Walls.Add(new WallInfo { Min = w.Wall.Min, Max = w.Wall.Max, Height = w.Wall.Height, Kind = w.Kind });
             return m;
@@ -138,7 +145,7 @@ namespace Rastvordd.Sim
         public Snapshot BuildSnapshot(int clientId)
         {
             var me = World.Find(clientId);
-            var snap = new Snapshot { Tick = World.Tick, Time = World.Time };
+            var snap = new Snapshot { Tick = World.Tick, Time = World.Time, DayTime = World.TimeOfDay };
             snap.Self = BuildSelf(me);
             float r2 = WorldViewRadius * WorldViewRadius;
 

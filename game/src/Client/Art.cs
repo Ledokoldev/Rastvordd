@@ -12,6 +12,22 @@ namespace Rastvordd.Client
     {
         static readonly Dictionary<string, Texture2D> Cache = new();
 
+        static Texture2D _light;
+        /// <summary>Мягкое круглое пятно для PointLight2D.</summary>
+        public static Texture2D LightTex => _light ??= new GradientTexture2D
+        {
+            Width = 256, Height = 256, Fill = GradientTexture2D.FillEnum.Radial,
+            FillFrom = new Vector2(0.5f, 0.5f), FillTo = new Vector2(1f, 0.5f),
+            Gradient = new Gradient { Colors = new[] { Colors.White, new Color(1, 1, 1, 0) } },
+        };
+
+        /// <summary>Тёплый свет огня.</summary>
+        public static PointLight2D FireLight(float sizeM, float energy) => new PointLight2D
+        {
+            Texture = LightTex, TextureScale = sizeM * Iso.PPM * 2 / 256f, Energy = energy,
+            Color = new Color(1f, 0.68f, 0.38f), BlendMode = Light2D.BlendModeEnum.Add,
+        };
+
         public static Texture2D Get(string path)
         {
             if (Cache.TryGetValue(path, out var t)) return t;
@@ -33,9 +49,18 @@ namespace Rastvordd.Client
             return null;
         }
 
-        static readonly string[] Trees = { "trees/tree_pine_1", "trees/tree_pine_2", "trees/tree_oak_dead", "trees/tree_birch", "trees/tree_leafy", "trees/tree_pine_1" };
+        const string Pine1 = "trees/tree_pine_1", Pine2 = "trees/tree_pine_2", Oak = "trees/tree_oak_dead", Birch = "trees/tree_birch", Leafy = "trees/tree_leafy";
 
-        public static Texture2D Tree(int seed) => Pick(seed, Trees);
+        /// <summary>Вид дерева зависит от биома: тайга — ели, пустошь — сухие, болото — мёртвые и берёзы.</summary>
+        public static Texture2D Tree(int seed, Biome biome = Biome.Grassland) => biome switch
+        {
+            Biome.Forest => Pick(seed, Pine1, Pine2, Pine1, Leafy, Birch),
+            Biome.Tundra => Pick(seed, Pine2, Pine1, Pine2, Birch),
+            Biome.Arid => Pick(seed, Oak, Oak, Birch),
+            Biome.Swamp => Pick(seed, Oak, Birch, Leafy),
+            Biome.Beach => Pick(seed, Pine2, Oak),
+            _ => Pick(seed, Leafy, Birch, Leafy, Oak, Pine1),
+        };
 
         public static Texture2D Node(NodeKind kind, int seed) => kind switch
         {

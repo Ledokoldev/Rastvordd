@@ -495,6 +495,7 @@ namespace Rastvordd.Client
         float _flicker;
 
         readonly PointLight2D _light;
+        readonly AudioStreamPlayer2D _crackle;
 
         public DeployView2D(DeployKind kind)
         {
@@ -505,11 +506,14 @@ namespace Rastvordd.Client
                 _light = Art.FireLight(6f, 0f);
                 _light.Position = new Vector2(-1, -10);
                 AddChild(_light);
+                _crackle = Sfx.Loop("furnace_loop", -8, 14);
+                AddChild(_crackle);
             }
         }
 
         public void Tick(float dt)
         {
+            if (_crackle != null && _crackle.Stream != null && Burning != _crackle.Playing) { if (Burning) _crackle.Play(); else _crackle.Stop(); }
             if (_light != null) _light.Energy = Burning ? 0.9f + 0.25f * Mathf.Sin(_flicker * 11) * Mathf.Sin(_flicker * 5.7f) : 0f;
             if (!Burning) return;
             _flicker += dt;

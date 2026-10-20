@@ -15,6 +15,7 @@ namespace Rastvordd.Client
         LocalServer _server;
         MapInfo _map;
         DecalLayer _decals;
+        readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
         bool _overview;
         float? _forcedDay;
@@ -86,6 +87,7 @@ namespace Rastvordd.Client
             var flatDecals = new Node2D { ZIndex = -9 };
             AddChild(flatDecals);
             _decals = new DecalLayer(_map, flatDecals, _world);
+            Sfx.Init(_world);
             _daylight = new CanvasModulate();
             AddChild(_daylight);
 
@@ -304,27 +306,35 @@ namespace Rastvordd.Client
                 {
                     case SimEventKind.Shot:
                         if (e.Text != "weapon_bow") Flash(e.Pos + e.Dir * 0.3f, new Color(1, 0.8f, 0.4f), 7, 0.06f, true);
+                        Sfx.Play(e.Text == "weapon_bow" ? "shot_bow" : e.Text == "weapon_ak" ? "shot_ak" : "shot_pipe", Iso.Px(e.Pos),
+                                 e.Text == "weapon_bow" ? -4 : 0, e.Text == "weapon_bow" ? 25 : 90, 0.06f);
                         break;
                     case SimEventKind.Swing:
                         if (_actorViews.TryGetValue(e.ActorId, out var swinger)) swinger.StartSwing();
+                        Sfx.Play("swing", Iso.Px(e.Pos), -6, 15, 0.15f);
                         break;
                     case SimEventKind.HitNode:
                         if (_nodeViews.TryGetValue(e.OtherId, out var nv)) nv.Hit();
+                        Sfx.Play(NodeHitSound(e.OtherId), Iso.Px(e.Pos), -2, 30, 0.1f);
                         break;
                     case SimEventKind.Gather:
                         FloatText(e.Pos, $"+{(int)e.Value} {e.Text}", new Color(1, 0.95f, 0.75f));
+                        if (e.OtherId == 0) Sfx.Play("loot", Iso.Px(e.Pos), -8, 10);
                         break;
                     case SimEventKind.Info:
                         _hud.Toast(e.Text);
                         break;
                     case SimEventKind.Crafted:
                         _hud.Toast("Скрафчено: " + e.Text);
+                        Sfx.Play("craft_done", _selfPx, -6, 10, 0f);
                         break;
                     case SimEventKind.Placed:
                         _hud.Toast("Установлено: " + e.Text);
+                        Sfx.Play("hit_wood", Iso.Px(e.Pos), -4, 20);
                         break;
                     case SimEventKind.HitActor:
                         Flash(e.Pos, new Color(0.85f, 0.1f, 0.08f), 5, 0.15f);
+                        Sfx.Play("hit_flesh", Iso.Px(e.Pos), -2, 30, 0.12f);
                         if (e.OtherId == _myId) _hud.Crosshair.HitFlash = 0.15f;
                         if (e.ActorId == _myId) _hud.FlashDamage();
                         break;
@@ -336,13 +346,37 @@ namespace Rastvordd.Client
                         else if (e.OtherId == _myId) _hud.Toast("Убит. Лут на трупе — подойди и нажми E.");
                         break;
                     case SimEventKind.Loot:
-                        if (e.ActorId == _myId) _hud.Toast("Залутано: " + e.Text);
+                        if (e.ActorId == _myId) { _hud.Toast("Залутано: " + e.Text); Sfx.Play("loot", _selfPx, -4, 10); }
                         break;
                     case SimEventKind.Respawn:
                         if (e.ActorId == _myId) _hud.Toast("Проснулся на пляже. Голый, с булыжником.");
                         break;
                 }
             }
+        }
+
+        string NodeHitSound(int nodeId)
+        {
+            foreach (var n in _cur.Nodes)
+                if (n.Id == nodeId)
+                    return n.Kind == NodeKind.Tree ? "hit_wood" : n.Kind == NodeKind.Stone ? "hit_stone" : "hit_metal_ore";
+            return "hit_stone";
+        }
+
+        /// <summary>Шаги: звук каждые ~0.8 м пути; по траве мягко, по гравию/песку/снегу/бетону жёстче.</summary>
+        void Footstep(int id, SVec pos, float speed, float dt)
+        {
+            if (speed < 0.5f) return;
+            _stepAcc.TryGetValue(id, out var acc);
+            acc += speed * dt;
+            if (acc >= 0.8f)
+            {
+                acc = 0;
+                var b = TerrainView.BiomeAt(_map, pos);
+                bool hard = b is Biome.Arid or Biome.Tundra or Biome.Beach || (pos.X > 4 && pos.X < 36 && pos.Y > -36 && pos.Y < -4);
+                Sfx.Play(hard ? "step_gravel" : "step_grass", Iso.Px(pos), id == _myId ? -10 : -6, 18, 0.15f);
+            }
+            _stepAcc[id] = acc;
         }
 
         void FloatText(SVec pos, string text, Color c)
@@ -394,6 +428,7 @@ namespace Rastvordd.Client
                     _selfPx = Iso.Px(pos);
                 }
                 view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId);
+                if (!a.Dead) Footstep(a.Id, pos, speed, dt);
             }
             foreach (var kv in _actorViews)
                 if (!seen.Contains(kv.Key)) kv.Value.Visible = false;

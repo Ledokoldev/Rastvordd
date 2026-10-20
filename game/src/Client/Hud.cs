@@ -41,7 +41,7 @@ void fragment() {
             _damageRect = FullRect(new Color(0.8f, 0, 0, 0));
 
             _hintLabel = MakeLabel(this, new Vector2(16, 12), 15, new Color(1, 1, 1, 0.75f));
-            _hintLabel.Text = "WASD — ходьба · Shift — бег · ЛКМ — стрелять · R — перезарядка · E — лутать · H — бинт\n1/2/3 — оружие · Tab — инвентарь · колесо — зум · Esc — курсор";
+            _hintLabel.Text = "WASD — ходьба · Shift — бег · ЛКМ — стрелять · ПКМ — прицелиться · R — перезарядка · E — лутать · H — бинт\n1/2/3 — оружие · Tab — инвентарь · колесо — зум · Esc — курсор";
             _modeLabel = MakeLabel(this, new Vector2(16, 58), 15, new Color(1, 0.9f, 0.6f, 0.85f));
 
             var hpBack = new ColorRect { Color = new Color(0, 0, 0, 0.55f), Size = new Vector2(260, 26), MouseFilter = Control.MouseFilterEnum.Ignore };

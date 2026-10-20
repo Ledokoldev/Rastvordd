@@ -278,7 +278,7 @@ namespace Rastvordd.Sim
             var move = cmd.Move;
             if (move.LengthSquared() > 1) move = Vector2.Normalize(move);
             a.Peek = Math.Clamp(cmd.Peek, 0f, 1f);
-            float speed = WalkSpeed * (1f - 0.45f * a.Peek);   // выглядываешь — идёшь медленнее
+            float speed = WalkSpeed * (1f - 0.45f * a.Peek);   // прицеливаешься — идёшь медленнее
             bool sprint = false;
             var toAimDir = cmd.Aim - a.Pos;
             if (cmd.Sprint && move.LengthSquared() > 0.01f && a.Peek < 0.3f && toAimDir.LengthSquared() > 0.01f)
@@ -371,7 +371,8 @@ namespace Rastvordd.Sim
             var w = a.Weapon;
             if (w == null) return 0;
             float moving = a.Vel.Length() / WalkSpeed;
-            return w.Def.BaseSpreadDeg + w.Bloom + MathF.Min(1.5f, moving) * 3f;
+            float spread = w.Def.BaseSpreadDeg + w.Bloom + MathF.Min(1.5f, moving) * 3f;
+            return spread * (1f - 0.35f * a.Peek);   // в прицеливании точнее
         }
 
         void TryLoot(Actor a)

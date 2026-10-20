@@ -21,15 +21,16 @@ namespace Rastvordd.Client
 
         static readonly string[] Flat = { "decal_pebbles", "decal_leaves", "decal_puddle", "decal_debris" };
 
-        // мелкие декали (9–18 px) в пикселе превращались в кляксы — убраны; остались только крупные кусты
-        static readonly Dictionary<Biome, (int count, int[] w)> Fill = new()
+        // крупные куртины травы своего цвета в каждом биоме (мелкие декали в пикселе были кляксами)
+        static readonly Dictionary<Biome, (int count, string[] ids)> Fill = new()
         {
-            [Biome.Grassland] = (1, new[] { 1 }),
-            [Biome.Forest] = (2, new[] { 1 }),
-            [Biome.Swamp] = (2, new[] { 1 }),
+            [Biome.Grassland] = (6, new[] { "grass/grass_meadow_1", "grass/grass_meadow_1", "grass/grass_meadow_2", "plants/bush_1" }),
+            [Biome.Forest] = (5, new[] { "grass/grass_forest_1", "grass/grass_forest_2", "grass/grass_forest_1", "plants/bush_1" }),
+            [Biome.Swamp] = (7, new[] { "grass/grass_swamp_1", "grass/grass_swamp_2", "grass/grass_swamp_1" }),
+            [Biome.Arid] = (3, new[] { "grass/grass_arid_1", "grass/grass_arid_1", "grass/grass_arid_2" }),
+            [Biome.Tundra] = (3, new[] { "grass/grass_tundra_1", "grass/grass_tundra_2" }),
+            [Biome.Beach] = (3, new[] { "grass/grass_beach_1", "grass/grass_beach_2" }),
         };
-
-        static readonly string[] Ids = { "plants/bush_1" };
         public DecalLayer(MapInfo map, Node2D flatParent, Node2D sortedParent)
         {
             _map = map;
@@ -61,17 +62,16 @@ namespace Rastvordd.Client
             var center = new SVec((cx + 0.5f) * Chunk, (cy + 0.5f) * Chunk);
             var biome = TerrainView.BiomeAt(_map, center);
             if (!Fill.TryGetValue(biome, out var fill)) return list;
-            int sum = 0;
-            foreach (var v in fill.w) sum += v;
 
             for (int i = 0; i < fill.count; i++)
             {
                 var p = new SVec(cx * Chunk + rng.Randf() * Chunk, cy * Chunk + rng.Randf() * Chunk);
                 if (TerrainView.BiomeAt(_map, p) == Biome.Water) continue;
                 if (p.X > 4 && p.X < 36 && p.Y > -36 && p.Y < -4) continue;   // не на площадке РТ
-                int r = rng.RandiRange(0, sum - 1), id = 0;
-                for (; id < fill.w.Length; id++) { if (r < fill.w[id]) break; r -= fill.w[id]; }
-                var tex = Art.Get(Ids[Mathf.Min(id, Ids.Length - 1)]);
+                // биом берём в самой точке: на границе биомов трава смешивается естественно
+                var here = TerrainView.BiomeAt(_map, p);
+                var set = Fill.TryGetValue(here, out var f2) ? f2.ids : fill.ids;
+                var tex = Art.Get(set[rng.RandiRange(0, set.Length - 1)]);
                 if (tex == null) continue;
 
                 bool flat = false;

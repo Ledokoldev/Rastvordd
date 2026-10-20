@@ -259,8 +259,11 @@ namespace Rastvordd.Client
         readonly Color _topC, _frontC;
         readonly WallKind _kind;
 
-        public WallView2D(WallInfo w)
+        readonly Biome _biome;
+
+        public WallView2D(WallInfo w, Biome biome = Biome.Grassland)
         {
+            _biome = biome;
             _kind = w.Kind;
             TextureFilter = TextureFilterEnum.Nearest;
             TextureRepeat = TextureRepeatEnum.Enabled;
@@ -292,7 +295,7 @@ namespace Rastvordd.Client
             };
             if (prop != null)
             {
-                var tex = Art.Get(prop);
+                var tex = Art.Styled(prop, _biome);
                 if (tex != null)
                 {
                     float s = _kind == WallKind.Car ? 1.4f : 1f;
@@ -418,11 +421,11 @@ namespace Rastvordd.Client
         readonly Vector2[] _specks;
         readonly Texture2D _tex;
 
-        public OreView2D(Vector2 basePx, NodeKind kind, float radiusM, int seed)
+        public OreView2D(Vector2 basePx, NodeKind kind, float radiusM, int seed, Biome biome = Biome.Grassland)
         {
             Base = Position = basePx;
             _kind = kind;
-            _tex = Art.Node(kind, seed);
+            _tex = Art.Node(kind, seed, biome);
             TextureFilter = TextureFilterEnum.Nearest;
             var rng = new RandomNumberGenerator { Seed = (ulong)seed };
             float r = radiusM * Iso.PPM;
@@ -474,9 +477,12 @@ namespace Rastvordd.Client
         public bool Available = true;
         readonly PickupKind _kind;
 
-        public PickupView2D(PickupKind kind)
+        readonly Biome _biome;
+
+        public PickupView2D(PickupKind kind, Biome biome = Biome.Grassland)
         {
             _kind = kind;
+            _biome = biome;
             TextureFilter = TextureFilterEnum.Nearest;
         }
 
@@ -485,8 +491,13 @@ namespace Rastvordd.Client
             // спрайт: у собранного куста ягод — просто куст, собранная конопля — пенёк (заглушка ниже)
             var tex = _kind switch
             {
-                PickupKind.Hemp => Available ? Art.Get("plants/hemp_plant") : null,
-                PickupKind.Berries => Art.Get(Available ? "plants/berry_bush" : "plants/bush_1"),
+                PickupKind.Hemp => !Available ? null
+                    : _biome == Biome.Tundra ? Art.Get("plants/hemp_tundra") ?? Art.Get("plants/hemp_plant")
+                    : _biome is Biome.Arid or Biome.Beach ? Art.Get("plants/hemp_arid") ?? Art.Get("plants/hemp_plant")
+                    : Art.Get("plants/hemp_plant"),
+                PickupKind.Berries => _biome == Biome.Tundra
+                    ? (Available ? Art.Get("plants/berry_tundra") : Art.Get("grass/grass_tundra_2")) ?? Art.Get("plants/berry_bush")
+                    : Art.Get(Available ? "plants/berry_bush" : "plants/bush_1"),
                 _ => Art.Get("props/barrel_water"),
             };
             if (tex != null)

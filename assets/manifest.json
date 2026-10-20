@@ -802,6 +802,222 @@
       ],
       "h": 1.8,
       "desc": "a tired warehouse guard: faded olive canvas jacket with patches, a crude riveted steel plate strapped on the chest, a dark cloth hood, worn grey trousers, heavy dirty boots, gaunt face"
+    },
+    {
+      "id": "grass_meadow_1",
+      "cat": "grass",
+      "h": 1.1,
+      "desc": "a dense clump of tall wild meadow grass, muted green with a few seed heads and a little dry yellow at the tips"
+    },
+    {
+      "id": "grass_meadow_2",
+      "cat": "grass",
+      "h": 0.9,
+      "desc": "a clump of overgrown weeds and tall grass with a couple of faded wild flowers, muted green"
+    },
+    {
+      "id": "grass_forest_1",
+      "cat": "grass",
+      "h": 0.9,
+      "desc": "a lush clump of dark green ferns and forest undergrowth"
+    },
+    {
+      "id": "grass_forest_2",
+      "cat": "grass",
+      "h": 0.8,
+      "desc": "a small patch of dark forest undergrowth: young saplings, ferns and moss-covered twigs"
+    },
+    {
+      "id": "grass_swamp_1",
+      "cat": "grass",
+      "h": 1.4,
+      "desc": "a clump of tall swamp reeds and brown cattails, dark olive green"
+    },
+    {
+      "id": "grass_swamp_2",
+      "cat": "grass",
+      "h": 1.0,
+      "desc": "a clump of dark green sedge and marsh grass with muddy roots"
+    },
+    {
+      "id": "grass_arid_1",
+      "cat": "grass",
+      "h": 0.8,
+      "desc": "a clump of dry sun-bleached yellow grass, brittle and dead"
+    },
+    {
+      "id": "grass_arid_2",
+      "cat": "grass",
+      "h": 0.9,
+      "desc": "a thorny dry desert shrub with tiny grey-green leaves and dead twigs"
+    },
+    {
+      "id": "grass_tundra_1",
+      "cat": "grass",
+      "h": 0.7,
+      "desc": "frost-covered dry grass tufts poking out of a small mound of snow, pale and icy"
+    },
+    {
+      "id": "grass_tundra_2",
+      "cat": "grass",
+      "h": 0.8,
+      "desc": "a low frozen shrub of dark twigs dusted with snow and frost"
+    },
+    {
+      "id": "grass_beach_1",
+      "cat": "grass",
+      "h": 0.9,
+      "desc": "a clump of coastal dune grass, pale yellow-green long blades bent by the wind"
+    },
+    {
+      "id": "grass_beach_2",
+      "cat": "grass",
+      "h": 0.6,
+      "desc": "a low coastal shrub with grey-green leaves growing out of sand, a bit of washed-up seaweed"
+    },
+    {
+      "id": "tree_spruce_snow_1",
+      "cat": "trees",
+      "h": 6.5,
+      "desc": "a tall dark spruce tree with branches heavily laden with snow, frosted needles"
+    },
+    {
+      "id": "tree_spruce_snow_2",
+      "cat": "trees",
+      "h": 5.5,
+      "desc": "a narrow fir tree covered with snow and icicles, partly bare branches"
+    },
+    {
+      "id": "tree_birch_frozen",
+      "cat": "trees",
+      "h": 5.0,
+      "desc": "a leafless birch tree in winter, white bark, frost and snow on the thin branches"
+    },
+    {
+      "id": "tree_dead_dry_1",
+      "cat": "trees",
+      "h": 4.5,
+      "desc": "a twisted dead tree in a dry wasteland, sun-bleached grey wood, cracked bark, no leaves"
+    },
+    {
+      "id": "tree_dead_dry_2",
+      "cat": "trees",
+      "h": 4.0,
+      "desc": "a gnarled dry tree with a few sparse dusty olive leaves, crooked trunk, arid wasteland"
+    },
+    {
+      "id": "tree_swamp_willow",
+      "cat": "trees",
+      "h": 5.5,
+      "desc": "a drooping swamp willow tree with long hanging dark green leaves and beards of grey moss"
+    },
+    {
+      "id": "tree_swamp_dead",
+      "cat": "trees",
+      "h": 5.0,
+      "desc": "a rotting dead swamp tree with a split trunk, hanging moss and fungus, dark wet wood"
+    },
+    {
+      "id": "tree_pine_coastal",
+      "cat": "trees",
+      "h": 5.5,
+      "desc": "a crooked coastal pine tree bent by the sea wind, sparse dark needles, twisted trunk"
+    },
+    {
+      "id": "node_stone_tundra",
+      "cat": "nodes",
+      "h": 1.3,
+      "desc": "a large grey granite boulder with a thick cap of snow on top and frost in the cracks, a harvestable stone resource"
+    },
+    {
+      "id": "node_metal_tundra",
+      "cat": "nodes",
+      "h": 1.3,
+      "desc": "a dark boulder with rusty orange metal ore veins, half covered with snow and ice, a harvestable metal ore resource"
+    },
+    {
+      "id": "node_sulfur_tundra",
+      "cat": "nodes",
+      "h": 1.3,
+      "desc": "a pale boulder crusted with yellow sulfur crystals, snow cap on top and frost, a harvestable sulfur ore resource"
+    },
+    {
+      "id": "node_stone_arid",
+      "cat": "nodes",
+      "h": 1.3,
+      "desc": "a sun-bleached sandy beige boulder with wind-eroded cracks, half buried in dry sand, a harvestable stone resource"
+    },
+    {
+      "id": "node_metal_arid",
+      "cat": "nodes",
+      "h": 1.3,
+      "desc": "a sandy reddish boulder with dark rusty metal ore veins, dusty and wind-eroded, half buried in sand, a harvestable metal ore resource"
+    },
+    {
+      "id": "node_sulfur_arid",
+      "cat": "nodes",
+      "h": 1.3,
+      "desc": "a crumbly pale boulder covered with bright yellow sulfur crust, dusty, in dry sand, a harvestable sulfur ore resource"
+    },
+    {
+      "id": "node_stone_swamp",
+      "cat": "nodes",
+      "h": 1.2,
+      "desc": "a dark wet boulder covered with thick green moss and lichen, sitting in mud, a harvestable stone resource"
+    },
+    {
+      "id": "node_metal_swamp",
+      "cat": "nodes",
+      "h": 1.2,
+      "desc": "a dark wet boulder with rusty metal ore veins, patches of moss, muddy base, a harvestable metal ore resource"
+    },
+    {
+      "id": "node_sulfur_swamp",
+      "cat": "nodes",
+      "h": 1.2,
+      "desc": "a wet boulder with yellow sulfur deposits and green moss, muddy base, a harvestable sulfur ore resource"
+    },
+    {
+      "id": "car_wreck_snow",
+      "cat": "props",
+      "h": 1.5,
+      "desc": "a burnt-out rusty abandoned sedan car wreck covered with a thick layer of snow, icicles, seen from the 3/4 top-down view"
+    },
+    {
+      "id": "car_wreck_sand",
+      "cat": "props",
+      "h": 1.5,
+      "desc": "a sun-bleached rusty abandoned sedan car wreck half buried in drifting desert sand, seen from the 3/4 top-down view"
+    },
+    {
+      "id": "junk_pile_snow",
+      "cat": "props",
+      "h": 0.8,
+      "desc": "a pile of junk (old tires, rusty sheet metal, broken pipes) covered with snow"
+    },
+    {
+      "id": "concrete_barrier_snow",
+      "cat": "props",
+      "h": 0.9,
+      "desc": "a cracked concrete road barrier with faded paint, covered with snow and frost"
+    },
+    {
+      "id": "hemp_tundra",
+      "cat": "plants",
+      "h": 1.2,
+      "desc": "a frost-bitten wild hemp plant with dark wilted leaves dusted with snow, growing from a snowdrift"
+    },
+    {
+      "id": "berry_tundra",
+      "cat": "plants",
+      "h": 0.7,
+      "desc": "a low lingonberry bush with small dark leaves and bright red berries poking out of the snow"
+    },
+    {
+      "id": "hemp_arid",
+      "cat": "plants",
+      "h": 1.2,
+      "desc": "a dried-out wild hemp plant with yellowed brittle leaves growing from cracked dry earth"
     }
   ],
   "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

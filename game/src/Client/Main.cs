@@ -172,7 +172,7 @@ namespace Rastvordd.Client
 
         void BuildMap(MapInfo map)
         {
-            foreach (var w in map.Walls) _world.AddChild(new WallView2D(w));
+            foreach (var w in map.Walls) _world.AddChild(new WallView2D(w, TerrainView.BiomeAt(map, (w.Min + w.Max) * 0.5f)));
         }
 
         // ---------- ввод ----------
@@ -517,7 +517,7 @@ namespace Rastvordd.Client
                 {
                     v = n.Kind == NodeKind.Tree
                         ? new TreeView2D(Iso.Px(n.Pos), n.Radius, n.Id, TerrainView.BiomeAt(_map, n.Pos))
-                        : new OreView2D(Iso.Px(n.Pos), n.Kind, n.Radius, n.Id);
+                        : new OreView2D(Iso.Px(n.Pos), n.Kind, n.Radius, n.Id, TerrainView.BiomeAt(_map, n.Pos));
                     _world.AddChild(v);
                     _nodeViews[n.Id] = v;
                 }
@@ -535,7 +535,7 @@ namespace Rastvordd.Client
                 seen.Add(p.Id);
                 if (!_pickupViews.TryGetValue(p.Id, out var v))
                 {
-                    v = new PickupView2D(p.Kind) { Position = Iso.Px(p.Pos) };
+                    v = new PickupView2D(p.Kind, TerrainView.BiomeAt(_map, p.Pos)) { Position = Iso.Px(p.Pos) };
                     _world.AddChild(v);
                     _pickupViews[p.Id] = v;
                 }

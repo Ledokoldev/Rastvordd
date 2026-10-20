@@ -63,16 +63,42 @@ namespace Rastvordd.Client
 
         const string Pine1 = "trees/tree_pine_1", Pine2 = "trees/tree_pine_2", Oak = "trees/tree_oak_dead", Birch = "trees/tree_birch", Leafy = "trees/tree_leafy";
 
-        /// <summary>Вид дерева зависит от биома: тайга — ели, пустошь — сухие, болото — мёртвые и берёзы.</summary>
+        const string SnowSpruce1 = "trees/tree_spruce_snow_1", SnowSpruce2 = "trees/tree_spruce_snow_2", FrozenBirch = "trees/tree_birch_frozen",
+                     Dry1 = "trees/tree_dead_dry_1", Dry2 = "trees/tree_dead_dry_2", Willow = "trees/tree_swamp_willow", SwampDead = "trees/tree_swamp_dead",
+                     Coastal = "trees/tree_pine_coastal";
+
+        /// <summary>Вид дерева зависит от биома: в тайге ели под снегом, в пустоши сухие, на болоте ивы и гниющие стволы.</summary>
         public static Texture2D Tree(int seed, Biome biome = Biome.Grassland) => biome switch
         {
-            Biome.Forest => Pick(seed, Pine1, Pine2, Pine1, Leafy, Birch),
-            Biome.Tundra => Pick(seed, Pine2, Pine1, Pine2, Birch),
-            Biome.Arid => Pick(seed, Oak, Oak, Birch),
-            Biome.Swamp => Pick(seed, Oak, Birch, Leafy),
-            Biome.Beach => Pick(seed, Pine2, Oak),
-            _ => Pick(seed, Leafy, Birch, Leafy, Oak, Pine1),
+            Biome.Forest => PickOr(seed, new[] { Pine1, Pine2, Pine1, Leafy, Oak }, Pine1),
+            Biome.Tundra => PickOr(seed, new[] { SnowSpruce1, SnowSpruce2, SnowSpruce1, FrozenBirch }, Pine2),
+            Biome.Arid => PickOr(seed, new[] { Dry1, Dry2, Dry1, Oak }, Oak),
+            Biome.Swamp => PickOr(seed, new[] { Willow, SwampDead, Willow, Birch }, Oak),
+            Biome.Beach => PickOr(seed, new[] { Coastal, Coastal, Pine2 }, Pine2),
+            _ => PickOr(seed, new[] { Leafy, Birch, Leafy, Birch, Pine1 }, Leafy),
         };
+
+        /// <summary>Вариант по seed; если файла нет — запасной (чтобы в тайге не вылезло лиственное дерево).</summary>
+        static Texture2D PickOr(int seed, string[] paths, string fallback)
+        {
+            uint h = (uint)seed * 2654435761u;
+            return Get(paths[(int)(h % (uint)paths.Length)]) ?? Get(fallback);
+        }
+
+        /// <summary>Камни и руды под биом: в тайге со снегом, в пустоши выгоревшие, на болоте во мху; в поле/лесу — обычные.</summary>
+        public static Texture2D Node(NodeKind kind, int seed, Biome biome)
+        {
+            string k = kind switch { NodeKind.Metal => "metal", NodeKind.Sulfur => "sulfur", _ => "stone" };
+            string suffix = biome switch { Biome.Tundra => "tundra", Biome.Arid => "arid", Biome.Beach => "arid", Biome.Swamp => "swamp", _ => null };
+            return (suffix != null ? Get($"nodes/node_{k}_{suffix}") : null) ?? Node(kind, seed);
+        }
+
+        /// <summary>Вариант укрытия/предмета под биом, иначе базовый.</summary>
+        public static Texture2D Styled(string basePath, Biome biome)
+        {
+            string suffix = biome switch { Biome.Tundra => "_snow", Biome.Arid or Biome.Beach => "_sand", _ => null };
+            return (suffix != null ? Get(basePath + suffix) : null) ?? Get(basePath);
+        }
 
         public static Texture2D Node(NodeKind kind, int seed) => kind switch
         {

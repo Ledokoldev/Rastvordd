@@ -782,8 +782,29 @@
       "cat": "tiles",
       "tile": 4,
       "desc": "ground viewed straight down from above: wet dark swamp mud with small murky puddles, rotting reeds and dark green algae"
+    },
+    {
+      "id": "char_naked",
+      "cat": "chars",
+      "sheet": [
+        4,
+        2
+      ],
+      "h": 1.8,
+      "desc": "a gaunt adult survivor, barefoot, wearing only dirty torn grey underwear shorts and a dirty cloth bandage around one forearm, short messy dark hair, pale dirty skin"
+    },
+    {
+      "id": "char_guard",
+      "cat": "chars",
+      "sheet": [
+        4,
+        2
+      ],
+      "h": 1.8,
+      "desc": "a tired warehouse guard: faded olive canvas jacket with patches, a crude riveted steel plate strapped on the chest, a dark cloth hood, worn grey trousers, heavy dirty boots, gaunt face"
     }
   ],
   "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",
-  "weapon_framing": "A single game sprite of a weapon or tool for a survival game: the item alone, strict side view, horizontal, pointing to the right (muzzle or business end on the right), centered, transparent background, no hands, no text, no frame, no border, no cast shadow."
+  "weapon_framing": "A single game sprite of a weapon or tool for a survival game: the item alone, strict side view, horizontal, pointing to the right (muzzle or business end on the right), centered, transparent background, no hands, no text, no frame, no border, no cast shadow.",
+  "sheet_framing": "A character sprite sheet for a 2D top-down survival game in 3/4 view like Project Zomboid: a grid of 4 columns and 2 rows of equally spaced frames on a transparent background. Top row: the same person walking diagonally toward the camera and to the right (front 3/4 view, facing down-right), 4 frames of one walk cycle. Bottom row: the same person walking diagonally away from the camera and to the right (back 3/4 view, facing up-right), 4 frames of one walk cycle. Identical character, proportions, clothing and lighting in every frame, full body visible, feet on the same baseline within each row, arms relaxed with empty hands, no weapon, no text, no labels, no grid lines, no frame borders, no cast shadow."
 }

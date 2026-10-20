@@ -37,6 +37,18 @@ namespace Rastvordd.Client
             return t;
         }
 
+        /// <summary>Кадры ходьбы персонажа: 'f' — лицом (вниз-вправо), 'b' — спиной (вверх-вправо). Нет файлов — null.</summary>
+        public static Texture2D[] CharFrames(string baseName, char row)
+        {
+            var frames = new Texture2D[4];
+            for (int i = 0; i < 4; i++)
+            {
+                frames[i] = Get($"chars/{baseName}_{row}{i}");
+                if (frames[i] == null) return null;
+            }
+            return frames;
+        }
+
         /// <summary>Детерминированный выбор варианта по id объекта.</summary>
         public static Texture2D Pick(int seed, params string[] paths)
         {

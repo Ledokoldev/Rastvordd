@@ -107,6 +107,43 @@ def process(a: dict, src: pathlib.Path) -> tuple[Image.Image, Image.Image]:
     return hd, px
 
 
+CHAR_FRAME = 64
+
+
+def process_sheet(a: dict, src: pathlib.Path) -> Image.Image:
+    """Лист персонажа cols×rows -> кадры 64×64 (ряд 0 — лицом «f», ряд 1 — спиной «b»).
+    Все кадры ряда режутся одной общей рамкой и стоят на одной линии ступней — без дрожи при ходьбе."""
+    cols, rows = a["sheet"]
+    raw = Image.open(src).convert("RGBA")
+    cw, ch = raw.width // cols, raw.height // rows
+    target_h = round(a["h"] * PX_PIXEL)
+    strip = Image.new("RGBA", (CHAR_FRAME * cols, CHAR_FRAME * rows), (0, 0, 0, 0))
+    for r in range(rows):
+        cells = []
+        for c in range(cols):
+            cell = raw.crop((c * cw, r * ch, (c + 1) * cw, (r + 1) * ch))
+            rr, gg, bb, al = cell.split()
+            al = al.point(lambda v: 0 if v < 70 else v).filter(ImageFilter.MinFilter(3))
+            cells.append(Image.merge("RGBA", (rr, gg, bb, al)))
+        boxes = [cl.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox() for cl in cells]
+        boxes = [b for b in boxes if b]
+        if not boxes:
+            continue
+        union = (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
+        scale = target_h / (union[3] - union[1])
+        for c, cl in enumerate(cells):
+            crop = cl.crop(union)
+            size = (max(1, round(crop.width * scale)), target_h)
+            px = pixelize(crop, size)
+            frame = Image.new("RGBA", (CHAR_FRAME, CHAR_FRAME), (0, 0, 0, 0))
+            frame.paste(px, ((CHAR_FRAME - px.width) // 2, CHAR_FRAME - target_h - 2), px)
+            dst = ROOT / "game" / "art" / a["cat"] / f"{a['id']}_{'fb'[r]}{c}.png"
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            frame.save(dst)
+            strip.paste(frame, (c * CHAR_FRAME, r * CHAR_FRAME), frame)
+    return strip
+
+
 def sheet(items: list[tuple[str, Image.Image]], scale: int, path: pathlib.Path, cols: int = 8) -> None:
     pad = 16
     imgs = [(n, im.resize((im.width * scale, im.height * scale), Image.NEAREST)) for n, im in items]
@@ -158,6 +195,11 @@ def main() -> None:
     for a in manifest["assets"]:
         src = ROOT / "assets" / "gen" / a["cat"] / f"{a['id']}.png"
         if not src.exists():
+            continue
+        if a.get("sheet"):
+            strip = process_sheet(a, src)
+            strip.resize((strip.width * 3, strip.height * 3), Image.NEAREST).save(ROOT / "assets" / f"preview_{a['id']}.png")
+            print(f"{a['id']:<24} sheet -> {a['sheet'][0] * a['sheet'][1]} frames")
             continue
         hd, px = process(a, src)
         for base, im in ((ROOT / "assets" / "hd", hd), (ROOT / "game" / "art", px)):

@@ -37,6 +37,11 @@ namespace Rastvordd.Client
                 Hair = isNpc ? new Color(0.2f, 0.22f, 0.16f) : new Color(0.28f, 0.18f, 0.1f),
                 Helmet = isNpc,
             };
+            // спрайты персонажа, если сгенерированы; охрана — свой лист, игроки пока «голые»
+            string sheet = isNpc ? "char_guard" : "char_naked";
+            _body.Front = Art.CharFrames(sheet, 'f');
+            _body.BackFrames = Art.CharFrames(sheet, 'b');
+            _body.TextureFilter = TextureFilterEnum.Nearest;
             _held = new Held2D { Position = new Vector2(1, -Iso.H(1.05f)) };
             AddChild(_body);
             AddChild(_held);
@@ -103,9 +108,18 @@ namespace Rastvordd.Client
         public Color Skin = new Color(0.86f, 0.68f, 0.55f);
         public bool Back, Moving, Dead, Helmet;
         public float Phase;
+        public Texture2D[] Front, BackFrames;
 
         public override void _Draw()
         {
+            var frames = Back ? BackFrames : Front;
+            if (frames != null)
+            {
+                // цикл ходьбы ~7 кадров/с; стоя — первый кадр
+                int idx = Moving && !Dead ? (int)(Phase / (Mathf.Pi / 2)) % 4 : 0;
+                DrawTexture(frames[idx], new Vector2(-32, -62), Dead ? new Color(0.55f, 0.5f, 0.5f) : Colors.White);
+                return;
+            }
             var shirt = Dead ? Shirt.Darkened(0.45f) : Shirt;
             var pants = Dead ? Pants.Darkened(0.45f) : Pants;
             float bob = Moving && !Dead ? -Mathf.Abs(Mathf.Sin(Phase)) * 1.5f : 0;

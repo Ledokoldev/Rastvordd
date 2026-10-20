@@ -20,13 +20,15 @@ uniform vec2 facing_dir = vec2(1.0, 0.0);
 uniform float cos_half = 0.42;
 uniform float near_px = 80.0;
 uniform float far_px = 1600.0;
-uniform float darkness = 0.55;
+uniform float darkness = 0.3;
 void fragment() {
     vec2 d = FRAGCOORD.xy - player_px;
     float dist = length(d);
     float c = dot(d / max(dist, 0.001), facing_dir);
-    float cone = smoothstep(cos_half - 0.06, cos_half + 0.03, c) * (1.0 - smoothstep(far_px * 0.88, far_px, dist));
-    float nearv = 1.0 - smoothstep(near_px * 0.85, near_px * 1.2, dist);
+    // ровные края без размытия (как в Project Zomboid), лёгкое сглаживание только против лесенки
+    float aa = 1.5 / max(dist, 1.0);
+    float cone = smoothstep(cos_half - aa, cos_half + aa, c) * (1.0 - smoothstep(far_px - 1.0, far_px + 1.0, dist));
+    float nearv = 1.0 - smoothstep(near_px - 1.0, near_px + 1.0, dist);
     COLOR = vec4(0.02, 0.03, 0.07, (1.0 - max(cone, nearv)) * darkness);
 }";
 
@@ -115,7 +117,7 @@ void fragment() {
             _visionMat.SetShaderParameter("facing_dir", facing);
             _visionMat.SetShaderParameter("near_px", nearPx);
             _visionMat.SetShaderParameter("far_px", farPx);
-            _visionMat.SetShaderParameter("darkness", enabled ? 0.55f : 0f);
+            _visionMat.SetShaderParameter("darkness", enabled ? 0.3f : 0f);
         }
 
         public void UpdateHud(SelfInfo s, float dt, string modeText)

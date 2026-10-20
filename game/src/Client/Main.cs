@@ -201,7 +201,7 @@ namespace Rastvordd.Client
 
             // выглядывание: курсор у края экрана
             float edge = Mathf.Max(Mathf.Abs(_screenDir.X), Mathf.Abs(_screenDir.Y));
-            float peekTarget = _forcedPeek ?? Mathf.Clamp((edge - 0.6f) / 0.33f, 0, 1);
+            float peekTarget = _forcedPeek ?? Mathf.Clamp((edge - 0.9f) / 0.08f, 0, 1);   // только у самого края экрана
             _peek = Mathf.MoveToward(_peek, peekTarget, dt * 3f);
 
             if (_autoAim.HasValue) { _aim = _autoAim.Value; return; }
@@ -380,7 +380,7 @@ namespace Rastvordd.Client
             // смещение зависит от положения курсора на экране (не в мире), поэтому камера не «убегает»
             // сдвиг — доля половины экрана, чтобы персонаж всегда оставался в кадре (не ближе 20% к краю)
             var halfWorld = GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X;
-            var target = _selfPx + _screenDir * halfWorld * (0.2f + 0.55f * _peek) + new Vector2(0, -Iso.H(1f));
+            var target = _selfPx + _screenDir * halfWorld * (0.55f * _peek) + new Vector2(0, -Iso.H(1f));
             _cam.Position = _frame <= 2 ? target : _cam.Position.Lerp(target, 1 - Mathf.Exp(-8 * dt));
             float zoomTarget = _zoom * (1f - 0.22f * _peek);   // выглядывая, камера чуть отдаляется
             var z = _cam.Zoom.X + (zoomTarget - _cam.Zoom.X) * (1 - Mathf.Exp(-10 * dt));

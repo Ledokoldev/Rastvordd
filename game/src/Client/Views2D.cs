@@ -1008,23 +1008,58 @@ namespace Rastvordd.Client
     public partial class BagView2D : Node2D
     {
         public bool IsCrate, Empty, Safe, Punch, Unlocked;
+        public int Id, Tier;
+        PointLight2D _aura;
 
         public BagView2D()
         {
             TextureFilter = TextureFilterEnum.Nearest;
-            Material = VisionFx.ObjectMat;
+            Material = VisionFx.LootMat.Duplicate() as ShaderMaterial;
+        }
+
+        // вид крейта по уровню лута: бытовые — дерево, еда, аптечка, инструменты, электрика; охраняемые — армейский, патроны;
+        // крупные РТ — оружейный и «элитный». Выбор по номеру — у одного ящика всегда один вид.
+        static readonly string[][] Styles =
+        {
+            new[] { "loot_crate_wood", "loot_crate_food", "loot_crate_medical", "loot_crate_tools", "loot_crate_electric" },
+            new[] { "loot_crate_army", "loot_crate_ammo", "loot_crate_tools", "loot_crate_medical" },
+            new[] { "loot_crate_weapon", "loot_crate_army", "loot_crate_elite" },
+        };
+        static readonly System.Collections.Generic.Dictionary<string, Color> Accent = new()
+        {
+            ["loot_crate_wood"] = new(0.45f, 1f, 0.45f), ["loot_crate_food"] = new(0.45f, 0.7f, 1f), ["loot_crate_medical"] = new(1f, 0.35f, 0.35f),
+            ["loot_crate_tools"] = new(1f, 0.6f, 0.2f), ["loot_crate_electric"] = new(0.4f, 0.75f, 1f), ["loot_crate_army"] = new(1f, 0.85f, 0.3f),
+            ["loot_crate_ammo"] = new(1f, 0.85f, 0.3f), ["loot_crate_weapon"] = new(1f, 0.3f, 0.25f), ["loot_crate_elite"] = new(1f, 0.45f, 0.15f),
+        };
+
+        string Style => Punch ? "crate_punch" : Safe ? "loot_safe" : !IsCrate ? null : Styles[System.Math.Clamp(Tier, 0, 2)][(int)((uint)Id * 2654435761u % (uint)Styles[System.Math.Clamp(Tier, 0, 2)].Length)];
+
+        public override void _Ready()
+        {
+            // ночью крейт с лутом чуть светится цветом своего вида — видно издалека, но не выдаёт стрелков
+            if (IsCrate && !Punch && Style != null && Accent.TryGetValue(Style, out var c))
+            {
+                _aura = new PointLight2D { Texture = Art.LightTex, TextureScale = 2.2f * Iso.PPM * 2 / 256f, Color = c, Energy = 0.35f, Position = new Vector2(0, -10), BlendMode = Light2D.BlendModeEnum.Add, ShadowEnabled = true, ShadowFilter = Light2D.ShadowFilterEnum.Pcf5 };
+                AddChild(_aura);
+            }
         }
 
         public override void _Draw()
         {
-            var tex = Art.Get(Punch ? (Unlocked ? "props/crate_punch_open" : "props/crate_punch") : Safe ? "props/safe" : IsCrate ? "props/crate_military" : "props/loot_bag") ?? Art.Get("props/crate_military");
+            string style = Style;
+            Texture2D tex = style == null ? Art.Get("props/loot_bag")
+                : Punch ? Art.Get(Unlocked ? "props/crate_punch_open" : "props/crate_punch")
+                : (Empty ? Art.Get($"props/{style}_open") : null) ?? Art.Get($"props/{style}") ?? Art.Get(Safe ? "props/safe" : "props/crate_military");
+            (Material as ShaderMaterial)?.SetShaderParameter("loot_on", Empty || (Punch && Unlocked) ? 0f : 1f);
+            if (_aura != null) _aura.Enabled = !Empty;
             if (tex != null)
             {
                 // ящики и сумки делаем чуть крупнее реального — иначе их не видно
                 float s = IsCrate ? 1.4f : 1.3f;
                 Shade.Sprite(this, tex, s, 0.32f, 1f);
                 DrawSetTransform(Vector2.Zero, 0, new Vector2(s, s));
-                DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 1), Empty ? new Color(0.45f, 0.45f, 0.45f) : Colors.White);
+                bool hasOpen = style != null && Art.Get($"props/{style}_open") != null;
+                DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 1), Empty && !hasOpen ? new Color(0.45f, 0.45f, 0.45f) : Colors.White);
                 DrawSetTransform(Vector2.Zero, 0, Vector2.One);
                 return;
             }

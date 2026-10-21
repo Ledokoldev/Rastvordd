@@ -21,7 +21,7 @@ namespace Rastvordd.Sim
     }
 
     public struct ProjSnap { public int Id; public Vector2 Pos; public Vector2 Dir; public bool Arrow; }
-    public struct BagSnap { public int Id; public Vector2 Pos; public bool IsCrate; public bool Empty; public bool Safe; public bool Punch; public bool Unlocked; }
+    public struct BagSnap { public int Id; public Vector2 Pos; public bool IsCrate; public bool Empty; public bool Safe; public bool Punch; public bool Unlocked; public int Tier; }
     public struct NodeSnap { public int Id; public NodeKind Kind; public Vector2 Pos; public float Radius; public float Fill; }
     public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; }
     public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; public int Level; public bool Seen; }
@@ -554,7 +554,7 @@ namespace Rastvordd.Sim
 
             foreach (var b in World.Bags)
                 if (Vector2.DistanceSquared(b.Pos, me.Pos) < 60 * 60 && (b.IsCrate || IsPointVisible(me, b.Pos)))
-                    snap.Bags.Add(new BagSnap { Id = b.Id, Pos = b.Pos, IsCrate = b.IsCrate, Empty = b.Empty, Safe = b.Safe, Punch = b.Punch, Unlocked = b.Unlocked });
+                    snap.Bags.Add(new BagSnap { Id = b.Id, Pos = b.Pos, IsCrate = b.IsCrate, Empty = b.Empty, Safe = b.Safe, Punch = b.Punch, Unlocked = b.Unlocked, Tier = b.Tier });
 
             foreach (var n in World.NodesInRadius(me.Pos, WorldViewRadius, _snapNodes))
                 if (Vector2.DistanceSquared(n.Pos, me.Pos) < r2)

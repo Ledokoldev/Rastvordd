@@ -72,6 +72,24 @@ void fragment() { COLOR.rgb = vis_apply(COLOR.rgb, vis_at(base_px)); }
             return m;
         }
 
+        const string LootShader = "shader_type canvas_item;\n" + Lib + @"
+// крейт с лутом: по силуэту раз в ~3 с пробегает косой блик, по краю — лёгкое мерцание; пустой — без эффекта
+uniform float loot_on = 1.0;
+varying vec2 base_px;
+varying vec2 local_px;
+void vertex() { base_px = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xy; local_px = VERTEX; }
+void fragment() {
+    float ph = fract(TIME / 3.2 + base_px.x * 0.0071 + base_px.y * 0.0043);
+    float band = (local_px.x + local_px.y * 0.6) * 0.035 - (ph * 6.0 - 2.5);
+    float glint = exp(-band * band * 6.0) * step(ph, 0.55) * loot_on;
+    COLOR.rgb += vec3(1.0, 0.95, 0.75) * glint * 0.55 * COLOR.a;
+    COLOR.rgb = vis_apply(COLOR.rgb, vis_at(base_px));
+}
+";
+        static ShaderMaterial _lootMat;
+        /// <summary>Крейты с лутом: видимость + бегущий блик, чтобы их было видно среди декоративных ящиков.</summary>
+        public static ShaderMaterial LootMat => _lootMat ??= new ShaderMaterial { Shader = new Shader { Code = LootShader } };
+
         static ShaderMaterial _objectMat;
         /// <summary>Материал для объектов мира (не персонажей): видимость по точке основания узла.</summary>
         public static ShaderMaterial ObjectMat => _objectMat ??= new ShaderMaterial { Shader = new Shader { Code = ObjectShader } };

@@ -2352,6 +2352,3727 @@
     2.5
    ],
    "desc": "a short metal post with a small old wall-style lamp and a cage over the bulb, marking an entrance; Soviet-era, weathered concrete and rusty metal, abandoned"
+  },
+  {
+   "id": "car_vaz2106_white_side",
+   "cat": "vehicles",
+   "h": 1.44,
+   "desc": "an abandoned Soviet Lada VAZ-2106 Zhiguli sedan, boxy, faded white paint with rust on the sills and wheel arches, dusty windows, chrome bumpers; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 4.17,
+   "foot": [
+    4.17,
+    1.61,
+    1.44
+   ]
+  },
+  {
+   "id": "car_vaz2106_white_front",
+   "cat": "vehicles",
+   "h": 1.44,
+   "desc": "an abandoned Soviet Lada VAZ-2106 Zhiguli sedan, boxy, faded white paint with rust on the sills and wheel arches, dusty windows, chrome bumpers; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.61,
+   "foot": [
+    1.61,
+    4.17,
+    1.44
+   ]
+  },
+  {
+   "id": "car_vaz2106_white_angled",
+   "cat": "vehicles",
+   "h": 1.44,
+   "desc": "an abandoned Soviet Lada VAZ-2106 Zhiguli sedan, boxy, faded white paint with rust on the sills and wheel arches, dusty windows, chrome bumpers; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 4.42,
+   "foot": [
+    3.3,
+    2.9,
+    1.44
+   ]
+  },
+  {
+   "id": "car_vaz2106_red_side",
+   "cat": "vehicles",
+   "h": 1.44,
+   "desc": "an abandoned Soviet Lada VAZ-2106 Zhiguli sedan, faded cherry-red paint, one flat tire, a cracked windshield, a rusty roof rack; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 4.17,
+   "foot": [
+    4.17,
+    1.61,
+    1.44
+   ]
+  },
+  {
+   "id": "car_vaz2106_red_angled",
+   "cat": "vehicles",
+   "h": 1.44,
+   "desc": "an abandoned Soviet Lada VAZ-2106 Zhiguli sedan, faded cherry-red paint, one flat tire, a cracked windshield, a rusty roof rack; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 4.42,
+   "foot": [
+    3.3,
+    2.9,
+    1.44
+   ]
+  },
+  {
+   "id": "car_vaz2101_green_side",
+   "cat": "vehicles",
+   "h": 1.44,
+   "desc": "an old Soviet Lada VAZ-2101 Kopeyka sedan, faded pale green paint, round headlights, rust patches, a missing hubcap; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 4.07,
+   "foot": [
+    4.07,
+    1.61,
+    1.44
+   ]
+  },
+  {
+   "id": "car_vaz2101_green_front",
+   "cat": "vehicles",
+   "h": 1.44,
+   "desc": "an old Soviet Lada VAZ-2101 Kopeyka sedan, faded pale green paint, round headlights, rust patches, a missing hubcap; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.61,
+   "foot": [
+    1.61,
+    4.07,
+    1.44
+   ]
+  },
+  {
+   "id": "car_vaz2109_grey_side",
+   "cat": "vehicles",
+   "h": 1.4,
+   "desc": "an abandoned Lada VAZ-2109 hatchback (Devyatka), wedge-shaped 1980s body, faded wet-asphalt grey paint, black plastic bumpers, broken rear window; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 4.0,
+   "foot": [
+    4.0,
+    1.65,
+    1.4
+   ]
+  },
+  {
+   "id": "car_vaz2109_grey_angled",
+   "cat": "vehicles",
+   "h": 1.4,
+   "desc": "an abandoned Lada VAZ-2109 hatchback (Devyatka), wedge-shaped 1980s body, faded wet-asphalt grey paint, black plastic bumpers, broken rear window; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 4.29,
+   "foot": [
+    3.2,
+    2.8,
+    1.4
+   ]
+  },
+  {
+   "id": "car_moskvich412_orange_side",
+   "cat": "vehicles",
+   "h": 1.48,
+   "desc": "an old Soviet Moskvich-412 sedan, faded orange paint, rectangular headlights, rust on the doors, dusty; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 4.25,
+   "foot": [
+    4.25,
+    1.55,
+    1.48
+   ]
+  },
+  {
+   "id": "car_moskvich412_orange_front",
+   "cat": "vehicles",
+   "h": 1.48,
+   "desc": "an old Soviet Moskvich-412 sedan, faded orange paint, rectangular headlights, rust on the doors, dusty; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.55,
+   "foot": [
+    1.55,
+    4.25,
+    1.48
+   ]
+  },
+  {
+   "id": "car_moskvich412_orange_angled",
+   "cat": "vehicles",
+   "h": 1.48,
+   "desc": "an old Soviet Moskvich-412 sedan, faded orange paint, rectangular headlights, rust on the doors, dusty; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 4.46,
+   "foot": [
+    3.4,
+    2.8,
+    1.48
+   ]
+  },
+  {
+   "id": "car_volga24_black_side",
+   "cat": "vehicles",
+   "h": 1.49,
+   "desc": "an old Soviet GAZ-24 Volga sedan, long and solid, faded black paint, chrome grille and bumpers, a deer-less hood, dust on the roof; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 4.74,
+   "foot": [
+    4.74,
+    1.8,
+    1.49
+   ]
+  },
+  {
+   "id": "car_volga24_black_front",
+   "cat": "vehicles",
+   "h": 1.49,
+   "desc": "an old Soviet GAZ-24 Volga sedan, long and solid, faded black paint, chrome grille and bumpers, a deer-less hood, dust on the roof; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.8,
+   "foot": [
+    1.8,
+    4.74,
+    1.49
+   ]
+  },
+  {
+   "id": "car_volga24_black_angled",
+   "cat": "vehicles",
+   "h": 1.49,
+   "desc": "an old Soviet GAZ-24 Volga sedan, long and solid, faded black paint, chrome grille and bumpers, a deer-less hood, dust on the roof; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 5.0,
+   "foot": [
+    3.8,
+    3.2,
+    1.49
+   ]
+  },
+  {
+   "id": "car_zaz968_beige_side",
+   "cat": "vehicles",
+   "h": 1.4,
+   "desc": "a tiny old Soviet ZAZ-968 Zaporozhets car with side air intakes 'ears', faded beige paint, rust, flat tires; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 3.73,
+   "foot": [
+    3.73,
+    1.57,
+    1.4
+   ]
+  },
+  {
+   "id": "car_zaz968_beige_angled",
+   "cat": "vehicles",
+   "h": 1.4,
+   "desc": "a tiny old Soviet ZAZ-968 Zaporozhets car with side air intakes 'ears', faded beige paint, rust, flat tires; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 4.02,
+   "foot": [
+    3.0,
+    2.7,
+    1.4
+   ]
+  },
+  {
+   "id": "van_uaz452_side",
+   "cat": "vehicles",
+   "h": 2.06,
+   "desc": "an old Soviet UAZ-452 'Bukhanka' van, loaf-shaped rounded body, faded army olive-green paint, small round headlights, rusty roof; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 4.36,
+   "foot": [
+    4.36,
+    1.94,
+    2.06
+   ]
+  },
+  {
+   "id": "van_uaz452_front",
+   "cat": "vehicles",
+   "h": 2.06,
+   "desc": "an old Soviet UAZ-452 'Bukhanka' van, loaf-shaped rounded body, faded army olive-green paint, small round headlights, rusty roof; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.94,
+   "foot": [
+    1.94,
+    4.36,
+    2.06
+   ]
+  },
+  {
+   "id": "van_uaz452_angled",
+   "cat": "vehicles",
+   "h": 2.06,
+   "desc": "an old Soviet UAZ-452 'Bukhanka' van, loaf-shaped rounded body, faded army olive-green paint, small round headlights, rusty roof; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 4.75,
+   "foot": [
+    3.5,
+    3.2,
+    2.06
+   ]
+  },
+  {
+   "id": "jeep_uaz469_side",
+   "cat": "vehicles",
+   "h": 2.0,
+   "desc": "an old Soviet UAZ-469 off-road jeep with a faded green canvas top, spare wheel on the back, scratched olive paint; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 4.03,
+   "foot": [
+    4.03,
+    1.79,
+    2.0
+   ]
+  },
+  {
+   "id": "jeep_uaz469_front",
+   "cat": "vehicles",
+   "h": 2.0,
+   "desc": "an old Soviet UAZ-469 off-road jeep with a faded green canvas top, spare wheel on the back, scratched olive paint; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.79,
+   "foot": [
+    1.79,
+    4.03,
+    2.0
+   ]
+  },
+  {
+   "id": "jeep_uaz469_angled",
+   "cat": "vehicles",
+   "h": 2.0,
+   "desc": "an old Soviet UAZ-469 off-road jeep with a faded green canvas top, spare wheel on the back, scratched olive paint; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 4.38,
+   "foot": [
+    3.2,
+    3.0,
+    2.0
+   ]
+  },
+  {
+   "id": "truck_gaz53_side",
+   "cat": "vehicles",
+   "h": 2.2,
+   "desc": "an old Soviet GAZ-53 truck with a rounded cab and a wooden-plank cargo bed, faded blue cab, rusty fenders; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 6.4,
+   "foot": [
+    6.4,
+    2.38,
+    2.2
+   ]
+  },
+  {
+   "id": "truck_gaz53_front",
+   "cat": "vehicles",
+   "h": 2.2,
+   "desc": "an old Soviet GAZ-53 truck with a rounded cab and a wooden-plank cargo bed, faded blue cab, rusty fenders; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.38,
+   "foot": [
+    2.38,
+    6.4,
+    2.2
+   ]
+  },
+  {
+   "id": "truck_gaz53_angled",
+   "cat": "vehicles",
+   "h": 2.2,
+   "desc": "an old Soviet GAZ-53 truck with a rounded cab and a wooden-plank cargo bed, faded blue cab, rusty fenders; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 6.73,
+   "foot": [
+    5.1,
+    4.3,
+    2.2
+   ]
+  },
+  {
+   "id": "truck_zil130_side",
+   "cat": "vehicles",
+   "h": 2.4,
+   "desc": "an old Soviet ZIL-130 truck, wide cab with a long hood and big grille, faded light blue cab and a grey wooden cargo bed; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 6.7,
+   "foot": [
+    6.7,
+    2.5,
+    2.4
+   ]
+  },
+  {
+   "id": "truck_zil130_front",
+   "cat": "vehicles",
+   "h": 2.4,
+   "desc": "an old Soviet ZIL-130 truck, wide cab with a long hood and big grille, faded light blue cab and a grey wooden cargo bed; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.5,
+   "foot": [
+    2.5,
+    6.7,
+    2.4
+   ]
+  },
+  {
+   "id": "truck_zil130_angled",
+   "cat": "vehicles",
+   "h": 2.4,
+   "desc": "an old Soviet ZIL-130 truck, wide cab with a long hood and big grille, faded light blue cab and a grey wooden cargo bed; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 7.05,
+   "foot": [
+    5.4,
+    4.5,
+    2.4
+   ]
+  },
+  {
+   "id": "truck_kamaz_dump_side",
+   "cat": "vehicles",
+   "h": 2.9,
+   "desc": "an old Soviet KamAZ-5511 dump truck, flat-nosed cab-over orange cab, a rusty steel dump body, big dual rear wheels; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 7.1,
+   "foot": [
+    7.1,
+    2.5,
+    2.9
+   ]
+  },
+  {
+   "id": "truck_kamaz_dump_front",
+   "cat": "vehicles",
+   "h": 2.9,
+   "desc": "an old Soviet KamAZ-5511 dump truck, flat-nosed cab-over orange cab, a rusty steel dump body, big dual rear wheels; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.5,
+   "foot": [
+    2.5,
+    7.1,
+    2.9
+   ]
+  },
+  {
+   "id": "truck_kamaz_dump_angled",
+   "cat": "vehicles",
+   "h": 2.9,
+   "desc": "an old Soviet KamAZ-5511 dump truck, flat-nosed cab-over orange cab, a rusty steel dump body, big dual rear wheels; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 7.4,
+   "foot": [
+    5.7,
+    4.6,
+    2.9
+   ]
+  },
+  {
+   "id": "bus_paz672_side",
+   "cat": "vehicles",
+   "h": 2.95,
+   "desc": "an old Soviet PAZ-672 small bus, rounded body, faded yellow and cream paint, many side windows, some broken, flat tires; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 7.0,
+   "foot": [
+    7.0,
+    2.5,
+    2.95
+   ]
+  },
+  {
+   "id": "bus_paz672_front",
+   "cat": "vehicles",
+   "h": 2.95,
+   "desc": "an old Soviet PAZ-672 small bus, rounded body, faded yellow and cream paint, many side windows, some broken, flat tires; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.5,
+   "foot": [
+    2.5,
+    7.0,
+    2.95
+   ]
+  },
+  {
+   "id": "bus_paz672_angled",
+   "cat": "vehicles",
+   "h": 2.95,
+   "desc": "an old Soviet PAZ-672 small bus, rounded body, faded yellow and cream paint, many side windows, some broken, flat tires; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 7.31,
+   "foot": [
+    5.6,
+    4.6,
+    2.95
+   ]
+  },
+  {
+   "id": "van_gazelle_side",
+   "cat": "vehicles",
+   "h": 2.2,
+   "desc": "an old 1990s GAZelle light truck with a white cab and a grey canvas-covered cargo bed, rust on the doors; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 5.5,
+   "foot": [
+    5.5,
+    2.1,
+    2.2
+   ]
+  },
+  {
+   "id": "van_gazelle_front",
+   "cat": "vehicles",
+   "h": 2.2,
+   "desc": "an old 1990s GAZelle light truck with a white cab and a grey canvas-covered cargo bed, rust on the doors; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.1,
+   "foot": [
+    2.1,
+    5.5,
+    2.2
+   ]
+  },
+  {
+   "id": "van_gazelle_angled",
+   "cat": "vehicles",
+   "h": 2.2,
+   "desc": "an old 1990s GAZelle light truck with a white cab and a grey canvas-covered cargo bed, rust on the doors; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 5.81,
+   "foot": [
+    4.4,
+    3.8,
+    2.2
+   ]
+  },
+  {
+   "id": "moto_ural_sidecar_side",
+   "cat": "vehicles",
+   "h": 1.1,
+   "desc": "an old Soviet Ural heavy motorcycle with a sidecar, faded dark green paint, round headlight, torn seat, rusty spokes; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.55,
+   "foot": [
+    2.55,
+    1.6,
+    1.1
+   ]
+  },
+  {
+   "id": "moto_ural_sidecar_front",
+   "cat": "vehicles",
+   "h": 1.1,
+   "desc": "an old Soviet Ural heavy motorcycle with a sidecar, faded dark green paint, round headlight, torn seat, rusty spokes; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.6,
+   "foot": [
+    1.6,
+    2.55,
+    1.1
+   ]
+  },
+  {
+   "id": "moto_ural_sidecar_angled",
+   "cat": "vehicles",
+   "h": 1.1,
+   "desc": "an old Soviet Ural heavy motorcycle with a sidecar, faded dark green paint, round headlight, torn seat, rusty spokes; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 3.01,
+   "foot": [
+    2.0,
+    2.4,
+    1.1
+   ]
+  },
+  {
+   "id": "tractor_belarus_side",
+   "cat": "vehicles",
+   "h": 2.8,
+   "desc": "an old Soviet Belarus MTZ-80 tractor, red-orange body with big rear wheels and smaller front wheels, a boxy cab with glass, mud on the tires; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 3.9,
+   "foot": [
+    3.9,
+    1.97,
+    2.8
+   ]
+  },
+  {
+   "id": "tractor_belarus_front",
+   "cat": "vehicles",
+   "h": 2.8,
+   "desc": "an old Soviet Belarus MTZ-80 tractor, red-orange body with big rear wheels and smaller front wheels, a boxy cab with glass, mud on the tires; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.97,
+   "foot": [
+    1.97,
+    3.9,
+    2.8
+   ]
+  },
+  {
+   "id": "tractor_belarus_angled",
+   "cat": "vehicles",
+   "h": 2.8,
+   "desc": "an old Soviet Belarus MTZ-80 tractor, red-orange body with big rear wheels and smaller front wheels, a boxy cab with glass, mud on the tires; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 4.36,
+   "foot": [
+    3.1,
+    3.1,
+    2.8
+   ]
+  },
+  {
+   "id": "trailer_2pts_side",
+   "cat": "vehicles",
+   "h": 2.0,
+   "desc": "an old Soviet two-axle agricultural tractor trailer with low steel sides, a drawbar in front, faded blue paint, rust, some hay inside; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 6.0,
+   "foot": [
+    6.0,
+    2.4,
+    2.0
+   ]
+  },
+  {
+   "id": "trailer_2pts_angled",
+   "cat": "vehicles",
+   "h": 2.0,
+   "desc": "an old Soviet two-axle agricultural tractor trailer with low steel sides, a drawbar in front, faded blue paint, rust, some hay inside; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 6.4,
+   "foot": [
+    4.8,
+    4.2,
+    2.0
+   ]
+  },
+  {
+   "id": "wreck_burnt_sedan_side",
+   "cat": "vehicles",
+   "h": 1.35,
+   "desc": "a completely burnt-out Soviet Zhiguli sedan wreck: blackened and orange-rusted bare metal, no glass, no tires, sitting on rims, ash; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 4.1,
+   "foot": [
+    4.1,
+    1.62,
+    1.35
+   ]
+  },
+  {
+   "id": "wreck_burnt_sedan_front",
+   "cat": "vehicles",
+   "h": 1.35,
+   "desc": "a completely burnt-out Soviet Zhiguli sedan wreck: blackened and orange-rusted bare metal, no glass, no tires, sitting on rims, ash; seen from the front: the nose with headlights and grille faces the viewer squarely, the body extends straight away from the camera so the hood and roof are seen from above; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.62,
+   "foot": [
+    1.62,
+    4.1,
+    1.35
+   ]
+  },
+  {
+   "id": "wreck_burnt_sedan_angled",
+   "cat": "vehicles",
+   "h": 1.35,
+   "desc": "a completely burnt-out Soviet Zhiguli sedan wreck: blackened and orange-rusted bare metal, no glass, no tires, sitting on rims, ash; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 4.36,
+   "foot": [
+    3.3,
+    2.8,
+    1.35
+   ]
+  },
+  {
+   "id": "wreck_burnt_liaz_side",
+   "cat": "vehicles",
+   "h": 3.0,
+   "desc": "a burnt-out Soviet LiAZ-677 city bus wreck, long rounded body, blackened rusty metal, all windows gone, sitting on rims; exact side profile, pointing to the right, wheels on one horizontal line; license plates blank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 10.5,
+   "foot": [
+    10.5,
+    2.5,
+    3.0
+   ]
+  },
+  {
+   "id": "table_kitchen",
+   "cat": "furniture",
+   "h": 0.75,
+   "desc": "a Soviet kitchen table with a light grey patterned formica top, thin metal edging and tapered wooden legs, a drawer in front; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.2,
+   "foot": [
+    1.2,
+    0.7,
+    0.75
+   ]
+  },
+  {
+   "id": "table_kitchen_oilcloth",
+   "cat": "furniture",
+   "h": 0.75,
+   "desc": "a wooden kitchen table covered with a faded checkered oilcloth, a chipped enamel mug on it, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.44,
+   "foot": [
+    1.2,
+    0.8,
+    0.75
+   ]
+  },
+  {
+   "id": "table_office",
+   "cat": "furniture",
+   "h": 0.75,
+   "desc": "a Soviet office desk of polished brown wood veneer with a drawer pedestal on the right, scratched top, a dusty rotary telephone; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.4,
+   "foot": [
+    1.4,
+    0.7,
+    0.75
+   ]
+  },
+  {
+   "id": "table_office_angled",
+   "cat": "furniture",
+   "h": 0.75,
+   "desc": "a Soviet office desk of brown wood veneer with drawer pedestals on both sides, scattered papers, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.56,
+   "foot": [
+    1.4,
+    0.7,
+    0.75
+   ]
+  },
+  {
+   "id": "school_desk",
+   "cat": "furniture",
+   "h": 0.8,
+   "desc": "a Soviet two-seat school desk (parta) with a slanted green-painted writing top and an attached bench, cast-iron frame; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.2,
+   "foot": [
+    1.2,
+    0.9,
+    0.8
+   ]
+  },
+  {
+   "id": "school_desk_side",
+   "cat": "furniture",
+   "h": 0.8,
+   "desc": "a Soviet school desk (parta) with attached bench seen in exact side profile: the cast-iron side frame, slanted green top and the seat; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 0.95,
+   "foot": [
+    0.95,
+    1.2,
+    0.8
+   ]
+  },
+  {
+   "id": "table_workshop",
+   "cat": "furniture",
+   "h": 0.9,
+   "desc": "a heavy steel workshop bench with a thick worn wooden top, a large bench vise, drawers, oil stains, a few tools; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.0,
+   "foot": [
+    2.0,
+    0.8,
+    0.9
+   ]
+  },
+  {
+   "id": "table_workshop_side",
+   "cat": "furniture",
+   "h": 0.9,
+   "desc": "a long welded steel workshop table seen in exact side profile, a vise at the right end, a shelf underneath with scrap parts; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.0,
+   "foot": [
+    2.0,
+    0.8,
+    0.9
+   ]
+  },
+  {
+   "id": "table_round_dining",
+   "cat": "furniture",
+   "h": 0.75,
+   "desc": "a round polished wooden dining table on a central pedestal leg covered with a lace tablecloth, dusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.1,
+   "foot": [
+    1.1,
+    1.1,
+    0.75
+   ]
+  },
+  {
+   "id": "table_folding_card",
+   "cat": "furniture",
+   "h": 0.7,
+   "desc": "a small folding table with a green felt top and wobbly legs, dominoes scattered on it, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.08,
+   "foot": [
+    0.9,
+    0.6,
+    0.7
+   ]
+  },
+  {
+   "id": "chair_kitchen",
+   "cat": "furniture",
+   "h": 0.9,
+   "desc": "a bentwood Viennese-style wooden kitchen chair with a round seat and curved back, worn dark varnish; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.45,
+   "foot": [
+    0.45,
+    0.45,
+    0.9
+   ]
+  },
+  {
+   "id": "chair_kitchen_side",
+   "cat": "furniture",
+   "h": 0.9,
+   "desc": "a simple wooden kitchen chair seen in exact side profile: the backrest on the left, seat and four legs; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 0.45,
+   "foot": [
+    0.45,
+    0.45,
+    0.9
+   ]
+  },
+  {
+   "id": "chair_office",
+   "cat": "furniture",
+   "h": 0.95,
+   "desc": "a Soviet office chair with a padded brown leatherette seat and backrest and wooden armrests, torn padding; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.55,
+   "foot": [
+    0.55,
+    0.55,
+    0.95
+   ]
+  },
+  {
+   "id": "chair_school",
+   "cat": "furniture",
+   "h": 0.8,
+   "desc": "a Soviet school chair of bent steel tube with plywood seat and backrest, chipped paint, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 0.57,
+   "foot": [
+    0.42,
+    0.42,
+    0.8
+   ]
+  },
+  {
+   "id": "stool_wood",
+   "cat": "furniture",
+   "h": 0.45,
+   "desc": "a simple square wooden stool (taburetka) with four legs and cross braces, painted white long ago, paint worn off; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.35,
+   "foot": [
+    0.35,
+    0.35,
+    0.45
+   ]
+  },
+  {
+   "id": "stool_metal",
+   "cat": "furniture",
+   "h": 0.5,
+   "desc": "a round metal workshop stool on three tube legs with a cracked dark seat, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 0.52,
+   "foot": [
+    0.38,
+    0.38,
+    0.5
+   ]
+  },
+  {
+   "id": "bench_indoor",
+   "cat": "furniture",
+   "h": 0.45,
+   "desc": "a long plain wooden bench (lavka) of thick boards on two plank legs, painted dark brown, worn; seen in exact side profile, long axis horizontal; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 1.8,
+   "foot": [
+    1.8,
+    0.4,
+    0.45
+   ]
+  },
+  {
+   "id": "sofa_book",
+   "cat": "furniture",
+   "h": 0.9,
+   "desc": "a Soviet fold-out sofa-book with brown patterned upholstery and wooden armrests, sagging seat, a torn cushion; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.0,
+   "foot": [
+    2.0,
+    0.9,
+    0.9
+   ]
+  },
+  {
+   "id": "sofa_green_angled",
+   "cat": "furniture",
+   "h": 0.9,
+   "desc": "a worn Soviet sofa with faded green velour upholstery and polished wooden armrests, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 2.18,
+   "foot": [
+    2.0,
+    0.9,
+    0.9
+   ]
+  },
+  {
+   "id": "armchair",
+   "cat": "furniture",
+   "h": 0.9,
+   "desc": "a Soviet 1970s armchair with thin splayed wooden legs, wooden armrests and faded mustard-yellow upholstery; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.8,
+   "foot": [
+    0.8,
+    0.8,
+    0.9
+   ]
+  },
+  {
+   "id": "armchair_angled",
+   "cat": "furniture",
+   "h": 0.9,
+   "desc": "a worn Soviet armchair with faded red-brown upholstery and wooden armrests, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.09,
+   "foot": [
+    0.8,
+    0.8,
+    0.9
+   ]
+  },
+  {
+   "id": "bed_iron_side",
+   "cat": "furniture",
+   "h": 1.0,
+   "desc": "a Soviet iron spring-mesh bed (pantsirnaya krovat) with chrome ball-tipped headboards, a thin striped mattress, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.0,
+   "foot": [
+    2.0,
+    0.9,
+    0.6
+   ]
+  },
+  {
+   "id": "bed_iron_front",
+   "cat": "furniture",
+   "h": 1.0,
+   "desc": "a Soviet iron spring-mesh bed with ball-tipped tube headboards and a thin striped mattress, the foot end faces the viewer, the bed extends away from the camera; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.9,
+   "foot": [
+    0.9,
+    2.0,
+    0.6
+   ]
+  },
+  {
+   "id": "bed_double_angled",
+   "cat": "furniture",
+   "h": 1.0,
+   "desc": "a polished wooden Soviet double bed with a plaid blanket and two pillows, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 2.39,
+   "foot": [
+    1.6,
+    2.0,
+    0.6
+   ]
+  },
+  {
+   "id": "bunk_bed_side",
+   "cat": "furniture",
+   "h": 1.7,
+   "desc": "a Soviet army two-tier steel bunk bed with thin grey wool blankets, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.0,
+   "foot": [
+    2.0,
+    0.8,
+    1.7
+   ]
+  },
+  {
+   "id": "cot_folding_side",
+   "cat": "furniture",
+   "h": 0.4,
+   "desc": "a folding camp cot (raskladushka) of aluminium tubes and faded green canvas, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 1.9,
+   "foot": [
+    1.9,
+    0.7,
+    0.4
+   ]
+  },
+  {
+   "id": "hospital_bed_side",
+   "cat": "furniture",
+   "h": 1.0,
+   "desc": "an old Soviet hospital bed of white-painted steel tubes on small wheels, chipped paint, a stained mattress, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.0,
+   "foot": [
+    2.0,
+    0.9,
+    0.7
+   ]
+  },
+  {
+   "id": "wardrobe_stenka",
+   "cat": "furniture",
+   "h": 2.1,
+   "desc": "a Soviet polished wooden wall unit (stenka) with glass cabinets of crystal dishes, wardrobe doors and drawers, dark brown veneer, scratched; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.7,
+   "foot": [
+    2.7,
+    0.5,
+    2.1
+   ]
+  },
+  {
+   "id": "wardrobe_single",
+   "cat": "furniture",
+   "h": 1.9,
+   "desc": "a Soviet two-door wooden wardrobe of light brown veneer with a small mirror on one door, scratched; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.55,
+    1.9
+   ]
+  },
+  {
+   "id": "wardrobe_angled",
+   "cat": "furniture",
+   "h": 1.9,
+   "desc": "a tall old two-door wooden wardrobe with a carved top, dark varnish, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.14,
+   "foot": [
+    1.0,
+    0.55,
+    1.9
+   ]
+  },
+  {
+   "id": "dresser",
+   "cat": "furniture",
+   "h": 0.85,
+   "desc": "a Soviet chest of drawers (komod) of brown veneer with four drawers and metal handles, a doily and a vase on top; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.45,
+    0.85
+   ]
+  },
+  {
+   "id": "sideboard_servant",
+   "cat": "furniture",
+   "h": 1.8,
+   "desc": "a Soviet sideboard (servant) with sliding glass doors showing dusty plates and crystal, cupboards below; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.3,
+   "foot": [
+    1.3,
+    0.45,
+    1.8
+   ]
+  },
+  {
+   "id": "bookcase",
+   "cat": "furniture",
+   "h": 2.0,
+   "desc": "a tall wooden bookcase with glass doors filled with rows of old books with plain spines, dusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.9,
+   "foot": [
+    0.9,
+    0.35,
+    2.0
+   ]
+  },
+  {
+   "id": "bookcase_angled",
+   "cat": "furniture",
+   "h": 2.0,
+   "desc": "a tall open wooden bookshelf with sagging shelves of old books and folders, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 0.95,
+   "foot": [
+    0.9,
+    0.35,
+    2.0
+   ]
+  },
+  {
+   "id": "shelf_metal_rack",
+   "cat": "furniture",
+   "h": 2.0,
+   "desc": "a grey steel storage rack with five shelves holding jars, tins, boxes and rags; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.4,
+    2.0
+   ]
+  },
+  {
+   "id": "shelf_wall_wood",
+   "cat": "furniture",
+   "h": 1.2,
+   "desc": "a low wooden open shelf unit with three shelves of pots, jars and a radio; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.3,
+    1.2
+   ]
+  },
+  {
+   "id": "rack_warehouse_angled",
+   "cat": "furniture",
+   "h": 3.0,
+   "desc": "a tall orange-blue steel pallet rack with two levels of pallets with boxes, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 2.84,
+   "foot": [
+    2.7,
+    1.0,
+    3.0
+   ]
+  },
+  {
+   "id": "tv_on_stand",
+   "cat": "furniture",
+   "h": 1.2,
+   "desc": "an old Soviet tube television (Rubin) with a wooden case on a thin-legged stand, dusty grey screen, a lace doily on top; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.7,
+   "foot": [
+    0.7,
+    0.5,
+    1.2
+   ]
+  },
+  {
+   "id": "tv_crt_angled",
+   "cat": "furniture",
+   "h": 1.1,
+   "desc": "an old boxy Soviet television in a wood-grain case standing on a small cabinet, cracked screen, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 0.77,
+   "foot": [
+    0.6,
+    0.5,
+    1.1
+   ]
+  },
+  {
+   "id": "fridge_zil",
+   "cat": "furniture",
+   "h": 1.5,
+   "desc": "an old Soviet ZIL refrigerator with rounded corners, white enamel yellowed with age, a big chrome lever handle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.65,
+   "foot": [
+    0.65,
+    0.6,
+    1.5
+   ]
+  },
+  {
+   "id": "fridge_zil_angled",
+   "cat": "furniture",
+   "h": 1.5,
+   "desc": "an old rounded Soviet refrigerator with yellowed white enamel and a chrome handle, door slightly open, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 0.86,
+   "foot": [
+    0.65,
+    0.6,
+    1.5
+   ]
+  },
+  {
+   "id": "stove_gas",
+   "cat": "furniture",
+   "h": 0.85,
+   "desc": "a Soviet four-burner white enamel gas stove with an oven door, grease stains, a dented kettle on a burner; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.5,
+   "foot": [
+    0.5,
+    0.55,
+    0.85
+   ]
+  },
+  {
+   "id": "stove_gas_angled",
+   "cat": "furniture",
+   "h": 0.85,
+   "desc": "a Soviet white enamel gas stove with four burners, a frying pan on top, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 0.71,
+   "foot": [
+    0.5,
+    0.55,
+    0.85
+   ]
+  },
+  {
+   "id": "sink_kitchen",
+   "cat": "furniture",
+   "h": 1.2,
+   "desc": "a chipped white enamel kitchen sink on a painted cabinet with a tall chrome tap, rusty stains; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.5,
+    0.85
+   ]
+  },
+  {
+   "id": "washbasin",
+   "cat": "furniture",
+   "h": 1.5,
+   "desc": "a bathroom washbasin on a pedestal with a cracked small mirror above it, rusty tap; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.55,
+   "foot": [
+    0.55,
+    0.45,
+    0.85
+   ]
+  },
+  {
+   "id": "bathtub_side",
+   "cat": "furniture",
+   "h": 0.6,
+   "desc": "an old cast-iron enamel bathtub on small legs, chipped white enamel with rust stains, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 1.7,
+   "foot": [
+    1.7,
+    0.75,
+    0.6
+   ]
+  },
+  {
+   "id": "bathtub_front",
+   "cat": "furniture",
+   "h": 0.6,
+   "desc": "an old cast-iron white enamel bathtub, the narrow end faces the viewer and the tub extends away from the camera, rust stains inside; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.75,
+   "foot": [
+    0.75,
+    1.7,
+    0.6
+   ]
+  },
+  {
+   "id": "toilet",
+   "cat": "furniture",
+   "h": 0.8,
+   "desc": "an old Soviet toilet bowl with a high-mounted cistern on a pipe and a chain pull, stained porcelain; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.4,
+   "foot": [
+    0.4,
+    0.65,
+    0.8
+   ]
+  },
+  {
+   "id": "toilet_side",
+   "cat": "furniture",
+   "h": 0.8,
+   "desc": "an old porcelain toilet with a cistern seen in exact side profile, stained, cracked seat; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 0.65,
+   "foot": [
+    0.65,
+    0.4,
+    0.8
+   ]
+  },
+  {
+   "id": "radiator",
+   "cat": "furniture",
+   "h": 0.6,
+   "desc": "a Soviet cast-iron accordion heating radiator with many sections, painted off-white, peeling, on a pipe; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.15,
+    0.6
+   ]
+  },
+  {
+   "id": "tool_rack",
+   "cat": "furniture",
+   "h": 1.8,
+   "desc": "a wall tool board of plywood on legs with hanging hammers, saws, wrenches, pliers and coils of wire; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.5,
+   "foot": [
+    1.5,
+    0.3,
+    1.8
+   ]
+  },
+  {
+   "id": "locker_metal",
+   "cat": "furniture",
+   "h": 1.8,
+   "desc": "a grey-green steel two-door locker with vent slits and a padlock, dented; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.8,
+   "foot": [
+    0.8,
+    0.5,
+    1.8
+   ]
+  },
+  {
+   "id": "lockers_row_angled",
+   "cat": "furniture",
+   "h": 1.8,
+   "desc": "a row of four narrow steel changing-room lockers painted pale blue, one door open, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.64,
+   "foot": [
+    1.6,
+    0.5,
+    1.8
+   ]
+  },
+  {
+   "id": "safe_old",
+   "cat": "furniture",
+   "h": 1.0,
+   "desc": "a heavy old Soviet steel safe painted dark green with a big key lock and a handle, scratched; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.6,
+    1.0
+   ]
+  },
+  {
+   "id": "safe_old_angled",
+   "cat": "furniture",
+   "h": 1.0,
+   "desc": "a heavy old steel safe painted grey with the door ajar, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 0.82,
+   "foot": [
+    0.6,
+    0.6,
+    1.0
+   ]
+  },
+  {
+   "id": "washing_machine",
+   "cat": "furniture",
+   "h": 0.85,
+   "desc": "a Soviet round-tub washing machine (Riga / Malyutka style), white enamel with a lid and a hose, chipped; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.5,
+   "foot": [
+    0.5,
+    0.5,
+    0.85
+   ]
+  },
+  {
+   "id": "piano",
+   "cat": "furniture",
+   "h": 1.3,
+   "desc": "an old upright piano of dark polished wood with the keyboard lid closed, scratches, a candleholder; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.5,
+   "foot": [
+    1.5,
+    0.6,
+    1.3
+   ]
+  },
+  {
+   "id": "coat_rack",
+   "cat": "furniture",
+   "h": 1.8,
+   "desc": "a wooden standing coat rack with an old coat and a fur hat hanging on it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.55,
+   "foot": [
+    0.5,
+    0.5,
+    1.8
+   ]
+  },
+  {
+   "id": "medical_cabinet",
+   "cat": "furniture",
+   "h": 1.7,
+   "desc": "an old white-painted steel medical cabinet with glass doors and a few bottles inside, chipped paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.4,
+    1.7
+   ]
+  },
+  {
+   "id": "sewing_machine_table",
+   "cat": "furniture",
+   "h": 1.0,
+   "desc": "an old black Podolsk treadle sewing machine on a cast-iron table, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.0,
+   "foot": [
+    0.9,
+    0.45,
+    0.8
+   ]
+  },
+  {
+   "id": "crate_wood_small",
+   "cat": "containers",
+   "h": 0.4,
+   "desc": "a small wooden crate of rough grey planks with rope handles; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.5,
+   "foot": [
+    0.5,
+    0.4,
+    0.4
+   ]
+  },
+  {
+   "id": "crate_wood_medium_angled",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "a medium wooden crate of pale pine planks with metal corner straps, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.08,
+   "foot": [
+    0.9,
+    0.6,
+    0.6
+   ]
+  },
+  {
+   "id": "crate_wood_long_side",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "a long narrow wooden military crate painted olive green with rope handles and latches, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.0,
+   "foot": [
+    2.0,
+    0.5,
+    0.45
+   ]
+  },
+  {
+   "id": "crate_wood_large",
+   "cat": "containers",
+   "h": 1.1,
+   "desc": "a large heavy wooden shipping crate of dark weathered planks with stencil marks worn off; seen in exact side profile, long axis horizontal; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 1.4,
+   "foot": [
+    1.4,
+    1.0,
+    1.1
+   ]
+  },
+  {
+   "id": "crate_wood_stack",
+   "cat": "containers",
+   "h": 1.6,
+   "desc": "a stack of three wooden crates of different sizes, slightly offset, one lid broken; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.2,
+   "foot": [
+    1.2,
+    0.8,
+    1.6
+   ]
+  },
+  {
+   "id": "crate_vegetable",
+   "cat": "containers",
+   "h": 0.3,
+   "desc": "a slatted wooden vegetable crate with some rotten potatoes and onions; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.4,
+    0.3
+   ]
+  },
+  {
+   "id": "crate_vegetable_stack_side",
+   "cat": "containers",
+   "h": 0.9,
+   "desc": "two stacks of slatted wooden vegetable crates side by side, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 1.2,
+   "foot": [
+    1.2,
+    0.4,
+    0.9
+   ]
+  },
+  {
+   "id": "ammo_box",
+   "cat": "containers",
+   "h": 0.3,
+   "desc": "a green-painted wooden Soviet ammunition box with rope handles and metal latches; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.35,
+    0.3
+   ]
+  },
+  {
+   "id": "ammo_box_angled",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "two stacked green-painted wooden ammunition boxes with rope handles, the top lid open, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 0.69,
+   "foot": [
+    0.6,
+    0.35,
+    0.6
+   ]
+  },
+  {
+   "id": "plastic_crate_blue",
+   "cat": "containers",
+   "h": 0.3,
+   "desc": "a blue plastic crate with empty glass bottles in it, scratched and dirty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.4,
+    0.3
+   ]
+  },
+  {
+   "id": "cardboard_boxes_stack",
+   "cat": "containers",
+   "h": 1.1,
+   "desc": "a stack of brown cardboard boxes, wet and sagging, one torn open; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.6,
+    1.1
+   ]
+  },
+  {
+   "id": "cardboard_box_angled",
+   "cat": "containers",
+   "h": 0.4,
+   "desc": "a single brown cardboard box with flaps open and junk inside, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 0.72,
+   "foot": [
+    0.6,
+    0.4,
+    0.4
+   ]
+  },
+  {
+   "id": "sacks_pile",
+   "cat": "containers",
+   "h": 0.8,
+   "desc": "a pile of white woven polypropylene sacks of flour and sugar, one split; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.2,
+   "foot": [
+    1.2,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "id": "sack_lying_side",
+   "cat": "containers",
+   "h": 0.35,
+   "desc": "a single full burlap sack lying on its side, tied with string, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 0.9,
+   "foot": [
+    0.9,
+    0.5,
+    0.35
+   ]
+  },
+  {
+   "id": "barrel_steel_blue",
+   "cat": "containers",
+   "h": 0.9,
+   "desc": "a 200-litre steel drum painted faded blue, dented, rust rings; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.6,
+    0.9
+   ]
+  },
+  {
+   "id": "barrel_lying_side",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "a rusty 200-litre steel drum lying on its side, seen in exact side profile, a puddle of dark oil; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 0.9,
+   "foot": [
+    0.9,
+    0.6,
+    0.6
+   ]
+  },
+  {
+   "id": "barrel_plastic_white",
+   "cat": "containers",
+   "h": 0.85,
+   "desc": "a dirty white plastic chemical barrel with a screw cap; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.55,
+   "foot": [
+    0.55,
+    0.55,
+    0.85
+   ]
+  },
+  {
+   "id": "barrels_group_angled",
+   "cat": "containers",
+   "h": 0.9,
+   "desc": "a group of four steel drums of different colours, rusty, one tipped over, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.6,
+   "foot": [
+    1.5,
+    1.2,
+    0.9
+   ]
+  },
+  {
+   "id": "canister_steel",
+   "cat": "containers",
+   "h": 0.47,
+   "desc": "a 20-litre steel jerrycan painted faded green, dented, with a three-handle top; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.35,
+   "foot": [
+    0.35,
+    0.2,
+    0.47
+   ]
+  },
+  {
+   "id": "canister_steel_side",
+   "cat": "containers",
+   "h": 0.35,
+   "desc": "a 20-litre steel jerrycan painted red, seen in exact side profile, the cap on top; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 0.47,
+   "foot": [
+    0.47,
+    0.2,
+    0.35
+   ]
+  },
+  {
+   "id": "canister_plastic",
+   "cat": "containers",
+   "h": 0.4,
+   "desc": "a translucent plastic fuel canister with a yellowish tint and a black cap; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.3,
+   "foot": [
+    0.3,
+    0.2,
+    0.4
+   ]
+  },
+  {
+   "id": "gas_cylinder_red",
+   "cat": "containers",
+   "h": 0.95,
+   "desc": "a red Soviet 50-litre propane gas cylinder with a brass valve and a protective cap, chipped paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.3,
+   "foot": [
+    0.3,
+    0.3,
+    0.95
+   ]
+  },
+  {
+   "id": "gas_cylinders_rack_angled",
+   "cat": "containers",
+   "h": 1.5,
+   "desc": "a steel cage rack holding four blue and red gas cylinders, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.3,
+   "foot": [
+    1.2,
+    0.5,
+    1.5
+   ]
+  },
+  {
+   "id": "oxygen_cylinder_lying_side",
+   "cat": "containers",
+   "h": 0.25,
+   "desc": "a long blue oxygen gas cylinder lying on the ground, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 1.5,
+   "foot": [
+    1.5,
+    0.25,
+    0.25
+   ]
+  },
+  {
+   "id": "pallet_empty",
+   "cat": "containers",
+   "h": 0.15,
+   "desc": "an empty wooden euro pallet, grey weathered boards, a broken plank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.2,
+   "foot": [
+    1.2,
+    0.8,
+    0.15
+   ]
+  },
+  {
+   "id": "pallet_wrapped_goods",
+   "cat": "containers",
+   "h": 1.3,
+   "desc": "a wooden pallet stacked with boxes wrapped in dirty stretch film; seen in exact side profile, long axis horizontal; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 1.2,
+   "foot": [
+    1.2,
+    0.8,
+    1.3
+   ]
+  },
+  {
+   "id": "pallet_bricks_angled",
+   "cat": "containers",
+   "h": 1.0,
+   "desc": "a wooden pallet stacked with red bricks, some fallen off, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.37,
+   "foot": [
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "id": "pallet_cement_side",
+   "cat": "containers",
+   "h": 0.9,
+   "desc": "a wooden pallet with grey paper cement bags, a few torn and hardened, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 1.2,
+   "foot": [
+    1.2,
+    0.8,
+    0.9
+   ]
+  },
+  {
+   "id": "tool_chest_angled",
+   "cat": "containers",
+   "h": 0.5,
+   "desc": "a red metal tool chest with an open lid and tools inside, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 0.81,
+   "foot": [
+    0.7,
+    0.4,
+    0.5
+   ]
+  },
+  {
+   "id": "trunk_sunduk",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "an old wooden chest (sunduk) bound with iron straps, a big padlock; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.9,
+   "foot": [
+    0.9,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "suitcase_old",
+   "cat": "containers",
+   "h": 0.4,
+   "desc": "an old brown fibreboard suitcase standing upright, metal corners, a broken latch; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.2,
+    0.4
+   ]
+  },
+  {
+   "id": "milk_can",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "an aluminium Soviet milk can (bidon) with a lid clamp, dented and dull; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.35,
+   "foot": [
+    0.35,
+    0.35,
+    0.6
+   ]
+  },
+  {
+   "id": "bench_park",
+   "cat": "outdoor",
+   "h": 0.85,
+   "desc": "a Soviet park bench with concrete legs and green-painted wooden slats, some slats broken; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.8,
+   "foot": [
+    1.8,
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "id": "bench_entrance_angled",
+   "cat": "outdoor",
+   "h": 0.85,
+   "desc": "a bench by an apartment building entrance with curved metal legs and wooden slats painted brown, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.81,
+   "foot": [
+    1.8,
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "id": "bench_park_side",
+   "cat": "outdoor",
+   "h": 0.85,
+   "desc": "a wooden park bench seen in exact side profile from its end: the cast-iron side leg and backrest outline; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    1.8,
+    0.5
+   ]
+  },
+  {
+   "id": "bus_stop_concrete",
+   "cat": "outdoor",
+   "h": 2.8,
+   "desc": "a Soviet concrete bus stop shelter with a flat slab roof, side walls with a faded mosaic pattern, a bench inside; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 4.0,
+   "foot": {
+    "legs": [
+     4.0,
+     1.6,
+     2.6
+    ]
+   }
+  },
+  {
+   "id": "bus_stop_metal_angled",
+   "cat": "outdoor",
+   "h": 2.6,
+   "desc": "a metal bus stop shelter with broken glass panels and a curved roof, a bench, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 3.78,
+   "foot": {
+    "legs": [
+     3.5,
+     1.5,
+     2.5
+    ]
+   }
+  },
+  {
+   "id": "kiosk_soyuzpechat",
+   "cat": "outdoor",
+   "h": 2.8,
+   "desc": "a Soviet newspaper kiosk (Soyuzpechat): a small glazed box with a sloping roof overhang, blue frame, dusty windows with faded magazines, no text; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.5,
+   "foot": [
+    2.5,
+    2.0,
+    2.6
+   ]
+  },
+  {
+   "id": "larek_metal",
+   "cat": "outdoor",
+   "h": 2.6,
+   "desc": "a 1990s steel street kiosk (larek) with a small barred window and a serving hatch, faded paint and rust, no text; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.5,
+   "foot": [
+    2.5,
+    2.0,
+    2.5
+   ]
+  },
+  {
+   "id": "larek_angled",
+   "cat": "outdoor",
+   "h": 2.6,
+   "desc": "a 1990s steel street kiosk (larek) painted faded green with barred windows, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 3.17,
+   "foot": [
+    2.5,
+    2.0,
+    2.5
+   ]
+  },
+  {
+   "id": "kvass_barrel_side",
+   "cat": "outdoor",
+   "h": 1.6,
+   "desc": "a Soviet yellow kvass barrel tank on a two-wheel trailer with a small tap, faded paint, rust, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.5,
+   "foot": [
+    2.5,
+    1.3,
+    1.6
+   ]
+  },
+  {
+   "id": "playground_swing",
+   "cat": "outdoor",
+   "h": 2.2,
+   "desc": "a Soviet playground swing: a steel A-frame painted in faded colours with one seat hanging on rods; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.4,
+   "foot": {
+    "legs": [
+     2.4,
+     1.2,
+     2.2
+    ]
+   }
+  },
+  {
+   "id": "playground_carousel",
+   "cat": "outdoor",
+   "h": 0.9,
+   "desc": "a round Soviet playground carousel with a steel deck and handrails, faded red and yellow paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.0,
+   "foot": [
+    2.0,
+    2.0,
+    0.9
+   ]
+  },
+  {
+   "id": "playground_slide_side",
+   "cat": "outdoor",
+   "h": 2.2,
+   "desc": "a Soviet metal playground slide with a ladder, faded blue paint, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 3.5,
+   "foot": [
+    3.5,
+    0.8,
+    2.2
+   ]
+  },
+  {
+   "id": "playground_rocket",
+   "cat": "outdoor",
+   "h": 4.5,
+   "desc": "a Soviet playground climbing frame shaped like a space rocket made of steel bars, faded red and silver paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.0,
+   "foot": {
+    "legs": [
+     2.0,
+     2.0,
+     4.5
+    ]
+   }
+  },
+  {
+   "id": "sandbox_mushroom",
+   "cat": "outdoor",
+   "h": 2.3,
+   "desc": "a wooden playground sandbox with a mushroom-shaped painted parasol in the middle, faded red with white dots; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.0,
+   "foot": [
+    2.0,
+    2.0,
+    0.3
+   ]
+  },
+  {
+   "id": "horizontal_bar",
+   "cat": "outdoor",
+   "h": 2.4,
+   "desc": "a courtyard horizontal bar and carpet beater frame of steel pipes, peeling paint; seen in exact side profile, long axis horizontal; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.5,
+   "foot": {
+    "legs": [
+     2.5,
+     0.3,
+     2.4
+    ]
+   }
+  },
+  {
+   "id": "carpet_beater_rack_angled",
+   "cat": "outdoor",
+   "h": 2.0,
+   "desc": "a Soviet courtyard pipe frame for beating carpets with a faded rug hanging over it, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 2.31,
+   "foot": {
+    "legs": [
+     2.5,
+     0.3,
+     2.0
+    ]
+   }
+  },
+  {
+   "id": "garage_rakushka",
+   "cat": "outdoor",
+   "h": 2.2,
+   "desc": "a Soviet steel 'rakushka' shell garage: a rounded corrugated metal hood over a car, faded green paint, a padlock at the front; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 3.0,
+   "foot": [
+    3.0,
+    5.0,
+    2.2
+   ]
+  },
+  {
+   "id": "garage_rakushka_side",
+   "cat": "outdoor",
+   "h": 2.2,
+   "desc": "a Soviet steel 'rakushka' shell garage, the rounded hood seen in exact side profile, faded paint, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 5.0,
+   "foot": [
+    5.0,
+    3.0,
+    2.2
+   ]
+  },
+  {
+   "id": "garage_brick",
+   "cat": "outdoor",
+   "h": 2.8,
+   "desc": "a Soviet single brick garage box with a flat ruberoid roof and closed steel double gates painted brown; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 3.5,
+   "foot": [
+    3.5,
+    6.0,
+    2.6
+   ]
+  },
+  {
+   "id": "garage_brick_angled",
+   "cat": "outdoor",
+   "h": 2.8,
+   "desc": "a Soviet single brick garage box with steel gates painted blue and a flat roof, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 6.03,
+   "foot": [
+    3.5,
+    6.0,
+    2.6
+   ]
+  },
+  {
+   "id": "shed_wood",
+   "cat": "outdoor",
+   "h": 2.6,
+   "desc": "a village wooden shed (saray) of grey vertical boards with a slate roof and a padlocked door; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.5,
+   "foot": [
+    2.5,
+    2.0,
+    2.2
+   ]
+  },
+  {
+   "id": "shed_wood_angled",
+   "cat": "outdoor",
+   "h": 2.6,
+   "desc": "a lopsided wooden shed patched with sheet metal, a rusty corrugated roof, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 3.17,
+   "foot": [
+    2.5,
+    2.0,
+    2.2
+   ]
+  },
+  {
+   "id": "outhouse",
+   "cat": "outdoor",
+   "h": 2.2,
+   "desc": "a wooden village outhouse with a heart-shaped hole in the door, grey boards, slate roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    1.2,
+    2.2
+   ]
+  },
+  {
+   "id": "outhouse_angled",
+   "cat": "outdoor",
+   "h": 2.2,
+   "desc": "a leaning wooden village outhouse painted faded green, door ajar, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.47,
+   "foot": [
+    1.0,
+    1.2,
+    2.2
+   ]
+  },
+  {
+   "id": "well_roofed",
+   "cat": "outdoor",
+   "h": 2.2,
+   "desc": "a village log well with a small gable roof, a wooden windlass with a chain and a dented bucket; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.4,
+   "foot": [
+    1.2,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "id": "well_crane_side",
+   "cat": "outdoor",
+   "h": 4.0,
+   "desc": "a village shadoof well (zhuravl): a tall wooden pole with a long swinging beam and a bucket on a pole, a log well box, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 5.0,
+   "foot": [
+    1.2,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "id": "water_tower",
+   "cat": "outdoor",
+   "h": 15.0,
+   "desc": "a Soviet Rozhnovsky water tower: a tall brick-and-steel column with a big rusty steel water tank and a cone roof on top, a ladder; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 4.0,
+   "foot": [
+    3.0,
+    3.0,
+    4.0
+   ]
+  },
+  {
+   "id": "power_pole_wood",
+   "cat": "outdoor",
+   "h": 8.0,
+   "desc": "a wooden power line pole with a crossarm and white porcelain insulators, a concrete stepped support at the base, sagging wires cut off; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.5,
+   "foot": [
+    0.4,
+    0.4,
+    8
+   ]
+  },
+  {
+   "id": "power_pole_concrete",
+   "cat": "outdoor",
+   "h": 9.0,
+   "desc": "a grey concrete power line pole with a steel crossarm and glass insulators, chipped concrete; seen exactly from the side so the crossarm points toward the viewer and looks short; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 0.6,
+   "foot": [
+    0.4,
+    0.4,
+    9
+   ]
+  },
+  {
+   "id": "power_pole_wood_angled",
+   "cat": "outdoor",
+   "h": 7.0,
+   "desc": "a leaning wooden power line pole with a crossarm and a strut, two insulators, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.3,
+   "foot": [
+    0.4,
+    0.4,
+    7
+   ]
+  },
+  {
+   "id": "streetlight_concrete",
+   "cat": "outdoor",
+   "h": 8.5,
+   "desc": "a Soviet concrete street light pole with a curved arm and an old cobra-head lamp, the arm reaching to the right; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.8,
+   "foot": [
+    0.4,
+    0.4,
+    8
+   ]
+  },
+  {
+   "id": "streetlight_park",
+   "cat": "outdoor",
+   "h": 3.5,
+   "desc": "a cast-iron park lamp post with a round milky glass globe on top, slightly bent; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.5,
+   "foot": [
+    0.3,
+    0.3,
+    3.5
+   ]
+  },
+  {
+   "id": "electric_cabinet",
+   "cat": "outdoor",
+   "h": 1.4,
+   "desc": "a grey steel street electrical distribution cabinet with a lightning bolt sticker without text, rusty door; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.8,
+   "foot": [
+    0.8,
+    0.4,
+    1.4
+   ]
+  },
+  {
+   "id": "trash_container",
+   "cat": "outdoor",
+   "h": 1.2,
+   "desc": "a Soviet green steel garbage container with a sloped top opening, dented, overflowing with trash bags; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.4,
+   "foot": [
+    1.4,
+    1.0,
+    1.1
+   ]
+  },
+  {
+   "id": "trash_containers_row_angled",
+   "cat": "outdoor",
+   "h": 1.2,
+   "desc": "a row of three rusty steel garbage containers of different colours with trash around, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 3.1,
+   "foot": [
+    3.0,
+    1.0,
+    1.1
+   ]
+  },
+  {
+   "id": "dumpster_skip_side",
+   "cat": "outdoor",
+   "h": 1.2,
+   "desc": "a big rusty steel construction skip (dumpster) full of broken bricks and boards, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 3.6,
+   "foot": [
+    3.6,
+    1.8,
+    1.2
+   ]
+  },
+  {
+   "id": "trash_urn",
+   "cat": "outdoor",
+   "h": 0.7,
+   "desc": "a Soviet concrete street trash urn shaped like a vase, chipped, with trash inside; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.5,
+   "foot": [
+    0.5,
+    0.5,
+    0.7
+   ]
+  },
+  {
+   "id": "haystack",
+   "cat": "outdoor",
+   "h": 3.5,
+   "desc": "a big village haystack (stog) with a pole sticking up from the top, greyish old hay; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 3.0,
+   "foot": [
+    3.0,
+    3.0,
+    3.0
+   ]
+  },
+  {
+   "id": "hay_bales_angled",
+   "cat": "outdoor",
+   "h": 1.0,
+   "desc": "a small stack of rectangular hay bales tied with twine, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 2.4,
+   "foot": [
+    2.2,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "id": "firewood_stack_side",
+   "cat": "outdoor",
+   "h": 1.4,
+   "desc": "a long neat stack of split firewood logs (polennitsa) with a small slate roof, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.5,
+   "foot": [
+    2.5,
+    0.6,
+    1.4
+   ]
+  },
+  {
+   "id": "firewood_pile",
+   "cat": "outdoor",
+   "h": 0.7,
+   "desc": "a messy pile of chopped firewood with an axe stuck in a chopping block; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.5,
+   "foot": [
+    1.5,
+    1.0,
+    0.7
+   ]
+  },
+  {
+   "id": "stump",
+   "cat": "outdoor",
+   "h": 0.5,
+   "desc": "an old tree stump with rotten bark, moss and a few mushrooms; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.7,
+   "foot": [
+    0.6,
+    0.6,
+    0.5
+   ]
+  },
+  {
+   "id": "log_pile_side",
+   "cat": "outdoor",
+   "h": 1.0,
+   "desc": "a pile of long felled pine logs stacked on each other, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 4.0,
+   "foot": [
+    4.0,
+    1.5,
+    1.0
+   ]
+  },
+  {
+   "id": "ruins_brick_pile",
+   "cat": "outdoor",
+   "h": 1.2,
+   "desc": "a heap of rubble from a collapsed brick wall: broken red bricks, mortar chunks, a piece of window frame; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 3.0,
+   "foot": [
+    3.0,
+    2.0,
+    1.2
+   ]
+  },
+  {
+   "id": "ruins_concrete_pile_angled",
+   "cat": "outdoor",
+   "h": 1.5,
+   "desc": "a pile of broken concrete panel pieces with twisted rebar sticking out, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 3.5,
+   "foot": [
+    3.2,
+    2.5,
+    1.5
+   ]
+  },
+  {
+   "id": "concrete_slabs_stack_side",
+   "cat": "outdoor",
+   "h": 0.9,
+   "desc": "a stack of four grey reinforced concrete road slabs with lifting loops, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 6.0,
+   "foot": [
+    6.0,
+    2.0,
+    0.9
+   ]
+  },
+  {
+   "id": "concrete_pipe_side",
+   "cat": "outdoor",
+   "h": 1.2,
+   "desc": "a large reinforced concrete drain pipe section lying on the ground, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.5,
+   "foot": [
+    2.5,
+    1.2,
+    1.2
+   ]
+  },
+  {
+   "id": "concrete_rings",
+   "cat": "outdoor",
+   "h": 1.8,
+   "desc": "two grey concrete well rings stacked on each other, chipped edges, moss; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.5,
+   "foot": [
+    1.5,
+    1.5,
+    1.8
+   ]
+  },
+  {
+   "id": "sandbags_wall",
+   "cat": "outdoor",
+   "h": 1.0,
+   "desc": "a straight low wall of stacked grey-green sandbags, some torn; seen in exact side profile, long axis horizontal; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.5,
+   "foot": [
+    2.5,
+    0.6,
+    1.0
+   ]
+  },
+  {
+   "id": "sandbags_curve_angled",
+   "cat": "outdoor",
+   "h": 1.0,
+   "desc": "a curved sandbag barricade of stacked sandbags, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 2.5,
+   "foot": [
+    2.4,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "id": "tank_trap",
+   "cat": "outdoor",
+   "h": 1.2,
+   "desc": "a Czech hedgehog anti-tank obstacle (yozh) of three welded rusty steel I-beams; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.8,
+   "foot": [
+    1.4,
+    1.4,
+    1.2
+   ]
+  },
+  {
+   "id": "tank_traps_row_side",
+   "cat": "outdoor",
+   "h": 1.2,
+   "desc": "a row of three rusty steel anti-tank hedgehogs, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 5.0,
+   "foot": [
+    5.0,
+    1.2,
+    1.2
+   ]
+  },
+  {
+   "id": "tires_pile",
+   "cat": "outdoor",
+   "h": 0.9,
+   "desc": "a pile of old worn car tires; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.5,
+   "foot": [
+    1.5,
+    1.2,
+    0.9
+   ]
+  },
+  {
+   "id": "tires_playground_side",
+   "cat": "outdoor",
+   "h": 0.6,
+   "desc": "a row of old tires half buried in the ground, painted in faded colours as a courtyard fence, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 3.0,
+   "foot": [
+    3.0,
+    0.6,
+    0.6
+   ]
+  },
+  {
+   "id": "gas_pipe_side",
+   "cat": "outdoor",
+   "h": 2.5,
+   "desc": "a yellow-painted overground gas pipe on steel supports with a U-shaped raised arch, peeling paint, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 5.0,
+   "foot": {
+    "legs": [
+     5.0,
+     0.3,
+     0.6
+    ]
+   }
+  },
+  {
+   "id": "doghouse",
+   "cat": "outdoor",
+   "h": 0.9,
+   "desc": "a village wooden dog kennel (budka) with a gable roof and a rusty chain; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.9,
+   "foot": [
+    0.9,
+    1.0,
+    0.9
+   ]
+  },
+  {
+   "id": "cart_telega_side",
+   "cat": "outdoor",
+   "h": 1.2,
+   "desc": "a village wooden horse cart (telega) with spoked wheels and plank sides, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 3.5,
+   "foot": [
+    3.5,
+    1.4,
+    1.0
+   ]
+  },
+  {
+   "id": "lenin_bust",
+   "cat": "outdoor",
+   "h": 2.5,
+   "desc": "a weathered concrete bust of a Soviet leader on a tall square pedestal, cracked, bird droppings, moss; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.2,
+   "foot": [
+    1.2,
+    1.2,
+    2.5
+   ]
+  },
+  {
+   "id": "gazebo_angled",
+   "cat": "outdoor",
+   "h": 3.0,
+   "desc": "a courtyard wooden gazebo (besedka) with a table and benches inside, a slate roof, peeling paint, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 3.5,
+   "foot": {
+    "legs": [
+     3.0,
+     3.0,
+     2.5
+    ]
+   }
+  },
+  {
+   "id": "clothesline",
+   "cat": "outdoor",
+   "h": 2.0,
+   "desc": "a courtyard clothesline between two T-shaped metal posts with a few faded sheets and shirts hanging; seen in exact side profile, long axis horizontal; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 3.0,
+   "foot": {
+    "legs": [
+     3.0,
+     0.2,
+     2.0
+    ]
+   }
+  },
+  {
+   "id": "beehive",
+   "cat": "outdoor",
+   "h": 0.8,
+   "desc": "a village wooden beehive box on legs, painted faded blue, a slanted roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.5,
+    0.8
+   ]
+  },
+  {
+   "id": "greenhouse_side",
+   "cat": "outdoor",
+   "h": 2.0,
+   "desc": "a dacha greenhouse of arched pipes covered with torn cloudy plastic film, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 4.0,
+   "foot": [
+    4.0,
+    2.5,
+    2.0
+   ]
+  },
+  {
+   "id": "fence_chainlink",
+   "cat": "outdoor",
+   "h": 2.0,
+   "desc": "a 3-metre section of chain-link mesh fence (rabitsa) stretched between two rusty steel posts, sagging, a hole cut in it, transparent background visible through the mesh; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 3.0,
+   "foot": {
+    "legs": [
+     3.0,
+     0.1,
+     2.0
+    ]
+   }
+  },
+  {
+   "id": "fence_picket",
+   "cat": "outdoor",
+   "h": 1.4,
+   "desc": "a 3-metre section of a village picket fence (shtaketnik) of narrow vertical pointed boards with gaps, faded green paint, transparent background visible between the boards; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 3.0,
+   "foot": {
+    "legs": [
+     3.0,
+     0.1,
+     1.4
+    ]
+   }
+  },
+  {
+   "id": "fence_metal_bars",
+   "cat": "outdoor",
+   "h": 1.8,
+   "desc": "a 3-metre section of a welded black steel bar fence with pointed tips between two square posts, rust, transparent background visible between the bars; seen in exact side profile, long axis horizontal; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 3.0,
+   "foot": {
+    "legs": [
+     3.0,
+     0.1,
+     1.8
+    ]
+   }
+  },
+  {
+   "id": "fence_picket_side",
+   "cat": "outdoor",
+   "h": 1.4,
+   "desc": "a 3-metre section of a grey wooden picket fence with a small wicket gate, seen in exact side profile, transparent background visible between the boards; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 3.0,
+   "foot": {
+    "legs": [
+     3.0,
+     0.1,
+     1.4
+    ]
+   }
+  },
+  {
+   "id": "dacha_toolbox_bin",
+   "cat": "outdoor",
+   "h": 0.7,
+   "desc": "a sand bin box for winter roads, wooden, painted faded red, lid ajar, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.17,
+   "foot": [
+    1.0,
+    0.6,
+    0.7
+   ]
+  },
+  {
+   "id": "vent_turbine",
+   "cat": "rooftop",
+   "h": 0.8,
+   "desc": "a rooftop rotating turbine ventilator: a galvanized ball of curved metal vanes on a short duct, standing on a flat roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.5,
+   "foot": [
+    0.5,
+    0.5,
+    0.8
+   ]
+  },
+  {
+   "id": "vent_shaft_brick",
+   "cat": "rooftop",
+   "h": 1.4,
+   "desc": "a Soviet panel-house brick ventilation shaft with slatted openings and a concrete cap, standing on a flat roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.4,
+   "foot": [
+    1.4,
+    0.7,
+    1.4
+   ]
+  },
+  {
+   "id": "vent_shaft_angled",
+   "cat": "rooftop",
+   "h": 1.4,
+   "desc": "a concrete ventilation shaft block with louvered openings and a sheet metal hood, standing on a flat roof, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.56,
+   "foot": [
+    1.4,
+    0.7,
+    1.4
+   ]
+  },
+  {
+   "id": "vent_pipes_cluster",
+   "cat": "rooftop",
+   "h": 1.0,
+   "desc": "a cluster of four thin sewer vent pipes of different heights sticking out of the roof with rain caps, standing on a flat roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.6,
+    1.0
+   ]
+  },
+  {
+   "id": "vent_duct_side",
+   "cat": "rooftop",
+   "h": 1.2,
+   "desc": "a long galvanized ventilation duct running on small supports with an elbow at one end, standing on a flat roof, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 4.0,
+   "foot": {
+    "legs": [
+     4.0,
+     0.6,
+     0.8
+    ]
+   }
+  },
+  {
+   "id": "vent_fan_box",
+   "cat": "rooftop",
+   "h": 1.0,
+   "desc": "a big industrial roof exhaust fan box with a round fan grille on the front and louvers, standing on a flat roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.4,
+   "foot": [
+    1.4,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "id": "chimney_metal_tall",
+   "cat": "rooftop",
+   "h": 4.0,
+   "desc": "a tall thin rusty steel chimney pipe with a rain cap and three guy wires, soot at the top, standing on a flat roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.5,
+    0.5,
+    4.0
+   ]
+  },
+  {
+   "id": "chimney_brick_angled",
+   "cat": "rooftop",
+   "h": 1.6,
+   "desc": "a red brick chimney stack with a sheet metal cap, crumbling mortar and soot, standing on a flat roof, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.08,
+   "foot": [
+    0.9,
+    0.6,
+    1.6
+   ]
+  },
+  {
+   "id": "ac_unit_split",
+   "cat": "rooftop",
+   "h": 0.6,
+   "desc": "a dirty white outdoor air conditioner unit with a round fan grille on a steel bracket frame, standing on a flat roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.85,
+   "foot": [
+    0.85,
+    0.35,
+    0.6
+   ]
+  },
+  {
+   "id": "ac_units_row_angled",
+   "cat": "rooftop",
+   "h": 0.6,
+   "desc": "a row of three old outdoor air conditioner units on a steel frame, yellowed plastic, standing on a flat roof, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.98,
+   "foot": [
+    2.0,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "antenna_tv_yagi",
+   "cat": "rooftop",
+   "h": 3.0,
+   "desc": "an old TV antenna: a long horizontal yagi with many crossbars on a rusty mast with guy wires, standing on a flat roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.5,
+   "foot": [
+    0.3,
+    0.3,
+    3.0
+   ]
+  },
+  {
+   "id": "antenna_mast_dish",
+   "cat": "rooftop",
+   "h": 4.0,
+   "desc": "a tall lattice steel antenna mast with a small dish and whip antennas, standing on a flat roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    0.6,
+    0.6,
+    4.0
+   ]
+  },
+  {
+   "id": "satellite_dish_small",
+   "cat": "rooftop",
+   "h": 1.0,
+   "desc": "a small grey satellite dish on a bracket, dirty, standing on a flat roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.7,
+   "foot": [
+    0.5,
+    0.5,
+    1.0
+   ]
+  },
+  {
+   "id": "satellite_dish_big_angled",
+   "cat": "rooftop",
+   "h": 1.8,
+   "desc": "a large old satellite dish on a steel stand with a feed arm, rust, standing on a flat roof, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 1.6,
+   "foot": [
+    1.4,
+    1.4,
+    1.8
+   ]
+  },
+  {
+   "id": "water_tank_horizontal_side",
+   "cat": "rooftop",
+   "h": 1.5,
+   "desc": "a horizontal cylindrical steel water tank on two cradle supports with a hatch on top, rust streaks, standing on a flat roof, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.5,
+   "foot": [
+    2.5,
+    1.2,
+    1.5
+   ]
+  },
+  {
+   "id": "roof_exit_booth",
+   "cat": "rooftop",
+   "h": 2.6,
+   "desc": "a small brick roof exit booth with a flat roof and a steel door, on top of a Soviet apartment block, standing on a flat roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 2.5,
+   "foot": [
+    2.5,
+    2.2,
+    2.5
+   ]
+  },
+  {
+   "id": "elevator_room_angled",
+   "cat": "rooftop",
+   "h": 3.0,
+   "desc": "a Soviet apartment block elevator machine room: a brick box with a flat ruberoid roof, a vent grille and a steel door, standing on a flat roof, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 4.53,
+   "foot": [
+    3.5,
+    3.0,
+    2.8
+   ]
+  },
+  {
+   "id": "roof_ladder_cage",
+   "cat": "rooftop",
+   "h": 3.0,
+   "desc": "a steel rooftop ladder with a safety cage of hoops, rusty, standing on a flat roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.7,
+   "foot": [
+    0.7,
+    0.3,
+    3.0
+   ]
+  },
+  {
+   "id": "roof_tires_sheets",
+   "cat": "rooftop",
+   "h": 0.5,
+   "desc": "old tires and bricks holding down loose sheets of ruberoid, standing on a flat roof; seen in exact side profile, long axis horizontal; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 1.6,
+   "foot": [
+    1.6,
+    1.2,
+    0.5
+   ]
+  },
+  {
+   "id": "skylight",
+   "cat": "rooftop",
+   "h": 0.5,
+   "desc": "a small pyramid glass skylight in a steel frame with some broken panes, standing on a flat roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.2,
+   "foot": [
+    1.2,
+    1.2,
+    0.5
+   ]
+  },
+  {
+   "id": "roof_parapet_drain",
+   "cat": "rooftop",
+   "h": 0.6,
+   "desc": "a low concrete roof parapet section with a rusty drain funnel and a puddle, standing on a flat roof, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 2.0,
+   "foot": [
+    2.0,
+    0.4,
+    0.6
+   ]
+  },
+  {
+   "id": "wall_panel_concrete",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a Soviet prefabricated concrete apartment block panel, light grey with small pebble texture, dark sealed joints along the edges, rust streaks, no text, no letters, no numbers"
+  },
+  {
+   "id": "wall_panel_window",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a Soviet prefab concrete apartment panel with one window in the middle: a white wooden double frame, dirty glass, a small balcony sill, no text, no letters, no numbers"
+  },
+  {
+   "id": "wall_brick_red",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: an old red brick wall, Soviet laying with darker burnt bricks, white efflorescence stains, crumbling mortar, no text, no letters, no numbers"
+  },
+  {
+   "id": "wall_brick_red_window",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: an old red brick wall with an arched-top window in the middle, a wooden frame with a cracked pane, a brick sill, no text, no letters, no numbers"
+  },
+  {
+   "id": "wall_brick_silicate_window",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a white silicate brick wall with a rectangular window in the middle with a steel frame and a concrete lintel, dirty glass, no text, no letters, no numbers"
+  },
+  {
+   "id": "wall_plaster_blue",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a village house wall plastered and painted faded pale blue, cracks, damp stains, patches of fallen plaster showing wooden lath, no text, no letters, no numbers"
+  },
+  {
+   "id": "wall_plaster_white",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a whitewashed lime plaster wall, dirty grey near the bottom, cracks, peeling patches, no text, no letters, no numbers"
+  },
+  {
+   "id": "wall_tile_beige",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a Soviet public building wall faced with small beige ceramic tiles, many tiles missing showing grey concrete, no text, no letters, no numbers"
+  },
+  {
+   "id": "wall_log",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a wall of a Russian log house (izba): thick horizontal round logs, darkened grey with moss caulk between them, no text, no letters, no numbers"
+  },
+  {
+   "id": "wall_planks_green",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a wall clad with vertical wooden boards painted faded green, peeling paint, grey wood showing, no text, no letters, no numbers"
+  },
+  {
+   "id": "wall_corrugated_blue",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a wall of blue-painted corrugated profiled steel sheets with vertical ribs, faded, scratches, rust at the bottom, no text, no letters, no numbers"
+  },
+  {
+   "id": "fence_wood_board",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a solid wooden board fence of grey weathered vertical planks nailed to two rails, a few planks missing, no text, no letters, no numbers"
+  },
+  {
+   "id": "fence_metal_profile",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a solid fence of brown profiled metal sheets on steel posts, dents, rust, no text, no letters, no numbers"
+  },
+  {
+   "id": "fence_concrete_plain",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a plain grey concrete fence panel with a smooth surface, cracks and rust stains, a row of barbed wire on top, no text, no letters, no numbers"
+  },
+  {
+   "id": "door_entrance_metal",
+   "cat": "walls",
+   "tile": 2.5,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a section of a grey concrete wall with an apartment block metal entrance door in the centre: brown painted steel, an intercom keypad box, a small canopy above; the door is 1 m wide and 2.1 m tall, the wall section is 2.5 m wide, no text, no letters, no numbers"
+  },
+  {
+   "id": "door_wood_padded",
+   "cat": "walls",
+   "tile": 2.5,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a section of a plastered wall with a Soviet apartment door in the centre upholstered in brown leatherette with decorative studs and a peephole; the door is 0.9 m wide and 2.1 m tall, the wall section is 2.5 m wide, no text, no letters, no numbers"
+  },
+  {
+   "id": "door_wood_double",
+   "cat": "walls",
+   "tile": 2.5,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a section of an old red brick wall with a double-leaf wooden door painted faded brown with small glass panes on top; the door is 1.4 m wide and 2.2 m tall, the wall section is 2.5 m wide, no text, no letters, no numbers"
+  },
+  {
+   "id": "door_metal_service",
+   "cat": "walls",
+   "tile": 2.5,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a section of a white silicate brick wall with a grey steel service door with rivets and a padlock hasp; the door is 0.9 m wide and 2.1 m tall, the wall section is 2.5 m wide, no text, no letters, no numbers"
+  },
+  {
+   "id": "garage_gate_brown",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: closed Soviet steel double garage gates painted brown with a big padlock and a crossbar, rust streaks, set in a brick wall frame, no text, no letters, no numbers"
+  },
+  {
+   "id": "window_barred",
+   "cat": "walls",
+   "tile": 2.5,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a section of a red brick wall with a window protected by a steel sunburst-pattern grille (solnyshko), dirty glass behind; the window is 1.2 m wide and 1.4 m tall, the wall section is 2.5 m wide, no text, no letters, no numbers"
+  },
+  {
+   "id": "window_wooden_old",
+   "cat": "walls",
+   "tile": 2.5,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: a section of a plastered wall with an old Soviet wooden window: white peeling double frame with a small ventilation pane (fortochka); the window is 1.3 m wide and 1.5 m tall, the wall section is 2.5 m wide, no text, no letters, no numbers"
+  },
+  {
+   "id": "window_shop_bars",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on, filling the whole image edge to edge: an old shop window section of a silicate brick wall: a wide glass window behind a rusty steel bar grating, dusty glass, no text, no text, no letters, no numbers"
+  },
+  {
+   "id": "roof_ruberoid_patched",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: black ruberoid roofing with many glossy bitumen patches of different ages, overlapping seams, small puddle stains"
+  },
+  {
+   "id": "roof_ruberoid_torn",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: old grey-black ruberoid roofing torn and blistered, with exposed underlayer, moss and small plants in the seams"
+  },
+  {
+   "id": "roof_slate_new",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: light grey corrugated asbestos slate sheets (shifer) in neat overlapping rows, fairly clean"
+  },
+  {
+   "id": "roof_slate_mossy",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: old dark grey corrugated asbestos slate sheets in overlapping rows, thick green moss and lichen, a cracked sheet"
+  },
+  {
+   "id": "roof_metal_green",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: corrugated metal roofing painted faded green with parallel ribs, peeling paint and rust spots"
+  },
+  {
+   "id": "roof_metal_red",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: standing-seam sheet metal roofing painted faded red-brown, seams in parallel lines, rust streaks"
+  },
+  {
+   "id": "roof_metal_patched",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: rusty corrugated metal roofing with several patches of different sheets and bolts, dents, holes"
+  },
+  {
+   "id": "roof_tiles_clay",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: old red clay roof tiles in overlapping rows, some broken, moss in the joints"
+  },
+  {
+   "id": "roof_concrete_slab",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: a flat roof of grey concrete slabs with dark bitumen-filled joints and black bitumen patches, puddle stains"
+  },
+  {
+   "id": "roof_gravel",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: a flat roof covered with grey gravel ballast over bitumen, a few weeds and puddles"
+  },
+  {
+   "id": "roof_shingles_brown",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: brown soft bitumen shingles in hexagonal-tab rows, faded and some missing"
+  },
+  {
+   "id": "decal_crack_asphalt",
+   "cat": "decals",
+   "h": 0.75,
+   "w": 1.5,
+   "desc": "a branching dark crack in asphalt with small chips, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_crack_concrete",
+   "cat": "decals",
+   "h": 0.6,
+   "w": 1.2,
+   "desc": "a jagged crack in a concrete slab with crumbs, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_oil_stain_big",
+   "cat": "decals",
+   "h": 0.6,
+   "w": 1.2,
+   "desc": "a dark glossy motor oil stain with rainbow sheen, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_puddle_big",
+   "cat": "decals",
+   "h": 1.0,
+   "w": 2.0,
+   "desc": "a big shallow muddy rain puddle reflecting a grey sky, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_puddle_oily",
+   "cat": "decals",
+   "h": 0.75,
+   "w": 1.5,
+   "desc": "a dirty puddle with an oily rainbow film, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_trash_scatter",
+   "cat": "decals",
+   "h": 0.75,
+   "w": 1.5,
+   "desc": "scattered trash: crumpled plastic bags, a bottle, cans, paper wrappers, cigarette packs, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_newspapers",
+   "cat": "decals",
+   "h": 0.5,
+   "w": 1.0,
+   "desc": "a few wet crumpled old newspapers with illegible grey print blur, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_leaves_pile",
+   "cat": "decals",
+   "h": 0.6,
+   "w": 1.2,
+   "desc": "a pile of dead brown and yellow fallen leaves, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_leaves_scatter",
+   "cat": "decals",
+   "h": 1.0,
+   "w": 2.0,
+   "desc": "a loose scatter of yellow and brown fallen birch and maple leaves, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_manhole",
+   "cat": "decals",
+   "h": 0.4,
+   "w": 0.8,
+   "desc": "a round cast-iron Soviet manhole cover (lyuk) with a raised grid pattern, rusty, set in a ring of cracked asphalt, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_manhole_open",
+   "cat": "decals",
+   "h": 0.45,
+   "w": 0.9,
+   "desc": "an open manhole: a dark round hole with the top of a rusty ladder, the cast-iron lid lying half aside, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_storm_drain",
+   "cat": "decals",
+   "h": 0.3,
+   "w": 0.6,
+   "desc": "a rectangular cast-iron storm drain grate with leaves stuck in it, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_road_dashes",
+   "cat": "decals",
+   "h": 1.5,
+   "w": 3.0,
+   "desc": "a worn white dashed road centre line, two dashes, cracked and faded, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_zebra",
+   "cat": "decals",
+   "h": 1.5,
+   "w": 3.0,
+   "desc": "faded white zebra crossing stripes on asphalt, worn, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_tire_tracks_mud",
+   "cat": "decals",
+   "h": 1.5,
+   "w": 3.0,
+   "desc": "two parallel muddy tire tracks with tread pattern, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_skid_marks",
+   "cat": "decals",
+   "h": 1.25,
+   "w": 2.5,
+   "desc": "black rubber tire skid marks curving, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_glass_shards",
+   "cat": "decals",
+   "h": 0.4,
+   "w": 0.8,
+   "desc": "scattered shards of broken window glass glinting, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_bricks_scatter",
+   "cat": "decals",
+   "h": 0.75,
+   "w": 1.5,
+   "desc": "scattered broken red brick pieces and dust, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_burnt_spot",
+   "cat": "decals",
+   "h": 1.0,
+   "w": 2.0,
+   "desc": "a black scorched burnt patch with ash and charred bits, an old campfire, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_moss_patch",
+   "cat": "decals",
+   "h": 0.6,
+   "w": 1.2,
+   "desc": "a patch of dark green moss with small weeds, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_sand_pile",
+   "cat": "decals",
+   "h": 0.75,
+   "w": 1.5,
+   "desc": "a low pile of yellow construction sand spilled, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_cigarette_butts",
+   "cat": "decals",
+   "h": 0.3,
+   "w": 0.6,
+   "desc": "a dirty scatter of cigarette butts and a crushed matchbox, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
+  },
+  {
+   "id": "loot_crate_wood",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "front",
+   "w": 1.1,
+   "foot": [
+    1.1,
+    0.77,
+    0.9
+   ],
+   "desc": "a tier-0 supply crate of light fresh pine planks with a bright green painted band around it, thick rope handles and shiny steel corner plates, a painted green circle symbol on the front, closed; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_wood_open",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "front",
+   "w": 1.1,
+   "foot": [
+    1.1,
+    0.77,
+    0.9
+   ],
+   "ref": "assets/gen/loot/loot_crate_wood.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside; a tier-0 supply crate of light fresh pine planks with a bright green painted band around it, thick rope handles and shiny steel corner plates, a painted green circle symbol on the front; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_wood_angled",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "angled",
+   "w": 1.34,
+   "foot": [
+    1.1,
+    0.77,
+    0.9
+   ],
+   "desc": "a tier-0 supply crate of light fresh pine planks with a bright green painted band around it, thick rope handles and shiny steel corner plates, a painted green circle symbol on the front, closed, turned about 30 degrees; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_wood_angled_open",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "angled",
+   "w": 1.34,
+   "foot": [
+    1.1,
+    0.77,
+    0.9
+   ],
+   "ref": "assets/gen/loot/loot_crate_wood_angled.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside, turned about 30 degrees; a tier-0 supply crate of light fresh pine planks with a bright green painted band around it, thick rope handles and shiny steel corner plates, a painted green circle symbol on the front; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_army",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "front",
+   "w": 1.3,
+   "foot": [
+    1.3,
+    0.91,
+    0.9
+   ],
+   "desc": "a tier-1 olive-green military crate with bright yellow-and-black hazard-striped corners, heavy steel latches and a painted white star-like stencil symbol on the front, closed; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_army_open",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "front",
+   "w": 1.3,
+   "foot": [
+    1.3,
+    0.91,
+    0.9
+   ],
+   "ref": "assets/gen/loot/loot_crate_army.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside; a tier-1 olive-green military crate with bright yellow-and-black hazard-striped corners, heavy steel latches and a painted white star-like stencil symbol on the front; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_army_angled",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "angled",
+   "w": 1.58,
+   "foot": [
+    1.3,
+    0.91,
+    0.9
+   ],
+   "desc": "a tier-1 olive-green military crate with bright yellow-and-black hazard-striped corners, heavy steel latches and a painted white star-like stencil symbol on the front, closed, turned about 30 degrees; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_army_angled_open",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "angled",
+   "w": 1.58,
+   "foot": [
+    1.3,
+    0.91,
+    0.9
+   ],
+   "ref": "assets/gen/loot/loot_crate_army_angled.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside, turned about 30 degrees; a tier-1 olive-green military crate with bright yellow-and-black hazard-striped corners, heavy steel latches and a painted white star-like stencil symbol on the front; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_weapon",
+   "cat": "loot",
+   "h": 0.7,
+   "view": "front",
+   "w": 1.8,
+   "foot": [
+    1.8,
+    1.26,
+    0.7
+   ],
+   "desc": "a tier-2 long dark-green weapon case with a bright red stripe along it, three heavy chrome latches and reinforced steel edges, closed; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_weapon_open",
+   "cat": "loot",
+   "h": 0.7,
+   "view": "front",
+   "w": 1.8,
+   "foot": [
+    1.8,
+    1.26,
+    0.7
+   ],
+   "ref": "assets/gen/loot/loot_crate_weapon.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside; a tier-2 long dark-green weapon case with a bright red stripe along it, three heavy chrome latches and reinforced steel edges; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_elite",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "front",
+   "w": 1.4,
+   "foot": [
+    1.4,
+    0.98,
+    0.9
+   ],
+   "desc": "a tier-3 heavy armoured steel crate, dark gunmetal with glowing orange-red seams, a lock panel with a small glowing red indicator lamp, bolted edges, closed; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_elite_open",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "front",
+   "w": 1.4,
+   "foot": [
+    1.4,
+    0.98,
+    0.9
+   ],
+   "ref": "assets/gen/loot/loot_crate_elite.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside; a tier-3 heavy armoured steel crate, dark gunmetal with glowing orange-red seams, a lock panel with a small glowing red indicator lamp, bolted edges; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_medical",
+   "cat": "loot",
+   "h": 0.8,
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.7,
+    0.8
+   ],
+   "desc": "a white metal medical box with a big bright red cross on the front, steel latches and a carry handle, closed; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_medical_open",
+   "cat": "loot",
+   "h": 0.8,
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.7,
+    0.8
+   ],
+   "ref": "assets/gen/loot/loot_crate_medical.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside; a white metal medical box with a big bright red cross on the front, steel latches and a carry handle; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_food",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "front",
+   "w": 1.1,
+   "foot": [
+    1.1,
+    0.77,
+    0.9
+   ],
+   "desc": "a slatted wooden food crate with a bright blue painted band, sacks and tin cans visible through the gaps between the slats, closed; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_food_open",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "front",
+   "w": 1.1,
+   "foot": [
+    1.1,
+    0.77,
+    0.9
+   ],
+   "ref": "assets/gen/loot/loot_crate_food.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside; a slatted wooden food crate with a bright blue painted band, sacks and tin cans visible through the gaps between the slats; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_tools",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.7,
+    0.9
+   ],
+   "desc": "a bright orange metal tool chest with several drawers with chrome handles and a lift-up lid, closed; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_tools_open",
+   "cat": "loot",
+   "h": 0.9,
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.7,
+    0.9
+   ],
+   "ref": "assets/gen/loot/loot_crate_tools.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside; a bright orange metal tool chest with several drawers with chrome handles and a lift-up lid; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_ammo",
+   "cat": "loot",
+   "h": 0.5,
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.42,
+    0.5
+   ],
+   "desc": "a small steel ammunition box painted dark green with a bright yellow band and a chrome clamp latch, closed; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_ammo_open",
+   "cat": "loot",
+   "h": 0.5,
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.42,
+    0.5
+   ],
+   "ref": "assets/gen/loot/loot_crate_ammo.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside; a small steel ammunition box painted dark green with a bright yellow band and a chrome clamp latch; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_ammo_angled",
+   "cat": "loot",
+   "h": 0.5,
+   "view": "angled",
+   "w": 0.73,
+   "foot": [
+    0.6,
+    0.42,
+    0.5
+   ],
+   "desc": "a small steel ammunition box painted dark green with a bright yellow band and a chrome clamp latch, closed, turned about 30 degrees; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_ammo_angled_open",
+   "cat": "loot",
+   "h": 0.5,
+   "view": "angled",
+   "w": 0.73,
+   "foot": [
+    0.6,
+    0.42,
+    0.5
+   ],
+   "ref": "assets/gen/loot/loot_crate_ammo_angled.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside, turned about 30 degrees; a small steel ammunition box painted dark green with a bright yellow band and a chrome clamp latch; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_electric",
+   "cat": "loot",
+   "h": 0.8,
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.7,
+    0.8
+   ],
+   "desc": "a grey metal box for electrical parts with a big yellow lightning-bolt symbol, a bright blue band and steel latches, closed; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_crate_electric_open",
+   "cat": "loot",
+   "h": 0.8,
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.7,
+    0.8
+   ],
+   "ref": "assets/gen/loot/loot_crate_electric.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside; a grey metal box for electrical parts with a big yellow lightning-bolt symbol, a bright blue band and steel latches; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_safe",
+   "cat": "loot",
+   "h": 1.0,
+   "view": "front",
+   "w": 0.8,
+   "foot": [
+    0.8,
+    0.56,
+    1.0
+   ],
+   "desc": "a chunky old Soviet steel safe painted dark green with a shiny gold-coloured dial and a brass handle, closed; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "loot_safe_open",
+   "cat": "loot",
+   "h": 1.0,
+   "view": "front",
+   "w": 1.05,
+   "foot": [
+    0.8,
+    0.56,
+    1.0
+   ],
+   "ref": "assets/gen/loot/loot_safe.png",
+   "desc": "exactly the same container as in the attached reference image (same shape, colours, markings and angle), but OPENED: lid or door open, EMPTY inside; a chunky old Soviet steel safe painted dark green with a shiny gold-coloured dial and a brass handle; a LOOTABLE container that must stand out at a glance from ordinary decorative boxes: bold readable silhouette with big simple shapes, strong saturated accent colours, clean bright highlights on metal fittings catching the light, worn but well kept, a small bright eye-catching detail; post-Soviet survival game; no text, no letters, no numbers, no logos"
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",
@@ -2361,5 +6082,6 @@
  "rig_framing": "A single isolated body part sprite for a 2D cutout animation rig, taken from the character shown in the attached reference image: exactly the same skin tone, dirt, hair, clothing colors, lighting from the top-left and painting style. Only that one body part, cleanly separated at the joints with rounded joint ends, centered, transparent background, nothing else in the image, no shadow, no text, no frame.",
  "ui_framing": "A single flat user-interface element texture for a gritty post-apocalyptic survival game HUD, seen straight-on (orthographic, no perspective), crisp readable shapes, the element fills the image edge to edge, transparent background outside the element, no text, no letters, no numbers, no logos.",
  "front_framing": "A single game sprite for a 2D top-down survival game. The camera looks from the SOUTH straight on, tilted down about 50 degrees (NOT isometric, NOT rotated, NO diagonal 45-degree angle): the object's front side faces the viewer squarely, its bottom edge perfectly horizontal and parallel to the bottom of the image; the left and right sides are not visible. The top surface of the object is visible above that face. Like the straight-on top-down perspective of RimWorld or classic top-down RPGs, but painted in high detail. The whole object fully visible and centered, its base at the bottom center. Transparent background, no ground, no cast shadow, no text, no frame, no border.",
- "side_framing": "A single game sprite for a 2D top-down survival game. The camera looks from the SOUTH straight on, tilted down about 50 degrees (NOT isometric, NOT rotated, NO diagonal 45-degree angle): the object is turned sideways so we see its long side in exact profile, its long axis perfectly horizontal and parallel to the bottom of the image; the front and back ends are not visible. The top surface of the object is visible above that face. Like the straight-on top-down perspective of RimWorld or classic top-down RPGs, but painted in high detail. The whole object fully visible and centered, its base at the bottom center. Transparent background, no ground, no cast shadow, no text, no frame, no border."
+ "side_framing": "A single game sprite for a 2D top-down survival game. The camera looks from the SOUTH straight on, tilted down about 50 degrees (NOT isometric, NOT rotated, NO diagonal 45-degree angle): the object is turned sideways so we see its long side in exact profile, its long axis perfectly horizontal and parallel to the bottom of the image; the front and back ends are not visible. The top surface of the object is visible above that face. Like the straight-on top-down perspective of RimWorld or classic top-down RPGs, but painted in high detail. The whole object fully visible and centered, its base at the bottom center. Transparent background, no ground, no cast shadow, no text, no frame, no border.",
+ "angled_framing": "A single game sprite for a 2D top-down survival game. The camera looks from the SOUTH, tilted down about 50 degrees (NOT isometric, NOT a 45-degree diamond view, NOT seen from a corner). The object itself is turned slightly, rotated about 30 degrees around its vertical axis: its main face is seen at a gentle angle and a narrow foreshortened strip of one side is also visible; its bottom edges slope only slightly. The top surface of the object is visible above. Like the top-down perspective of RimWorld or Project Zomboid, but painted in high detail. The whole object fully visible and centered, its base at the bottom center. Transparent background, no ground, no cast shadow, no text, no frame, no border."
 }

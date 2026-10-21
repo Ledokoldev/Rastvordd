@@ -23,6 +23,9 @@ namespace Rastvordd.Client
         BuildGhost2D _bghost;
         MapView _mapView;
         UiPanel _uiPanel;
+        BuildMenu _buildMenu;
+        Label _guide;
+        int _setPiece = -1;
         (UiOp op, string item, int index)? _uiReq;
         bool _uiWasOpen;
         string _lastPlace;
@@ -92,6 +95,9 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("slot")) _slot = int.Parse(a.Substring(4)) - 1;
                 else if (a.StartsWith("craft")) _craftReq = int.Parse(a.Substring(5));
                 else if (a == "stop") _forceWalk = SVec.Zero;
+                else if (a == "bmenu") { _buildMenu.Visible = !_buildMenu.Visible; }
+                else if (a.StartsWith("give")) { var g = a.Substring(4).Split('x'); _server.World.Find(_myId).Add(g[0], g.Length > 1 ? int.Parse(g[1]) : 1); }   // отладка: give<id>x<n>
+                else if (a.StartsWith("ui")) _uiReq = ((UiOp)int.Parse(a.Substring(2).Split('_')[0]), a.Contains('_') ? a.Substring(a.IndexOf('_') + 1) : null, 0);   // отладка: ui<op>_<item>
                 else if (a == "map") { _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); }
                 else if (a == "crouch") _forceCrouch = true;
                 else if (a == "save") SaveWorld();
@@ -179,7 +185,16 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _hud.AddChild(_mapView);
             _uiPanel = new UiPanel();
             _uiPanel.Action += (op, item, index) => _uiReq = (op, item, index);
-            _hud.AddChild(_uiPanel);
+_hud.AddChild(_uiPanel);
+            _buildMenu = new BuildMenu();
+            _buildMenu.Picked += k => { _setPiece = k; _buildMenu.Visible = false; Input.MouseMode = Input.MouseModeEnum.Hidden; };
+            _hud.AddChild(_buildMenu);
+            _guide = new Label { Position = new Vector2(0, 120), MouseFilter = Control.MouseFilterEnum.Ignore };
+            _guide.AddThemeFontSizeOverride("font_size", 15);
+            _guide.AddThemeColorOverride("font_color", new Color(0.85f, 0.92f, 1f));
+            _guide.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.9f));
+            _guide.AddThemeConstantOverride("outline_size", 5);
+            _hud.AddChild(_guide);
             _hud.CraftRequested += i => _craftReq = i;
             _hud.CodeEntered += (door, code) => _codeReq = (door, code);
             _hud.WipeRequested += () =>
@@ -361,6 +376,12 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             }
             else if (e is InputEventMouseButton mb && mb.Pressed)
             {
+                // ПКМ с Планом — меню элементов вместо прицела
+                if (mb.ButtonIndex == MouseButton.Right && _cur?.Self != null && _cur.Self.HoldingPlan)
+                {
+                    _buildMenu.Visible = !_buildMenu.Visible;
+                    Input.MouseMode = _buildMenu.Visible ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
+                }
                 if (mb.ButtonIndex == MouseButton.WheelUp) _zoom = Mathf.Min(2.6f, _zoom * 1.1f);
                 else if (mb.ButtonIndex == MouseButton.WheelDown) _zoom = Mathf.Max(0.9f, _zoom / 1.1f);
             }
@@ -379,12 +400,13 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             {
                 Move = move,
                 Aim = _aim,
-                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !_uiPanel.Visible && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
+                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !_uiPanel.Visible && !_buildMenu.Visible && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
                 Eat = _eatEdge,
                 DebugKit = _debugEdge,
                 Craft = _craftReq,
                 Code = _codeReq?.code ?? -1,
                 UiOp = (int)(_uiReq?.op ?? UiOp.None),
+                SetPiece = _setPiece,
                 UiItem = _uiReq?.item,
                 UiIndex = _uiReq?.index ?? 0,
                 CodeDoor = _codeReq?.door ?? 0,
@@ -410,7 +432,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _screenDir = ((screen - vs / 2) / (vs / 2)).Clamp(-Vector2.One, Vector2.One);
 
             // прицеливание на ПКМ: конус уже, видно дальше, камеру можно протянуть к курсору
-            float peekTarget = _forcedPeek ?? (Input.IsMouseButtonPressed(MouseButton.Right) ? 1f : 0f);
+            float peekTarget = _forcedPeek ?? (Input.IsMouseButtonPressed(MouseButton.Right) && !(_cur?.Self?.HoldingPlan ?? false) ? 1f : 0f);   // с Планом ПКМ — меню
             _peek = Mathf.MoveToward(_peek, peekTarget, dt * 5f);
 
             if (_autoAim.HasValue) { _aim = _autoAim.Value; return; }
@@ -479,6 +501,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _slot = _craftReq = -1;
                 _codeReq = null;
                 _uiReq = null;
+                _setPiece = -1;
                 if (_autoFireFrames > 0) _autoFireFrames--;
                 HandleEvents();
                 _acc -= World.Dt;
@@ -966,6 +989,12 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             RemoveMissing(_fireViews, seen);
 
             _mapView.SetState(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _cur.Actors.Find(x => x.Id == _myId).Facing, _cur.Self.Home);
+
+            // меню плана и шпаргалка стройки
+            if (_cur.Self.HoldingPlan) _buildMenu.Fill(_cur.Self.BuildPieces, (int)_cur.Self.BuildPiece);
+            else if (_buildMenu.Visible) { _buildMenu.Visible = false; Input.MouseMode = Input.MouseModeEnum.Hidden; }
+            _guide.Text = _cur.Self.BuildGuide ?? "";
+            _guide.Position = new Vector2(GetViewport().GetVisibleRect().Size.X - _guide.GetCombinedMinimumSize().X - 16, 110);
 
             // окно по E (ящик, печь, столб) и крафт у верстака
             _uiPanel.Show(_cur.Self.Ui);

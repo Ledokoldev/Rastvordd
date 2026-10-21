@@ -73,6 +73,8 @@ namespace Rastvordd.Sim
         public float BagReadyIn;        // секунд до готовности спальника
         public string BuildStatus;      // с планом в руках: лимиты базы под курсором
         public UiView Ui;               // открытое окно (ящик, печь, столб…)
+        public string BuildGuide;       // шпаргалка «как построить дом» с отметками
+        public List<(int kind, string name, string cost)> BuildPieces = new();   // меню плана
         public bool OpenCraft;          // открыть крафт (E у верстака)
         public bool HasZone;            // зона столба под курсором (клетка столба, радиус World.ClaimRadius)
         public (int i, int j) ZoneCell;
@@ -264,6 +266,13 @@ namespace Rastvordd.Sim
             snap.Self = BuildSelf(me);
             snap.Self.Place = World.MonumentAt(me.Pos)?.Name;
             snap.Self.Ui = World.BuildUi(me);
+            if (!me.Dead && me.Held?.Id is "build_plan" or "tool_hammer" or "deploy_claim") snap.Self.BuildGuide = BuildGuide(me);
+            if (!me.Dead && me.Held?.Def?.Build == true)
+                for (int k = 0; k <= (int)StructKind.Door; k++)
+                {
+                    var cost = Building.Cost((StructKind)k, k == (int)StructKind.Door ? 1 : 0);
+                    snap.Self.BuildPieces.Add((k, Building.KindName((StructKind)k), string.Join(", ", System.Array.ConvertAll(cost, c => $"{Items.Name(c.id)} {c.n}"))));
+                }
             snap.Self.OpenCraft = me.WantsCraftMenu;
             me.WantsCraftMenu = false;
             foreach (var d in World.Deployables) if (d.Kind == DeployKind.Claim && d.Auth.Contains(me.Id)) { snap.Self.Home = d.Pos; break; }
@@ -397,7 +406,7 @@ namespace Rastvordd.Sim
                 var cost = Building.Cost(me.BuildPiece, me.BuildPiece == StructKind.Door ? 1 : 0);
                 string price = string.Join(", ", System.Array.ConvertAll(cost, c => $"{Items.Name(c.id)} {c.n}"));
                 if (string.IsNullOrEmpty(s.InteractHint))
-                    s.InteractHint = $"{Building.KindName(me.BuildPiece)} · {price} · R — другой элемент{(s.BuildOk ? "" : " · " + why)}";
+                    s.InteractHint = $"{Building.KindName(me.BuildPiece)} · {price} · ПКМ — выбрать элемент{(s.BuildOk ? "" : " · " + why)}";
             }
             else if (!me.Dead && held?.Id == "tool_hammer" && World.TargetStructure(me, 2f) is Structure t && string.IsNullOrEmpty(s.InteractHint))
             {
@@ -414,7 +423,7 @@ namespace Rastvordd.Sim
 
         string Hint((World.InteractKind kind, object target) it) => it.kind switch
         {
-            World.InteractKind.Bag => ((LootBag)it.target).IsCrate ? "[E] Залутать ящик" : "[E] Залутать",
+            World.InteractKind.Bag => ((LootBag)it.target).IsCrate ? "[E] Открыть ящик" : "[E] Открыть рюкзак",
             World.InteractKind.Pickup => ((Pickup)it.target).Kind switch
             {
                 PickupKind.Hemp => "[E] Собрать коноплю",
@@ -422,12 +431,45 @@ namespace Rastvordd.Sim
                 _ => "[E] Попить",
             },
             World.InteractKind.Furnace => FurnaceHint((Deployable)it.target),
-            World.InteractKind.Workbench => "[E] Верстак",
-            World.InteractKind.Box => ((Deployable)it.target).Storage.Empty ? "[E] Ящик (пуст) · Alt+E — сложить" : $"[E] Забрать из ящика ({((Deployable)it.target).Storage.Items.Count} шт.) · Alt+E — сложить",
+            World.InteractKind.Workbench => "[E] Верстак — крафт",
+            World.InteractKind.Box => ((Deployable)it.target).Storage.Empty ? "[E] Ящик (пуст)" : $"[E] Ящик ({((Deployable)it.target).Storage.Items.Count} шт.)",
             World.InteractKind.Claim => ClaimHint(World, (Deployable)it.target),
             World.InteractKind.Door => (((Structure)it.target).Open ? "[E] Закрыть дверь" : "[E] Открыть дверь") + (((Structure)it.target).Locked ? " · замок" : ""),
             _ => "",
         };
+
+        /// <summary>Шпаргалка по шагам: что уже сделано на твоей базе.</summary>
+        string BuildGuide(Actor me)
+        {
+            Deployable claim = null;
+            foreach (var d in World.Deployables) if (d.Kind == DeployKind.Claim && d.OwnerId == me.Id) { claim = d; break; }
+            int found = 0, walls = 0, doorways = 0, doors = 0, locked = 0, weak = 0, total = 0;
+            if (claim != null)
+                foreach (var s in World.Structures)
+                {
+                    if (s.ClaimId != claim.Id) continue;
+                    total++;
+                    if (s.Tier == 0) weak++;
+                    switch (s.Kind)
+                    {
+                        case StructKind.Foundation: found++; break;
+                        case StructKind.Wall: case StructKind.Window: walls++; break;
+                        case StructKind.Doorway: doorways++; break;
+                        case StructKind.Door: doors++; if (s.Locked) locked++; break;
+                    }
+                }
+            float hours = claim != null ? World.ClaimHoursLeft(claim) : 0;
+            string L(bool done, string text) => (done ? "[x] " : "[ ] ") + text;
+            return "КАК ПОСТРОИТЬ ДОМ\n" +
+                L(claim != null, "Шкаф: возьми его в руки, ЛКМ по земле") + "\n" +
+                L(found >= 1, $"Фундаменты: План в руки, ПКМ → Фундамент, ЛКМ ({found})") + "\n" +
+                L(walls >= 3, $"Стены по краям фундаментов: ПКМ → Стена ({walls})") + "\n" +
+                L(doorways >= 1, "Дверной проём вместо одной стены") + "\n" +
+                L(doors >= 1, "Дверь в проём: ПКМ → Дверь, ЛКМ по проёму") + "\n" +
+                L(locked >= 1, "Замок (крафт Q) — в руки, ЛКМ по двери") + "\n" +
+                L(total > 0 && weak == 0, "Киянкой ЛКМ: каркас → дерево → камень") + "\n" +
+                L(hours >= 1, $"Ресурсы в шкаф (E), иначе сгниёт ({hours:0.0} ч)");
+        }
 
         string BuildStatus(Deployable c, Actor me)
         {

@@ -914,6 +914,7 @@ namespace Rastvordd.Sim
             var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = rad };   // столб тонкий, спальник плоский, ящик компактный
             if (def.Deploy == DeployKind.Box) dep.Storage = new LootBag { Id = NextId(), Pos = at };
             dep.Auth.Add(a.Id);
+            if (def.Deploy == DeployKind.Furnace && !a.IsBot) dep.On = false;   // игрок зажигает сам в окне печи
             AddDeployable(dep);
             // фундаменты без столба в его зоне — привязываются к нему
             if (def.Deploy == DeployKind.Claim)

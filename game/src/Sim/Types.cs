@@ -44,6 +44,13 @@ namespace Rastvordd.Sim
         public bool Auto;
         public float NoiseRadius;
 
+        // отдача: ствол уводит в сторону по узору (знаки по очереди выстрелов), с нарастанием; мышкой компенсируется
+        public float RecoilDeg;            // увод за первый выстрел очереди
+        public float RecoilGrowDeg;        // прибавка за каждый следующий
+        public float RecoilMaxDeg = 20;
+        public float RecoilRecoverDeg = 35; // возврат, когда не стреляешь (град/с)
+        public int[] RecoilPattern;        // знаки увода: 1 — по часовой, −1 — против; null — случайно
+
         // ближний бой и добыча
         public bool Melee;
         public float MeleeArcDeg = 90;
@@ -70,6 +77,9 @@ namespace Rastvordd.Sim
         public int Ammo;
         public float Cooldown;
         public float Bloom;
+        public float Recoil;        // текущий увод ствола, градусы
+        public int Streak;          // выстрелов в текущей очереди
+        public float SinceShot = 10;
         public float ReloadLeft;   // > 0 — идёт перезарядка
         public WeaponState(WeaponDef def, int ammo) { Def = def; Ammo = ammo; }
     }
@@ -155,14 +165,17 @@ namespace Rastvordd.Sim
             {
                 Id = "weapon_pipe", AmmoId = "ammo_pistol",
                 Damage = 22, FireInterval = 0.2f, Magazine = 10, ReloadTime = 1.7f,
-                BaseSpreadDeg = 2.5f, BloomPerShotDeg = 2f, MaxBloomDeg = 9f, BloomRecoverDeg = 14f,
+                BaseSpreadDeg = 2.5f, BloomPerShotDeg = 2.5f, MaxBloomDeg = 11f, BloomRecoverDeg = 14f,
+                RecoilDeg = 3.2f, RecoilGrowDeg = 0.4f, RecoilMaxDeg = 12f, RecoilRecoverDeg = 28f,
                 BulletSpeed = 110, Range = 40, Auto = false, NoiseRadius = 45,
             };
             Add("weapon_ak", "Калаш", ItemCategory.Weapon).Weapon = new WeaponDef
             {
                 Id = "weapon_ak", AmmoId = "ammo_rifle",
                 Damage = 30, FireInterval = 0.12f, Magazine = 30, ReloadTime = 2.5f,
-                BaseSpreadDeg = 1.2f, BloomPerShotDeg = 1.1f, MaxBloomDeg = 8f, BloomRecoverDeg = 11f,
+                BaseSpreadDeg = 1.2f, BloomPerShotDeg = 2.0f, MaxBloomDeg = 13f, BloomRecoverDeg = 11f,
+                RecoilDeg = 1.6f, RecoilGrowDeg = 0.22f, RecoilMaxDeg = 26f, RecoilRecoverDeg = 32f,
+                RecoilPattern = new[] { 1, 1, -1, 1, -1, -1, -1, 1, 1, 1, -1, -1, 1, -1, -1, 1 },
                 BulletSpeed = 150, Range = 65, Auto = true, NoiseRadius = 70,
             };
 

@@ -621,6 +621,13 @@ namespace Rastvordd.Sim
             var wd = w.Def;
             w.Cooldown -= Dt;
             w.Bloom = MathF.Max(0, w.Bloom - wd.BloomRecoverDeg * Dt);
+            // отпустил курок — ствол возвращается, очередь сбрасывается
+            w.SinceShot += Dt;
+            if (w.SinceShot > wd.FireInterval * 1.6f)
+            {
+                w.Recoil = MathF.Sign(w.Recoil) * MathF.Max(0, MathF.Abs(w.Recoil) - wd.RecoilRecoverDeg * Dt);
+                if (w.SinceShot > 0.35f) w.Streak = 0;
+            }
 
             if (wd.Melee)
             {
@@ -665,7 +672,17 @@ namespace Rastvordd.Sim
             w.Bloom = MathF.Min(wd.MaxBloomDeg, w.Bloom + wd.BloomPerShotDeg);
             // разброс: сумма двух случайных — чаще ближе к центру
             float r = ((float)Rng.NextDouble() + (float)Rng.NextDouble() - 1f) * 0.5f;
-            float ang = a.Facing + r * spreadDeg * MathF.PI / 180f;
+            float ang = a.Facing + (w.Recoil + r * spreadDeg) * MathF.PI / 180f;
+            // увод ствола следующим выстрелам: по узору ствола, с нарастанием; в приседе меньше, на ходу больше
+            if (wd.RecoilDeg > 0)
+            {
+                int sign = wd.RecoilPattern != null ? wd.RecoilPattern[w.Streak % wd.RecoilPattern.Length] : (Rng.Next(2) == 0 ? -1 : 1);
+                float step = (wd.RecoilDeg + wd.RecoilGrowDeg * w.Streak) * sign + ((float)Rng.NextDouble() - 0.5f) * 0.8f;
+                step *= (a.Crouching ? 0.7f : 1f) * (a.Vel.Length() > 0.5f ? 1.3f : 1f);
+                w.Recoil = Math.Clamp(w.Recoil + step, -wd.RecoilMaxDeg, wd.RecoilMaxDeg);
+            }
+            w.Streak++;
+            w.SinceShot = 0;
             var dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
             var muzzle = a.Pos + dir * (a.Radius + 0.35f);
             Projectiles.Add(new Projectile
@@ -754,7 +771,7 @@ namespace Rastvordd.Sim
             var w = a.Weapon;
             if (w == null || w.Def.Melee) return 0;
             float moving = a.Vel.Length() / WalkSpeed;
-            float spread = w.Def.BaseSpreadDeg + w.Bloom + MathF.Min(1.5f, moving) * 3f;
+            float spread = w.Def.BaseSpreadDeg + w.Bloom + MathF.Min(1.5f, moving) * 5f;   // на ходу заметно хуже
             return spread * (1f - 0.35f * a.Peek) * (a.Crouching ? 0.75f : 1f);   // в приседе точнее
         }
 

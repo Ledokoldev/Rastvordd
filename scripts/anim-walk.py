@@ -25,6 +25,7 @@ FRAME = 64
 PX_PER_M = 32
 
 POSITIVE = ("The same person walks in place on a treadmill with a steady natural walking cycle, legs stepping and arms swinging slightly, "
+            "the body keeps exactly the same diagonal orientation as in the first frame for the whole video, the torso and head never rotate toward the camera, "
             "full body always visible, the person stays exactly in the center of the frame and does not turn, the camera is completely static, "
             "plain flat solid green background, no shadow, even lighting.")
 NEGATIVE = ("camera movement, zoom, pan, walking out of frame, turning around, changing clothes, extra people, extra limbs, deformed, blurry, "
@@ -107,6 +108,13 @@ def pick_cycle(frames: list, want: int = 6) -> list:
         return sum(i * v for i, v in enumerate(h))
 
     start = 2   # первые кадры часто «разгоняются»
+    # отбрасываем кадры, где верх тела (голова/плечи) сильно отличается от первого — значит, развернулся
+    top = [f.convert("L").resize((48, 64)).crop((0, 0, 48, 28)) for f in frames]
+    base = sum(i * v for i, v in enumerate(ImageChops.difference(top[start], top[start + 1]).histogram()))
+    ok = [k for k in range(len(frames)) if k <= start or sum(i * v for i, v in enumerate(ImageChops.difference(top[start], top[k]).histogram())) < base * 6]
+    if len(ok) >= want + 4:
+        frames = [frames[k] for k in ok]
+        small = [small[k] for k in ok]
     best, best_d = len(frames) - 1, float("inf")
     for j in range(start + 6, len(frames)):
         d = diff(small[start], small[j])
@@ -141,7 +149,8 @@ def to_sprite(frames: list, h_m: float = 1.8) -> list:
 def main() -> None:
     sheet_id = sys.argv[1] if len(sys.argv) > 1 else "char_naked"
     only_process = "--only-process" in sys.argv
-    for row in (0, 1):
+    rows = (0,) if "--front" in sys.argv else (1,) if "--back" in sys.argv else (0, 1)
+    for row in rows:
         tag = "fb"[row]
         raw_dir = ROOT / "assets" / "gen" / "anim" / f"{sheet_id}_walk_{tag}"
         if not only_process:

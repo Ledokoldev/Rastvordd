@@ -16,6 +16,7 @@ namespace Rastvordd.Client
         MapInfo _map;
         DecalLayer _decals;
         FootstepLoop _steps;
+        float _shake;   // тряска камеры от своих выстрелов
         Weather _weather;
         VisionRays _rays;
         readonly Dictionary<int, float> _stepAcc = new();
@@ -362,6 +363,7 @@ namespace Rastvordd.Client
                     case SimEventKind.Shot:
                         if (e.Text != "weapon_bow") Flash(e.Pos + e.Dir * 0.3f, new Color(1, 0.8f, 0.4f), 7, 0.06f, true);
                         if (_actorViews.TryGetValue(e.ActorId, out var shooter)) shooter.Kick();
+                        if (e.ActorId == _myId && e.Text != "weapon_bow") _shake = Mathf.Min(1.5f, _shake + 0.6f);
                         if (e.Text != "weapon_bow") SpawnCasing(e.Pos, e.Dir);
                         // настоящий сэмпл выстрела для всего огнестрела (самопал — чуть выше и тише); каждый доигрывает до конца
                         if (e.Text == "weapon_bow") Sfx.Play("shot_bow", Iso.Px(e.Pos), -4, 25, 0.06f);
@@ -546,6 +548,7 @@ namespace Rastvordd.Client
                     if (d.LengthSquared() > 0.04f) facing = Mathf.Atan2(d.Y, d.X);
                     _selfPx = Iso.Px(pos);
                 }
+                view.RecoilRad = Mathf.DegToRad(a.RecoilDeg);
                 view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId, a.Crouching);
                 if (a.Id == _myId)
                 {
@@ -717,6 +720,9 @@ namespace Rastvordd.Client
             var halfWorld = GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X;
             var target = _selfPx + _screenDir * halfWorld * (0.35f * _peek) + new Vector2(0, -Iso.H(1f));
             _cam.Position = _frame <= 2 ? target : _cam.Position.Lerp(target, 1 - Mathf.Exp(-8 * dt));
+            _shake = Mathf.MoveToward(_shake, 0, dt * 6f);
+            if (_shake > 0.01f) _cam.Offset = new Vector2(_fxRng.RandfRange(-1, 1), _fxRng.RandfRange(-1, 1)) * 2.5f * _shake;
+            else _cam.Offset = Vector2.Zero;
             float zoomTarget = _zoom * (1f - 0.1f * _peek);   // в прицеливании камера чуть отдаляется
             var z = _cam.Zoom.X + (zoomTarget - _cam.Zoom.X) * (1 - Mathf.Exp(-10 * dt));
             _cam.Zoom = new Vector2(z, z);

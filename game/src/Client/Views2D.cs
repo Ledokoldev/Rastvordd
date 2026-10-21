@@ -61,6 +61,9 @@ namespace Rastvordd.Client
         /// <summary>Выстрел: ствол дёргается назад и подкидывается.</summary>
         public void Kick() => _kick = 1f;
 
+        /// <summary>Увод ствола от отдачи (радианы) — оружие в руках поворачивается туда, куда реально полетят пули.</summary>
+        public float RecoilRad;
+
         /// <summary>Начало перезарядки: наклон, магазин выпадает, кисть за новым, возврат.</summary>
         public void StartReload(float duration)
         {
@@ -156,7 +159,7 @@ namespace Rastvordd.Client
             }
             else _reloadDur = 0;
 
-            _held.Rotation = facing + swingOffset + kickUp + tilt * side;
+            _held.Rotation = facing + RecoilRad + swingOffset + kickUp + tilt * side;
             _held.Scale = new Vector2(1, right ? 1 : -1);
             var basePos = new Vector2(right ? 2 : -2, -Iso.H(1.05f) * (crouch ? 0.78f : 1f) + (_body.Moving ? -Mathf.Abs(Mathf.Sin(_body.Phase)) : 0));
             _held.Position = (basePos - new Vector2(Mathf.Cos(facing), Mathf.Sin(facing)) * kickBack).Round();

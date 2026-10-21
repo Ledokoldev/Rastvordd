@@ -19,6 +19,18 @@ namespace Rastvordd.Client
         readonly Node2D _flatParent, _sortedParent;
         readonly Dictionary<(int, int), List<Node2D>> _chunks = new();
 
+        /// <summary>Где декору не место (пол построек). Проверяется при создании и в RefreshBlocked.</summary>
+        public System.Func<SVec, bool> Blocked;
+
+        /// <summary>Постройки поменялись: прячем декор на полу, возвращаем там, где пол сломали.</summary>
+        public void RefreshBlocked()
+        {
+            if (Blocked == null) return;
+            foreach (var list in _chunks.Values)
+                foreach (var n in list)
+                    n.Visible = !Blocked(new SVec(n.Position.X / Iso.PPM, n.Position.Y / Iso.PPM));
+        }
+
         static readonly string[] Flat = { "decal_pebbles", "decal_leaves", "decal_puddle", "decal_debris" };
 
         // крупные куртины травы своего цвета в каждом биоме (мелкие декали в пикселе были кляксами)
@@ -98,6 +110,7 @@ namespace Rastvordd.Client
                     Material = set == null ? VisionFx.ObjectMat : (texPath.StartsWith("grass/") || texPath.StartsWith("plants/") || texPath.Contains("flowers_") ? VisionFx.GrassMat : VisionFx.ObjectMat),
                     Modulate = new Color(1, 1, 1, flat ? 0.85f : 1f) * (0.9f + rng.Randf() * 0.15f),
                 };
+                if (Blocked != null && Blocked(p)) s.Visible = false;   // на полу постройки
                 (flat ? _flatParent : _sortedParent).AddChild(s);
                 list.Add(s);
             }

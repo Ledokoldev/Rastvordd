@@ -84,6 +84,9 @@ namespace Rastvordd.Client
 
         readonly HashSet<(int, int)> _floors = new();
 
+        /// <summary>Точка на полу (фундаменте) постройки.</summary>
+        public bool OnFloor(SVec p) => _floors.Contains(Building.CellOf(p));
+
         void RebuildOccluders()
         {
             _floors.Clear();

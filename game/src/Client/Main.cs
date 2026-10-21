@@ -954,7 +954,12 @@ namespace Rastvordd.Client
 
             // постройки: виды, тени обзора, прозрачность стен перед персонажем, призрак плана
             _build ??= new BuildLayer(_world);
-            if (_build.Sync(_cur.Structures, _cur.StructVersion) && _rays != null) { _rays.Dynamic.Clear(); _rays.Dynamic.AddRange(_build.Occluders); }
+if (_build.Sync(_cur.Structures, _cur.StructVersion))
+            {
+                if (_rays != null) { _rays.Dynamic.Clear(); _rays.Dynamic.AddRange(_build.Occluders); }
+                _decals.Blocked ??= _build.OnFloor;
+                _decals.RefreshBlocked();
+            }
             _build.UpdateFade(_selfPx, dt);
             if (_bghost == null) { _bghost = new BuildGhost2D(); _world.AddChild(_bghost); }
             _bghost.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_hud.CraftOpen;

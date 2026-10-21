@@ -87,7 +87,7 @@ namespace Rastvordd.Client
             var dir = new Vector2(Mathf.Cos(_facing), Mathf.Sin(_facing));
             var perp = new Vector2(-dir.Y, dir.X);
             DrawColoredPolygon(new[] { mp + dir * 10, mp - dir * 6 + perp * 6, mp - dir * 3, mp - dir * 6 - perp * 6 }, new Color(1f, 0.35f, 0.25f));
-            DrawString(font, origin + new Vector2(8, side - 10), "M — закрыть карту", HorizontalAlignment.Left, -1, 13, new Color(0.9f, 0.9f, 0.85f));
+            DrawString(font, origin + new Vector2(8, side - 10), "G или Esc — закрыть карту", HorizontalAlignment.Left, -1, 13, new Color(0.9f, 0.9f, 0.85f));
         }
     }
 }

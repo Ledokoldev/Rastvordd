@@ -434,9 +434,12 @@ else if (arg == "--atcrate")
                         Input.MouseMode = _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
                         break;
                     case Key.Tab: _invOpen = !_invOpen; if (!_invOpen && _cur.Self.Ui != null) _uiReq = (UiOp.Close, null, 0); break;
-                    case Key.M: _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); break;
+                    case Key.G: _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); break;
                     case Key.F5: SaveWorld(); _hud.Toast("Мир сохранён"); break;
                     case Key.F12: SaveScreenshot($"user://shot_{Time.GetTicksMsec()}.png"); break;
+                    case Key.Escape when _mapView.Visible:
+                        _mapView.Visible = false;
+                        break;
                     case Key.Escape when _inv.Visible:
                         _invOpen = false;
                         if (_cur.Self.Ui != null) _uiReq = (UiOp.Close, null, 0);

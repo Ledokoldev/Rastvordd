@@ -124,7 +124,7 @@ namespace Rastvordd.Client
             DrawRect(box, new Color(1, 1, 1, 0.25f), false, 1);
             DrawString(font, new Vector2(Side / 2 - 4, 13), "С", HorizontalAlignment.Left, -1, 11, new Color(1, 1, 1, 0.7f));
 
-            string cap = (_place ?? "") + (_place != null ? "  ·  " : "") + "M — карта";
+            string cap = (_place ?? "") + (_place != null ? "  ·  " : "") + "G — карта";
             var cs = font.GetStringSize(cap, HorizontalAlignment.Left, -1, 12);
             DrawString(font, new Vector2(Side - cs.X + 1, Side + 15), cap, HorizontalAlignment.Left, -1, 12, new Color(0, 0, 0, 0.9f));
             DrawString(font, new Vector2(Side - cs.X, Side + 14), cap, HorizontalAlignment.Left, -1, 12, UiTheme.Ink);

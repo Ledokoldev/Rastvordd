@@ -64,14 +64,15 @@ namespace Rastvordd.Sim
 
         void Perceive()
         {
-            _threat = Threat();
+            _threat = Threat() ?? RememberedFoe();   // спрятался — не значит, что ушёл
+            PerceiveFoe();
             _load = CarriedValue();
             _stash = StashValue();
             Aggression = Archetype == BotArchetype.Roamer ? 0.6f + 0.4f * (1 - _caution) : 0.2f + 0.3f * (1 - _caution);
             // слух: выстрелы и взрывы прошлого тика
             foreach (var e in _w.Events)
             {
-                if (e.ActorId == _me.Id) continue;
+                if (e.ActorId == _me.Id || e.ActorId == _foe?.Id) continue;   // выстрелы того, с кем дерусь, — не «чужой бой»
                 bool expl = e.Kind == SimEventKind.Explosion;
                 if (e.Kind != SimEventKind.Shot && !expl) continue;
                 if (Vector2.Distance(e.Pos, _me.Pos) > HearRange(e.Text, expl)) continue;
@@ -139,8 +140,8 @@ namespace Rastvordd.Sim
         {
             _goals = new List<Goal>
             {
-                new() { Name = "бегство", Score = () => _fleeTime > 0 || (_threat != null && !CanFight(_threat)) ? 100 : 0, Act = Flee },
-                new() { Name = "бой", Score = () => _threat != null && CanFight(_threat) ? 95 * Math.Max(W("бой"), 0.5f) : 0, Act = (ref InputCmd c) => { Hunt(_threat, ref c); return true; } },
+                new() { Name = "бегство", Score = () => _fleeTime > 0 || (_threat != null && !CanFight(_threat)) ? 100 : 0, Act = Retreat },
+                new() { Name = "бой", Score = () => _threat != null && CanFight(_threat) ? 95 * Math.Max(W("бой"), 0.5f) : 0, Act = (ref InputCmd c) => { Combat(_threat, ref c); return true; } },
                 new() { Name = "антирейд", Score = () => AntiRaidScore() * W("антирейд"), Act = AntiRaid },
                 new() { Name = "охота", Score = () => (W("охота") > 0 && PickPrey() != null ? 85 : 0) * W("охота"), Act = (ref InputCmd c) => { if (_prey == null) return false; Hunt(_prey, ref c); return true; } },
                 new() { Name = "нужды", Score = () => NeedsUrgency() * 70, Act = Needs },
@@ -178,30 +179,11 @@ namespace Rastvordd.Sim
 
         // ---------- бой и бегство ----------
 
-        /// <summary>Драться или бежать: дальнобойное, не слабее, не ранен; роумер смелее.</summary>
+        /// <summary>Драться или отходить: причина отхода (HP, патроны, его оружие, проигранный размен) — в _loseWhy.</summary>
         bool CanFight(Actor t)
         {
-            float d = Vector2.Distance(t.Pos, _me.Pos);
-            bool hitMe = _me.LastAttacker == t.Id && _w.Time - _me.LastDamagedTime < 4f;
-            float edge = MyPower - KitPower(t) + (Archetype == BotArchetype.Roamer ? 0.1f : 0) + (_me.Hp - t.Hp) / 400f;
-            if (_me.Hp < 40) return false;
-            if (Ranged() != null) return edge >= 0 && d < 35;
-            return hitMe && edge > 0.1f && d < 6;   // с копьём — только если сам полез и он слабее
-        }
-
-        bool Flee(ref InputCmd cmd)
-        {
-            if (_threat != null) _fleeTime = 3f + 4f * _caution;
-            _fleeTime -= World.Dt;
-            Doing = "убегает";
-            var from = _threat?.Pos ?? _me.Pos - _me.FacingDir;
-            var away = _me.Pos - from;
-            if (away.LengthSquared() < 0.01f) away = Vector2.UnitX;
-            cmd.Move = Avoid(Vector2.Normalize(away));
-            cmd.Sprint = true;
-            cmd.Aim = _me.Pos + Vector2.Normalize(away) * 3;
-            if (_me.Hp < 60) cmd.Heal = true;
-            return true;
+            _loseWhy = LosingReason(t);
+            return _loseWhy == null;
         }
 
         // ---------- нужды ----------
@@ -332,6 +314,7 @@ namespace Rastvordd.Sim
                 if (a == _me || a.Dead || a.Spectator || a.Team == Team.Npc) continue;
                 float d = Vector2.Distance(a.Pos, _me.Pos);
                 bool hitMe = _me.LastAttacker == a.Id && _w.Time - _me.LastDamagedTime < 5f;
+                if (!hitMe && _preyIgnore.TryGetValue(a.Id, out float until) && _w.Time < until) continue;   // бросил погоню — пока не трогать
                 if (!hitMe && (loaded || d > 45 || MyPower < 0.4f || KitPower(a) > MyPower + 0.05f)) continue;   // без копья/лука первым не лезет
                 if (!_w.HasLineOfSight(_me.Pos, a.Pos)) continue;
                 if (d < best) { best = d; _prey = a; }

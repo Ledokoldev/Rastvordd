@@ -738,15 +738,15 @@ namespace Rastvordd.Sim
         float _preyTimer, _aimDrift, _roamBest = float.MaxValue, _roamStuck;
         Vector2 _roamTo;
 
-        /// <summary>Сила «кита» на глаз: что в руках (огнестрел > лук > копьё > инструменты > камень).</summary>
+        /// <summary>Сила «кита» на глаз: что в руках (калаш > самопал > лук > копьё > инструменты > камень).</summary>
         static float KitPower(Actor a)
         {
             var id = a.Held?.Id;
-            if (a.Weapon != null && !a.Weapon.Def.Melee) return id == "weapon_bow" ? 0.6f : 1f;
+            if (a.Weapon != null && !a.Weapon.Def.Melee) return id == "weapon_bow" ? 0.6f : id == "weapon_pipe" ? 0.8f : 1f;
             return id switch { "weapon_spear" => 0.4f, "tool_hatchet" or "tool_pickaxe" => 0.25f, _ => 0.1f };
         }
 
-        float MyPower => Ranged() is string g ? (g == "weapon_bow" ? 0.6f : 1f) : Has("weapon_spear") ? 0.4f : 0.15f;
+        float MyPower => Ranged() is string g ? GunPower(g) : Has("weapon_spear") ? 0.4f : 0.15f;
 
         /// <summary>Лучшее дальнобойное с боезапасом: калаш, самопал, лук.</summary>
         string Ranged()
@@ -760,36 +760,8 @@ namespace Rastvordd.Sim
             return null;
         }
 
-        void Hunt(Actor prey, ref InputCmd cmd)
-        {
-            var to = prey.Pos - _me.Pos;
-            float d = to.Length();
-            var dir = d > 0.01f ? to / d : Vector2.UnitX;
-            string gun = d > 3.5f ? Ranged() : null;
-            Doing = $"{(Archetype == BotArchetype.Roamer ? "охотится на" : "отбивается от")} {prey.Name}";
-            if (gun != null)
-            {
-                if (!Hold(gun, ref cmd)) return;
-                var st = _me.Belt[SlotOf(gun)].State;
-                if (st != null && st.Ammo <= 0 && st.ReloadLeft <= 0) { cmd.Reload = Click2(); return; }   // пусто — перезарядка
-                // держит дистанцию 8–14 м и стрейфится
-                var side = new Vector2(-dir.Y, dir.X) * (MathF.Sin(_w.Time * 0.9f + _me.Id) > 0 ? 1 : -1);
-                var move = side * 0.6f + (d > 14 ? dir : d < 8 ? -dir * 0.7f : Vector2.Zero);
-                cmd.Move = move.LengthSquared() > 0.01f ? Avoid(Vector2.Normalize(move)) : Vector2.Zero;
-                _aimDrift = _aimDrift * 0.95f + ((float)_rng.NextDouble() - 0.5f) * 0.25f;
-                cmd.Aim = prey.Pos + prey.Vel * (d / 45f) + new Vector2(-dir.Y, dir.X) * _aimDrift * d * 0.06f;
-                cmd.Peek = 1;
-                bool auto = st?.Def.Auto ?? false;
-                cmd.Fire = _w.HasLineOfSight(_me.Pos, prey.Pos) && (auto ? MathF.Sin(_w.Time * 3f + _me.Id) > -0.3f : Click2());   // автомат — очередями
-                return;
-            }
-            // копьё: вплотную
-            string melee = Has("weapon_spear") ? "weapon_spear" : Has("tool_hatchet") ? "tool_hatchet" : "tool_rock";
-            if (!Hold(melee, ref cmd)) return;
-            cmd.Aim = prey.Pos;
-            if (d > 1.8f) { cmd.Move = Avoid(dir); cmd.Sprint = d > 6; }
-            else cmd.Fire = true;
-        }
+        /// <summary>Охота и отбивание: дальний бой с укрытиями и пиками (PlayerBot.Combat.cs), без ствола — вплотную.</summary>
+        void Hunt(Actor prey, ref InputCmd cmd) => Combat(prey, ref cmd);
 
         /// <summary>Дойти до точки: маршрут A* сам ведёт через свои двери (откроет и закроет).</summary>
         bool GoTo(Vector2 p, float tol, ref InputCmd cmd) => MoveTo(p, tol, ref cmd);

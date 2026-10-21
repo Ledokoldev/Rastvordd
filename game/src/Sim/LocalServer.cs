@@ -256,6 +256,12 @@ namespace Rastvordd.Sim
             }
             int shown = World.Milestones.Count;
             var thoughtsShown = new Dictionary<int, int>();
+            var duelArg = System.Array.Find(System.Environment.GetCommandLineArgs(), a => a.StartsWith("--duel="));
+            if (duelArg != null)
+            {
+                var k = duelArg.Substring(7).Split(':');
+                _duel = new DuelState { KitA = DuelGun(k[0]), KitB = DuelGun(k.Length > 1 ? k[1] : k[0]) };
+            }
             for (int t = 0; t < ticks; t++)
             {
                 if (focusId >= 0) _pending[focusId] = InputCmd.Empty;
@@ -268,6 +274,7 @@ namespace Rastvordd.Sim
                     for (int k = System.Math.Max(0, b.Thoughts.Count - fresh); k < b.Thoughts.Count; k++) log($"МЫСЛЬ {b.Me.Name}: {b.Thoughts[k]}");
                     thoughtsShown[b.Me.Id] = b.ThoughtTotal;
                 }
+                if (_duel != null) DuelStep(log);
                 if (RaidKitAt >= 0 && World.Time >= RaidKitAt)
                 {
                     RaidKitAt = -1;
@@ -285,6 +292,104 @@ namespace Rastvordd.Sim
                     foreach (var b in _bots.Values)
                         log($"[{World.Time,6:0}s] {b.Me.Name} @({b.Me.Pos.X:0.0};{b.Me.Pos.Y:0.0}) {b.Debug}: {b.Doing} · HP {b.Me.Hp:0} · дерево {b.Me.Count("wood")} камень {b.Me.Count("stone")} металл {b.Me.Count("metal_fragments")} лом {b.Me.Count("scrap")} · изучено {b.Me.Known.Count} · E→{World.NearestInteract(b.Me).kind} · построек {World.Structures.FindAll(s => s.OwnerId == b.Me.Id).Count} · {World.LastInfo.GetValueOrDefault(b.Me.Id)}");
             }
+
+            // итог боёв: укрытия, пики, перезарядки, отходы (счётчики PlayerBot.CombatStats)
+            if (_duel != null) log($"ДУЭЛЬ итог: {_duel.KitA} {_duel.WinA} — {_duel.KitB} {_duel.WinB}, ничьих {_duel.Draw}, раундов {_duel.Round}");
+            foreach (var b in _bots.Values)
+            {
+                var parts = new List<string>();
+                foreach (var kv in b.CombatStats) parts.Add($"{kv.Key} {kv.Value}");
+                log($"БОЙ-СТАТ {b.Me.Name}: {(parts.Count > 0 ? string.Join(", ", parts) : "боёв не было")}");
+            }
+        }
+
+        // ---------- отладка боя: --duel=ak:pipe ----------
+
+        /// <summary>
+        /// Дуэль ботов (этап 3 мозга): первый бот (фермер) и третий (бродяга) получают оружие по --duel=ak:pipe
+        /// (ak, pipe, bow, spear) и встают в 18 м друг от друга на поле с камнями и деревьями, подальше от РТ и баз.
+        /// Раунд — до смерти или 100 с, затем новое поле. Сохранение игрока не трогает (обычный отладочный прогон).
+        /// </summary>
+        sealed class DuelState { public string KitA, KitB; public int Round, WinA, WinB, Draw; public float NextAt = 20, EndAt = -1, StartAt; }
+        DuelState _duel;
+        readonly System.Random _duelRng = new(7);
+        readonly List<ResourceNode> _duelNodes = new();
+
+        static string DuelGun(string k) => k switch { "ak" => "weapon_ak", "pipe" => "weapon_pipe", "bow" => "weapon_bow", "spear" => "weapon_spear", _ => k };
+
+        void DuelStep(System.Action<string> log)
+        {
+            var d = _duel;
+            PlayerBot a = null, b = null;
+            int i = 0;
+            foreach (var bot in _bots.Values) { if (i == 0) a = bot; if (i == 2) b = bot; i++; }
+            if (a == null || b == null) return;
+            if (d.EndAt > 0)
+            {
+                if (!a.Me.Dead && !b.Me.Dead && World.Time < d.EndAt) return;
+                string res;
+                if (a.Me.Dead && b.Me.Dead) { res = "оба мертвы"; d.Draw++; }
+                else if (a.Me.Dead) { res = $"победил {b.Me.Name} ({Items.Name(d.KitB)}, осталось HP {b.Me.Hp:0})"; d.WinB++; }
+                else if (b.Me.Dead) { res = $"победил {a.Me.Name} ({Items.Name(d.KitA)}, осталось HP {a.Me.Hp:0})"; d.WinA++; }
+                else { res = $"ничья по времени (HP {a.Me.Hp:0} / {b.Me.Hp:0})"; d.Draw++; }
+                log($"ДУЭЛЬ раунд {d.Round}: {res} за {World.Time - d.StartAt:0} с");
+                d.EndAt = -1; d.NextAt = World.Time + 8;
+                return;
+            }
+            if (World.Time < d.NextAt) return;
+            // поле: суша, не у РТ и не у баз, вокруг камни и деревья
+            Vector2 c = default, pa = default, pb = default;
+            int cover = 0;
+            for (int k = 0; k < 600; k++)
+            {
+                c = new Vector2((float)(_duelRng.NextDouble() * 2 - 1) * 380, (float)(_duelRng.NextDouble() * 2 - 1) * 380);
+                if (!World.Terrain.IsLand(c) || World.NearMonument(c, 90)) continue;
+                bool nearBase = false;
+                foreach (var dp in World.Deployables) if (dp.Kind == DeployKind.Claim && Vector2.Distance(dp.Pos, c) < 70) nearBase = true;
+                if (nearBase) continue;
+                cover = World.NodesInRadius(c, 16, _duelNodes).Count;
+                if (cover < 4 || cover > 30) continue;
+                float ang = (float)(_duelRng.NextDouble() * System.Math.PI * 2);
+                var dir = new Vector2(System.MathF.Cos(ang), System.MathF.Sin(ang));
+                pa = FreeNear(c - dir * 9); pb = FreeNear(c + dir * 9);
+                if (World.Terrain.IsLand(pa) && World.Terrain.IsLand(pb)) break;
+            }
+            DuelPrepare(a.Me, d.KitA, pa);
+            DuelPrepare(b.Me, d.KitB, pb);
+            d.Round++; d.StartAt = World.Time; d.EndAt = World.Time + 100;
+            log($"ДУЭЛЬ раунд {d.Round}: {a.Me.Name} ({Items.Name(d.KitA)}) против {b.Me.Name} ({Items.Name(d.KitB)}) у ({c.X:0};{c.Y:0}), камней и деревьев рядом {cover}");
+        }
+
+        Vector2 FreeNear(Vector2 p)
+        {
+            for (int r = 0; r < 12; r++)
+                for (int k = 0; k < 8; k++)
+                {
+                    var q = p + new Vector2(System.MathF.Cos(k * 0.785f), System.MathF.Sin(k * 0.785f)) * r * 0.5f;
+                    if (World.IsFree(q, 0.5f)) return q;
+                }
+            return p;
+        }
+
+        void DuelPrepare(Actor x, string gun, Vector2 at)
+        {
+            if (x.Dead) World.RespawnPlayer(x);
+            // убрать стволы и патроны с прошлого раунда (и подобранные с трупа) — раунд идёт ровно с заданным оружием
+            static bool GunOrAmmo(ItemSlot s) => s != null && (s.Def?.Category == ItemCategory.Ammo || (s.Def?.Weapon != null && !s.Def.Weapon.Melee));
+            for (int s = 0; s < Actor.BeltSize; s++) if (GunOrAmmo(x.Belt[s])) x.Belt[s] = null;
+            for (int s = 0; s < Actor.PackSize; s++) if (GunOrAmmo(x.Pack[s])) x.Pack[s] = null;
+            var wd = Items.Get(gun).Weapon;
+            // оружие — сразу в руки (первый слот пояса), чтобы противник его видел
+            for (int s = 0; s < Actor.BeltSize; s++) if (x.Belt[s]?.Id == gun) x.Belt[s] = null;
+            for (int s = 0; s < Actor.PackSize; s++) if (x.Pack[s]?.Id == gun) x.Pack[s] = null;
+            var old = x.Belt[0];
+            x.Belt[0] = Items.NewSlot(gun, wd.Melee ? 0 : wd.Magazine);
+            x.Current = 0;
+            if (old != null) x.AddSlot(old);
+            if (!wd.Melee) x.Add(wd.AmmoId, gun == "weapon_bow" ? 25 : gun == "weapon_pipe" ? 40 : 90);
+            if (x.Count("bandage") < 3) x.Add("bandage", 3 - x.Count("bandage"));
+            x.Hp = x.MaxHp; x.Food = 100; x.Water = 100;
+            x.Pos = at; x.Vel = Vector2.Zero;
         }
 
         /// <summary>Отладка: «рейд» — снять долю прочности со всех построек бота от имени attackerId.</summary>

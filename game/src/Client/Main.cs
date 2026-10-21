@@ -58,6 +58,10 @@ namespace Rastvordd.Client
 
         Node2D _world;
         Camera2D _cam;
+        /// <summary>Стены и пропсы карты (РТ) — для прозрачности заслонов.</summary>
+        readonly List<WallView2D> _mapWalls = new();
+        /// <summary>Отладка (--occl-off): прозрачность только над своим персонажем — как было до D39, для сравнения.</summary>
+        bool _occlSelfOnly;
         float _zoom = 2.0f;
         Hud _hud;
 
@@ -363,6 +367,30 @@ else if (arg == "--atcrate")
                     var p = arg.Substring(6).Split(',');
                     _autoAim = new SVec(float.Parse(p[0], inv), float.Parse(p[1], inv));
                 }
+                else if (arg == "--occl-off") _occlSelfOnly = true;
+                else if (arg.StartsWith("--occl="))
+                {
+                    // отладка перекрытий 3/4: --occl=tree — противник за кроной дерева, --occl=wall — за бетонной стеной склада у ворот.
+                    // В обоих случаях он честно в прямой видимости (луч идёт мимо ствола / через проход), но рисунок его закрывает.
+                    var w = _server.World;
+                    var me = w.Find(_myId);
+                    var foe = w.Actors.Find(a => a.Id != _myId && !a.Spectator && a.Team == Team.Npc) ?? w.Actors.Find(a => a.Id != _myId && !a.Spectator);
+                    SVec foePos;
+                    if (arg.EndsWith("wall")) { foePos = new SVec(16.8f, -5.8f); me.Pos = new SVec(21f, -1.5f); }
+                    else
+                    {
+                        // лиственная роща у склада; противник чуть сбоку от ствола — луч обзора идёт мимо ствола
+                        var at = new SVec(8, 5);
+                        ResourceNode tree = null;
+                        foreach (var n in w.Nodes)
+                            if (n.Kind == NodeKind.Tree && (tree == null || SVec.Distance(n.Pos, at) < SVec.Distance(tree.Pos, at))) tree = n;
+                        foePos = tree.Pos + new SVec(tree.Radius * 0.9f + 0.6f, -0.8f);
+                        me.Pos = tree.Pos + new SVec(0, 3.5f);
+                    }
+                    if (foe != null) { foe.Pos = foePos; foe.Dead = false; }
+                    _autoAim = foePos;
+                    GD.Print($"occl: я {me.Pos}, противник {foe?.Id} {foe?.Name} {foePos}");
+                }
                 else if (arg.StartsWith("--near="))
                 {
                     // встать рядом с ближайшим узлом вида (tree/stone/metal/sulfur) и смотреть на него: --near=tree[,угол°]
@@ -398,7 +426,12 @@ else if (arg == "--atcrate")
 
         void BuildMap(MapInfo map)
         {
-            foreach (var w in map.Walls) _world.AddChild(new WallView2D(w, TerrainView.BiomeAt(map, (w.Min + w.Max) * 0.5f)));
+            foreach (var w in map.Walls)
+            {
+                var v = new WallView2D(w, TerrainView.BiomeAt(map, (w.Min + w.Max) * 0.5f));
+                _world.AddChild(v);
+                _mapWalls.Add(v);
+            }
         }
 
         // ---------- ввод ----------
@@ -996,6 +1029,7 @@ else if (arg == "--atcrate")
             }
             foreach (var kv in _actorViews)
                 if (!seen.Contains(kv.Key)) kv.Value.Visible = false;
+            CollectOcclusionFocus();
 
             // пули
             seen.Clear();
@@ -1049,6 +1083,27 @@ else if (arg == "--atcrate")
             }
         }
 
+        /// <summary>
+        /// Фокусы прозрачности заслонов (Occlusion): свой персонаж, все персонажи из снапшота и пятно у курсора.
+        /// Снапшот содержит только тех, кого игрок честно видит (серверный туман, D32), — спрятанных это не выдаёт.
+        /// </summary>
+        void CollectOcclusionFocus()
+        {
+            var half = GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X + new Vector2(200, 300);   // запас: высокие спрайты выше кадра
+            Occlusion.Begin(new Rect2(_cam.Position - half, half * 2));
+            foreach (var a in _cur.Actors)
+            {
+                if (!_actorViews.TryGetValue(a.Id, out var view) || !view.Visible) continue;
+                if (_occlSelfOnly && a.Id != _myId) continue;
+                Occlusion.AddBody(view.Position, a.Dead);
+            }
+            if (!_cur.Self.Dead && !UiShown && !_occlSelfOnly)
+            {
+                var ground = Iso.Px(_aim);
+                Occlusion.AddCursor(ground - new Vector2(0, Iso.GunH), ground);
+            }
+        }
+
         /// <summary>Ресурсы, пикапы и постройки из снапшота + призрак установки.</summary>
         void RenderWorldObjects(float dt)
         {
@@ -1067,9 +1122,9 @@ else if (arg == "--atcrate")
                 }
                 if (Mathf.Abs(v.Fill - n.Fill) > 0.01f) { v.Fill = n.Fill; v.QueueRedraw(); }
                 v.Tick(dt);
-                // кроны над игроком становятся прозрачными
+                // кроны, за которыми игрок, видимый ему персонаж или курсор, становятся прозрачными
                 if (v is TreeView2D t)
-                    t.SetFade(t.Covers(_selfPx), dt);
+                    t.UpdateOcclusion(dt);
             }
             RemoveMissing(_nodeViews, seen);
 
@@ -1163,6 +1218,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
                 _decals.RefreshBlocked();
             }
             _build.UpdateFade(_selfPx, dt);
+            foreach (var w in _mapWalls) w.UpdateOcclusion(dt);
             if (_bghost == null) { _bghost = new BuildGhost2D(); _world.AddChild(_bghost); }
             _bghost.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_hud.CraftOpen;
             if (_bghost.Visible) { _bghost.Set(_cur.Self.GhostPiece, _cur.Self.GhostPoly, _cur.Self.GhostA, _cur.Self.GhostB, _cur.Self.BuildOk); _bghost.SetZone(_cur.Self.HasZone, _cur.Self.ZoneCell); }

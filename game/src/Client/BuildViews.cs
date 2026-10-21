@@ -143,7 +143,7 @@ namespace Rastvordd.Client
                     }
         }
 
-        /// <summary>Стены, закрывающие персонажа (он стоит за ними), полупрозрачны.</summary>
+        /// <summary>Стены, закрывающие фокусы кадра (свой персонаж, видимые персонажи, курсор — см. Occlusion), полупрозрачны.</summary>
         public void UpdateFade(Vector2 selfPx, float dt)
         {
             // внутри дома (стоим на фундаменте) — стены ниже по экрану поблизости срезаются
@@ -153,13 +153,13 @@ namespace Rastvordd.Client
             {
                 bool cut = inside && w.Position.Y > selfPx.Y && w.Position.Y - selfPx.Y < near && Mathf.Abs(w.Position.X - selfPx.X) < near;
                 w.SetCut(cut);
-                w.SetFade(!cut && w.Covers(selfPx), dt);
+                w.UpdateOcclusion(dt);
             }
             foreach (var w in Slants)
             {
                 bool cut = inside && w.Position.Y > selfPx.Y && w.Position.Y - selfPx.Y < near && Mathf.Abs(w.Position.X - selfPx.X) < near;
                 w.SetCut(cut);
-                w.SetFade(!cut && w.Covers(selfPx), dt);
+                w.UpdateOcclusion(dt);
             }
         }
     }

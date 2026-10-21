@@ -498,7 +498,7 @@ namespace Rastvordd.Client
                     DrawSetTransform(new Vector2(0, -depth * 0.5f), 0, new Vector2(1, 0.45f));
                     DrawCircle(new Vector2(3, 0), tex.GetWidth() * 0.5f * s, new Color(0, 0, 0, 0.22f));
                     DrawSetTransform(Vector2.Zero, 0, new Vector2(s, s));
-                    DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 2));
+                    DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 2), new Color(1, 1, 1, _alpha));
                     DrawSetTransform(Vector2.Zero, 0, Vector2.One);
                     return;
                 }
@@ -548,18 +548,20 @@ namespace Rastvordd.Client
                 return;
             }
             if (_kind == WallKind.Built) { DrawRect(_front, new Color(0.45f, 0.36f, 0.25f, _alpha)); DrawRect(_top, new Color(0.6f, 0.5f, 0.35f, _alpha)); return; }
-            DrawRect(_front, _frontC);
-            DrawRect(_top, _topC);
-            DrawRect(_top, _topC.Darkened(0.2f), false, 1);
+            var frontC = new Color(_frontC, _alpha);
+            var topC = new Color(_topC, _alpha);
+            DrawRect(_front, frontC);
+            DrawRect(_top, topC);
+            DrawRect(_top, topC.Darkened(0.2f), false, 1);
             if (_kind == WallKind.Crate)
             {
                 for (float y = _front.Position.Y + 6; y < 0; y += 7)
-                    DrawLine(new Vector2(_front.Position.X, y), new Vector2(_front.End.X, y), _frontC.Darkened(0.25f), 1);
+                    DrawLine(new Vector2(_front.Position.X, y), new Vector2(_front.End.X, y), frontC.Darkened(0.25f), 1);
             }
             else if (_kind == WallKind.Concrete && _front.Size.X > 40)
             {
                 for (float x = _front.Position.X + 32; x < _front.End.X; x += 32)
-                    DrawLine(new Vector2(x, _front.Position.Y), new Vector2(x, 0), _frontC.Darkened(0.12f), 1);
+                    DrawLine(new Vector2(x, _front.Position.Y), new Vector2(x, 0), frontC.Darkened(0.12f), 1);
             }
         }
     }
@@ -577,16 +579,36 @@ namespace Rastvordd.Client
                 _ => (Art.Get("walls/wallface_metal"), Art.Get("tiles/ground_concrete")),
             };
 
-        /// <summary>Закрывает ли стена персонажа, стоящего ногами в feet (он позади неё).</summary>
-        public bool Covers(Vector2 feet)
+        Rect2? _screen;
+        /// <summary>Что стена (или пропс-спрайт) занимает на экране, в пикселях мира: лицевая грань + верх.</summary>
+        public Rect2 ScreenRect
         {
-            if (feet.Y >= Position.Y - 1) return false;
-            float bodyTop = feet.Y - Iso.H(1.9f);
-            var front = new Rect2(_front.Position + Position, _front.Size);
-            var top = new Rect2(_top.Position + Position, _top.Size);
-            var body = new Rect2(feet.X - 8, bodyTop, 16, feet.Y - bodyTop);
-            return body.Intersects(front) || body.Intersects(top);
+            get
+            {
+                if (_screen.HasValue) return _screen.Value;
+                var r = _front.Merge(_top);
+                string prop = _kind switch
+                {
+                    WallKind.Car => "props/car_wreck",
+                    WallKind.Barrier => "props/concrete_barrier",
+                    WallKind.Junk => "props/junk_pile",
+                    WallKind.Barrel => "props/barrel_oil",
+                    WallKind.WoodCrate => "props/crate_wood",
+                    _ => null,
+                };
+                var tex = prop != null ? Art.Styled(prop, _biome) : null;
+                if (tex != null)
+                {
+                    float s = _kind == WallKind.Car ? 1.4f : 1f;
+                    r = new Rect2(-tex.GetWidth() / 2f * s, (-tex.GetHeight() + 2) * s, tex.GetWidth() * s, tex.GetHeight() * s);
+                }
+                _screen = new Rect2(r.Position + Position, r.Size);
+                return _screen.Value;
+            }
         }
+
+        /// <summary>Прозрачность по фокусам кадра (Occlusion); срезанная стена не растворяется.</summary>
+        public void UpdateOcclusion(float dt) => SetFade(!_cut && Occlusion.Covers(ScreenRect, Position.Y), dt);
 
         bool _cut;
         /// <summary>Срезать стену до низкой (персонаж внутри дома, стена перед ним).</summary>
@@ -599,10 +621,7 @@ namespace Rastvordd.Client
 
         public void SetFade(bool fade, float dt)
         {
-            float target = fade ? 0.3f : 1f;
-            if (Mathf.Abs(target - _alpha) < 0.01f) return;
-            _alpha = Mathf.MoveToward(_alpha, target, dt * 5);
-            QueueRedraw();
+            if (Occlusion.Step(ref _alpha, fade, dt)) QueueRedraw();
         }
     }
 
@@ -645,32 +664,21 @@ namespace Rastvordd.Client
             TextureFilter = TextureFilterEnum.Nearest;
         }
 
-        /// <summary>Закрывает ли дерево персонажа, стоящего ногами в feet: тело (≈1,8 м) пересекает силуэт дерева, а сам он позади ствола.</summary>
-        public bool Covers(Vector2 feet)
+        /// <summary>Силуэт дерева на экране (пиксели мира): крона и ствол, без прозрачных краёв спрайта и тени у корней.</summary>
+        public Rect2 ScreenRect
         {
-            if (feet.Y > Base.Y + 4) return false;                       // стоит перед деревом — рисуется поверх
-            float halfW = _tex != null ? _tex.GetWidth() * 0.4f : CanopyR;
-            float top = Base.Y - (_tex != null ? _tex.GetHeight() * 0.95f : Iso.H(4.5f));
-            float bodyTop = feet.Y - Iso.H(1.9f);
-            return Mathf.Abs(feet.X - Base.X) < halfW + 8 && bodyTop < Base.Y - 6 && feet.Y > top;
+            get
+            {
+                float halfW = _tex != null ? _tex.GetWidth() * 0.4f : CanopyR;
+                float top = Base.Y - (_tex != null ? _tex.GetHeight() * 0.95f : Iso.H(4.5f));
+                return new Rect2(Base.X - halfW, top, halfW * 2, Base.Y - 4 - top);
+            }
         }
 
-        /// <summary>Крона полупрозрачна, если под ней игрок — чтобы не терять персонажа.</summary>
-        bool _cut;
-        /// <summary>Срезать стену до низкой (персонаж внутри дома, стена перед ним).</summary>
-        public void SetCut(bool cut)
+        /// <summary>Крона полупрозрачна, если за деревом стоит игрок, видимый ему персонаж или курсор.</summary>
+        public void UpdateOcclusion(float dt)
         {
-            if (cut == _cut) return;
-            _cut = cut;
-            QueueRedraw();
-        }
-
-        public void SetFade(bool fade, float dt)
-        {
-            float target = fade ? 0.35f : 1f;
-            if (Mathf.Abs(target - _alpha) < 0.01f) return;
-            _alpha = Mathf.MoveToward(_alpha, target, dt * 4);
-            QueueRedraw();
+            if (Occlusion.Step(ref _alpha, Occlusion.Covers(ScreenRect, Base.Y + 4), dt)) QueueRedraw();
         }
 
         public override void _Draw()

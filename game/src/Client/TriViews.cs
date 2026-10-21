@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 using Rastvordd.Sim;
 using SVec = System.Numerics.Vector2;
 
@@ -111,23 +111,18 @@ namespace Rastvordd.Client
             DrawPolyline(new[] { top[0], top[1], top[2], top[3], top[0] }, new Color(0, 0, 0, 0.25f), 1);
         }
 
-        /// <summary>Закрывает ли персонажа, стоящего ногами в feet (он позади стены).</summary>
-        public bool Covers(Vector2 feet)
-        {
-            if (feet.Y >= Position.Y - 1) return false;
-            var r = new Rect2(Position + new Vector2(Mathf.Min(_f0.X, _f1.X), Mathf.Min(_b0.Y, _b1.Y) - _h), new Vector2(Mathf.Abs(_f1.X - _f0.X) + 1, Mathf.Max(_f0.Y, _f1.Y) - Mathf.Min(_b0.Y, _b1.Y) + _h));
-            float bodyTop = feet.Y - Iso.H(1.9f);
-            return new Rect2(feet.X - 8, bodyTop, 16, feet.Y - bodyTop).Intersects(r);
-        }
+        /// <summary>Что стена занимает на экране (пиксели мира): лицевая грань + верх.</summary>
+        public Rect2 ScreenRect => new(Position + new Vector2(Mathf.Min(_f0.X, _f1.X), Mathf.Min(_b0.Y, _b1.Y) - _h),
+            new Vector2(Mathf.Abs(_f1.X - _f0.X) + 1, Mathf.Max(_f0.Y, _f1.Y) - Mathf.Min(_b0.Y, _b1.Y) + _h));
+
+        /// <summary>Прозрачность по фокусам кадра (Occlusion); срезанная стена не растворяется.</summary>
+        public void UpdateOcclusion(float dt) => SetFade(!_cut && Occlusion.Covers(ScreenRect, Position.Y), dt);
 
         public void SetCut(bool cut) { if (cut != _cut) { _cut = cut; QueueRedraw(); } }
 
         public void SetFade(bool fade, float dt)
         {
-            float target = fade ? 0.3f : 1f;
-            if (Mathf.Abs(target - _alpha) < 0.01f) return;
-            _alpha = Mathf.MoveToward(_alpha, target, dt * 5);
-            QueueRedraw();
+            if (Occlusion.Step(ref _alpha, fade, dt)) QueueRedraw();
         }
     }
 }

@@ -60,6 +60,7 @@ namespace Rastvordd.Client
         /// <summary>Стены и пропсы карты (РТ) — для прозрачности заслонов.</summary>
         readonly List<WallView2D> _mapWalls = new();
         PrefabLayer _prefab;
+        LightingLayer _lighting;
         /// <summary>Отладка (--occl-off): прозрачность только над своим персонажем — как было до D39, для сравнения.</summary>
         bool _occlSelfOnly;
         float _zoom = 2.0f;
@@ -447,6 +448,7 @@ else if (arg == "--atcrate")
         void BuildMap(MapInfo map)
         {
             _prefab = new PrefabLayer(map, _world, this);
+            _lighting = new LightingLayer(map, _world);
             foreach (var w in map.Walls)
             {
                 if (w.Hidden) continue;   // хитбокс пропса РТ — рисуется спрайтом
@@ -711,6 +713,12 @@ else if (arg == "--atcrate")
             }
             _ambient.Update(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _forcedDay ?? _cur.DayTime, dt);
             _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime);
+            {
+                // свет РТ: фонари ночью, лампы корпуса Подстанции — при включённом щитке
+                bool powered = _cur.DecorSprites.Exists(d => d.sprite == "props/subst_main_panel_on");
+                var halfV = GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X;
+                _lighting.Update(_overview ? 0 : World.NightFactorAt(_forcedDay ?? _cur.DayTime), powered, new Rect2(_cam.Position - halfV, halfV * 2), dt);
+            }
             UpdateHud(dt);
 
             if (_hud.AdminOpen && _frame % 15 == 0) _hud.SetAdminSounds(PlayingSounds());

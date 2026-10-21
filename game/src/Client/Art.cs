@@ -26,6 +26,8 @@ namespace Rastvordd.Client
         {
             Texture = LightTex, TextureScale = sizeM * Iso.PPM * 2 / 256f, Energy = energy,
             Color = new Color(1f, 0.68f, 0.38f), BlendMode = Light2D.BlendModeEnum.Add,
+            // огонь, факел, вспышка выстрела — с настоящими тенями от стен и техники (LightOccluder2D)
+            ShadowEnabled = true, ShadowFilter = Light2D.ShadowFilterEnum.Pcf5, ShadowFilterSmooth = 2f, ShadowColor = new Color(0, 0, 0, 0.9f),
         };
 
         public static Texture2D Get(string path)

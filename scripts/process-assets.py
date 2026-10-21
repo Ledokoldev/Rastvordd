@@ -234,6 +234,11 @@ def main() -> None:
     args = {k: v for k, _, v in (s.lstrip("-").partition("=") for s in sys.argv[1:])}
     only = set(args["only"].split(",")) if args.get("only") else None
     manifest = json.loads((ROOT / "assets" / "manifest.json").read_text(encoding="utf-8"))
+    if args.get("manifest"):
+        # отдельный список ассетов (параллельная работа) — добавляется к общему
+        extra = json.loads((ROOT / args["manifest"]).read_text(encoding="utf-8"))
+        ids = {a["id"] for a in extra["assets"]}
+        manifest["assets"] = [a for a in manifest["assets"] if a["id"] not in ids] + extra["assets"]
     if PALETTE_FILE.exists() and "new-palette" not in args:
         _global_palette = Image.open(PALETTE_FILE)
         _global_palette.load()

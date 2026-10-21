@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Numerics;
 
 namespace Rastvordd.Sim
@@ -7,11 +7,12 @@ namespace Rastvordd.Sim
     /// Простой NPC класса A (охрана РТ): патруль → бой → поиск → возврат.
     /// Управляет персонажем через тот же InputCmd, что и игрок.
     /// </summary>
-    public sealed class NpcBrain
+    public sealed class NpcBrain : IBrain
     {
         enum State { Patrol, Combat, Search }
 
         readonly Actor _me;
+        public Actor Me => _me;
         readonly World _w;
         readonly Random _rng;
         readonly float _skill;          // 0..1: реакция и точность

@@ -121,6 +121,16 @@ namespace Rastvordd.Client
                 catch (System.Exception ex) { GD.PrintErr($"сохранение не прочитано: {ex.Message}"); }
             }
             _myId = _server.Connect("Игрок");
+            // отладка: --simtest=600[,бот] — прокрутить 600 с мира без отрисовки и встать рядом с ботом
+            var st = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--simtest="));
+            if (st != null)
+            {
+                var p = st.Substring(10).Split(',');
+                _server.FastForward(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), s => GD.Print(s), _myId);
+                var me = _server.World.Find(_myId);
+                me.Pos = _server.BotPos(p.Length > 1 ? int.Parse(p[1]) : 0) + new SVec(-3, 2);
+                me.Dead = false; me.Hp = me.MaxHp;
+            }
             if (loaded) CallDeferred(nameof(ToastLoaded));
             ParseArgs();
 
@@ -727,6 +737,7 @@ namespace Rastvordd.Client
                 }
                 view.RecoilRad = Mathf.DegToRad(a.RecoilDeg);
                 view.AimDown = a.Id == _myId ? _peek : a.Peek;
+                view.SetLabel(a.Label);
                 view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId, a.Crouching);
                 if (a.Id == _myId)
                 {

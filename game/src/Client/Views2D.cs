@@ -66,6 +66,15 @@ namespace Rastvordd.Client
 
         public void StartSwing() => _swing = SwingTime;
 
+        string _label;
+        /// <summary>Подпись над головой (боты: имя и что делает).</summary>
+        public void SetLabel(string label)
+        {
+            if (label == _label) return;
+            _label = label;
+            QueueRedraw();
+        }
+
         float _hitStop;
         /// <summary>Попадание: анимация удара замирает на мгновение — удар ощущается тяжёлым.</summary>
         public void HitStop(float seconds) => _hitStop = seconds;
@@ -108,6 +117,14 @@ namespace Rastvordd.Client
                     DrawArc(c, 20, a0, a1, 12, new Color(1, 1, 1, 0.35f * (1 - k)), 4f);
                     DrawArc(c, 23, a0 + 0.3f, a1, 12, new Color(1, 1, 1, 0.18f * (1 - k)), 2f);
                 }
+            }
+            if (!string.IsNullOrEmpty(_label) && !_dead)
+            {
+                var font = ThemeDB.FallbackFont;
+                var size = font.GetStringSize(_label, HorizontalAlignment.Left, -1, 9);
+                var at = new Vector2(-size.X / 2, -Iso.H(2.75f));
+                DrawRect(new Rect2(at + new Vector2(-2, -9), new Vector2(size.X + 4, 12)), new Color(0, 0, 0, 0.45f));
+                DrawString(font, at, _label, HorizontalAlignment.Left, -1, 9, new Color(0.95f, 0.9f, 0.75f));
             }
             // тень
             DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.45f));

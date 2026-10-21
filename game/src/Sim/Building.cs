@@ -147,6 +147,29 @@ namespace Rastvordd.Sim
         public int StructVersion;
 
         bool HasFoundation(int i, int j) => _foundations.ContainsKey((i, j));
+        public Structure FoundationAt(int i, int j) => _foundations.GetValueOrDefault((i, j));
+        public Structure EdgeAt(int i, int j, int dir) => _edges.GetValueOrDefault((i, j, dir));
+        public Structure DoorAt(int i, int j, int dir) => _doors.GetValueOrDefault((i, j, dir));
+
+        /// <summary>Клетка свободна под фундамент по геометрии (без правил столба): суша, не РТ, нет препятствий.</summary>
+        public bool FoundationGeoOk(int ci, int cj, out string why)
+        {
+            why = "";
+            if (HasFoundation(ci, cj)) { why = "уже стоит"; return false; }
+            var min = new Vector2(ci * Building.Cell, cj * Building.Cell);
+            var max = min + new Vector2(Building.Cell);
+            if (!Terrain.IsLand(min) || !Terrain.IsLand(max) || !Terrain.IsLand(new Vector2(min.X, max.Y)) || !Terrain.IsLand(new Vector2(max.X, min.Y)))
+            { why = "вода"; return false; }
+            if (min.X < 38 && max.X > 2 && min.Y < 2 && max.Y > -38) { why = "на объекте нельзя"; return false; }
+            var c = (min + max) * 0.5f;
+            foreach (var w in WallsNear(c, 1.5f))
+                if (w.Owner == null && Geo.BoxOverlap(min, max, w.Wall.Min, w.Wall.Max)) { why = "мешает препятствие"; return false; }
+            foreach (var n in NodesNear(c, 1.5f))
+                if (Geo.CircleBox(n.Pos, n.Radius, min, max)) { why = "мешает дерево/камень"; return false; }
+            foreach (var d in DeploysNear(c, 1.5f))
+                if (d.Kind != DeployKind.Claim && Geo.CircleBox(d.Pos, d.Radius, min, max)) { why = "мешает установленное"; return false; }
+            return true;
+        }
 
         string CostText((string id, int n)[] cost) => string.Join(", ", Array.ConvertAll(cost, c => $"{Items.Name(c.id)} {c.n}"));
 
@@ -169,19 +192,7 @@ namespace Rastvordd.Sim
             if (kind == StructKind.Foundation)
             {
                 var (ci, cj) = Building.CellOf(at);
-                if (HasFoundation(ci, cj)) { why = "уже стоит"; return false; }
-                var min = new Vector2(ci * Building.Cell, cj * Building.Cell);
-                var max = min + new Vector2(Building.Cell);
-                if (!Terrain.IsLand(min) || !Terrain.IsLand(max) || !Terrain.IsLand(new Vector2(min.X, max.Y)) || !Terrain.IsLand(new Vector2(max.X, min.Y)))
-                { why = "вода"; return false; }
-                if (min.X < 38 && max.X > 2 && min.Y < 2 && max.Y > -38) { why = "на объекте нельзя"; return false; }
-                var c = (min + max) * 0.5f;
-                foreach (var w in WallsNear(c, 1.5f))
-                    if (w.Owner == null && Geo.BoxOverlap(min, max, w.Wall.Min, w.Wall.Max)) { why = "мешает препятствие"; return false; }
-                foreach (var n in NodesNear(c, 1.5f))
-                    if (Geo.CircleBox(n.Pos, n.Radius, min, max)) { why = "мешает дерево/камень"; return false; }
-                foreach (var d in DeploysNear(c, 1.5f))
-                    if (d.Kind != DeployKind.Claim && Geo.CircleBox(d.Pos, d.Radius, min, max)) { why = "мешает установленное"; return false; }
+                if (!FoundationGeoOk(ci, cj, out why)) return false;
                 return ClaimAllows(a, kind, (ci, cj), out _, out why);
             }
 
@@ -289,7 +300,10 @@ namespace Rastvordd.Sim
         /// <summary>Постройка перед персонажем (куда смотрит, в пределах досягаемости). Дверь важнее проёма.</summary>
         public Structure TargetStructure(Actor a, float reach)
         {
-            var hit = a.Pos + a.FacingDir * MathF.Min(reach, 1.3f);
+            // точка удара — куда наведён прицел, но не дальше досягаемости
+            var toAim = a.LastAim - a.Pos;
+            float dl = toAim.Length();
+            var hit = dl > 0.05f ? a.Pos + toAim / dl * MathF.Min(dl, reach + 0.3f) : a.Pos + a.FacingDir * MathF.Min(reach, 1.3f);
             Structure best = null;
             float bestD = 1.25f;
             var (i, j, dir) = Building.NearestEdge(hit);

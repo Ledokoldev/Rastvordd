@@ -16,6 +16,7 @@ namespace Rastvordd.Sim
         public bool Reloading;
         public bool Sprinting;
         public bool Crouching;
+        public string Label;         // подпись над головой (боты: имя и занятие)
     }
 
     public struct ProjSnap { public int Id; public Vector2 Pos; public Vector2 Dir; public bool Arrow; }
@@ -117,13 +118,20 @@ namespace Rastvordd.Sim
 
         public readonly World World;
         readonly Dictionary<int, InputCmd> _pending = new();
-        readonly List<NpcBrain> _brains = new();
+        readonly List<IBrain> _brains = new();
+        readonly Dictionary<int, PlayerBot> _bots = new();
+        bool _botsStarted;
+        readonly int _seed;
+        /// <summary>Сколько ботов-игроков живёт на острове (позже — от размера карты и настроек вайпа).</summary>
+        public int BotCount = 2;
+        static readonly string[] BotNames = { "Сёма", "Жека", "Толян", "Вован", "Лёха", "Димон" };
         readonly Dictionary<int, InputCmd> _inputs = new();
         readonly List<SimEvent> _eventsThisTick = new();
 
         public LocalServer(int seed)
         {
             World = new World(seed) { Seed = seed };
+            _seed = seed;
             int i = 0;
             foreach (var npc in World.SpawnNpcs())
                 _brains.Add(new NpcBrain(npc, World, seed * 31 + i++));
@@ -158,6 +166,38 @@ namespace Rastvordd.Sim
 
         public string SaveJson() => World.Save().ToJson();
 
+        /// <summary>Боты-игроки: после загрузки продолжают своими персонажами (по имени), иначе — новые с пляжа.</summary>
+        void StartBots()
+        {
+            _botsStarted = true;
+            for (int i = 0; i < BotCount && i < BotNames.Length; i++)
+            {
+                string name = BotNames[i] + " (бот)";
+                var a = World.FindPlayer(name) ?? World.SpawnPlayer(name);
+                var bot = new PlayerBot(a, World, _seed * 17 + i);
+                _bots[a.Id] = bot;
+                _brains.Add(bot);
+            }
+        }
+
+        /// <summary>Отладка: прокрутить мир на seconds без клиента, печатая занятия ботов.</summary>
+        public void FastForward(float seconds, System.Action<string> log, int focusId = -1)
+        {
+            int ticks = (int)(seconds / World.Dt);
+            for (int t = 0; t < ticks; t++)
+            {
+                if (focusId >= 0) _pending[focusId] = InputCmd.Empty;
+                Tick();
+                if (t % (int)(30 / World.Dt) == 0)
+                    foreach (var b in _bots.Values)
+                        log($"[{World.Time,6:0}s] {b.Me.Name} @({b.Me.Pos.X:0.0};{b.Me.Pos.Y:0.0}) {b.Debug}: {b.Doing} · HP {b.Me.Hp:0} · дерево {b.Me.Count("wood")} камень {b.Me.Count("stone")} · построек {World.Structures.FindAll(s => s.OwnerId == b.Me.Id).Count} · {World.LastInfo.GetValueOrDefault(b.Me.Id)}");
+            }
+        }
+
+        public Vector2 BotPos(int index) { int i = 0; foreach (var b in _bots.Values) if (i++ == index) return b.Me.Pos; return Vector2.Zero; }
+
+        public string BotLabel(int actorId) => _bots.TryGetValue(actorId, out var b) ? $"{b.Me.Name}: {b.Doing}" : null;
+
         public void Submit(int clientId, InputCmd cmd) => _pending[clientId] = cmd;
 
         public void Tick()
@@ -165,9 +205,8 @@ namespace Rastvordd.Sim
             _inputs.Clear();
             foreach (var kv in _pending) _inputs[kv.Key] = kv.Value;
             _pending.Clear();
-            int bi = 0;
-            foreach (var a in World.Actors)
-                if (a.Team == Team.Npc) _inputs[a.Id] = _brains[bi++].Think();
+            if (!_botsStarted) StartBots();
+            foreach (var b in _brains) _inputs[b.Me.Id] = b.Think();
             World.Step(_inputs);
             _eventsThisTick.Clear();
             _eventsThisTick.AddRange(World.Events);
@@ -195,6 +234,7 @@ namespace Rastvordd.Sim
                     HeldId = a.Held?.Id, Reloading = w != null && w.ReloadLeft > 0,
                     Sprinting = a.Vel.Length() > World.WalkSpeed + 0.3f,
                     Crouching = a.Crouching,
+                    Label = BotLabel(a.Id),
                 });
             }
 

@@ -392,7 +392,10 @@ namespace Rastvordd.Sim
             return null;
         }
 
-        void Info(Actor a, string text) => Events.Add(new SimEvent { Kind = SimEventKind.Info, ActorId = a.Id, Pos = a.Pos, Text = text });
+        /// <summary>Последнее сообщение каждому (боты читают причины отказа).</summary>
+        public readonly Dictionary<int, string> LastInfo = new();
+
+        void Info(Actor a, string text) { LastInfo[a.Id] = text; Events.Add(new SimEvent { Kind = SimEventKind.Info, ActorId = a.Id, Pos = a.Pos, Text = text }); }
 
         // ---------- восприятие ----------
 
@@ -869,7 +872,7 @@ namespace Rastvordd.Sim
             if (Vector2.Distance(a.Pos, at) > PlaceRange) { Info(a, "Слишком далеко"); return; }
             if (!IsFree(at, 0.65f)) { Info(a, "Здесь не поставить"); return; }
             if (def.Deploy == DeployKind.Claim && !CanPlaceClaim(at, out string why)) { Info(a, $"Столб: {why}"); return; }
-            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id };
+            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = def.Deploy == DeployKind.Claim ? 0.3f : 0.6f };   // столб тонкий
             if (def.Deploy == DeployKind.Box) dep.Storage = new LootBag { Id = NextId(), Pos = at };
             dep.Auth.Add(a.Id);
             AddDeployable(dep);

@@ -124,7 +124,7 @@ def process(a: dict, src: pathlib.Path) -> tuple[Image.Image, Image.Image]:
     h_hd = max(8, round(a["h"] * PX_HD))
     hd = im.resize((max(1, round(im.width * h_hd / im.height)), h_hd), Image.LANCZOS)
     # мелочи на земле — крупнее реальных, иначе в пикселе не читаются
-    h_px = max(4, round(a["h"] * PX_PIXEL * (1.9 if a["cat"] == "clutter" else 1.0)))
+    h_px = max(4, round(a["h"] * PX_PIXEL * (1.9 if a["cat"] == "clutter" and not a.get("w") else 1.0)))   # заданная ширина — реальный размер, без укрупнения
     keep = _global_palette
     if a["cat"] in OWN_PALETTE_CATS:
         # трава и растения: своя палитра — в общей мало зелёного, и они превращались в тёмные кляксы

@@ -1667,7 +1667,7 @@
    "h": 1.2,
    "desc": "a rusty yellow triangular high-voltage warning sign with a black lightning bolt on a metal post, no text. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details.",
    "view": "front",
-   "w": 0.7
+   "w": 0.8
   },
   {
    "id": "crate_punch",
@@ -1917,12 +1917,12 @@
    "h": 6.95,
    "desc": "a Soviet traffic police (GAI) roadside post: a small two-storey building, the ground floor of white silicate bricks with a steel door, the upper floor a glass observation cabin with large windows all around (many panes cracked or missing) and a flat roof with a dead rooftop searchlight and a bent antenna; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
    "foot": [
-    4.2,
-    4.2,
+    5.6,
+    5.0,
     3.0
    ],
    "view": "front",
-   "w": 4.2
+   "w": 6.0
   },
   {
    "id": "gai_barrier",
@@ -1981,8 +1981,8 @@
   {
    "id": "road_sign_round",
    "cat": "clutter",
-   "h": 2.6,
-   "desc": "a Soviet road sign on a striped metal pole: a round red sign with a white horizontal bar (no entry), bent and rusty, bullet holes; nothing written on it; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+   "desc": "a Soviet road sign on a striped metal pole: a round red sign with a white horizontal bar (no entry), bent and rusty, bullet holes; nothing written on it; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details.",
+   "w": 0.8
   },
   {
    "id": "phone_booth",

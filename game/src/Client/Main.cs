@@ -900,7 +900,7 @@ else if (arg == "--atcrate")
             if (speed < 0.5f) return;
             _stepAcc.TryGetValue(id, out var acc);
             acc += speed * dt;
-            if (acc >= Footsteps.Stride(speed))
+            if (acc >= Footsteps.Stride(speed, crouch))
             {
                 acc = 0;
                 bool sprint = speed > Sim.World.WalkSpeed * 1.3f;

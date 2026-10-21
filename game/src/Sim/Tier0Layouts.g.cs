@@ -33,7 +33,7 @@ namespace Rastvordd.Sim
             ["subst_relay_cabinet"] = (1.2f, 0.6f, 1.8f, false),
             ["subst_insulator_pallet"] = (1.2f, 1.0f, 1.0f, false),
             ["subst_reel_stack"] = (2.4f, 1.0f, 1.2f, false),
-            ["gai_post"] = (4.2f, 4.2f, 3.0f, false),
+            ["gai_post"] = (5.6f, 5.0f, 3.0f, false),
             ["gai_barrier"] = (7.0f, 0.5f, 1.1f, true),
             ["car_police_2101"] = (4.1f, 1.7f, 1.4f, false),
             ["car_zhiguli_wreck"] = (4.1f, 1.7f, 1.4f, false),

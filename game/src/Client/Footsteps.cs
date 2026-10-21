@@ -25,8 +25,15 @@ namespace Rastvordd.Client
         static readonly Dictionary<Surface, int> _last = new();
         static readonly RandomNumberGenerator _rng = new();
 
-        /// <summary>Длина шага, м: спринт — шире.</summary>
-        public static float Stride(float speed) => speed > Sim.World.WalkSpeed * 1.3f ? 1.05f : 0.75f;
+        /// <summary>
+        /// Длина шага, м. Скорость в игре выше реальной (ходьба 4,5 м/с), поэтому шаг «длинный»: темп — около 2 шагов в секунду
+        /// при ходьбе, 2,6 на бегу, 1,4 вприсядку. Иначе записи наслаиваются и сливаются в кашу.
+        /// </summary>
+        public static float Stride(float speed, bool crouch = false)
+        {
+            float rate = crouch ? 1.4f : speed > Sim.World.WalkSpeed * 1.3f ? 2.6f : 2.0f;
+            return speed / rate;
+        }
 
         public static void Play(Surface s, Vector2 posPx, float volumeDb, float hearM)
         {

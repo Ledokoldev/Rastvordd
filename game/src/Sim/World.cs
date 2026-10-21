@@ -478,6 +478,7 @@ namespace Rastvordd.Sim
             a.Add("expl_c4", 6);
             a.Add("expl_satchel", 10);
             a.Add("ammo_rifle", 120);
+            a.Add("punchcard_1", 2);   // проверить Подстанцию, пока РТ тира 0 нет в игре
             a.Add("metal_ore", 60);
             a.Add("sulfur_ore", 30);
             foreach (var (id, n) in new[] { ("wood", 5000), ("stone", 5000), ("metal_fragments", 3000), ("cloth", 100), ("scrap", 500), ("charcoal", 100), ("sulfur", 100), ("bandage", 5) })

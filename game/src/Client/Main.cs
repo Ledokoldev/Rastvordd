@@ -763,6 +763,7 @@ namespace Rastvordd.Client
                 view.RecoilRad = Mathf.DegToRad(a.RecoilDeg);
                 view.AimDown = a.Id == _myId ? _peek : a.Peek;
                 view.SetLabel(a.Label);
+                view.Swimming = a.Swimming;
                 view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId, a.Crouching);
                 if (a.Id == _myId)
                 {

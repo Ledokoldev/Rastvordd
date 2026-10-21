@@ -69,11 +69,21 @@ namespace Rastvordd.Client
         /// <summary>Конец предмета в руках относительно ног персонажа (пиксели мира).</summary>
         public Vector2 TipLocal => _canvas.TipPx - Feet;
 
+        bool _swim;
+        /// <summary>В воде: видно только выше пояса, тело опущено, срез — по воде.</summary>
+        public void SetSwim(bool swim)
+        {
+            if (swim == _swim) return;
+            _swim = swim;
+            _sprite.RegionEnabled = swim;
+            _sprite.RegionRect = new Rect2(0, 0, VW, Feet.Y - 26);
+        }
+
         public void Refresh(bool dead)
         {
             // смерть: лежит на боку
             _sprite.Rotation = dead ? Mathf.Pi / 2 * (Mathf.Cos(S.Aim) >= 0 ? 1 : -1) : 0;
-            _sprite.Position = dead ? new Vector2(0, -6) : Vector2.Zero;
+            _sprite.Position = dead ? new Vector2(0, -6) : _swim ? new Vector2(0, 18) : Vector2.Zero;
             _sprite.Modulate = dead ? new Color(0.6f, 0.55f, 0.55f) : Colors.White;
             _canvas.QueueRedraw();
         }

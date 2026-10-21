@@ -16,6 +16,7 @@ namespace Rastvordd.Sim
         public bool Reloading;
         public bool Sprinting;
         public bool Crouching;
+        public bool Swimming;
         public string Label;         // подпись над головой (боты: имя и занятие)
     }
 
@@ -247,6 +248,7 @@ namespace Rastvordd.Sim
                     HeldId = a.Held?.Id, Reloading = w != null && w.ReloadLeft > 0,
                     Sprinting = a.Vel.Length() > World.WalkSpeed + 0.3f,
                     Crouching = a.Crouching,
+                    Swimming = a.Swimming,
                     Label = BotLabel(a.Id),
                 });
             }

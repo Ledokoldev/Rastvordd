@@ -280,6 +280,7 @@ namespace Rastvordd.Sim
         public bool FireHeldLastTick;
         public float Peek;
         public bool Crouching;
+        public bool Swimming;           // в воде: медленно, без оружия
         public float PendingSwingAt = -1;   // удар инструментом засчитывается с задержкой — когда он опускается на цель
         public WeaponState PendingSwing;
         public StructKind BuildPiece = StructKind.Foundation;   // что ставит план постройки (R — сменить)

@@ -515,8 +515,10 @@ namespace Rastvordd.Sim
             var move = cmd.Move;
             if (move.LengthSquared() > 1) move = Vector2.Normalize(move);
             a.Peek = Math.Clamp(cmd.Peek, 0f, 1f);
-            a.Crouching = cmd.Crouch;
+            a.Swimming = !Terrain.IsLand(a.Pos);
+            a.Crouching = cmd.Crouch && !a.Swimming;
             float speed = WalkSpeed * (1f - 0.45f * a.Peek) * (a.Crouching ? 0.5f : 1f);   // прицел и присед — медленнее
+            if (a.Swimming) { speed = WalkSpeed * 0.45f; cmd.Sprint = false; }              // плавание (D25)
             bool sprint = false;
             var toAimDir = cmd.Aim - a.Pos;
             a.LastAim = cmd.Aim;
@@ -533,7 +535,7 @@ namespace Rastvordd.Sim
             var before = a.Pos;
             a.Pos += a.Vel * Dt;
             ResolveCollisions(a);
-            KeepOnLand(a, before);
+            a.Swimming = !Terrain.IsLand(a.Pos);
 
             // взгляд
             if (toAimDir.LengthSquared() > 0.04f) a.Facing = MathF.Atan2(toAimDir.Y, toAimDir.X);
@@ -560,7 +562,8 @@ namespace Rastvordd.Sim
                 if (a.PendingSwing != null && a.Weapon == a.PendingSwing) Swing(a, a.PendingSwing);   // сменил предмет — удар отменён
                 a.PendingSwing = null;
             }
-            StepHeld(a, cmd, sprint);
+            if (!a.Swimming) StepHeld(a, cmd, sprint);   // в воде руки заняты плаванием
+            else a.FireHeldLastTick = cmd.Fire;
 
             if (cmd.Interact) Interact(a);
         }
@@ -577,16 +580,6 @@ namespace Rastvordd.Sim
             a.Pos = Vector2.Clamp(a.Pos, new Vector2(-HalfSize + a.Radius), new Vector2(HalfSize - a.Radius));
         }
 
-        /// <summary>В воду не заходим: пробуем скользить вдоль берега по одной оси, иначе стоим.</summary>
-        void KeepOnLand(Actor a, Vector2 before)
-        {
-            if (Terrain.IsLand(a.Pos)) return;
-            var slideX = new Vector2(a.Pos.X, before.Y);
-            var slideY = new Vector2(before.X, a.Pos.Y);
-            if (Terrain.IsLand(slideX)) { a.Pos = slideX; a.Vel = new Vector2(a.Vel.X, 0); }
-            else if (Terrain.IsLand(slideY)) { a.Pos = slideY; a.Vel = new Vector2(0, a.Vel.Y); }
-            else { a.Pos = before; a.Vel = Vector2.Zero; }
-        }
 
         static Vector2 PushOutCircle(Vector2 p, float r, Vector2 c, float cr)
         {

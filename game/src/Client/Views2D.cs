@@ -66,6 +66,10 @@ namespace Rastvordd.Client
 
         public void StartSwing() => _swing = SwingTime;
 
+        /// <summary>Плывёт: тело по пояс в воде, круги по воде.</summary>
+        public bool Swimming;
+        float _ripple;
+
         string _label;
         /// <summary>Подпись над головой (боты: имя и что делает).</summary>
         public void SetLabel(string label)
@@ -125,6 +129,19 @@ namespace Rastvordd.Client
                 var at = new Vector2(-size.X / 2, -Iso.H(2.75f));
                 DrawRect(new Rect2(at + new Vector2(-2, -9), new Vector2(size.X + 4, 12)), new Color(0, 0, 0, 0.45f));
                 DrawString(font, at, _label, HorizontalAlignment.Left, -1, 9, new Color(0.95f, 0.9f, 0.75f));
+            }
+            if (Swimming && !_dead)
+            {
+                // круги по воде у пояса
+                DrawSetTransform(new Vector2(0, -8), 0, new Vector2(1, 0.4f));
+                for (int i = 0; i < 2; i++)
+                {
+                    float k = (_ripple * 0.8f + i * 0.5f) % 1f;
+                    DrawArc(Vector2.Zero, 9 + k * 10, 0, Mathf.Tau, 24, new Color(0.85f, 0.92f, 1f, 0.5f * (1 - k)), 1.5f);
+                }
+                DrawCircle(Vector2.Zero, 9, new Color(0.75f, 0.85f, 0.95f, 0.25f));
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                return;
             }
             // тень
             DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.45f));
@@ -204,8 +221,10 @@ namespace Rastvordd.Client
             var basePos = new Vector2(right ? 2 : -2, -Iso.H(1.05f) * (crouch ? 0.78f : 1f) + (_body.Moving ? -Mathf.Abs(Mathf.Sin(_body.Phase)) : 0));
             _held.Position = (basePos - new Vector2(Mathf.Cos(facing), Mathf.Sin(facing)) * kickBack).Round();
             _held.ReloadHand = reloadHand;
+            if (Swimming) { _ripple += dt; QueueRedraw(); }
             if (_rig != null)
             {
+                _rig.SetSwim(Swimming);
                 var rs = _rig.S;
                 rs.Aim = facing;
                 rs.Recoil = RecoilRad;
@@ -216,7 +235,7 @@ namespace Rastvordd.Client
                 rs.AimDown = Mathf.MoveToward(rs.AimDown, AimDown, dt * 6);
                 rs.Phase = _body.Phase;
                 rs.Breath += dt * 1.6f;
-                rs.Held = heldId;
+                rs.Held = Swimming ? null : heldId;   // в воде руки гребут
                 rs.Kick = _kick;
                 rs.Reload = reloading && _reloadDur > 0 ? Mathf.Clamp(_reloadT / _reloadDur, 0, 1) : -1;
                 rs.Swing = _swing > 0 ? 1f - _swing / SwingTime : -1;

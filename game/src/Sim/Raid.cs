@@ -63,7 +63,7 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Множитель урона взрывом по уровню: разметка рассыпается, камень — 2 шашки, металл — 4, сталь — 8.</summary>
-        static readonly float[] BlastTierMult = { 3f, 1.2f, 0.55f, 0.5f, 0.5f };
+        public static readonly float[] BlastTierMult = { 3f, 1.2f, 0.55f, 0.5f, 0.5f };
 
         void Throw(Actor a, Vector2 aim)
         {

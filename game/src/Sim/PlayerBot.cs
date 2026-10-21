@@ -686,6 +686,7 @@ namespace Rastvordd.Sim
                 // 8г. прогрессия: лом → верстак 1 → изучение → верстак 2 → … → верстак 3
                 if (Progress(box, metal, ref cmd)) return;
                 if (Arm(box, furnace, ref cmd)) return;
+                if (Raid(box, furnace, ref cmd)) return;
             }
 
             // 9. отнести добычу (камень копим, пока дом не каменный)
@@ -797,7 +798,13 @@ namespace Rastvordd.Sim
             if (!Has("weapon_pipe")) return CraftAtBench("weapon_pipe", box, ref cmd);
             if (_me.Count("ammo_pistol") >= 20 || !_me.Known.Contains("ammo_pistol")) return false;
             if (_me.Count("gunpowder") >= 5) return CraftAtBench("ammo_pistol", box, ref cmd);
-            // порох: уголь 15 + сера 10
+            return MakeGunpowder(5, box, furnace, ref cmd);
+        }
+
+        /// <summary>Порох до target: уголь 15 + сера 10 у верстака; сера и уголь — из печи (серная руда + дерево).</summary>
+        bool MakeGunpowder(int target, Deployable box, Deployable furnace, ref InputCmd cmd)
+        {
+            if (_me.Count("gunpowder") >= target) return false;
             if (_me.Count("charcoal") >= 15 && _me.Count("sulfur") >= 10) return CraftAtBench("gunpowder", box, ref cmd);
             if (TakeFromBox(box, "sulfur", 10, ref cmd) || TakeFromBox(box, "charcoal", 15, ref cmd)) return true;
             if (furnace == null) return false;
@@ -813,6 +820,133 @@ namespace Rastvordd.Sim
                 return true;
             }
             return false;   // печь работает — пока фармим
+        }
+
+        // ---------- рейд: бомбы на дверь чужой базы, вынести ящик ----------
+
+        Deployable _raidClaim;
+        Structure _raidDoor;
+        float _raidRetarget, _raidCooldown, _throwWait;
+        bool _raidLooted;
+
+        /// <summary>Дверь чужой базы, которую дешевле всего взорвать (прочность с учётом материала).</summary>
+        (Deployable claim, Structure door) PickRaidTarget()
+        {
+            Deployable bestC = null; Structure bestD = null;
+            float best = float.MaxValue;
+            foreach (var c in _w.Deployables)
+            {
+                if (c.Kind != DeployKind.Claim || c.Auth.Contains(_me.Id) || c.OwnerId == _me.Id) continue;
+                foreach (var s in _w.Structures)
+                {
+                    if (s.Kind != StructKind.Door || s.ClaimId != c.Id) continue;
+                    float cost = BombsFor(s) * 1000 + Vector2.Distance(s.Center, _me.Pos);
+                    if (cost < best) { best = cost; bestC = c; bestD = s; }
+                }
+            }
+            return (bestC, bestD);
+        }
+
+        /// <summary>Сколько самодельных бомб нужно на постройку (с запасом на осечки).</summary>
+        static int BombsFor(Structure s)
+        {
+            float perBomb = 75f * 0.95f * World.BlastTierMult[Math.Clamp(s.Tier, 0, 4)];
+            return (int)MathF.Ceiling(s.Hp / perBomb * 1.25f);
+        }
+
+        bool Raid(Deployable box, Deployable furnace, ref InputCmd cmd)
+        {
+            if ((_raidCooldown -= World.Dt) > 0 || Ranged() == null || !_me.Known.Contains("expl_satchel") || MyBenchLevel() < 2) return false;
+            if (_raidClaim == null || !_w.Deployables.Contains(_raidClaim) || (_raidRetarget -= World.Dt) < 0)
+            {
+                (_raidClaim, _raidDoor) = PickRaidTarget();
+                _raidRetarget = 120;
+                _raidLooted = false;
+                if (_raidClaim == null) { _raidCooldown = 300; return false; }
+            }
+            var enemyBox = EnemyBox();
+            bool doorDown = _raidDoor == null || !_w.Structures.Contains(_raidDoor);
+
+            // 1. бомбы
+            int need = doorDown ? 0 : BombsFor(_raidDoor);
+            if (!doorDown && _me.Count("expl_satchel") < need && !InRaid)
+            {
+                var r = Recipes.All[Recipe("expl_satchel")];
+                foreach (var (id, n) in r.Cost)
+                {
+                    if (_me.Count(id) >= n) continue;
+                    if (id == "gunpowder") { Doing = $"копит порох на рейд ({_me.Count("expl_satchel")}/{need} бомб)"; return MakeGunpowder(n, box, furnace, ref cmd); }
+                    if (TakeFromBox(box, id, n, ref cmd)) return true;
+                    if (id == "cloth") { Doing = "собирает коноплю на бомбы"; return UsePickup(PickupKind.Hemp, ref cmd) || true; }
+                    if (id == "metal_fragments") { _metalGoal = Math.Max(_metalGoal, 300); return false; }
+                    return !Need(id, n, ref cmd) || true;
+                }
+                return CraftAtBench("expl_satchel", box, ref cmd);
+            }
+
+            // 2. дверь: бросать с внешней стороны, отходить и ждать взрыва
+            if (!doorDown)
+            {
+                if (!InRaid) _w.Milestone(_me, $"идёт в рейд на базу {_w.Find(_raidClaim.OwnerId)?.Name ?? "?"} ({need} бомб)");
+                InRaid = true;
+                var outside = DoorOutside(_raidDoor);
+                Doing = $"рейдит: дверь {Building.TierNames[_raidDoor.Tier]} {(int)_raidDoor.Hp}/{(int)_raidDoor.MaxHp}";
+                if ((_throwWait -= World.Dt) > 0)
+                {
+                    // ждём взрыва в стороне, держа оружие
+                    var back = outside + Vector2.Normalize(outside - _raidDoor.Center) * 4f;
+                    MoveTo(back, 0.8f, ref cmd);
+                    Hold(Ranged() ?? "tool_hatchet", ref cmd);
+                    return true;
+                }
+                if (_me.Count("expl_satchel") == 0) { InRaid = false; _raidCooldown = 120; return false; }
+                if (!MoveTo(outside, 0.5f, ref cmd)) return true;
+                cmd.Aim = _raidDoor.Center;
+                if (Hold("expl_satchel", ref cmd)) { Click(ref cmd); _throwWait = 6.5f; }
+                return true;
+            }
+
+            // 3. дверь выбита — вынести ящик
+            if (InRaid && !_raidLooted)
+            {
+                if (enemyBox == null || enemyBox.Storage.Empty) { _raidLooted = true; }
+                else
+                {
+                    Doing = "выносит чужой ящик";
+                    if (!MoveTo(enemyBox.Pos, 1.1f, ref cmd)) return true;
+                    cmd.Aim = enemyBox.Pos;
+                    cmd.Interact = Click2();
+                    if (Vector2.Distance(_me.Pos, enemyBox.Pos) < 1.6f && _w.Time - _lootTry > 2f)
+                    {
+                        _lootTry = _w.Time;
+                        if (++_lootAttempts > 6) _raidLooted = true;
+                    }
+                    return true;
+                }
+                _w.Milestone(_me, $"зарейдил базу {_w.Find(_raidClaim.OwnerId)?.Name ?? "?"}");
+            }
+            if (InRaid) { InRaid = false; _raidCooldown = 900; _raidClaim = null; _lootAttempts = 0; }
+            return false;
+        }
+        float _lootTry;
+        int _lootAttempts;
+        public bool InRaid;
+
+        Deployable EnemyBox()
+        {
+            if (_raidClaim == null) return null;
+            foreach (var d in _w.Deployables)
+                if (d.Kind == DeployKind.Box && d.OwnerId == _raidClaim.OwnerId && d.Storage != null) return d;
+            return null;
+        }
+
+        /// <summary>Точка снаружи двери: со стороны клетки без фундамента.</summary>
+        Vector2 DoorOutside(Structure door)
+        {
+            var (ca, cb) = Building.EdgeCells(door.I, door.J, door.Dir);
+            var outsideCell = _w.FoundationAt(ca.Item1, ca.Item2) == null ? ca : cb;
+            var c = Building.CellCenter(outsideCell.Item1, outsideCell.Item2);
+            return door.Center + Vector2.Normalize(c - door.Center) * 1.6f;
         }
 
         /// <summary>Скрафтить у своего верстака: ресурсы из кармана или ящика.</summary>

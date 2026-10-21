@@ -234,6 +234,9 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Отладка: прокрутить мир на seconds без клиента, печатая занятия ботов.</summary>
+        /// <summary>Отладка рейдов: в эту секунду мира первый бот получает бомбы и патроны (−1 — нет).</summary>
+        public float RaidKitAt = -1;
+
         public void FastForward(float seconds, System.Action<string> log, int focusId = -1)
         {
             int ticks = (int)(seconds / World.Dt);
@@ -248,6 +251,16 @@ namespace Rastvordd.Sim
                 if (focusId >= 0) _pending[focusId] = InputCmd.Empty;
                 Tick();
                 while (shown < World.Milestones.Count) log("ВЕХА " + World.Milestones[shown++]);
+                if (RaidKitAt >= 0 && World.Time >= RaidKitAt)
+                {
+                    RaidKitAt = -1;
+                    foreach (var b in _bots.Values)
+                    {
+                        b.Me.Add("expl_satchel", 14); b.Me.Add("ammo_pistol", 60);
+                        log($"[{World.Time,6:0}s] отладка: {b.Me.Name} получил 14 бомб и 60 патронов");
+                        break;
+                    }
+                }
                 foreach (var e in World.Events)
                     if (e.Kind == SimEventKind.Death)
                         log($"[{World.Time,6:0}s] смерть: {World.Find(e.ActorId)?.Name} ← {World.Find(e.OtherId)?.Name ?? "?"}");

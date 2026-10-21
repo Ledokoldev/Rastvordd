@@ -164,6 +164,8 @@ namespace Rastvordd.Client
             if (st != null)
             {
                 var p = st.Substring(10).Split(',');
+                var rk = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--raidkit="));
+                if (rk != null) _server.RaidKitAt = float.Parse(rk.Substring(10), System.Globalization.CultureInfo.InvariantCulture);
                 _server.FastForward(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), s => GD.Print(s), _myId);
                 var me = _server.World.Find(_myId);
 int bi = p.Length > 1 ? int.Parse(p[1]) : 0;

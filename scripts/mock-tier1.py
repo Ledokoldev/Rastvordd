@@ -471,10 +471,10 @@ def track(s, pts, ballast=True):
         if ballast:
             s.ground('ground_gravel', [(p[0] + nx - ux, p[1] + ny - uy), (q[0] + nx + ux, q[1] + ny + uy), (q[0] - nx + ux, q[1] - ny + uy), (p[0] - nx - ux, p[1] - ny - uy)], 2)
         ang = round(-math.degrees(math.atan2(dy, dx)), 1)
-        k = max(1, int(math.ceil(ln / 5.8)))
+        k = max(1, int(math.ceil(ln / 9.2)))         # звено 6 м ×1,6: колея и шпалы в масштабе вагонов (ширина ~1,8 м)
         for i in range(k):
             t = (i + 0.5) / k
-            s.dec('rail_track', p[0] + dx * t, p[1] + dy * t, 1.0, ang)
+            s.dec('rail_track', p[0] + dx * t, p[1] + dy * t, 1.6, ang)
         s.keepout.append((min(p[0], q[0]) - 2, min(p[1], q[1]) - 2, max(p[0], q[0]) + 2, max(p[1], q[1]) + 2))
 
 
@@ -665,7 +665,7 @@ def ats():
     # кросс: стойки кросса, патч-панель (сюда втыкают кабели), схема на стене
     s.prop('props/ats_cross_frame', 50, 13.0, plan=(C_COVER, ''))
     s.prop('props/ats_patch_panel', 50, 18.7, plan=(C_COVER, ''))
-    mech(s, 50, 19.3, 'patch', 'ПАТЧ-ПАНЕЛЬ (3 кабеля по схеме)')
+    mech(s, 50, 19.3, 'patch', 'ПАТЧ-ПАНЕЛЬ')
     s.prop('props/ats_cross_frame', 50, 24.6, plan=(C_COVER, ''))
     s.prop('props/rail_schema_board', 51.6, 31.4, plan=(C_COVER, ''))
     s.labels.append((46.6, 30.0, 'схема'))
@@ -682,7 +682,7 @@ def ats():
     s.prop('props/phone_booth', 56.4, 35.2, plan=(C_COVER, ''))
     s.prop('props/int_table', 58.5, 41.5)
     s.prop('props/ats_switchboard', 68, 19.6, plan=(C_COVER, ''))
-    mech(s, 68, 20.6, 'switch', 'КОММУТАТОР (перфокарта I)')
+    mech(s, 68, 20.6, 'switch', 'КОММУТАТОР')
     s.prop('props/ats_desk_phones', 70.4, 26.6, True, plan=(C_COVER, ''))
     s.prop('props/int_desk', 67, 31.2, plan=(C_COVER, ''))
     s.prop('props/int_shelf', 65.2, 28.7, plan=(C_COVER, ''))
@@ -691,7 +691,7 @@ def ats():
     s.prop('props/int_shelf', 67.2, 36.7, plan=(C_COVER, ''))
     # пневмопочта: от коммутатора к трём приёмным станциям (часть трубы идёт снаружи по стене)
     pipe(s, [(68, 21.2), (71.3, 21.2), (71.3, 36.6), (70, 36.6)])
-    pipe(s, [(66.4, 21.0), (66.4, 16.4), (56, 16.4), (56, 10.6), (43, 10.6), (43, 12.6)])
+    pipe(s, [(66.4, 21.0), (66.4, 13.4), (56, 13.4), (56, 10.6), (43, 10.6), (43, 12.6)])
     pipe(s, [(43, 10.6), (30, 10.6), (30, 7.1)])
     s.prop('props/ats_pneumo_station', 70, 37.0, plan=(C_COVER, ''))
     mech(s, 70, 37.6, 'capsule:1', 'станция 1')
@@ -699,7 +699,7 @@ def ats():
     mech(s, 43, 13.6, 'capsule:2', 'станция 2')
     s.prop('props/ats_pneumo_station', 30, 7.0, plan=(C_COVER, ''))
     mech(s, 30, 7.6, 'capsule:3', 'станция 3')
-    s.labels.append((57, 15.0, 'трубы пневмопочты'))
+    s.labels.append((57, 12.6, 'трубы пневмопочты'))
     # кабели-перемычки в трёх разных комнатах
     s.prop('props/ats_cable_bundle', 27, 11.4)
     mech(s, 27, 11.4, 'cable:1', 'кабель 1')
@@ -716,12 +716,19 @@ def ats():
     s.prop('props/car_police_2101', 66, 50.5, plan=(C_CAR, ''))
     for (x, y) in [(10.5, 38.5), (13, 38.8), (9, 47)]:
         s.prop('props/subst_cable_drum', x, y, plan=(C_COVER, ''))
-    s.prop('props/subst_reel_stack', 15, 50.6, plan=(C_COVER, ''))
     s.prop('props/ats_cable_tray_stack', 31, 39.6, plan=(C_COVER, ''))
     s.prop('props/ats_diesel_gen', 70, 9, plan=(C_COVER, ''))
     s.prop('props/subst_oil_tank', 64, 12.4, plan=(C_COVER, ''))
     s.prop('props/subst_ktp', 9.6, 17, plan=(C_COVER, ''))
     s.prop('props/subst_relay_cabinet', 44, 40, plan=(C_COVER, ''))
+    s.prop('props/fuel_truck_wreck', 43, 47.6, True, plan=(C_CAR, ''))
+    s.prop('props/ats_cable_tray_stack', 36, 36.6, plan=(C_COVER, ''))
+    s.prop('props/subst_reel_stack', 20, 39.4, plan=(C_COVER, ''))
+    s.prop('props/subst_cable_drum', 33.5, 47.6, plan=(C_COVER, ''))
+    s.prop('props/concrete_barrier', 12, 44.6, plan=(C_COVER, '')); s.prop('props/concrete_barrier', 13.4, 44.8, plan=(C_COVER, ''))
+    s.prop('props/shed_canopy', 16, 50.8, plan=(C_COVER, ''))
+    s.prop('props/junk_pile', 40, 44, plan=(C_SCRAP, ''))
+    s.prop('props/barrel_oil', 57, 37.4, plan=(C_SCRAP, '')); s.prop('props/barrel_water', 57.7, 37.8, plan=(C_SCRAP, ''))
     for (x, y) in [(8, 7), (50, 6), (77.5, 47), (18, 6.5)]:
         s.prop('props/junk_pile', x, y, plan=(C_SCRAP, ''))
     for (x, y) in [(66.5, 9.6), (67.3, 10), (8.5, 30), (9.2, 30.5), (52, 41.5), (78, 18), (40, 6.4), (40.8, 6.8)]:
@@ -747,6 +754,129 @@ def ats():
                'Выходы: ворота (юг), калитка (восток);', 'в здание: главный вход, роллета,', 'боковая дверь (запад), экспедиция.',
                'Корпус ~60×38 м, двор 74×49 м.']
     s.render('ats')
+
+
+# =====================================================================================
+def depot():
+    s = Scene('Депо «Тупик» — РТ тира 1, сложность 4/5 (план, север сверху)', 112, 64, seed=303)
+    s.legend = LEGEND
+    s.ground('ground_grass')
+    s.ground('ground_dirt', [(0, 4), (112, 4), (112, 60), (0, 60)], 8)
+    s.ground('ground_gravel', [(4, 14), (108, 14), (110, 58), (2, 58)], 6, zone=(C_ZONE['grav'], 'двор депо'))
+    s.ground('ground_concrete', s.rect(52, 36, 96, 56), 2)
+    s.ground('ground_concrete', [(88, 31.6), (104, 31.6), (104, 37), (88, 37)], 1)
+    s.ground('ground_asphalt', [(4, 24), (24, 24), (24, 30), (4, 30)], 3)
+    s.zones.insert(0, ([(-9, 7), (121, 7), (121, 13), (-9, 13)], C_RAIL, 'главный ход (насквозь)'))
+    # пути: главный ход, отстой с вагоном (C), путь к рампе (B), тупик (E), путь в локомотивное депо (D)
+    track(s, [(-9, 10), (121, 10)])
+    track(s, [(-9, 44), (36, 44), (90, 44)])            # C → (стрелка 1 прямо) → D в депо
+    track(s, [(36, 44), (54, 30), (106, 30)])           # стрелка 1 в отвод → B → рампа, упор
+    track(s, [(66, 30), (86, 10)])                      # стрелка 2 в отвод → на главный ход (вагон уходит)
+    track(s, [(78, 30), (88, 22), (105, 22)])           # стрелка 3 в отвод → тупик E без рампы
+    for (x, y) in [(40.5, 42.4), (70.5, 28.4), (82.5, 28.4)]:
+        s.dec('rail_switch', x, y)
+    s.labels += [(2, 41.2, 'путь отстоя (вагон)'), (58, 27.6, 'путь к рампе'), (96, 19.6, 'тупик'), (26, 6.6, 'главный ход'), (2, 6.6, '')]
+    for (x, y, k) in [(30, 44.5, 1.3), (60, 30.5, 1.2), (94, 44.4, 1.6), (12, 10.6, 1.2), (98, 30.4, 1.2)]:
+        s.dec('decal_oil_stain', x, y, k)
+    tufts(s, (2, 14, 110, 58), 120, [(56, 37.5, 92.5, 54.5)])
+    for (x, y) in [(28, 50), (48, 20), (70, 52.5), (104, 50)]:
+        s.dec('decal_puddle', x, y, 1.3)
+    # ---------- локомотивное депо: ворота на западе (путь заходит внутрь), задние ворота на востоке ----------
+    BR = 'wallface_brick'
+    s.walls([(56, 42), (56, 38), (92, 38), (92, 42)], 6.0, BR)
+    s.walls([(56, 46), (56, 54), (92, 54), (92, 46)], 6.0, BR, gaps=[(62, 54, 64, 54)])
+    s.wall(62, 54, 64, 54, 6.0, 'wallface_door_metal')
+    s.wall(56, 42, 56, 46, 6.0, 'wallface_rail_shed')                  # ворота депо (запад) — створки открыты
+    s.wall(92, 42, 92, 46, 6.0, 'wallface_rail_shed')                  # задние ворота (восток), заперты
+    s.roof(56, 38, 92, 54, 6.0, 'roof_metal')
+    s.prop('props/gate_leaf_open', 54.6, 41.6, True); s.prop('props/gate_leaf_open', 54.6, 47.8, True)
+    s.prop('props/door_lamp_post', 54.4, 40.4); s.prop('props/porch_front', 63, 55.6)
+    s.labels += [(46.6, 38.6, 'ворота депо'), (60.4, 56.6, 'дверь')]
+    s.prop('props/rail_locomotive', 76, 45.6, plan=(C_COVER, ''))
+    s.labels.append((58, 36.2, 'локомотивное депо (тепловоз)'))
+    s.prop('props/rail_wheelset', 60, 40.6, plan=(C_COVER, ''))
+    s.prop('props/rail_wheelset', 63, 40.6, plan=(C_COVER, ''))
+    s.prop('props/table_workshop' if L('props/table_workshop') else 'props/workbench', 86, 39.6, plan=(C_COVER, ''))
+    s.prop('props/int_shelf', 89.6, 38.8, plan=(C_COVER, ''))
+    s.prop('props/crate_military', 88.6, 52.6, plan=(C_LOOT, ''))
+    for (x, y) in [(60, 52.6), (61, 53)]:
+        s.prop('props/barrel_oil', x, y, plan=(C_SCRAP, ''))
+    s.prop('props/rail_sleepers_stack', 72, 53.4, plan=(C_COVER, ''))
+    # ---------- вагон с крейтом на пути отстоя ----------
+    s.prop('props/rail_freight_wagon', 18, 45.45, plan=(C_CAR, ''))
+    mech(s, 18, 44, 'wagon_start', 'ВАГОН (старт), внутри крейт')
+    s.mark(18, 43.6, C_MECH, 'MECH:crate')
+    mech(s, 97, 30, 'wagon_end', 'вагон у рампы (финиш)')
+    s.prop('props/rail_loading_ramp', 96, 35.6, plan=(C_COVER, ''))
+    s.labels.append((89, 36.6, 'погрузочная рампа'))
+    s.prop('props/rail_buffer_stop', 107.4, 31.2, plan=(C_COVER, ''))
+    s.prop('props/rail_buffer_stop', 106.4, 23.2, plan=(C_COVER, ''))
+    s.prop('props/rail_handcar', 99, 23.4, plan=(C_COVER, ''))
+    # ---------- стрелки и пост ЭЦ ----------
+    s.prop('props/rail_switch_lever', 38.4, 47.4, plan=(C_COVER, ''))
+    mech(s, 38.4, 47.0, 'lever:1', 'стрелка 1')
+    s.prop('props/rail_switch_lever', 67.4, 33.2, plan=(C_COVER, ''))
+    mech(s, 67.4, 32.8, 'lever:2', 'стрелка 2')
+    s.prop('props/rail_switch_lever', 79.4, 33.2, plan=(C_COVER, ''))
+    mech(s, 79.4, 32.8, 'lever:3', 'стрелка 3')
+    s.prop('props/rail_signal_box', 37, 25.6, plan=(C_COVER, ''))
+    s.labels.append((32.6, 19.0, 'пост ЭЦ'))
+    s.prop('props/rail_schema_board', 44.6, 25.4, plan=(C_COVER, ''))
+    mech(s, 44.6, 25.0, 'board', 'СХЕМА стрелок')
+    for (x, y) in [(33, 13.4), (60, 27.4), (104, 13.4), (34, 41.2)]:
+        s.prop('props/rail_signal', x, y, plan=(C_COVER, ''))
+    # ---------- контора депо ----------
+    ST = 'wallface_stucco'
+    s.ground('floor_linoleum', s.rect(6, 15, 20, 23), 0)
+    s.walls([(6, 23), (6, 15), (20, 15), (20, 23), (15, 23)], 3.2, ST)
+    s.wall(6, 23, 12, 23, 3.2, ST); s.wall(12, 23, 13.6, 23, 3.2, 'wallface_door_wood'); s.wall(13.6, 23, 15, 23, 3.2, ST)
+    s.wall(13, 15, 13, 23, 3.0, ST)
+    s.roof(6, 15, 20, 23, 3.2, 'roof_slate')
+    s.prop('props/porch_front', 12.8, 24.6)
+    s.prop('props/int_desk', 9, 16.0, plan=(C_COVER, '')); s.prop('props/int_lockers', 18.4, 15.7, plan=(C_COVER, ''))
+    s.prop('props/crate_wood', 17.6, 21.6, plan=(C_LOOT, ''))
+    s.labels.append((6.2, 13.6, 'контора'))
+    s.prop('props/car_zhiguli_wreck', 10, 28.4, plan=(C_CAR, ''))
+    # ---------- главный ход: цистерны-укрытия ----------
+    s.prop('props/rail_cistern', 50, 11.45, plan=(C_CAR, ''))
+    s.prop('props/rail_cistern', 63, 11.45, plan=(C_CAR, ''))
+    s.prop('props/rail_cistern', 104, 11.45, True, plan=(C_CAR, ''))
+    # ---------- хлам и лут по двору ----------
+    for (x, y) in [(28, 36), (48, 50), (100, 50), (6, 54), (74, 20)]:
+        s.prop('props/junk_pile', x, y, plan=(C_SCRAP, ''))
+    for (x, y) in [(26, 34), (26.8, 34.4), (48.6, 37), (49.3, 37.4), (102, 40.6), (102.7, 41), (9, 50), (84, 17)]:
+        s.prop(random.choice(SCRAP), x, y, plan=(C_SCRAP, ''))
+    for (x, y) in [(30, 52.6), (100, 56), (46, 33.6)]:
+        s.prop('props/rail_sleepers_stack', x, y, plan=(C_COVER, ''))
+    s.prop('props/rail_wheelset', 104, 44.6, plan=(C_COVER, ''))
+    s.prop('props/subst_cable_drum', 22, 36, plan=(C_COVER, ''))
+    s.prop('props/crate_wood', 23.6, 52.4, plan=(C_LOOT, ''))
+    for (x, y) in [(16, 36), (40, 54), (58, 22), (96, 52.5), (6, 33), (88, 26.8)]:
+        s.prop(random.choice(CL), x, y, random.random() < .5)
+    s.prop('props/concrete_barrier', 44, 56.6, plan=(C_COVER, ''))
+    s.prop('props/concrete_barrier', 46.2, 56.4, plan=(C_COVER, ''))
+    lamp(s, 30, 38.6); lamp(s, 52, 35.8, True); lamp(s, 86, 35.6); lamp(s, 24, 24.4)
+    # забор только с юга и востока (север — открытый главный ход)
+    s.walls([(2, 58), (2, 60), (110, 60), (110, 38)], 2.2, 'wallface_concrete', gaps=[(30, 60, 36, 60)])
+    s.labels.append((30.4, 60.6, 'проезд'))
+    # охрана: один с луком на вагоне, двое внизу
+    guard(s, 18, 43.2, 'bow', 'лучник на крыше вагона')
+    guard(s, 50.5, 46.5, 'club', 'сторож у ворот депо (дубинка)')
+    guard(s, 92, 34.2, 'pipe', 'сторож у рампы (труба)', back=True)
+    for (x, y) in [(3, 34), (108, 34), (60, 58.4), (24, 16.8), (110, 56)]:
+        s.prop('plants/bush_1', x, y, random.random() < .5)
+    s.weeds((2, 14, 110, 58), 520, [(55.5, 37.5, 92.5, 54.5), (5.5, 14.5, 20.5, 23.5), (87, 31, 105, 37)])
+    s.weeds((-9, 0, 121, 14), 140, bush=0.05)
+    s.forest([(-9, 3, 121, 61)], 0.5)
+    s.notes = ['#rail|пути', '#car|вагоны, цистерны (укрытия)', '#scrap|бочки и хлам с ломом', '#loot|ящики', '#cover|постройки, укрытия',
+               '#mech|механика', '#guard|сторожа', '', '!Как проходить:', '1. Пост ЭЦ: схема стрелок — какие', '   нужно перевести (каждый раз своя).',
+               '2. Перевести 3 стрелки рычагами', '   (лязг, слышно ~40 м).', '3. Перфокарта I в вагон: вагон', '   трогается и катится на виду',
+               '   (стрелка 1 → путь к рампе,', '   стрелка 2 — мимо главного хода,', '   стрелка 3 — мимо тупика).', '4. У рампы крейт открывается.',
+               '   Ошибся стрелкой — вагон в депо', '   или в тупике, надо переводить', '   и толкать заново.', '',
+               '!Охрана: 3 (лучник на вагоне,', '   дубинка у депо, труба у рампы).', '!Награда: фрагменты ×2,', '   шанс второй перфокарты II.', '',
+               'Открытый двор: простреливается', 'с главного хода и с вагонов.', 'Выходы: по путям на запад и восток,', 'проезд в заборе (юг).',
+               'Размер ~110×60 м. Клетка = 1 м.']
+    s.render('depot')
 
 
 #__RT__

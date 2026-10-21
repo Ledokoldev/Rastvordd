@@ -1139,6 +1139,25 @@ namespace Rastvordd.Sim
             }
         }
 
+        /// <summary>Бот берёт из своего ящика только нужное (рукой: рядом и без стены между).</summary>
+        public bool BotTake(Actor a, Deployable box, string id, int n)
+        {
+            if (box.Storage == null || Vector2.Distance(a.Pos, box.Pos) > InteractRange || !ClearLine(a.Pos, box.Pos, null, true)) return false;
+            int got = 0;
+            for (int i = box.Storage.Items.Count - 1; i >= 0 && got < n; i--)
+            {
+                var s = box.Storage.Items[i];
+                if (s.Id != id || s.State != null) continue;
+                int take = Math.Min(n - got, s.Count);
+                int put = a.AddUpTo(id, take);
+                got += put;
+                s.Count -= put;
+                if (s.Count <= 0) box.Storage.Items.RemoveAt(i);
+                if (put < take) break;
+            }
+            return got > 0;
+        }
+
         /// <summary>Ящик: E — забрать всё, Alt+E (присед) — сложить весь инвентарь (пояс остаётся при себе).</summary>
         void UseBox(Actor a, Deployable box)
         {

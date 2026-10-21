@@ -738,7 +738,7 @@ namespace Rastvordd.Sim
             Doing = $"берёт из ящика: {Items.Name(id)}";
             if (!GoTo(CellC(1, 0) + new Vector2(-0.35f, 0.35f), 0.4f, ref cmd)) return true;
             cmd.Aim = box.Pos;
-            cmd.Interact = Click2();
+            _w.BotTake(_me, box, id, n - _me.Count(id));   // только нужное, а не всё (иначе «сложить — забрать» по кругу)
             return true;
         }
 

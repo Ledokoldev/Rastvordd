@@ -17,6 +17,22 @@ namespace Rastvordd.Client
         public static float H(float meters) => meters * PPM * HS;
     }
 
+    /// <summary>
+    /// Тень от силуэта спрайта: та же картинка чёрным, сплющенная и скошенная вправо-вверх (свет сверху-слева).
+    /// Низ тени совпадает с основанием спрайта — предмет стоит на земле, а не парит над круглым пятном.
+    /// </summary>
+    public static class Shade
+    {
+        public const float Flat = 0.42f, Skew = 0.46f;
+
+        public static void Sprite(CanvasItem ci, Texture2D tex, float scale = 1f, float alpha = 0.32f, float sink = 2f)
+        {
+            ci.DrawSetTransformMatrix(new Transform2D(new Vector2(scale, 0), new Vector2(-Skew * scale, Flat * scale), Vector2.Zero));
+            ci.DrawTexture(tex, new Vector2(-tex.GetWidth() / 2f, -tex.GetHeight() + sink), new Color(0, 0, 0, alpha));
+            ci.DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+        }
+    }
+
     // ---------- персонаж-заглушка: 4 диагональные позы (левые — зеркало правых) ----------
 
     public partial class ActorView2D : Node2D
@@ -495,15 +511,14 @@ namespace Rastvordd.Client
                 {
                     float s = _kind == WallKind.Car ? 1.4f : 1f;
                     float depth = _top.Size.Y;
-                    DrawSetTransform(new Vector2(0, -depth * 0.5f), 0, new Vector2(1, 0.45f));
-                    DrawCircle(new Vector2(3, 0), tex.GetWidth() * 0.5f * s, new Color(0, 0, 0, 0.22f));
+                    Shade.Sprite(this, tex, s, 0.32f * _alpha);
                     DrawSetTransform(Vector2.Zero, 0, new Vector2(s, s));
                     DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 2), new Color(1, 1, 1, _alpha));
                     DrawSetTransform(Vector2.Zero, 0, Vector2.One);
                     return;
                 }
             }
-            DrawRect(new Rect2(_front.Position.X + 3, -2, _front.Size.X, 6), new Color(0, 0, 0, 0.2f));
+            if (!_cut) DrawCastShadow();
             // срез: изнутри дома стены перед персонажем рисуются низкими, как в Project Zomboid
             var frontR = _front;
             var topR = _top;
@@ -532,8 +547,14 @@ namespace Rastvordd.Client
                 // лицевая сторона темнее (в тени), верх светлее — так читается высота
                 float a = _alpha;
                 var tint = _kind == WallKind.Built && _tier == 0 ? new Color(0.85f, 0.92f, 1.05f) : _kind == WallKind.Built && _tier >= 4 ? new Color(0.62f, 0.66f, 0.74f) : Colors.White;
-                DrawTextureRect(frontTex, frontR, true, new Color(0.78f * tint.R, 0.78f * tint.G, 0.78f * tint.B, a));
-                DrawTextureRect(topTex, topR, true, new Color(1.05f * tint.R, 1.05f * tint.G, 1.05f * tint.B, a));
+                DrawTextureRect(frontTex, frontR, true, new Color(0.72f * tint.R, 0.72f * tint.G, 0.72f * tint.B, a));
+                ShadeFace(frontR, a);
+                // верх — материал самой стены, светлее лица (на него падает свет), а не текстура пола:
+                // иначе верх сливается с полом и стена выглядит нарисованной на земле
+                DrawTextureRect(frontTex, topR, true, new Color(1.22f * tint.R, 1.2f * tint.G, 1.15f * tint.B, a));
+                DrawRect(new Rect2(topR.Position.X + 1, topR.Position.Y + 1, Mathf.Max(0, topR.Size.X - 2), 1), new Color(1, 0.97f, 0.9f, 0.18f * a));
+                // светлая кромка на ребре «верх — лицо»: так читается толщина и угол
+                DrawLine(new Vector2(topR.Position.X, topR.End.Y - 0.5f), new Vector2(topR.End.X, topR.End.Y - 0.5f), new Color(1, 0.97f, 0.9f, 0.28f * a), 1);
                 if (_cut) DrawRect(topR, new Color(0, 0, 0, 0.35f), false, 1);
                 if (_locked && !_cut)
                 {
@@ -543,8 +564,7 @@ namespace Rastvordd.Client
                     DrawRect(new Rect2(lp + new Vector2(1, 1), new Vector2(2, 1)), new Color(0.9f, 0.15f, 0.1f, a));
                 }
                 if (_door && !_cut) DrawRect(new Rect2(_front.End.X - Mathf.Min(6, _front.Size.X * 0.3f), _front.Position.Y + _front.Size.Y * 0.5f, 2, 3), new Color(0.15f, 0.13f, 0.1f, a));   // ручка
-                DrawLine(new Vector2(topR.Position.X, topR.End.Y), topR.End, new Color(0, 0, 0, 0.35f), 1);
-                DrawRect(topR, new Color(0, 0, 0, 0.25f), false, 1);
+                DrawRect(topR, new Color(0, 0, 0, 0.3f), false, 1);
                 return;
             }
             if (_kind == WallKind.Built) { DrawRect(_front, new Color(0.45f, 0.36f, 0.25f, _alpha)); DrawRect(_top, new Color(0.6f, 0.5f, 0.35f, _alpha)); return; }
@@ -568,6 +588,45 @@ namespace Rastvordd.Client
 
     public partial class WallView2D
     {
+        /// <summary>
+        /// Тень стены на землю — по тому же свету, что у спрайтов (Shade): след стены, сдвинутый вправо-вверх на высоту,
+        /// плюс тёмная полоса у основания с южной стороны (контакт с землёй).
+        /// </summary>
+        void DrawCastShadow()
+        {
+            float x0 = _front.Position.X, x1 = _front.End.X, d = _top.Size.Y, hh = _front.Size.Y;
+            var o = new Vector2(Shade.Skew * hh, -Shade.Flat * hh);
+            var hull = new[]
+            {
+                new Vector2(x0, 0), new Vector2(x1, 0), new Vector2(x1, 0) + o, new Vector2(x1, -d) + o,
+                new Vector2(x0, -d) + o, new Vector2(x0, -d),
+            };
+            DrawColoredPolygon(hull, new Color(0.03f, 0.04f, 0.03f, 0.3f * _alpha));
+            for (int i = 0; i < 4; i++)
+                DrawRect(new Rect2(x0 - 1, i, x1 - x0 + 2, 1), new Color(0, 0, 0, (0.32f - i * 0.075f) * _alpha));
+        }
+
+        /// <summary>Объём лица стены: внизу темнее (цоколь, затенение у земли), вверху светлее, края — тёмной гранью.</summary>
+        void ShadeFace(Rect2 r, float a)
+        {
+            int rows = Mathf.Max(1, (int)r.Size.Y);
+            for (int i = 0; i < rows; i += 2)
+            {
+                float t = i / (float)rows;                       // 0 — верх, 1 — низ
+                float dark = t > 0.55f ? (t - 0.55f) * 0.55f : 0;
+                float lit = t < 0.12f ? (0.12f - t) * 1.2f : 0;
+                if (dark > 0) DrawRect(new Rect2(r.Position.X, r.Position.Y + i, r.Size.X, 2), new Color(0, 0, 0, dark * a));
+                if (lit > 0) DrawRect(new Rect2(r.Position.X, r.Position.Y + i, r.Size.X, 2), new Color(1, 0.97f, 0.9f, lit * a));
+            }
+            float plinth = Mathf.Min(4, r.Size.Y * 0.12f);
+            DrawRect(new Rect2(r.Position.X, r.End.Y - plinth, r.Size.X, plinth), new Color(0.05f, 0.05f, 0.04f, 0.3f * a));
+            if (r.Size.X > 6)
+            {
+                DrawRect(new Rect2(r.Position.X, r.Position.Y, 1, r.Size.Y), new Color(0, 0, 0, 0.25f * a));
+                DrawRect(new Rect2(r.End.X - 1, r.Position.Y, 1, r.Size.Y), new Color(0, 0, 0, 0.35f * a));
+            }
+        }
+
         /// <summary>Лицевая и верхняя текстуры построенной стены по уровню (дверь — свои).</summary>
         public static (Texture2D front, Texture2D top) BuiltTextures(int tier, bool door) => door
             ? (Art.Get(tier >= 3 ? "walls/wallface_door_metal" : "walls/wallface_door_wood") ?? Art.Get("walls/wallface_wood"), Art.Get("tiles/floor_wood"))
@@ -683,9 +742,13 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.45f));
-            DrawCircle(new Vector2(10, 0), CanopyR * 0.9f, new Color(0, 0, 0, 0.2f));
-            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+            if (_tex != null) Shade.Sprite(this, _tex, 1f, 0.26f);
+            else
+            {
+                DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.45f));
+                DrawCircle(new Vector2(10, 0), CanopyR * 0.9f, new Color(0, 0, 0, 0.2f));
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+            }
             if (_tex != null)
             {
                 DrawTexture(_tex, new Vector2(-_tex.GetWidth() / 2, -_tex.GetHeight() + 2), new Color(1, 1, 1, _alpha));
@@ -741,8 +804,12 @@ namespace Rastvordd.Client
         public override void _Draw()
         {
             float s = _kind == NodeKind.Barrel ? 1f : 0.55f + 0.45f * Mathf.Sqrt(Mathf.Clamp(Fill, 0, 1));   // бочка не уменьшается от ударов
-            DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.4f));
-            DrawCircle(new Vector2(4, 0), 24 * s, new Color(0, 0, 0, 0.22f));
+            if (_tex != null) Shade.Sprite(this, _tex, s, 0.3f, 3f);
+            else
+            {
+                DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.4f));
+                DrawCircle(new Vector2(4, 0), 24 * s, new Color(0, 0, 0, 0.22f));
+            }
             DrawSetTransform(Vector2.Zero, 0, new Vector2(s, s));
             if (_tex != null)
             {
@@ -799,9 +866,7 @@ namespace Rastvordd.Client
             };
             if (tex != null)
             {
-                DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.4f));
-                DrawCircle(new Vector2(2, 0), tex.GetWidth() * 0.4f, new Color(0, 0, 0, 0.22f));
-                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                Shade.Sprite(this, tex);
                 DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 2));
                 return;
             }
@@ -884,9 +949,7 @@ namespace Rastvordd.Client
             }
             if (tex != null)
             {
-                DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.4f));
-                DrawCircle(new Vector2(2, 0), tex.GetWidth() * 0.45f, new Color(0, 0, 0, 0.25f));
-                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                Shade.Sprite(this, tex);
                 DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 2));
                 if (_kind == DeployKind.Furnace && Burning)
                 {
@@ -946,8 +1009,7 @@ namespace Rastvordd.Client
             {
                 // ящики и сумки делаем чуть крупнее реального — иначе их не видно
                 float s = IsCrate ? 1.4f : 1.3f;
-                DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.4f));
-                DrawCircle(new Vector2(2, 0), tex.GetWidth() * 0.5f * s, new Color(0, 0, 0, 0.25f));
+                Shade.Sprite(this, tex, s, 0.32f, 1f);
                 DrawSetTransform(Vector2.Zero, 0, new Vector2(s, s));
                 DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 1), Empty ? new Color(0.45f, 0.45f, 0.45f) : Colors.White);
                 DrawSetTransform(Vector2.Zero, 0, Vector2.One);

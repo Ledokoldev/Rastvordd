@@ -157,7 +157,7 @@ namespace Rastvordd.Sim
         {
             report = null;
             var save = WorldSave.FromJson(json);
-            if (save == null || save.Version != 1 || save.Seed != World.Seed) return false;
+            if (save == null || save.Version != 2 || save.Seed != World.Seed) return false;
             World.Load(save);
             // мир жил, пока игра была закрыта (не больше суток за раз)
             float away = (float)System.Math.Min(24 * 3600, (System.DateTime.UtcNow - save.SavedAtUtc).TotalSeconds);

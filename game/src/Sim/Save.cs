@@ -11,7 +11,7 @@ namespace Rastvordd.Sim
     /// </summary>
     public sealed class WorldSave
     {
-        public int Version = 1;
+        public int Version = 2;   // 2: остров 1 км, малые РТ
         public int Seed;
         public float Time, TimeOffset;
         public int NextId;

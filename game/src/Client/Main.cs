@@ -99,7 +99,9 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("slot")) _slot = int.Parse(a.Substring(4)) - 1;
                 else if (a.StartsWith("craft")) _craftReq = int.Parse(a.Substring(5));
                 else if (a == "stop") _forceWalk = SVec.Zero;
-                else if (a == "bmenu") { _buildMenu.Visible = !_buildMenu.Visible; }
+                else if (a == "bmenu") _buildMenu.Open();
+                else if (a == "bdone") _buildMenu.Release();   // отладка: отпустить ПКМ
+                else if (a.StartsWith("bpick")) { GetViewport().WarpMouse(GetViewport().GetVisibleRect().Size / 2 + new Vector2(0, -1).Rotated(int.Parse(a.Substring(5)) * Mathf.Tau / 5) * 110); }   // отладка: навести на сектор колеса
                 else if (a.StartsWith("give")) { var g = a.Substring(4).Split('x'); _server.World.Find(_myId).Add(g[0], g.Length > 1 ? int.Parse(g[1]) : 1); }   // отладка: give<id>x<n>
                 else if (a.StartsWith("ui")) _uiReq = ((UiOp)int.Parse(a.Substring(2).Split('_')[0]), a.Contains('_') ? a.Substring(a.IndexOf('_') + 1).Replace('~', '#').Replace('^', '>') : null, 0);   // отладка: ui<op>_<арг> (# → ~, > → ^)
                 else if (a == "inv") _invOpen = !_invOpen;
@@ -197,7 +199,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _inv.Op += (op, arg) => _uiReq = (op, arg, 0);
             _hud.AddChild(_inv);
             _buildMenu = new BuildMenu();
-            _buildMenu.Picked += k => { _setPiece = k; _buildMenu.Visible = false; Input.MouseMode = Input.MouseModeEnum.Hidden; };
+            _buildMenu.Picked += k => _setPiece = k;
             _hud.AddChild(_buildMenu);
             _buildBar = new BuildBar { Visible = false };
             _buildBar.SetAnchorsPreset(Control.LayoutPreset.CenterBottom);
@@ -400,14 +402,11 @@ else if (arg == "--atcrate")
                         break;
                 }
             }
+            else if (e is InputEventMouseButton rb && rb.ButtonIndex == MouseButton.Right && !rb.Pressed) _buildMenu.Release();
             else if (e is InputEventMouseButton mb && mb.Pressed)
             {
-                // ПКМ с Планом — меню элементов вместо прицела
-                if (mb.ButtonIndex == MouseButton.Right && _cur?.Self != null && _cur.Self.HoldingPlan)
-                {
-                    _buildMenu.Visible = !_buildMenu.Visible;
-                    Input.MouseMode = _buildMenu.Visible ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
-                }
+                // ПКМ с Планом — колесо элементов (держишь, наводишь, отпускаешь) вместо прицела
+                if (mb.ButtonIndex == MouseButton.Right && _cur?.Self != null && _cur.Self.HoldingPlan && !UiShown) _buildMenu.Open();
                 // с Планом колесо листает элементы стройки (Ctrl+колесо — зум), иначе — зум
                 bool plan = _cur?.Self != null && _cur.Self.HoldingPlan && !mb.CtrlPressed;
                 if (plan && mb.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown)

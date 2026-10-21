@@ -4,55 +4,6 @@ using Godot;
 
 namespace Rastvordd.Client
 {
-    /// <summary>Плитка элемента стройки: иконка в металлической ячейке, название и цена (красная — не хватает ресурсов).</summary>
-    public partial class BuildTile : Control
-    {
-        public const float W = 104, H = 132;
-        public int Kind;
-        public string Title, Cost, Hint;
-        public bool Can, Selected;
-        public event Action<int> Picked;
-        bool _hover;
-
-        public BuildTile()
-        {
-            CustomMinimumSize = new Vector2(W, H);
-            MouseFilter = MouseFilterEnum.Stop;
-            MouseDefaultCursorShape = CursorShape.PointingHand;
-        }
-
-        public override void _Ready()
-        {
-            MouseEntered += () => { _hover = true; QueueRedraw(); };
-            MouseExited += () => { _hover = false; QueueRedraw(); };
-        }
-
-        static readonly string[] IconIds = { "foundation", "wall", "doorway", "window", "door" };
-
-        public override void _Draw()
-        {
-            var cell = new Rect2(0, 0, W, W);
-            UiTheme.DrawSlot(this, cell, _hover);
-            var icon = Art.Get($"icons/icon_build_{IconIds[Math.Clamp(Kind, 0, IconIds.Length - 1)]}");
-            if (icon != null) DrawTextureRect(icon, new Rect2(12, 10, W - 24, W - 24), false, Can ? Colors.White : new Color(0.55f, 0.5f, 0.5f));
-            DrawString(UiTheme.Text, new Vector2(8, 17), (Kind + 1).ToString(), HorizontalAlignment.Left, -1, 12, Selected ? UiTheme.Accent : UiTheme.Dim);
-            if (Selected) DrawRect(cell.Grow(-1), UiTheme.Accent, false, 2);
-
-            var text = UiTheme.Text;
-            var ts = text.GetStringSize(Title, HorizontalAlignment.Left, -1, 13);
-            DrawString(text, new Vector2((W - ts.X) / 2, W + 14), Title, HorizontalAlignment.Left, -1, 13, Selected ? UiTheme.Accent : UiTheme.Ink);
-            var cs = text.GetStringSize(Cost, HorizontalAlignment.Left, -1, 11);
-            DrawString(text, new Vector2((W - cs.X) / 2, W + 28), Cost, HorizontalAlignment.Left, -1, 11, Can ? UiTheme.Dim : new Color(0.9f, 0.42f, 0.38f));
-        }
-
-        public override string _GetTooltip(Vector2 atPosition) => $"{Title}\n{Hint}\nцена: {Cost}{(Can ? "" : "\nне хватает ресурсов")}";
-
-        public override void _GuiInput(InputEvent e)
-        {
-            if (e is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left) { Picked?.Invoke(Kind); AcceptEvent(); }
-        }
-    }
-
     /// <summary>Полоска элементов над поясом, пока План в руках: выбранный подсвечен, колесо мыши листает.</summary>
     public partial class BuildBar : Control
     {
@@ -76,7 +27,7 @@ namespace Rastvordd.Client
         public override void _Draw()
         {
             float w = 5 * C + 4 * Gap;
-            string cap = $"{Rastvordd.Sim.Building.KindName((Rastvordd.Sim.StructKind)_sel)}   ·   колесо — сменить   ·   ПКМ — меню";
+            string cap = $"{Rastvordd.Sim.Building.KindName((Rastvordd.Sim.StructKind)_sel)}   ·   зажми ПКМ — колесо";
             var fs = UiTheme.Text.GetStringSize(cap, HorizontalAlignment.Left, -1, 12);
             DrawString(UiTheme.Text, new Vector2((w - fs.X) / 2 + 1, 13), cap, HorizontalAlignment.Left, -1, 12, new Color(0, 0, 0, 0.8f));
             DrawString(UiTheme.Text, new Vector2((w - fs.X) / 2, 12), cap, HorizontalAlignment.Left, -1, 12, UiTheme.Ink);
@@ -92,79 +43,137 @@ namespace Rastvordd.Client
         }
     }
 
-    /// <summary>Меню плана (ПКМ с Планом в руках): сетка элементов стройки, клик или цифра — выбрать.</summary>
-    public partial class BuildMenu : PanelContainer
+    /// <summary>
+    /// Колесо стройки как в Расте: пока зажата ПКМ с Планом — круг секторов вокруг центра экрана,
+    /// ведёшь мышь к сектору, отпускаешь ПКМ — элемент выбран. Мышь у центра — выбор не меняется.
+    /// </summary>
+    public partial class BuildMenu : Control
     {
         public event Action<int> Picked;
-        readonly HBoxContainer _row;
-        readonly Label _desc;
-        string _sig;
-        readonly List<BuildTile> _tiles = new();
-
-        public BuildMenu()
-        {
-            Visible = false;
-            Theme = UiTheme.Theme;
-            var root = new VBoxContainer();
-            root.AddThemeConstantOverride("separation", 10);
-            AddChild(root);
-            root.AddChild(UiTheme.Header("СТРОЙКА", out _));
-            _row = new HBoxContainer();
-            _row.AddThemeConstantOverride("separation", 10);
-            root.AddChild(_row);
-            _desc = UiTheme.Small("", UiTheme.Ink, 14);
-            _desc.HorizontalAlignment = HorizontalAlignment.Center;
-            _desc.AutowrapMode = TextServer.AutowrapMode.Off;
-            root.AddChild(_desc);
-            var tip = UiTheme.Small("Всё ставится каркасом — потом Киянкой (ЛКМ) улучшаешь до дерева и камня.\nКлик или цифра 1–5 — выбрать · ПКМ — закрыть", null, 12);
-            tip.HorizontalAlignment = HorizontalAlignment.Center;
-            tip.AutowrapMode = TextServer.AutowrapMode.Off;
-            root.AddChild(tip);
-        }
-
+        const float Outer = 160, Inner = 58, IconR = 110, IconSize = 58;
+        static readonly string[] IconIds = { "foundation", "wall", "doorway", "window", "door" };
         static readonly Dictionary<string, string> Hints = new()
         {
             ["Фундамент"] = "пол 2×2 м, с него всё начинается",
             ["Стена"] = "на край фундамента",
-            ["Дверной проём"] = "стена с проходом, в неё ставится дверь",
-            ["Окно"] = "стена с окном: видно и можно стрелять",
+            ["Дверной проём"] = "стена с проходом под дверь",
+            ["Окно"] = "видно и можно стрелять",
             ["Дверь"] = "в дверной проём",
         };
+        List<(int kind, string name, string cost, bool can)> _pieces = new();
+        int _current, _hover = -1;
+
+        public BuildMenu()
+        {
+            Visible = false;
+            MouseFilter = MouseFilterEnum.Ignore;
+            SetAnchorsPreset(LayoutPreset.FullRect);
+        }
+
+        Vector2 Center => GetViewportRect().Size / 2;
 
         public void Fill(List<(int kind, string name, string cost, bool can)> pieces, int current)
         {
-            string sig = current + "|" + string.Join(";", pieces.ConvertAll(p => p.name + p.cost + p.can));
-            if (sig == _sig) return;
-            _sig = sig;
-            foreach (var c in _row.GetChildren()) c.QueueFree();
-            _tiles.Clear();
-            foreach (var (kind, name, cost, can) in pieces)
-            {
-                var t = new BuildTile { Kind = kind, Title = name, Cost = cost, Can = can, Selected = kind == current, Hint = Hints.GetValueOrDefault(name, "") };
-                t.Picked += k => Picked?.Invoke(k);
-                t.MouseEntered += () => _desc.Text = $"{t.Title} — {t.Hint}";
-                _row.AddChild(t);
-                _tiles.Add(t);
-                if (t.Selected) _desc.Text = $"{t.Title} — {t.Hint}";
-            }
-            CallDeferred(nameof(Recenter));
+            _pieces = pieces;
+            _current = current;
         }
 
-        /// <summary>Цифры 1–5 выбирают элемент, пока меню открыто.</summary>
+        /// <summary>ПКМ нажата: показать колесо, курсор — в центр.</summary>
+        public void Open()
+        {
+            Visible = true;
+            _hover = -1;
+            Input.MouseMode = Input.MouseModeEnum.Visible;
+            GetViewport().WarpMouse(Center);
+            QueueRedraw();
+        }
+
+        /// <summary>ПКМ отпущена: выбрать сектор под курсором и закрыть.</summary>
+        public void Release()
+        {
+            if (!Visible) return;
+            Visible = false;
+            Input.MouseMode = Input.MouseModeEnum.Hidden;
+            if (_hover >= 0 && _hover < _pieces.Count) Picked?.Invoke(_pieces[_hover].kind);
+        }
+
+        /// <summary>Цифры 1–5 выбирают элемент, пока колесо открыто.</summary>
         public bool PickByKey(Key key)
         {
             int i = (int)(key - Key.Key1);
-            if (!Visible || i < 0 || i >= _tiles.Count) return false;
-            Picked?.Invoke(_tiles[i].Kind);
+            if (!Visible || i < 0 || i >= _pieces.Count) return false;
+            _hover = i;
+            Release();
             return true;
         }
 
-        void Recenter()
+        static float SectorAngle(int k, int n) => -Mathf.Pi / 2 + k * Mathf.Tau / n;   // первый сектор — сверху, дальше по часовой
+
+        public override void _Process(double delta)
         {
-            var vs = GetViewportRect().Size;
-            Size = Vector2.Zero;
-            Size = GetCombinedMinimumSize();
-            Position = (vs - Size) / 2;
+            if (!Visible) return;
+            int n = Math.Max(1, _pieces.Count);
+            var d = GetViewport().GetMousePosition() - Center;
+            int h = -1;
+            if (d.Length() > Inner * 0.6f)
+            {
+                float a = Mathf.PosMod(d.Angle() + Mathf.Pi / 2 + Mathf.Pi / n, Mathf.Tau);
+                h = (int)(a / (Mathf.Tau / n)) % n;
+            }
+            if (h != _hover) { _hover = h; QueueRedraw(); }
+        }
+
+        static Vector2[] Ring(Vector2 c, float r0, float r1, float a0, float a1)
+        {
+            const int steps = 18;
+            var pts = new Vector2[(steps + 1) * 2];
+            for (int i = 0; i <= steps; i++)
+            {
+                float a = Mathf.Lerp(a0, a1, i / (float)steps);
+                pts[i] = c + Vector2.FromAngle(a) * r1;
+                pts[pts.Length - 1 - i] = c + Vector2.FromAngle(a) * r0;
+            }
+            return pts;
+        }
+
+        public override void _Draw()
+        {
+            int n = _pieces.Count;
+            if (n == 0) return;
+            var c = Center;
+            float step = Mathf.Tau / n, gap = 0.025f;
+            for (int k = 0; k < n; k++)
+            {
+                float mid = SectorAngle(k, n);
+                bool hov = k == _hover, cur = _pieces[k].kind == _current;
+                float r1 = hov ? Outer + 8 : Outer;
+                DrawColoredPolygon(Ring(c, Inner, r1, mid - step / 2 + gap, mid + step / 2 - gap),
+                    hov ? new Color(0.2f, 0.2f, 0.19f, 0.92f) : new Color(0.07f, 0.07f, 0.07f, 0.82f));
+                if (hov || cur)
+                    DrawColoredPolygon(Ring(c, r1 - 3, r1, mid - step / 2 + gap, mid + step / 2 - gap), hov ? UiTheme.Accent : new Color(UiTheme.Accent, 0.5f));
+                var icon = Art.Get($"icons/icon_build_{IconIds[Math.Clamp(_pieces[k].kind, 0, IconIds.Length - 1)]}");
+                var ip = c + Vector2.FromAngle(mid) * (hov ? IconR + 4 : IconR);
+                float s = hov ? IconSize + 8 : IconSize;
+                if (icon != null) DrawTextureRect(icon, new Rect2(ip - new Vector2(s, s) / 2, new Vector2(s, s)), false, _pieces[k].can ? Colors.White : new Color(0.6f, 0.55f, 0.55f));
+            }
+            // центр: что под курсором
+            DrawCircle(c, Inner - 6, new Color(0.05f, 0.05f, 0.05f, 0.88f));
+            int show = _hover >= 0 ? _hover : _pieces.FindIndex(p => p.kind == _current);
+            if (show < 0) return;
+            var (_, name, cost, can) = _pieces[show];
+            var font = UiTheme.Text;
+            void Line(string t, float y, int size, Color col)
+            {
+                var sz = font.GetStringSize(t, HorizontalAlignment.Left, -1, size);
+                DrawString(font, new Vector2(c.X - sz.X / 2, c.Y + y), t, HorizontalAlignment.Left, -1, size, col);
+            }
+            Line(name, -4, 14, _hover >= 0 ? UiTheme.Accent : UiTheme.Ink);
+            Line(cost, 14, 11, can ? UiTheme.Dim : new Color(0.9f, 0.42f, 0.38f));
+            string hint = Hints.GetValueOrDefault(name, "");
+            var hs = font.GetStringSize(hint, HorizontalAlignment.Left, -1, 13);
+            var hp = new Vector2(c.X - hs.X / 2, c.Y + Outer + 34);
+            DrawString(font, hp + Vector2.One, hint, HorizontalAlignment.Left, -1, 13, new Color(0, 0, 0, 0.9f));
+            DrawString(font, hp, hint, HorizontalAlignment.Left, -1, 13, UiTheme.Ink);
         }
     }
 }

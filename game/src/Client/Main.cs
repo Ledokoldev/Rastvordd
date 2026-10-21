@@ -31,6 +31,11 @@ namespace Rastvordd.Client
         PickupFeed _feed;
         Label _guide;
         int _setPiece = -1;
+        // наблюдатель (песочница ботов)
+        bool _spectate;
+        int _followId, _timeScale = 1;
+        float _specRefresh;
+        Label _specPanel;
         string _researchReq;      // изучить узел дерева (id)
         (UiOp op, string item, int index)? _uiReq;
         bool UiShown => _inv.Visible;
@@ -147,7 +152,9 @@ namespace Rastvordd.Client
                 try { loaded = _server.LoadSave(FileAccess.GetFileAsString(SavePath), out _awayReport); }
                 catch (System.Exception ex) { GD.PrintErr($"сохранение не прочитано: {ex.Message}"); }
             }
-            _myId = _server.Connect("Игрок");
+            // песочница: --spectate — без своего персонажа, смотреть на ботов
+            _spectate = System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--spectate") >= 0;
+            _myId = _spectate ? _server.ConnectSpectator() : _server.Connect("Игрок");
             // отладка: --simtest=600[,бот] — прокрутить 600 с мира без отрисовки и встать рядом с ботом
             var st = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--simtest="));
             if (st != null)
@@ -379,6 +386,7 @@ else if (arg == "--atcrate")
             if (e is InputEventKey k && k.Pressed && !k.Echo)
             {
                 if (_buildMenu.PickByKey(k.PhysicalKeycode)) return;
+                if (_spectate && SpectatorKey(k.PhysicalKeycode)) return;
                 switch (k.PhysicalKeycode)
                 {
                     case Key.R: _reloadEdge = true; break;
@@ -434,6 +442,51 @@ else if (arg == "--atcrate")
             }
         }
 
+        /// <summary>Наблюдатель: Tab — следующий бот, F — свободная камера, 1–4 — скорость ×1/×2/×4/×8.</summary>
+        bool SpectatorKey(Key key)
+        {
+            switch (key)
+            {
+                case Key.Tab:
+                    var bots = _server.BotLines();
+                    if (bots.Count == 0) return true;
+                    int i = bots.FindIndex(b => b.id == _followId);
+                    _followId = bots[(i + 1) % bots.Count].id;
+                    return true;
+                case Key.F: _followId = 0; return true;
+                case Key.Key1: _timeScale = 1; return true;
+                case Key.Key2: _timeScale = 2; return true;
+                case Key.Key3: _timeScale = 4; return true;
+                case Key.Key4: _timeScale = 8; return true;
+            }
+            return false;
+        }
+
+        void UpdateSpectatorPanel(float dt)
+        {
+            if (_specPanel == null)
+            {
+                _specPanel = new Label { Position = new Vector2(16, 96), MouseFilter = Control.MouseFilterEnum.Ignore };
+                _specPanel.AddThemeFontSizeOverride("font_size", 14);
+                _specPanel.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.9f));
+                _specPanel.AddThemeConstantOverride("outline_size", 5);
+                _hud.AddChild(_specPanel);
+            }
+            if ((_specRefresh -= dt) > 0) return;
+            _specRefresh = 0.4f;
+            var sb = new System.Text.StringBuilder();
+            sb.Append($"НАБЛЮДАТЕЛЬ · скорость ×{_timeScale} · время {(int)(_server.World.Time / 60):00}:{(int)(_server.World.Time % 60):00}\n");
+            sb.Append("Tab — следующий бот · F — свободная камера · WASD/Shift — лететь · 1–4 — скорость ×1/×2/×4/×8\n\n");
+            foreach (var (id, line) in _server.BotLines()) sb.Append(id == _followId ? "▶ " : "   ").Append(line).Append('\n');
+            var ms = _server.World.Milestones;
+            if (ms.Count > 0)
+            {
+                sb.Append("\nВЕХИ\n");
+                for (int i = System.Math.Max(0, ms.Count - 12); i < ms.Count; i++) sb.Append("   ").Append(ms[i]).Append('\n');
+            }
+            _specPanel.Text = sb.ToString();
+        }
+
         InputCmd BuildCmd()
         {
             var move = SVec.Zero;
@@ -445,6 +498,7 @@ else if (arg == "--atcrate")
             move += _forceWalk;
             return new InputCmd
             {
+                Follow = _followId,
                 Move = move,
                 Aim = _aim,
                 Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
@@ -531,9 +585,9 @@ else if (arg == "--atcrate")
             RunScript();
             UpdateAim((float)delta);
 
-            _acc += delta;
-            int steps = 0;
-            while (_acc >= World.Dt && steps < 5)
+            _acc += delta * _timeScale;
+            int steps = 0, maxSteps = 5 * _timeScale;
+            while (_acc >= World.Dt && steps < maxSteps)
             {
                 _prevActors.Clear();
                 foreach (var a in _cur.Actors) _prevActors[a.Id] = a;
@@ -557,7 +611,8 @@ else if (arg == "--atcrate")
                 _acc -= World.Dt;
                 steps++;
             }
-            if (steps == 5) _acc = 0;
+            if (steps == maxSteps) _acc = 0;
+            if (_spectate) UpdateSpectatorPanel((float)delta);
 
             float alpha = (float)(_acc / World.Dt);
             float dt = (float)delta;
@@ -879,12 +934,12 @@ else if (arg == "--atcrate")
                 seen.Add(a.Id);
                 if (!_actorViews.TryGetValue(a.Id, out var view))
                 {
-                    view = new ActorView2D(a.IsNpc, a.Id == _myId);
+                    view = new ActorView2D(a.IsNpc, a.Id == _myId && !_spectate);
                     view.MagDropped += SpawnMag;
                     _world.AddChild(view);
                     _actorViews[a.Id] = view;
                 }
-                view.Visible = true;
+                view.Visible = !(_spectate && a.Id == _myId);   // наблюдателя в мире нет
                 var pos = a.Pos;
                 float facing = a.Facing, speed = 0;
                 if (_prevActors.TryGetValue(a.Id, out var prev) && SVec.Distance(prev.Pos, a.Pos) < 3)
@@ -942,7 +997,7 @@ else if (arg == "--atcrate")
                 seen.Add(b.Id);
                 if (!_bagViews.TryGetValue(b.Id, out var v))
                 {
-                    v = new BagView2D { IsCrate = b.IsCrate, Position = Iso.Px(b.Pos) };
+                    v = new BagView2D { IsCrate = b.IsCrate, Safe = b.Safe, Position = Iso.Px(b.Pos) };
                     _world.AddChild(v);
                     _bagViews[b.Id] = v;
                 }
@@ -1167,7 +1222,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             if (_rays == null) { _rays = new VisionRays(_map); if (_build != null) _rays.Dynamic.AddRange(_build.Occluders); }
             _rays.Update(selfM, range, _cur.Nodes);
             VisionFx.Update(_selfPx, dir.LengthSquared() > 0.01f ? dir.Normalized() : Vector2.Right,
-                            Mathf.Cos(Mathf.DegToRad((130 - 70 * _peek) * 0.5f)), range, _rays.Texture, !s.Dead);
+                            Mathf.Cos(Mathf.DegToRad((130 - 70 * _peek) * 0.5f)), range, _rays.Texture, !s.Dead && !_spectate);   // наблюдатель видит всё
 
             // прицел: круг = реальный разброс на дистанции до курсора
             var mouse = _autoAim.HasValue ? canvas * (Iso.Px(_aim) - new Vector2(0, Iso.GunH)) : GetViewport().GetMousePosition();

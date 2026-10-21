@@ -306,10 +306,16 @@ namespace Rastvordd.Sim
         float _nodeBest = float.MaxValue, _nodeNoProgress;
 
         Vector2 _wanderTo;
+        float _wanderBest = float.MaxValue, _wanderStuck;
         void Wander(ref InputCmd cmd)
         {
+            // упёрлись (точка за стеной или в воде) — 5 с без продвижения: выбираем другую
+            float wd = Vector2.Distance(_wanderTo, _me.Pos);
+            if (wd < _wanderBest - 0.3f) { _wanderBest = wd; _wanderStuck = 0; }
+            else if ((_wanderStuck += World.Dt) > 5f) _wanderTo = default;
             if (_wanderTo == default || Vector2.Distance(_wanderTo, _me.Pos) < 2)
             {
+                _wanderBest = float.MaxValue; _wanderStuck = 0;
                 float a = (float)(_rng.NextDouble() * Math.PI * 2);
                 _wanderTo = _me.Pos + new Vector2(MathF.Cos(a), MathF.Sin(a)) * 25;
                 if (!_w.Terrain.IsLand(_wanderTo)) _wanderTo = _me.Pos * 0.8f;
@@ -323,7 +329,7 @@ namespace Rastvordd.Sim
             float bd = 90;
             foreach (var p in _w.Pickups)
             {
-                if (p.Kind != kind || !p.Available) continue;
+                if (p.Kind != kind || !p.Available || _badPickups.Contains(p)) continue;
                 if (_w.NearMonument(p.Pos, 18)) continue;
                 float d = Vector2.Distance(p.Pos, _me.Pos);
                 if (d < bd) { bd = d; best = p; }
@@ -335,9 +341,17 @@ namespace Rastvordd.Sim
         {
             var p = NearestPickup(kind);
             if (p == null) return false;
-            if (GoTo(p.Pos, 1.2f, ref cmd)) cmd.Interact = true;
+            // не подходим 8 с — пикап недоступен (за стеной, в воде), ищем другой
+            float d = Vector2.Distance(_me.Pos, p.Pos);
+            if (p != _pickTarget) { _pickTarget = p; _pickBest = d; _pickNoProgress = 0; }
+            else if (d < _pickBest - 0.3f) { _pickBest = d; _pickNoProgress = 0; }
+            else if ((_pickNoProgress += World.Dt) > 8f) { _badPickups.Add(p); _pickTarget = null; return false; }
+            if (GoTo(p.Pos, 1.2f, ref cmd)) cmd.Interact = Click2();
             return true;
         }
+        Pickup _pickTarget;
+        float _pickBest, _pickNoProgress;
+        readonly HashSet<Pickup> _badPickups = new();
 
         // ---------- угроза ----------
 
@@ -345,7 +359,7 @@ namespace Rastvordd.Sim
         {
             foreach (var a in _w.Actors)
             {
-                if (a == _me || a.Dead) continue;
+                if (a == _me || a.Dead || a.Spectator) continue;
                 float d = Vector2.Distance(a.Pos, _me.Pos);
                 bool armed = a.Weapon != null && !a.Weapon.Def.Melee;
                 bool hitMe = _me.LastAttacker == a.Id && _w.Time - _me.LastDamagedTime < 4f;
@@ -387,6 +401,13 @@ namespace Rastvordd.Sim
                 return cmd;
             }
 
+            // ранен и нечем лечиться — бинт из ткани (конопля)
+            if (_me.Hp < 60 && _me.Count("bandage") == 0 && _fleeTime <= 0)
+            {
+                if (_me.Count("cloth") >= 4) { if (Craft("bandage", ref cmd)) return cmd; }
+                else { Doing = "ищет коноплю на бинт"; if (UsePickup(PickupKind.Hemp, ref cmd)) return cmd; }
+            }
+            if (_me.Hp < 70 && _me.Count("bandage") > 0) cmd.Heal = true;
             // голод и жажда
             if (_me.Food < 35 && (_me.Count("berries") > 0 || _me.Count("canned") > 0)) cmd.Eat = true;
             if (_me.Water < 30) { Doing = "идёт пить"; if (UsePickup(PickupKind.WaterBarrel, ref cmd)) return cmd; }
@@ -619,7 +640,7 @@ namespace Rastvordd.Sim
                 int metal = _me.Count("metal_fragments");
                 foreach (var it in box.Storage.Items) if (it.Id == "metal_fragments") metal += it.Count;
                 var furnace = MyFurnace();
-                if (furnace == null && metal < 300)
+                if (furnace == null && metal < _metalGoal)
                 {
                     if (!Has("deploy_furnace"))
                     {
@@ -646,8 +667,10 @@ namespace Rastvordd.Sim
                         cmd.Interact = Click2();
                         return;
                     }
-                    if (metal < 300 && !furnace.Burning && _me.Count("metal_ore") < 60 && !Need("metal_ore", 60, ref cmd)) return;
+                    if (metal < _metalGoal && !furnace.Burning && _me.Count("metal_ore") < 60 && !Need("metal_ore", 60, ref cmd)) return;
                 }
+                // 8г. прогрессия: лом → верстак 1 → изучение → верстак 2 → … → верстак 3
+                if (Progress(box, metal, ref cmd)) return;
             }
 
             // 9. отнести добычу (камень копим, пока дом не каменный)
@@ -668,10 +691,144 @@ namespace Rastvordd.Sim
         bool _int;
         bool Click2() { _int = !_int; return _int; }
 
+        // ---------- прогрессия: верстаки и изучение ----------
+
+        int _metalGoal = 300;
+        static readonly string[] ResearchOrder = { "gunpowder", "ammo_pistol", "weapon_pipe", "ammo_rifle", "expl_satchel", "weapon_ak", "expl_c4" };
+        static readonly string[] BenchIds = { "deploy_workbench", "deploy_workbench2", "deploy_workbench3" };
+
+        /// <summary>Где у дома стоят верстаки (с востока, в ряд) и откуда с ними работать.</summary>
+        Vector2 BenchSpot(int level) => level switch { 1 => CellC(2, 0) + new Vector2(0.2f, -0.3f), 2 => CellC(2, 1) + new Vector2(0.2f, 0.3f), _ => CellC(3, 0) + new Vector2(0.6f, 1.0f) };
+        Vector2 BenchStand => CellC(3, 1) + new Vector2(-0.4f, -0.6f);
+
+        int MyBenchLevel()
+        {
+            int lvl = 0;
+            foreach (var d in _w.Deployables) if (d.Kind == DeployKind.Workbench && d.OwnerId == _me.Id) lvl = Math.Max(lvl, Math.Max(1, d.Level));
+            return lvl;
+        }
+
+        int InBox(Deployable box, string id)
+        {
+            int n = 0;
+            foreach (var it in box.Storage.Items) if (it.Id == id) n += it.Count;
+            return n;
+        }
+
+        /// <summary>Нужно n штук в кармане: забрать из ящика (E — всё), иначе false.</summary>
+        bool TakeFromBox(Deployable box, string id, int n, ref InputCmd cmd)
+        {
+            if (_me.Count(id) >= n || InBox(box, id) == 0) return false;
+            Doing = $"берёт из ящика: {Items.Name(id)}";
+            if (!GoTo(CellC(1, 0) + new Vector2(-0.35f, 0.35f), 0.4f, ref cmd)) return true;
+            cmd.Aim = box.Pos;
+            cmd.Interact = Click2();
+            return true;
+        }
+
+        /// <summary>true — бот занят прогрессией в этот тик; false — всё сделано или ждём металл из печи.</summary>
+        bool Progress(Deployable box, int metal, ref InputCmd cmd)
+        {
+            int lvl = MyBenchLevel();
+            int scrap = _me.Count("scrap") + InBox(box, "scrap");
+
+            // изучить, что доступно на нашем уровне
+            foreach (var id in ResearchOrder)
+            {
+                var n = Tech.Get(id);
+                if (n == null || _me.Known.Contains(id) || n.Bench > lvl || !Array.TrueForAll(n.Requires, r => _me.Known.Contains(r))) continue;
+                if (scrap < n.Scrap) return GetScrap(n.Scrap, box, ref cmd);
+                if (TakeFromBox(box, "scrap", n.Scrap, ref cmd)) return true;
+                Doing = $"изучает: {Items.Name(id)}";
+                if (!GoTo(BenchStand, 0.6f, ref cmd)) return true;
+                cmd.Aim = BenchSpot(lvl);
+                cmd.Research = id;
+                return true;
+            }
+
+            // следующий верстак
+            if (lvl >= 3) return false;
+            string bench = BenchIds[lvl];
+            if (Has(bench))
+            {
+                Doing = $"ставит {Items.Name(bench)}";
+                var spot = BenchSpot(lvl + 1);
+                if (!GoTo(spot + new Vector2(1.6f, 0), 0.5f, ref cmd)) return true;
+                cmd.Aim = spot;
+                if (Hold(bench, ref cmd)) Click(ref cmd);
+                return true;
+            }
+            var r = Recipes.All[Recipe(bench)];
+            foreach (var (id, n) in r.Cost)
+            {
+                if (_me.Count(id) >= n) continue;
+                if (TakeFromBox(box, id, n, ref cmd)) return true;
+                if (id == "scrap") return GetScrap(n, box, ref cmd);
+                if (id == "metal_fragments") { _metalGoal = Math.Max(_metalGoal, n + 60); Doing = $"копит металл на {Items.Name(bench)} ({metal}/{n})"; return metal >= n ? false : false; }
+                return !Need(id, n, ref cmd) || true;
+            }
+            // всё есть — крафтим у текущего верстака
+            if (lvl > 0 && !GoTo(BenchStand, 0.6f, ref cmd)) { Doing = $"идёт крафтить {Items.Name(bench)}"; return true; }
+            if (!Craft(bench, ref cmd)) Doing = $"не может скрафтить {Items.Name(bench)}";
+            return true;
+        }
+
+        // ---------- металлолом: бочки, кучи хлама, сумки ----------
+
+        ResourceNode _scrapNode;
+        float _scrapTimer;
+        readonly HashSet<ResourceNode> _badScrap = new();
+
+        /// <summary>Набрать n лома: сначала подобрать выпавшее рядом, потом ближайшие кучи и бочки, подальше от охраны.</summary>
+        bool GetScrap(int n, Deployable box, ref InputCmd cmd)
+        {
+            if (_me.Count("scrap") >= n) return false;
+            // сумка рядом (из разбитой бочки) — подобрать
+            foreach (var b in _w.Bags)
+            {
+                if (b.Empty || b.IsCrate || Vector2.Distance(b.Pos, _me.Pos) > 8) continue;
+                Doing = "подбирает хлам";
+                if (MoveTo(b.Pos, 0.9f, ref cmd)) cmd.Interact = Click2();
+                return true;
+            }
+            if (_scrapNode == null || !_w.Nodes.Contains(_scrapNode) || (_scrapTimer -= World.Dt) < 0)
+            {
+                _scrapNode = null;
+                float best = float.MaxValue;
+                foreach (var nd in _w.NodesInRadius(_me.Pos, 220, _nodeBuf))
+                {
+                    if (nd.Kind is not (NodeKind.Barrel or NodeKind.Junk) || _badScrap.Contains(nd) || Guarded(nd.Pos)) continue;
+                    float d = Vector2.Distance(nd.Pos, _me.Pos) * (nd.Kind == NodeKind.Junk ? 0.6f : 1f);   // в куче лома больше
+                    if (d < best) { best = d; _scrapNode = nd; }
+                }
+                _scrapTimer = 30;
+                _nodeBest = float.MaxValue; _nodeNoProgress = 0;
+                if (_scrapNode == null) { Doing = "ищет лом"; Wander(ref cmd); return true; }
+            }
+            float dist = Vector2.Distance(_me.Pos, _scrapNode.Pos);
+            if (dist < _nodeBest - 0.3f) { _nodeBest = dist; _nodeNoProgress = 0; }
+            else if ((_nodeNoProgress += World.Dt) > 6f && dist > _scrapNode.Radius + 1.0f) { _badScrap.Add(_scrapNode); _scrapNode = null; return true; }
+            Doing = _scrapNode.Kind == NodeKind.Junk ? $"ковыряет хлам (лом {_me.Count("scrap")}/{n})" : $"бьёт бочку (лом {_me.Count("scrap")}/{n})";
+            if (!MoveTo(_scrapNode.Pos, _scrapNode.Radius + 0.9f, ref cmd)) return true;
+            cmd.Aim = _scrapNode.Pos;
+            string tool = _scrapNode.Kind == NodeKind.Junk ? (Has("tool_pickaxe") ? "tool_pickaxe" : "tool_rock")
+                                                         : (Has("weapon_spear") ? "weapon_spear" : Has("tool_hatchet") ? "tool_hatchet" : "tool_rock");
+            if (Hold(tool, ref cmd)) cmd.Fire = true;
+            return true;
+        }
+
+        /// <summary>Рядом живая охрана РТ — туда без оружия не ходим.</summary>
+        bool Guarded(Vector2 p)
+        {
+            foreach (var a in _w.Actors)
+                if (a.Team == Team.Npc && !a.Dead && Vector2.DistanceSquared(a.Pos, p) < 32 * 32) return true;
+            return false;
+        }
+
         // ---------- роумер: охота на слабых, лут трупов, обход РТ ----------
 
         Actor _prey;
-        float _preyTimer, _aimDrift;
+        float _preyTimer, _aimDrift, _roamBest = float.MaxValue, _roamStuck;
         Vector2 _roamTo;
 
         /// <summary>Сила «кита» на глаз: что в руках (огнестрел > лук > копьё > инструменты > камень).</summary>
@@ -699,7 +856,7 @@ namespace Rastvordd.Sim
                 float best = float.MaxValue;
                 foreach (var a in _w.Actors)
                 {
-                    if (a == _me || a.Dead || a.Team == Team.Npc) continue;
+                    if (a == _me || a.Dead || a.Spectator || a.Team == Team.Npc) continue;
                     float d = Vector2.Distance(a.Pos, _me.Pos);
                     bool hitMe = _me.LastAttacker == a.Id && _w.Time - _me.LastDamagedTime < 5f;
                     if (!hitMe && (loaded || d > 45 || MyPower < 0.4f || KitPower(a) > MyPower + 0.05f)) continue;   // без копья/лука первым не лезет
@@ -745,8 +902,12 @@ namespace Rastvordd.Sim
             }
 
             // бродит между РТ (там ходят люди), по пути смотрит по сторонам
+            float rd = Vector2.Distance(_roamTo, _me.Pos);
+            if (rd < _roamBest - 0.5f) { _roamBest = rd; _roamStuck = 0; }
+            else if ((_roamStuck += World.Dt) > 8f) _roamTo = default;   // упёрся — другая цель
             if (_roamTo == default || Vector2.Distance(_roamTo, _me.Pos) < 6)
             {
+                _roamBest = float.MaxValue; _roamStuck = 0;
                 // чередует: окрестности РТ и пляжи, где просыпаются голые
                 if (_rng.NextDouble() < 0.5 && _w.PlayerSpawns.Count > 0)
                     _roamTo = _w.PlayerSpawns[_rng.Next(_w.PlayerSpawns.Count)] * 0.97f;

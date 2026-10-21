@@ -5,7 +5,7 @@ using System.Numerics;
 namespace Rastvordd.Sim
 {
     /// <summary>Какое окно открыто у игрока (по E): ящик, рюкзак/ящик РТ, печь, шкаф.</summary>
-    public enum UiKind { None, Box, Bag, Furnace, Claim }
+    public enum UiKind { None, Box, Bag, Furnace, Claim, Recycler }
 
     /// <summary>
     /// Действия в инвентаре. Всё — ячейки: «pack» (рюкзак), «belt» (пояс), «cont» (открытый ящик/рюкзак),
@@ -40,6 +40,33 @@ namespace Rastvordd.Sim
     {
         public const float UiRange = 3f;
         public const int BoxSlots = 30;
+        public const int RecyclerSlots = 12;
+
+        /// <summary>Переработчики: раз в 2 с разбирают одну вещь из ячеек; выход кладётся туда же.</summary>
+        void StepRecyclers()
+        {
+            foreach (var d in Deployables)
+            {
+                if (d.Kind != DeployKind.Recycler || !d.On) continue;
+                d.SmeltTimer += Dt;
+                if (d.SmeltTimer < 2f) continue;
+                d.SmeltTimer = 0;
+                var items = d.Storage.Items;
+                int idx = items.FindIndex(s => Items.RecycleYield(s.Id).Count > 0);
+                if (idx < 0) { d.On = false; continue; }
+                var it = items[idx];
+                var yields = Items.RecycleYield(it.Id);
+                if (it.Count > 1) it.Count--; else items.RemoveAt(idx);
+                foreach (var (id, n) in yields)
+                {
+                    var same = items.Find(s => s.Id == id && s.State == null && s.Count + n <= Items.MaxStack(id));
+                    if (same != null) same.Count += n;
+                    else if (items.Count < RecyclerSlots) items.Add(new ItemSlot(id, n));
+                    else { d.On = false; break; }   // выход некуда класть — стоп
+                }
+                Events.Add(new SimEvent { Kind = SimEventKind.HitNode, Pos = d.Pos, OtherId = -1 });   // лязг — слышно
+            }
+        }
         static readonly string[] FurnaceIds = { "metal_ore", "sulfur_ore", "wood", "metal_fragments", "sulfur", "charcoal" };
         static readonly string[] ClaimIds = { "wood", "stone", "metal_fragments", "scrap" };
 
@@ -99,7 +126,7 @@ namespace Rastvordd.Sim
         {
             "pack" => Actor.PackSize,
             "belt" => Actor.BeltSize,
-            "cont" => a.OpenUi == UiKind.Box ? BoxSlots : Math.Max(UiItems(a)?.Count ?? 0, 12),
+            "cont" => a.OpenUi == UiKind.Box ? BoxSlots : a.OpenUi == UiKind.Recycler ? RecyclerSlots : Math.Max(UiItems(a)?.Count ?? 0, 12),
             "fur" => FurnaceIds.Length,
             "claim" => ClaimIds.Length,
             _ => 0,
@@ -165,7 +192,7 @@ namespace Rastvordd.Sim
                 "belt" => s.Def != null && s.Def.Holdable,                     // пояс — то, что держат в руках
                 "fur" => i <= 2 && s.Id == FurnaceIds[i],                       // в печь: руда и дерево, готовое только забирают
                 "claim" => s.Id == ClaimIds[i],
-                "cont" => a.OpenUi != UiKind.Box || i < BoxSlots,
+                "cont" => a.OpenUi == UiKind.Box ? i < BoxSlots : a.OpenUi != UiKind.Recycler || i < RecyclerSlots,
                 _ => true,
             };
         }
@@ -209,7 +236,7 @@ namespace Rastvordd.Sim
             if (s == null) return;
             if (src is "pack" or "belt")
             {
-                string dst = a.OpenUi switch { UiKind.Box or UiKind.Bag => "cont", UiKind.Furnace => "fur", UiKind.Claim => "claim", _ => src == "pack" ? "belt" : "pack" };
+                string dst = a.OpenUi switch { UiKind.Box or UiKind.Bag or UiKind.Recycler => "cont", UiKind.Furnace => "fur", UiKind.Claim => "claim", _ => src == "pack" ? "belt" : "pack" };
                 int count = CellCount(a, dst);
                 // сначала доложить в такую же стопку, потом — в первую подходящую пустую
                 for (int pass = 0; pass < 2 && GetCell(a, src, si) != null; pass++)
@@ -284,6 +311,10 @@ namespace Rastvordd.Sim
                     break;
                 case UiOp.TakeOut:
                     for (int i = 3; i < 6; i++) QuickCell(a, "fur", i);
+                    break;
+                case UiOp.Toggle when a.OpenTarget is Deployable rc && rc.Kind == DeployKind.Recycler:
+                    rc.On = !rc.On;
+                    if (rc.On && !rc.Storage.Items.Exists(s => Items.RecycleYield(s.Id).Count > 0)) { rc.On = false; Info(a, "Нечего перерабатывать: положи детали или вещи"); }
                     break;
                 case UiOp.Toggle when a.OpenTarget is Deployable f:
                     f.On = !f.On;
@@ -384,6 +415,13 @@ namespace Rastvordd.Sim
                     for (int i = 0; i < 6; i++) v.Cells.Add(Cell(GetCell(a, "fur", i), labels[i]));
                     v.On = f.On; v.Burning = f.Burning;
                     v.Info = f.Burning ? "Горит: руда плавится, дерево горит, копится уголь" : f.On ? "Зажжена, но не хватает руды или дерева" : "Потушена: положи руду и дерево, нажми «Зажечь»";
+                    break;
+                case UiKind.Recycler when a.OpenTarget is Deployable rc:
+                    v.Title = "ПЕРЕРАБОТЧИК";
+                    for (int i = 0; i < RecyclerSlots; i++) v.Cells.Add(i < rc.Storage.Items.Count ? Cell(rc.Storage.Items[i]) : new CellView());
+                    v.On = rc.On; v.Burning = rc.On;
+                    v.Info = rc.On ? "Работает: детали и вещи превращаются в лом и металл (шумно — слышно издалека)"
+                                   : "Положи детали (шестерни, пружины, трубы, изоленту) или ненужные вещи и нажми «Запустить»";
                     break;
                 case UiKind.Claim when a.OpenTarget is Deployable c:
                     v.Title = "ШКАФ";

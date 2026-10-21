@@ -1426,6 +1426,48 @@
    "cat": "icons",
    "icon": 128,
    "desc": "an advanced heavy industrial steel workbench with a small lathe and gas bottles"
+  },
+  {
+   "id": "icon_gears",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a few rusty metal gears of different sizes held together"
+  },
+  {
+   "id": "icon_spring",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heavy coiled steel spring, slightly rusty"
+  },
+  {
+   "id": "icon_metal_pipe",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a short piece of rusty steel water pipe with a threaded end"
+  },
+  {
+   "id": "icon_tape",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a roll of grey duct tape"
+  },
+  {
+   "id": "icon_keycard",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a worn plastic access key card with a magnetic stripe and a faded green label"
+  },
+  {
+   "id": "recycler",
+   "cat": "props",
+   "h": 1.6,
+   "desc": "a big industrial recycling machine: a rusty green steel box with an input hopper on top, a conveyor, a crusher and an output tray"
+  },
+  {
+   "id": "safe",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a heavy steel safe box with a card reader panel and a thick door, painted dark grey with worn edges"
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

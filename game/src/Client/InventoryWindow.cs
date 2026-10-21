@@ -336,6 +336,10 @@ namespace Rastvordd.Client
                     case UiKind.Claim:
                         Button("ЗАБРАТЬ ВСЁ", UiOp.TakeAll);
                         break;
+                    case UiKind.Recycler:
+                        Button(ui.On ? "ОСТАНОВИТЬ" : "ЗАПУСТИТЬ", UiOp.Toggle);
+                        Button("ЗАБРАТЬ ВСЁ", UiOp.TakeAll);
+                        break;
                     default:
                         Button("ЗАБРАТЬ ВСЁ", UiOp.TakeAll);
                         if (ui.Kind == UiKind.Box) Button("СЛОЖИТЬ ВСЁ", UiOp.PutAll);

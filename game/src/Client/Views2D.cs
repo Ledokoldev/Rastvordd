@@ -854,7 +854,7 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            var tex = Art.Get(_kind switch { DeployKind.Workbench => _level >= 2 ? $"props/workbench{_level}" : "props/workbench", DeployKind.Claim => "props/claim_post", DeployKind.Box => "props/crate_wood", DeployKind.SleepBag => "props/sleeping_bag", _ => "props/furnace" });
+            var tex = Art.Get(_kind switch { DeployKind.Workbench => _level >= 2 ? $"props/workbench{_level}" : "props/workbench", DeployKind.Claim => "props/claim_post", DeployKind.Box => "props/crate_wood", DeployKind.SleepBag => "props/sleeping_bag", DeployKind.Recycler => "props/recycler", _ => "props/furnace" });
             if (tex == null && _kind == DeployKind.Claim)
             {
                 // запасной вид столба: столб с жестяным ящиком и красной тряпкой
@@ -912,7 +912,7 @@ namespace Rastvordd.Client
 
     public partial class BagView2D : Node2D
     {
-        public bool IsCrate, Empty;
+        public bool IsCrate, Empty, Safe;
 
         public BagView2D()
         {
@@ -922,7 +922,7 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            var tex = Art.Get(IsCrate ? "props/crate_military" : "props/loot_bag");
+            var tex = Art.Get(Safe ? "props/safe" : IsCrate ? "props/crate_military" : "props/loot_bag") ?? Art.Get("props/crate_military");
             if (tex != null)
             {
                 // ящики и сумки делаем чуть крупнее реального — иначе их не видно

@@ -139,6 +139,8 @@ namespace Rastvordd.Sim
             foreach (var p in new[] { new Vector2(4, -36), new Vector2(36, -36), new Vector2(36, -2.5f), new Vector2(4, -20), new Vector2(18, -36), new Vector2(36, -18) })
                 AddScrapSpot(NodeKind.Barrel, p);
             AddScrapSpot(NodeKind.Junk, new Vector2(33, -22));
+            AddRecycler(new Vector2(20, -6));
+            AddSafe(new Vector2(6.5f, -33));
             AddScrapSpot(NodeKind.Junk, new Vector2(7, -5));
 
             foreach (var p in new[] { new Vector2(15, -24), new Vector2(28, -30), new Vector2(29, -10),
@@ -301,6 +303,26 @@ namespace Rastvordd.Sim
                 if (Rng.NextDouble() < chance) bag.Items.Add(new ItemSlot(id, Rng.Next(min, max + 1)));
             }
             // уровень по карточкам Астры: без охраны — бытовое, малая охрана — компоненты и патроны, склад — оружие
+            bag.Unlocked = false;
+            if (bag.Safe)
+            {
+                // сейф: гарантированно лом и детали, шанс на оружие и взрывчатку
+                bag.Items.Add(new ItemSlot("scrap", Rng.Next(25, 46)));
+                bag.Items.Add(new ItemSlot(Rng.Next(2) == 0 ? "comp_gears" : "comp_spring", Rng.Next(1, 3)));
+                Maybe(0.6, "comp_pipe", 1, 2);
+                Maybe(0.5, "metal_fragments", 50, 120);
+                Maybe(0.4, "gunpowder", 30, 60);
+                if (Rng.NextDouble() < 0.25) bag.Items.Add(Items.NewSlot("weapon_ak"));
+                if (Rng.NextDouble() < 0.2) bag.Items.Add(Items.NewSlot("expl_satchel"));
+                if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot("expl_c4"));
+                return;
+            }
+            // детали — во всех ящиках; карта доступа — в охраняемых
+            Maybe(0.35, "comp_tape", 1, 2);
+            Maybe(bag.Tier == 0 ? 0.15 : 0.35, "comp_gears", 1, 2);
+            Maybe(bag.Tier == 0 ? 0.15 : 0.3, "comp_spring", 1, 1);
+            Maybe(bag.Tier == 0 ? 0.1 : 0.3, "comp_pipe", 1, 2);
+            if (bag.Tier >= 1) Maybe(0.18, "keycard", 1, 1);
             switch (bag.Tier)
             {
                 case 0:
@@ -339,6 +361,14 @@ namespace Rastvordd.Sim
         }
 
         // ---------- актёры ----------
+
+        /// <summary>Наблюдатель для песочницы ботов: в мире его нет.</summary>
+        public Actor SpawnSpectator()
+        {
+            var a = new Actor { Id = NextId(), Name = "Наблюдатель", Team = Team.Player, Spectator = true, Pos = Vector2.Zero };
+            Actors.Add(a);
+            return a;
+        }
 
         public Actor SpawnPlayer(string name)
         {
@@ -403,6 +433,7 @@ namespace Rastvordd.Sim
             a.AddSlot(Items.NewSlot("weapon_ak", 30));
             a.Add("ammo_rifle", Rng.Next(30, 75));
             a.Add("scrap", Rng.Next(5, 20));
+            if (Rng.NextDouble() < 0.12) a.Add("keycard", 1);
             if (Rng.NextDouble() < 0.4) a.Add("bandage", 1);
             if (Rng.NextDouble() < 0.3) a.Add("canned", 1);
         }
@@ -537,6 +568,7 @@ namespace Rastvordd.Sim
             foreach (var a in Actors)
             {
                 if (!inputs.TryGetValue(a.Id, out var cmd)) cmd = InputCmd.Empty;
+                if (a.Spectator) { StepSpectator(a, cmd); continue; }
                 if (a.Dead)
                 {
                     if (a.Team == Team.Npc && Time - a.DeadTime > NpcRespawnTime) RespawnNpc(a);
@@ -551,6 +583,7 @@ namespace Rastvordd.Sim
             StepBags();
             StepPickupsAndNodes();
             StepFurnaces();
+            StepRecyclers();
             StepClaims();
             StepThrowns();
             StepFires();
@@ -656,7 +689,7 @@ namespace Rastvordd.Sim
             a.Food = MathF.Max(0, a.Food - FoodDecay * (sprint ? 1.5f : 1f) * Dt);
             a.Water = MathF.Max(0, a.Water - WaterDecay * (sprint ? 1.5f : 1f) * Dt);
             // сытый — понемногу лечится, на нуле — понемногу теряет здоровье
-            if (a.Food > 60 && a.Water > 60) a.Hp = MathF.Min(a.MaxHp, a.Hp + 0.25f * Dt);
+            if (a.Food > 40 && a.Water > 40) a.Hp = MathF.Min(a.MaxHp, a.Hp + 0.25f * Dt);
             float starving = (a.Food <= 0 ? 0.35f : 0) + (a.Water <= 0 ? 0.35f : 0);
             if (starving > 0)
             {
@@ -711,6 +744,17 @@ namespace Rastvordd.Sim
             return true;
         }
 
+        /// <summary>Вехи прогресса (для гонки ботов и отчёта): «[мм:сс] Сёма — верстак 2».</summary>
+        public readonly List<string> Milestones = new();
+        readonly HashSet<string> _milestoneKeys = new();
+
+        public void Milestone(Actor a, string what)
+        {
+            if (!_milestoneKeys.Add(a.Id + "|" + what)) return;
+            int m = (int)(Time / 60), s = (int)(Time % 60);
+            Milestones.Add($"[{m:00}:{s:00}] {a.Name} — {what}");
+        }
+
         void Research(Actor a, string id)
         {
             var n = Tech.Get(id);
@@ -719,6 +763,7 @@ namespace Rastvordd.Sim
             a.Take("scrap", n.Scrap);
             a.Known.Add(id);
             Info(a, $"Изучено: {Items.Name(id)}");
+            Milestone(a, $"изучил: {Items.Name(id)}");
         }
 
         void StepCrafting(Actor a)
@@ -898,7 +943,7 @@ namespace Rastvordd.Sim
             float best = float.MaxValue;
             foreach (var o in Actors)
             {
-                if (o == a || o.Dead || (a.Team == Team.Npc && o.Team == Team.Npc)) continue;
+                if (o == a || o.Dead || o.Spectator || (a.Team == Team.Npc && o.Team == Team.Npc)) continue;
                 float d = Vector2.Distance(o.Pos, a.Pos);
                 if (d < best && InArc(o.Pos, o.Radius)) { best = d; victim = o; }
             }
@@ -958,6 +1003,23 @@ namespace Rastvordd.Sim
         /// <summary>Бочка или куча хлама на постоянном месте: после разграбления появляется там же.</summary>
         void AddScrapSpot(NodeKind kind, Vector2 p) => AddNode(kind, p);
 
+        /// <summary>Переработчик на РТ: ничей, не ломается, открыт всем.</summary>
+        void AddRecycler(Vector2 p)
+        {
+            var d = new Deployable { Id = NextId(), Kind = DeployKind.Recycler, Pos = p, Radius = 0.9f, Hp = 1e9f };
+            d.Storage = new LootBag { Id = NextId(), Pos = p };
+            AddDeployable(d);
+        }
+
+        /// <summary>Сейф: ящик высшего уровня под карту доступа.</summary>
+        void AddSafe(Vector2 p)
+        {
+            AddCrate(p, 2);
+            var safe = Bags[^1];
+            safe.Safe = true;
+            FillCrate(safe);
+        }
+
         void RemoveNode(ResourceNode node)
         {
             Nodes.Remove(node);
@@ -980,6 +1042,8 @@ namespace Rastvordd.Sim
             if (Rng.NextDouble() < (rich ? 0.2 : 0.1)) Put("ammo_pistol", Rng.Next(4, 9));
             if (Rng.NextDouble() < 0.08) Put("gunpowder", Rng.Next(5, 11));
             if (Rng.NextDouble() < 0.05) Put("bandage", 1);
+            if (Rng.NextDouble() < 0.2) Put("comp_tape", 1);
+            if (Rng.NextDouble() < 0.12) Put(Rng.Next(3) switch { 0 => "comp_gears", 1 => "comp_spring", _ => "comp_pipe" }, 1);
             Bags.Add(bag);
             Events.Add(new SimEvent { Kind = SimEventKind.Destroyed, ActorId = byId, Pos = node.Pos, Text = "Бочка" });
             RemoveNode(node);
@@ -990,7 +1054,8 @@ namespace Rastvordd.Sim
             if (Vector2.Distance(a.Pos, at) > PlaceRange) { Info(a, "Слишком далеко"); return; }
             float rad = def.Deploy switch { DeployKind.Claim or DeployKind.SleepBag => 0.3f, DeployKind.Box => 0.45f, _ => 0.6f };
             if (def.Deploy == DeployKind.Claim && !CanPlaceClaim(at, out string why)) { Info(a, $"Шкаф: {why}"); return; }
-            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = rad, Level = Items.BenchLevel(def.Id) };   // столб тонкий, спальник плоский, ящик компактный
+            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = rad, Level = Items.BenchLevel(def.Id) };
+            if (def.Deploy is DeployKind.Workbench or DeployKind.Claim or DeployKind.Furnace) Milestone(a, $"поставил: {def.Name}");   // столб тонкий, спальник плоский, ящик компактный
             if (def.Deploy == DeployKind.Box) dep.Storage = new LootBag { Id = NextId(), Pos = at };
             dep.Auth.Add(a.Id);
             if (def.Deploy == DeployKind.Furnace && !a.IsBot) dep.On = false;   // игрок зажигает сам в окне печи
@@ -1017,7 +1082,7 @@ namespace Rastvordd.Sim
 
         // ---------- взаимодействие (E) ----------
 
-        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box }
+        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box, Recycler }
 
         /// <summary>Что ближе всего под рукой. Используется и сервером, и подсказкой на экране.</summary>
         public (InteractKind kind, object target) NearestInteract(Actor a)
@@ -1040,7 +1105,7 @@ namespace Rastvordd.Sim
             {
                 if (dp.Kind == DeployKind.SleepBag || !ClearLine(a.Pos, dp.Pos, null, true)) continue;   // спальник — не для E
                 float d = Vector2.Distance(a.Pos, dp.Pos) - dp.Radius + 0.3f;
-                if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, _ => InteractKind.Workbench }, dp); }
+                if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, DeployKind.Recycler => InteractKind.Recycler, _ => InteractKind.Workbench }, dp); }
             }
             var door = NearestDoor(a.Pos, best.Item1 == InteractKind.None ? InteractRange + 0.4f : bestD);   // дверь — если ближе остального
             if (door != null && ClearLine(a.Pos, door.Center, door, true)) best = (InteractKind.Door, door);
@@ -1053,7 +1118,12 @@ namespace Rastvordd.Sim
             switch (kind)
             {
                 // у живого игрока — окна, боты пользуются быстрыми действиями
+                case InteractKind.Bag when ((LootBag)target).Safe && !((LootBag)target).Unlocked:
+                    if (a.Take("keycard", 1) > 0) { ((LootBag)target).Unlocked = true; Info(a, "Сейф открыт картой доступа"); if (!a.IsBot) OpenUi(a, UiKind.Bag, target); }
+                    else Info(a, "Сейф заперт: нужна карта доступа (бывает в ящиках и у охраны)");
+                    break;
                 case InteractKind.Bag when !a.IsBot: OpenUi(a, UiKind.Bag, target); break;
+                case InteractKind.Recycler when !a.IsBot: OpenUi(a, UiKind.Recycler, target); break;
                 case InteractKind.Furnace when !a.IsBot: OpenUi(a, UiKind.Furnace, target); break;
                 case InteractKind.Claim when !a.IsBot: OpenUi(a, UiKind.Claim, target); break;
                 case InteractKind.Box when !a.IsBot: OpenUi(a, UiKind.Box, target); break;
@@ -1223,16 +1293,27 @@ namespace Rastvordd.Sim
 
         // ---------- бой ----------
 
+        /// <summary>Наблюдатель: летит по WASD (Shift — быстрее) или висит над тем, за кем следит.</summary>
+        void StepSpectator(Actor a, InputCmd cmd)
+        {
+            a.Dead = false; a.Hp = a.MaxHp; a.Food = a.Water = 100;
+            if (cmd.Follow != 0 && Find(cmd.Follow) is Actor t) { a.Pos = t.Pos; a.Facing = t.Facing; return; }
+            var move = cmd.Move;
+            if (move.LengthSquared() > 1) move = Vector2.Normalize(move);
+            a.Pos += move * (cmd.Sprint ? 70f : 28f) * Dt;
+            a.Pos = Vector2.Clamp(a.Pos, new Vector2(-HalfSize), new Vector2(HalfSize));
+        }
+
         void SeparateActors()
         {
             for (int i = 0; i < Actors.Count; i++)
             {
                 var a = Actors[i];
-                if (a.Dead) continue;
+                if (a.Dead || a.Spectator) continue;
                 for (int j = i + 1; j < Actors.Count; j++)
                 {
                     var b = Actors[j];
-                    if (b.Dead) continue;
+                    if (b.Dead || b.Spectator) continue;
                     var d = b.Pos - a.Pos;
                     float min = a.Radius + b.Radius;
                     float dist = d.Length();
@@ -1266,7 +1347,7 @@ namespace Rastvordd.Sim
                     if (Geo.SegmentCircle(a, b, d.Pos, d.Radius, out float t) && t < bestT) { bestT = t; hitWall = null; hitNode = null; }
                 foreach (var act in Actors)
                 {
-                    if (act.Dead || act.Id == p.OwnerId) continue;
+                    if (act.Dead || act.Spectator || act.Id == p.OwnerId) continue;
                     if (owner != null && owner.Team == Team.Npc && act.Team == Team.Npc) continue;
                     if (Geo.SegmentCircle(a, b, act.Pos, act.Radius, out float t) && t < bestT)
                     {
@@ -1299,6 +1380,7 @@ namespace Rastvordd.Sim
 
         public void Damage(Actor target, float dmg, int attackerId, Vector2 pos)
         {
+            if (target.Spectator) return;
             target.Hp -= dmg;
             target.LastAttacker = attackerId;
             target.LastDamagedTime = Time;

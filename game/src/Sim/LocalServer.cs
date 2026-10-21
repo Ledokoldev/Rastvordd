@@ -21,7 +21,7 @@ namespace Rastvordd.Sim
     }
 
     public struct ProjSnap { public int Id; public Vector2 Pos; public Vector2 Dir; public bool Arrow; }
-    public struct BagSnap { public int Id; public Vector2 Pos; public bool IsCrate; public bool Empty; }
+    public struct BagSnap { public int Id; public Vector2 Pos; public bool IsCrate; public bool Empty; public bool Safe; }
     public struct NodeSnap { public int Id; public NodeKind Kind; public Vector2 Pos; public float Radius; public float Fill; }
     public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; }
     public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; public int Level; public bool Seen; }
@@ -183,6 +183,24 @@ namespace Rastvordd.Sim
         /// <summary>Подключение: если в сохранении есть персонаж с этим именем — продолжаем им.</summary>
         public int Connect(string name) => (World.FindPlayer(name) ?? World.SpawnPlayer(name)).Id;
 
+        /// <summary>Песочница: смотреть на ботов без своего персонажа.</summary>
+        public int ConnectSpectator() => World.SpawnSpectator().Id;
+
+        /// <summary>Строки панели наблюдателя: боты, их дела и прогресс.</summary>
+        public List<(int id, string line)> BotLines()
+        {
+            var list = new List<(int, string)>();
+            foreach (var b in _bots.Values)
+            {
+                var a = b.Me;
+                int bench = 0;
+                foreach (var d in World.Deployables) if (d.Kind == DeployKind.Workbench && d.OwnerId == a.Id) bench = System.Math.Max(bench, System.Math.Max(1, d.Level));
+                string arch = b.Archetype == BotArchetype.Roamer ? "бродяга" : "фермер";
+                list.Add((a.Id, $"{a.Name} · {arch} · {(a.Dead ? "мёртв" : b.Doing)}\n   HP {a.Hp:0} · верстак {bench} · изучено {a.Known.Count}/{Tech.All.Count} · лом {a.Count("scrap")} · металл {a.Count("metal_fragments")} · построек {World.Structures.FindAll(s => s.OwnerId == a.Id).Count}"));
+            }
+            return list;
+        }
+
         /// <summary>Загрузить сохранение (до Connect). false — файл от другого зерна/версии.</summary>
         public bool LoadSave(string json, out string report)
         {
@@ -224,16 +242,18 @@ namespace Rastvordd.Sim
                 var crates = World.Bags.FindAll(b => b.IsCrate && b.Tier == tier);
                 log($"ящики уровня {tier}: {crates.Count} · пример: {(crates.Count > 0 ? string.Join(", ", crates[0].Items.ConvertAll(s => $"{Items.Name(s.Id)} ×{s.Count}")) : "-")}");
             }
+            int shown = World.Milestones.Count;
             for (int t = 0; t < ticks; t++)
             {
                 if (focusId >= 0) _pending[focusId] = InputCmd.Empty;
                 Tick();
+                while (shown < World.Milestones.Count) log("ВЕХА " + World.Milestones[shown++]);
                 foreach (var e in World.Events)
                     if (e.Kind == SimEventKind.Death)
                         log($"[{World.Time,6:0}s] смерть: {World.Find(e.ActorId)?.Name} ← {World.Find(e.OtherId)?.Name ?? "?"}");
                 if (t % (int)(30 / World.Dt) == 0)
                     foreach (var b in _bots.Values)
-                        log($"[{World.Time,6:0}s] {b.Me.Name} @({b.Me.Pos.X:0.0};{b.Me.Pos.Y:0.0}) {b.Debug}: {b.Doing} · HP {b.Me.Hp:0} · дерево {b.Me.Count("wood")} камень {b.Me.Count("stone")} · построек {World.Structures.FindAll(s => s.OwnerId == b.Me.Id).Count} · {World.LastInfo.GetValueOrDefault(b.Me.Id)}");
+                        log($"[{World.Time,6:0}s] {b.Me.Name} @({b.Me.Pos.X:0.0};{b.Me.Pos.Y:0.0}) {b.Debug}: {b.Doing} · HP {b.Me.Hp:0} · дерево {b.Me.Count("wood")} камень {b.Me.Count("stone")} металл {b.Me.Count("metal_fragments")} лом {b.Me.Count("scrap")} · изучено {b.Me.Known.Count} · построек {World.Structures.FindAll(s => s.OwnerId == b.Me.Id).Count} · {World.LastInfo.GetValueOrDefault(b.Me.Id)}");
             }
         }
 
@@ -324,7 +344,7 @@ namespace Rastvordd.Sim
 
             foreach (var b in World.Bags)
                 if (Vector2.DistanceSquared(b.Pos, me.Pos) < 60 * 60 && (b.IsCrate || IsPointVisible(me, b.Pos)))
-                    snap.Bags.Add(new BagSnap { Id = b.Id, Pos = b.Pos, IsCrate = b.IsCrate, Empty = b.Empty });
+                    snap.Bags.Add(new BagSnap { Id = b.Id, Pos = b.Pos, IsCrate = b.IsCrate, Empty = b.Empty, Safe = b.Safe });
 
             foreach (var n in World.NodesInRadius(me.Pos, WorldViewRadius, _snapNodes))
                 if (Vector2.DistanceSquared(n.Pos, me.Pos) < r2)
@@ -342,7 +362,7 @@ namespace Rastvordd.Sim
             {
                 if (Vector2.DistanceSquared(d.Pos, me.Pos) >= r2) continue;
                 aliveD.Add(d.Id);
-                bool seen = !me.Dead && (World.IsOwnBase(me, d) || Vector2.Distance(me.Pos, d.Pos) < 1.5f || World.SeesPoint(me, d.Pos, vr, vc));
+                bool seen = me.Spectator || !me.Dead && (World.IsOwnBase(me, d) || Vector2.Distance(me.Pos, d.Pos) < 1.5f || World.SeesPoint(me, d.Pos, vr, vc));
                 if (seen) dmem[d.Id] = new DeploySnap { Id = d.Id, Kind = d.Kind, Pos = d.Pos, Burning = d.Burning, Level = d.Level, Seen = true };
                 else if (dmem.TryGetValue(d.Id, out var old)) { old.Seen = false; dmem[d.Id] = old; }
             }
@@ -363,7 +383,7 @@ namespace Rastvordd.Sim
             {
                 if (Vector2.DistanceSquared(st.Center, me.Pos) >= r2) continue;
                 aliveS.Add(st.Id);
-                bool seen = !me.Dead && (World.IsOwnBase(me, st) || World.SeesStructure(me, st, vr, vc));
+                bool seen = me.Spectator || !me.Dead && (World.IsOwnBase(me, st) || World.SeesStructure(me, st, vr, vc));
                 if (seen) smem[st.Id] = new StructSnap { Id = st.Id, Kind = st.Kind, I = st.I, J = st.J, Dir = st.Dir, Tier = st.Tier, Hp = st.Hp / st.MaxHp, Open = st.Open, Locked = st.Locked, Seen = true };
                 else if (smem.TryGetValue(st.Id, out var old)) { old.Seen = false; smem[st.Id] = old; }
             }
@@ -482,7 +502,8 @@ namespace Rastvordd.Sim
 
         string Hint((World.InteractKind kind, object target) it) => it.kind switch
         {
-            World.InteractKind.Bag => ((LootBag)it.target) is var lb && lb.IsCrate ? "[E] Открыть ящик" : lb.Corpse ? "[E] Обыскать рюкзак" : "[E] Подобрать вещи",
+            World.InteractKind.Bag => ((LootBag)it.target) is var lb && lb.Safe && !lb.Unlocked ? "[E] Сейф — нужна карта доступа" : lb.IsCrate ? "[E] Открыть ящик" : lb.Corpse ? "[E] Обыскать рюкзак" : "[E] Подобрать вещи",
+            World.InteractKind.Recycler => "[E] Переработчик — детали в лом",
             World.InteractKind.Pickup => ((Pickup)it.target).Kind switch
             {
                 PickupKind.Hemp => "[E] Собрать коноплю",
@@ -557,6 +578,7 @@ namespace Rastvordd.Sim
         /// <summary>Серверный туман войны: клиент не получает тех, кого не видит (защита от wallhack).</summary>
         bool IsVisibleTo(Actor viewer, Actor target)
         {
+            if (viewer.Spectator) return Vector2.Distance(viewer.Pos, target.Pos) < WorldViewRadius;
             if (viewer.Dead) return Vector2.Distance(viewer.Pos, target.Pos) < 30;
             if (World.CanSeeActor(viewer, target, World.ViewRange(viewer), World.ViewCone(viewer))) return true;
             // выстрел выдаёт стрелка, если между нами нет стен
@@ -588,7 +610,7 @@ namespace Rastvordd.Sim
             if (gone != null) foreach (var id in gone) mem.Remove(id);
         }
 
-        bool IsPointVisible(Actor viewer, Vector2 p) =>
+        bool IsPointVisible(Actor viewer, Vector2 p) => viewer.Spectator ||
             Vector2.Distance(viewer.Pos, p) < 3 || World.CanSee(viewer, p, World.ViewRange(viewer), World.ViewCone(viewer));
     }
 }

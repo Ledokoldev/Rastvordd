@@ -29,6 +29,7 @@ namespace Rastvordd.Sim
         public int UiIndex;
         public int SetPiece;      // выбор элемента плана из меню (−1 — нет)
         public string Research;   // изучить узел дерева (id предмета) у верстака
+        public int Follow;        // наблюдатель: за кем следить (id; 0 — свободная камера)
 
         public static InputCmd Empty => new InputCmd { SelectSlot = -1, Craft = -1, Code = -1, SetPiece = -1 };
     }
@@ -93,7 +94,7 @@ namespace Rastvordd.Sim
     }
 
     public enum ItemCategory { Resource, Component, Tool, Weapon, Ammo, Food, Medical, Deployable }
-    public enum DeployKind { None, Workbench, Furnace, Claim, Box, SleepBag }
+    public enum DeployKind { None, Workbench, Furnace, Claim, Box, SleepBag, Recycler }   // Recycler — переработчик на РТ (ничей, не ломается)
 
     public sealed class ItemDef
     {
@@ -145,6 +146,11 @@ namespace Rastvordd.Sim
             Add("charcoal", "Уголь", ItemCategory.Resource);
             Add("cloth", "Ткань", ItemCategory.Resource);
             Add("gunpowder", "Порох", ItemCategory.Component);
+            Add("comp_gears", "Шестерни", ItemCategory.Component);
+            Add("comp_spring", "Пружина", ItemCategory.Component);
+            Add("comp_pipe", "Труба", ItemCategory.Component);
+            Add("comp_tape", "Изолента", ItemCategory.Component);
+            Add("keycard", "Карта доступа", ItemCategory.Component);
             Add("scrap", "Металлолом", ItemCategory.Component);
 
             // патроны
@@ -228,6 +234,23 @@ namespace Rastvordd.Sim
 
         /// <summary>Уровень верстака, который ставит предмет (0 — не верстак).</summary>
         public static int BenchLevel(string id) => id switch { "deploy_workbench" => 1, "deploy_workbench2" => 2, "deploy_workbench3" => 3, _ => 0 };
+
+        /// <summary>Что даёт переработчик за одну штуку (D33): детали — лом и металл, крафтовые вещи — половину рецепта.</summary>
+        public static List<(string id, int n)> RecycleYield(string id)
+        {
+            var list = new List<(string, int)>();
+            switch (id)
+            {
+                case "comp_gears": list.Add(("scrap", 10)); list.Add(("metal_fragments", 15)); return list;
+                case "comp_spring": list.Add(("scrap", 8)); list.Add(("metal_fragments", 10)); return list;
+                case "comp_pipe": list.Add(("scrap", 6)); list.Add(("metal_fragments", 20)); return list;
+                case "comp_tape": list.Add(("scrap", 3)); list.Add(("cloth", 5)); return list;
+            }
+            var r = Recipes.All.Find(x => x.Output == id);
+            if (r == null || r.Count > 1) return list;           // сырьё, патроны и порох не перерабатываются
+            foreach (var (cid, n) in r.Cost) if (n / 2 > 0) list.Add((cid, n / 2));
+            return list;
+        }
 
         /// <summary>Характеристики для карточек крафта и изучения: (название, значение).</summary>
         public static List<(string label, string value)> Stats(string id)
@@ -317,12 +340,17 @@ namespace Rastvordd.Sim
             "deploy_box" => "Хранилище на 30 ячеек",
             "deploy_claim" => "Центр базы: даёт строить рядом; клади ресурсы, иначе база гниёт",
             "deploy_furnace" => "Плавит руду в металл и серу",
+            "comp_gears" or "comp_spring" or "comp_pipe" or "comp_tape" => "Деталь: в переработчике на РТ — лом и металл",
+            "keycard" => "Открывает сейф на РТ с охраной (одна карта — один сейф)",
             _ => "",
         };
 
         /// <summary>Редкость (цвет рамки и время обыска): 0 обычное, 1 необычное, 2 редкое, 3 эпическое, 4 легендарное.</summary>
         public static int Rarity(string id) => id switch
         {
+            "keycard" => 3,
+            "comp_gears" or "comp_spring" or "comp_pipe" => 2,
+            "comp_tape" => 1,
             "weapon_ak" or "expl_c4" => 4,
             "expl_satchel" or "ammo_rifle" or "lock_code" or "weapon_bow" => 3,
             "weapon_pipe" or "gunpowder" or "ammo_pistol" or "metal_fragments" or "expl_fire" or "lock_key" or "weapon_spear" => 2,
@@ -426,8 +454,8 @@ namespace Rastvordd.Sim
 
         public static TechNode Get(string id) => All.Find(n => n.Id == id);
 
-        /// <summary>Знает ли игрок рецепт. Боты знают всё — у них свои сценарии.</summary>
-        public static bool Knows(Actor a, string id) => a.IsBot || Get(id) == null || a.Known.Contains(id);
+        /// <summary>Знает ли игрок рецепт (боты изучают так же, как люди).</summary>
+        public static bool Knows(Actor a, string id) => Get(id) == null || a.Known.Contains(id);
     }
 
     public sealed class CraftJob
@@ -464,6 +492,7 @@ namespace Rastvordd.Sim
         public bool IsBot;              // бот: E — быстрые действия, у живого игрока — окна
         public bool WantsCraftMenu;     // нажал E у верстака — клиент откроет дерево изучения
         public readonly HashSet<string> Known = new();   // изученные узлы дерева (примитив известен всегда, см. Tech)
+        public bool Spectator;          // наблюдатель: летает, видит всё, мир его не замечает
         public UiKind OpenUi;
         public object OpenTarget;
         public float PendingSwingAt = -1;   // удар инструментом засчитывается с задержкой — когда он опускается на цель
@@ -668,6 +697,8 @@ namespace Rastvordd.Sim
         public Vector2 Pos;
         public bool IsCrate;            // ящик на РТ (респавнится), иначе сумка с трупа
         public bool Corpse;             // вещи с трупа: обыскиваются по ячейке, как ящик РТ; выброшенное — открыто сразу
+        public bool Safe;               // сейф на РТ: открывается картой доступа, до следующего наполнения
+        public bool Unlocked;
         public int Tier = 2;            // уровень лута ящика: 0 — без охраны, 1 — малая охрана, 2 — крупный РТ
         /// <summary>Обыск по игрокам: сколько ячеек уже раскрыто и сколько идёт текущая.</summary>
         public readonly Dictionary<int, (int n, float t)> Search = new();

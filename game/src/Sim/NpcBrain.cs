@@ -133,7 +133,7 @@ namespace Rastvordd.Sim
             _provoked = false;
             foreach (var a in _w.Actors)
             {
-                if (a.Dead || a.Team == Team.Npc) continue;
+                if (a.Dead || a.Spectator || a.Team == Team.Npc) continue;
                 bool shotAtMe = _me.LastAttacker == a.Id && _w.Time - _me.LastDamagedTime < 1.5f;
                 if (shotAtMe) _provoked = true;
                 if (!shotAtMe && !_w.CanSeeActor(_me, a, a.Crouching ? SightRange * 0.7f : SightRange, SightCone)) continue;

@@ -18,3 +18,19 @@
 - Код игры: C# (Godot 4 .NET), см. `docs/design/09-tech.md`.
 - Логику симуляции держать отдельно от отображения (сервер-авторитарная архитектура, даже в одиночной игре).
 - Творческие задачи можно отдавать Codex («Астра», приложение OpenAI Codex уже залогинено): `scripts/gen-assets.ps1` (картинки), `scripts/gpt-tasks.ps1` (тексты). Усилие Codex — не выше `medium` (`-c model_reasoning_effort="medium"`).
+
+## Как собирать, запускать и проверять
+- Сборка: `dotnet build game -v q -nologo` (из корня репозитория).
+- Движок: `tools/godot/Godot_v4.7.2-stable_mono_win64/` — `…_win64.exe` для игры, `…_console.exe` для прогонов и скриншотов. Новые картинки — сначала `--headless --path game --import`.
+- Игра: `Играть.cmd`; песочница ботов: `Наблюдать за ботами.cmd` (`--spectate`: Tab — следить за ботом, F — свободная камера, 1–4 — скорость).
+- Пользователь разрешает запускать игру и гонять её для проверок.
+- Скриншот-прогон: `…_console.exe --path game -- --frames=N --shot=путь.png --do=кадр:действие,…` (действия: give<id>x<n>, slotN, at<dx>;<dy>, fire, interact, ui<op>_<арг>, craftmenu, tech, learn<id>, piece<n>, bmenu, peace, info, pathtest…; места: --buildspot, --atcrate, --spawn=x,y, --aim=x,y).
+- Прогон ботов: `--simtest=секунды[,бот,home|base]` (+ `--frames=3 --shot=…`, чтобы процесс завершился), лог — строки «ВЕХА» и «МЫСЛЬ»; `--raidkit=секунда` — первый бот получает бомбы. Разбор зависаний: `python scripts/bot-stalls.py лог.log`.
+- **Сохранение игрока** (`%APPDATA%\Godot\app_userdata\Rastvordd\world_save.json`) читается и пишется ТОЛЬКО при обычном запуске без аргументов. Любой отладочный запуск — свежий мир. Не ломать это правило: однажды тест чуть не перезаписал мир пользователя.
+- Перед тем как открыть вторую копию игры, закрыть первую (`CloseMainWindow`), иначе обе пишут одно сохранение.
+
+## Договорённости
+- Коммиты: `git -c user.name=LedokoI -c user.email=ledokolagent@gmail.com commit …`, в конце сообщения строка `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+- Интерфейс — минималистичный и плоский (`UiTheme`: тёмные полупрозрачные панели, квадратные ячейки, один акцент, шрифт Rubik). Ржавые рамки и пиксельный шрифт пользователь отверг.
+- Решения — в `docs/decisions.md` (D-номера), состояние и прогоны ботов — `docs/bot-sandbox-journal.md`, мозг ботов — `docs/design/bot-brain.md`, роадмап — `docs/roadmap.md`, сводка последней сессии — `docs/handoff.md`.
+- Переносная сборка для виртуалки: `dist/Rastvordd-VM` + zip (в .gitignore); пересобирать копированием `game/` без `screenshots`, `.godot/editor`, `.godot/shader_cache`.

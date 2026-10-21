@@ -15,7 +15,6 @@ namespace Rastvordd.Client
         LocalServer _server;
         MapInfo _map;
         DecalLayer _decals;
-        FootstepLoop _steps;
         float _shake;   // тряска камеры от своих выстрелов
         Weather _weather;
         VisionRays _rays;
@@ -140,6 +139,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("give")) { var g = a.Substring(4).Split('x'); _server.World.Find(_myId).Add(g[0], g.Length > 1 ? int.Parse(g[1]) : 1); }   // отладка: give<id>x<n>
                 else if (a.StartsWith("ui")) _uiReq = ((UiOp)int.Parse(a.Substring(2).Split('_')[0]), a.Contains('_') ? a.Substring(a.IndexOf('_') + 1).Replace('~', '#').Replace('^', '>') : null, 0);   // отладка: ui<op>_<арг> (# → ~, > → ^)
                 else if (a == "inv") _invOpen = !_invOpen;
+                else if (a == "steps") GD.Print("steps: " + string.Join(", ", System.Linq.Enumerable.Select(System.Linq.Enumerable.Where(Sfx.Played, kv => kv.Key.StartsWith("steps/")), kv => kv.Key[6..] + "×" + kv.Value)));   // отладка: какие шаги звучали
                 else if (a == "info") GD.Print($"info: {_server.World.LastInfo.GetValueOrDefault(_myId)} | structs {_server.World.Structures.Count} | aim {_autoAim} | me {_server.World.Find(_myId).Pos}" + (_server.World.Substations.Count > 0 ? $" | подстанция: питание {_server.World.Substations[0].Powered}, крейт открыт {_server.World.Substations[0].Crate.Unlocked}, таймер {_server.World.Substations[0].CrateTimer:0}" : ""));   // отладка: последнее сообщение
                 else if (a == "map") { _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); }
                 else if (a == "crouch") _forceCrouch = true;
@@ -221,7 +221,6 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             SteamHrtf.Init(this, _map);
             _weather = new Weather(_world, this);
             Tuning.Load();
-            _steps = new FootstepLoop(this);
             _ambient = new Ambient(this, _map);
             _daylight = new CanvasModulate();
             AddChild(_daylight);
@@ -883,12 +882,12 @@ else if (arg == "--atcrate")
             if (speed < 0.5f) return;
             _stepAcc.TryGetValue(id, out var acc);
             acc += speed * dt;
-            if (acc >= 0.8f)
+            if (acc >= Footsteps.Stride(speed))
             {
                 acc = 0;
-                var b = TerrainView.BiomeAt(_map, pos);
-                bool hard = b is Biome.Arid or Biome.Tundra or Biome.Beach || (pos.X > 4 && pos.X < 36 && pos.Y > -36 && pos.Y < -4);
-                Sfx.Play(hard ? "step_gravel" : "step_grass", Iso.Px(pos), (id == _myId ? -10 : -6) - (crouch ? 8 : 0), crouch ? 8 : 18, 0.15f);
+                bool sprint = speed > Sim.World.WalkSpeed * 1.3f;
+                float vol = (id == _myId ? Tuning.StepsVolumeDb : -4) + (sprint ? 3 : 0) - (crouch ? 10 : 0);
+                Footsteps.Play(SurfaceAt(pos), Iso.Px(pos), vol, crouch ? 7 : sprint ? 24 : 18);
             }
             _stepAcc[id] = acc;
         }
@@ -907,14 +906,34 @@ else if (arg == "--atcrate")
             return sb.ToString();
         }
 
-        StepSurface SurfaceAt(SVec p)
+        /// <summary>
+        /// Что под ногами: пол постройки (каркас и дерево — дерево, камень — бетон, металл — металл),
+        /// участки готовых РТ (кафель, бетон, асфальт — бетон; гравий и грунт — песок), площадки старых РТ — бетон,
+        /// иначе биом: тундра — снег, пляж и пустошь — песок, болото — грязь, остальное — трава.
+        /// </summary>
+        Surface SurfaceAt(SVec p)
         {
-            if (InYard(p)) return StepSurface.Concrete;   // площадка РТ
+            int tier = _build?.FloorTier(p) ?? -1;
+            if (tier >= 0) return tier <= 1 ? Surface.Wood : tier == 2 ? Surface.Concrete : Surface.Metal;
+            for (int i = _map.Patches.Count - 1; i >= 0; i--)
+            {
+                var pt = _map.Patches[i];
+                if (p.X < pt.Min.X || p.X > pt.Max.X || p.Y < pt.Min.Y || p.Y > pt.Max.Y) continue;
+                return pt.Tile.Contains("gravel") || pt.Tile.Contains("dirt") ? Surface.Sand : Surface.Concrete;
+            }
+            for (int i = 0; i < _map.Yards.Count; i++)
+            {
+                if (i < _map.YardPrefab.Count && _map.YardPrefab[i]) continue;
+                var (mn, mx) = _map.Yards[i];
+                if (p.X > mn.X + 2 && p.X < mx.X - 2 && p.Y > mn.Y + 2 && p.Y < mx.Y - 2) return Surface.Concrete;
+            }
             return TerrainView.BiomeAt(_map, p) switch
             {
-                Biome.Tundra => StepSurface.Snow,
-                Biome.Grassland or Biome.Forest or Biome.Swamp => StepSurface.Grass,
-                _ => StepSurface.None,
+                Biome.Tundra => Surface.Snow,
+                Biome.Beach or Biome.Arid => Surface.Sand,
+                Biome.Swamp => Surface.Mud,
+                Biome.Water => Surface.None,
+                _ => Surface.Grass,
             };
         }
 
@@ -1046,14 +1065,7 @@ else if (arg == "--atcrate")
                 view.SetLabel(a.Label);
                 view.Swimming = a.Swimming;
                 view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId, a.Crouching);
-                if (a.Id == _myId)
-                {
-                    // свои шаги — непрерывная запись по поверхности; на песке и пр. — старые короткие
-                    var surf = a.Dead ? StepSurface.None : SurfaceAt(pos);
-                    _steps.Update(surf, a.Dead ? 0 : speed, dt);
-                    if (!a.Dead && surf == StepSurface.None) Footstep(a.Id, pos, speed, dt, a.Crouching);
-                }
-                else if (!a.Dead) Footstep(a.Id, pos, speed, dt, a.Crouching);
+                if (!a.Dead && !a.Swimming) Footstep(a.Id, pos, speed, dt, a.Crouching);
             }
             foreach (var kv in _actorViews)
                 if (!seen.Contains(kv.Key)) kv.Value.Visible = false;

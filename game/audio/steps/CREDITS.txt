@@ -1,0 +1,27 @@
+Footsteps — game-ready individual steps
+70 individual WAV files. Mono, 48000 Hz, 24-bit PCM.
+Latest bright versions with hard noise gate. Sand folder contains SOFT only.
+Each file is a separate footstep variation, not a walking loop.
+
+SAND — credit required (CC BY 4.0)
+Suggested game credit:
+Sand footsteps by Mossy4, Freesound sound 388289, CC BY 4.0; edited, processed and cut into individual footsteps.
+https://freesound.org/people/Mossy4/sounds/388289/
+https://creativecommons.org/licenses/by/4.0/
+
+OTHER SURFACES — CC0
+Concrete: SecureSubset, sound 813622
+https://freesound.org/people/SecureSubset/sounds/813622/
+Metal: SecureSubset, sound 813620
+https://freesound.org/people/SecureSubset/sounds/813620/
+Wood: Nox_Sound, sound 543685
+https://freesound.org/people/Nox_Sound/sounds/543685/
+Grass: Nox_Sound, sound 556042
+https://freesound.org/people/Nox_Sound/sounds/556042/
+Snow: Nox_Sound, sound 613849
+https://freesound.org/people/Nox_Sound/sounds/613849/
+Mud: Nox_Sound, sound 548384
+https://freesound.org/people/Nox_Sound/sounds/548384/
+https://creativecommons.org/publicdomain/zero/1.0/
+
+All sounds modified with tonal/weight processing, noise gating and segmentation.

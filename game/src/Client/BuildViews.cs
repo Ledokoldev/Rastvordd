@@ -114,6 +114,16 @@ namespace Rastvordd.Client
 
         readonly HashSet<(int, int)> _floors = new();
         readonly List<SVec[]> _triFloors = new();
+        readonly Dictionary<(int, int), int> _floorTier = new();
+        readonly List<(SVec[] poly, int tier)> _triTier = new();
+
+        /// <summary>Уровень фундамента под точкой (для звука шагов) или -1.</summary>
+        public int FloorTier(SVec p)
+        {
+            if (_floorTier.TryGetValue(Building.CellOf(p), out var t)) return t;
+            foreach (var (poly, tier) in _triTier) if (Building.PointInPoly(p, poly)) return tier;
+            return -1;
+        }
 
         /// <summary>Точка на полу (фундаменте) постройки.</summary>
         public bool OnFloor(SVec p)
@@ -127,10 +137,12 @@ namespace Rastvordd.Client
         {
             _floors.Clear();
             _triFloors.Clear();
+            _floorTier.Clear();
+            _triTier.Clear();
             foreach (var (snap, _) in _items.Values)
             {
-                if (snap.Kind == StructKind.Foundation) _floors.Add((snap.I, snap.J));
-                else if (snap.Kind == StructKind.TriFoundation) _triFloors.Add(snap.Poly);
+                if (snap.Kind == StructKind.Foundation) { _floors.Add((snap.I, snap.J)); _floorTier[(snap.I, snap.J)] = snap.Tier; }
+                else if (snap.Kind == StructKind.TriFoundation) { _triFloors.Add(snap.Poly); _triTier.Add((snap.Poly, snap.Tier)); }
             }
             Occluders.Clear();
             Acoustics.DynamicWalls.Clear();

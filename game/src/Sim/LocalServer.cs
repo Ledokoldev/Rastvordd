@@ -551,6 +551,18 @@ namespace Rastvordd.Sim
             World.Step(_inputs);
             _eventsThisTick.Clear();
             _eventsThisTick.AddRange(World.Events);
+            Chronicle?.Record(World, _bots);
+        }
+
+        /// <summary>Летопись вайпа (scripts/wipe-report.py): включает клиент или отладка --chronicle=путь.</summary>
+        public Chronicle Chronicle;
+
+        /// <summary>Начать летопись в файл (null — путь из --chronicle=…, если задан).</summary>
+        public void StartChronicle(string path = null)
+        {
+            path ??= System.Array.Find(System.Environment.GetCommandLineArgs(), a => a.StartsWith("--chronicle="))?.Substring(12);
+            if (path == null || Chronicle != null) return;
+            Chronicle = new Chronicle(path, World);
         }
 
         readonly List<ResourceNode> _snapNodes = new();

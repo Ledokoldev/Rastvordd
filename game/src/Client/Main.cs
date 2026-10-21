@@ -188,6 +188,15 @@ namespace Rastvordd.Client
             // песочница: --spectate — без своего персонажа, смотреть на ботов
             _spectate = System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--spectate") >= 0;
             _myId = _spectate ? _server.ConnectSpectator() : _server.Connect("Игрок");
+            // летопись вайпа — всегда: обычная игра и песочница пишут в user://chronicle, отладка — куда скажут (--chronicle=путь)
+            try
+            {
+                var custom = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--chronicle="));
+                bool debugRun = !_saveEnabled && !_spectate;
+                if (custom != null || !debugRun)
+                    _server.StartChronicle(custom?.Substring(12) ?? ProjectSettings.GlobalizePath($"user://chronicle/{(_spectate ? "sandbox" : "wipe")}_{System.DateTime.Now:yyyy-MM-dd_HH-mm}.jsonl"));
+            }
+            catch (System.Exception ex) { GD.PrintErr($"летопись не начата: {ex.Message}"); }
             // отладка: --simtest=600[,бот] — прокрутить 600 с мира без отрисовки и встать рядом с ботом
             var st = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--simtest="));
             if (st != null)

@@ -1210,6 +1210,78 @@
       "ref": "assets/gen/anim/char_naked_ref_f.png",
       "h": 0.5,
       "desc": "only his bare shin with the bare foot, perfectly straight and vertical, knee end at the top, the foot at the bottom pointing to the right"
+    },
+    {
+      "id": "rig_guard_head_f",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_guard_ref_f.png",
+      "h": 0.5,
+      "desc": "the head and a short neck of this guard with his dark cloth hood, 3/4 front view facing down-right, gaunt tired face"
+    },
+    {
+      "id": "rig_guard_head_b",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_guard_ref_b.png",
+      "h": 0.5,
+      "desc": "the head and a short neck of this guard with his dark cloth hood seen from behind, 3/4 back view facing up-right"
+    },
+    {
+      "id": "rig_guard_torso_f",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_guard_ref_f.png",
+      "h": 0.5,
+      "desc": "the torso of this guard in his faded olive canvas jacket with the riveted steel chest plate, from the base of the neck to the waist WITHOUT any arms or sleeves (cut cleanly at the shoulders), 3/4 front view facing down-right"
+    },
+    {
+      "id": "rig_guard_torso_b",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_guard_ref_b.png",
+      "h": 0.5,
+      "desc": "the back of this guard in his faded olive canvas jacket, from the base of the neck to the waist WITHOUT any arms or sleeves (cut at the shoulders), 3/4 back view facing up-right"
+    },
+    {
+      "id": "rig_guard_pelvis",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_guard_ref_f.png",
+      "h": 0.5,
+      "desc": "only his hips and the top of his worn grey trousers with a belt, legs cut off at the top of the thighs, 3/4 front view"
+    },
+    {
+      "id": "rig_guard_upperarm",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_guard_ref_f.png",
+      "h": 0.5,
+      "desc": "only his upper arm in the faded olive canvas jacket sleeve, from shoulder to elbow, perfectly straight and horizontal, shoulder end on the left, elbow end on the right"
+    },
+    {
+      "id": "rig_guard_forearm",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_guard_ref_f.png",
+      "h": 0.5,
+      "desc": "only his forearm in the olive canvas jacket sleeve with a dirty gloved hand clenched in a fist as if gripping a handle, perfectly straight and horizontal, elbow end on the left, fist on the right"
+    },
+    {
+      "id": "rig_guard_thigh",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_guard_ref_f.png",
+      "h": 0.5,
+      "desc": "only his thigh in worn grey trousers, from hip to knee, perfectly straight and vertical, hip end at the top, knee at the bottom"
+    },
+    {
+      "id": "rig_guard_shin",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_guard_ref_f.png",
+      "h": 0.5,
+      "desc": "only his shin in worn grey trousers with a heavy dirty boot, perfectly straight and vertical, knee end at the top, the boot at the bottom pointing to the right"
     }
   ],
   "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

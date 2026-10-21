@@ -496,6 +496,12 @@ namespace Rastvordd.Sim
             if (cmd.Craft >= 0 && cmd.Craft < Recipes.All.Count) QueueCraft(a, Recipes.All[cmd.Craft]);
             StepCrafting(a);
 
+            if (a.PendingSwingAt > 0 && Time >= a.PendingSwingAt)
+            {
+                a.PendingSwingAt = -1;
+                if (a.PendingSwing != null && a.Weapon == a.PendingSwing) Swing(a, a.PendingSwing);   // сменил предмет — удар отменён
+                a.PendingSwing = null;
+            }
             StepHeld(a, cmd, sprint);
 
             if (cmd.Interact) Interact(a);
@@ -633,7 +639,7 @@ namespace Rastvordd.Sim
             {
                 trigger = cmd.Fire && w.Cooldown <= 0 && !sprint;
                 a.FireHeldLastTick = cmd.Fire;
-                if (trigger) Swing(a, w);
+                if (trigger) StartSwing(a, w);
                 return;
             }
 
@@ -697,11 +703,20 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Удар инструментом: сначала люди в дуге перед собой, потом ресурсы.</summary>
+        public const float SwingImpactDelay = 0.2f;
+
+        /// <summary>Начало удара: анимация замаха; попадание — через SwingImpactDelay (когда инструмент опускается).</summary>
+        void StartSwing(Actor a, WeaponState w)
+        {
+            w.Cooldown = w.Def.FireInterval;
+            a.PendingSwingAt = Time + SwingImpactDelay;
+            a.PendingSwing = w;
+            Events.Add(new SimEvent { Kind = SimEventKind.Swing, ActorId = a.Id, Pos = a.Pos, Dir = a.FacingDir, Text = w.Def.Id });
+        }
+
         void Swing(Actor a, WeaponState w)
         {
             var wd = w.Def;
-            w.Cooldown = wd.FireInterval;
-            Events.Add(new SimEvent { Kind = SimEventKind.Swing, ActorId = a.Id, Pos = a.Pos, Dir = a.FacingDir });
             float halfArc = wd.MeleeArcDeg * 0.5f * MathF.PI / 180f;
 
             bool InArc(Vector2 p, float r)

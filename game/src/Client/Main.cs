@@ -381,6 +381,8 @@ namespace Rastvordd.Client
                     case SimEventKind.HitNode:
                         if (_nodeViews.TryGetValue(e.OtherId, out var nv)) nv.Hit();
                         Sfx.Play(NodeHitSound(e.OtherId), Iso.Px(e.Pos), -2, 30, 0.1f);
+                        SpawnChips(e.OtherId, e.Pos, e.ActorId);
+                        if (e.ActorId == _myId) _shake = Mathf.Min(1.2f, _shake + 0.45f);
                         break;
                     case SimEventKind.Gather:
                         FloatText(e.Pos, $"+{(int)e.Value} {e.Text}", new Color(1, 0.95f, 0.75f));
@@ -484,6 +486,35 @@ namespace Rastvordd.Client
             };
             _world.AddChild(g);
             _debris.Add(g);
+        }
+
+        /// <summary>Щепки/крошка при ударе по ресурсу: цвет по типу узла, разлетаются от удара.</summary>
+        void SpawnChips(int nodeId, SVec nodePos, int actorId)
+        {
+            var kind = NodeKind.Stone;
+            foreach (var n in _cur.Nodes) if (n.Id == nodeId) { kind = n.Kind; break; }
+            Color[] cols = kind switch
+            {
+                NodeKind.Tree => new[] { new Color(0.62f, 0.45f, 0.26f), new Color(0.8f, 0.66f, 0.42f), new Color(0.45f, 0.32f, 0.18f) },
+                NodeKind.Metal => new[] { new Color(0.55f, 0.52f, 0.5f), new Color(0.75f, 0.42f, 0.2f), new Color(0.4f, 0.38f, 0.37f) },
+                NodeKind.Sulfur => new[] { new Color(0.6f, 0.6f, 0.55f), new Color(0.92f, 0.85f, 0.3f), new Color(0.8f, 0.72f, 0.2f) },
+                _ => new[] { new Color(0.6f, 0.59f, 0.56f), new Color(0.42f, 0.41f, 0.4f), new Color(0.75f, 0.74f, 0.7f) },
+            };
+            var from = _actorViews.TryGetValue(actorId, out var av) ? av.Position : Iso.Px(nodePos);
+            var away = (Iso.Px(nodePos) - from).Normalized();
+            int count = _fxRng.RandiRange(4, 7);
+            for (int i = 0; i < count; i++)
+            {
+                var dir = (-away).Rotated(_fxRng.RandfRange(-1.2f, 1.2f));
+                var g = new Debris2D
+                {
+                    Position = Iso.Px(nodePos) - away * 6, Z = _fxRng.RandfRange(6, 16), VZ = _fxRng.RandfRange(40, 90),
+                    Vel = dir * _fxRng.RandfRange(30, 70), Spin = _fxRng.RandfRange(-15, 15), Life = _fxRng.RandfRange(0.8f, 1.6f),
+                    Color = cols[_fxRng.RandiRange(0, cols.Length - 1)], Size = new Vector2(_fxRng.RandiRange(1, 2), _fxRng.RandiRange(1, 2)),
+                };
+                _world.AddChild(g);
+                _debris.Add(g);
+            }
         }
 
         /// <summary>Пустой магазин падает из оружия при перезарядке.</summary>

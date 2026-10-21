@@ -180,9 +180,15 @@ namespace Rastvordd.Client
                 }
                 else
                 {
-                    float raise = t < 0.38f ? Ease(t / 0.38f) : t < 0.55f ? 1f - Ease((t - 0.38f) / 0.17f) * 1.35f : -0.35f * (1f - Ease((t - 0.55f) / 0.45f));
-                    wAng = aim - 2.3f * raise;                         // поднят назад за голову → опускается вперёд-вниз
-                    grip = shNear + new Vector2(-2 * raise, 6 - 13 * raise) + fwd * (4 + 3 * (1 - raise));
+                    // свой замах у инструмента: кирка — высоко над головой, топор — из-за плеча, камень — одной рукой
+                    float arc = held == "tool_pickaxe" ? 2.8f : held == "tool_hatchet" ? 2.2f : 1.7f;
+                    float raiseH = held == "tool_pickaxe" ? 15f : held == "tool_hatchet" ? 12f : 9f;
+                    // 0–0.35 замах (медленно, с «оттяжкой»), 0.35–0.45 резкий удар (попадание ≈0.45), 0.45–1 отдача и возврат
+                    float raise = t < 0.35f ? Ease(t / 0.35f)
+                                : t < 0.45f ? 1f - (t - 0.35f) / 0.1f * 1.3f
+                                : -0.3f * (1f - Ease((t - 0.45f) / 0.55f));
+                    wAng = aim - arc * raise;                          // поднят назад → опускается вперёд-вниз к цели
+                    grip = shNear + new Vector2(-2 * raise, 6 - raiseH * raise) + fwd * (4 + 3 * (1 - raise));
                 }
             }
             else

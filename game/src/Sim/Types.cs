@@ -253,6 +253,8 @@ namespace Rastvordd.Sim
         public bool FireHeldLastTick;
         public float Peek;
         public bool Crouching;
+        public float PendingSwingAt = -1;   // удар инструментом засчитывается с задержкой — когда он опускается на цель
+        public WeaponState PendingSwing;
         public readonly ItemSlot[] Belt = new ItemSlot[BeltSize];
         public int Current;
         public readonly List<ItemStack> Inventory = new();

@@ -382,10 +382,18 @@ namespace Rastvordd.Sim
                 return cmd;
             }
 
+            // нужды (лечение, вода, еда) — раньше дел; в погоне за добычей роумер их откладывает
+            if (_prey == null && _fleeTime <= 0 && Threat() == null && Needs(ref cmd)) return cmd;
             if (Archetype == BotArchetype.Roamer && Roam(ref cmd)) return cmd;
 
             // угроза: уходим (к дому, если он есть), лечимся
             var threat = Threat();
+            if (threat != null && Archetype == BotArchetype.Farmer && Ranged() != null && MyPower >= KitPower(threat)
+                && Vector2.Distance(threat.Pos, _me.Pos) < 30 && _me.Hp > 40)
+            {
+                Hunt(threat, ref cmd);   // вооружён не хуже — защищается, а не бежит
+                return cmd;
+            }
             if (threat != null) _fleeTime = 3f + 4f * _caution;
             if (_fleeTime > 0)
             {
@@ -401,20 +409,26 @@ namespace Rastvordd.Sim
                 return cmd;
             }
 
-            // ранен и нечем лечиться — бинт из ткани (конопля)
-            if (_me.Hp < 60 && _me.Count("bandage") == 0 && _fleeTime <= 0)
-            {
-                if (_me.Count("cloth") >= 4) { if (Craft("bandage", ref cmd)) return cmd; }
-                else { Doing = "ищет коноплю на бинт"; if (UsePickup(PickupKind.Hemp, ref cmd)) return cmd; }
-            }
-            if (_me.Hp < 70 && _me.Count("bandage") > 0) cmd.Heal = true;
-            // голод и жажда
-            if (_me.Food < 35 && (_me.Count("berries") > 0 || _me.Count("canned") > 0)) cmd.Eat = true;
-            if (_me.Water < 30) { Doing = "идёт пить"; if (UsePickup(PickupKind.WaterBarrel, ref cmd)) return cmd; }
-            if (_me.Food < 30 && _me.Count("berries") == 0) { Doing = "ищет ягоды"; if (UsePickup(PickupKind.Berries, ref cmd)) return cmd; }
 
             Plan(ref cmd);
             return cmd;
+        }
+
+        /// <summary>Лечение, вода, еда. Раненый держит сытость повыше — тогда здоровье восстанавливается само.</summary>
+        bool Needs(ref InputCmd cmd)
+        {
+            bool hurt = _me.Hp < _me.MaxHp - 5;
+            // ранен и нечем лечиться — бинт из ткани (конопля)
+            if (_me.Hp < 60 && _me.Count("bandage") == 0)
+            {
+                if (_me.Count("cloth") >= 4) { if (Craft("bandage", ref cmd)) return true; }
+                else { Doing = "ищет коноплю на бинт"; if (UsePickup(PickupKind.Hemp, ref cmd)) return true; }
+            }
+            if (_me.Hp < 70 && _me.Count("bandage") > 0) cmd.Heal = true;
+            if (_me.Food < (hurt ? 60 : 35) && (_me.Count("berries") > 0 || _me.Count("canned") > 0)) cmd.Eat = true;
+            if (_me.Water < (hurt ? 50 : 30)) { Doing = "идёт пить"; if (UsePickup(PickupKind.WaterBarrel, ref cmd)) return true; }
+            if (_me.Food < (hurt ? 45 : 30) && _me.Count("berries") == 0) { Doing = "ищет ягоды"; if (UsePickup(PickupKind.Berries, ref cmd)) return true; }
+            return false;
         }
 
         void Plan(ref InputCmd cmd)
@@ -658,7 +672,7 @@ namespace Rastvordd.Sim
                 if (furnace != null)
                 {
                     bool ready = (!furnace.Burning && furnace.OutMetal + furnace.OutCharcoal > 0) || furnace.OutMetal >= 40;   // забираем пачкой, а не по 2
-                    bool haveOre = _me.Count("metal_ore") >= 60 && _me.Count("wood") >= 40;
+                    bool haveOre = (_me.Count("metal_ore") >= 60 || _me.Count("sulfur_ore") >= 40) && _me.Count("wood") >= 40;
                     if (ready || (haveOre && !furnace.Burning))
                     {
                         Doing = ready ? "забирает металл из печи" : "загружает печь";
@@ -671,6 +685,7 @@ namespace Rastvordd.Sim
                 }
                 // 8г. прогрессия: лом → верстак 1 → изучение → верстак 2 → … → верстак 3
                 if (Progress(box, metal, ref cmd)) return;
+                if (Arm(box, furnace, ref cmd)) return;
             }
 
             // 9. отнести добычу (камень копим, пока дом не каменный)
@@ -773,6 +788,50 @@ namespace Rastvordd.Sim
             return true;
         }
 
+        // ---------- вооружение: самопал и патроны ----------
+
+        /// <summary>Самопал и 20 патронов: сера → печь (сера и уголь) → порох → патроны. true — занят этим.</summary>
+        bool Arm(Deployable box, Deployable furnace, ref InputCmd cmd)
+        {
+            if (!_me.Known.Contains("weapon_pipe") || MyBenchLevel() < 1) return false;
+            if (!Has("weapon_pipe")) return CraftAtBench("weapon_pipe", box, ref cmd);
+            if (_me.Count("ammo_pistol") >= 20 || !_me.Known.Contains("ammo_pistol")) return false;
+            if (_me.Count("gunpowder") >= 5) return CraftAtBench("ammo_pistol", box, ref cmd);
+            // порох: уголь 15 + сера 10
+            if (_me.Count("charcoal") >= 15 && _me.Count("sulfur") >= 10) return CraftAtBench("gunpowder", box, ref cmd);
+            if (TakeFromBox(box, "sulfur", 10, ref cmd) || TakeFromBox(box, "charcoal", 15, ref cmd)) return true;
+            if (furnace == null) return false;
+            // сера и уголь — из печи: загрузить серную руду и дерево, забрать готовое
+            if (_me.Count("sulfur") < 10 && _me.Count("sulfur_ore") < 40 && furnace.SulfurOre + furnace.OutSulfur < 10)
+                return !Need("sulfur_ore", 40, ref cmd) || true;
+            Doing = "делает порох: ждёт серу и уголь из печи";
+            if (furnace.OutSulfur > 0 || furnace.OutCharcoal >= 15 || (!furnace.Burning && _me.Count("sulfur_ore") > 0))
+            {
+                if (!GoTo(furnace.Pos + new Vector2(-1.0f, 0.3f), 0.4f, ref cmd)) return true;
+                cmd.Aim = furnace.Pos;
+                cmd.Interact = Click2();
+                return true;
+            }
+            return false;   // печь работает — пока фармим
+        }
+
+        /// <summary>Скрафтить у своего верстака: ресурсы из кармана или ящика.</summary>
+        bool CraftAtBench(string output, Deployable box, ref InputCmd cmd)
+        {
+            var r = Recipes.All[Recipe(output)];
+            foreach (var (id, n) in r.Cost)
+            {
+                if (_me.Count(id) >= n) continue;
+                if (TakeFromBox(box, id, n, ref cmd)) return true;
+                if (id == "scrap") return GetScrap(n, box, ref cmd);
+                if (id == "metal_fragments") { _metalGoal = Math.Max(_metalGoal, n + 60); return false; }
+                return !Need(id, n, ref cmd) || true;
+            }
+            if (r.Bench > 0 && !GoTo(BenchStand, 0.6f, ref cmd)) { Doing = $"идёт крафтить {Items.Name(output)}"; return true; }
+            if (!Craft(output, ref cmd)) Doing = $"не может скрафтить {Items.Name(output)}";
+            return true;
+        }
+
         // ---------- металлолом: бочки, кучи хлама, сумки ----------
 
         ResourceNode _scrapNode;
@@ -839,7 +898,18 @@ namespace Rastvordd.Sim
             return id switch { "weapon_spear" => 0.4f, "tool_hatchet" or "tool_pickaxe" => 0.25f, _ => 0.1f };
         }
 
-        float MyPower => MathF.Max(Has("weapon_bow") && _me.Count("arrow") > 0 ? 0.6f : 0, Has("weapon_spear") ? 0.4f : 0.15f);
+        float MyPower => Ranged() is string g ? (g == "weapon_bow" ? 0.6f : 1f) : Has("weapon_spear") ? 0.4f : 0.15f;
+
+        /// <summary>Лучшее дальнобойное с боезапасом: калаш, самопал, лук.</summary>
+        string Ranged()
+        {
+            foreach (var (gun, ammo) in new[] { ("weapon_ak", "ammo_rifle"), ("weapon_pipe", "ammo_pistol"), ("weapon_bow", "arrow") })
+            {
+                int s = SlotOf(gun);
+                if (s >= 0 && ((_me.Belt[s].State?.Ammo ?? 0) > 0 || _me.Count(ammo) > 0)) return gun;
+            }
+            return null;
+        }
 
         /// <summary>true — роумер сам решил, что делать в этот тик (иначе общий план: еда, инструменты, фарм).</summary>
         bool Roam(ref InputCmd cmd)
@@ -930,11 +1000,13 @@ namespace Rastvordd.Sim
             var to = prey.Pos - _me.Pos;
             float d = to.Length();
             var dir = d > 0.01f ? to / d : Vector2.UnitX;
-            bool bow = Has("weapon_bow") && _me.Count("arrow") > 0 && d > 3.5f;
-            Doing = $"охотится на {prey.Name}";
-            if (bow)
+            string gun = d > 3.5f ? Ranged() : null;
+            Doing = $"{(Archetype == BotArchetype.Roamer ? "охотится на" : "отбивается от")} {prey.Name}";
+            if (gun != null)
             {
-                if (!Hold("weapon_bow", ref cmd)) return;
+                if (!Hold(gun, ref cmd)) return;
+                var st = _me.Belt[SlotOf(gun)].State;
+                if (st != null && st.Ammo <= 0 && st.ReloadLeft <= 0) { cmd.Reload = Click2(); return; }   // пусто — перезарядка
                 // держит дистанцию 8–14 м и стрейфится
                 var side = new Vector2(-dir.Y, dir.X) * (MathF.Sin(_w.Time * 0.9f + _me.Id) > 0 ? 1 : -1);
                 var move = side * 0.6f + (d > 14 ? dir : d < 8 ? -dir * 0.7f : Vector2.Zero);
@@ -942,7 +1014,8 @@ namespace Rastvordd.Sim
                 _aimDrift = _aimDrift * 0.95f + ((float)_rng.NextDouble() - 0.5f) * 0.25f;
                 cmd.Aim = prey.Pos + prey.Vel * (d / 45f) + new Vector2(-dir.Y, dir.X) * _aimDrift * d * 0.06f;
                 cmd.Peek = 1;
-                cmd.Fire = _w.HasLineOfSight(_me.Pos, prey.Pos) && Click2();
+                bool auto = st?.Def.Auto ?? false;
+                cmd.Fire = _w.HasLineOfSight(_me.Pos, prey.Pos) && (auto ? MathF.Sin(_w.Time * 3f + _me.Id) > -0.3f : Click2());   // автомат — очередями
                 return;
             }
             // копьё: вплотную

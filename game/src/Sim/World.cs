@@ -783,6 +783,7 @@ namespace Rastvordd.Sim
                 Info(a, "Пояс полон — предмет у ног");
             }
             Events.Add(new SimEvent { Kind = SimEventKind.Crafted, ActorId = a.Id, Pos = a.Pos, Text = $"{Items.Name(r.Output)}{(r.Count > 1 ? " ×" + r.Count : "")}" });
+            if (Items.Get(r.Output)?.Weapon is WeaponDef wd && !wd.Melee) Milestone(a, $"скрафтил: {Items.Name(r.Output)}");
         }
 
         // ---------- предмет в руках ----------

@@ -1474,6 +1474,145 @@
    "cat": "icons",
    "icon": 128,
    "desc": "a triangular wooden floor foundation slab (equilateral triangle shape) made of planks on a low frame, seen from above at an angle"
+  },
+  {
+   "id": "subst_transformer",
+   "cat": "props",
+   "h": 4.6,
+   "desc": "a huge abandoned high-voltage oil power transformer: a heavy steel tank on a concrete pad, rows of radiator cooling fins on both sides, three tall brown porcelain bushings on top, a cylindrical conservator oil tank on struts, oil stains; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+  },
+  {
+   "id": "subst_portal",
+   "cat": "props",
+   "h": 6.0,
+   "desc": "a tall switchyard steel lattice gantry portal: two lattice legs and a lattice crossbeam with hanging strings of glass disc insulators and a few sagging broken wires; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+  },
+  {
+   "id": "subst_breaker",
+   "cat": "props",
+   "h": 3.0,
+   "desc": "a high-voltage oil circuit breaker: three big cylindrical grey steel tanks in a row on a steel frame with porcelain bushings and a control box; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+  },
+  {
+   "id": "subst_disconnector",
+   "cat": "props",
+   "h": 2.8,
+   "desc": "a high-voltage disconnect switch on two concrete posts with ribbed porcelain insulator columns and a rusty switch blade; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+  },
+  {
+   "id": "subst_pylon_fallen",
+   "cat": "props",
+   "h": 4.0,
+   "desc": "a collapsed steel lattice power-line pylon lying on the ground diagonally, twisted and bent, with snapped wires and insulators, a dramatic landmark; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+  },
+  {
+   "id": "subst_cable_drum",
+   "cat": "props",
+   "h": 1.7,
+   "desc": "a big wooden cable reel drum standing on its edge, wound with thick black power cable, weathered planks; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+  },
+  {
+   "id": "subst_truck",
+   "cat": "props",
+   "h": 3.0,
+   "desc": "an abandoned Soviet utility truck with a folded aerial lift bucket boom on its back, flat tires, rusted orange cab; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+  },
+  {
+   "id": "subst_kpp",
+   "cat": "props",
+   "h": 3.0,
+   "desc": "a small square guard booth checkpoint made of white silicate bricks with a flat roof, a dirty window and a steel door, a lamp above the door; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+  },
+  {
+   "id": "subst_main_panel",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "a big wall-mounted main electrical switchboard panel: grey steel cabinet with two empty round sockets for big ceramic plug fuses, a large knife switch lever in the off position, analog dial gauges, dead indicator lamps; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+  },
+  {
+   "id": "subst_main_panel_on",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "exactly the same electrical switchboard panel as in the attached reference image, same angle and style, but now powered: two white ceramic plug fuses screwed into the sockets, the big knife switch lever up in the on position, warm red and green indicator lamps glowing",
+   "ref": "assets/gen/props/subst_main_panel.png"
+  },
+  {
+   "id": "subst_switchgear",
+   "cat": "props",
+   "h": 2.3,
+   "desc": "a row of four tall grey metal switchgear cabinets side by side, small inspection windows, door handles, warning stripes; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+  },
+  {
+   "id": "subst_sign",
+   "cat": "clutter",
+   "h": 1.2,
+   "desc": "a rusty yellow triangular high-voltage warning sign with a black lightning bolt on a metal post, no text. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+  },
+  {
+   "id": "crate_punch",
+   "cat": "props",
+   "h": 1.1,
+   "desc": "a heavy locked steel loot crate, olive drab with yellow hazard stripes, an old electromechanical punch-card reader box bolted on the front with a card slot and a dark indicator lamp, reinforced corners"
+  },
+  {
+   "id": "crate_punch_open",
+   "cat": "props",
+   "h": 1.3,
+   "desc": "the same heavy steel loot crate, olive drab with yellow hazard stripes, now with its lid swung open and empty inside, the punch-card reader on the front with a glowing green indicator lamp"
+  },
+  {
+   "id": "icon_punchcard_1",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an old Soviet computer punch card made of beige cardboard with rows of small rectangular punched holes and a green stripe along the top edge, slightly bent and dirty"
+  },
+  {
+   "id": "icon_punchcard_2",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an old Soviet computer punch card made of beige cardboard with rows of small rectangular punched holes and a blue stripe along the top edge, slightly bent and dirty"
+  },
+  {
+   "id": "icon_fuse",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a big old ceramic screw-in plug fuse: white porcelain body with a brass screw base and a small colored indicator cap, scratched and dusty"
+  },
+  {
+   "id": "wallface_brick",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: a weathered wall of grey-white Soviet silicate bricks with dirty mortar, water stains and chipped corners"
+  },
+  {
+   "id": "wallface_fence_po2",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: a Soviet precast concrete fence panel with a raised diamond relief pattern, weathered grey with rust streaks, coils of barbed wire along the top"
+  },
+  {
+   "id": "wallface_shutter",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: a closed rusty corrugated steel roller shutter door filling the whole image, dented, flaking grey paint"
+  },
+  {
+   "id": "floor_tile",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "floor viewed straight down from above: old Soviet brown and beige ceramic floor tiles, cracked and dirty, some tiles missing"
+  },
+  {
+   "id": "decal_oil_stain",
+   "cat": "decals",
+   "h": 1.0,
+   "desc": "a dark oil stain on the ground seen from above with a few drips"
+  },
+  {
+   "id": "decal_cables",
+   "cat": "decals",
+   "h": 0.9,
+   "desc": "thick black power cables lying tangled on the ground seen from above"
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

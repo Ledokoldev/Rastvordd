@@ -502,6 +502,7 @@ namespace Rastvordd.Sim
 
         public bool HasLineOfSight(Vector2 a, Vector2 b)
         {
+            SimPerf.Count("обзор (LOS)");
             foreach (var w in WallsAlong(a, b))
                 if (w.Wall.BlocksVision && Geo.SegmentAabb(a, b, w.Wall.Min, w.Wall.Max, out _)) return false;
             foreach (var n in NodesAlong(a, b))
@@ -582,6 +583,7 @@ namespace Rastvordd.Sim
             Time += Dt;
             Tick++;
             Noises.RemoveAll(n => Time - n.Time > 3f);
+            long t0 = SimPerf.Begin();
 
             foreach (var a in Actors)
             {
@@ -595,9 +597,15 @@ namespace Rastvordd.Sim
                 }
                 StepActor(a, cmd);
             }
+            SimPerf.End("шаг: персонажи", t0);
 
+            t0 = SimPerf.Begin();
             SeparateActors();
+            SimPerf.End("шаг: раздвижка", t0);
+            t0 = SimPerf.Begin();
             StepProjectiles();
+            SimPerf.End("шаг: пули", t0);
+            t0 = SimPerf.Begin();
             StepBags();
             StepPickupsAndNodes();
             StepFurnaces();
@@ -607,6 +615,7 @@ namespace Rastvordd.Sim
             StepFires();
             StepSubstations();
             StepTier0();
+            SimPerf.End("шаг: прочее (печи, РТ, сумки)", t0);
         }
 
         void StepActor(Actor a, InputCmd cmd)

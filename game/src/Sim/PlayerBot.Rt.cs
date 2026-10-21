@@ -70,7 +70,9 @@ namespace Rastvordd.Sim
         /// <summary>Аппетит к риску 0..1 из характера: осторожность против жадности и тяги к драке.</summary>
         float Appetite => Math.Clamp(0.1f + (0.9f - _caution) * 1.3f + (_greed - 0.3f) * 0.6f + (Archetype == BotArchetype.Roamer ? 0.3f : 0f), 0.05f, 0.95f);
 
-        RtInfo _fav;
+        RtInfo _fav, _leaveFor;
+        Vector2 _leaveTo;
+        int _favCrowd;
 
         /// <summary>«Своя» РТ, у которой строиться: осторожный — тихая и бедная, рисковый — опасная и богатая.</summary>
         RtInfo PickFavourite(out string why)
@@ -84,12 +86,15 @@ namespace Rastvordd.Sim
             RtInfo pick = null;
             foreach (var r in rts)
             {
-                float s = a * r.Reward / maxRew - (1 - a) * 1.4f * r.Risk / riskUnit - Vector2.Distance(_me.Pos, r.M.Center) / 3000f + (float)_rng.NextDouble() * 0.08f;
-                if (s > best) { best = s; pick = r; }
+                // тесно: у этой РТ уже строятся другие — каждая чужая база минус 0,22 (все 12 ботов садились у двух РТ)
+                int crowd = 0;
+                lock (Sites) foreach (var (w, q) in Sites) if (w == _w && Vector2.Distance(q, r.M.Center) < r.Radius + 130) crowd++;
+                float s = a * r.Reward / maxRew - (1 - a) * 1.4f * r.Risk / riskUnit - Vector2.Distance(_me.Pos, r.M.Center) / 3000f + (float)_rng.NextDouble() * 0.08f - 0.22f * crowd;
+                if (s > best) { best = s; pick = r; _favCrowd = crowd; }
             }
-            why = pick.Guards == 0 ? "тихо, охраны нет — мне хватит"
+            why = (_favCrowd > 0 ? $"рядом уже {_favCrowd} баз, но " : "") + (pick.Guards == 0 ? "тихо, охраны нет — мне хватит"
                 : a > 0.6f ? $"рискую: {pick.Guards} охр., зато лут жирный"
-                : $"охраны немного ({pick.Guards}), лут приличный";
+                : $"охраны немного ({pick.Guards}), лут приличный");
             return pick;
         }
 
@@ -592,8 +597,12 @@ namespace Rastvordd.Sim
             if (claim == null)
             {
                 if (Vector2.Distance(_me.Pos, _rt.M.Center) > _rt.Radius + 50) { EndRun("отошёл от РТ"); return false; }
-                var away = _me.Pos - _rt.M.Center;
-                GoTo(_rt.M.Center + Vector2.Normalize(away + new Vector2(0.01f, 0)) * (_rt.Radius + 60), 4, ref cmd);
+                // точка отхода считается один раз: раньше она «ехала» вместе с ботом (от центра РТ через меня), счётчик застревания
+                // каждый тик сбрасывался, маршрут не строился — бродяга без базы стоял у забора по 25 мин
+                if (_leaveFor != _rt) { _leaveFor = _rt; var away = _me.Pos - _rt.M.Center; _leaveTo = _rt.M.Center + Vector2.Normalize(away + new Vector2(0.01f, 0)) * (_rt.Radius + 60); if (!_w.Terrain.IsLand(_leaveTo)) _leaveTo = _rt.M.Center + Geo.Rotate(Vector2.Normalize(away + new Vector2(0.01f, 0)), 1.6f) * (_rt.Radius + 60); }
+                var to = _leaveTo;
+                GoTo(to, 4, ref cmd);
+                if (_rtTravelStuck(to)) { EndRun("застрял на выходе с РТ"); return false; }   // без базы: раньше стоял у забора бесконечно
                 return true;
             }
             if (Vector2.Distance(_me.Pos, claim.Pos) < 14) { EndRun("дома"); return false; }

@@ -35,7 +35,7 @@ namespace Rastvordd.Sim
 
         Vector2? _site;                        // выбранное место базы (клетка начала дома)
         (int i, int j) _origin;
-        float _deadTime, _thinkFireToggle, _stuck, _avoidTimer, _avoidAngle, _fleeTime;
+        float _deadTime, _thinkFireToggle, _stuck, _avoidTimer, _avoidAngle;
         Vector2 _lastPos;
         bool _fireEdge;
         ResourceNode _node;
@@ -120,6 +120,12 @@ namespace Rastvordd.Sim
             // прогресс к цели: 1,5 с без приближения — застряли
             if (Vector2.Distance(_goalFor, p) > 0.5f) { _goalFor = p; _goalBest = float.MaxValue; _goalStuck = 0; }
             if (d.Length() < _goalBest - 0.2f) { _goalBest = d.Length(); _goalStuck = 0; } else _goalStuck += World.Dt;
+            // долгое окно: за 8 с не приблизился и на 2 м (ёрзает вдоль забора — короткий счётчик сбрасывается) — считать застрявшим
+            if (Vector2.Distance(_winGoal, p) > 3f || _w.Time - _winAt > 8f)
+            {
+                if (Vector2.Distance(_winGoal, p) <= 3f && _winDist - d.Length() < 2f && d.Length() > 6f) { _goalStuck = MathF.Max(_goalStuck, 2f); _path = null; _pathCheck = 0; _exitTryAt = -99; SimPerf.Count("ёрзает — ищу путь"); }
+                _winGoal = p; _winAt = _w.Time; _winDist = d.Length();
+            }
 
             // идём по маршруту
             if (_path != null && Vector2.Distance(_pathGoal, p) < 1.5f && (_pathAge += World.Dt) < 15f && _goalStuck < 2.5f)
@@ -138,11 +144,17 @@ namespace Rastvordd.Sim
             else _path = null;
 
             // прямая закрыта (дом, дерево у угла, печь) или застряли — строим маршрут
-            if ((_pathCheck -= World.Dt) <= 0 && (_goalStuck > 1.5f || (d.Length() < 35 && !_w.SegmentWalkable(_me.Pos, p, _me.Radius + 0.05f, tol + 0.4f))))
+            // проверка прямой — не каждый тик (раньше при свободной прямой она шла каждый тик: до сотни проверок клеток на бота)
+            bool checkNow = (_pathCheck -= World.Dt) <= 0;
+            if (checkNow) _pathCheck = 0.25f;
+            if (checkNow && (_goalStuck > 1.5f || (d.Length() < 35 && !_w.SegmentWalkable(_me.Pos, p, _me.Radius + 0.05f, tol + 0.4f))))
             {
                 _pathCheck = 0.6f;
                 var goal = d.Length() < 35 ? p : _me.Pos + Vector2.Normalize(d) * 25;
-                var path = Pathfinder.Find(_w, _me.Pos, goal, _me.Radius, d.Length() < 35 ? tol : 1.5f, OwnDoor);
+                // внутри РТ, а цель снаружи — сначала выйти через проход (иначе промежуточная точка «за забором» водила по кругу внутри)
+                var path = ExitPath(p);
+                if (path != null) Thought("выбираюсь с РТ через проход");
+                else path = Pathfinder.Find(_w, _me.Pos, goal, _me.Radius, d.Length() < 35 ? tol : 1.5f, OwnDoor);
                 // дальняя цель, а промежуточная точка за стеной (выход с РТ через ворота сбоку) — пробуем повёрнутые направления
                 if (path == null && d.Length() >= 35)
                     foreach (float turn in new[] { 0.5f, -0.5f, 1.0f, -1.0f, 1.6f, -1.6f, 2.4f, -2.4f })
@@ -152,6 +164,7 @@ namespace Rastvordd.Sim
                         path = Pathfinder.Find(_w, _me.Pos, g2, _me.Radius, 1.5f, OwnDoor);
                         if (path != null) break;
                     }
+                if (path == null) _pathCheck = 1.5f;   // пути нет — не искать заново каждые 0,6 с (поиск «впустую» — самый дорогой)
                 if (path != null && path.Count > 0)
                 {
                     _path = path; _pathIdx = 0; _pathGoal = p; _pathAge = 0; _goalStuck = 0;
@@ -191,6 +204,22 @@ namespace Rastvordd.Sim
             return false;
         }
 
+        float _exitTryAt = -99, _winAt = -99, _winDist;
+        Vector2 _winGoal;
+
+        /// <summary>Маршрут из огороженной РТ к точке снаружи периметра (в сторону цели), если цель — за пределами этой РТ.</summary>
+        List<Vector2> ExitPath(Vector2 goal)
+        {
+            if (_w.Time - _exitTryAt < 4f) return null;
+            Monument m = null;
+            foreach (var mm in _w.Monuments) if (mm.Contains(_me.Pos, 1) && !mm.Contains(goal, 4)) { m = mm; break; }
+            if (m == null) return null;
+            _exitTryAt = _w.Time;
+            var path = Pathfinder.FindExit(_w, _me.Pos, m, _me.Radius, OwnDoor);
+            if (path != null && path.Count > 0) { SimPerf.Count("выход с РТ найден"); return path; }
+            return null;
+        }
+
         /// <summary>Ближайшая свободная точка (кольца до 1,5 м), куда видно напрямую.</summary>
         Vector2? FreeSpotNear(Vector2 at)
         {
@@ -210,6 +239,25 @@ namespace Rastvordd.Sim
         bool MineDoor(Structure s) => s.Kind == StructKind.Door && (s.OwnerId == _me.Id || (_w.ClaimAt(Building.CellOf(s.Center)) is Deployable c && c.Auth.Contains(_me.Id))) && CanUnlock(s);
         bool CanUnlock(Structure s) => !s.Locked || (s.KeyLock ? _me.Count("key_" + s.Id) > 0 : s.LockAuth.Contains(_me.Id));
         bool OwnDoor(MapWall w) => w.Owner is Structure s && MineDoor(s);
+
+        // двери рядом: раньше каждый шаг перебирал все постройки мира (у 20 ботов — тысячи); теперь список дверей в 12 м,
+        // обновляется раз в 0,5 с или при смене числа построек
+        readonly List<Structure> _doorsNear = new();
+        float _doorsAt = -99;
+        int _doorsStructCount = -1;
+        Vector2 _doorsPos;
+
+        List<Structure> DoorsNear()
+        {
+            if (_w.Time - _doorsAt > 0.5f || _w.Structures.Count != _doorsStructCount || Vector2.DistanceSquared(_doorsPos, _me.Pos) > 16)
+            {
+                _doorsAt = _w.Time; _doorsStructCount = _w.Structures.Count; _doorsPos = _me.Pos;
+                _doorsNear.Clear();
+                foreach (var s in _w.Structures)
+                    if (s.Kind == StructKind.Door && Vector2.DistanceSquared(s.Center, _me.Pos) < 12 * 12) _doorsNear.Add(s);
+            }
+            return _doorsNear;
+        }
 
         // двери, которые надо закрыть за собой (раньше помнилась одна: проходя тамбур — две двери подряд — бот «забывал» наружную,
         // а через уже открытую дверь проходил, не запоминая её вовсе, — база стояла нараспашку весь прогон)
@@ -231,9 +279,9 @@ namespace Rastvordd.Sim
         /// </summary>
         bool OpenDoorAhead(Vector2 wp, ref InputCmd cmd)
         {
-            foreach (var s in _w.Structures)
+            foreach (var s in DoorsNear())
             {
-                if (s.Kind != StructKind.Door || !MineDoor(s) || Vector2.DistanceSquared(s.Center, _me.Pos) > 9) continue;
+                if (!MineDoor(s) || Vector2.DistanceSquared(s.Center, _me.Pos) > 9) continue;
                 bool crosses = false;
                 foreach (var (min, max, _, _) in Building.Boxes(StructKind.Door, s.A, s.B, false)) if (Geo.SegmentAabb(_me.Pos, wp, min, max, out _)) { crosses = true; break; }
                 if (!crosses) continue;
@@ -286,25 +334,37 @@ namespace Rastvordd.Sim
 
         // ---------- база ----------
 
-        Deployable MyClaim()
+        // своё установленное — один проход по списку мира за тик (раньше MyClaim/MyBox/MyFurnace/MyBenchLevel перебирали его
+        // десятки раз за тик на бота). Внутри тика мир не меняется: ставится всё в World.Step, после мозгов.
+        uint _mineTick = uint.MaxValue;
+        Deployable _mClaim, _mBox, _mFurnace;
+        int _mBench;
+
+        void ScanMine()
         {
-            foreach (var d in _w.Deployables) if (d.Kind == DeployKind.Claim && d.OwnerId == _me.Id) return d;
-            return null;
+            if (_mineTick == _w.Tick) return;
+            _mineTick = _w.Tick;
+            _mClaim = _mBox = _mFurnace = null; _mBench = 0;
+            foreach (var d in _w.Deployables)
+            {
+                if (d.OwnerId != _me.Id) continue;
+                switch (d.Kind)
+                {
+                    case DeployKind.Claim: _mClaim ??= d; break;
+                    case DeployKind.Box: _mBox ??= d; break;
+                    case DeployKind.Furnace: _mFurnace ??= d; break;
+                    case DeployKind.Workbench: _mBench = Math.Max(_mBench, Math.Max(1, d.Level)); break;
+                }
+            }
         }
+
+        Deployable MyClaim() { ScanMine(); return _mClaim; }
 
         static NodeKind NodeFor(string id) => id switch { "wood" => NodeKind.Tree, "metal_ore" => NodeKind.Metal, "sulfur_ore" => NodeKind.Sulfur, _ => NodeKind.Stone };
 
-        Deployable MyFurnace()
-        {
-            foreach (var d in _w.Deployables) if (d.Kind == DeployKind.Furnace && d.OwnerId == _me.Id) return d;
-            return null;
-        }
+        Deployable MyFurnace() { ScanMine(); return _mFurnace; }
 
-        Deployable MyBox()
-        {
-            foreach (var d in _w.Deployables) if (d.Kind == DeployKind.Box && d.OwnerId == _me.Id) return d;
-            return null;
-        }
+        Deployable MyBox() { ScanMine(); return _mBox; }
 
         // ---------- ресурсы ----------
 
@@ -457,9 +517,13 @@ namespace Rastvordd.Sim
                 return cmd;
             }
 
+            long t0 = SimPerf.Begin();
             Perceive();
+            SimPerf.End("бот: восприятие", t0);
+            t0 = SimPerf.Begin();
             Decide(ref cmd);
             CloseDoorBehind();
+            SimPerf.End("бот: решение+действие", t0);
             return cmd;
         }
 
@@ -493,12 +557,7 @@ namespace Rastvordd.Sim
         Vector2 BenchSpot(int level) => AtPlan(_plan.Benches[Math.Clamp(level - 1, 0, 2)]);
         Vector2 BenchStand => AtPlan(_plan.BenchStand);
 
-        int MyBenchLevel()
-        {
-            int lvl = 0;
-            foreach (var d in _w.Deployables) if (d.Kind == DeployKind.Workbench && d.OwnerId == _me.Id) lvl = Math.Max(lvl, Math.Max(1, d.Level));
-            return lvl;
-        }
+        int MyBenchLevel() { ScanMine(); return _mBench; }
 
         int InBox(Deployable box, string id)
         {

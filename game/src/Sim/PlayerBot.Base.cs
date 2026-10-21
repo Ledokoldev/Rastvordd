@@ -631,6 +631,9 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Хозяйство фермера: инструменты → место и шкаф → база по чертежу → содержание → печь → прогрессия → вооружение → рейд → сейч → фарм.</summary>
+        float _upkeepAt = -99;
+        bool _upkeepLow;
+
         void Plan(ref InputCmd cmd)
         {
             int wood = _me.Count("wood"), stone = _me.Count("stone");
@@ -673,7 +676,9 @@ namespace Rastvordd.Sim
             if (!Has("tool_hammer")) { if (!Craft("tool_hammer", ref cmd)) Gather(NodeKind.Tree, ref cmd); return; }
 
             // 4. содержание: запас на ~2 часа (раньше стройки — база не должна гнить)
-            if (_w.ClaimHoursLeft(claim) < 1.0f && _w.ClaimLoad(claim).b > 0)
+            // запас шкафа — раз в 2 с (перебор всех построек мира на каждый тик)
+            if (_w.Time - _upkeepAt > 2f) { _upkeepAt = _w.Time; _upkeepLow = _w.ClaimHoursLeft(claim) < 1.0f && _w.ClaimLoad(claim).b > 0; }
+            if (_upkeepLow)
             {
                 bool have = true;
                 foreach (var (id, perHour) in _w.UpkeepPerHourOf(claim))

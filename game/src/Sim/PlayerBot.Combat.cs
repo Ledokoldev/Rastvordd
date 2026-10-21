@@ -147,7 +147,9 @@ namespace Rastvordd.Sim
             var gun = Ranged();
             if (gun == null)
             {
-                if (foeKit < 0.5f && edge > 0.05f && _me.Hp >= 40) return null;   // ближник против ближника слабее — драться
+                // ближник против ближника не сильнее — драться (раньше нужно было «заметно сильнее»: двое с камнями разбегались оба)
+                if (foeKit < 0.5f && edge > -0.08f && _me.Hp >= 40) return null;
+                if (foeKit < 0.5f && hitMe && edge > -0.2f && _me.Hp >= 30) return null;   // напал — отмахиваюсь
                 return foeKit >= 0.6f ? $"у него {Items.Name(_foeKitId)}, а мне нечем стрелять" : "нечем драться";
             }
             if (_me.Hp < 30 && foeHp > _me.Hp) return $"мало HP ({_me.Hp:0})";
@@ -196,17 +198,25 @@ namespace Rastvordd.Sim
         /// <summary>Отход (цель «бегство»): за укрытие от его взгляда, бегом; оторвался — бинт, перезарядка, домой.</summary>
         bool Retreat(ref InputCmd cmd)
         {
-            var t = _threat ?? RememberedFoe();
+            if (FleeCheck()) return false;   // разошлись или дошёл — назад к своей задаче
+            var t = _fleeFrom ?? _threat ?? RememberedFoe();
             if (!_retreating || _w.Time - _lastFleeAt > 2f)
             {
                 _retreating = true;
                 _hasEscape = false;
-                if (t != null) { Thought($"отхожу от {t.Name}: {_loseWhy ?? LosingReason(t) ?? "опасно"}"); Stat("отход"); }
+                if (t != null) { Thought($"отхожу от {t.Name} на {_fleeEnd - _w.Time:0} с: {(_enc.TryGetValue(t.Id, out var en) && en.S == Stance.Flee ? en.Why : _loseWhy ?? LosingReason(t) ?? "опасно")}"); Stat("отход"); }
             }
             _lastFleeAt = _w.Time;
-            if (_threat != null) _fleeTime = 3f + 4f * _caution;
-            _fleeTime -= World.Dt;
             Doing = "отходит";
+            // далеко от него и не видит — к точке отхода (дом или подальше), а не кружить у камня
+            if (_fleeFrom != null && t != null && !SeesFoe(t) && Vector2.Distance(t.Pos, _me.Pos) > 20 && Vector2.Distance(_me.Pos, _fleeDest) > 4f)
+            {
+                Doing = "отходит к безопасному месту";
+                GoTo(_fleeDest, 3f, ref cmd);
+                cmd.Sprint = true;
+                cmd.Aim = _me.Pos + (cmd.Move.LengthSquared() > 0.01f ? cmd.Move : Vector2.UnitX) * 3;
+                return true;
+            }
             var from = t != null ? KnownPos(t) : _me.Pos - _me.FacingDir;
             bool seen = t != null && SeesFoe(t);
             if (!_hasEscape || (_escapeCheck -= World.Dt) <= 0 || Vector2.Distance(_me.Pos, _escapePos) < 1.5f && seen)
@@ -331,11 +341,16 @@ namespace Rastvordd.Sim
             if (t == _prey)
             {
                 if (_chaseFoe != t) { _chaseFoe = t; _chaseStart = _w.Time; }
-                if (_w.Time - MathF.Max(_foeHitAt, _chaseStart) > 25f)
+                // уходит от меня, а я 12 с не попадаю (или 25 с вообще) — не гоняться: разошлись на 2 мин, если он сам не нападёт
+                var rel = t.Pos - _me.Pos;
+                bool leaving = t.Vel.LengthSquared() > 1f && Vector2.Dot(t.Vel, rel) > 0.4f * t.Vel.Length() * rel.Length();
+                bool hitMe = _me.LastAttacker == t.Id && _w.Time - _me.LastDamagedTime < 8f;
+                float noHit = _w.Time - MathF.Max(_foeHitAt, _chaseStart);
+                if (!hitMe && (noHit > 25f || (leaving && noHit > 12f && rel.Length() > 12f)))
                 {
-                    Thought($"бросаю погоню за {t.Name}: 25 с ни одного попадания");
+                    Thought($"бросаю погоню за {t.Name}: {(noHit > 25f ? "25 с ни одного попадания" : "он уходит, не догнать")}");
                     Stat("брошена погоня");
-                    _preyIgnore[t.Id] = _w.Time + 120f;
+                    PartWith(t, "бросил погоню");
                     _prey = null; _chaseFoe = null;
                     ForgetFoe();
                     return;

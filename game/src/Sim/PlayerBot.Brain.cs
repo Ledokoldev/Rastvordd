@@ -26,6 +26,7 @@ namespace Rastvordd.Sim
         }
 
         readonly List<Heard> _heard = new();
+        float _valueAt = -99;
         Actor _threat;
         float _load, _stash;
         public float Load => _load;
@@ -68,8 +69,8 @@ namespace Rastvordd.Sim
         {
             _threat = Threat() ?? RememberedFoe();   // спрятался — не значит, что ушёл
             PerceiveFoe();
-            _load = CarriedValue();
-            _stash = StashValue();
+            // ценность груза и ящика — раз в 0,5 с (перебор рюкзака и ящика каждый тик у 20 ботов заметен)
+            if (_w.Time - _valueAt >= 0.5f) { _valueAt = _w.Time; _load = CarriedValue(); _stash = StashValue(); _surplus = SurplusValue(); }
             Aggression = Archetype == BotArchetype.Roamer ? 0.6f + 0.4f * (1 - _caution) : 0.2f + 0.3f * (1 - _caution);
             // слух: выстрелы и взрывы прошлого тика
             foreach (var e in _w.Events)
@@ -90,7 +91,7 @@ namespace Rastvordd.Sim
             PerceiveBases();
             PerceiveDeaths();
             PerceiveRaid();
-            _surplus = SurplusValue();
+            PerceivePeople();
         }
 
         // ---------- журнал мыслей ----------
@@ -129,6 +130,7 @@ namespace Rastvordd.Sim
         List<Goal> _goals;
         readonly Dictionary<string, float> _lastSwitchLog = new();
         Goal _goal;
+        Actor _lastThreatDecided;
         public string GoalName => _goal?.Name ?? "-";
 
         /// <summary>Вес цели по архетипу: одна логика, разные характеры.</summary>
@@ -166,10 +168,13 @@ namespace Rastvordd.Sim
         {
             _goals = new List<Goal>
             {
-                new() { Name = "бегство", Score = () => _fleeTime > 0 || (_threat != null && !CanFight(_threat)) ? 100 : 0, Act = Retreat },
-                new() { Name = "бой", Score = () => _threat != null && CanFight(_threat) ? 95 * Math.Max(W("бой"), 0.5f) : 0, Act = (ref InputCmd c) => { Combat(_threat, ref c); return true; } },
+                new() { Name = "бегство", Score = FleeScore, Act = Retreat },
+                new() { Name = "бой", Score = () => _threat != null && ThreatMode(_threat) > 0 ? 95 * Math.Max(W("бой"), 0.5f) : 0, Act = (ref InputCmd c) => { Combat(_threat, ref c); return true; } },
+                new() { Name = "сторож", Score = WatchdogScore, Act = WatchdogAct },
+                new() { Name = "засада у РТ", Score = CampScore, Act = CampAct },
                 new() { Name = "антирейд", Score = () => AntiRaidScore() * W("антирейд"), Act = AntiRaid },
-                new() { Name = "охота", Score = () => (W("охота") > 0 && PickPrey() != null ? 85 : 0) * W("охота"), Act = (ref InputCmd c) => { if (_prey == null) return false; Hunt(_prey, ref c); return true; } },
+                new() { Name = "охота", Score = EncFightScore, Act = EncFightAct },
+                new() { Name = "месть", Score = RevengeScore, Act = RevengeAct },
                 new() { Name = "нужды", Score = () => NeedsUrgency() * 70, Act = Needs },
                 new() { Name = "проверить бой", Score = () => InvestigateScore() * W("проверить бой"), Act = Investigate },
                 new() { Name = "лут трупа", Score = () => CorpseNear() != null && _me.Hp > 35 ? 60 * W("лут трупа") : 0, Act = LootCorpse },
@@ -187,11 +192,25 @@ namespace Rastvordd.Sim
         void Decide(ref InputCmd cmd)
         {
             if (_goals == null) BuildGoals();
+            CountHealth();
+            // цели пересчитываются раз в 0,2 с (вразнобой у разных ботов), действие — каждый тик;
+            // сразу — если по мне попали или появилась/сменилась угроза
+            bool urgent = _w.Time - _me.LastDamagedTime < 0.05f || _threat != _lastThreatDecided;
+            if (_goal != null && !urgent && (_w.Tick + _me.Id) % 6 != 0)
+            {
+                long tk = SimPerf.Begin();
+                if (!_goal.Act(ref cmd)) Plan(ref cmd);
+                SimPerf.End("действие: " + _goal.Name, tk);
+                return;
+            }
+            _lastThreatDecided = _threat;
             Goal best = null;
             float bestScore = 0;
             foreach (var g in _goals)
             {
+                long tq = SimPerf.Begin();
                 float s = g.Score();
+                SimPerf.End("очки: " + g.Name, tq);
                 if (g == _goal) s *= 1.25f;
                 if (s > bestScore) { bestScore = s; best = g; }
             }
@@ -204,7 +223,9 @@ namespace Rastvordd.Sim
                     Thought($"{_goal.Name} → {best.Name}{(best.Name == "бой" || best.Name == "бегство" ? $": {_threat?.Name ?? "угроза"}, у него {Items.Name(_threat?.Held?.Id ?? "tool_rock")}" : "")}");
                 _goal = best;
             }
+            long ta = SimPerf.Begin();
             if (!best.Act(ref cmd)) Plan(ref cmd);
+            SimPerf.End("действие: " + best.Name, ta);
         }
 
         // ---------- бой и бегство ----------
@@ -294,29 +315,6 @@ namespace Rastvordd.Sim
 
         // ---------- роумер: охота, лут трупов, снаряжение, бродить ----------
 
-        Actor PickPrey()
-        {
-            int load = _me.Count("wood") + _me.Count("stone") + _me.Count("metal_fragments") * 3 + _me.Count("scrap") * 5;
-            bool loaded = load > 900;
-            if (_me.Hp < 35) { _prey = null; return null; }
-            if (_prey != null && !_prey.Dead && (_preyTimer -= World.Dt) > 0) return _prey;
-            _prey = null;
-            float best = float.MaxValue;
-            foreach (var a in _w.Actors)
-            {
-                if (a == _me || a.Dead || a.Spectator || a.Team == Team.Npc) continue;
-                float d = Vector2.Distance(a.Pos, _me.Pos);
-                bool hitMe = _me.LastAttacker == a.Id && _w.Time - _me.LastDamagedTime < 5f;
-                if (!hitMe && _preyIgnore.TryGetValue(a.Id, out float until) && _w.Time < until) continue;   // бросил погоню — пока не трогать
-                if (!hitMe && (loaded || d > 45 || MyPower < 0.4f || KitPower(a) > MyPower + 0.05f)) continue;   // без копья/лука первым не лезет
-                if (!_w.HasLineOfSight(_me.Pos, a.Pos)) continue;
-                if (d < best) { best = d; _prey = a; }
-            }
-            _preyTimer = 2f;
-            if (_prey != null && _prey != _lastPrey) { Thought($"вижу {_prey.Name} ({Items.Name(_prey.Held?.Id ?? "tool_rock")}) — слабее меня, охочусь"); _lastPrey = _prey; }
-            return _prey;
-        }
-        Actor _lastPrey;
 
         readonly Dictionary<LootBag, float> _badLoot = new();
         LootBag _lootBag;

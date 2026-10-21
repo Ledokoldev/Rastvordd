@@ -366,6 +366,10 @@ namespace Rastvordd.Sim
                         break;
                     }
                 }
+                if (t > 0 && t % (int)(60 / World.Dt) == 0) { log($"[{World.Time,6:0}s] {SimPerf.Report()}"); SimPerf.Reset(); }
+                // здоровье мозга: доля времени в бегстве и в бою/охоте за 10 мин (> 30 % — тревога)
+                if (t > 0 && t % (int)(600 / World.Dt) == 0)
+                    foreach (var b in _bots.Values) log($"[{World.Time,6:0}s] ЗДОРОВЬЕ {b.Me.Name}: {b.HealthReport()}");
                 foreach (var e in World.Events)
                     if (e.Kind == SimEventKind.Death)
                         log($"[{World.Time,6:0}s] смерть: {World.Find(e.ActorId)?.Name} ← {World.Find(e.OtherId)?.Name ?? "?"}");
@@ -383,6 +387,9 @@ namespace Rastvordd.Sim
             if (basedump) BaseDump(log);
             // итог боёв: укрытия, пики, перезарядки, отходы (счётчики PlayerBot.CombatStats)
             if (_duel != null) log($"ДУЭЛЬ итог: {_duel.KitA} {_duel.WinA} — {_duel.KitB} {_duel.WinB}, ничьих {_duel.Draw}, раундов {_duel.Round}");
+            float tf = 0, th = 0, ta = 0;
+            foreach (var b in _bots.Values) { tf += b.TotFlee; th += b.TotFight; ta += b.TotAll; }
+            if (ta > 0) log($"ЗДОРОВЬЕ итог: в бегстве {tf / ta:P1}, в бою/охоте {th / ta:P1} времени живых ботов");
             foreach (var b in _bots.Values)
             {
                 var parts = new List<string>();
@@ -541,14 +548,29 @@ namespace Rastvordd.Sim
 
         public void Submit(int clientId, InputCmd cmd) => _pending[clientId] = cmd;
 
+        static readonly bool PerfLog = System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--perflog") >= 0;
+
         public void Tick()
         {
             _inputs.Clear();
             foreach (var kv in _pending) _inputs[kv.Key] = kv.Value;
             _pending.Clear();
             if (!_botsStarted) StartBots();
-            foreach (var b in _brains) _inputs[b.Me.Id] = b.Think();
+            long t0 = SimPerf.Begin();
+            foreach (var b in _brains)
+            {
+                long tb = SimPerf.Begin();
+                _inputs[b.Me.Id] = b.Think();
+                SimPerf.End(b is PlayerBot ? "мозг бота" : "мозг охраны", tb);
+            }
+            SimPerf.End("мозги всего", t0);
+            long ts = SimPerf.Begin();
             World.Step(_inputs);
+            SimPerf.End("шаг мира", ts);
+            SimPerf.End("тик всего", t0);
+            SimPerf.TickDone();
+            // --perflog: профиль раз в 30 с мира в stdout (окно песочницы: сколько стоит тик и сколько памяти)
+            if (PerfLog && World.Tick % (int)(30 / World.Dt) == 0) { System.Console.WriteLine($"[{World.Time,6:0}s] {SimPerf.Report()} | процесс {System.Environment.WorkingSet / (1024 * 1024)} МБ"); SimPerf.Reset(); }
             _eventsThisTick.Clear();
             _eventsThisTick.AddRange(World.Events);
             Chronicle?.Record(World, _bots);

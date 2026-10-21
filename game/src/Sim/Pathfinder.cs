@@ -24,6 +24,7 @@ namespace Rastvordd.Sim
             float len = Vector2.Distance(a, b) - stopShort;
             if (len <= 0) return true;
             var dir = Vector2.Normalize(b - a);
+            SimPerf.Count("проходимость отрезка");
             for (float t = 0.35f; t < len; t += 0.35f)
                 if (WalkBlocked(a + dir * t, r, passable)) return false;
             return true;
@@ -37,44 +38,82 @@ namespace Rastvordd.Sim
     public static class Pathfinder
     {
         const float Step = 0.25f;
-        const int MaxCells = 60000;
+        const int MaxCells = 120000;   // буферы общие (не на каждый поиск), поэтому окно можно держать больше — хватает на выход с крупной РТ
 
         /// <summary>passable — какие стены можно «пройти» (свои двери: бот их откроет по пути).</summary>
-        public static List<Vector2> Find(World w, Vector2 from, Vector2 to, float r, float tol, Func<MapWall, bool> passable = null)
+        public static List<Vector2> Find(World w, Vector2 from, Vector2 to, float r, float tol, Func<MapWall, bool> passable = null, int budget = Budget)
+        {
+            long t0 = SimPerf.Begin();
+            var res = FindInner(w, from, to, r, tol, passable, budget);
+            SimPerf.End(res == null ? "A* (не найден)" : "A*", t0);
+            return res;
+        }
+
+        /// <summary>
+        /// Выход из огороженной РТ: путь до любой клетки снаружи прямоугольника m (с запасом), окно — вся РТ с полями.
+        /// Обычный поиск ищет в окне вокруг отрезка «я — цель» и не видит ворот на другой стороне РТ.
+        /// </summary>
+        public static List<Vector2> FindExit(World w, Vector2 from, Monument m, float r, Func<MapWall, bool> passable = null)
+        {
+            long t0 = SimPerf.Begin();
+            var lo = m.Min - new Vector2(4); var hi = m.Max + new Vector2(4);
+            bool Outside(Vector2 p) => p.X < lo.X || p.Y < lo.Y || p.X > hi.X || p.Y > hi.Y;
+            float ToOut(Vector2 p) => MathF.Max(0, MathF.Min(MathF.Min(p.X - lo.X, hi.X - p.X), MathF.Min(p.Y - lo.Y, hi.Y - p.Y)));
+            var res = FindInner(w, from, (lo + hi) * 0.5f, r, 0, passable, 60000, Outside, ToOut, lo - new Vector2(3), hi + new Vector2(3));
+            SimPerf.End(res == null ? "A* выход с РТ (не найден)" : "A* выход с РТ", t0);
+            return res;
+        }
+
+        // буферы поиска переиспользуются (раньше — 4 массива по 60 тыс. клеток на каждый вызов: ≈600 КБ мусора в куче больших
+        // объектов на поиск); «чистота» клетки — по номеру поиска, без очистки массивов
+        static byte[] _state = new byte[MaxCells];
+        static float[] _g = new float[MaxCells];
+        static int[] _from = new int[MaxCells];
+        static int[] _stamp = new int[MaxCells];
+        static bool[] _closed = new bool[MaxCells];
+        static int _search;
+        static readonly PriorityQueue<int, float> _open = new();
+        /// <summary>Сколько клеток раскрыть за поиск: путь вокруг дома/РТ укладывается в 3–6 тыс., дальше — почти всегда «пути нет».</summary>
+        public const int Budget = 20000;
+
+        static List<Vector2> FindInner(World w, Vector2 from, Vector2 to, float r, float tol, Func<MapWall, bool> passable, int budget,
+            Func<Vector2, bool> goalTest = null, Func<Vector2, float> heur = null, Vector2? boxMin = null, Vector2? boxMax = null)
         {
             // сетка выровнена по миру (кратно 0,5 м): центр клетки попадает ровно в середину дверного проёма
-            var min = Vector2.Min(from, to) - new Vector2(8);
+            var min = boxMin ?? Vector2.Min(from, to) - new Vector2(8);
             min = new Vector2(MathF.Floor(min.X / Step) * Step, MathF.Floor(min.Y / Step) * Step);
-            var max = Vector2.Max(from, to) + new Vector2(8);
+            var max = boxMax ?? Vector2.Max(from, to) + new Vector2(8);
             int nx = (int)((max.X - min.X) / Step) + 1, ny = (int)((max.Y - min.Y) / Step) + 1;
             if (nx * ny > MaxCells) return null;
 
-            var state = new byte[nx * ny];       // 0 — не знаем, 1 — свободно, 2 — занято
-            var g = new float[nx * ny];
-            var from_ = new int[nx * ny];
-            var closed = new bool[nx * ny];
-            Array.Fill(g, float.MaxValue);
+            int stampNow = ++_search;
+            if (stampNow == int.MaxValue) { Array.Clear(_stamp); _search = stampNow = 1; }
+            var state = _state; var g = _g; var from_ = _from; var stamp = _stamp; var closed = _closed;
+            void Touch(int i) { if (stamp[i] != stampNow) { stamp[i] = stampNow; state[i] = 0; g[i] = float.MaxValue; closed[i] = false; } }
             Vector2 P(int i) => min + new Vector2(i % nx, i / nx) * Step;
             int Idx(Vector2 p) => Math.Clamp((int)MathF.Round((p.Y - min.Y) / Step), 0, ny - 1) * nx + Math.Clamp((int)MathF.Round((p.X - min.X) / Step), 0, nx - 1);
             bool Free(int i)
             {
+                Touch(i);
                 if (state[i] == 0) state[i] = (byte)(w.WalkBlocked(P(i), r, passable) ? 2 : 1);
                 return state[i] == 1;
             }
 
             int start = Idx(from), goal = Idx(to);
-            float H(int i) { var d = Vector2.Abs(P(i) - to); return (MathF.Max(d.X, d.Y) + 0.414f * MathF.Min(d.X, d.Y)); }
-            var open = new PriorityQueue<int, float>();
+            float H(int i) { if (heur != null) return heur(P(i)); var d = Vector2.Abs(P(i) - to); return (MathF.Max(d.X, d.Y) + 0.414f * MathF.Min(d.X, d.Y)); }
+            var open = _open;
+            open.Clear();
+            Touch(start);
             g[start] = 0; from_[start] = -1;
             open.Enqueue(start, H(start));
             int found = -1, expanded = 0;
-            while (open.Count > 0 && expanded < MaxCells)
+            while (open.Count > 0 && expanded < budget)
             {
                 int c = open.Dequeue();
                 if (closed[c]) continue;
                 closed[c] = true;
                 expanded++;
-                if (Vector2.Distance(P(c), to) <= tol + 0.3f) { found = c; break; }
+                if (goalTest != null ? goalTest(P(c)) : Vector2.Distance(P(c), to) <= tol + 0.3f) { found = c; break; }
                 int cx = c % nx, cy = c / nx;
                 for (int dy = -1; dy <= 1; dy++)
                     for (int dx = -1; dx <= 1; dx++)
@@ -83,7 +122,7 @@ namespace Rastvordd.Sim
                         int x = cx + dx, y = cy + dy;
                         if (x < 0 || y < 0 || x >= nx || y >= ny) continue;
                         int n = y * nx + x;
-                        if (closed[n] || !Free(n)) continue;
+                        if (!Free(n) || closed[n]) continue;
                         if (dx != 0 && dy != 0 && (!Free(cy * nx + x) || !Free(y * nx + cx))) continue;   // углы не срезаем
                         float step = (dx != 0 && dy != 0 ? 1.414f : 1f) * Step * (w.Terrain.IsLand(P(n)) ? 1f : 4f);
                         float ng = g[c] + step;
@@ -92,6 +131,7 @@ namespace Rastvordd.Sim
                         open.Enqueue(n, ng + H(n));
                     }
             }
+            SimPerf.Count("A*: клеток раскрыто", expanded);
             if (found < 0) return null;
 
             var raw = new List<Vector2>();
@@ -105,7 +145,7 @@ namespace Rastvordd.Sim
             while (k < raw.Count)
             {
                 int far = k;
-                for (int j = raw.Count - 1; j > k; j--)
+                for (int j = Math.Min(raw.Count - 1, k + 48); j > k; j--)   // не дальше 48 клеток (12 м) вперёд: иначе на длинном пути — тысячи проверок отрезков
                     if (w.SegmentWalkable(cur, raw[j], r, 0, passable)) { far = j; break; }
                 path.Add(raw[far]);
                 cur = raw[far];

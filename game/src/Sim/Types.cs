@@ -163,18 +163,18 @@ namespace Rastvordd.Sim
             Add("tool_hatchet", "Каменный топор", ItemCategory.Tool).Weapon = WeaponDef.MeleeTool("tool_hatchet", 15, 0.8f, 1.8f, 16, 3, 2, 2);
             Add("tool_pickaxe", "Каменная кирка", ItemCategory.Tool).Weapon = WeaponDef.MeleeTool("tool_pickaxe", 14, 0.9f, 1.8f, 3, 14, 10, 9);
             Add("weapon_spear", "Деревянное копьё", ItemCategory.Weapon).Weapon = WeaponDef.MeleeTool("weapon_spear", 35, 0.9f, 2.3f, 1, 1, 1, 1, 50);
-            Add("tool_hammer", "Молоток", ItemCategory.Tool).Weapon = WeaponDef.MeleeTool("tool_hammer", 6, 0.6f, 2.0f, 1, 1, 1, 1);   // улучшает и чинит постройки
-            Add("build_plan", "План постройки", ItemCategory.Tool).Build = true;
+            Add("tool_hammer", "Киянка", ItemCategory.Tool).Weapon = WeaponDef.MeleeTool("tool_hammer", 6, 0.6f, 2.0f, 1, 1, 1, 1);   // улучшает и чинит постройки
+            Add("build_plan", "План", ItemCategory.Tool).Build = true;
             // взрывчатка (названия — черновик docs/naming.md)
-            var satchel = Add("expl_satchel", "Связка", ItemCategory.Weapon);
+            var satchel = Add("expl_satchel", "Самодельная бомба", ItemCategory.Weapon);
             satchel.Explosive = new ExplosiveDef { Damage = 75, Radius = 2.2f, Fuse = 5f, DudChance = 0.2f, ThrowRange = 10 };
             satchel.Stack = 10;
-            var c4 = Add("expl_c4", "Шашка с часами", ItemCategory.Weapon);
+            var c4 = Add("expl_c4", "Взрывчатка", ItemCategory.Weapon);
             c4.Explosive = new ExplosiveDef { Damage = 500, Radius = 2.5f, Fuse = 10f, ThrowRange = 8, Sticks = true };
             c4.Stack = 10;
             Add("lock_code", "Кодовый замок", ItemCategory.Tool).Lock = true;
             Add("lock_key", "Замок с ключом", ItemCategory.Tool).Lock = true;
-            var molotov = Add("expl_fire", "Коктейль", ItemCategory.Weapon);   // бутылка с горючкой: огонь по дереву
+            var molotov = Add("expl_fire", "Коктейль Молотова", ItemCategory.Weapon);   // бутылка с горючкой: огонь по дереву
             molotov.Explosive = new ExplosiveDef { Radius = 1.6f, Fuse = 0f, ThrowRange = 12, FireTime = 14f };
             molotov.Stack = 10;
             Add("weapon_torch", "Факел", ItemCategory.Weapon).Weapon = WeaponDef.MeleeTool("weapon_torch", 10, 0.8f, 1.6f, 1, 1, 1, 1);   // светит ночью
@@ -209,7 +209,7 @@ namespace Rastvordd.Sim
             Add("deploy_workbench", "Верстак", ItemCategory.Deployable).Deploy = DeployKind.Workbench;
             Add("deploy_sleepbag", "Спальник", ItemCategory.Deployable).Deploy = DeployKind.SleepBag;
             Add("deploy_box", "Ящик", ItemCategory.Deployable).Deploy = DeployKind.Box;
-            Add("deploy_claim", "Межевой столб", ItemCategory.Deployable).Deploy = DeployKind.Claim;   // центр базы: зона, бюджет, содержание
+            Add("deploy_claim", "Шкаф", ItemCategory.Deployable).Deploy = DeployKind.Claim;   // центр базы: зона, бюджет, содержание
             Add("deploy_furnace", "Печь", ItemCategory.Deployable).Deploy = DeployKind.Furnace;
         }
 

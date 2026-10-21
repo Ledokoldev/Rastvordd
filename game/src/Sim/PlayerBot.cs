@@ -430,7 +430,7 @@ namespace Rastvordd.Sim
             if (claim == null)
             {
                 if (!Has("deploy_claim")) { if (!Craft("deploy_claim", ref cmd)) Gather(NodeKind.Tree, ref cmd); return; }
-                Doing = "ставит столб";
+                Doing = "ставит шкаф";
                 // столб — в северо-западный угол, чтобы не мешал ходить по дому
                 if (!MoveTo(CellC(0, 0) + new Vector2(0.3f, 1.2f), 0.6f, ref cmd)) return;
                 cmd.Aim = CellC(0, 0) + new Vector2(-0.55f, -0.55f);
@@ -570,7 +570,7 @@ namespace Rastvordd.Sim
             {
                 foreach (var (id, perHour) in _w.UpkeepPerHourOf(claim))
                     if (!Need(id, (int)MathF.Ceiling(perHour * 2), ref cmd)) return;
-                Doing = "кормит столб";
+                Doing = "кормит шкаф";
                 if (!GoTo(claim.Pos + new Vector2(0.6f, 0.6f), 0.35f, ref cmd)) return;   // вплотную к столбу, дальше от двери
                 cmd.Aim = claim.Pos;
                 cmd.Interact = Click2();

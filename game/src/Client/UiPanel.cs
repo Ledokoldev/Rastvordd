@@ -125,7 +125,7 @@ namespace Rastvordd.Client
                     AddButton("Забрать готовое", () => Action?.Invoke(UiOp.TakeOut, null, 0));
                     break;
                 case UiKind.Claim:
-                    _info.Text = v.ClaimText + "\nПоложи сюда ресурсы — столб тратит их на содержание дома. Без запаса дом начнёт гнить.";
+                    _info.Text = v.ClaimText + "\nПоложи сюда ресурсы — шкаф тратит их на содержание дома. Без запаса дом начнёт гнить.";
                     foreach (var it in v.Items)
                     {
                         var id = it.id;

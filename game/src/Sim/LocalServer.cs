@@ -271,7 +271,7 @@ namespace Rastvordd.Sim
             snap.Self.HasBag = myBag != null;
             snap.Self.BagReadyIn = myBag != null ? System.Math.Max(0, myBag.ReadyAt - World.Time) : 0;
             if (me.Held?.Def?.Build == true && World.ClaimAt(Building.CellOf(me.LastAim)) is Deployable zc) { snap.Self.ZoneCell = Building.CellOf(zc.Pos); snap.Self.HasZone = true; snap.Self.BuildStatus = BuildStatus(zc, me); }
-            else if (me.Held?.Def?.Build == true) snap.Self.BuildStatus = "Нет зоны столба — сначала поставь межевой столб";
+            else if (me.Held?.Def?.Build == true) snap.Self.BuildStatus = "Нет зоны шкафа — сначала поставь шкаф";
             float r2 = WorldViewRadius * WorldViewRadius;
 
             foreach (var a in World.Actors)
@@ -443,7 +443,7 @@ namespace Rastvordd.Sim
             var (b, found, doors) = w.ClaimLoad(c);
             float h = w.ClaimHoursLeft(c);
             string upkeep = b <= 0 ? "" : h > 0 ? $" · запас {h:0.0} ч" : c.Grace > 0 ? $" · ЗАПАСА НЕТ, гниение через {c.Grace / 60:0} мин" : " · ГНИЁТ";
-            return $"[E] Межевой столб · нагрузка {b:0}/{World.BudgetMax} · фундаменты {found}/{World.FoundMax} · двери {doors}/{World.DoorMax}{upkeep}";
+            return $"[E] Шкаф · нагрузка {b:0}/{World.BudgetMax} · фундаменты {found}/{World.FoundMax} · двери {doors}/{World.DoorMax}{upkeep}";
         }
 
         static string FurnaceHint(Deployable f)

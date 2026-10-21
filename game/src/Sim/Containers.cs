@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -36,7 +36,7 @@ namespace Rastvordd.Sim
             if (kind == UiKind.Claim && target is Deployable c && !c.Auth.Contains(a.Id))
             {
                 c.Auth.Add(a.Id);
-                Info(a, "Ты вписан в столб: можно строить в его зоне");
+                Info(a, "Ты вписан в шкаф: можно строить в его зоне");
             }
         }
 
@@ -198,7 +198,7 @@ namespace Rastvordd.Sim
                     v.On = f.On; v.Burning = f.Burning;
                     break;
                 case Deployable c when a.OpenUi == UiKind.Claim:
-                    v.Title = "Межевой столб";
+                    v.Title = "Шкаф";
                     var (load, found, doors) = ClaimLoad(c);
                     float h = ClaimHoursLeft(c);
                     var need = UpkeepPerHourOf(c);

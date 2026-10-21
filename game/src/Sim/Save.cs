@@ -221,7 +221,7 @@ namespace Rastvordd.Sim
                             }
                     }
                 }
-                if (eaten.Count > 0) report.Add("столб съел: " + string.Join(", ", eaten));
+                if (eaten.Count > 0) report.Add("шкаф съел: " + string.Join(", ", eaten));
                 if (lost > 0) report.Add($"без запаса сгнило элементов: {lost}");
             }
 

@@ -910,7 +910,7 @@ namespace Rastvordd.Sim
         {
             if (Vector2.Distance(a.Pos, at) > PlaceRange) { Info(a, "Слишком далеко"); return; }
             float rad = def.Deploy switch { DeployKind.Claim or DeployKind.SleepBag => 0.3f, DeployKind.Box => 0.45f, _ => 0.6f };
-            if (def.Deploy == DeployKind.Claim && !CanPlaceClaim(at, out string why)) { Info(a, $"Столб: {why}"); return; }
+            if (def.Deploy == DeployKind.Claim && !CanPlaceClaim(at, out string why)) { Info(a, $"Шкаф: {why}"); return; }
             var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = rad };   // столб тонкий, спальник плоский, ящик компактный
             if (def.Deploy == DeployKind.Box) dep.Storage = new LootBag { Id = NextId(), Pos = at };
             dep.Auth.Add(a.Id);

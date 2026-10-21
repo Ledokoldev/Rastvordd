@@ -41,7 +41,7 @@ namespace Rastvordd.Sim
         public const float BuildRange = 6f;
         public const int MaxTier = 4;
 
-        public static readonly string[] TierNames = { "разметка", "дерево", "камень", "металл", "сталь" };
+        public static readonly string[] TierNames = { "каркас", "дерево", "камень", "металл", "сталь" };
         static readonly float[] TierHp = { 10, 250, 500, 1000, 2000 };
 
         public static string KindName(StructKind k) => k switch
@@ -496,7 +496,7 @@ namespace Rastvordd.Sim
         {
             why = "";
             claim = ClaimAt(cell);
-            if (claim == null) { why = "нужен межевой столб рядом (зона 8 клеток)"; return false; }
+            if (claim == null) { why = "нужен шкаф рядом (зона 8 клеток)"; return false; }
             if (!claim.Auth.Contains(a.Id)) { why = "чужая зона"; return false; }
             var (b, found, doors) = ClaimLoad(claim);
             float add = kind == StructKind.Foundation ? 1 : kind == StructKind.Door ? 3.5f : 0.5f;   // дверь заменяет 0,5 проёма на 4
@@ -509,7 +509,7 @@ namespace Rastvordd.Sim
         /// <summary>E по столбу: положить запас на содержание (до ~2 часов по каждому ресурсу).</summary>
         void UseClaim(Actor a, Deployable claim)
         {
-            if (!claim.Auth.Contains(a.Id)) { claim.Auth.Add(a.Id); Info(a, "Ты вписан в столб: можно строить в его зоне"); return; }
+            if (!claim.Auth.Contains(a.Id)) { claim.Auth.Add(a.Id); Info(a, "Ты вписан в шкаф: можно строить в его зоне"); return; }
             var need = UpkeepPerHourOf(claim);
             var parts = new List<string>();
             foreach (var (id, perHour) in need)
@@ -522,7 +522,7 @@ namespace Rastvordd.Sim
                 parts.Add($"{Items.Name(id)} {got}");
             }
             float h = ClaimHoursLeft(claim);
-            Info(a, parts.Count > 0 ? $"В столб: {string.Join(", ", parts)} · хватит на {h:0.0} ч" : need.Count == 0 ? "Столб: базы ещё нет — содержать нечего" : $"Столб: запас на {h:0.0} ч");
+            Info(a, parts.Count > 0 ? $"В шкаф: {string.Join(", ", parts)} · хватит на {h:0.0} ч" : need.Count == 0 ? "Шкаф: базы ещё нет — содержать нечего" : $"Шкаф: запас на {h:0.0} ч");
         }
 
         /// <summary>Раз в секунду: столбы едят запас; без запаса — отсрочка 30 минут, потом гниение тех элементов, чей ресурс кончился.</summary>

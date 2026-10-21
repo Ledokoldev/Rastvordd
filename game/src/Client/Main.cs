@@ -610,7 +610,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         break;
                     case SimEventKind.HitStruct:
                         Sfx.Play(e.Text is "камень" or "металл" or "сталь" ? "hit_metal_ore" : "hit_wood", Iso.Px(e.Pos), -2, 30, 0.1f);
-                        SpawnChipsAt(e.Pos, TierChips[e.Text == "разметка" ? 0 : e.Text == "дерево" ? 1 : e.Text == "камень" ? 2 : 3], e.ActorId, e.Value > 0 ? 6 : 3);
+                        SpawnChipsAt(e.Pos, TierChips[e.Text == "каркас" ? 0 : e.Text == "дерево" ? 1 : e.Text == "камень" ? 2 : 3], e.ActorId, e.Value > 0 ? 6 : 3);
                         if (_actorViews.TryGetValue(e.ActorId, out var sh)) sh.HitStop(0.07f);
                         if (e.ActorId == _myId) _shake = Mathf.Min(1.2f, _shake + 0.4f);
                         break;

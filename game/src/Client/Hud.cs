@@ -10,6 +10,7 @@ namespace Rastvordd.Client
     {
         const int BarW = 260;
 
+        Label _buildLabel;
         Label _hpLabel, _foodLabel, _waterLabel, _ammoLabel, _hintLabel, _toastLabel, _promptLabel, _invLabel, _deathLabel, _modeLabel, _queueLabel;
         ColorRect _hpFill, _foodFill, _waterFill, _damageRect, _deathRect, _vision;
         PanelContainer _invPanel, _craftPanel;
@@ -131,6 +132,8 @@ void fragment() {
             _ammoLabel.HorizontalAlignment = HorizontalAlignment.Right;
             _promptLabel = MakeLabel(this, Vector2.Zero, 20, new Color(1, 0.9f, 0.5f));
             _promptLabel.HorizontalAlignment = HorizontalAlignment.Center;
+            _buildLabel = MakeLabel(this, Vector2.Zero, 15, new Color(0.75f, 0.88f, 1f));
+            _buildLabel.HorizontalAlignment = HorizontalAlignment.Center;
             _toastLabel = MakeLabel(this, Vector2.Zero, 20, Colors.White);
             _toastLabel.HorizontalAlignment = HorizontalAlignment.Center;
 
@@ -363,6 +366,7 @@ void fragment() {
 
             _modeLabel.Text = modeText;
             _promptLabel.Text = s.InteractHint ?? "";
+            _buildLabel.Text = s.Dead ? "" : s.BuildStatus ?? "";
 
             var inv = new System.Text.StringBuilder("ИНВЕНТАРЬ\n\n");
             if (s.Inventory.Count == 0) inv.Append("пусто");
@@ -403,6 +407,7 @@ void fragment() {
             if (_adminPanel.Visible) Place(_adminPanel, vs, 0.5f, 0.3f, Vector2.Zero);
             Place(_belt, vs, 0.5f, 1, new Vector2(0, -16));
             Place(_promptLabel, vs, 0.5f, 1, new Vector2(0, -90));
+            Place(_buildLabel, vs, 0.5f, 1, new Vector2(0, -118));
             Place(_toastLabel, vs, 0.5f, 0, new Vector2(0, 90));
             Place(_invPanel, vs, 1, 0.5f, new Vector2(-30, 0));
             Place(_deathLabel, vs, 0.5f, 0.5f, Vector2.Zero);

@@ -71,6 +71,7 @@ namespace Rastvordd.Sim
         public Vector2? Home;           // твой межевой столб (для карты)
         public bool HasBag;             // есть свой спальник
         public float BagReadyIn;        // секунд до готовности спальника
+        public string BuildStatus;      // с планом в руках: лимиты базы под курсором
         public bool HasZone;            // зона столба под курсором (клетка столба, радиус World.ClaimRadius)
         public (int i, int j) ZoneCell;
         public BeltSlotInfo?[] Belt = new BeltSlotInfo?[Actor.BeltSize];
@@ -247,7 +248,8 @@ namespace Rastvordd.Sim
             var myBag = World.ReadyBag(me);
             snap.Self.HasBag = myBag != null;
             snap.Self.BagReadyIn = myBag != null ? System.Math.Max(0, myBag.ReadyAt - World.Time) : 0;
-            if (me.Held?.Def?.Build == true && World.ClaimAt(Building.CellOf(me.LastAim)) is Deployable zc) { snap.Self.ZoneCell = Building.CellOf(zc.Pos); snap.Self.HasZone = true; }
+            if (me.Held?.Def?.Build == true && World.ClaimAt(Building.CellOf(me.LastAim)) is Deployable zc) { snap.Self.ZoneCell = Building.CellOf(zc.Pos); snap.Self.HasZone = true; snap.Self.BuildStatus = BuildStatus(zc, me); }
+            else if (me.Held?.Def?.Build == true) snap.Self.BuildStatus = "Нет зоны столба — сначала поставь межевой столб";
             float r2 = WorldViewRadius * WorldViewRadius;
 
             foreach (var a in World.Actors)
@@ -404,6 +406,15 @@ namespace Rastvordd.Sim
             World.InteractKind.Door => (((Structure)it.target).Open ? "[E] Закрыть дверь" : "[E] Открыть дверь") + (((Structure)it.target).Locked ? " · замок" : ""),
             _ => "",
         };
+
+        string BuildStatus(Deployable c, Actor me)
+        {
+            var (b, found, doors) = World.ClaimLoad(c);
+            float h = World.ClaimHoursLeft(c);
+            string who = c.Auth.Contains(me.Id) ? "твоя база" : "ЧУЖАЯ зона";
+            string upkeep = b <= 0 ? "" : h > 0 ? $" · запас {h:0.0} ч" : " · запаса нет";
+            return $"{who}: нагрузка {b:0}/{World.BudgetMax} (осталось {World.BudgetMax - b:0}) · фундаменты {found}/{World.FoundMax} · двери {doors}/{World.DoorMax}{upkeep}";
+        }
 
         static string ClaimHint(World w, Deployable c)
         {

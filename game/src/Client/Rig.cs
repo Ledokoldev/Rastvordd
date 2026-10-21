@@ -202,7 +202,11 @@ namespace Rastvordd.Client
                     float raise = t < 0.35f ? Ease(t / 0.35f)
                                 : t < 0.45f ? 1f - (t - 0.35f) / 0.1f * 1.3f
                                 : -0.3f * (1f - Ease((t - 0.45f) / 0.55f));
-                    wAng = aim - arc * raise;                          // поднят назад → опускается вперёд-вниз к цели
+                    // плоскость удара вертикальна: «вперёд» по земле + «вверх»; проецируем в вид 3/4 (глубина ×0,5).
+                    // В профиль это поворот в плоскости экрана, анфас/спиной — инструмент идёт вверх над головой и вниз к цели.
+                    float th = arc * raise;                            // угол подъёма от «вперёд»
+                    var sd = new Vector2(fwd.X * Mathf.Cos(th), fwd.Y * 0.5f * Mathf.Cos(th) - Mathf.Sin(th));
+                    wAng = Mathf.Atan2(sd.Y, sd.X);
                     grip = shNear + new Vector2(-2 * raise, 6 - raiseH * raise) + fwd * (4 + 3 * (1 - raise));
                     toolSlide = Mathf.Clamp(raise, 0, 1);              // на замахе кисти врозь, в ударе сходятся у конца рукояти
                 }

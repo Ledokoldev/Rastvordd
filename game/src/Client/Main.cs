@@ -139,6 +139,7 @@ namespace Rastvordd.Client
                 }
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
+                else if (arg.StartsWith("--riggallery")) AddChild(new RigGallery(arg.Contains('=') ? arg.Split('=')[1] : "naked"));
                 else if (arg == "--crouch") _forceCrouch = true;
                 else if (arg == "--sprint") _forceSprint = true;
                 else if (arg.StartsWith("--walk="))

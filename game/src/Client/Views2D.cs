@@ -48,7 +48,7 @@ namespace Rastvordd.Client
             AddChild(_body);
             AddChild(_held);
             // управляемый персонаж из частей (если части сгенерированы): руки по IK к оружию, ноги шагают, позы
-            var rigSet = isNpc ? null : RigSet.Load("naked");
+            var rigSet = RigSet.Load(isNpc ? "guard" : "naked");
             if (rigSet != null)
             {
                 _rig = new RigView(rigSet);

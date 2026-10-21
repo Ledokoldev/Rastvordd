@@ -88,7 +88,7 @@ namespace Rastvordd.Client
 
         static float HeldLength(string id) => id switch
         {
-            "tool_rock" => 0.28f, "tool_hatchet" or "tool_pickaxe" => 0.62f, "weapon_spear" => 1.5f,
+            "tool_rock" => 0.3f, "tool_hatchet" => 0.78f, "tool_pickaxe" => 0.85f, "weapon_spear" => 1.5f,
             "weapon_bow" => 0.85f, "weapon_pipe" => 0.5f, "weapon_ak" => 0.92f, _ => 0.6f,
         };
 
@@ -136,8 +136,20 @@ namespace Rastvordd.Client
             float lift = moving ? (s.Sprint ? 3.5f : 2f) : 0;
             float bob = moving ? -Mathf.Abs(Mathf.Sin(s.Phase)) * (s.Sprint ? 1.5f : 1f) : Mathf.Sin(s.Breath) * 0.4f;
 
+            // удар инструментом: корпус откидывается назад на замахе, «падает» вперёд в удар, колени пружинят
+            bool toolSwing = s.Swing >= 0 && s.Held != null && IsTool(s.Held) && s.Held != "weapon_spear";
+            float swingLean = 0, swingDip = 0;
+            if (toolSwing)
+            {
+                float t = s.Swing;
+                swingLean = t < 0.35f ? -0.16f * Ease(t / 0.35f)
+                          : t < 0.45f ? Mathf.Lerp(-0.16f, 0.3f, Ease((t - 0.35f) / 0.1f))
+                          : 0.3f * (1f - Ease((t - 0.45f) / 0.55f));
+                swingDip = t > 0.38f && t < 0.75f ? Mathf.Sin((t - 0.38f) / 0.37f * Mathf.Pi) * 2.5f : 0;
+            }
+
             float lThigh = _set.Thigh.GetHeight() - 1, lShin = _set.Shin.GetHeight() - 1;
-            float hipY = -(lThigh + lShin) + 0.6f + crouch * 7 + bob;   // в стойке ноги почти прямые
+            float hipY = -(lThigh + lShin) + 0.6f + crouch * 12 + bob + swingDip;   // в стойке ноги почти прямые
             var hipL = new Vector2(-3, hipY);
             var hipR = new Vector2(3, hipY);
 
@@ -145,16 +157,19 @@ namespace Rastvordd.Client
             Vector2 Foot(float ph, float x)
             {
                 float sw = Mathf.Sin(ph);
-                var f = new Vector2(x + crouch * Mathf.Sign(x) * 2, 0) + fwd * stride * sw;
+                var f = new Vector2(x, 0) + new Vector2(fwd.X, fwd.Y * 0.5f) * stride * sw;
                 f.Y -= Mathf.Max(0, Mathf.Cos(ph)) * lift;
                 return f;
             }
-            var footFar = Foot(s.Phase + Mathf.Pi, -3);
-            var footNear = Foot(s.Phase, 4);
+            // присед — полуколено: ближняя нога шагнула вперёд (колено вверх), дальняя отставлена назад (колено к земле)
+            var fwdG = new Vector2(fwd.X, fwd.Y * 0.5f);   // направление по земле с ракурсным сжатием глубины
+            var footFar = Foot(s.Phase + Mathf.Pi, -3) + crouch * (-fwdG * 11);
+            var footNear = Foot(s.Phase, 4) + crouch * (fwdG * 7);
             float kneeBend = -1;   // колени сгибаются «вперёд» (к взгляду)
 
             // корпус: наклон вперёд на бегу
-            float lean = s.Sprint ? 0.18f : moving ? 0.06f : 0;
+            float lean = (s.Sprint ? 0.18f : moving ? 0.06f : 0) + crouch * 0.12f;
+            lean += swingLean * Mathf.Clamp(Mathf.Abs(fwd.X) + 0.3f, 0, 1);   // в профиль наклон виден, анфас — меньше
             var waist = new Vector2(0, hipY - 2);
             float torsoH = (back ? _set.TorsoB : _set.TorsoF).GetHeight();
             var torsoTop = waist + new Vector2(Mathf.Sin(lean) * torsoH, -Mathf.Cos(lean) * torsoH);
@@ -168,7 +183,7 @@ namespace Rastvordd.Client
             float len = (hasItem ? HeldLength(held) : 0) * 32f;
             float wAng = aim + s.Recoil * (_mirror ? -1 : 1);
             Vector2 grip;
-            float down = 0;
+            float down = 0, toolSlide = -1;
             if (s.Swing >= 0 && hasItem && IsTool(held))
             {
                 // удар: замах за плечо → резкий удар вниз-вперёд → возврат
@@ -189,6 +204,7 @@ namespace Rastvordd.Client
                                 : -0.3f * (1f - Ease((t - 0.45f) / 0.55f));
                     wAng = aim - arc * raise;                          // поднят назад → опускается вперёд-вниз к цели
                     grip = shNear + new Vector2(-2 * raise, 6 - raiseH * raise) + fwd * (4 + 3 * (1 - raise));
+                    toolSlide = Mathf.Clamp(raise, 0, 1);              // на замахе кисти врозь, в ударе сходятся у конца рукояти
                 }
             }
             else
@@ -206,7 +222,9 @@ namespace Rastvordd.Client
                 grip -= new Vector2(Mathf.Cos(wAng), Mathf.Sin(wAng)) * s.Kick * 3f;
             }
             var wDir = new Vector2(Mathf.Cos(wAng), Mathf.Sin(wAng));
-            Vector2 support = TwoHanded(held ?? "") ? grip + wDir * len * 0.5f : shFar + new Vector2(1, 12) + fwd * 1.5f;
+            bool toolGrip = hasItem && IsTool(held) && held != "weapon_spear";
+            float supportAt = toolGrip ? (toolSlide >= 0 ? Mathf.Lerp(0.1f, 0.38f, toolSlide) : 0.25f) : 0.5f;
+            Vector2 support = TwoHanded(held ?? "") ? grip + wDir * len * supportAt : shFar + new Vector2(1, 12) + fwd * 1.5f;
             if (s.Reload >= 0 && s.Reload > 0.3f && s.Reload < 0.7f)
                 support = grip + wDir * len * 0.25f + new Vector2(0, 6);     // вторая кисть за магазином
             if (!hasItem) { grip = shNear + new Vector2(1, 12) + fwd * 1.5f; support = shFar + new Vector2(1, 12) - fwd * 1.5f; }
@@ -221,7 +239,7 @@ namespace Rastvordd.Client
                 var tex = Art.HeldSprite(held);
                 if (tex == null) return;
                 float sc = len / (tex.GetWidth() * 0.9f);
-                var center = grip + wDir * len * 0.3f;
+                var center = grip + wDir * len * (toolGrip ? 0.42f : 0.3f);   // инструмент держат за конец рукояти
                 var p = center + RigView.Feet;
                 float rot = wAng;
                 if (_mirror) { p.X = RigView.VW - p.X; rot = -rot; }
@@ -243,10 +261,33 @@ namespace Rastvordd.Client
                 Part(_set.Shin, leg.joint, leg.a2 - Mathf.Pi / 2, new Vector2(_set.Shin.GetWidth() / 2f, 1));
             }
 
+            // звено ноги от a до b: текстура тянется/сжимается — так видно ракурсное сокращение (бедро к камере)
+            void Seg(Texture2D t, Vector2 a, Vector2 b, float l)
+            {
+                var d = b - a;
+                Part(t, a, Mathf.Atan2(d.Y, d.X) - Mathf.Pi / 2, new Vector2(t.GetWidth() / 2f, 1), Mathf.Max(0.25f, d.Length() / l));
+            }
+
             void DrawBody()
             {
-                DrawLeg(hipL, footFar);
-                DrawLeg(hipR, footNear);
+                if (crouch > 0 && Mathf.Abs(fwd.X) < 0.45f)
+                {
+                    // присед анфас/спиной: опорное колено на земле, другая нога выставлена вперёд — бедро сокращено ракурсом
+                    float f = Mathf.Sign(fwd.Y);   // +1 — к камере, −1 — от камеры
+                    var kneeK = new Vector2(-3, f > 0 ? -0.5f : 1f);
+                    var footK = new Vector2(-3.5f, f > 0 ? -4f : 4f);
+                    var kneeF = hipR + new Vector2(0.5f, f > 0 ? 6f : 4f);
+                    var footF = new Vector2(4.5f, f > 0 ? 0f : -3f);
+                    Seg(_set.Shin, kneeK, footK, lShin);
+                    Seg(_set.Thigh, hipL, kneeK, lThigh);
+                    Seg(_set.Shin, kneeF, footF, lShin);
+                    Seg(_set.Thigh, hipR, kneeF, lThigh);
+                }
+                else
+                {
+                    DrawLeg(hipL, footFar);
+                    DrawLeg(hipR, footNear);
+                }
                 Part(_set.Pelvis, waist + new Vector2(0, 1), lean * 0.5f, new Vector2(_set.Pelvis.GetWidth() / 2f, _set.Pelvis.GetHeight() * 0.7f));
                 var torso = back ? _set.TorsoB : _set.TorsoF;
                 Part(torso, waist, lean, new Vector2(torso.GetWidth() / 2f, torso.GetHeight()));

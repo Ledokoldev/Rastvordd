@@ -13,6 +13,10 @@ namespace Rastvordd.Sim
         public WallKind Kind;
         public Structure Owner;        // часть постройки игрока (иначе — карта)
         public bool PassBullets;       // проём окна: пули и взгляд проходят
+        public int Id;                 // номер стены карты (для клиента: какие убраны)
+        public string Tex;             // текстура лица (стены готовых РТ), иначе по виду
+        public bool Hidden;            // только хитбокс пропса: не рисуется
+        public bool Prefab;            // часть готовой РТ
     }
 
     public struct Noise
@@ -89,6 +93,7 @@ namespace Rastvordd.Sim
         public World(int seed)
         {
             Rng = new Random(seed);
+            Seed = seed;
             Terrain = new TerrainMap(HalfSize, seed);
             BuildMap();
         }
@@ -102,7 +107,7 @@ namespace Rastvordd.Sim
         {
             var min = new Vector2(MathF.Min(x1, x2), MathF.Min(y1, y2));
             var max = new Vector2(MathF.Max(x1, x2), MathF.Max(y1, y2));
-            var w = new MapWall { Wall = new Wall(min, max, h), Kind = kind };
+            var w = new MapWall { Wall = new Wall(min, max, h), Kind = kind, Id = _wallSeq++, Prefab = _prefabMode };
             Walls.Add(w);
             _wallGrid.Insert(w, min, max);
         }
@@ -160,6 +165,9 @@ namespace Rastvordd.Sim
                 if (Terrain.BiomeAt(p) == Biome.Beach && IsFree(p, 1.5f)) PlayerSpawns.Add(p);
             }
             if (PlayerSpawns.Count == 0) PlayerSpawns.Add(new Vector2(0, 40));
+
+            // готовые РТ — в самом конце и своим генератором: остальная раскладка мира (и старые сохранения) не сдвигается
+            PlaceSubstation();
         }
 
         // площадь на один объект (м²) и веса: дерево, камень, металл, сера, конопля, ягоды, бочка воды, ящик-укрытие, руины
@@ -430,8 +438,16 @@ namespace Rastvordd.Sim
             a.Hp = a.MaxHp;
             a.Dead = false;
             a.ClearAll();
-            a.AddSlot(Items.NewSlot("weapon_ak", 30));
-            a.Add("ammo_rifle", Rng.Next(30, 75));
+            if (NpcKit.TryGetValue(NpcHomes[a.Id], out var kit) && kit == "pipe")
+            {
+                a.AddSlot(Items.NewSlot("weapon_pipe"));   // тир 1: сторож с самопалом, не калаш
+                a.Add("ammo_pistol", Rng.Next(10, 25));
+            }
+            else
+            {
+                a.AddSlot(Items.NewSlot("weapon_ak", 30));
+                a.Add("ammo_rifle", Rng.Next(30, 75));
+            }
             a.Add("scrap", Rng.Next(5, 20));
             if (Rng.NextDouble() < 0.12) a.Add("keycard", 1);
             if (Rng.NextDouble() < 0.4) a.Add("bandage", 1);
@@ -587,6 +603,7 @@ namespace Rastvordd.Sim
             StepClaims();
             StepThrowns();
             StepFires();
+            StepSubstations();
         }
 
         void StepActor(Actor a, InputCmd cmd)
@@ -1083,7 +1100,7 @@ namespace Rastvordd.Sim
 
         // ---------- взаимодействие (E) ----------
 
-        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box, Recycler }
+        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box, Recycler, Panel }
 
         /// <summary>Что ближе всего под рукой. Используется и сервером, и подсказкой на экране.</summary>
         public (InteractKind kind, object target) NearestInteract(Actor a)
@@ -1107,6 +1124,11 @@ namespace Rastvordd.Sim
                 if (dp.Kind == DeployKind.SleepBag || !ClearLine(a.Pos, dp.Pos, null, true)) continue;   // спальник — не для E
                 float d = Vector2.Distance(a.Pos, dp.Pos) - dp.Radius + 0.3f;
                 if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, DeployKind.Recycler => InteractKind.Recycler, _ => InteractKind.Workbench }, dp); }
+            }
+            foreach (var s in Substations)
+            {
+                float d = Vector2.Distance(a.Pos, s.PanelPos);
+                if (d < bestD && ClearLine(a.Pos, s.PanelPos, null, true)) { bestD = d; best = (InteractKind.Panel, s); }
             }
             var door = NearestDoor(a.Pos, best.Item1 == InteractKind.None ? InteractRange + 0.4f : bestD);   // дверь — если ближе остального
             if (door != null && ClearLine(a.Pos, door.Center, door, true)) best = (InteractKind.Door, door);
@@ -1151,6 +1173,8 @@ namespace Rastvordd.Sim
             switch (kind)
             {
                 // у живого игрока — окна, боты пользуются быстрыми действиями
+                case InteractKind.Panel: UsePanel(a, (Substation)target); break;
+                case InteractKind.Bag when ((LootBag)target).Punch && !((LootBag)target).Unlocked: UsePunchCrate(a, (LootBag)target); break;
                 case InteractKind.Bag when ((LootBag)target).Safe && !((LootBag)target).Unlocked:
                     if (a.Take("keycard", 1) > 0) { ((LootBag)target).Unlocked = true; Info(a, "Сейф открыт картой доступа"); if (!a.IsBot) OpenUi(a, UiKind.Bag, target); }
                     else Info(a, "Сейф заперт: нужна карта доступа (бывает в ящиках и у охраны)");
@@ -1277,6 +1301,12 @@ namespace Rastvordd.Sim
                 case PickupKind.WaterBarrel:
                     a.Water = MathF.Min(100, a.Water + 40);
                     Info(a, "Напился воды");
+                    break;
+                case PickupKind.Fuse:
+                    a.Add("fuse", 1);
+                    p.RespawnLeft = 1e9f;   // вернётся при обновлении РТ или если пробку вынесут за забор
+                    Events.Add(new SimEvent { Kind = SimEventKind.Gather, ActorId = a.Id, Pos = p.Pos, Value = 1, Text = "Пробка" });
+                    Info(a, $"Пробка у тебя ({a.Count("fuse")}). Вставь в главный щиток в щитовой");
                     break;
             }
         }
@@ -1492,6 +1522,7 @@ namespace Rastvordd.Sim
                 var b = Bags[i];
                 if (b.IsCrate)
                 {
+                    if (b.Punch) continue;   // наполняется при обновлении своей РТ
                     if (b.Empty)
                     {
                         b.RespawnLeft -= Dt;

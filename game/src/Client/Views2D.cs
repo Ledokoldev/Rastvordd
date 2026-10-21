@@ -464,6 +464,7 @@ namespace Rastvordd.Client
         readonly WallKind _kind;
         readonly int _tier;
         readonly bool _door, _locked;
+        readonly string _texPath;      // стены готовых РТ: своя текстура лица
         float _alpha = 1;
 
         readonly Biome _biome;
@@ -476,6 +477,7 @@ namespace Rastvordd.Client
             _tier = w.Tier;
             _door = w.Door;
             _locked = w.Locked;
+            _texPath = w.Tex;
             TextureFilter = TextureFilterEnum.Nearest;
             TextureRepeat = TextureRepeatEnum.Enabled;
             float cx = (w.Min.X + w.Max.X) * 0.5f * Iso.PPM;
@@ -528,7 +530,7 @@ namespace Rastvordd.Client
                 frontR = new Rect2(_front.Position.X, -hc, _front.Size.X, hc);
                 topR = new Rect2(_top.Position.X, -hc - _top.Size.Y, _top.Size.X, _top.Size.Y);
             }
-            var (frontTex, topTex) = _kind switch
+            var (frontTex, topTex) = _texPath != null ? (Art.Get(_texPath), Art.Get(_texPath)) : _kind switch
             {
                 WallKind.Built when _door => (Art.Get(_tier >= 3 ? "walls/wallface_door_metal" : "walls/wallface_door_wood") ?? Art.Get("walls/wallface_wood"), Art.Get("tiles/floor_wood")),
                 WallKind.Built => _tier switch
@@ -852,6 +854,17 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
+            if (_kind == PickupKind.Fuse)
+            {
+                // пробка Подстанции: маленькая, но с бликом, чтобы её было видно на полу
+                var ft = Available ? Art.Get("icons/icon_fuse") : null;
+                if (ft == null) return;
+                DrawSetTransform(new Vector2(0, -2), 0, new Vector2(0.32f, 0.32f));
+                DrawTexture(ft, new Vector2(-ft.GetWidth() / 2, -ft.GetHeight()));
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                DrawCircle(new Vector2(4, -16), 1.5f, new Color(1, 1, 0.85f, 0.8f));
+                return;
+            }
             // спрайт: у собранного куста ягод — просто куст, собранная конопля — пенёк (заглушка ниже)
             var tex = _kind switch
             {
@@ -994,7 +1007,7 @@ namespace Rastvordd.Client
 
     public partial class BagView2D : Node2D
     {
-        public bool IsCrate, Empty, Safe;
+        public bool IsCrate, Empty, Safe, Punch, Unlocked;
 
         public BagView2D()
         {
@@ -1004,7 +1017,7 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            var tex = Art.Get(Safe ? "props/safe" : IsCrate ? "props/crate_military" : "props/loot_bag") ?? Art.Get("props/crate_military");
+            var tex = Art.Get(Punch ? (Unlocked ? "props/crate_punch_open" : "props/crate_punch") : Safe ? "props/safe" : IsCrate ? "props/crate_military" : "props/loot_bag") ?? Art.Get("props/crate_military");
             if (tex != null)
             {
                 // ящики и сумки делаем чуть крупнее реального — иначе их не видно

@@ -21,7 +21,7 @@ namespace Rastvordd.Sim
     }
 
     public struct ProjSnap { public int Id; public Vector2 Pos; public Vector2 Dir; public bool Arrow; }
-    public struct BagSnap { public int Id; public Vector2 Pos; public bool IsCrate; public bool Empty; public bool Safe; }
+    public struct BagSnap { public int Id; public Vector2 Pos; public bool IsCrate; public bool Empty; public bool Safe; public bool Punch; public bool Unlocked; }
     public struct NodeSnap { public int Id; public NodeKind Kind; public Vector2 Pos; public float Radius; public float Fill; }
     public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; }
     public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; public int Level; public bool Seen; }
@@ -130,10 +130,13 @@ namespace Rastvordd.Sim
         public List<ThrownSnap> Throwns = new();
         public List<FireSnap> Fires = new();
         public int StructVersion;         // меняется при любой стройке/поломке/двери
+        public int PrefabVersion;         // состояние готовых РТ: роллеты, щитки
+        public List<int> GoneWalls = new();
+        public List<(int id, string sprite)> DecorSprites = new();
         public List<SimEvent> Events = new();
     }
 
-    public struct WallInfo { public Vector2 Min, Max; public float Height; public WallKind Kind; public int Tier; public bool Door; public bool Locked; public int StructId; }
+    public struct WallInfo { public Vector2 Min, Max; public float Height; public WallKind Kind; public int Tier; public bool Door; public bool Locked; public int StructId; public int Id; public string Tex; public bool Hidden; }
 
     public sealed class MapInfo
     {
@@ -141,6 +144,11 @@ namespace Rastvordd.Sim
         public List<WallInfo> Walls = new();
         public List<(Vector2 min, Vector2 max)> Yards = new();   // площадки РТ: бетон под ногами
         public List<string> YardNames = new();
+        public List<bool> YardPrefab = new();   // готовая РТ: земля — своими участками, без бетонной заливки
+        public List<MapDecor> Decors = new();
+        public List<MapPatch> Patches = new();
+        public List<MapRoof> Roofs = new();
+        public List<MapWire> Wires = new();
         // рельеф и биомы (сетка N×N, клетка Cell метров) — отправляются один раз при подключении
         public int N;
         public float Cell;
@@ -183,9 +191,16 @@ namespace Rastvordd.Sim
         {
             var t = World.Terrain;
             var m = new MapInfo { HalfSize = World.HalfSize, N = t.N, Cell = TerrainMap.Cell, Biomes = t.Biomes, Heights = t.Height };
-            foreach (var mon in World.Monuments) { m.Yards.Add((mon.Min, mon.Max)); m.YardNames.Add(mon.Name); }
+            foreach (var mon in World.Monuments) { m.Yards.Add((mon.Min, mon.Max)); m.YardNames.Add(mon.Name); m.YardPrefab.Add(World.Prefabs.Contains(mon)); }
             foreach (var w in World.Walls)
-                m.Walls.Add(new WallInfo { Min = w.Wall.Min, Max = w.Wall.Max, Height = w.Wall.Height, Kind = w.Kind });
+                m.Walls.Add(new WallInfo { Min = w.Wall.Min, Max = w.Wall.Max, Height = w.Wall.Height, Kind = w.Kind, Id = w.Id, Tex = w.Tex, Hidden = w.Hidden });
+            foreach (var s in World.Substations)
+                if (!World.Walls.Contains(s.Shutter))   // поднятая роллета тоже нужна клиенту — чтобы опустить её при обновлении
+                    m.Walls.Add(new WallInfo { Min = s.Shutter.Wall.Min, Max = s.Shutter.Wall.Max, Height = s.Shutter.Wall.Height, Kind = s.Shutter.Kind, Id = s.Shutter.Id, Tex = s.Shutter.Tex });
+            foreach (var d in World.Decors) m.Decors.Add(new MapDecor { Id = d.Id, Sprite = d.Sprite, Pos = d.Pos, Flip = d.Flip });
+            m.Patches.AddRange(World.Patches);
+            m.Roofs.AddRange(World.Roofs);
+            m.Wires.AddRange(World.Wires);
             return m;
         }
 
@@ -539,7 +554,7 @@ namespace Rastvordd.Sim
 
             foreach (var b in World.Bags)
                 if (Vector2.DistanceSquared(b.Pos, me.Pos) < 60 * 60 && (b.IsCrate || IsPointVisible(me, b.Pos)))
-                    snap.Bags.Add(new BagSnap { Id = b.Id, Pos = b.Pos, IsCrate = b.IsCrate, Empty = b.Empty, Safe = b.Safe });
+                    snap.Bags.Add(new BagSnap { Id = b.Id, Pos = b.Pos, IsCrate = b.IsCrate, Empty = b.Empty, Safe = b.Safe, Punch = b.Punch, Unlocked = b.Unlocked });
 
             foreach (var n in World.NodesInRadius(me.Pos, WorldViewRadius, _snapNodes))
                 if (Vector2.DistanceSquared(n.Pos, me.Pos) < r2)
@@ -572,6 +587,9 @@ namespace Rastvordd.Sim
                 if (Vector2.DistanceSquared(f.Pos, me.Pos) < EventRadius * EventRadius)
                     snap.Fires.Add(new FireSnap { Id = f.Id, Pos = f.Pos, Radius = f.Radius, Left = f.Left });
             snap.StructVersion = World.StructVersion;
+            snap.PrefabVersion = World.PrefabVersion;
+            World.CollectGoneWalls(snap.GoneWalls);
+            foreach (var s in World.Substations) snap.DecorSprites.Add((s.Panel.Id, s.Panel.Sprite));
             var smem = Memory(_structMem, clientId);
             var aliveS = new HashSet<int>();
             foreach (var st in World.Structures)
@@ -697,12 +715,15 @@ namespace Rastvordd.Sim
 
         string Hint((World.InteractKind kind, object target) it) => it.kind switch
         {
+            World.InteractKind.Panel => ((Substation)it.target).Powered ? "Главный щиток — включён" : $"[E] Главный щиток — вставить пробку ({((Substation)it.target).FusesIn}/2)",
+            World.InteractKind.Bag when ((LootBag)it.target).Punch && !((LootBag)it.target).Unlocked => "[E] Крейт — перфокарта I",
             World.InteractKind.Bag => ((LootBag)it.target) is var lb && lb.Safe && !lb.Unlocked ? "[E] Сейф — нужна карта доступа" : lb.Safe ? "[E] Открыть сейф" : lb.IsCrate ? "[E] Открыть ящик" : lb.Corpse ? "[E] Обыскать рюкзак" : "[E] Подобрать вещи",
             World.InteractKind.Recycler => "[E] Переработчик — детали в лом",
             World.InteractKind.Pickup => ((Pickup)it.target).Kind switch
             {
                 PickupKind.Hemp => "[E] Собрать коноплю",
                 PickupKind.Berries => "[E] Собрать ягоды",
+                PickupKind.Fuse => "[E] Взять пробку",
                 _ => "[E] Попить",
             },
             World.InteractKind.Furnace => FurnaceHint((Deployable)it.target),

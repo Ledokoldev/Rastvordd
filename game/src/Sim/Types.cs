@@ -151,6 +151,9 @@ namespace Rastvordd.Sim
             Add("comp_pipe", "Труба", ItemCategory.Component);
             Add("comp_tape", "Изолента", ItemCategory.Component);
             Add("keycard", "Карта доступа", ItemCategory.Component);
+            Add("punchcard_1", "Перфокарта I", ItemCategory.Component);
+            Add("punchcard_2", "Перфокарта II", ItemCategory.Component);
+            Add("fuse", "Пробка", ItemCategory.Component);
             Add("scrap", "Металлолом", ItemCategory.Component);
 
             // патроны
@@ -314,6 +317,9 @@ namespace Rastvordd.Sim
             "comp_tape" => 4f,
             "comp_gears" or "comp_spring" or "comp_pipe" => 12f,
             "keycard" => 40f,
+            "punchcard_1" => 30f,
+            "punchcard_2" => 80f,
+            "fuse" => 0f,
             "bandage" => 3f,
             "berries" or "canned" or "water_bottle" => 1f,
             "weapon_pipe" => 60f,
@@ -373,6 +379,9 @@ namespace Rastvordd.Sim
             "deploy_furnace" => "Плавит руду в металл и серу",
             "comp_gears" or "comp_spring" or "comp_pipe" or "comp_tape" => "Деталь: в переработчике на РТ — лом и металл",
             "keycard" => "Открывает сейф на РТ с охраной (одна карта — один сейф)",
+            "punchcard_1" => "Открывает крейт РТ тира 1 (Подстанция). Тратится",
+            "punchcard_2" => "Открывает крейт РТ тира 2. Тратится",
+            "fuse" => "Пробка Подстанции: вставь в главный щиток. За забор не вынести",
             _ => "",
         };
 
@@ -380,6 +389,9 @@ namespace Rastvordd.Sim
         public static int Rarity(string id) => id switch
         {
             "keycard" => 3,
+            "punchcard_1" => 2,
+            "punchcard_2" => 3,
+            "fuse" => 1,
             "comp_gears" or "comp_spring" or "comp_pipe" => 2,
             "comp_tape" => 1,
             "weapon_ak" or "expl_c4" => 4,
@@ -665,7 +677,7 @@ namespace Rastvordd.Sim
         };
     }
 
-    public enum PickupKind { Hemp, Berries, WaterBarrel }
+    public enum PickupKind { Hemp, Berries, WaterBarrel, Fuse }
 
     /// <summary>То, что собирают руками по E: конопля, ягоды, бочка с водой.</summary>
     public sealed class Pickup
@@ -730,6 +742,7 @@ namespace Rastvordd.Sim
         public bool Corpse;             // вещи с трупа: обыскиваются по ячейке, как ящик РТ; выброшенное — открыто сразу
         public bool Safe;               // сейф на РТ: открывается картой доступа, до следующего наполнения
         public bool Unlocked;
+        public bool Punch;              // крейт РТ под перфокарту: открывает таймер РТ, наполняет обновление РТ
         public int Tier = 2;            // уровень лута ящика: 0 — без охраны, 1 — малая охрана, 2 — крупный РТ
         /// <summary>Обыск по игрокам: сколько ячеек уже раскрыто и сколько идёт текущая.</summary>
         public readonly Dictionary<int, (int n, float t)> Search = new();
@@ -739,7 +752,7 @@ namespace Rastvordd.Sim
         public bool Empty => Items.Count == 0;
     }
 
-    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted, Built, Destroyed, Door, HitStruct, Explosion, Locked, Revealed }
+    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted, Built, Destroyed, Door, HitStruct, Explosion, Locked, Revealed, Machine }
 
     public struct SimEvent
     {

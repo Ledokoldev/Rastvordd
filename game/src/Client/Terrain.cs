@@ -169,8 +169,10 @@ void fragment() {
                 var p = new Vector2((mx + 0.5f) * step - map.HalfSize, (my + 0.5f) * step - map.HalfSize);
                 // площадки РТ: бетон внутри забора, гравий по краю
                 float pad = 0, gravel = 0;
-                foreach (var (ymin, ymax) in map.Yards)
+                for (int yi = 0; yi < map.Yards.Count; yi++)
                 {
+                    if (yi < map.YardPrefab.Count && map.YardPrefab[yi]) continue;   // готовая РТ: земля своими участками
+                    var (ymin, ymax) = map.Yards[yi];
                     var mn = new Vector2(ymin.X, ymin.Y); var mx2 = new Vector2(ymax.X, ymax.Y);
                     if (p.X < mn.X - 6 || p.X > mx2.X + 6 || p.Y < mn.Y - 6 || p.Y > mx2.Y + 6) continue;
                     float pd = Box(p, mn + new Vector2(3, 3), mx2 - new Vector2(3, 3), 1.5f);

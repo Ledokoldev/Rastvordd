@@ -60,6 +60,7 @@ namespace Rastvordd.Client
         Camera2D _cam;
         /// <summary>Стены и пропсы карты (РТ) — для прозрачности заслонов.</summary>
         readonly List<WallView2D> _mapWalls = new();
+        PrefabLayer _prefab;
         /// <summary>Отладка (--occl-off): прозрачность только над своим персонажем — как было до D39, для сравнения.</summary>
         bool _occlSelfOnly;
         float _zoom = 2.0f;
@@ -139,7 +140,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("give")) { var g = a.Substring(4).Split('x'); _server.World.Find(_myId).Add(g[0], g.Length > 1 ? int.Parse(g[1]) : 1); }   // отладка: give<id>x<n>
                 else if (a.StartsWith("ui")) _uiReq = ((UiOp)int.Parse(a.Substring(2).Split('_')[0]), a.Contains('_') ? a.Substring(a.IndexOf('_') + 1).Replace('~', '#').Replace('^', '>') : null, 0);   // отладка: ui<op>_<арг> (# → ~, > → ^)
                 else if (a == "inv") _invOpen = !_invOpen;
-                else if (a == "info") GD.Print($"info: {_server.World.LastInfo.GetValueOrDefault(_myId)} | structs {_server.World.Structures.Count} | aim {_autoAim} | me {_server.World.Find(_myId).Pos}");   // отладка: последнее сообщение
+                else if (a == "info") GD.Print($"info: {_server.World.LastInfo.GetValueOrDefault(_myId)} | structs {_server.World.Structures.Count} | aim {_autoAim} | me {_server.World.Find(_myId).Pos}" + (_server.World.Substations.Count > 0 ? $" | подстанция: питание {_server.World.Substations[0].Powered}, крейт открыт {_server.World.Substations[0].Crate.Unlocked}, таймер {_server.World.Substations[0].CrateTimer:0}" : ""));   // отладка: последнее сообщение
                 else if (a == "map") { _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); }
                 else if (a == "crouch") _forceCrouch = true;
                 else if (a == "save") SaveWorld();
@@ -149,6 +150,12 @@ namespace Rastvordd.Client
                 {
                     var p = a.Substring(2).Split(';');
                     _forceWalk = new SVec(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture));
+                }
+                else if (a.StartsWith("subtp"))
+                {
+                    // отладка: перенестись на Подстанции в точку (x;y) от её угла
+                    var p = a.Substring(5).Split(';');
+                    _server.World.Find(_myId).Pos = _server.World.Substations[0].At(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture));
                 }
                 else if (a.StartsWith("at"))
                 {
@@ -298,6 +305,13 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     var p = arg.Substring(8).Split(',');
                     _server.World.Find(_myId).Pos = new SVec(float.Parse(p[0], inv), float.Parse(p[1], inv));
                 }
+                else if (arg.StartsWith("--atsub="))
+                {
+                    // отладка: встать на Подстанции в точке (x, y) от её угла
+                    var p = arg.Substring(8).Split(',');
+                    var sub = _server.World.Substations[0];
+                    _server.World.Find(_myId).Pos = sub.At(float.Parse(p[0], inv), float.Parse(p[1], inv));
+                }
                 else if (arg.StartsWith("--atmon="))
                 {
                     // отладка: встать у южных ворот РТ номер N
@@ -426,11 +440,14 @@ else if (arg == "--atcrate")
 
         void BuildMap(MapInfo map)
         {
+            _prefab = new PrefabLayer(map, _world, this);
             foreach (var w in map.Walls)
             {
+                if (w.Hidden) continue;   // хитбокс пропса РТ — рисуется спрайтом
                 var v = new WallView2D(w, TerrainView.BiomeAt(map, (w.Min + w.Max) * 0.5f));
                 _world.AddChild(v);
                 _mapWalls.Add(v);
+                if (w.Tex != null) _prefab.WallsById[w.Id] = v;
             }
         }
 
@@ -777,6 +794,17 @@ else if (arg == "--atcrate")
                         Sfx.Play($"reveal_{System.Math.Clamp((int)e.Value, 0, 4)}", _selfPx, -4, 10, 0.02f);
                         Sfx.Play("rummage", _selfPx, -10, 10, 0.1f);
                         break;
+                    case SimEventKind.Machine:
+                        // механизмы готовых РТ: пробка, питание, роллета, считыватель крейта
+                        switch (e.Text)
+                        {
+                            case "fuse": Sfx.Play("lock_click", Iso.Px(e.Pos), 0, 15, 0f); Flash(e.Pos, new Color(1f, 0.9f, 0.5f), 6, 0.15f, true); break;
+                            case "power": Sfx.Play("fuse_hiss", Iso.Px(e.Pos), 2, 60, 0f); Flash(e.Pos, new Color(0.6f, 0.8f, 1f), 18, 0.4f, true); _shake = Mathf.Min(1f, _shake + 0.3f); break;
+                            case "shutter": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), 0, 40, 0.1f); break;
+                            case "reader": Sfx.Play("c4_beep", Iso.Px(e.Pos), 0, 60, 0f); Flash(e.Pos, new Color(0.4f, 1f, 0.5f), 5, 0.2f, true); break;
+                            case "crate": Sfx.Play("craft_done", Iso.Px(e.Pos), 2, 40, 0f); Flash(e.Pos, new Color(0.4f, 1f, 0.5f), 14, 0.5f, true); break;
+                        }
+                        break;
                     case SimEventKind.Locked:
                         Sfx.Play("lock_click", Iso.Px(e.Pos), -4, 10, 0f);
                         if (e.ActorId == _myId) { if (_scriptCode >= 0) _codeReq = (e.OtherId, _scriptCode); else _hud.ShowCode(e.OtherId); }
@@ -1057,12 +1085,12 @@ else if (arg == "--atcrate")
                 seen.Add(b.Id);
                 if (!_bagViews.TryGetValue(b.Id, out var v))
                 {
-                    v = new BagView2D { IsCrate = b.IsCrate, Safe = b.Safe, Position = Iso.Px(b.Pos) };
+                    v = new BagView2D { IsCrate = b.IsCrate, Safe = b.Safe, Punch = b.Punch, Position = Iso.Px(b.Pos) };
                     _world.AddChild(v);
                     _bagViews[b.Id] = v;
                 }
                 v.Visible = true;
-                if (v.Empty != b.Empty) { v.Empty = b.Empty; v.QueueRedraw(); }
+                if (v.Empty != b.Empty || v.Unlocked != b.Unlocked) { v.Empty = b.Empty; v.Unlocked = b.Unlocked; v.QueueRedraw(); }
             }
             foreach (var kv in _bagViews)
                 if (!seen.Contains(kv.Key)) kv.Value.Visible = false;
@@ -1219,6 +1247,8 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             }
             _build.UpdateFade(_selfPx, dt);
             foreach (var w in _mapWalls) w.UpdateOcclusion(dt);
+            _prefab.Sync(_cur);
+            _prefab.Update(_selfPx, dt);
             if (_bghost == null) { _bghost = new BuildGhost2D(); _world.AddChild(_bghost); }
             _bghost.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_hud.CraftOpen;
             if (_bghost.Visible) { _bghost.Set(_cur.Self.GhostPiece, _cur.Self.GhostPoly, _cur.Self.GhostA, _cur.Self.GhostB, _cur.Self.BuildOk); _bghost.SetZone(_cur.Self.HasZone, _cur.Self.ZoneCell); }

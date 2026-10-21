@@ -185,6 +185,7 @@ namespace Rastvordd.Sim
                 Actors.Add(a);
             }
             _nextId = Math.Max(_nextId, w.NextId);
+            FixupPrefabsAfterLoad();
         }
 
         /// <summary>

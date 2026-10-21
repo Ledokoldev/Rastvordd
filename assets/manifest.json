@@ -5657,7 +5657,7 @@
    "id": "decal_road_dashes",
    "cat": "decals",
    "h": 1.5,
-   "w": 3.0,
+   "w": 0.5,
    "desc": "a worn white dashed road centre line, two dashes, cracked and faded, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
   },
   {
@@ -5671,14 +5671,14 @@
    "id": "decal_tire_tracks_mud",
    "cat": "decals",
    "h": 1.5,
-   "w": 3.0,
+   "w": 1.1,
    "desc": "two parallel muddy tire tracks with tread pattern, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
   },
   {
    "id": "decal_skid_marks",
    "cat": "decals",
    "h": 1.25,
-   "w": 2.5,
+   "w": 1.2,
    "desc": "black rubber tire skid marks curving, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers"
   },
   {

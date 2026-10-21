@@ -66,6 +66,10 @@ namespace Rastvordd.Client
 
         public void StartSwing() => _swing = SwingTime;
 
+        float _flinch;
+        /// <summary>Попадание: корпус и голова дёргаются от удара, тело на миг краснеет. fromFront — бьют спереди.</summary>
+        public void Flinch(bool fromFront) => _flinch = fromFront ? 1f : -1f;
+
         /// <summary>Плывёт: тело по пояс в воде, круги по воде.</summary>
         public bool Swimming;
         float _ripple;
@@ -235,6 +239,9 @@ namespace Rastvordd.Client
                 rs.AimDown = Mathf.MoveToward(rs.AimDown, AimDown, dt * 6);
                 rs.Phase = _body.Phase;
                 rs.Breath += dt * 1.6f;
+                _flinch = Mathf.MoveToward(_flinch, 0, dt * 6);
+                rs.Flinch = _flinch * Mathf.Abs(_flinch);   // резкий рывок и мягкий возврат
+                _rig.Modulate = Colors.White.Lerp(new Color(1f, 0.55f, 0.5f), Mathf.Abs(_flinch) * 0.8f);
                 rs.Held = Swimming ? null : heldId;   // в воде руки гребут
                 rs.Kick = _kick;
                 rs.Reload = reloading && _reloadDur > 0 ? Mathf.Clamp(_reloadT / _reloadDur, 0, 1) : -1;

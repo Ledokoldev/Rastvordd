@@ -603,6 +603,13 @@ namespace Rastvordd.Client
                         Sfx.Play("hit_flesh", Iso.Px(e.Pos), -2, 30, 0.12f);
                         if (e.OtherId == _myId) _hud.Crosshair.HitFlash = 0.15f;
                         if (e.ActorId == _myId) _hud.FlashDamage();
+                        if (_actorViews.TryGetValue(e.ActorId, out var victim))
+                        {
+                            var vf = _cur.Actors.Find(x => x.Id == e.ActorId).Facing;
+                            var from = _actorViews.TryGetValue(e.OtherId, out var att) ? att.Position : Iso.Px(e.Pos);
+                            var toAtt = from - victim.Position;
+                            victim.Flinch(toAtt.LengthSquared() < 1 || toAtt.Dot(new Vector2(Mathf.Cos(vf), Mathf.Sin(vf))) >= 0);
+                        }
                         break;
                     case SimEventKind.HitWall:
                         Flash(e.Pos, new Color(1, 0.85f, 0.5f), 3, 0.1f);

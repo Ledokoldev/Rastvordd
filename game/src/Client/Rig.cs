@@ -34,6 +34,7 @@ namespace Rastvordd.Client
         public float Reload = -1;    // 0..1 или −1
         public float Swing = -1;     // 0..1 или −1
         public float Breath;         // для дыхания в стойке
+        public float Flinch;         // −1..1: вздрагивание от попадания (знак — откуда удар: спереди → назад)
     }
 
     /// <summary>
@@ -186,7 +187,7 @@ namespace Rastvordd.Client
             float kneeBend = -1;   // колени сгибаются «вперёд» (к взгляду)
 
             // корпус: наклон вперёд на бегу
-            float lean = (s.Sprint ? 0.18f : moving ? 0.06f : 0) + crouch * 0.12f;
+            float lean = (s.Sprint ? 0.18f : moving ? 0.06f : 0) + crouch * 0.12f - s.Flinch * 0.3f;
             lean += swingLean * Mathf.Clamp(Mathf.Abs(fwd.X) + 0.3f, 0, 1);   // в профиль наклон виден, анфас — меньше
             var waist = new Vector2(0, hipY - 2);
             float torsoH = (back ? _set.TorsoB : _set.TorsoF).GetHeight();
@@ -347,7 +348,7 @@ namespace Rastvordd.Client
                 var torso = back ? _set.TorsoB : _set.TorsoF;
                 Part(torso, waist, lean, new Vector2(torso.GetWidth() / 2f, torso.GetHeight()));
                 var head = back ? _set.HeadB : _set.HeadF;
-                float headTilt = s.AimDown * 0.15f + lean * 0.5f;   // в прицеле голова к прикладу
+                float headTilt = s.AimDown * 0.15f + lean * 0.5f - s.Flinch * 0.25f;   // в прицеле голова к прикладу; от удара голова дёргается
                 Part(head, neck, headTilt, new Vector2(head.GetWidth() / 2f, head.GetHeight()));
             }
 

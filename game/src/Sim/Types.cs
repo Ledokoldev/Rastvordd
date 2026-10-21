@@ -168,6 +168,7 @@ namespace Rastvordd.Sim
             c4.Explosive = new ExplosiveDef { Damage = 500, Radius = 2.5f, Fuse = 10f, ThrowRange = 8, Sticks = true };
             c4.Stack = 10;
             Add("lock_code", "Кодовый замок", ItemCategory.Tool).Lock = true;
+            Add("lock_key", "Замок с ключом", ItemCategory.Tool).Lock = true;
             Add("weapon_torch", "Факел", ItemCategory.Weapon).Weapon = WeaponDef.MeleeTool("weapon_torch", 10, 0.8f, 1.6f, 1, 1, 1, 1);   // светит ночью
 
             // огнестрел и лук
@@ -203,8 +204,15 @@ namespace Rastvordd.Sim
             Add("deploy_furnace", "Печь", ItemCategory.Deployable).Deploy = DeployKind.Furnace;
         }
 
-        public static ItemDef Get(string id) => Defs.TryGetValue(id, out var d) ? d : null;
-        public static string Name(string id) => Defs.TryGetValue(id, out var d) ? d.Name : id;
+        public static ItemDef Get(string id)
+        {
+            if (Defs.TryGetValue(id, out var d)) return d;
+            // ключ от конкретного замка: key_<id замка> — заводится по первому запросу
+            if (id != null && id.StartsWith("key_") && int.TryParse(id.Substring(4), out int lockId))
+                return Add(id, $"Ключ №{lockId % 1000:000}", ItemCategory.Component);
+            return null;
+        }
+        public static string Name(string id) => Get(id)?.Name ?? id;
 
         /// <summary>Новый предмет для пояса: у оружия сразу заводится состояние.</summary>
         public static ItemSlot NewSlot(string id, int ammo = 0)
@@ -234,6 +242,7 @@ namespace Rastvordd.Sim
             new Recipe { Output = "deploy_claim", Cost = new[] { ("wood", 100) }, Time = 3 },
             new Recipe { Output = "expl_satchel", Cost = new[] { ("cloth", 10), ("gunpowder", 30), ("metal_fragments", 20) }, Time = 4, Bench = 1 },
             new Recipe { Output = "expl_c4", Cost = new[] { ("gunpowder", 200), ("metal_fragments", 100), ("scrap", 20), ("cloth", 5) }, Time = 15, Bench = 1 },
+            new Recipe { Output = "lock_key", Cost = new[] { ("wood", 75) }, Time = 2 },
             new Recipe { Output = "lock_code", Cost = new[] { ("metal_fragments", 100) }, Time = 4 },
             new Recipe { Output = "build_plan", Cost = new[] { ("wood", 20) }, Time = 1 },
             new Recipe { Output = "tool_hammer", Cost = new[] { ("wood", 100) }, Time = 3 },

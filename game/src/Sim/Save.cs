@@ -26,7 +26,7 @@ namespace Rastvordd.Sim
 
         public sealed class NodeS { public int Id, Kind; public float X, Y, R, Amount, Max; }
         public sealed class SlotS { public string Id; public int Count, Ammo = -1; }
-        public sealed class StructS { public int Id, Kind, I, J, Dir, Tier, OwnerId, ClaimId, Code; public float Hp; public bool Open, Locked; public List<int> LockAuth = new(); }
+        public sealed class StructS { public int Id, Kind, I, J, Dir, Tier, OwnerId, ClaimId, Code; public float Hp; public bool Open, Locked, KeyLock; public List<int> LockAuth = new(); }
         public sealed class DeployS
         {
             public int Id, Kind, OwnerId, Ore, SulfurOre, OutMetal, OutSulfur, OutCharcoal;
@@ -72,7 +72,7 @@ namespace Rastvordd.Sim
             foreach (var (k, left) in _nodeRespawns) w.NodeRespawns.Add(((int)k, left));
             foreach (var s in Structures)
             {
-                var ss = new WorldSave.StructS { Id = s.Id, Kind = (int)s.Kind, I = s.I, J = s.J, Dir = s.Dir, Tier = s.Tier, OwnerId = s.OwnerId, ClaimId = s.ClaimId, Hp = s.Hp, Open = s.Open, Locked = s.Locked, Code = s.Code };
+                var ss = new WorldSave.StructS { Id = s.Id, Kind = (int)s.Kind, I = s.I, J = s.J, Dir = s.Dir, Tier = s.Tier, OwnerId = s.OwnerId, ClaimId = s.ClaimId, Hp = s.Hp, Open = s.Open, Locked = s.Locked, KeyLock = s.KeyLock, Code = s.Code };
                 ss.LockAuth.AddRange(s.LockAuth);
                 w.Structures.Add(ss);
             }
@@ -147,7 +147,7 @@ namespace Rastvordd.Sim
                 var s = new Structure
                 {
                     Id = ss.Id, Kind = (StructKind)ss.Kind, I = ss.I, J = ss.J, Dir = ss.Dir, Tier = ss.Tier, OwnerId = ss.OwnerId, ClaimId = ss.ClaimId,
-                    Hp = ss.Hp, Open = ss.Open, Locked = ss.Locked, Code = ss.Code,
+                    Hp = ss.Hp, Open = ss.Open, Locked = ss.Locked, KeyLock = ss.KeyLock, Code = ss.Code,
                 };
                 foreach (var id in ss.LockAuth) s.LockAuth.Add(id);
                 if (s.Kind == StructKind.Foundation) _foundations[(s.I, s.J)] = s;

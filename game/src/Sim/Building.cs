@@ -15,7 +15,8 @@ namespace Rastvordd.Sim
         public int Tier;               // 0 разметка, 1 дерево, 2 камень, 3 металл, 4 сталь
         public float Hp;
         public bool Open;              // дверь открыта
-        public bool Locked;            // на двери кодовый замок
+        public bool Locked;            // на двери замок
+        public bool KeyLock;           // замок с ключом (иначе кодовый)
         public int Code;
         public readonly HashSet<int> LockAuth = new();
         public int OwnerId;
@@ -355,12 +356,20 @@ namespace Rastvordd.Sim
             if (door == null || door.Kind != StructKind.Door) { Info(a, "Замок ставится на дверь — подойди и наведи на неё"); return; }
             if (door.Locked) { Info(a, "На двери уже есть замок"); return; }
             door.Locked = true;
-            door.Code = Rng.Next(1000, 10000);
-            door.LockAuth.Add(a.Id);
             var held = a.Held;
+            door.KeyLock = held.Id == "lock_key";
             held.Count--;
             if (held.Count <= 0) a.Belt[a.Current] = null;
             StructVersion++;
+            if (door.KeyLock)
+            {
+                // ключ — обычный предмет: потеряешь (убьют) — тот, кто подберёт, откроет дверь
+                a.Add("key_" + door.Id, 1);
+                Info(a, $"Замок поставлен. {Items.Name("key_" + door.Id)} — в инвентаре");
+                return;
+            }
+            door.Code = Rng.Next(1000, 10000);
+            door.LockAuth.Add(a.Id);
             Info(a, $"Кодовый замок поставлен. Код: {door.Code} — запомни");
         }
 
@@ -386,7 +395,11 @@ namespace Rastvordd.Sim
         /// <summary>E по двери: открыть/закрыть. Закрыть нельзя, если в проёме кто-то стоит.</summary>
         void ToggleDoor(Actor a, Structure door)
         {
-            if (door.Locked && !door.LockAuth.Contains(a.Id))
+            if (door.Locked && door.KeyLock)
+            {
+                if (a.Count("key_" + door.Id) <= 0) { Info(a, "Заперто на ключ"); Events.Add(new SimEvent { Kind = SimEventKind.Door, ActorId = a.Id, OtherId = door.Id, Pos = door.Center, Value = -1 }); return; }
+            }
+            else if (door.Locked && !door.LockAuth.Contains(a.Id))
             {
                 Events.Add(new SimEvent { Kind = SimEventKind.Locked, ActorId = a.Id, OtherId = door.Id, Pos = door.Center });
                 return;

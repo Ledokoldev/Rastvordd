@@ -948,11 +948,12 @@ namespace Rastvordd.Sim
                 var parts = new List<string>();
                 foreach (var st in a.Inventory)
                 {
+                    if (st.Id.StartsWith("key_")) continue;   // ключи остаются при себе
                     var same = box.Storage.Items.Find(s => s.Id == st.Id && s.State == null);
                     if (same != null) same.Count += st.Count; else box.Storage.Items.Add(new ItemSlot(st.Id, st.Count));
                     parts.Add($"{Items.Name(st.Id)} ×{st.Count}");
                 }
-                a.Inventory.Clear();
+                a.Inventory.RemoveAll(s => !s.Id.StartsWith("key_"));
                 Info(a, parts.Count <= 3 ? "В ящик: " + string.Join(", ", parts) : $"В ящик: {string.Join(", ", parts.GetRange(0, 3))} и ещё {parts.Count - 3}");
                 return;
             }

@@ -434,6 +434,18 @@ namespace Rastvordd.Sim
                 return;
             }
 
+            // 7б. замок с ключом на дверь (ключ остаётся в кармане; убьют — заберут и откроют)
+            var myDoor = _w.DoorAt(_origin.i, _origin.j + 2, 0);
+            if (myDoor != null && !myDoor.Locked)
+            {
+                if (!Has("lock_key")) { if (!Craft("lock_key", ref cmd)) Need("wood", 75, ref cmd); return; }
+                Doing = "ставит замок";
+                if (!GoTo(CellC(0, 1) + new Vector2(0.2f, 0.1f), 0.5f, ref cmd)) return;
+                cmd.Aim = DoorCenter;
+                if (Hold("lock_key", ref cmd)) Click(ref cmd);
+                return;
+            }
+
             // 8. содержание: запас на ~2 часа
             if (_w.ClaimHoursLeft(claim) < 1.5f && _w.ClaimLoad(claim).b > 0)
             {

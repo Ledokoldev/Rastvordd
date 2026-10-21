@@ -11,7 +11,7 @@ namespace Rastvordd.Sim
     /// </summary>
     public sealed class WorldSave
     {
-        public int Version = 2;   // 2: остров 1 км, малые РТ
+        public int Version = 3;   // 3: рюкзак ячейками   // 2: остров 1 км, малые РТ
         public int Seed;
         public float Time, TimeOffset;
         public int NextId;
@@ -100,7 +100,7 @@ namespace Rastvordd.Sim
                     Current = a.Current, BuildPiece = (int)a.BuildPiece,
                 };
                 foreach (var s in a.Belt) ps.Belt.Add(SaveSlot(s));
-                foreach (var it in a.Inventory) ps.Inventory.Add(new WorldSave.SlotS { Id = it.Id, Count = it.Count });
+                foreach (var it in a.Pack) ps.Inventory.Add(SaveSlot(it));
                 w.Players.Add(ps);
             }
             return w;
@@ -171,7 +171,7 @@ namespace Rastvordd.Sim
             {
                 var a = new Actor { Id = ps.Id, Name = ps.Name, Team = Team.Player, Pos = new Vector2(ps.X, ps.Y), Hp = ps.Hp, Food = ps.Food, Water = ps.Water, Dead = ps.Dead };
                 for (int i = 0; i < Actor.BeltSize && i < ps.Belt.Count; i++) a.Belt[i] = LoadSlot(ps.Belt[i]);
-                foreach (var it in ps.Inventory) if (Items.Get(it.Id) != null) a.Inventory.Add(new ItemStack(it.Id, it.Count));
+                for (int i = 0; i < Actor.PackSize && i < ps.Inventory.Count; i++) a.Pack[i] = LoadSlot(ps.Inventory[i]);
                 a.Current = ps.Current;
                 a.BuildPiece = (StructKind)ps.BuildPiece;
                 Actors.Add(a);

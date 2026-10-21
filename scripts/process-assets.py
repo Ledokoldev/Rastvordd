@@ -99,6 +99,14 @@ def process(a: dict, src: pathlib.Path) -> tuple[Image.Image, Image.Image]:
         px = pixelize(im, size, colors=32)
         _global_palette = keep
         return im, px
+    if a.get("ui"):
+        # элементы интерфейса: точный размер в пикселях, своя палитра (рамки, ячейки, кнопки)
+        w, h = a["ui"]
+        keep = _global_palette
+        _global_palette = None
+        px = pixelize(im, (w, h), colors=48)
+        _global_palette = keep
+        return im, px
     box = a.get("icon") or a.get("weapon")
     if box:
         hd = fit_square(im, box)

@@ -368,10 +368,7 @@ void fragment() {
             _promptLabel.Text = s.InteractHint ?? "";
             _buildLabel.Text = s.Dead ? "" : s.BuildStatus ?? "";
 
-            var inv = new System.Text.StringBuilder("ИНВЕНТАРЬ\n\n");
-            if (s.Inventory.Count == 0) inv.Append("пусто");
-            foreach (var (name, count) in s.Inventory) inv.Append($"{name} ×{count}\n");
-            _invLabel.Text = inv.ToString();
+
 
             if (_craftPanel.Visible)
             {

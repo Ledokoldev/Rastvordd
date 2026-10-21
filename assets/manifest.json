@@ -1330,11 +1330,78 @@
    "cat": "props",
    "h": 0.9,
    "desc": "a dirty olive-green sleeping bag rolled out flat on the ground with a folded rag as a pillow, patched and stained, post-apocalyptic"
+  },
+  {
+   "id": "ui_panel",
+   "cat": "ui",
+   "ui": [
+    128,
+    128
+   ],
+   "desc": "a square window frame made of dark rusty riveted sheet-metal plates, frame border evenly thick (about one eighth of the size) on all four sides with rivets in the corners, the inner area is plain very dark grimy canvas, suitable for 9-slice scaling"
+  },
+  {
+   "id": "ui_slot",
+   "cat": "ui",
+   "ui": [
+    48,
+    48
+   ],
+   "desc": "a square inventory slot: a recessed square cell of dark scratched gunmetal with a thin worn bevelled rim and slightly lighter edges, the inside empty and dark"
+  },
+  {
+   "id": "ui_button",
+   "cat": "ui",
+   "ui": [
+    120,
+    40
+   ],
+   "desc": "a horizontal rectangular button plate of worn rusty painted metal, olive-drab paint chipped at the edges, a small rivet at each end, empty middle"
+  },
+  {
+   "id": "ui_header",
+   "cat": "ui",
+   "ui": [
+    120,
+    40
+   ],
+   "desc": "a horizontal header strip of dirty stencil-painted dark metal with hazard-yellow worn stripes only at the two ends, empty middle"
+  },
+  {
+   "id": "icon_build_foundation",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a square low wooden floor platform foundation block made of planks on a stone base"
+  },
+  {
+   "id": "icon_build_wall",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a single standing wall segment made of rough wooden planks, seen at a slight angle"
+  },
+  {
+   "id": "icon_build_doorway",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a wooden wall segment with an empty rectangular doorway opening in the middle"
+  },
+  {
+   "id": "icon_build_window",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a wooden wall segment with a small square window opening with bars"
+  },
+  {
+   "id": "icon_build_door",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a crude wooden plank door with metal hinges and a handle, standing upright"
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",
  "weapon_framing": "A single game sprite of a weapon or tool for a survival game: the item alone, strict side view, horizontal, pointing to the right (muzzle or business end on the right), centered, transparent background, no hands, no text, no frame, no border, no cast shadow.",
  "sheet_framing": "A character sprite sheet for a 2D top-down survival game in 3/4 view like Project Zomboid: a grid of 4 columns and 2 rows of equally spaced frames on a transparent background. Top row: the same person walking diagonally toward the camera and to the right (front 3/4 view, facing down-right), 4 frames of one walk cycle. Bottom row: the same person walking diagonally away from the camera and to the right (back 3/4 view, facing up-right), 4 frames of one walk cycle. Identical character, proportions, clothing and lighting in every frame, full body visible, feet on the same baseline within each row, arms relaxed with empty hands, no weapon, no text, no labels, no grid lines, no frame borders, no cast shadow.",
  "clutter_style": "Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details.",
- "rig_framing": "A single isolated body part sprite for a 2D cutout animation rig, taken from the character shown in the attached reference image: exactly the same skin tone, dirt, hair, clothing colors, lighting from the top-left and painting style. Only that one body part, cleanly separated at the joints with rounded joint ends, centered, transparent background, nothing else in the image, no shadow, no text, no frame."
+ "rig_framing": "A single isolated body part sprite for a 2D cutout animation rig, taken from the character shown in the attached reference image: exactly the same skin tone, dirt, hair, clothing colors, lighting from the top-left and painting style. Only that one body part, cleanly separated at the joints with rounded joint ends, centered, transparent background, nothing else in the image, no shadow, no text, no frame.",
+ "ui_framing": "A single flat user-interface element texture for a gritty post-apocalyptic survival game HUD, seen straight-on (orthographic, no perspective), crisp readable shapes, the element fills the image edge to edge, transparent background outside the element, no text, no letters, no numbers, no logos."
 }

@@ -287,6 +287,7 @@ namespace Rastvordd.Sim
         void FillCrate(LootBag bag)
         {
             bag.Items.Clear();
+            bag.Search.Clear();   // новый лут — обыскивать заново
             void Maybe(double chance, string id, int min, int max)
             {
                 if (Rng.NextDouble() < chance) bag.Items.Add(new ItemSlot(id, Rng.Next(min, max + 1)));
@@ -607,6 +608,7 @@ namespace Rastvordd.Sim
 
             if (cmd.Interact) Interact(a);
             StepUi(a, cmd);
+            DropOverflow(a);
             if (cmd.SetPiece >= 0 && cmd.SetPiece <= (int)StructKind.Door) a.BuildPiece = (StructKind)cmd.SetPiece;
         }
 
@@ -654,8 +656,9 @@ namespace Rastvordd.Sim
             // выбираем еду, которая лучше всего закрывает текущий голод и жажду
             string best = null;
             float bestScore = 0;
-            foreach (var s in a.Inventory)
+            foreach (var s in a.Pack)
             {
+                if (s == null) continue;
                 var d = Items.Get(s.Id);
                 if (d == null || d.Category != ItemCategory.Food) continue;
                 float score = MathF.Min(d.Food, 100 - a.Food) + MathF.Min(d.Water, 100 - a.Water);
@@ -994,16 +997,17 @@ namespace Rastvordd.Sim
         {
             if (a.Crouching)
             {
-                if (a.Inventory.Count == 0) { Info(a, "Инвентарь пуст — класть нечего"); return; }
                 var parts = new List<string>();
-                foreach (var st in a.Inventory)
+                for (int i = 0; i < Actor.PackSize; i++)
                 {
-                    if (st.Id.StartsWith("key_")) continue;   // ключи остаются при себе
+                    var st = a.Pack[i];
+                    if (st == null || st.Id.StartsWith("key_")) continue;   // ключи остаются при себе
                     var same = box.Storage.Items.Find(s => s.Id == st.Id && s.State == null);
-                    if (same != null) same.Count += st.Count; else box.Storage.Items.Add(new ItemSlot(st.Id, st.Count));
+                    if (same != null && st.State == null) same.Count += st.Count; else box.Storage.Items.Add(st);
                     parts.Add($"{Items.Name(st.Id)} ×{st.Count}");
+                    a.Pack[i] = null;
                 }
-                a.Inventory.RemoveAll(s => !s.Id.StartsWith("key_"));
+                if (parts.Count == 0) { Info(a, "Рюкзак пуст — класть нечего"); return; }
                 Info(a, parts.Count <= 3 ? "В ящик: " + string.Join(", ", parts) : $"В ящик: {string.Join(", ", parts.GetRange(0, 3))} и ещё {parts.Count - 3}");
                 return;
             }
@@ -1030,8 +1034,12 @@ namespace Rastvordd.Sim
                 }
                 else
                 {
-                    a.Add(s.Id, s.Count);
-                    parts.Add($"{Items.Name(s.Id)} ×{s.Count}");
+                    // сколько влезет; остальное остаётся в сумке (иначе бот бесконечно перекладывал бы сумки)
+                    int put = a.AddUpTo(s.Id, s.Count);
+                    if (put <= 0) continue;
+                    parts.Add($"{Items.Name(s.Id)} ×{put}");
+                    s.Count -= put;
+                    if (s.Count > 0) continue;
                 }
                 bag.Items.RemoveAt(i);
             }
@@ -1218,7 +1226,7 @@ namespace Rastvordd.Sim
             a.Dead = true;
             a.DeadTime = Time;
             var bag = new LootBag { Id = NextId(), Pos = a.Pos, Despawn = 300f };
-            foreach (var s in a.Inventory) bag.Items.Add(new ItemSlot(s.Id, s.Count));
+            foreach (var s in a.Pack) if (s != null) bag.Items.Add(s);
             foreach (var s in a.Belt)
                 if (s != null)
                 {

@@ -223,6 +223,35 @@ namespace Rastvordd.Sim
         }
         public static string Name(string id) => Get(id)?.Name ?? id;
 
+        /// <summary>Редкость (цвет рамки и время обыска): 0 обычное, 1 необычное, 2 редкое, 3 эпическое, 4 легендарное.</summary>
+        public static int Rarity(string id) => id switch
+        {
+            "weapon_ak" or "expl_c4" => 4,
+            "expl_satchel" or "ammo_rifle" or "lock_code" or "weapon_bow" => 3,
+            "weapon_pipe" or "gunpowder" or "ammo_pistol" or "metal_fragments" or "expl_fire" or "lock_key" or "weapon_spear" => 2,
+            "bandage" or "canned" or "water_bottle" or "charcoal" or "sulfur" or "scrap" or "arrow" or "tool_hatchet" or "tool_pickaxe" => 1,
+            _ when id != null && id.StartsWith("key_") => 3,
+            _ => 0,
+        };
+
+        /// <summary>Сколько секунд обыскивается ячейка с этим предметом (Arc Raiders: редкое — дольше).</summary>
+        public static float SearchTime(string id) => 0.45f + 0.4f * Rarity(id);
+
+        /// <summary>Сколько штук в одной ячейке.</summary>
+        public static int MaxStack(string id)
+        {
+            var d = Get(id);
+            if (d == null) return 1;
+            if (d.Holdable) return System.Math.Max(1, d.Stack);
+            return d.Category switch
+            {
+                ItemCategory.Ammo => id == "arrow" ? 64 : 128,
+                ItemCategory.Medical => 10,
+                ItemCategory.Food => 10,
+                _ => id.StartsWith("key_") ? 1 : 1000,
+            };
+        }
+
         /// <summary>Новый предмет для пояса: у оружия сразу заводится состояние.</summary>
         public static ItemSlot NewSlot(string id, int ammo = 0)
         {
@@ -311,70 +340,98 @@ namespace Rastvordd.Sim
         public Vector2 LastAim;
         public readonly ItemSlot[] Belt = new ItemSlot[BeltSize];
         public int Current;
-        public readonly List<ItemStack> Inventory = new();
+        public const int PackSize = 24;
+        /// <summary>Рюкзак: 24 ячейки, в ячейке стопка до Items.MaxStack (как в Arc Raiders).</summary>
+        public readonly ItemSlot[] Pack = new ItemSlot[PackSize];
+        /// <summary>Не влезло (рюкзак полон) — World выбросит рядом сумкой.</summary>
+        public readonly List<ItemSlot> Overflow = new();
         public readonly List<CraftJob> CraftQueue = new();
 
         public ItemSlot Held => Belt[Current];
         public WeaponState Weapon => Held?.State;
         public Vector2 FacingDir => new Vector2(System.MathF.Cos(Facing), System.MathF.Sin(Facing));
 
+        /// <summary>Сколько всего этого предмета в рюкзаке и на поясе.</summary>
         public int Count(string id)
         {
             int n = 0;
-            foreach (var s in Inventory) if (s.Id == id) n += s.Count;
+            foreach (var s in Pack) if (s != null && s.Id == id) n += s.Count;
+            foreach (var s in Belt) if (s != null && s.Id == id && s.State == null) n += s.Count;
             return n;
         }
 
-        /// <summary>Складывает предмет: держимое — на пояс, остальное — в инвентарь. Возвращает false, если пояс полон.</summary>
-        public bool Add(string id, int count)
+        /// <summary>Положить сколько влезет; возвращает, сколько положено. Держимое — сначала на пояс.</summary>
+        public int AddUpTo(string id, int count)
         {
-            if (count <= 0) return true;
+            if (count <= 0) return 0;
             var def = Items.Get(id);
-            if (def != null && def.Holdable)
+            int max = Items.MaxStack(id), left = count;
+            bool holdable = def != null && def.Holdable;
+            // доложить в начатые стопки (держимое — и на поясе)
+            if (max > 1)
             {
-                // складываемое держимое (взрывчатка) — докладываем в уже начатый слот
-                if (def.Stack > 1)
-                    foreach (var s in Belt)
-                        if (s != null && s.Id == id && s.Count < def.Stack)
-                        {
-                            int put = System.Math.Min(count, def.Stack - s.Count);
-                            s.Count += put; count -= put;
-                            if (count == 0) return true;
-                        }
-                while (count > 0)
-                {
-                    var slot = Items.NewSlot(id);
-                    slot.Count = System.Math.Min(count, def.Stack);
-                    if (!AddSlot(slot)) return false;
-                    count -= slot.Count;
-                }
-                return true;
+                if (holdable) foreach (var s in Belt) left -= Fill(s);
+                foreach (var s in Pack) left -= Fill(s);
             }
-            foreach (var s in Inventory) if (s.Id == id) { s.Count += count; return true; }
-            Inventory.Add(new ItemStack(id, count));
-            return true;
+            int Fill(ItemSlot s)
+            {
+                if (left <= 0 || s == null || s.Id != id || s.State != null || s.Count >= max) return 0;
+                int put = System.Math.Min(left, max - s.Count);
+                s.Count += put;
+                return put;
+            }
+            // новые ячейки
+            while (left > 0)
+            {
+                var slot = Items.NewSlot(id);
+                slot.Count = System.Math.Min(left, max);
+                if (!AddSlot(slot)) break;
+                left -= slot.Count;
+            }
+            return count - left;
         }
 
-        /// <summary>Кладёт слот (например, оружие с патронами в магазине) в первый свободный слот пояса.</summary>
+        /// <summary>Положить предмет; не влезшее уходит в Overflow (выпадет рядом). Возвращает false, если что-то не влезло.</summary>
+        public bool Add(string id, int count)
+        {
+            int put = AddUpTo(id, count);
+            int left = count - put;
+            while (left > 0)
+            {
+                var s = Items.NewSlot(id);
+                s.Count = System.Math.Min(left, Items.MaxStack(id));
+                Overflow.Add(s);
+                left -= s.Count;
+            }
+            return put == count;
+        }
+
+        /// <summary>Положить ячейку целиком (оружие с патронами): держимое — на пояс, иначе в рюкзак. false — некуда.</summary>
         public bool AddSlot(ItemSlot slot)
         {
             var def = slot.Def;
-            if (def == null || !def.Holdable) { Add(slot.Id, slot.Count); return true; }
-            for (int i = 0; i < BeltSize; i++)
-                if (Belt[i] == null) { Belt[i] = slot; return true; }
+            if (def != null && def.Holdable)
+                for (int i = 0; i < BeltSize; i++)
+                    if (Belt[i] == null) { Belt[i] = slot; return true; }
+            for (int i = 0; i < PackSize; i++)
+                if (Pack[i] == null) { Pack[i] = slot; return true; }
             return false;
         }
 
         public int Take(string id, int count)
         {
             int taken = 0;
-            for (int i = Inventory.Count - 1; i >= 0 && taken < count; i--)
+            for (int pass = 0; pass < 2 && taken < count; pass++)
             {
-                var s = Inventory[i];
-                if (s.Id != id) continue;
-                int t = System.Math.Min(s.Count, count - taken);
-                s.Count -= t; taken += t;
-                if (s.Count == 0) Inventory.RemoveAt(i);
+                var arr = pass == 0 ? Pack : Belt;
+                for (int i = arr.Length - 1; i >= 0 && taken < count; i--)
+                {
+                    var s = arr[i];
+                    if (s == null || s.Id != id || s.State != null) continue;
+                    int t = System.Math.Min(s.Count, count - taken);
+                    s.Count -= t; taken += t;
+                    if (s.Count == 0) arr[i] = null;
+                }
             }
             return taken;
         }
@@ -382,17 +439,10 @@ namespace Rastvordd.Sim
         public void ClearAll()
         {
             for (int i = 0; i < BeltSize; i++) Belt[i] = null;
-            Inventory.Clear();
+            for (int i = 0; i < PackSize; i++) Pack[i] = null;
             CraftQueue.Clear();
             Current = 0;
         }
-    }
-
-    public sealed class ItemStack
-    {
-        public string Id;
-        public int Count;
-        public ItemStack(string id, int count) { Id = id; Count = count; }
     }
 
     public sealed class Wall
@@ -484,13 +534,15 @@ namespace Rastvordd.Sim
         public Vector2 Pos;
         public bool IsCrate;            // ящик на РТ (респавнится), иначе сумка с трупа
         public int Tier = 2;            // уровень лута ящика: 0 — без охраны, 1 — малая охрана, 2 — крупный РТ
+        /// <summary>Обыск по игрокам: сколько ячеек уже раскрыто и сколько идёт текущая.</summary>
+        public readonly Dictionary<int, (int n, float t)> Search = new();
         public float Despawn;           // для сумок
         public float RespawnLeft;       // для ящиков
         public readonly List<ItemSlot> Items = new();
         public bool Empty => Items.Count == 0;
     }
 
-    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted, Built, Destroyed, Door, HitStruct, Explosion, Locked }
+    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted, Built, Destroyed, Door, HitStruct, Explosion, Locked, Revealed }
 
     public struct SimEvent
     {

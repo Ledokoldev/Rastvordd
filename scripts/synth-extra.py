@@ -1,6 +1,7 @@
 """Дополнительные синтезированные звуки (взрыв, фитиль, щелчок замка) — без перезаписи остальных.
 Запуск: python scripts/synth-extra.py"""
 import importlib.util
+import math
 import pathlib
 
 spec = importlib.util.spec_from_file_location("synth", pathlib.Path(__file__).with_name("synth-sfx.py"))
@@ -77,6 +78,25 @@ def water(name: str, length: float, bright: float, body: float) -> None:
             bubbles[at + i] += s.math.sin(2 * s.math.pi * f0 * (1 + i / ln) * i / s.SR) * (1 - i / ln) * 0.3
     thud = [x * e for x, e in zip(s.lowpass(s.noise(c), 250), s.env(c, 0.003, 0.08))]
     s.save(name, s.mix(hiss, bubbles, [x * body for x in thud]), 0.7)
+
+
+def chime(name: str, notes: list, length: float, bright: float) -> None:
+    # раскрытие ячейки: звоночек, чем реже вещь — тем больше нот и ярче
+    c = s.n(length)
+    out = [0.0] * c
+    for k, f in enumerate(notes):
+        start = s.n(0.06 * k)
+        for i in range(c - start):
+            e = math.exp(-i / (s.SR * length * 0.35))
+            out[start + i] += (s.math.sin(2 * s.math.pi * f * i / s.SR) + bright * 0.3 * s.math.sin(2 * s.math.pi * f * 2.01 * i / s.SR)) * e * 0.4
+    s.save(name, out, 0.6)
+
+
+def rummage(name: str) -> None:
+    # шорох обыска: мягкий шум с «хрустом»
+    c = s.n(0.45)
+    base = [x * e for x, e in zip(s.lowpass(s.highpass(s.noise(c), 400), 2500), s.env(c, 0.05, 0.15))]
+    s.save(name, base, 0.45)
 
 
 def main() -> None:

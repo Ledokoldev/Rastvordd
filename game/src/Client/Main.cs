@@ -22,11 +22,13 @@ namespace Rastvordd.Client
         BuildLayer _build;
         BuildGhost2D _bghost;
         MapView _mapView;
-        UiPanel _uiPanel;
+        InventoryWindow _inv;
+        bool _invOpen;
         BuildMenu _buildMenu;
         Label _guide;
         int _setPiece = -1;
         (UiOp op, string item, int index)? _uiReq;
+        bool UiShown => _inv.Visible;
         bool _uiWasOpen;
         string _lastPlace;
         readonly Dictionary<int, float> _stepAcc = new();
@@ -97,7 +99,8 @@ namespace Rastvordd.Client
                 else if (a == "stop") _forceWalk = SVec.Zero;
                 else if (a == "bmenu") { _buildMenu.Visible = !_buildMenu.Visible; }
                 else if (a.StartsWith("give")) { var g = a.Substring(4).Split('x'); _server.World.Find(_myId).Add(g[0], g.Length > 1 ? int.Parse(g[1]) : 1); }   // отладка: give<id>x<n>
-                else if (a.StartsWith("ui")) _uiReq = ((UiOp)int.Parse(a.Substring(2).Split('_')[0]), a.Contains('_') ? a.Substring(a.IndexOf('_') + 1) : null, 0);   // отладка: ui<op>_<item>
+                else if (a.StartsWith("ui")) _uiReq = ((UiOp)int.Parse(a.Substring(2).Split('_')[0]), a.Contains('_') ? a.Substring(a.IndexOf('_') + 1).Replace('~', '#').Replace('^', '>') : null, 0);   // отладка: ui<op>_<арг> (# → ~, > → ^)
+                else if (a == "inv") _invOpen = !_invOpen;
                 else if (a == "map") { _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); }
                 else if (a == "crouch") _forceCrouch = true;
                 else if (a == "save") SaveWorld();
@@ -183,9 +186,9 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _mapView = new MapView(_map, monList);
             _mapView.SetAnchorsPreset(Control.LayoutPreset.FullRect);
             _hud.AddChild(_mapView);
-            _uiPanel = new UiPanel();
-            _uiPanel.Action += (op, item, index) => _uiReq = (op, item, index);
-_hud.AddChild(_uiPanel);
+            _inv = new InventoryWindow();
+            _inv.Op += (op, arg) => _uiReq = (op, arg, 0);
+            _hud.AddChild(_inv);
             _buildMenu = new BuildMenu();
             _buildMenu.Picked += k => { _setPiece = k; _buildMenu.Visible = false; Input.MouseMode = Input.MouseModeEnum.Hidden; };
             _hud.AddChild(_buildMenu);
@@ -258,6 +261,15 @@ _hud.AddChild(_uiPanel);
                         }
                         if (found) break;
                     }
+                }
+else if (arg == "--atcrate")
+                {
+                    // отладка: встать у ближайшего к центру ящика РТ без охраны
+                    var w = _server.World;
+                    LootBag best = null;
+                    foreach (var b in w.Bags) if (b.IsCrate && b.Tier == 0 && (best == null || b.Pos.Length() < best.Pos.Length())) best = b;
+                    best ??= w.Bags.Find(b => b.IsCrate);
+                    if (best != null) { w.Find(_myId).Pos = best.Pos + new SVec(-1.2f, 0.4f); _autoAim = best.Pos; }
                 }
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
@@ -362,12 +374,13 @@ _hud.AddChild(_uiPanel);
                         _hud.ToggleCraft();
                         Input.MouseMode = _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
                         break;
-                    case Key.Tab: _hud.ToggleInventory(); break;
+                    case Key.Tab: _invOpen = !_invOpen; if (!_invOpen && _cur.Self.Ui != null) _uiReq = (UiOp.Close, null, 0); break;
                     case Key.M: _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); break;
                     case Key.F5: SaveWorld(); _hud.Toast("Мир сохранён"); break;
                     case Key.F12: SaveScreenshot($"user://shot_{Time.GetTicksMsec()}.png"); break;
-                    case Key.Escape when _uiPanel.Visible:
-                        _uiReq = (UiOp.Close, null, 0);
+                    case Key.Escape when _inv.Visible:
+                        _invOpen = false;
+                        if (_cur.Self.Ui != null) _uiReq = (UiOp.Close, null, 0);
                         break;
                     case Key.Escape:
                         Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Hidden ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
@@ -400,7 +413,7 @@ _hud.AddChild(_uiPanel);
             {
                 Move = move,
                 Aim = _aim,
-                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !_uiPanel.Visible && !_buildMenu.Visible && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
+                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
                 Eat = _eatEdge,
                 DebugKit = _debugEdge,
                 Craft = _craftReq,
@@ -607,6 +620,11 @@ _hud.AddChild(_uiPanel);
                         Sfx.Play((int)e.Value >= 2 ? "hit_stone" : "hit_wood", Iso.Px(e.Pos), 2, 40, 0.05f);
                         SpawnChipsAt(e.Pos, TierChips[System.Math.Clamp((int)e.Value, 0, 4)], -1, 18);
                         _shake = Mathf.Min(1.2f, _shake + 0.3f);
+                        break;
+                    case SimEventKind.Revealed:
+                        // ячейка раскрылась: звоночек по редкости (Arc Raiders)
+                        Sfx.Play($"reveal_{System.Math.Clamp((int)e.Value, 0, 4)}", _selfPx, -4, 10, 0.02f);
+                        Sfx.Play("rummage", _selfPx, -10, 10, 0.1f);
                         break;
                     case SimEventKind.Locked:
                         Sfx.Play("lock_click", Iso.Px(e.Pos), -4, 10, 0f);
@@ -997,11 +1015,14 @@ _hud.AddChild(_uiPanel);
             _guide.Position = new Vector2(GetViewport().GetVisibleRect().Size.X - _guide.GetCombinedMinimumSize().X - 16, 110);
 
             // окно по E (ящик, печь, столб) и крафт у верстака
-            _uiPanel.Show(_cur.Self.Ui);
-            if (_uiPanel.Visible != _uiWasOpen)
+            bool showInv = !_cur.Self.Dead && (_invOpen || _cur.Self.Ui != null);
+            _inv.Visible = showInv;
+            if (showInv) _inv.Refresh(_cur.Self, _cur.Self.Ui, dt);
+            if (_inv.Visible != _uiWasOpen)
             {
-                _uiWasOpen = _uiPanel.Visible;
-                Input.MouseMode = _uiPanel.Visible || _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
+                _uiWasOpen = _inv.Visible;
+                if (!_inv.Visible) _invOpen = false;
+                Input.MouseMode = _inv.Visible || _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
             }
             if (_cur.Self.OpenCraft && !_hud.CraftOpen) { _hud.ToggleCraft(); Input.MouseMode = Input.MouseModeEnum.Visible; }
 

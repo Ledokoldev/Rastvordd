@@ -4,29 +4,44 @@ using System.Numerics;
 
 namespace Rastvordd.Sim
 {
-    /// <summary>Какое окно открыто у игрока (по E): ящик, сумка/ящик РТ, печь, межевой столб.</summary>
+    /// <summary>Какое окно открыто у игрока (по E): ящик, рюкзак/ящик РТ, печь, шкаф.</summary>
     public enum UiKind { None, Box, Bag, Furnace, Claim }
 
-    /// <summary>Действие в окне. Предмет — UiItem: «inv:id» (инвентарь), «belt:N» (пояс) или просто id ресурса.</summary>
-    public enum UiOp { None, Close, Take, Put, TakeAll, PutAll, Toggle, TakeOut }
+    /// <summary>
+    /// Действия в инвентаре. Всё — ячейки: «pack» (рюкзак), «belt» (пояс), «cont» (открытый ящик/рюкзак),
+    /// «fur» (печь: 0 руда, 1 серная руда, 2 топливо, 3–5 готовое), «claim» (шкаф: дерево, камень, металл, лом).
+    /// Move — перетаскивание A→B, Quick — «на другую сторону» (Shift+клик, ховер-лут).
+    /// </summary>
+    public enum UiOp { None, Close, Move, Quick, TakeAll, PutAll, Toggle, TakeOut }
 
-    /// <summary>Что показать в окне: две колонки (ты и контейнер) и особые поля печи и столба.</summary>
+    /// <summary>Ячейка для отрисовки.</summary>
+    public struct CellView
+    {
+        public string Id, Name;
+        public int Count, Rarity;
+        public bool Hidden;          // ещё не обыскана
+        public int Ammo, Magazine;   // у оружия
+        public string Label;         // подпись под ячейкой (печь, шкаф)
+    }
+
+    /// <summary>Что показать в окне справа (контейнер); рюкзак и пояс приходят в SelfInfo всегда.</summary>
     public sealed class UiView
     {
         public UiKind Kind;
         public string Title;
-        public List<(string id, string name, int count)> Items = new();      // содержимое контейнера
-        public List<(string key, string id, string name, int count)> Mine = new();   // что можно положить
-        // печь
-        public int Ore, SulfurOre, Fuel, OutMetal, OutSulfur, OutCharcoal;
-        public bool On, Burning;
-        // столб
-        public string ClaimText;
+        public List<CellView> Cells = new();
+        public float Progress;                // обыск текущей ячейки, 0..1
+        public bool Searching;
+        public bool On, Burning;               // печь
+        public string Info;                    // пояснение (печь, шкаф)
     }
 
     public sealed partial class World
     {
         public const float UiRange = 3f;
+        public const int BoxSlots = 30;
+        static readonly string[] FurnaceIds = { "metal_ore", "sulfur_ore", "wood", "metal_fragments", "sulfur", "charcoal" };
+        static readonly string[] ClaimIds = { "wood", "stone", "metal_fragments", "scrap" };
 
         /// <summary>Открыть окно (живым игрокам; боты пользуются быстрыми действиями).</summary>
         void OpenUi(Actor a, UiKind kind, object target)
@@ -43,7 +58,7 @@ namespace Rastvordd.Sim
         Vector2? UiTargetPos(Actor a) => a.OpenTarget switch
         {
             Deployable d when Deployables.Contains(d) => d.Pos,
-            LootBag b when Bags.Contains(b) || (b.IsCrate && Bags.Contains(b)) => b.Pos,
+            LootBag b when Bags.Contains(b) => b.Pos,
             _ => null,
         };
 
@@ -54,169 +69,309 @@ namespace Rastvordd.Sim
             _ => null,
         };
 
-        /// <summary>Каждый тик: окно закрывается, если отошёл или контейнер исчез; выполняем действие из ввода.</summary>
+        /// <summary>Контейнер, который надо обыскивать: чужие ящики, рюкзаки, ящики РТ. Свой ящик — сразу.</summary>
+        LootBag SearchBag(Actor a) => a.OpenTarget switch
+        {
+            LootBag b => b,
+            Deployable d when d.Storage != null && !d.Auth.Contains(a.Id) && d.OwnerId != a.Id => d.Storage,
+            _ => null,
+        };
+
+        int Revealed(Actor a)
+        {
+            var b = SearchBag(a);
+            return b == null ? int.MaxValue : b.Search.GetValueOrDefault(a.Id).n;
+        }
+
+        void Unreveal(Actor a, int index)
+        {
+            var b = SearchBag(a);
+            if (b == null) return;
+            var st = b.Search.GetValueOrDefault(a.Id);
+            if (index < st.n) b.Search[a.Id] = (st.n - 1, st.t);
+        }
+
+        // ---------- ячейки ----------
+
+        int CellCount(Actor a, string inv) => inv switch
+        {
+            "pack" => Actor.PackSize,
+            "belt" => Actor.BeltSize,
+            "cont" => a.OpenUi == UiKind.Box ? BoxSlots : Math.Max(UiItems(a)?.Count ?? 0, 12),
+            "fur" => FurnaceIds.Length,
+            "claim" => ClaimIds.Length,
+            _ => 0,
+        };
+
+        ItemSlot GetCell(Actor a, string inv, int i)
+        {
+            if (i < 0 || i >= CellCount(a, inv)) return null;
+            switch (inv)
+            {
+                case "pack": return a.Pack[i];
+                case "belt": return a.Belt[i];
+                case "cont":
+                    var items = UiItems(a);
+                    if (items == null || i >= items.Count || i >= Revealed(a)) return null;   // не обыскано — не взять
+                    return items[i];
+                case "fur" when a.OpenTarget is Deployable f:
+                    int n = i switch { 0 => f.Ore, 1 => f.SulfurOre, 2 => (int)f.Fuel, 3 => f.OutMetal, 4 => f.OutSulfur, _ => f.OutCharcoal };
+                    return n > 0 ? new ItemSlot(FurnaceIds[i], n) : null;
+                case "claim" when a.OpenTarget is Deployable c:
+                    int m = (int)c.Store.GetValueOrDefault(ClaimIds[i]);
+                    return m > 0 ? new ItemSlot(ClaimIds[i], m) : null;
+            }
+            return null;
+        }
+
+        void SetCell(Actor a, string inv, int i, ItemSlot s)
+        {
+            switch (inv)
+            {
+                case "pack": a.Pack[i] = s; break;
+                case "belt": a.Belt[i] = s; break;
+                case "cont":
+                    var items = UiItems(a);
+                    if (s == null) { if (i < items.Count) { items.RemoveAt(i); Unreveal(a, i); } }
+                    else if (i < items.Count) items[i] = s;
+                    else items.Add(s);
+                    break;
+                case "fur" when a.OpenTarget is Deployable f:
+                    int n = s?.Count ?? 0;
+                    switch (i)
+                    {
+                        case 0: f.Ore = n; break;
+                        case 1: f.SulfurOre = n; break;
+                        case 2: f.Fuel = n + (f.Fuel - MathF.Floor(f.Fuel)); break;
+                        case 3: f.OutMetal = n; break;
+                        case 4: f.OutSulfur = n; break;
+                        default: f.OutCharcoal = n; break;
+                    }
+                    break;
+                case "claim" when a.OpenTarget is Deployable c:
+                    c.Store[ClaimIds[i]] = s?.Count ?? 0;
+                    break;
+            }
+        }
+
+        /// <summary>Можно ли положить эту вещь в эту ячейку.</summary>
+        bool Accepts(Actor a, string inv, int i, ItemSlot s)
+        {
+            if (s == null) return true;
+            return inv switch
+            {
+                "belt" => s.Def != null && s.Def.Holdable,                     // пояс — то, что держат в руках
+                "fur" => i <= 2 && s.Id == FurnaceIds[i],                       // в печь: руда и дерево, готовое только забирают
+                "claim" => s.Id == ClaimIds[i],
+                "cont" => a.OpenUi != UiKind.Box || i < BoxSlots,
+                _ => true,
+            };
+        }
+
+        int StackLimit(string inv, string id) => inv is "fur" or "claim" ? int.MaxValue : Items.MaxStack(id);
+
+        /// <summary>Перетаскивание: положить в пустую, докинуть в такую же стопку или поменять местами.</summary>
+        void MoveCell(Actor a, string src, int si, string dst, int di)
+        {
+            if (src == dst && si == di) return;
+            var s = GetCell(a, src, si);
+            if (s == null || di < 0 || di >= CellCount(a, dst) || !Accepts(a, dst, di, s)) return;
+            if (dst == "cont" && di >= Revealed(a) && di < (UiItems(a)?.Count ?? 0)) return;   // в необысканную — нельзя
+            var d = GetCell(a, dst, di);
+            if (d == null)
+            {
+                if (src == "cont" && dst == "cont") { var list = UiItems(a); list.RemoveAt(si); list.Add(s); return; }
+                SetCell(a, dst, di, s);
+                SetCell(a, src, si, null);
+            }
+            else if (d.Id == s.Id && d.State == null && s.State == null)
+            {
+                int room = StackLimit(dst, d.Id) - d.Count;
+                int n = Math.Min(room, s.Count);
+                if (n <= 0) return;
+                d.Count += n; s.Count -= n;
+                SetCell(a, dst, di, d);
+                SetCell(a, src, si, s.Count > 0 ? s : null);
+            }
+            else if (Accepts(a, src, si, d) && src is not ("fur" or "claim") && dst is not ("fur" or "claim"))
+            {
+                SetCell(a, dst, di, s);
+                SetCell(a, src, si, d);
+            }
+        }
+
+        /// <summary>Быстро на другую сторону: из рюкзака/пояса — в открытый контейнер, из контейнера — к себе.</summary>
+        void QuickCell(Actor a, string src, int si)
+        {
+            var s = GetCell(a, src, si);
+            if (s == null) return;
+            if (src is "pack" or "belt")
+            {
+                string dst = a.OpenUi switch { UiKind.Box or UiKind.Bag => "cont", UiKind.Furnace => "fur", UiKind.Claim => "claim", _ => src == "pack" ? "belt" : "pack" };
+                int count = CellCount(a, dst);
+                // сначала доложить в такую же стопку, потом — в первую подходящую пустую
+                for (int pass = 0; pass < 2 && GetCell(a, src, si) != null; pass++)
+                    for (int i = 0; i < count && GetCell(a, src, si) != null; i++)
+                    {
+                        var d = GetCell(a, dst, i);
+                        if (pass == 0 ? d != null && d.Id == s.Id : d == null && Accepts(a, dst, i, s) && !(dst == "cont" && i < (UiItems(a)?.Count ?? 0)))
+                            MoveCell(a, src, si, dst, i);
+                    }
+                if (GetCell(a, src, si) != null && dst == "cont" && Accepts(a, "cont", UiItems(a).Count, s)) MoveCell(a, src, si, "cont", UiItems(a).Count);
+                return;
+            }
+            // из контейнера — к себе: стопками сколько влезет, оружие — целиком
+            if (s.State == null && Items.MaxStack(s.Id) > 1)
+            {
+                int put = a.AddUpTo(s.Id, s.Count);
+                if (put <= 0) { Info(a, "Рюкзак полон"); return; }
+                s.Count -= put;
+                SetCell(a, src, si, s.Count > 0 ? s : null);
+            }
+            else if (a.AddSlot(s)) SetCell(a, src, si, null);
+            else Info(a, "Рюкзак полон");
+        }
+
+        /// <summary>Каждый тик: обыск, закрытие окна, действия из ввода.</summary>
         void StepUi(Actor a, InputCmd cmd)
         {
-            if (a.OpenUi == UiKind.None) return;
+            var op = (UiOp)cmd.UiOp;
+            // свой рюкзак и пояс можно перекладывать и без открытого окна (Tab)
+            if (a.OpenUi == UiKind.None)
+            {
+                if (op == UiOp.Move) DoMove(a, cmd.UiItem);
+                else if (op == UiOp.Quick) DoQuick(a, cmd.UiItem);
+                return;
+            }
             var pos = UiTargetPos(a);
-            if (a.Dead || pos == null || Vector2.Distance(pos.Value, a.Pos) > UiRange || (UiOp)cmd.UiOp == UiOp.Close)
+            if (a.Dead || pos == null || Vector2.Distance(pos.Value, a.Pos) > UiRange || op == UiOp.Close)
             {
                 a.OpenUi = UiKind.None; a.OpenTarget = null;
                 return;
             }
-            var op = (UiOp)cmd.UiOp;
-            if (op == UiOp.None) return;
-            switch (a.OpenUi)
+            // обыск: ячейки раскрываются по одной, редкое — дольше (Arc Raiders)
+            if (SearchBag(a) is LootBag sb)
             {
-                case UiKind.Box:
-                case UiKind.Bag:
-                    ContainerOp(a, UiItems(a), op, cmd.UiItem, cmd.UiIndex);
-                    if (a.OpenTarget is LootBag lb && lb.IsCrate && lb.Empty && lb.RespawnLeft <= 0) lb.RespawnLeft = 90f;
-                    break;
-                case UiKind.Furnace: FurnaceOp(a, (Deployable)a.OpenTarget, op, cmd.UiItem); break;
-                case UiKind.Claim: ClaimOp(a, (Deployable)a.OpenTarget, op, cmd.UiItem); break;
+                var st = sb.Search.GetValueOrDefault(a.Id);
+                if (st.n < sb.Items.Count)
+                {
+                    st.t += Dt;
+                    var it = sb.Items[st.n];
+                    if (st.t >= Items.SearchTime(it.Id))
+                    {
+                        Events.Add(new SimEvent { Kind = SimEventKind.Revealed, ActorId = a.Id, Pos = a.Pos, Value = Items.Rarity(it.Id), Text = it.Id });
+                        st = (st.n + 1, 0);
+                    }
+                    sb.Search[a.Id] = st;
+                }
             }
-        }
-
-        /// <summary>Снять с игрока предмет по ключу «inv:id» / «belt:N» — целиком.</summary>
-        ItemSlot TakeFromActor(Actor a, string key)
-        {
-            if (key == null) return null;
-            if (key.StartsWith("belt:") && int.TryParse(key.Substring(5), out int bi) && bi >= 0 && bi < Actor.BeltSize && a.Belt[bi] != null)
-            {
-                var s = a.Belt[bi];
-                a.Belt[bi] = null;
-                return s;
-            }
-            string id = key.StartsWith("inv:") ? key.Substring(4) : key;
-            int n = a.Take(id, int.MaxValue);
-            return n > 0 ? new ItemSlot(id, n) : null;
-        }
-
-        void ContainerOp(Actor a, List<ItemSlot> items, UiOp op, string key, int index)
-        {
-            if (items == null) return;
             switch (op)
             {
-                case UiOp.Take when index >= 0 && index < items.Count:
-                    var s = items[index];
-                    if (s.Def != null && s.Def.Holdable && s.Def.Stack <= 1) { if (!a.AddSlot(s)) { Info(a, "Пояс полон"); return; } }
-                    else a.Add(s.Id, s.Count);
-                    items.RemoveAt(index);
-                    break;
+                case UiOp.Move: DoMove(a, cmd.UiItem); break;
+                case UiOp.Quick: DoQuick(a, cmd.UiItem); break;
                 case UiOp.TakeAll:
-                    for (int i = items.Count - 1; i >= 0; i--)
-                    {
-                        var it = items[i];
-                        if (it.Def != null && it.Def.Holdable && it.Def.Stack <= 1) { if (!a.AddSlot(it)) continue; }
-                        else a.Add(it.Id, it.Count);
-                        items.RemoveAt(i);
-                    }
-                    break;
-                case UiOp.Put:
-                    var put = TakeFromActor(a, key);
-                    if (put == null) return;
-                    var same = put.State == null ? items.Find(x => x.Id == put.Id && x.State == null) : null;
-                    if (same != null) same.Count += put.Count; else items.Add(put);
+                    string inv = a.OpenUi switch { UiKind.Furnace => "fur", UiKind.Claim => "claim", _ => "cont" };
+                    for (int i = CellCount(a, inv) - 1; i >= 0; i--) if (inv != "fur" || i >= 3) QuickCell(a, inv, i);
                     break;
                 case UiOp.PutAll:
-                    foreach (var st in new List<ItemStack>(a.Inventory))
-                    {
-                        if (st.Id.StartsWith("key_")) continue;   // ключи остаются при себе
-                        var p = TakeFromActor(a, "inv:" + st.Id);
-                        if (p == null) continue;
-                        var m = items.Find(x => x.Id == p.Id && x.State == null);
-                        if (m != null) m.Count += p.Count; else items.Add(p);
-                    }
-                    break;
-            }
-        }
-
-        void FurnaceOp(Actor a, Deployable f, UiOp op, string key)
-        {
-            switch (op)
-            {
-                case UiOp.Put:
-                    string id = key?.StartsWith("inv:") == true ? key.Substring(4) : key;
-                    if (id == "metal_ore") f.Ore += a.Take(id, int.MaxValue);
-                    else if (id == "sulfur_ore") f.SulfurOre += a.Take(id, int.MaxValue);
-                    else if (id == "wood") f.Fuel += a.Take(id, int.MaxValue);
-                    else Info(a, "В печь — только руда и дерево");
-                    break;
-                case UiOp.Take:   // вынуть обратно загруженное
-                    if (key == "metal_ore") { a.Add(key, f.Ore); f.Ore = 0; }
-                    else if (key == "sulfur_ore") { a.Add(key, f.SulfurOre); f.SulfurOre = 0; }
-                    else if (key == "wood") { a.Add(key, (int)f.Fuel); f.Fuel -= (int)f.Fuel; }
+                    for (int i = 0; i < Actor.PackSize; i++)
+                        if (a.Pack[i] is ItemSlot p && !p.Id.StartsWith("key_")) QuickCell(a, "pack", i);   // ключи остаются при себе
                     break;
                 case UiOp.TakeOut:
-                    if (f.OutMetal > 0) { a.Add("metal_fragments", f.OutMetal); f.OutMetal = 0; }
-                    if (f.OutSulfur > 0) { a.Add("sulfur", f.OutSulfur); f.OutSulfur = 0; }
-                    if (f.OutCharcoal > 0) { a.Add("charcoal", f.OutCharcoal); f.OutCharcoal = 0; }
+                    for (int i = 3; i < 6; i++) QuickCell(a, "fur", i);
                     break;
-                case UiOp.Toggle:
+                case UiOp.Toggle when a.OpenTarget is Deployable f:
                     f.On = !f.On;
                     if (f.On && !f.Burning) Info(a, f.Fuel <= 0 ? "Нужно дерево" : "Нужна руда");
                     break;
             }
+            if (a.OpenTarget is LootBag lb && lb.IsCrate && lb.Empty && lb.RespawnLeft <= 0) lb.RespawnLeft = 90f;
         }
 
-        void ClaimOp(Actor a, Deployable c, UiOp op, string key)
+        static (string inv, int i) ParseCell(string s)
         {
-            string id = key?.StartsWith("inv:") == true ? key.Substring(4) : key;
-            if (id is not ("wood" or "stone" or "metal_fragments" or "scrap")) return;
-            if (op == UiOp.Put)
-            {
-                int n = a.Take(id, int.MaxValue);
-                if (n > 0) c.Store[id] = c.Store.GetValueOrDefault(id) + n;
-            }
-            else if (op == UiOp.Take)
-            {
-                int n = (int)c.Store.GetValueOrDefault(id);
-                if (n > 0) { a.Add(id, n); c.Store[id] -= n; }
-            }
+            int c = s?.IndexOf('#') ?? -1;
+            return c > 0 && int.TryParse(s.Substring(c + 1), out int i) ? (s.Substring(0, c), i) : (null, -1);
         }
 
-        /// <summary>Содержимое окна для снапшота.</summary>
+        /// <summary>«src#i>dst#j».</summary>
+        void DoMove(Actor a, string arg)
+        {
+            var parts = arg?.Split('>');
+            if (parts == null || parts.Length != 2) return;
+            var (src, si) = ParseCell(parts[0]);
+            var (dst, di) = ParseCell(parts[1]);
+            if (src == null || dst == null) return;
+            if (a.OpenUi == UiKind.None && (src is not ("pack" or "belt") || dst is not ("pack" or "belt"))) return;
+            MoveCell(a, src, si, dst, di);
+        }
+
+        void DoQuick(Actor a, string arg)
+        {
+            var (inv, i) = ParseCell(arg);
+            if (inv == null || (a.OpenUi == UiKind.None && inv is not ("pack" or "belt"))) return;
+            QuickCell(a, inv, i);
+        }
+
+        /// <summary>Не влезшее в рюкзак — сумкой под ноги.</summary>
+        void DropOverflow(Actor a)
+        {
+            if (a.Overflow.Count == 0) return;
+            var bag = new LootBag { Id = NextId(), Pos = a.Pos + new Vector2(0.4f, 0.3f), Despawn = 300f };
+            bag.Items.AddRange(a.Overflow);
+            a.Overflow.Clear();
+            Bags.Add(bag);
+            Info(a, "Рюкзак полон — лишнее выпало рядом");
+        }
+
+        // ---------- для снапшота ----------
+
+        public static CellView Cell(ItemSlot s, string label = null) => s == null ? new CellView { Label = label } : new CellView
+        {
+            Id = s.Id, Name = Items.Name(s.Id), Count = s.Count, Rarity = Items.Rarity(s.Id), Label = label,
+            Ammo = s.State?.Ammo ?? 0, Magazine = s.State != null && !s.State.Def.Melee ? s.State.Def.Magazine : 0,
+        };
+
         public UiView BuildUi(Actor a)
         {
             if (a.OpenUi == UiKind.None) return null;
             var v = new UiView { Kind = a.OpenUi };
-            switch (a.OpenTarget)
+            switch (a.OpenUi)
             {
-                case Deployable d when a.OpenUi == UiKind.Box:
-                    v.Title = "Ящик";
-                    foreach (var s in d.Storage.Items) v.Items.Add((s.Id, Items.Name(s.Id), s.Count));
+                case UiKind.Box:
+                case UiKind.Bag:
+                    v.Title = a.OpenUi == UiKind.Box ? "ЯЩИК" : a.OpenTarget is LootBag lb && lb.IsCrate ? "ЯЩИК" : "РЮКЗАК";
+                    var items = UiItems(a);
+                    int revealed = Math.Min(Revealed(a), items.Count);
+                    int cells = CellCount(a, "cont");
+                    for (int i = 0; i < cells; i++)
+                        v.Cells.Add(i < items.Count ? (i < revealed ? Cell(items[i]) : new CellView { Hidden = true }) : new CellView());
+                    if (SearchBag(a) is LootBag sb && revealed < items.Count)
+                    {
+                        v.Searching = true;
+                        v.Progress = Math.Clamp(sb.Search.GetValueOrDefault(a.Id).t / Items.SearchTime(items[revealed].Id), 0, 1);
+                    }
                     break;
-                case LootBag b:
-                    v.Title = b.IsCrate ? "Ящик" : "Рюкзак";
-                    foreach (var s in b.Items) v.Items.Add((s.Id, Items.Name(s.Id), s.Count));
-                    break;
-                case Deployable f when a.OpenUi == UiKind.Furnace:
-                    v.Title = "Печь";
-                    v.Ore = f.Ore; v.SulfurOre = f.SulfurOre; v.Fuel = (int)f.Fuel;
-                    v.OutMetal = f.OutMetal; v.OutSulfur = f.OutSulfur; v.OutCharcoal = f.OutCharcoal;
+                case UiKind.Furnace when a.OpenTarget is Deployable f:
+                    v.Title = "ПЕЧЬ";
+                    string[] labels = { "руда", "сера", "топливо", "металл", "сера", "уголь" };
+                    for (int i = 0; i < 6; i++) v.Cells.Add(Cell(GetCell(a, "fur", i), labels[i]));
                     v.On = f.On; v.Burning = f.Burning;
+                    v.Info = f.Burning ? "Горит: руда плавится, дерево горит, копится уголь" : f.On ? "Зажжена, но не хватает руды или дерева" : "Потушена: положи руду и дерево, нажми «Зажечь»";
                     break;
-                case Deployable c when a.OpenUi == UiKind.Claim:
-                    v.Title = "Шкаф";
+                case UiKind.Claim when a.OpenTarget is Deployable c:
+                    v.Title = "ШКАФ";
+                    string[] cl = { "дерево", "камень", "металл", "лом" };
+                    for (int i = 0; i < 4; i++) v.Cells.Add(Cell(GetCell(a, "claim", i), cl[i]));
                     var (load, found, doors) = ClaimLoad(c);
                     float h = ClaimHoursLeft(c);
-                    var need = UpkeepPerHourOf(c);
                     var parts = new List<string>();
-                    foreach (var (id, per) in need) parts.Add($"{Items.Name(id)} {per:0.#}/ч");
-                    v.ClaimText = $"Нагрузка {load:0}/{BudgetMax} · фундаменты {found}/{FoundMax} · двери {doors}/{DoorMax}\n" +
-                                  (load <= 0 ? "Базы ещё нет — содержать нечего" :
-                                   $"Содержание: {string.Join(", ", parts)}\nЗапаса хватит на {h:0.0} ч" + (h <= 0 ? (c.Grace > 0 ? $" — без запаса гниение через {c.Grace / 60:0} мин" : " — ГНИЁТ") : ""));
-                    foreach (var (id, n) in c.Store) if (n >= 1) v.Items.Add((id, Items.Name(id), (int)n));
+                    foreach (var (id, per) in UpkeepPerHourOf(c)) parts.Add($"{Items.Name(id)} {per:0.#}/ч");
+                    v.Info = $"Нагрузка {load:0}/{BudgetMax} · фундаменты {found}/{FoundMax} · двери {doors}/{DoorMax}\n" +
+                             (load <= 0 ? "Базы ещё нет — содержать нечего" :
+                              $"Содержание: {string.Join(", ", parts)} · запаса на {h:0.0} ч" + (h <= 0 ? (c.Grace > 0 ? $" — гниение через {c.Grace / 60:0} мин" : " — ГНИЁТ") : ""));
                     break;
             }
-            // твои вещи: инвентарь, а для ящиков и сумок — ещё и пояс
-            foreach (var st in a.Inventory)
-                if (a.OpenUi is not (UiKind.Furnace or UiKind.Claim) || st.Id is "metal_ore" or "sulfur_ore" or "wood" or "stone" or "metal_fragments" or "scrap")
-                    v.Mine.Add(("inv:" + st.Id, st.Id, Items.Name(st.Id), st.Count));
-            if (a.OpenUi is UiKind.Box or UiKind.Bag)
-                for (int i = 0; i < Actor.BeltSize; i++)
-                    if (a.Belt[i] is ItemSlot s && i != a.Current) v.Mine.Add(($"belt:{i}", s.Id, $"{Items.Name(s.Id)} (пояс {i + 1})", s.Count));
             return v;
         }
     }

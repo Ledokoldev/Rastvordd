@@ -80,7 +80,8 @@ namespace Rastvordd.Sim
         public (int i, int j) ZoneCell;
         public BeltSlotInfo?[] Belt = new BeltSlotInfo?[Actor.BeltSize];
         public int Current;
-        public List<(string name, int count)> Inventory = new();
+        public List<CellView> Pack = new();          // рюкзак 24 ячейки
+        public List<CellView> BeltCells = new();     // пояс 6 ячеек
         public List<(string name, float progress)> CraftQueue = new();
         public List<RecipeInfo> Recipes = new();
     }
@@ -169,7 +170,7 @@ namespace Rastvordd.Sim
         {
             report = null;
             var save = WorldSave.FromJson(json);
-            if (save == null || save.Version != 2 || save.Seed != World.Seed) return false;
+            if (save == null || save.Version != 3 || save.Seed != World.Seed) return false;
             World.Load(save);
             // мир жил, пока игра была закрыта (не больше суток за раз)
             float away = (float)System.Math.Min(24 * 3600, (System.DateTime.UtcNow - save.SavedAtUtc).TotalSeconds);
@@ -334,7 +335,7 @@ namespace Rastvordd.Sim
             {
                 bool mine = e.ActorId == me.Id || e.OtherId == me.Id;
                 bool personal = e.Kind is SimEventKind.Loot or SimEventKind.Gather or SimEventKind.Info
-                                       or SimEventKind.Crafted or SimEventKind.Placed or SimEventKind.Locked;   // Built видят все рядом: слышно стройку
+                                       or SimEventKind.Crafted or SimEventKind.Placed or SimEventKind.Locked or SimEventKind.Revealed;   // Built видят все рядом: слышно стройку
                 if (personal && e.ActorId != me.Id) continue;
                 if (!mine && Vector2.DistanceSquared(e.Pos, me.Pos) > EventRadius * EventRadius) continue;
                 snap.Events.Add(e);
@@ -376,7 +377,8 @@ namespace Rastvordd.Sim
                 };
             }
 
-            foreach (var it in me.Inventory) s.Inventory.Add((Items.Name(it.Id), it.Count));
+            foreach (var it in me.Pack) s.Pack.Add(World.Cell(it));
+            foreach (var it in me.Belt) s.BeltCells.Add(World.Cell(it));
             foreach (var job in me.CraftQueue)
                 s.CraftQueue.Add((Items.Name(job.Recipe.Output), 1f - job.Left / job.Recipe.Time));
 

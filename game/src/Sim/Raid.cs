@@ -13,6 +13,7 @@ namespace Rastvordd.Sim
         public float DudChance;       // шанс осечки (связка)
         public float ThrowRange;
         public bool Sticks;           // шашка прилипает к стене
+        public float FireTime;        // > 0 — не взрывается, а разливает огонь на столько секунд
     }
 
     public sealed class Thrown
@@ -28,9 +29,38 @@ namespace Rastvordd.Sim
         public bool Landed => Flight >= FlightTime;
     }
 
+    /// <summary>Горящее пятно: жжёт деревянное (разметку и дерево) и людей.</summary>
+    public sealed class FireZone
+    {
+        public int Id;
+        public int OwnerId;
+        public Vector2 Pos;
+        public float Radius, Left;
+    }
+
     public sealed partial class World
     {
         public readonly List<Thrown> Throwns = new();
+        public readonly List<FireZone> Fires = new();
+
+        /// <summary>Огонь: дерево и разметка горят (D22), камень и металл — нет. Люди в огне получают урон.</summary>
+        void StepFires()
+        {
+            for (int i = Fires.Count - 1; i >= 0; i--)
+            {
+                var f = Fires[i];
+                f.Left -= Dt;
+                if (f.Left <= 0) { Fires.RemoveAt(i); continue; }
+                foreach (var s in new List<Structure>(Structures))
+                {
+                    if (s.Tier > 1) continue;
+                    float dist = s.IsEdge ? DistToEdge(s, f.Pos) : Vector2.Distance(Building.CellCenter(s.I, s.J), f.Pos) - 0.8f;
+                    if (dist < f.Radius) DamageStructure(s, (s.Tier == 0 ? 6f : 9f) * Dt, f.OwnerId);
+                }
+                foreach (var a in Actors)
+                    if (!a.Dead && Vector2.Distance(a.Pos, f.Pos) < f.Radius) Damage(a, 12f * Dt, f.OwnerId, a.Pos);
+            }
+        }
 
         /// <summary>Множитель урона взрывом по уровню: разметка рассыпается, камень — 2 шашки, металл — 4, сталь — 8.</summary>
         static readonly float[] BlastTierMult = { 3f, 1.2f, 0.55f, 0.5f, 0.5f };
@@ -85,6 +115,13 @@ namespace Rastvordd.Sim
                     var bag = new LootBag { Id = NextId(), Pos = t.Pos, Despawn = 120 };
                     bag.Items.Add(Items.NewSlot(t.ItemId));
                     Bags.Add(bag);
+                    continue;
+                }
+                var exd = Items.Get(t.ItemId).Explosive;
+                if (exd.FireTime > 0)
+                {
+                    Fires.Add(new FireZone { Id = NextId(), OwnerId = t.OwnerId, Pos = t.Pos, Radius = exd.Radius, Left = exd.FireTime });
+                    Events.Add(new SimEvent { Kind = SimEventKind.Explosion, ActorId = t.OwnerId, Pos = t.Pos, Value = exd.Radius, Text = t.ItemId });
                     continue;
                 }
                 Explode(t);

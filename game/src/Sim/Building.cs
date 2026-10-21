@@ -318,7 +318,7 @@ namespace Rastvordd.Sim
             return _foundations.TryGetValue((ci, cj), out var f) && Vector2.Distance(a.Pos, f.Center) < reach + 1.6f ? f : null;
         }
 
-        static float DistToEdge(Structure e, Vector2 p)
+        internal static float DistToEdge(Structure e, Vector2 p)
         {
             var c = e.Center;
             return e.Dir == 0 ? MathF.Abs(p.Y - c.Y) + MathF.Max(0, MathF.Abs(p.X - c.X) - Building.Cell / 2)

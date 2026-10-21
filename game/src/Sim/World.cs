@@ -369,6 +369,7 @@ namespace Rastvordd.Sim
                     for (int k = 0; k < Actor.BeltSize; k++)
                         if (a.Belt[k]?.Id is "deploy_claim" or "weapon_torch" or "tool_rock" or "tool_hammer") a.Belt[k] = null;
                     a.Add("expl_c4", 10);
+                    a.Add("expl_fire", 5);
                     a.Add("expl_satchel", 10);
                     a.Add("lock_code", 1);
                     a.Add("deploy_box", 1);
@@ -500,6 +501,7 @@ namespace Rastvordd.Sim
             StepFurnaces();
             StepClaims();
             StepThrowns();
+            StepFires();
         }
 
         void StepActor(Actor a, InputCmd cmd)

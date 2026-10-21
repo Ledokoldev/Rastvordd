@@ -169,6 +169,9 @@ namespace Rastvordd.Sim
             c4.Stack = 10;
             Add("lock_code", "Кодовый замок", ItemCategory.Tool).Lock = true;
             Add("lock_key", "Замок с ключом", ItemCategory.Tool).Lock = true;
+            var molotov = Add("expl_fire", "Коктейль", ItemCategory.Weapon);   // бутылка с горючкой: огонь по дереву
+            molotov.Explosive = new ExplosiveDef { Radius = 1.6f, Fuse = 0f, ThrowRange = 12, FireTime = 14f };
+            molotov.Stack = 10;
             Add("weapon_torch", "Факел", ItemCategory.Weapon).Weapon = WeaponDef.MeleeTool("weapon_torch", 10, 0.8f, 1.6f, 1, 1, 1, 1);   // светит ночью
 
             // огнестрел и лук
@@ -244,6 +247,7 @@ namespace Rastvordd.Sim
             new Recipe { Output = "expl_c4", Cost = new[] { ("gunpowder", 200), ("metal_fragments", 100), ("scrap", 20), ("cloth", 5) }, Time = 15, Bench = 1 },
             new Recipe { Output = "lock_key", Cost = new[] { ("wood", 75) }, Time = 2 },
             new Recipe { Output = "lock_code", Cost = new[] { ("metal_fragments", 100) }, Time = 4 },
+            new Recipe { Output = "expl_fire", Cost = new[] { ("cloth", 10), ("sulfur", 15), ("charcoal", 10) }, Time = 3 },
             new Recipe { Output = "build_plan", Cost = new[] { ("wood", 20) }, Time = 1 },
             new Recipe { Output = "tool_hammer", Cost = new[] { ("wood", 100) }, Time = 3 },
             new Recipe { Output = "weapon_torch", Cost = new[] { ("wood", 30), ("cloth", 5) }, Time = 2 },

@@ -238,7 +238,7 @@ namespace Rastvordd.Client
             _light = Art.FireLight(1.6f, 0f);
             _light.Color = itemId == "expl_c4" ? new Godot.Color(1f, 0.2f, 0.15f) : new Godot.Color(1f, 0.6f, 0.25f);
             AddChild(_light);
-            if (itemId == "expl_satchel") { _hiss = Sfx.Loop("fuse_hiss", -10, 12); if (_hiss != null) { AddChild(_hiss); _hiss.Play(); } }
+            if (itemId == "expl_satchel") { _hiss = Sfx.Loop("fuse_hiss", -10, 12); if (_hiss != null) { _hiss.Autoplay = true; AddChild(_hiss); } }
         }
 
         public void Tick(float dt)
@@ -275,6 +275,54 @@ namespace Rastvordd.Client
                     float a = _t * 23 + i * 2.1f;
                     DrawRect(new Godot.Rect2(at + new Godot.Vector2(5 + Godot.Mathf.Cos(a) * 2, -6 + Godot.Mathf.Sin(a * 1.3f) * 2), Godot.Vector2.One), new Godot.Color(1f, 0.8f, 0.3f));
                 }
+        }
+    }
+}
+
+namespace Rastvordd.Client
+{
+    /// <summary>Горящее пятно: несколько языков пламени из fx/fire_*, тёплый свет, треск.</summary>
+    public partial class FireView2D : Godot.Node2D
+    {
+        public float Radius, Left;
+        float _t;
+        readonly Godot.PointLight2D _light;
+        readonly Godot.Vector2[] _spots;
+
+        public FireView2D(float radiusM, int seed)
+        {
+            Radius = radiusM;
+            TextureFilter = TextureFilterEnum.Nearest;
+            Material = VisionFx.ObjectMat;
+            _light = Art.FireLight(radiusM * 3.5f, 1.4f);
+            AddChild(_light);
+            var crackle = Sfx.Loop("furnace_loop", -4, 25);
+            if (crackle != null) { crackle.Autoplay = true; AddChild(crackle); }
+            var rng = new Godot.RandomNumberGenerator { Seed = (ulong)seed };
+            _spots = new Godot.Vector2[7];
+            for (int i = 0; i < _spots.Length; i++)
+            {
+                float a = rng.Randf() * Godot.Mathf.Tau, r = Godot.Mathf.Sqrt(rng.Randf()) * radiusM * Iso.PPM * 0.8f;
+                _spots[i] = new Godot.Vector2(Godot.Mathf.Cos(a) * r, Godot.Mathf.Sin(a) * r * 0.5f);
+            }
+        }
+
+        public void Tick(float dt) { _t += dt; _light.Energy = (Left < 2 ? Left / 2 : 1) * (1.2f + 0.3f * Godot.Mathf.Sin(_t * 13) * Godot.Mathf.Sin(_t * 5.3f)); QueueRedraw(); }
+
+        public override void _Draw()
+        {
+            float fade = Left < 2 ? Left / 2 : 1;
+            DrawSetTransform(Godot.Vector2.Zero, 0, new Godot.Vector2(1, 0.5f));
+            DrawCircle(Godot.Vector2.Zero, Radius * Iso.PPM, new Godot.Color(0.08f, 0.05f, 0.03f, 0.45f * fade));   // копоть
+            DrawSetTransform(Godot.Vector2.Zero, 0, Godot.Vector2.One);
+            for (int i = 0; i < _spots.Length; i++)
+            {
+                var tex = Art.Get($"fx/fire_{((int)(_t * 10) + i) % 4 + 1}");
+                if (tex == null) continue;
+                float s = (1.3f + 0.45f * (i % 3) + 0.15f * Godot.Mathf.Sin(_t * 7 + i)) * fade;
+                var size = tex.GetSize() * s;
+                DrawTextureRect(tex, new Godot.Rect2(_spots[i] - new Godot.Vector2(size.X / 2, size.Y), size), false);
+            }
         }
     }
 }

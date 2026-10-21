@@ -49,6 +49,7 @@ namespace Rastvordd.Client
         readonly Dictionary<int, PickupView2D> _pickupViews = new();
         readonly Dictionary<int, DeployView2D> _deployViews = new();
         readonly Dictionary<int, ThrownView2D> _thrownViews = new();
+        readonly Dictionary<int, FireView2D> _fireViews = new();
         readonly List<FlashView2D> _fx = new();
         readonly List<FloatText2D> _texts = new();
         GhostView2D _ghost;
@@ -206,6 +207,24 @@ namespace Rastvordd.Client
                     var mons = _server.World.Monuments;
                     var m = mons[System.Math.Clamp(int.Parse(arg.Substring(8)), 0, mons.Count - 1)];
                     _server.World.Find(_myId).Pos = new SVec(m.Center.X, m.Max.Y + 4);
+                }
+                else if (arg == "--buildspot")
+                {
+                    // отладка: встать на ближайшее к (60;60) место, где можно строить дом 3×3 (лицом на восток)
+                    var w = _server.World;
+                    for (int r = 0; r < 200; r += 2)
+                    {
+                        bool found = false;
+                        for (int k = 0; k < 16 && !found; k++)
+                        {
+                            var c = new SVec(60, 60) + new SVec(Mathf.Cos(k * 0.39f), Mathf.Sin(k * 0.39f)) * r;
+                            var (ci, cj) = Building.CellOf(c);
+                            bool ok = true;
+                            for (int di = -1; di <= 3 && ok; di++) for (int dj = -1; dj <= 3 && ok; dj++) ok = w.FoundationGeoOk(ci + di, cj + dj, out _);
+                            if (ok) { w.Find(_myId).Pos = Building.CellCenter(ci, cj) + new SVec(-1, 0); found = true; }
+                        }
+                        if (found) break;
+                    }
                 }
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
@@ -539,6 +558,11 @@ namespace Rastvordd.Client
                     case SimEventKind.Locked:
                         Sfx.Play("lock_click", Iso.Px(e.Pos), -4, 10, 0f);
                         if (e.ActorId == _myId) { if (_scriptCode >= 0) _codeReq = (e.OtherId, _scriptCode); else _hud.ShowCode(e.OtherId); }
+                        break;
+                    case SimEventKind.Explosion when e.Text == "expl_fire":
+                        Sfx.Play("glass_break", Iso.Px(e.Pos), -2, 40, 0.08f);
+                        Sfx.Play("fire_whoosh", Iso.Px(e.Pos), -4, 40, 0.08f);
+                        Flash(e.Pos, new Color(1f, 0.6f, 0.25f), 30, 0.35f, true);
                         break;
                     case SimEventKind.Explosion:
                     {
@@ -893,6 +917,16 @@ namespace Rastvordd.Client
                 tv.Tick(dt);
             }
             RemoveMissing(_thrownViews, seen);
+
+            seen.Clear();
+            foreach (var f in _cur.Fires)
+            {
+                seen.Add(f.Id);
+                if (!_fireViews.TryGetValue(f.Id, out var fv)) { fv = new FireView2D(f.Radius, f.Id) { Position = Iso.Px(f.Pos) }; _world.AddChild(fv); _fireViews[f.Id] = fv; }
+                fv.Left = f.Left;
+                fv.Tick(dt);
+            }
+            RemoveMissing(_fireViews, seen);
 
             // вход на РТ — название
             if (_cur.Self.Place != _lastPlace) { _lastPlace = _cur.Self.Place; if (_lastPlace != null) _hud.Toast(_lastPlace); }

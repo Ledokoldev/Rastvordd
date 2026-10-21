@@ -43,7 +43,30 @@ def fuse(name: str) -> None:
     s.save(name, s.mix([x * 0.5 for x in hiss], crackle), 0.5)
 
 
+def glass(name: str) -> None:
+    # бьётся бутылка: звонкие высокие осколки + глухой удар
+    c = s.n(0.5)
+    shards = [0.0] * c
+    for _ in range(26):
+        at = s.rng.randint(0, s.n(0.25))
+        f = s.rng.uniform(2500, 6500)
+        ln = s.n(s.rng.uniform(0.03, 0.12))
+        for i in range(min(ln, c - at)):
+            shards[at + i] += s.math.sin(2 * s.math.pi * f * i / s.SR) * s.math.exp(-i / (ln * 0.3)) * s.rng.uniform(0.1, 0.4)
+    thud = [x * e for x, e in zip(s.lowpass(s.noise(c), 600), s.env(c, 0.001, 0.04))]
+    s.save(name, s.mix(shards, thud))
+
+
+def whoosh(name: str) -> None:
+    # вспыхнувшая горючка: нарастающий шум с низом
+    c = s.n(1.2)
+    w = [x * (min(1.0, i / s.n(0.15)) * s.math.exp(-max(0, i - s.n(0.15)) / s.n(0.5))) for i, x in enumerate(s.lowpass(s.noise(c), 1800))]
+    s.save(name, w)
+
+
 def main() -> None:
+    glass("glass_break")
+    whoosh("fire_whoosh")
     explosion("explosion_small", 0.8)
     explosion("explosion_big", 1.3)
     fuse("fuse_hiss")

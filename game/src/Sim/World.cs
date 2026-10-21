@@ -1423,16 +1423,34 @@ namespace Rastvordd.Sim
             a.Dead = true;
             a.DeadTime = Time;
             var bag = new LootBag { Id = NextId(), Pos = a.Pos, Despawn = 300f, Corpse = true };
-            foreach (var s in a.Pack) if (s != null) bag.Items.Add(s);
-            foreach (var s in a.Belt)
-                if (s != null)
-                {
-                    if (s.State != null) s.State.ReloadLeft = 0;
-                    bag.Items.Add(s);
-                }
+            if (a.Team == Team.Npc) NpcDrop(a, bag);   // охрана РТ — не фулл-лут
+            else
+            {
+                foreach (var s in a.Pack) if (s != null) bag.Items.Add(s);
+                foreach (var s in a.Belt)
+                    if (s != null)
+                    {
+                        if (s.State != null) s.State.ReloadLeft = 0;
+                        bag.Items.Add(s);
+                    }
+            }
             a.ClearAll();
             if (!bag.Empty) Bags.Add(bag);
             Events.Add(new SimEvent { Kind = SimEventKind.Death, ActorId = a.Id, OtherId = killerId, Pos = a.Pos });
+        }
+
+        /// <summary>
+        /// Что падает с охраны РТ (D35): не весь обвес. Оружие — никогда, патроны — часть, лом и карта — как есть,
+        /// бинт и еда — иногда. Иначе с одного РТ выносят по 4–5 калашей.
+        /// </summary>
+        void NpcDrop(Actor a, LootBag bag)
+        {
+            void Put(string id, int n) { if (n > 0) bag.Items.Add(new ItemSlot(id, n)); }
+            if (Rng.NextDouble() < 0.6) Put("ammo_rifle", Math.Min(a.Count("ammo_rifle"), Rng.Next(5, 16)));
+            Put("scrap", a.Count("scrap"));
+            Put("keycard", a.Count("keycard"));
+            if (Rng.NextDouble() < 0.5) Put("bandage", a.Count("bandage"));
+            if (Rng.NextDouble() < 0.5) Put("canned", a.Count("canned"));
         }
 
         void StepBags()

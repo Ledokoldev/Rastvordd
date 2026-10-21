@@ -159,7 +159,7 @@ namespace Rastvordd.Sim
         float RaidScore()
         {
             if (_raid != null) return 72 * MathF.Max(W("рейд"), 0.8f);
-            if (_w.Time < _raidCooldown || _rtPhase != RtPhase.None) return 0;
+            if (_w.Time < _raidCooldown || _rtPhase != RtPhase.None || _rj != null) return 0;
             if (_w.Time - _raidJudgeAt < 5) return _raidScoreCache;
             _raidJudgeAt = _w.Time;
             _raidScoreCache = 0;

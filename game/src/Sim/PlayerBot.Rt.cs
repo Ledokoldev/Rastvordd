@@ -140,7 +140,9 @@ namespace Rastvordd.Sim
             if (gun == null) { why = "охрана, а у меня нет ствола"; return false; }
             if (AmmoLeft(gun) < 20) { why = "мало патронов"; return false; }
             if (MyPower < r.Kit - 0.25f) { why = $"у охраны {(r.Kit >= 1 ? "калаши" : "самопалы")} — мой {Items.Name(gun)} слабее"; return false; }
-            if (r.Guards > 2 + (int)(Aggression * 4 + Appetite * 2)) { why = $"слишком много охраны ({r.Guards})"; return false; }
+            // с перфокартой Подстанция — главный приз этапа: терплю на 3 охранника больше (раньше перфокарты копились, а на Подстанцию не шёл никто)
+            int extra = r.Sub != null && Stock("punchcard_1") > 0 ? 3 : 0;
+            if (r.Guards > 2 + extra + (int)(Aggression * 4 + Appetite * 2)) { why = $"слишком много охраны ({r.Guards})"; return false; }
             if (deaths >= 2 + (int)(Appetite * 3)) { why = $"там уже {deaths} раза умирал"; return false; }
             return true;
         }
@@ -149,7 +151,7 @@ namespace Rastvordd.Sim
         float RtScore()
         {
             if (_rtPhase != RtPhase.None) return (_rtPhase == RtPhase.Prep ? 58 : 66) * MathF.Max(W("поход на РТ"), 0.9f);
-            if (_w.Time < _rtNextAt || _w.Time < _rebuildUntil || _w.Time - _alarmAt < 120 || _raid != null || !Has("tool_hatchet")) return 0;
+            if (_w.Time < _rtNextAt || _w.Time < _rebuildUntil || _w.Time - _alarmAt < 120 || _raid != null || _rj != null || !Has("tool_hatchet")) return 0;
             if (_w.Time - _rtScoreAt < 3) return _rtScore;
             _rtScoreAt = _w.Time;
             _rtScore = 0;
@@ -175,10 +177,17 @@ namespace Rastvordd.Sim
             string no = null;
             foreach (var r in Rts())
             {
-                if (!RtFeasible(r, out string w)) { if (r == _fav) no = $"«{r.Short}»: {w}"; continue; }
+                if (!RtFeasible(r, out string w))
+                {
+                    if (r == _fav) no = $"«{r.Short}»: {w}";
+                    if (card && r.Sub != null) Say("подстанция-нет", $"с перфокартой на «{r.Short}» не иду: {w}", 300);
+                    continue;
+                }
                 float value = r.Reward * (r == _fav ? 1.3f : 1f) + (card && r.Sub != null ? 150 : 0) + (comps > 0 && r.Recycler != null ? 40 : 0)
                               + (Stock("keycard") > 0 ? r.Safes.Count * 60 : 0) + (wantCard && r.T0 != null && !Skipped(r.T0) ? 90 : 0);
-                float risk = r.Risk * (1 - Appetite) * 25 + Vector2.Distance(Home, r.M.Center) / 8f;
+                float risk = r.Risk * (1 - Appetite) * 25 + Vector2.Distance(Home, r.M.Center) / 8f + (DangerSpot(r.M.Center, r.Radius + 20) ? 60 * (1 - Appetite) : 0);   // недавно там умирал
+                // слух по радио «на РТ ещё есть перфокарта» — туда, если перфокарта нужна
+                if (wantCard && _w.Director != null) foreach (var ru in _w.Director.Rumors) if (ru.Kind == "punchcard" && r.M.Contains(ru.Pos, 5)) value += 60;
                 float s = value - risk;
                 if (s > best) { best = s; pick = r; }
             }
@@ -197,7 +206,8 @@ namespace Rastvordd.Sim
         {
             if (_rtPhase == RtPhase.None)
             {
-                if (_rtPick == null) return false;
+                // выбор устаревает: между пересчётами целей поход мог только что закончиться (раньше — сотни «иду на РТ» за секунду)
+                if (_rtPick == null || _w.Time < _rtNextAt || _w.Time - _rtScoreAt > 3.5f) return false;
                 _rt = _rtPick;
                 _rtPhase = RtPhase.Prep;
                 _rtStartAt = _rtLootAt = _w.Time;

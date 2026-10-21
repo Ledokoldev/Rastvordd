@@ -108,7 +108,7 @@ namespace Rastvordd.Sim
             if (!expired)
             {
                 if (hitMe && en.S is Stance.Watch or Stance.Parted or Stance.Camp && LosingReason(a) == null) Set(en, Stance.Fight, "он напал — отвечаю");
-                else if (hitMe && en.S is Stance.Watch or Stance.Parted or Stance.Camp) Set(en, Stance.Flee, $"он напал, а мне не выстоять: {_loseWhy}");
+                else if (hitMe && en.S is Stance.Watch or Stance.Parted or Stance.Camp) Set(en, Stance.Flee, $"он напал, а мне не выстоять: {LosingReason(a)}");
                 else if (en.S == Stance.Fight && Critical() is string c) Set(en, Stance.Flee, c);
                 return;
             }
@@ -210,6 +210,7 @@ namespace Rastvordd.Sim
         {
             if (_fleeFrom != null && _enc.TryGetValue(_fleeFrom.Id, out var en) && en.S == Stance.Flee) Set(en, Stance.Parted, why);
             else Thought($"отход окончен: {why}");
+            if (_encAvoid == _fleeFrom) _encAvoid = null;
             _fleeFrom = null; _fleeEnd = -99;
             _retreating = false; _hasEscape = false;
         }
@@ -222,7 +223,7 @@ namespace Rastvordd.Sim
             if (Fleeing) return 100;
             if (_fleeFrom != null) EndFlee("время отхода вышло");
             if (_threat != null && ThreatMode(_threat) < 0) { StartFlee(_threat); return 100; }
-            if (_encAvoid != null) { StartFlee(_encAvoid); return 100; }
+            if (_encAvoid != null && _enc.TryGetValue(_encAvoid.Id, out var ea) && ea.S == Stance.Flee) { StartFlee(_encAvoid); return 100; }
             return 0;
         }
 

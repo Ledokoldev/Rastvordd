@@ -507,6 +507,7 @@ namespace Rastvordd.Sim
         {
             var cmd = InputCmd.Empty;
             cmd.Aim = _me.Pos + _me.FacingDir * 3;
+            StepDeath();
             if (_me.Dead)
             {
                 Doing = "мёртв";
@@ -551,6 +552,9 @@ namespace Rastvordd.Sim
 
         int _metalGoal = 300;
         static readonly string[] ResearchOrder = { "lock_code", "gunpowder", "ammo_pistol", "weapon_pipe", "ammo_rifle", "expl_satchel", "weapon_ak", "expl_c4" };
+        // агрессивные (бродяги и задиристые фермеры) учат бомбы раньше патронов 5.56: рейды — на втором часу, а не «никогда»
+        static readonly string[] ResearchOrderRaider = { "lock_code", "gunpowder", "ammo_pistol", "weapon_pipe", "expl_satchel", "ammo_rifle", "weapon_ak", "expl_c4" };
+        string[] MyResearchOrder => Aggression > 0.45f ? ResearchOrderRaider : ResearchOrder;
         static readonly string[] BenchIds = { "deploy_workbench", "deploy_workbench2", "deploy_workbench3" };
 
         /// <summary>Где в доме стоят верстаки (мастерская мейна) и откуда с ними работать.</summary>
@@ -585,7 +589,7 @@ namespace Rastvordd.Sim
             int scrap = _me.Count("scrap") + InBox(box, "scrap");
 
             // изучить, что доступно на нашем уровне
-            foreach (var id in ResearchOrder)
+            foreach (var id in MyResearchOrder)
             {
                 var n = Tech.Get(id);
                 if (n == null || _me.Known.Contains(id) || n.Bench > lvl || !Array.TrueForAll(n.Requires, r => _me.Known.Contains(r))) continue;

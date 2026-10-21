@@ -198,7 +198,8 @@ namespace Rastvordd.Sim
         /// <summary>Отход (цель «бегство»): за укрытие от его взгляда, бегом; оторвался — бинт, перезарядка, домой.</summary>
         bool Retreat(ref InputCmd cmd)
         {
-            if (FleeCheck()) return false;   // разошлись или дошёл — назад к своей задаче
+            if (!Fleeing) { _redecide = true; return false; }   // отход окончен (по таймеру) — к своей задаче
+            if (FleeCheck()) { _redecide = true; return false; }   // разошлись или дошёл — назад к своей задаче
             var t = _fleeFrom ?? _threat ?? RememberedFoe();
             if (!_retreating || _w.Time - _lastFleeAt > 2f)
             {

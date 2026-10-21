@@ -92,6 +92,7 @@ namespace Rastvordd.Sim
             PerceiveDeaths();
             PerceiveRaid();
             PerceivePeople();
+            StepStage();
         }
 
         // ---------- журнал мыслей ----------
@@ -131,6 +132,7 @@ namespace Rastvordd.Sim
         readonly Dictionary<string, float> _lastSwitchLog = new();
         Goal _goal;
         Actor _lastThreatDecided;
+        bool _redecide;
         public string GoalName => _goal?.Name ?? "-";
 
         /// <summary>Вес цели по архетипу: одна логика, разные характеры.</summary>
@@ -173,6 +175,8 @@ namespace Rastvordd.Sim
                 new() { Name = "сторож", Score = WatchdogScore, Act = WatchdogAct },
                 new() { Name = "засада у РТ", Score = CampScore, Act = CampAct },
                 new() { Name = "антирейд", Score = () => AntiRaidScore() * W("антирейд"), Act = AntiRaid },
+                new() { Name = "слух", Score = RumorScore, Act = RumorAct },
+                new() { Name = "после смерти", Score = AfterDeathScore, Act = AfterDeathAct },
                 new() { Name = "охота", Score = EncFightScore, Act = EncFightAct },
                 new() { Name = "месть", Score = RevengeScore, Act = RevengeAct },
                 new() { Name = "нужды", Score = () => NeedsUrgency() * 70, Act = Needs },
@@ -195,11 +199,12 @@ namespace Rastvordd.Sim
             CountHealth();
             // цели пересчитываются раз в 0,2 с (вразнобой у разных ботов), действие — каждый тик;
             // сразу — если по мне попали или появилась/сменилась угроза
-            bool urgent = _w.Time - _me.LastDamagedTime < 0.05f || _threat != _lastThreatDecided;
+            bool urgent = _w.Time - _me.LastDamagedTime < 0.05f || _threat != _lastThreatDecided || _redecide;
+            _redecide = false;
             if (_goal != null && !urgent && (_w.Tick + _me.Id) % 6 != 0)
             {
                 long tk = SimPerf.Begin();
-                if (!_goal.Act(ref cmd)) Plan(ref cmd);
+                if (!_goal.Act(ref cmd)) { Plan(ref cmd); _redecide = true; }   // цель кончилась — пересчитать в следующий тик
                 SimPerf.End("действие: " + _goal.Name, tk);
                 return;
             }
@@ -219,7 +224,7 @@ namespace Rastvordd.Sim
             {
                 bool fresh = _w.Time - _lastSwitchLog.GetValueOrDefault(best.Name, -999) > 30;   // повтор той же смены — не чаще раза в 30 с
                 if (fresh) _lastSwitchLog[best.Name] = _w.Time;
-                if (fresh && _goal != null && best.Name is "бегство" or "бой" or "антирейд" or "проверить бой" or "охота" or "рейд" or "поход на РТ" or "разведка")
+                if (fresh && _goal != null && best.Name is "бегство" or "бой" or "антирейд" or "проверить бой" or "охота" or "рейд" or "поход на РТ" or "разведка" or "слух" or "месть")
                     Thought($"{_goal.Name} → {best.Name}{(best.Name == "бой" || best.Name == "бегство" ? $": {_threat?.Name ?? "угроза"}, у него {Items.Name(_threat?.Held?.Id ?? "tool_rock")}" : "")}");
                 _goal = best;
             }

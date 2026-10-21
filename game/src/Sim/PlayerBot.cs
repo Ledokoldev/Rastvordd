@@ -96,14 +96,21 @@ namespace Rastvordd.Sim
             // РТ с охраной обходим стороной, если цель не на самом РТ
             foreach (var m in _w.Monuments)
             {
-                if (m.Contains(p, 5)) continue;
+                if (m.Contains(p, 5) || d.Length() < 15) continue;   // ближние перемещения (по дому, к дереву) — без отталкивания
                 var off = _me.Pos - m.Center;
                 float r = (m.Max - m.Min).Length() * 0.5f + 45;
                 float dist = off.Length();
                 if (dist < r && dist > 0.1f) want += off / dist * (r - dist) / r * 2.5f;
             }
             if (want.LengthSquared() > 0.0001f) want = Vector2.Normalize(want);
-            cmd.Move = d.Length() < 1.2f ? Vector2.Normalize(d) : Avoid(want);   // вблизи цели — без обходов, иначе крутится
+            // вблизи цели — напрямую (иначе крутится), но если упёрлись в ящик/столб дольше секунды — обходим
+            if (d.Length() < 1.2f)
+            {
+                _nearStuck = Vector2.Distance(_me.Pos, _lastNear) < 0.02f ? _nearStuck + World.Dt : 0;
+                _lastNear = _me.Pos;
+                cmd.Move = _nearStuck > 1f ? Geo.Rotate(Vector2.Normalize(d), 1.3f) : Vector2.Normalize(d);
+            }
+            else cmd.Move = Avoid(want);
             cmd.Aim = p;
             return false;
         }
@@ -188,6 +195,19 @@ namespace Rastvordd.Sim
             var inside = ca.Item1 >= _origin.i && ca.Item1 <= _origin.i + 1 && ca.Item2 >= _origin.j && ca.Item2 <= _origin.j + 1 ? ca : cb;
             var stand = Building.CellCenter(inside.Item1, inside.Item2);
             stand += Vector2.Normalize(c - stand) * 0.2f;
+            // точку занял ящик/спальник/столб — сдвигаемся вдоль стены от него
+            var tangent = t.dir == 0 ? Vector2.UnitX : Vector2.UnitY;
+            foreach (var d in _w.DeploysInRadius(stand, 1.1f, _depBuf))
+            {
+                if (Vector2.Distance(d.Pos, stand) > d.Radius + 0.6f) continue;   // сетка отдаёт соседей с запасом
+                float side = Vector2.Dot(stand - d.Pos, tangent);
+                stand += tangent * (side >= 0 ? 1 : -1) * 0.7f;
+                break;
+            }
+            // не дальше 0,45 от центра клетки вдоль стены — иначе упрёмся в поперечную стену
+            var cc = Building.CellCenter(inside.Item1, inside.Item2);
+            float along = Math.Clamp(Vector2.Dot(stand - cc, tangent), -0.45f, 0.45f);
+            stand = cc + tangent * along + (stand - cc - tangent * Vector2.Dot(stand - cc, tangent));
             return (stand, c);
         }
 
@@ -271,6 +291,9 @@ namespace Rastvordd.Sim
             if (Hold(tool, ref cmd)) cmd.Fire = true;
         }
         readonly List<ResourceNode> _nodeBuf = new();
+        readonly List<Deployable> _depBuf = new();
+        float _nearStuck;
+        Vector2 _lastNear;
         readonly HashSet<ResourceNode> _badNodes = new();
         float _nodeBest = float.MaxValue, _nodeNoProgress;
 
@@ -378,7 +401,13 @@ namespace Rastvordd.Sim
                 return;
             }
             // роумер базу пока не строит: добывает то, что просит снаряжение
-            if (Archetype == BotArchetype.Roamer) { Gather(wood < 400 ? NodeKind.Tree : NodeKind.Stone, ref cmd); return; }
+            if (Archetype == BotArchetype.Roamer)
+            {
+                if (wood < 400) Gather(NodeKind.Tree, ref cmd);
+                else if (stone < 200) Gather(NodeKind.Stone, ref cmd);
+                else { Doing = "бродит"; Wander(ref cmd); }   // запас есть — не копит бесконечно
+                return;
+            }
 
             // 2. место и столб
             var claim = MyClaim();
@@ -424,7 +453,7 @@ namespace Rastvordd.Sim
             }
 
             // 5. улучшить до дерева (проём — до двери: потом молоток попадает в дверь)
-            int targetTier = stone >= 600 && _greed > 0.5f ? 2 : 1;
+            const int targetTier = 1;   // сначала весь дом в дерево; камень — когда база готова (шаг 8б)
             foreach (var t in Template())
             {
                 var s = Built(t);
@@ -460,7 +489,7 @@ namespace Rastvordd.Sim
                 if (!Has("deploy_box")) { if (!Craft("deploy_box", ref cmd)) Gather(NodeKind.Tree, ref cmd); return; }
                 Doing = "ставит ящик";
                 if (!GoTo(CellC(1, 1), 0.5f, ref cmd)) return;
-                cmd.Aim = CellC(1, 0) + new Vector2(0.12f, -0.12f);   // ящик радиусом 0,6 — не ближе 0,65 к стенам
+                cmd.Aim = CellC(1, 0) + new Vector2(0.33f, -0.33f);   // ящик в северо-восточный угол, не мешает ходить
                 if (Hold("deploy_box", ref cmd)) Click(ref cmd);
                 return;
             }
@@ -507,11 +536,47 @@ namespace Rastvordd.Sim
                 return;
             }
 
-            // 9. отнести добычу
-            if (wood > 500 + 400 * _greed || stone > 300 + 300 * _greed)
+            // 8б. дом в камень: камень из кармана, не хватает — забираем из ящика, иначе добываем
+            bool stoneDone = true;
+            var upgrades = new List<((StructKind kind, int i, int j, int dir) t, Structure s)>();
+            foreach (var t in Template())
+                if (Built(t) is Structure s && s.Tier < 2 && !(t.kind == StructKind.Doorway && _w.DoorAt(t.i, t.j, 0) != null)) upgrades.Add((t, s));
+            if (myDoor != null && myDoor.Tier < 2) upgrades.Add(((StructKind.Door, myDoor.I, myDoor.J, 0), myDoor));
+            if (upgrades.Count > 0)
+            {
+                stoneDone = false;
+                var (t, s) = upgrades[0];
+                var cost = Building.Cost(t.kind, s.Tier + 1);
+                var (id, n) = cost[0];
+                if (_me.Count(id) < n)
+                {
+                    int inBox = 0;
+                    foreach (var it in box.Storage.Items) if (it.Id == id) inBox += it.Count;
+                    if (inBox >= n - _me.Count(id))
+                    {
+                        Doing = "берёт камень из ящика";
+                        if (!GoTo(CellC(1, 0) + new Vector2(-0.35f, 0.35f), 0.4f, ref cmd)) return;
+                        cmd.Aim = box.Pos;
+                        cmd.Interact = Click2();
+                        return;
+                    }
+                    if (!Need(id, n, ref cmd)) return;
+                }
+                Doing = $"в камень: {Building.KindName(t.kind)}";
+                Vector2 stand, face;
+                if (t.kind == StructKind.Door) { stand = CellC(0, 1) + new Vector2(0, 0.2f); face = DoorCenter; }
+                else (stand, face) = HammerSpot(t);
+                if (!GoTo(stand, 0.6f, ref cmd)) return;
+                cmd.Aim = face;
+                if (Hold("tool_hammer", ref cmd) && Vector2.Dot(_me.FacingDir, Vector2.Normalize(face - _me.Pos)) > 0.9f) cmd.Fire = true;
+                return;
+            }
+
+            // 9. отнести добычу (камень копим, пока дом не каменный)
+            if (wood > 500 + 400 * _greed || (stoneDone && stone > 300 + 300 * _greed))
             {
                 Doing = "несёт добычу домой";
-                if (!GoTo(CellC(1, 0) + new Vector2(-0.3f, 0.9f), 0.4f, ref cmd)) return;
+                if (!GoTo(CellC(1, 0) + new Vector2(-0.35f, 0.35f), 0.4f, ref cmd)) return;
                 cmd.Aim = box.Pos;
                 cmd.Crouch = true;
                 cmd.Interact = Click2();
@@ -586,13 +651,14 @@ namespace Rastvordd.Sim
             // снаряжение: копьё, потом лук и стрелы (иначе — общий фарм)
             if (!Has("tool_hatchet")) return false;
             if (!Has("weapon_spear")) { if (!Craft("weapon_spear", ref cmd)) Need("wood", 300, ref cmd); return true; }
-            if (!Has("weapon_bow"))
+            bool hempNear = NearestPickup(PickupKind.Hemp) != null;
+            if (!Has("weapon_bow") && (_me.Count("cloth") >= 50 || hempNear))
             {
-                if (_me.Count("cloth") < 50) { Doing = "собирает коноплю"; if (UsePickup(PickupKind.Hemp, ref cmd)) return true; return false; }
+                if (_me.Count("cloth") < 50) { Doing = "собирает коноплю"; UsePickup(PickupKind.Hemp, ref cmd); return true; }
                 if (!Craft("weapon_bow", ref cmd)) Need("wood", 200, ref cmd);
                 return true;
             }
-            if (_me.Count("arrow") < 12)
+            if (Has("weapon_bow") && _me.Count("arrow") < 12)
             {
                 if (Craft("arrow", ref cmd)) return true;
                 if (_me.Count("wood") < 25) { Need("wood", 150, ref cmd); return true; }

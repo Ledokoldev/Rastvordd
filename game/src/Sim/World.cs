@@ -883,9 +883,9 @@ namespace Rastvordd.Sim
         void TryPlace(Actor a, Vector2 at, ItemDef def)
         {
             if (Vector2.Distance(a.Pos, at) > PlaceRange) { Info(a, "Слишком далеко"); return; }
-            if (!IsFree(at, 0.65f)) { Info(a, "Здесь не поставить"); return; }
+            float rad = def.Deploy switch { DeployKind.Claim or DeployKind.SleepBag => 0.3f, DeployKind.Box => 0.45f, _ => 0.6f };
             if (def.Deploy == DeployKind.Claim && !CanPlaceClaim(at, out string why)) { Info(a, $"Столб: {why}"); return; }
-            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = def.Deploy is DeployKind.Claim or DeployKind.SleepBag ? 0.3f : 0.6f };   // столб тонкий, спальник плоский
+            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = rad };   // столб тонкий, спальник плоский, ящик компактный
             if (def.Deploy == DeployKind.Box) dep.Storage = new LootBag { Id = NextId(), Pos = at };
             dep.Auth.Add(a.Id);
             AddDeployable(dep);
@@ -932,6 +932,7 @@ namespace Rastvordd.Sim
             }
             foreach (var dp in DeploysNear(a.Pos, InteractRange))
             {
+                if (dp.Kind == DeployKind.SleepBag) continue;   // спальник — не для E
                 float d = Vector2.Distance(a.Pos, dp.Pos) - dp.Radius + 0.3f;
                 if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, _ => InteractKind.Workbench }, dp); }
             }

@@ -310,7 +310,7 @@ namespace Rastvordd.Sim
             var (i, j, dir) = Building.NearestEdge(hit);
             foreach (var key in new[] { (i, j, dir) })
             {
-                if (_doors.TryGetValue(key, out var d) && Vector2.Distance(d.Center, hit) < bestD + 0.3f) return d;
+                if (_doors.TryGetValue(key, out var d) && Vector2.Distance(d.Center, hit) < bestD + 0.1f) return d;   // дверь — только если целимся почти в неё
                 if (_edges.TryGetValue(key, out var e)) { float dd = DistToEdge(e, hit); if (dd < bestD) { bestD = dd; best = e; } }
             }
             if (best != null) return best;

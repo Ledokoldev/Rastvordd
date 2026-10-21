@@ -41,6 +41,8 @@ namespace Rastvordd.Client
             string sheet = isNpc ? "char_guard" : "char_naked";
             _body.Front = Art.CharFrames(sheet, 'f');
             _body.BackFrames = Art.CharFrames(sheet, 'b');
+            _body.WalkFront = Art.WalkFrames(sheet, 'f');
+            _body.WalkBack = Art.WalkFrames(sheet, 'b');
             _body.TextureFilter = TextureFilterEnum.Nearest;
             _held = new Held2D { Position = new Vector2(1, -Iso.H(1.05f)) };
             AddChild(_body);
@@ -170,10 +172,18 @@ namespace Rastvordd.Client
         public Color Skin = new Color(0.86f, 0.68f, 0.55f);
         public bool Back, Moving, Dead, Helmet;
         public float Phase;
-        public Texture2D[] Front, BackFrames;
+        public Texture2D[] Front, BackFrames, WalkFront, WalkBack;
 
         public override void _Draw()
         {
+            // ходьба из видео (если есть): цикл по фазе шага; стоя — первый кадр листа
+            var walk = Back ? WalkBack : WalkFront;
+            if (walk != null && Moving && !Dead)
+            {
+                int wi = (int)(Phase / Mathf.Tau * walk.Length) % walk.Length;
+                DrawTexture(walk[wi], new Vector2(-32, -62));
+                return;
+            }
             var frames = Back ? BackFrames : Front;
             if (frames != null)
             {

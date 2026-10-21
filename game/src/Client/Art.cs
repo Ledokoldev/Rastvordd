@@ -49,6 +49,19 @@ namespace Rastvordd.Client
             return frames;
         }
 
+        /// <summary>Цикл ходьбы из видео (Wan 2.2): chars/<base>_walk_<f|b>0..N. Нет — null.</summary>
+        public static Texture2D[] WalkFrames(string baseName, char row)
+        {
+            var list = new List<Texture2D>();
+            for (int i = 0; i < 16; i++)
+            {
+                var t = Get($"chars/{baseName}_walk_{row}{i}");
+                if (t == null) break;
+                list.Add(t);
+            }
+            return list.Count >= 2 ? list.ToArray() : null;
+        }
+
         /// <summary>Детерминированный выбор варианта по id объекта.</summary>
         public static Texture2D Pick(int seed, params string[] paths)
         {

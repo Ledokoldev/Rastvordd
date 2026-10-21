@@ -72,6 +72,26 @@ namespace Rastvordd.Client
         readonly Dictionary<int, ActorView2D> _actorViews = new();
         readonly Dictionary<int, TracerView2D> _projViews = new();
         readonly Dictionary<int, BagView2D> _bagViews = new();
+        readonly Dictionary<Node, float> _hiddenFor = new();
+
+        /// <summary>
+        /// Кого нет в снапшоте — спрятать, а через 20 с совсем удалить: иначе в песочнице с десятками ботов копились
+        /// сотни спрятанных персонажей (у каждого свой SubViewport, перерисовка каждый кадр) — утечка памяти.
+        /// </summary>
+        void ReapViews<T>(Dictionary<int, T> views, HashSet<int> seen, float dt) where T : Node2D
+        {
+            List<int> dead = null;
+            foreach (var (id, v) in views)
+            {
+                if (seen.Contains(id)) { _hiddenFor.Remove(v); continue; }
+                v.Visible = false;
+                float t = (_hiddenFor.TryGetValue(v, out var h) ? h : 0) + dt;
+                _hiddenFor[v] = t;
+                if (t > 20) (dead ??= new()).Add(id);
+            }
+            if (dead == null) return;
+            foreach (var id in dead) { var v = views[id]; _hiddenFor.Remove(v); v.QueueFree(); views.Remove(id); }
+        }
         readonly Dictionary<int, NodeView2D> _nodeViews = new();
         readonly Dictionary<int, PickupView2D> _pickupViews = new();
         readonly Dictionary<int, DeployView2D> _deployViews = new();
@@ -380,6 +400,7 @@ else if (arg == "--atcrate")
                 }
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
+                else if (arg == "--nohrtf") Tuning.SteamHrtf = false;   // отладка: звук без Steam Audio (сравнить память)
                 else if (arg.StartsWith("--riggallery")) AddChild(new RigGallery(arg.Contains('=') ? arg.Split('=')[1] : "naked"));
                 else if (arg == "--crouch") _forceCrouch = true;
                 else if (arg == "--sprint") _forceSprint = true;
@@ -805,7 +826,7 @@ else if (arg == "--atcrate")
                 {
                     GD.Print(PlayingSounds() + $" buses {AudioServer.BusCount}");
                     GD.Print($"amb: biome {TerrainView.BiomeAt(_map, new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM))} | {_ambient.Debug}");
-                    GD.Print($"perf: {_perfFrames / _perfTime:F0} fps, sim {_simTime / (_perfTime * 30):F2} ms/tick, nodes {_server.World.Nodes.Count}, views {_world.GetChildCount()}");
+                    GD.Print($"perf: {_perfFrames / _perfTime:F0} fps, sim {_simTime / (_perfTime * 30):F2} ms/tick, nodes {_server.World.Nodes.Count}, views {_world.GetChildCount()}, объектов {Performance.GetMonitor(Performance.Monitor.ObjectCount):0}, узлов {Performance.GetMonitor(Performance.Monitor.ObjectNodeCount):0}, ресурсов {Performance.GetMonitor(Performance.Monitor.ObjectResourceCount):0}, куча .NET {System.GC.GetTotalMemory(false) / (1024 * 1024)} МБ, видеопамять {Performance.GetMonitor(Performance.Monitor.RenderVideoMemUsed) / (1024 * 1024):0} МБ");
                     _perfTime = 0; _perfFrames = 0; _simTime = 0;
                 }
             }
@@ -1168,8 +1189,7 @@ else if (arg == "--atcrate")
                 view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId, a.Crouching);
                 if (!a.Dead && !a.Swimming) Footstep(a.Id, pos, speed, dt, a.Crouching);
             }
-            foreach (var kv in _actorViews)
-                if (!seen.Contains(kv.Key)) kv.Value.Visible = false;
+            ReapViews(_actorViews, seen, dt);
             CollectOcclusionFocus();
 
             // пули
@@ -1206,8 +1226,7 @@ else if (arg == "--atcrate")
                 if (v.Empty != b.Empty || v.Unlocked != b.Unlocked) { v.Empty = b.Empty; v.Unlocked = b.Unlocked; v.QueueRedraw(); }
                 v.Position = Iso.Px(b.Pos);   // крейт едет в вагоне, висит на кране, приходит капсулой
             }
-            foreach (var kv in _bagViews)
-                if (!seen.Contains(kv.Key)) kv.Value.Visible = false;
+            ReapViews(_bagViews, seen, dt);
 
             RenderWorldObjects(dt);
 

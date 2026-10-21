@@ -106,6 +106,8 @@ namespace Rastvordd.Client
                 else if (a == "release") _autoFireFrames = 0;
                 else if (a == "craftmenu") _hud.ToggleCraft();
                 else if (a == "tech") _hud.OpenTech();
+                else if (a == "rec") foreach (var d in _server.World.Deployables) { if (d.Kind == DeployKind.Recycler) GD.Print($"рециклер {d.Pos}: on={d.On} [{string.Join(", ", d.Storage.Items.ConvertAll(x => x.Id + "×" + x.Count))}] · у меня шестерни {_server.World.Find(_myId).Count("comp_gears")}"); }   // отладка
+                else if (a == "peace") { foreach (var n in _server.World.Actors) if (n.Team == Team.Npc) { n.Dead = true; n.DeadTime = _server.World.Time; } }   // отладка: охрана РТ «спит»
                 else if (a.StartsWith("speckey")) SpectatorKey(a.Substring(7) switch { "tab" => Key.Tab, "f" => Key.F, "2" => Key.Key2, "3" => Key.Key3, "4" => Key.Key4, _ => Key.Key1 });   // отладка: клавиши наблюдателя
                 else if (a.StartsWith("learn")) _researchReq = a.Substring(5);   // отладка: learn<id>
                 else if (a.StartsWith("slot")) _slot = int.Parse(a.Substring(4)) - 1;

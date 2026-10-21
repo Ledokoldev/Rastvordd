@@ -1006,7 +1006,7 @@ namespace Rastvordd.Sim
         /// <summary>Переработчик на РТ: ничей, не ломается, открыт всем.</summary>
         void AddRecycler(Vector2 p)
         {
-            var d = new Deployable { Id = NextId(), Kind = DeployKind.Recycler, Pos = p, Radius = 0.9f, Hp = 1e9f };
+            var d = new Deployable { Id = NextId(), Kind = DeployKind.Recycler, Pos = p, Radius = 0.9f, Hp = 1e9f, On = false };
             d.Storage = new LootBag { Id = NextId(), Pos = p };
             AddDeployable(d);
         }

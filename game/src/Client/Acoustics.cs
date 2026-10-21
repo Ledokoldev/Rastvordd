@@ -142,7 +142,9 @@ namespace Rastvordd.Client
 
             void Start()
             {
-                Spawn(stream, dryBus, db + Mathf.LinearToDb(Mathf.Max(0.001f, 1f - farMix * 0.75f)), pitch);
+                float dryDb = db + Mathf.LinearToDb(Mathf.Max(0.001f, 1f - farMix * 0.75f));
+                if (Tuning.SteamHrtf && SteamHrtf.Ready) SteamHrtf.Play(stream, posM - _listener, dryDb, pitch, occluded);   // HRTF Valve
+                else Spawn(stream, dryBus, dryDb, pitch);
                 Spawn(stream, "AcRoom", db - 2f, pitch);                                         // эхо места слушателя
                 if (farMix > 0.02f) Spawn(stream, "AcFar", db + Mathf.LinearToDb(farMix) + 1f, pitch); // глухой дальний раскат
             }

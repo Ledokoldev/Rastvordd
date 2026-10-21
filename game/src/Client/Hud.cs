@@ -59,6 +59,9 @@ namespace Rastvordd.Client
             var stretch = new CheckBox { Text = "Шаги: растяжение без изменения высоты", ButtonPressed = Tuning.StepsStretch, FocusMode = Control.FocusModeEnum.None };
             stretch.Toggled += on => { Tuning.StepsStretch = on; Tuning.Save(); };
             box.AddChild(stretch);
+            var hrtf = new CheckBox { Text = SteamHrtf.Ready ? "Направление звука: Steam Audio HRTF" : "Steam Audio не загрузился — наш бинаурал", ButtonPressed = Tuning.SteamHrtf && SteamHrtf.Ready, Disabled = !SteamHrtf.Ready, FocusMode = Control.FocusModeEnum.None };
+            hrtf.Toggled += on => { Tuning.SteamHrtf = on; Tuning.Save(); };
+            box.AddChild(hrtf);
             _adminSounds = new Label();
             _adminSounds.AddThemeFontSizeOverride("font_size", 13);
             _adminSounds.AddThemeColorOverride("font_color", new Color(0.8f, 1f, 0.8f));

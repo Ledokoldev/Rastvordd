@@ -100,6 +100,7 @@ namespace Rastvordd.Client
             _decals = new DecalLayer(_map, flatDecals, _world);
             Sfx.Init(_world);
             Acoustics.Init(this, _map);
+            SteamHrtf.Init(this, _map);
             _weather = new Weather(_world, this);
             Tuning.Load();
             _steps = new FootstepLoop(this);

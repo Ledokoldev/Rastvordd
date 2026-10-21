@@ -12,6 +12,7 @@ namespace Rastvordd.Client
         public static float StepsVolumeDb = -6f;
         public static float AmbientVolumeDb = 0f;          // общий фон (ветер, прибой, птицы, сверчки)
         public static bool StepsStretch = true;            // растяжение без изменения высоты (можно выключить для сравнения)
+        public static bool SteamHrtf = true;               // направление звука через Steam Audio HRTF (иначе наш бинаурал)
 
         public static void Load()
         {
@@ -23,6 +24,7 @@ namespace Rastvordd.Client
             StepsVolumeDb = (float)cfg.GetValue("steps", "volume_db", StepsVolumeDb);
             AmbientVolumeDb = (float)cfg.GetValue("ambient", "volume_db", AmbientVolumeDb);
             StepsStretch = (bool)cfg.GetValue("steps", "stretch", StepsStretch);
+            SteamHrtf = (bool)cfg.GetValue("acoustics", "steam_hrtf", SteamHrtf);
         }
 
         public static void Save()
@@ -34,6 +36,7 @@ namespace Rastvordd.Client
             cfg.SetValue("steps", "volume_db", StepsVolumeDb);
             cfg.SetValue("ambient", "volume_db", AmbientVolumeDb);
             cfg.SetValue("steps", "stretch", StepsStretch);
+            cfg.SetValue("acoustics", "steam_hrtf", SteamHrtf);
             cfg.Save(Path);
         }
     }

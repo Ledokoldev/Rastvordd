@@ -104,7 +104,8 @@ namespace Rastvordd.Client
             if (Cell.Hidden) return "Обыскивается…";
             if (Cell.Id == null) return Cell.Label ?? "";
             string extra = Cell.Magazine > 0 ? $"\nв магазине {Cell.Ammo}/{Cell.Magazine}" : Cell.Count > 1 ? $"\n×{Cell.Count}" : "";
-            return $"{Cell.Name}{extra}\n{UiTheme.RarityName(Cell.Rarity)}\n\nтащи мышкой · Shift+клик / ПКМ — перенести";
+            string desc = Rastvordd.Sim.Items.Desc(Cell.Id);
+            return $"{Cell.Name}{extra}\n{UiTheme.RarityName(Cell.Rarity)}{(desc != "" ? "\n" + desc : "")}\n\nтащи мышкой · Shift+клик / ПКМ — перенести";
         }
 
         public override Variant _GetDragData(Vector2 atPosition)

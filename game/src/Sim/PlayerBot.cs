@@ -20,7 +20,7 @@ namespace Rastvordd.Sim
     /// </summary>
     public enum BotArchetype { Farmer, Roamer }
 
-    public sealed class PlayerBot : IBrain
+    public sealed partial class PlayerBot : IBrain
     {
         public BotArchetype Archetype = BotArchetype.Farmer;
         public Actor Me => _me;
@@ -439,35 +439,8 @@ namespace Rastvordd.Sim
                 return cmd;
             }
 
-            // нужды (лечение, вода, еда) — раньше дел; в погоне за добычей роумер их откладывает
-            if (_prey == null && _fleeTime <= 0 && Threat() == null && Needs(ref cmd)) return cmd;
-            if (Archetype == BotArchetype.Roamer && Roam(ref cmd)) return cmd;
-
-            // угроза: уходим (к дому, если он есть), лечимся
-            var threat = Threat();
-            if (threat != null && Archetype == BotArchetype.Farmer && Ranged() != null && MyPower >= KitPower(threat)
-                && Vector2.Distance(threat.Pos, _me.Pos) < 30 && _me.Hp > 40)
-            {
-                Hunt(threat, ref cmd);   // вооружён не хуже — защищается, а не бежит
-                return cmd;
-            }
-            if (threat != null) _fleeTime = 3f + 4f * _caution;
-            if (_fleeTime > 0)
-            {
-                _fleeTime -= World.Dt;
-                Doing = "убегает";
-                var from = threat?.Pos ?? _me.Pos - _me.FacingDir;
-                var away = _me.Pos - from;
-                if (away.LengthSquared() < 0.01f) away = Vector2.UnitX;
-                cmd.Move = Avoid(Vector2.Normalize(away));
-                cmd.Sprint = true;
-                cmd.Aim = _me.Pos + Vector2.Normalize(away) * 3;
-                if (_me.Hp < 60) cmd.Heal = true;
-                return cmd;
-            }
-
-
-            Plan(ref cmd);
+            Perceive();
+            Decide(ref cmd);
             return cmd;
         }
 
@@ -1109,90 +1082,6 @@ namespace Rastvordd.Sim
                 if ((s >= 0 || p >= 0) && ((st?.Ammo ?? 0) > 0 || _me.Count(ammo) > 0)) return gun;
             }
             return null;
-        }
-
-        /// <summary>true — роумер сам решил, что делать в этот тик (иначе общий план: еда, инструменты, фарм).</summary>
-        bool Roam(ref InputCmd cmd)
-        {
-            // ставка: с большим грузом — не охотимся
-            int load = _me.Count("wood") + _me.Count("stone") + _me.Count("metal_fragments") * 3 + _me.Count("scrap") * 5;
-            bool loaded = load > 900;
-            if (_me.Hp < 35) { _prey = null; return false; }   // ранен — общий план: убегает и лечится
-
-            // цель: видимый слабее меня в 45 м (голый, с камнем) или тот, кто меня бьёт
-            if (_prey == null || _prey.Dead || (_preyTimer -= World.Dt) < 0)
-            {
-                _prey = null;
-                float best = float.MaxValue;
-                foreach (var a in _w.Actors)
-                {
-                    if (a == _me || a.Dead || a.Spectator || a.Team == Team.Npc) continue;
-                    float d = Vector2.Distance(a.Pos, _me.Pos);
-                    bool hitMe = _me.LastAttacker == a.Id && _w.Time - _me.LastDamagedTime < 5f;
-                    if (!hitMe && (loaded || d > 45 || MyPower < 0.4f || KitPower(a) > MyPower + 0.05f)) continue;   // без копья/лука первым не лезет
-                    if (!_w.HasLineOfSight(_me.Pos, a.Pos)) continue;
-                    if (d < best) { best = d; _prey = a; }
-                }
-                _preyTimer = 2f;
-            }
-            if (_prey != null) { Hunt(_prey, ref cmd); return true; }
-
-            // лут: сумка с трупа рядом
-            LootBag bag = null;
-            float bd = 35;
-            foreach (var b in _w.Bags)
-            {
-                if (b.Empty || b.IsCrate) continue;
-                float d = Vector2.Distance(b.Pos, _me.Pos);
-                if (d < bd) { bd = d; bag = b; }
-            }
-            if (bag != null)
-            {
-                Doing = "лутает труп";
-                if (MoveTo(bag.Pos, 1.0f, ref cmd)) cmd.Interact = Click2();
-                return true;
-            }
-
-            // снаряжение: копьё, потом лук и стрелы (иначе — общий фарм)
-            if (!Has("tool_hatchet")) return false;
-            if (!Has("weapon_spear")) { if (!Craft("weapon_spear", ref cmd)) Need("wood", 150, ref cmd); return true; }
-            bool hempNear = NearestPickup(PickupKind.Hemp) != null;
-            if (!Has("weapon_bow") && (_me.Count("cloth") >= 50 || hempNear))
-            {
-                if (_me.Count("cloth") < 50) { Doing = "собирает коноплю"; UsePickup(PickupKind.Hemp, ref cmd); return true; }
-                if (!Craft("weapon_bow", ref cmd)) Need("wood", 100, ref cmd);
-                return true;
-            }
-            if (Has("weapon_bow") && _me.Count("arrow") < 12)
-            {
-                if (Craft("arrow", ref cmd)) return true;
-                if (_me.Count("wood") < 25) { Need("wood", 150, ref cmd); return true; }
-                Need("stone", 80, ref cmd);
-                return true;
-            }
-
-            // бродит между РТ (там ходят люди), по пути смотрит по сторонам
-            float rd = Vector2.Distance(_roamTo, _me.Pos);
-            if (rd < _roamBest - 0.5f) { _roamBest = rd; _roamStuck = 0; }
-            else if ((_roamStuck += World.Dt) > 8f) _roamTo = default;   // упёрся — другая цель
-            if (_roamTo == default || Vector2.Distance(_roamTo, _me.Pos) < 6)
-            {
-                _roamBest = float.MaxValue; _roamStuck = 0;
-                // чередует: окрестности РТ и пляжи, где просыпаются голые
-                if (_rng.NextDouble() < 0.5 && _w.PlayerSpawns.Count > 0)
-                    _roamTo = _w.PlayerSpawns[_rng.Next(_w.PlayerSpawns.Count)] * 0.97f;
-                else
-                {
-                    var m = _w.Monuments[_rng.Next(_w.Monuments.Count)];
-                    var ang = (float)(_rng.NextDouble() * Math.PI * 2);
-                    _roamTo = m.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * (70 + (m.Max - m.Min).Length() * 0.5f);   // дальше от охраны
-                }
-                if (!_w.Terrain.IsLand(_roamTo)) _roamTo *= 0.85f;
-            }
-            Doing = "бродит";
-            if (Hold(Has("weapon_bow") ? "weapon_bow" : "weapon_spear", ref cmd)) { }
-            MoveTo(_roamTo, 4, ref cmd);
-            return true;
         }
 
         void Hunt(Actor prey, ref InputCmd cmd)

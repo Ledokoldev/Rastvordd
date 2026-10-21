@@ -205,7 +205,7 @@ namespace Rastvordd.Sim
                 int bench = 0;
                 foreach (var d in World.Deployables) if (d.Kind == DeployKind.Workbench && d.OwnerId == a.Id) bench = System.Math.Max(bench, System.Math.Max(1, d.Level));
                 string arch = b.Archetype == BotArchetype.Roamer ? "бродяга" : "фермер";
-                list.Add((a.Id, $"{a.Name} · {arch} · {(a.Dead ? "мёртв" : b.Doing)}\n   HP {a.Hp:0} · верстак {bench} · изучено {a.Known.Count}/{Tech.All.Count} · лом {a.Count("scrap")} · металл {a.Count("metal_fragments")} · построек {World.Structures.FindAll(s => s.OwnerId == a.Id).Count}"));
+                list.Add((a.Id, $"{a.Name} · {arch} · цель: {b.GoalName} · {(a.Dead ? "мёртв" : b.Doing)}\n   мысль: {b.LastThought}\n   HP {a.Hp:0} · верстак {bench} · изучено {a.Known.Count}/{Tech.All.Count} · лом {a.Count("scrap")} · металл {a.Count("metal_fragments")} · построек {World.Structures.FindAll(s => s.OwnerId == a.Id).Count}"));
             }
             return list;
         }
@@ -255,11 +255,19 @@ namespace Rastvordd.Sim
                 log($"ящики уровня {tier}: {crates.Count} · пример: {(crates.Count > 0 ? string.Join(", ", crates[0].Items.ConvertAll(s => $"{Items.Name(s.Id)} ×{s.Count}")) : "-")}");
             }
             int shown = World.Milestones.Count;
+            var thoughtsShown = new Dictionary<int, int>();
             for (int t = 0; t < ticks; t++)
             {
                 if (focusId >= 0) _pending[focusId] = InputCmd.Empty;
                 Tick();
                 while (shown < World.Milestones.Count) log("ВЕХА " + World.Milestones[shown++]);
+                foreach (var b in _bots.Values)
+                {
+                    // журнал мыслей: решения директора с причинами
+                    int fresh = b.ThoughtTotal - thoughtsShown.GetValueOrDefault(b.Me.Id);
+                    for (int k = System.Math.Max(0, b.Thoughts.Count - fresh); k < b.Thoughts.Count; k++) log($"МЫСЛЬ {b.Me.Name}: {b.Thoughts[k]}");
+                    thoughtsShown[b.Me.Id] = b.ThoughtTotal;
+                }
                 if (RaidKitAt >= 0 && World.Time >= RaidKitAt)
                 {
                     RaidKitAt = -1;

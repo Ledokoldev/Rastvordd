@@ -298,6 +298,37 @@ namespace Rastvordd.Sim
             return list;
         }
 
+        /// <summary>Ценность одной штуки «в ломах» — для решений ботов: стеш, груз, что подобрать, ради чего рисковать.</summary>
+        public static float Value(string id) => id switch
+        {
+            "wood" or "stone" => 0.05f,
+            "metal_ore" or "sulfur_ore" => 0.15f,
+            "metal_fragments" or "charcoal" => 0.3f,
+            "sulfur" => 0.5f,
+            "cloth" => 0.3f,
+            "scrap" => 1f,
+            "gunpowder" => 1.5f,
+            "ammo_pistol" => 1f,
+            "ammo_rifle" => 2f,
+            "arrow" => 0.3f,
+            "comp_tape" => 4f,
+            "comp_gears" or "comp_spring" or "comp_pipe" => 12f,
+            "keycard" => 40f,
+            "bandage" => 3f,
+            "berries" or "canned" or "water_bottle" => 1f,
+            "weapon_pipe" => 60f,
+            "weapon_ak" => 250f,
+            "weapon_bow" => 25f,
+            "weapon_spear" => 8f,
+            "expl_satchel" => 50f,
+            "expl_c4" => 300f,
+            "expl_fire" => 15f,
+            "lock_code" => 30f,
+            _ when id.StartsWith("deploy_workbench") => 80f,
+            _ when id.StartsWith("tool_") => 5f,
+            _ => 1f,
+        };
+
         /// <summary>Для чего предмет — одна строка в подсказке инвентаря.</summary>
         public static string Desc(string id) => id switch
         {

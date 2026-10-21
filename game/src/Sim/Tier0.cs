@@ -19,6 +19,13 @@ namespace Rastvordd.Sim
         public int ActorId;             // кто сейчас делает (0 — никто)
         public float Progress, _tick;
         public bool Done;
+        /// <summary>Условие (тир 1): null — можно; иначе — что сказать игроку («нужен брелок»).</summary>
+        public Func<Actor, string> Require;
+        /// <summary>Что сделать по окончании (тир 1); иначе — перфокарта или выбитая дверь.</summary>
+        public Action<Actor> OnDone;
+        public bool Repeatable;         // после окончания снова доступно (рычаги, ворота, пробки)
+        public bool KeepProgress;       // отошёл — прогресс не сбрасывается (кабина крана)
+        public float Range = 1.8f;      // насколько можно отойти, не сорвав
     }
 
     /// <summary>РТ тира 0 (docs/design/11-monuments.md): без охраны, перфокарта I за маленьким локальным действием.</summary>
@@ -143,11 +150,13 @@ namespace Rastvordd.Sim
 
         void UseStash(Actor a, Stash s)
         {
-            if (s.Done) { Info(a, s.GivesCard ? "Уже вскрыто — пусто" : "Дверь уже выбита"); return; }
+            if (s.Done) { Info(a, s.GivesCard ? "Уже вскрыто — пусто" : s.Door != null ? "Дверь уже выбита" : "Уже сделано"); return; }
             if (s.ActorId != 0 && s.ActorId != a.Id) { Info(a, "Кто-то уже этим занят"); return; }
             if (s.ActorId == a.Id) return;
+            var why = s.Require?.Invoke(a);
+            if (why != null) { Info(a, why); return; }
             s.ActorId = a.Id;
-            s.Progress = 0;
+            if (!s.KeepProgress) s.Progress = 0;
             Info(a, $"{s.Verb}… не отходи ({s.Seconds:0} с, шумно)");
         }
 
@@ -158,24 +167,8 @@ namespace Rastvordd.Sim
             {
                 foreach (var s in rt.Stashes)
                 {
-                    if (s.ActorId == 0) continue;
-                    var a = Find(s.ActorId);
-                    if (a == null || a.Dead || Vector2.Distance(a.Pos, s.Pos) > 1.8f)
-                    {
-                        if (a != null && !a.Dead) Info(a, "Сорвалось — отошёл");
-                        s.ActorId = 0;
-                        continue;
-                    }
-                    s.Progress += Dt;
-                    if ((s._tick -= Dt) <= 0)
-                    {
-                        s._tick = 0.8f;
-                        Noises.Add(new Noise { Pos = s.Pos, Radius = s.Noise, SourceId = a.Id, Time = Time });
-                        Events.Add(new SimEvent { Kind = SimEventKind.Machine, ActorId = a.Id, Pos = s.Pos, Text = s.Sound });
-                    }
-                    if (s.Progress < s.Seconds) continue;
-                    s.Done = true;
-                    s.ActorId = 0;
+                    var a = StepStash(s);
+                    if (a == null) continue;
                     rt.RefreshLeft = Tier0Rt.RefreshTime;
                     if (s.GivesCard)
                     {
@@ -197,6 +190,40 @@ namespace Rastvordd.Sim
                     ResetTier0(rt);
                 }
             }
+        }
+
+        /// <summary>Шаг «держи E»: шум, прогресс, срыв. Возвращает актёра, если действие только что закончено.</summary>
+        Actor StepStash(Stash s)
+        {
+            if (s.ActorId == 0) return null;
+            var a = Find(s.ActorId);
+            if (a == null || a.Dead || Vector2.Distance(a.Pos, s.Pos) > s.Range)
+            {
+                if (a != null && !a.Dead) Info(a, s.KeepProgress ? "Отошёл — дело стоит, вернись и продолжи" : "Сорвалось — отошёл");
+                s.ActorId = 0;
+                return null;
+            }
+            s.Progress += Dt;
+            if ((s._tick -= Dt) <= 0)
+            {
+                s._tick = 0.8f;
+                Noises.Add(new Noise { Pos = s.Pos, Radius = s.Noise, SourceId = a.Id, Time = Time });
+                Events.Add(new SimEvent { Kind = SimEventKind.Machine, ActorId = a.Id, Pos = s.Pos, Text = s.Sound });
+            }
+            if (s.Progress < s.Seconds) return null;
+            s.ActorId = 0;
+            s.Progress = 0;
+            if (!s.Repeatable) s.Done = true;
+            s.OnDone?.Invoke(a);
+            return s.OnDone == null ? a : null;
+        }
+
+        /// <summary>Все «держи E» готовых РТ (тир 0 и тир 1).</summary>
+        public IEnumerable<Stash> AllStashes()
+        {
+            foreach (var rt in Tier0) foreach (var s in rt.Stashes) yield return s;
+            foreach (var rt in Tier1) foreach (var s in rt.Stashes) yield return s;
+            foreach (var s in DirectorStashes) yield return s;
         }
 
         void ResetTier0(Tier0Rt rt)

@@ -48,6 +48,11 @@ namespace Rastvordd.Client
             MouseFilter = MouseFilterEnum.Ignore;
         }
 
+        /// <summary>Ивенты режиссёра (видны всем) и тепловая карта (только наблюдателю).</summary>
+        public List<DirectorMarker> Markers = new();
+        public List<(SVec pos, float heat)> Hot = new();
+        public float Time;
+
         public void SetState(SVec me, float facing, SVec? home)
         {
             _me = me; _facing = facing; _home = home;
@@ -75,6 +80,23 @@ namespace Rastvordd.Client
                 var at = new Vector2((a.X + b.X) / 2 - sz.X / 2, a.Y - 4);
                 DrawString(font, at + Vector2.One, label, HorizontalAlignment.Left, -1, 13, new Color(0, 0, 0, 0.8f));
                 DrawString(font, at, label, HorizontalAlignment.Left, -1, 13, new Color(0.98f, 0.92f, 0.7f));
+            }
+            // тепловая карта (наблюдатель): красные пятна — где мясорубка
+            foreach (var (hp0, heat) in Hot)
+            {
+                var hp1 = P(hp0);
+                float r = Mathf.Clamp(6 + heat * 0.6f, 6, 40) * side / 900f;
+                DrawCircle(hp1, r, new Color(1f, 0.15f, 0.05f, Mathf.Clamp(0.15f + heat * 0.01f, 0.15f, 0.55f)));
+            }
+            // ивенты режиссёра: сброс груза, закрытый ящик — с таймером
+            foreach (var m in Markers)
+            {
+                var mp0 = P(m.Pos);
+                var col = m.Open ? new Color(0.4f, 1f, 0.45f) : m.Kind == "airdrop" ? new Color(1f, 0.3f, 0.2f) : new Color(1f, 0.85f, 0.25f);
+                DrawCircle(mp0, 9, new Color(0, 0, 0, 0.6f));
+                DrawCircle(mp0, 6, col);
+                string tl = m.Open ? "открыт" : m.Kind == "airdrop" ? (m.Started ? $"{Mathf.CeilToInt(m.StartsAt - Time)} с" : "летит") : m.Started ? $"взлом {Mathf.CeilToInt(m.StartsAt - Time)} с" : "закрыт";
+                DrawString(font, mp0 + new Vector2(11, 5), $"{m.Name} · {tl}", HorizontalAlignment.Left, -1, 13, col);
             }
             if (_home is SVec h)
             {

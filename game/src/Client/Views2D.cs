@@ -839,6 +839,7 @@ namespace Rastvordd.Client
 
     public partial class PickupView2D : Node2D
     {
+        public string Item;   // LocalItem: какой предмет РТ лежит
         public bool Available = true;
         readonly PickupKind _kind;
 
@@ -854,10 +855,15 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            if (_kind is PickupKind.Fuse or PickupKind.PunchCard)
+            if (_kind is PickupKind.Fuse or PickupKind.PunchCard or PickupKind.LocalItem)
             {
-                // пробка Подстанции, перфокарта: маленькие, но с бликом, чтобы их было видно
-                var ft = Available ? Art.Get(_kind == PickupKind.Fuse ? "icons/icon_fuse" : "icons/icon_punchcard_1") : null;
+                // пробка Подстанции, перфокарта, брелок, кабель: маленькие, но с бликом, чтобы их было видно
+                var ft = !Available ? null : _kind switch
+                {
+                    PickupKind.Fuse => Art.Get("icons/icon_fuse"),
+                    PickupKind.PunchCard => Art.Get("icons/icon_punchcard_1"),
+                    _ => Art.Get($"icons/icon_{Item}") ?? Art.Get(Item == "rt_cable" ? "icons/icon_tape" : "icons/icon_keycard"),
+                };
                 if (ft == null) return;
                 DrawSetTransform(new Vector2(0, -2), 0, new Vector2(0.32f, 0.32f));
                 DrawTexture(ft, new Vector2(-ft.GetWidth() / 2, -ft.GetHeight()));

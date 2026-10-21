@@ -13,6 +13,8 @@ namespace Rastvordd.Sim
         public bool Flip;
         public bool Flat;              // декаль на земле (трещины, разметка, лужи): без тени, под всеми объектами
         public float Scale = 1, Rot;   // для декалей: масштаб и поворот (градусы)
+        public bool Pivot;             // стрела крана: вращается вокруг левого края (точка опоры — Pos)
+        public float Lift;             // поднята над землёй, м (стрела крана)
     }
 
     /// <summary>Участок земли другой текстурой (гравий ОРУ, асфальт, кафель в корпусе) — под всеми объектами.</summary>
@@ -33,6 +35,29 @@ namespace Rastvordd.Sim
         public readonly List<MapPatch> Patches = new();
         public readonly List<MapRoof> Roofs = new();
         public readonly List<MapWire> Wires = new();
+        /// <summary>Режиссёр вайпа: фаза, тепловая карта, ивенты, слухи (Director.cs).</summary>
+        public Director Director;
+        /// <summary>«Держи E» ивентов режиссёра (закрытый ящик).</summary>
+        public readonly List<Stash> DirectorStashes = new();
+
+        /// <summary>Лут ивента режиссёра: больше и ценнее, к поздней фазе — взрывчатка (чтобы рейды случались).</summary>
+        internal void FillEventCrate(LootBag bag, int phase)
+        {
+            bag.Items.Clear();
+            bag.Search.Clear();
+            bag.Unlocked = false;
+            bag.Items.Add(new ItemSlot("scrap", Rng.Next(60, 121)));
+            bag.Items.Add(new ItemSlot("comp_gears", Rng.Next(1, 4)));
+            bag.Items.Add(new ItemSlot("comp_spring", Rng.Next(1, 3)));
+            bag.Items.Add(new ItemSlot(phase >= 1 ? "ammo_rifle" : "ammo_pistol", Rng.Next(20, 50)));
+            bag.Items.Add(new ItemSlot("bandage", Rng.Next(2, 5)));
+            if (Rng.NextDouble() < 0.5) bag.Items.Add(new ItemSlot("punchcard_1", 1));
+            if (phase >= 1 && Rng.NextDouble() < 0.4) bag.Items.Add(new ItemSlot("punchcard_2", 1));
+            if (phase >= 1 && Rng.NextDouble() < 0.5) bag.Items.Add(Items.NewSlot("weapon_pipe"));
+            if (phase >= 1) bag.Items.Add(new ItemSlot("gunpowder", Rng.Next(40, 100)));
+            if (phase >= 2 && Rng.NextDouble() < 0.6) bag.Items.Add(Items.NewSlot("expl_satchel"));
+            if (phase >= 2 && Rng.NextDouble() < 0.25) bag.Items.Add(Items.NewSlot("expl_c4"));
+        }
         /// <summary>Готовые РТ (собранные из спрайтов): площадка не заливается бетоном, лес и узлы внутри убираются.</summary>
         public readonly List<Monument> Prefabs = new();
 
@@ -84,7 +109,7 @@ namespace Rastvordd.Sim
         {
             var d = Decor(sprite, p, flip);
             string id = sprite[(sprite.LastIndexOf('/') + 1)..];
-            if (!Foot.TryGetValue(id, out var f) && !Tier0Layouts.Foot.TryGetValue(id, out f)) return d;
+            if (!Foot.TryGetValue(id, out var f) && !Tier0Layouts.Foot.TryGetValue(id, out f) && !Tier1Layouts.Foot.TryGetValue(id, out f)) return d;
             if (f.legs)
             {
                 AddHiddenWall(p.X - f.w / 2, p.Y - f.d, p.X - f.w / 2 + f.d, p.Y, f.h);
@@ -183,6 +208,13 @@ namespace Rastvordd.Sim
                     if (m.Contains(Nodes[i].Pos, 3)) { _nodeGrid.Remove(Nodes[i]); Nodes.RemoveAt(i); }
             foreach (var s in Substations) { s.Relink(this); ResetSubstation(s); }   // состояние РТ не сохраняется: после загрузки — свежая
             foreach (var t in Tier0) ResetTier0(t);
+            foreach (var t in Tier1)
+            {
+                // крейт тира 1 в сохранении — обычная сумка без признака «под перфокарту»: убрать копии, вернуть свой
+                Bags.RemoveAll(b => b != t.Crate && b.IsCrate && (Vector2.Distance(b.Pos, t.CratePos) < 0.6f || Vector2.Distance(b.Pos, t.WagonStart) < 0.6f
+                    || Vector2.Distance(b.Pos, t.ContStart) < 0.6f || Vector2.Distance(b.Pos, t.ContEnd) < 0.6f || t.Capsules.Exists(c => Vector2.Distance(b.Pos, c) < 1.5f)));
+                ResetTier1(t);
+            }
         }
     }
 }

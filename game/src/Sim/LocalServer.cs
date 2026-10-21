@@ -23,7 +23,7 @@ namespace Rastvordd.Sim
     public struct ProjSnap { public int Id; public Vector2 Pos; public Vector2 Dir; public bool Arrow; }
     public struct BagSnap { public int Id; public Vector2 Pos; public bool IsCrate; public bool Empty; public bool Safe; public bool Punch; public bool Unlocked; public int Tier; }
     public struct NodeSnap { public int Id; public NodeKind Kind; public Vector2 Pos; public float Radius; public float Fill; }
-    public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; }
+    public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; public string Item; }
     public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; public int Level; public bool Seen; }
 
     /// <summary>Узел дерева изучения для окна верстака.</summary>
@@ -133,8 +133,15 @@ namespace Rastvordd.Sim
         public int PrefabVersion;         // состояние готовых РТ: роллеты, щитки
         public List<int> GoneWalls = new();
         public List<(int id, string sprite)> DecorSprites = new();
+        public List<(int id, Vector2 pos, float rot)> DecorMoves = new();   // вагон, стрела крана, контейнер
+        public List<DirectorMarker> Markers = new();   // ивенты режиссёра — видны всей карте
+        public List<(int n, string text)> Radio = new();   // последние слухи по радио
+        public List<(Vector2 pos, float heat)> Hot = new();   // тепловая карта — только наблюдателю
+        public int Phase;
         public List<SimEvent> Events = new();
     }
+
+    public struct DirectorMarker { public int Id; public string Kind, Name; public Vector2 Pos, PlaneFrom, PlaneTo; public float StartsAt, EndsAt; public bool Open, Started; }
 
     public struct WallInfo { public Vector2 Min, Max; public float Height; public WallKind Kind; public int Tier; public bool Door; public bool Locked; public int StructId; public int Id; public string Tex; public bool Hidden; }
 
@@ -225,7 +232,7 @@ namespace Rastvordd.Sim
             foreach (var w in World.RemovableWalls)
                 if (!World.Walls.Contains(w))   // поднятая роллета, выбитая дверь — тоже нужны клиенту, чтобы вернуть их при обновлении РТ
                     m.Walls.Add(new WallInfo { Min = w.Wall.Min, Max = w.Wall.Max, Height = w.Wall.Height, Kind = w.Kind, Id = w.Id, Tex = w.Tex });
-            foreach (var d in World.Decors) m.Decors.Add(new MapDecor { Id = d.Id, Sprite = d.Sprite, Pos = d.Pos, Flip = d.Flip, Flat = d.Flat, Scale = d.Scale, Rot = d.Rot });
+            foreach (var d in World.Decors) m.Decors.Add(new MapDecor { Id = d.Id, Sprite = d.Sprite, Pos = d.Pos, Flip = d.Flip, Flat = d.Flat, Scale = d.Scale, Rot = d.Rot, Pivot = d.Pivot, Lift = d.Lift });
             m.Patches.AddRange(World.Patches);
             m.Roofs.AddRange(World.Roofs);
             m.Wires.AddRange(World.Wires);
@@ -645,7 +652,7 @@ namespace Rastvordd.Sim
 
             foreach (var p in World.Pickups)
                 if (Vector2.DistanceSquared(p.Pos, me.Pos) < r2)
-                    snap.Pickups.Add(new PickupSnap { Id = p.Id, Kind = p.Kind, Pos = p.Pos, Available = p.Available });
+                    snap.Pickups.Add(new PickupSnap { Id = p.Id, Kind = p.Kind, Pos = p.Pos, Available = p.Available, Item = p.Item });
 
             // туман войны для построек и установленного (D32): своё видно всегда, чужое — только в обзоре, остальное — как запомнил
             float vr = World.ViewRange(me), vc = World.ViewCone(me);
@@ -673,6 +680,15 @@ namespace Rastvordd.Sim
             snap.PrefabVersion = World.PrefabVersion;
             World.CollectGoneWalls(snap.GoneWalls);
             foreach (var s in World.Substations) snap.DecorSprites.Add((s.Panel.Id, s.Panel.Sprite));
+            foreach (var d in World.MovingDecors) snap.DecorMoves.Add((d.Id, d.Pos, d.Rot));
+            if (World.Director is { } dir)
+            {
+                snap.Phase = dir.Phase;
+                foreach (var ev in dir.Events)
+                    snap.Markers.Add(new DirectorMarker { Id = ev.Id, Kind = ev.Kind, Name = ev.Name, Pos = ev.Pos, PlaneFrom = ev.PlaneFrom, PlaneTo = ev.PlaneTo, StartsAt = ev.StartsAt, EndsAt = ev.EndsAt, Open = ev.Open, Started = ev.Kind == "airdrop" ? ev.Crate != null : ev.StartsAt > 0 });
+                for (int i = System.Math.Max(0, dir.Radio.Count - 6); i < dir.Radio.Count; i++) snap.Radio.Add((dir.Radio[i].n, dir.Radio[i].text));
+                if (me.Spectator) snap.Hot.AddRange(dir.HotSpots(12));
+            }
             var smem = Memory(_structMem, clientId);
             var aliveS = new HashSet<int>();
             foreach (var st in World.Structures)
@@ -799,6 +815,7 @@ namespace Rastvordd.Sim
         string Hint((World.InteractKind kind, object target) it) => it.kind switch
         {
             World.InteractKind.Stash => "[E] " + ((Stash)it.target).Verb,
+            World.InteractKind.Bag when World.Director?.Events.Find(e => e.Crate == it.target) is { } ev && !ev.Open => ev.Kind == "airdrop" ? $"Сброс груза — откроется через {System.MathF.Ceiling(ev.StartsAt - World.Time)} с" : ev.StartsAt > 0 ? $"Закрытый ящик — взлом, {System.MathF.Ceiling(ev.StartsAt - World.Time)} с" : "Закрытый ящик — запусти взлом рядом [E]",
             World.InteractKind.Panel => ((Substation)it.target).Powered ? "Главный щиток — включён" : $"[E] Главный щиток — вставить пробку ({((Substation)it.target).FusesIn}/2)",
             World.InteractKind.Bag when ((LootBag)it.target).Punch && !((LootBag)it.target).Unlocked => "[E] Крейт — перфокарта I",
             World.InteractKind.Bag => ((LootBag)it.target) is var lb && lb.Safe && !lb.Unlocked ? "[E] Сейф — нужна карта доступа" : lb.Safe ? "[E] Открыть сейф" : lb.IsCrate ? "[E] Открыть ящик" : lb.Corpse ? "[E] Обыскать рюкзак" : "[E] Подобрать вещи",
@@ -809,6 +826,7 @@ namespace Rastvordd.Sim
                 PickupKind.Berries => "[E] Собрать ягоды",
                 PickupKind.Fuse => "[E] Взять пробку",
                 PickupKind.PunchCard => "[E] Взять перфокарту I",
+                PickupKind.LocalItem => $"[E] Взять: {Items.Name(((Pickup)it.target).Item)}",
                 _ => "[E] Попить",
             },
             World.InteractKind.Furnace => FurnaceHint((Deployable)it.target),

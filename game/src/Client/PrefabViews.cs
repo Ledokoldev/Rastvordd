@@ -9,7 +9,9 @@ namespace Rastvordd.Client
     public partial class DecorView2D : Node2D
     {
         string _sprite;
-        readonly bool _flip;
+        readonly bool _flip, _pivot;
+        readonly float _lift;
+        float _rot;
         float _alpha = 1;
         Texture2D _tex;
         Rect2 _screen;
@@ -18,6 +20,9 @@ namespace Rastvordd.Client
         {
             Position = Iso.Px(d.Pos);
             _flip = d.Flip;
+            _pivot = d.Pivot;
+            _lift = d.Lift;
+            _rot = d.Rot;
             TextureFilter = TextureFilterEnum.Nearest;
             Material = VisionFx.ObjectMat;
             SetSprite(d.Sprite);
@@ -33,6 +38,18 @@ namespace Rastvordd.Client
             QueueRedraw();
         }
 
+        /// <summary>Подвижное украшение (вагон, стрела крана, контейнер): новое место и поворот из снапшота.</summary>
+        public void MoveTo(System.Numerics.Vector2 pos, float rot)
+        {
+            var p = Iso.Px(pos);
+            if (p.DistanceSquaredTo(Position) < 0.25f && Mathf.Abs(rot - _rot) < 0.2f) return;
+            Position = p;
+            _rot = rot;
+            float w = _tex?.GetWidth() ?? 16, h = _tex?.GetHeight() ?? 16;
+            _screen = new Rect2(Position.X - w / 2, Position.Y - h, w, h);
+            QueueRedraw();
+        }
+
         public void UpdateOcclusion(float dt)
         {
             if (Occlusion.Step(ref _alpha, Occlusion.Covers(_screen, Position.Y), dt)) QueueRedraw();
@@ -41,6 +58,17 @@ namespace Rastvordd.Client
         public override void _Draw()
         {
             if (_tex == null) return;
+            if (_pivot)
+            {
+                // стрела крана: висит на высоте, вращается вокруг левого края (точка опоры), в виде 3/4 — по экрану
+                var at = new Vector2(0, -Iso.H(_lift));
+                float a = Mathf.DegToRad(_rot);
+                var dir = new Vector2(Mathf.Cos(a), Mathf.Sin(a) * 0.8f);
+                DrawSetTransform(at, Mathf.Atan2(dir.Y, dir.X), Vector2.One);
+                DrawTexture(_tex, new Vector2(0, -_tex.GetHeight() / 2f), new Color(1, 1, 1, _alpha));
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                return;
+            }
             if (_flip) DrawSetTransform(Vector2.Zero, 0, new Vector2(-1, 1));
             Shade.Sprite(this, _tex, 1f, 0.32f);
             if (_flip) DrawSetTransform(Vector2.Zero, 0, new Vector2(-1, 1));
@@ -232,6 +260,8 @@ namespace Rastvordd.Client
 
         public void Sync(Snapshot snap)
         {
+            foreach (var (id, pos, rot) in snap.DecorMoves)
+                if (_decors.TryGetValue(id, out var mv)) mv.MoveTo(pos, rot);
             if (snap.PrefabVersion == _version) return;
             _version = snap.PrefabVersion;
             var gone = new HashSet<int>(snap.GoneWalls);

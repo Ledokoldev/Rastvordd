@@ -153,7 +153,7 @@ namespace Rastvordd.Sim
                 NpcHomes[-NpcHomes.Count - 1] = p;   // ключи временные, заменяются при спавне
 
             // малые РТ по острову
-            PlaceSmallMonuments();
+            // старые малые РТ-«коробки» убраны (пользователь: скучные «квадрат в квадрате») — их место заняли готовые РТ тира 0 и 1
 
             // раскладка по биомам: плотность и что встречается
             ScatterByBiome();
@@ -169,6 +169,7 @@ namespace Rastvordd.Sim
             // готовые РТ — в самом конце и своим генератором: остальная раскладка мира (и старые сохранения) не сдвигается
             PlaceSubstation();
             PlaceTier0();
+            PlaceTier1();
         }
 
         // площадь на один объект (м²) и веса: дерево, камень, металл, сера, конопля, ягоды, бочка воды, ящик-укрытие, руины
@@ -439,7 +440,13 @@ namespace Rastvordd.Sim
             a.Hp = a.MaxHp;
             a.Dead = false;
             a.ClearAll();
-            if (NpcKit.TryGetValue(NpcHomes[a.Id], out var kit) && kit == "pipe")
+            if (NpcKit.TryGetValue(NpcHomes[a.Id], out var kit) && kit is "club" or "bow")
+            {
+                // тир 1: сторож с дубиной (копьё) или лучник
+                a.AddSlot(Items.NewSlot(kit == "bow" ? "weapon_bow" : "weapon_spear"));
+                if (kit == "bow") a.Add("arrow", Rng.Next(10, 20));
+            }
+            else if (kit == "pipe")
             {
                 a.AddSlot(Items.NewSlot("weapon_pipe"));   // тир 1: сторож с самопалом, не калаш
                 a.Add("ammo_pistol", Rng.Next(10, 25));
@@ -615,6 +622,9 @@ namespace Rastvordd.Sim
             StepFires();
             StepSubstations();
             StepTier0();
+            StepTier1();
+            foreach (var s in DirectorStashes.ToArray()) StepStash(s);
+            (Director ??= new Director(Seed)).Step(this);
             SimPerf.End("шаг: прочее (печи, РТ, сумки)", t0);
         }
 
@@ -1137,12 +1147,11 @@ namespace Rastvordd.Sim
                 float d = Vector2.Distance(a.Pos, dp.Pos) - dp.Radius + 0.3f;
                 if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, DeployKind.Recycler => InteractKind.Recycler, _ => InteractKind.Workbench }, dp); }
             }
-            foreach (var rt in Tier0)
-                foreach (var st in rt.Stashes)
-                {
-                    float d = Vector2.Distance(a.Pos, st.Pos);
-                    if (!st.Done && d < bestD && ClearLine(a.Pos, st.Pos, null, true)) { bestD = d; best = (InteractKind.Stash, st); }
-                }
+            foreach (var st in AllStashes())
+            {
+                float d = Vector2.Distance(a.Pos, st.Pos);
+                if (!st.Done && d < bestD && ClearLine(a.Pos, st.Pos, null, true)) { bestD = d; best = (InteractKind.Stash, st); }
+            }
             foreach (var s in Substations)
             {
                 float d = Vector2.Distance(a.Pos, s.PanelPos);
@@ -1193,6 +1202,10 @@ namespace Rastvordd.Sim
                 // у живого игрока — окна, боты пользуются быстрыми действиями
                 case InteractKind.Panel: UsePanel(a, (Substation)target); break;
                 case InteractKind.Stash: UseStash(a, (Stash)target); break;
+                case InteractKind.Bag when ((LootBag)target).Punch && !((LootBag)target).Unlocked && Director?.Events.Find(e => e.Crate == target) is { } dev:
+                    Info(a, dev.Kind == "airdrop" ? $"Груз ещё закрыт — {MathF.Ceiling(dev.StartsAt - Time)} с" : dev.StartsAt > 0 ? $"Идёт взлом — {MathF.Ceiling(dev.StartsAt - Time)} с" : "Закрытый ящик: запусти взлом (рядом, держи E)");
+                    break;
+                case InteractKind.Bag when ((LootBag)target).Punch && !((LootBag)target).Unlocked && Tier1.Find(r => r.Crate == target) is { } t1: UseTier1Crate(a, t1); break;
                 case InteractKind.Bag when ((LootBag)target).Punch && !((LootBag)target).Unlocked: UsePunchCrate(a, (LootBag)target); break;
                 case InteractKind.Bag when ((LootBag)target).Safe && !((LootBag)target).Unlocked:
                     if (a.Take("keycard", 1) > 0) { ((LootBag)target).Unlocked = true; Info(a, "Сейф открыт картой доступа"); if (!a.IsBot) OpenUi(a, UiKind.Bag, target); }
@@ -1320,6 +1333,12 @@ namespace Rastvordd.Sim
                 case PickupKind.WaterBarrel:
                     a.Water = MathF.Min(100, a.Water + 40);
                     Info(a, "Напился воды");
+                    break;
+                case PickupKind.LocalItem:
+                    a.Add(p.Item, 1);
+                    p.RespawnLeft = 1e9f;
+                    Events.Add(new SimEvent { Kind = SimEventKind.Gather, ActorId = a.Id, Pos = p.Pos, Value = 1, Text = Items.Name(p.Item) });
+                    Info(a, $"{Items.Name(p.Item)} у тебя ({a.Count(p.Item)})");
                     break;
                 case PickupKind.PunchCard:
                     a.Add("punchcard_1", 1);

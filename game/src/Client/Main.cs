@@ -62,6 +62,8 @@ namespace Rastvordd.Client
         readonly List<WallView2D> _mapWalls = new();
         PrefabLayer _prefab;
         LightingLayer _lighting;
+        DirectorLayer _dirLayer;
+        RadioFeed _radio;
         /// <summary>Отладка (--occl-off): прозрачность только над своим персонажем — как было до D39, для сравнения.</summary>
         bool _occlSelfOnly;
         float _zoom = 2.0f;
@@ -142,7 +144,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("ui")) _uiReq = ((UiOp)int.Parse(a.Substring(2).Split('_')[0]), a.Contains('_') ? a.Substring(a.IndexOf('_') + 1).Replace('~', '#').Replace('^', '>') : null, 0);   // отладка: ui<op>_<арг> (# → ~, > → ^)
                 else if (a == "inv") _invOpen = !_invOpen;
                 else if (a == "steps") GD.Print("steps: " + string.Join(", ", System.Linq.Enumerable.Select(System.Linq.Enumerable.Where(Sfx.Played, kv => kv.Key.StartsWith("steps/")), kv => kv.Key[6..] + "×" + kv.Value)));   // отладка: какие шаги звучали
-                else if (a == "info") GD.Print($"info: {_server.World.LastInfo.GetValueOrDefault(_myId)} | structs {_server.World.Structures.Count} | aim {_autoAim} | me {_server.World.Find(_myId).Pos}" + (_server.World.Substations.Count > 0 ? $" | подстанция: питание {_server.World.Substations[0].Powered}, крейт открыт {_server.World.Substations[0].Crate.Unlocked}, таймер {_server.World.Substations[0].CrateTimer:0}" : ""));   // отладка: последнее сообщение
+                else if (a == "info") GD.Print($"info: {_server.World.LastInfo.GetValueOrDefault(_myId)} | structs {_server.World.Structures.Count} | aim {_autoAim} | me {_server.World.Find(_myId).Pos}" + (_server.World.Substations.Count > 0 ? $" | тир1: {string.Join(", ", _server.World.Tier1.ConvertAll(r => $"{r.Key} готов={r.Ready} кабели={r.CablesIn} вагон={r.WagonT:0.00} кран={(r.Cabin != null ? r.Cabin.Progress : 0):0} крейт={(r.Crate.Unlocked ? "открыт" : "закрыт")}@{r.Crate.Pos.X:0};{r.Crate.Pos.Y:0}"))} | подстанция: питание {_server.World.Substations[0].Powered}, крейт открыт {_server.World.Substations[0].Crate.Unlocked}, таймер {_server.World.Substations[0].CrateTimer:0}" : ""));   // отладка: последнее сообщение
                 else if (a == "map") { _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); }
                 else if (a == "crouch") _forceCrouch = true;
                 else if (a == "save") SaveWorld();
@@ -152,6 +154,12 @@ namespace Rastvordd.Client
                 {
                     var p = a.Substring(2).Split(';');
                     _forceWalk = new SVec(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture));
+                }
+                else if (a.StartsWith("t1tp"))
+                {
+                    // отладка: перенестись на РТ тира 1: t1tp<номер>;x;y от её угла
+                    var p = a.Substring(4).Split(';');
+                    _server.World.Find(_myId).Pos = _server.World.Tier1[int.Parse(p[0])].At(float.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[2], System.Globalization.CultureInfo.InvariantCulture));
                 }
                 else if (a.StartsWith("subtp"))
                 {
@@ -322,6 +330,13 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     var sub = _server.World.Substations[0];
                     _server.World.Find(_myId).Pos = sub.At(float.Parse(p[0], inv), float.Parse(p[1], inv));
                 }
+                else if (arg.StartsWith("--att1="))
+                {
+                    // отладка: встать на РТ тира 1 номер N в точке (x, y) от её угла: --att1=0,40,30
+                    var p = arg.Substring(7).Split(',');
+                    var rt = _server.World.Tier1[int.Parse(p[0])];
+                    _server.World.Find(_myId).Pos = rt.At(float.Parse(p[1], inv), float.Parse(p[2], inv));
+                }
                 else if (arg.StartsWith("--att0="))
                 {
                     // отладка: встать на РТ тира 0 номер N в точке (x, y) от её угла: --att0=0,40,30
@@ -459,6 +474,8 @@ else if (arg == "--atcrate")
         {
             _prefab = new PrefabLayer(map, _world, this);
             _lighting = new LightingLayer(map, _world);
+            _dirLayer = new DirectorLayer();
+            AddChild(_dirLayer);
             foreach (var w in map.Walls)
             {
                 if (w.Hidden) continue;   // хитбокс пропса РТ — рисуется спрайтом
@@ -586,6 +603,10 @@ else if (arg == "--atcrate")
                 foreach (var (id, _, line) in _server.BotShortLines())
                     if (n++ < 24) sb.Append(id == _followId ? " ▶ " : "    ").Append(line).Append('\n');
             }
+            sb.Append($"\nРЕЖИССЁР · фаза {(_cur.Phase == 0 ? "ранняя" : _cur.Phase == 1 ? "средняя" : "поздняя")}");
+            foreach (var m in _cur.Markers) sb.Append($" · {m.Name}{(m.Open ? " (открыт)" : "")}");
+            if (_cur.Hot.Count > 0) sb.Append($" · самое горячее место: жар {_cur.Hot[0].heat:0}");
+            sb.Append('\n');
             var ms = _server.World.Milestones;
             if (ms.Count > 0)
             {
@@ -874,6 +895,13 @@ else if (arg == "--atcrate")
                             case "crate": Sfx.Play("craft_done", Iso.Px(e.Pos), 2, 40, 0f); Flash(e.Pos, new Color(0.4f, 1f, 0.5f), 14, 0.5f, true); break;
                             case "pry": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), -2, 25, 0.15f); break;
                             case "glass": Sfx.Play("glass_break", Iso.Px(e.Pos), -4, 30, 0.12f); break;
+ 
+                            case "beep": Sfx.Play("c4_beep", Iso.Px(e.Pos), 4, 30, 0f); Flash(e.Pos, new Color(1f, 0.3f, 0.2f), 5, 0.2f, true); break;
+                            case "gate": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), 2, 40, 0.05f); break;
+                            case "alarm": Sfx.Play("c4_beep", Iso.Px(e.Pos), 8, 70, 0.3f); Flash(e.Pos, (int)(_server.World.Time * 2) % 2 == 0 ? new Color(1f, 0.6f, 0.1f) : new Color(1f, 0.2f, 0.1f), 10, 0.5f, true); break;
+                            case "pipe": Sfx.Play("fuse_hiss", Iso.Px(e.Pos), 0, 45, 0.15f); break;
+                            case "rail": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), 0, 55, 0.2f); break;
+                            case "crane": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), -6, 90, 0.3f, 0.6f); break;
                             case "bang": Sfx.Play("hit_wood", Iso.Px(e.Pos), 2, 40, 0.1f); _shake = Mathf.Min(0.6f, _shake + 0.15f); break;
                         }
                         break;
@@ -1176,6 +1204,7 @@ else if (arg == "--atcrate")
                 }
                 v.Visible = true;
                 if (v.Empty != b.Empty || v.Unlocked != b.Unlocked) { v.Empty = b.Empty; v.Unlocked = b.Unlocked; v.QueueRedraw(); }
+                v.Position = Iso.Px(b.Pos);   // крейт едет в вагоне, висит на кране, приходит капсулой
             }
             foreach (var kv in _bagViews)
                 if (!seen.Contains(kv.Key)) kv.Value.Visible = false;
@@ -1247,7 +1276,7 @@ else if (arg == "--atcrate")
                 seen.Add(p.Id);
                 if (!_pickupViews.TryGetValue(p.Id, out var v))
                 {
-                    v = new PickupView2D(p.Kind, TerrainView.BiomeAt(_map, p.Pos)) { Position = Iso.Px(p.Pos) };
+                    v = new PickupView2D(p.Kind, TerrainView.BiomeAt(_map, p.Pos)) { Position = Iso.Px(p.Pos), Item = p.Item };
                     _world.AddChild(v);
                     _pickupViews[p.Id] = v;
                 }
@@ -1334,6 +1363,16 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             foreach (var w in _mapWalls) w.UpdateOcclusion(dt);
             _prefab.Sync(_cur);
             _prefab.Update(_selfPx, dt);
+            _dirLayer.Sync(_cur.Markers, _cur.Time);
+            if (_radio == null)
+            {
+                _radio = new RadioFeed { AnchorLeft = 0, AnchorRight = 1, AnchorTop = 1, AnchorBottom = 1, OffsetTop = -175, OffsetBottom = -100 };   // над поясом: не мешает панели наблюдателя
+                _hud.AddChild(_radio);
+            }
+            _radio.Sync(_cur.Radio, dt);
+            _mapView.Markers = _cur.Markers;
+            _mapView.Hot = _cur.Hot.ConvertAll(h => (h.pos, h.heat));
+            _mapView.Time = _cur.Time;
             if (_bghost == null) { _bghost = new BuildGhost2D(); _world.AddChild(_bghost); }
             _bghost.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_hud.CraftOpen;
             if (_bghost.Visible) { _bghost.Set(_cur.Self.GhostPiece, _cur.Self.GhostPoly, _cur.Self.GhostA, _cur.Self.GhostB, _cur.Self.BuildOk); _bghost.SetZone(_cur.Self.HasZone, _cur.Self.ZoneCell); }

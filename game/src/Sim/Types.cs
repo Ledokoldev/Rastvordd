@@ -154,6 +154,8 @@ namespace Rastvordd.Sim
             Add("punchcard_1", "Перфокарта I", ItemCategory.Component);
             Add("punchcard_2", "Перфокарта II", ItemCategory.Component);
             Add("fuse", "Пробка", ItemCategory.Component);
+            Add("rt_keyfob", "Брелок от ворот", ItemCategory.Component);
+            Add("rt_cable", "Кабель-перемычка", ItemCategory.Component);
             Add("scrap", "Металлолом", ItemCategory.Component);
 
             // патроны
@@ -382,6 +384,8 @@ namespace Rastvordd.Sim
             "punchcard_1" => "Открывает крейт РТ тира 1 (Подстанция). Тратится",
             "punchcard_2" => "Открывает крейт РТ тира 2. Тратится",
             "fuse" => "Пробка Подстанции: вставь в главный щиток. За забор не вынести",
+            "rt_keyfob" => "Брелок от гаражных ворот: жми у гаражей — нужные ворота запищат. Из Гаражей не вынести",
+            "rt_cable" => "Перемычка для кросса АТС. Из АТС не вынести",
             _ => "",
         };
 
@@ -677,7 +681,7 @@ namespace Rastvordd.Sim
         };
     }
 
-    public enum PickupKind { Hemp, Berries, WaterBarrel, Fuse, PunchCard }
+    public enum PickupKind { Hemp, Berries, WaterBarrel, Fuse, PunchCard, LocalItem }
 
     /// <summary>То, что собирают руками по E: конопля, ягоды, бочка с водой.</summary>
     public sealed class Pickup
@@ -686,6 +690,7 @@ namespace Rastvordd.Sim
         public PickupKind Kind;
         public Vector2 Pos;
         public float RespawnLeft;       // > 0 — уже собрано, ждём
+        public string Item;             // LocalItem: предмет РТ (брелок, кабель) — живёт только на своей РТ
         public bool Available => RespawnLeft <= 0;
     }
 

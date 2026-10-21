@@ -92,7 +92,18 @@ namespace Rastvordd.Sim
         {
             var d = p - _me.Pos;
             if (d.Length() <= tol) return true;
-            cmd.Move = d.Length() < 1.2f ? Vector2.Normalize(d) : Avoid(Vector2.Normalize(d));   // вблизи цели — без обходов, иначе крутится
+            var want = Vector2.Normalize(d);
+            // РТ с охраной обходим стороной, если цель не на самом РТ
+            foreach (var m in _w.Monuments)
+            {
+                if (m.Contains(p, 5)) continue;
+                var off = _me.Pos - m.Center;
+                float r = (m.Max - m.Min).Length() * 0.5f + 45;
+                float dist = off.Length();
+                if (dist < r && dist > 0.1f) want += off / dist * (r - dist) / r * 2.5f;
+            }
+            if (want.LengthSquared() > 0.0001f) want = Vector2.Normalize(want);
+            cmd.Move = d.Length() < 1.2f ? Vector2.Normalize(d) : Avoid(want);   // вблизи цели — без обходов, иначе крутится
             cmd.Aim = p;
             return false;
         }

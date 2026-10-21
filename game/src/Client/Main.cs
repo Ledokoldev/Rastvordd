@@ -15,6 +15,7 @@ namespace Rastvordd.Client
         LocalServer _server;
         MapInfo _map;
         DecalLayer _decals;
+        FootstepLoop _steps;
         VisionRays _rays;
         readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
@@ -94,6 +95,8 @@ namespace Rastvordd.Client
             AddChild(flatDecals);
             _decals = new DecalLayer(_map, flatDecals, _world);
             Sfx.Init(_world);
+            Tuning.Load();
+            _steps = new FootstepLoop(this);
             _ambient = new Ambient(this, _map);
             _daylight = new CanvasModulate();
             AddChild(_daylight);
@@ -198,6 +201,10 @@ namespace Rastvordd.Client
                     case Key.Key6: _slot = 5; break;
                     case Key.F: _eatEdge = true; break;
                     case Key.N: _timeEdge = true; break;
+                    case Key.F1:
+                        _hud.ToggleAdmin();
+                        Input.MouseMode = _hud.AdminOpen || _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
+                        break;
                     case Key.F9: _debugEdge = true; break;
                     case Key.Q:
                         _hud.ToggleCraft();
@@ -228,7 +235,7 @@ namespace Rastvordd.Client
             {
                 Move = move,
                 Aim = _aim,
-                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
+                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
                 Eat = _eatEdge,
                 DebugKit = _debugEdge,
                 Craft = _craftReq,
@@ -332,8 +339,12 @@ namespace Rastvordd.Client
                 {
                     case SimEventKind.Shot:
                         if (e.Text != "weapon_bow") Flash(e.Pos + e.Dir * 0.3f, new Color(1, 0.8f, 0.4f), 7, 0.06f, true);
-                        Sfx.Play(e.Text == "weapon_bow" ? "shot_bow" : e.Text == "weapon_ak" ? "shot_ak" : "shot_pipe", Iso.Px(e.Pos),
-                                 e.Text == "weapon_bow" ? -4 : 0, e.Text == "weapon_bow" ? 25 : 90, 0.06f);
+                        // настоящий сэмпл выстрела для всего огнестрела (самопал — чуть выше и тише); каждый доигрывает до конца
+                        if (e.Text == "weapon_bow") Sfx.Play("shot_bow", Iso.Px(e.Pos), -4, 25, 0.06f);
+                        else Sfx.Play("shot_ak", Iso.Px(e.Pos), e.Text == "weapon_ak" ? 0 : -3, 120, 0.03f, e.Text == "weapon_ak" ? 1f : 1.12f);
+                        break;
+                    case SimEventKind.Reload:
+                        Sfx.Play("reload_ak", Iso.Px(e.Pos), -2, 25, 0.02f);
                         break;
                     case SimEventKind.Swing:
                         if (_actorViews.TryGetValue(e.ActorId, out var swinger)) swinger.StartSwing();
@@ -405,6 +416,17 @@ namespace Rastvordd.Client
             _stepAcc[id] = acc;
         }
 
+        StepSurface SurfaceAt(SVec p)
+        {
+            if (p.X > 4 && p.X < 36 && p.Y > -36 && p.Y < -4) return StepSurface.Concrete;   // площадка РТ
+            return TerrainView.BiomeAt(_map, p) switch
+            {
+                Biome.Tundra => StepSurface.Snow,
+                Biome.Grassland or Biome.Forest or Biome.Swamp => StepSurface.Grass,
+                _ => StepSurface.None,
+            };
+        }
+
         void FloatText(SVec pos, string text, Color c)
         {
             var t = new FloatText2D { Position = Iso.Px(pos), Text = text, Color = c, ZIndex = 5 };
@@ -454,7 +476,14 @@ namespace Rastvordd.Client
                     _selfPx = Iso.Px(pos);
                 }
                 view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId, a.Crouching);
-                if (!a.Dead) Footstep(a.Id, pos, speed, dt, a.Crouching);
+                if (a.Id == _myId)
+                {
+                    // свои шаги — непрерывная запись по поверхности; на песке и пр. — старые короткие
+                    var surf = a.Dead ? StepSurface.None : SurfaceAt(pos);
+                    _steps.Update(surf, a.Dead ? 0 : speed, dt);
+                    if (!a.Dead && surf == StepSurface.None) Footstep(a.Id, pos, speed, dt, a.Crouching);
+                }
+                else if (!a.Dead) Footstep(a.Id, pos, speed, dt, a.Crouching);
             }
             foreach (var kv in _actorViews)
                 if (!seen.Contains(kv.Key)) kv.Value.Visible = false;

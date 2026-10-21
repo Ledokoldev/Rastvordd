@@ -18,14 +18,16 @@ namespace Rastvordd.Client
         public static AudioStream Get(string name)
         {
             if (Cache.TryGetValue(name, out var s)) return s;
+            // сначала настоящие сэмплы (audio/real/*.mp3), потом синтезированные заглушки
+            var real = $"res://audio/real/{name}.mp3";
             var res = $"res://audio/{name}.wav";
-            s = ResourceLoader.Exists(res) ? GD.Load<AudioStream>(res) : null;
+            s = ResourceLoader.Exists(real) ? GD.Load<AudioStream>(real) : ResourceLoader.Exists(res) ? GD.Load<AudioStream>(res) : null;
             Cache[name] = s;
             return s;
         }
 
         /// <param name="hearM">Дальше этого расстояния (м) не слышно.</param>
-        public static void Play(string name, Vector2 posPx, float volumeDb = 0, float hearM = 40, float pitchVar = 0.08f)
+        public static void Play(string name, Vector2 posPx, float volumeDb = 0, float hearM = 40, float pitchVar = 0.08f, float basePitch = 1f)
         {
             var s = Get(name);
             if (s == null || _parent == null) return;
@@ -33,7 +35,7 @@ namespace Rastvordd.Client
             {
                 Stream = s, Position = posPx, VolumeDb = volumeDb,
                 MaxDistance = hearM * Iso.PPM, Attenuation = 1.6f,
-                PitchScale = 1f + Rng.RandfRange(-pitchVar, pitchVar),
+                PitchScale = basePitch * (1f + Rng.RandfRange(-pitchVar, pitchVar)),
             };
             _parent.AddChild(p);
             p.Finished += p.QueueFree;

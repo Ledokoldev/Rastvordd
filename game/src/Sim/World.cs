@@ -642,6 +642,7 @@ namespace Rastvordd.Sim
             else if (cmd.Reload && w.Ammo < wd.Magazine && a.Count(wd.AmmoId) > 0)
             {
                 w.ReloadLeft = wd.ReloadTime;
+                Events.Add(new SimEvent { Kind = SimEventKind.Reload, ActorId = a.Id, Pos = a.Pos, Text = wd.Id });
             }
 
             trigger = wd.Auto ? cmd.Fire : cmd.Fire && !a.FireHeldLastTick;
@@ -650,7 +651,11 @@ namespace Rastvordd.Sim
 
             if (w.Ammo <= 0)
             {
-                if (a.Count(wd.AmmoId) > 0) w.ReloadLeft = wd.ReloadTime;
+                if (a.Count(wd.AmmoId) > 0)
+                {
+                    w.ReloadLeft = wd.ReloadTime;
+                    Events.Add(new SimEvent { Kind = SimEventKind.Reload, ActorId = a.Id, Pos = a.Pos, Text = wd.Id });
+                }
                 return;
             }
 

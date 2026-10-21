@@ -22,6 +22,46 @@ namespace Rastvordd.Client
 
         public Crosshair Crosshair { get; private set; }
         public bool CraftOpen => _craftPanel.Visible;
+        PanelContainer _adminPanel;
+        public bool AdminOpen => _adminPanel != null && _adminPanel.Visible;
+
+        /// <summary>Админка (F1): подстройки, которые нужно подбирать на слух/глаз. Сохраняются сразу.</summary>
+        void BuildAdmin()
+        {
+            _adminPanel = new PanelContainer { Visible = false };
+            AddChild(_adminPanel);
+            var box = new VBoxContainer();
+            box.AddThemeConstantOverride("separation", 6);
+            _adminPanel.AddChild(box);
+            var title = new Label { Text = "АДМИНКА  (F1 — закрыть)" };
+            title.AddThemeFontSizeOverride("font_size", 18);
+            box.AddChild(title);
+
+            void Slider(string name, float min, float max, float step, System.Func<float> get, System.Action<float> set, string fmt)
+            {
+                var row = new HBoxContainer();
+                row.AddThemeConstantOverride("separation", 10);
+                var label = new Label { Text = name, CustomMinimumSize = new Vector2(230, 0) };
+                var value = new Label { CustomMinimumSize = new Vector2(70, 0), Text = get().ToString(fmt) };
+                var s = new HSlider { MinValue = min, MaxValue = max, Step = step, Value = get(), CustomMinimumSize = new Vector2(260, 24), FocusMode = Control.FocusModeEnum.None };
+                s.ValueChanged += v => { set((float)v); value.Text = ((float)v).ToString(fmt); Tuning.Save(); };
+                row.AddChild(label);
+                row.AddChild(s);
+                row.AddChild(value);
+                box.AddChild(row);
+            }
+
+            Slider("Скорость шагов: бетон", 0.4f, 1.8f, 0.01f, () => Tuning.StepsConcrete, v => Tuning.StepsConcrete = v, "0.00");
+            Slider("Скорость шагов: трава", 0.4f, 1.8f, 0.01f, () => Tuning.StepsGrass, v => Tuning.StepsGrass = v, "0.00");
+            Slider("Скорость шагов: снег", 0.4f, 1.8f, 0.01f, () => Tuning.StepsSnow, v => Tuning.StepsSnow = v, "0.00");
+            Slider("Громкость шагов, дБ", -30f, 6f, 0.5f, () => Tuning.StepsVolumeDb, v => Tuning.StepsVolumeDb = v, "0.0");
+            var hint = new Label { Text = "1.00 = как записано при обычном шаге. Присед и спринт меняют темп сами." };
+            hint.AddThemeFontSizeOverride("font_size", 13);
+            hint.AddThemeColorOverride("font_color", new Color(1, 1, 1, 0.6f));
+            box.AddChild(hint);
+        }
+
+        public void ToggleAdmin() => _adminPanel.Visible = !_adminPanel.Visible;
         public event Action<int> CraftRequested;
 
         const string VisionShader = @"
@@ -78,6 +118,7 @@ void fragment() {
             _toastLabel.HorizontalAlignment = HorizontalAlignment.Center;
 
             BuildBelt();
+            BuildAdmin();
 
             _invPanel = new PanelContainer { Visible = false, MouseFilter = Control.MouseFilterEnum.Ignore };
             AddChild(_invPanel);
@@ -296,6 +337,7 @@ void fragment() {
 
             var vs = GetViewport().GetVisibleRect().Size;
             Place(_ammoLabel, vs, 1, 1, new Vector2(-20, -20));
+            if (_adminPanel.Visible) Place(_adminPanel, vs, 0.5f, 0.3f, Vector2.Zero);
             Place(_belt, vs, 0.5f, 1, new Vector2(0, -16));
             Place(_promptLabel, vs, 0.5f, 1, new Vector2(0, -90));
             Place(_toastLabel, vs, 0.5f, 0, new Vector2(0, 90));

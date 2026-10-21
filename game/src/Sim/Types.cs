@@ -391,7 +391,7 @@ namespace Rastvordd.Sim
         public bool Empty => Items.Count == 0;
     }
 
-    public enum SimEventKind { Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted }
+    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted }
 
     public struct SimEvent
     {

@@ -277,9 +277,9 @@ namespace Rastvordd.Sim
 
         void AddPickup(PickupKind kind, Vector2 p) => Pickups.Add(new Pickup { Id = NextId(), Kind = kind, Pos = p });
 
-        void AddCrate(Vector2 pos)
+        void AddCrate(Vector2 pos, int tier = 2)
         {
-            var bag = new LootBag { Id = NextId(), Pos = pos, IsCrate = true };
+            var bag = new LootBag { Id = NextId(), Pos = pos, IsCrate = true, Tier = tier };
             FillCrate(bag);
             Bags.Add(bag);
         }
@@ -291,17 +291,41 @@ namespace Rastvordd.Sim
             {
                 if (Rng.NextDouble() < chance) bag.Items.Add(new ItemSlot(id, Rng.Next(min, max + 1)));
             }
-            Maybe(0.4, "ammo_rifle", 15, 40);
-            Maybe(0.5, "ammo_pistol", 10, 30);
-            Maybe(0.8, "scrap", 10, 30);
-            Maybe(0.4, "bandage", 1, 3);
-            Maybe(0.5, "metal_fragments", 20, 60);
-            Maybe(0.35, "gunpowder", 10, 30);
-            Maybe(0.4, "canned", 1, 2);
-            Maybe(0.4, "water_bottle", 1, 2);
-            Maybe(0.3, "cloth", 10, 30);
-            if (Rng.NextDouble() < 0.12) bag.Items.Add(Items.NewSlot("weapon_pipe"));
-            if (Rng.NextDouble() < 0.08) bag.Items.Add(Items.NewSlot("weapon_ak"));
+            // уровень по карточкам Астры: без охраны — бытовое, малая охрана — компоненты и патроны, склад — оружие
+            switch (bag.Tier)
+            {
+                case 0:
+                    Maybe(0.8, "scrap", 5, 15);
+                    Maybe(0.5, "cloth", 10, 25);
+                    Maybe(0.5, "canned", 1, 2);
+                    Maybe(0.5, "water_bottle", 1, 2);
+                    Maybe(0.35, "bandage", 1, 2);
+                    Maybe(0.3, "metal_fragments", 10, 30);
+                    Maybe(0.2, "ammo_pistol", 5, 15);
+                    break;
+                case 1:
+                    Maybe(0.85, "scrap", 10, 25);
+                    Maybe(0.6, "metal_fragments", 25, 70);
+                    Maybe(0.45, "gunpowder", 15, 35);
+                    Maybe(0.45, "ammo_pistol", 10, 30);
+                    Maybe(0.3, "ammo_rifle", 10, 25);
+                    Maybe(0.4, "bandage", 1, 3);
+                    Maybe(0.3, "canned", 1, 2);
+                    if (Rng.NextDouble() < 0.15) bag.Items.Add(Items.NewSlot("weapon_pipe"));
+                    if (Rng.NextDouble() < 0.12) bag.Items.Add(Items.NewSlot("lock_code"));
+                    break;
+                default:
+                    Maybe(0.5, "ammo_rifle", 20, 45);
+                    Maybe(0.5, "ammo_pistol", 10, 30);
+                    Maybe(0.85, "scrap", 20, 40);
+                    Maybe(0.5, "bandage", 2, 4);
+                    Maybe(0.55, "metal_fragments", 40, 90);
+                    Maybe(0.45, "gunpowder", 25, 50);
+                    if (Rng.NextDouble() < 0.18) bag.Items.Add(Items.NewSlot("weapon_pipe"));
+                    if (Rng.NextDouble() < 0.12) bag.Items.Add(Items.NewSlot("weapon_ak"));
+                    if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot("expl_satchel"));
+                    break;
+            }
             if (bag.Empty) bag.Items.Add(new ItemSlot("scrap", 10));
         }
 

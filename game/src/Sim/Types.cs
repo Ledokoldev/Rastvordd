@@ -472,6 +472,7 @@ namespace Rastvordd.Sim
         public int Id;
         public Vector2 Pos;
         public bool IsCrate;            // ящик на РТ (респавнится), иначе сумка с трупа
+        public int Tier = 2;            // уровень лута ящика: 0 — без охраны, 1 — малая охрана, 2 — крупный РТ
         public float Despawn;           // для сумок
         public float RespawnLeft;       // для ящиков
         public readonly List<ItemSlot> Items = new();

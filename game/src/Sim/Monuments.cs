@@ -113,9 +113,10 @@ namespace Rastvordd.Sim
             }
 
             // ящики: первый всегда в постройке, остальные во дворе
-            AddCrate((b0 + b1) * 0.5f);
+            int tier = guards == 0 ? 0 : 1;   // без охраны — бытовой лут, с охраной — получше
+            AddCrate((b0 + b1) * 0.5f, tier);
             for (int i = 1; i < crates; i++)
-                AddCrate(new Vector2(Range(min.X + 3, max.X - 3), Range(c.Y + 2, max.Y - 3)));
+                AddCrate(new Vector2(Range(min.X + 3, max.X - 3), Range(c.Y + 2, max.Y - 3)), tier);
             if (Rng.NextDouble() < 0.7) AddPickup(PickupKind.WaterBarrel, new Vector2(max.X - 3, min.Y + 3));
 
             // охрана: в постройке и во дворе

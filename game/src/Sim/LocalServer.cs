@@ -195,6 +195,11 @@ namespace Rastvordd.Sim
         public void FastForward(float seconds, System.Action<string> log, int focusId = -1)
         {
             int ticks = (int)(seconds / World.Dt);
+            foreach (var tier in new[] { 0, 1, 2 })
+            {
+                var crates = World.Bags.FindAll(b => b.IsCrate && b.Tier == tier);
+                log($"ящики уровня {tier}: {crates.Count} · пример: {(crates.Count > 0 ? string.Join(", ", crates[0].Items.ConvertAll(s => $"{Items.Name(s.Id)} ×{s.Count}")) : "-")}");
+            }
             for (int t = 0; t < ticks; t++)
             {
                 if (focusId >= 0) _pending[focusId] = InputCmd.Empty;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -56,6 +56,32 @@ namespace Rastvordd.Sim
         public readonly TerrainMap Terrain;
         readonly List<(NodeKind kind, float left)> _nodeRespawns = new();
 
+        // пространственные сетки: проверки идут по соседним клеткам, а не по всей карте
+        const float GridCell = 8f;
+        readonly SpatialHash<MapWall> _wallGrid = new(GridCell);
+        readonly SpatialHash<ResourceNode> _nodeGrid = new(GridCell);
+        readonly SpatialHash<Deployable> _deployGrid = new(GridCell);
+        readonly List<MapWall> _qWalls = new();
+        readonly List<ResourceNode> _qNodes = new();
+        readonly List<Deployable> _qDeploys = new();
+
+        List<MapWall> WallsNear(Vector2 c, float r) => _wallGrid.QueryCircle(c, r, _qWalls);
+        List<ResourceNode> NodesNear(Vector2 c, float r) => _nodeGrid.QueryCircle(c, r + 1f, _qNodes);
+        List<Deployable> DeploysNear(Vector2 c, float r) => _deployGrid.QueryCircle(c, r + 1f, _qDeploys);
+        List<MapWall> WallsAlong(Vector2 a, Vector2 b) => _wallGrid.QuerySegment(a, b, _qWalls);
+        List<ResourceNode> NodesAlong(Vector2 a, Vector2 b) => _nodeGrid.QuerySegment(a, b, _qNodes);
+        List<Deployable> DeploysAlong(Vector2 a, Vector2 b) => _deployGrid.QuerySegment(a, b, _qDeploys);
+
+        /// <summary>Узлы и постройки в радиусе (для снапшотов) — через сетку, в свой список.</summary>
+        public List<ResourceNode> NodesInRadius(Vector2 c, float r, List<ResourceNode> into) => _nodeGrid.QueryCircle(c, r, into);
+        public List<Deployable> DeploysInRadius(Vector2 c, float r, List<Deployable> into) => _deployGrid.QueryCircle(c, r, into);
+
+        void AddDeployable(Deployable d)
+        {
+            Deployables.Add(d);
+            _deployGrid.Insert(d, d.Pos - new Vector2(d.Radius), d.Pos + new Vector2(d.Radius));
+        }
+
         int _nextId = 1;
 
         public World(int seed)
@@ -74,7 +100,9 @@ namespace Rastvordd.Sim
         {
             var min = new Vector2(MathF.Min(x1, x2), MathF.Min(y1, y2));
             var max = new Vector2(MathF.Max(x1, x2), MathF.Max(y1, y2));
-            Walls.Add(new MapWall { Wall = new Wall(min, max, h), Kind = kind });
+            var w = new MapWall { Wall = new Wall(min, max, h), Kind = kind };
+            Walls.Add(w);
+            _wallGrid.Insert(w, min, max);
         }
 
         static bool InMonument(Vector2 p) => p.X > 2 && p.X < 38 && p.Y > -38 && p.Y < 2;
@@ -213,10 +241,10 @@ namespace Rastvordd.Sim
         public bool IsFree(Vector2 p, float r)
         {
             if (!Terrain.IsLand(p)) return false;
-            foreach (var w in Walls)
+            foreach (var w in WallsNear(p, r))
                 if (Vector2.Distance(Vector2.Clamp(p, w.Wall.Min, w.Wall.Max), p) < r) return false;
-            foreach (var n in Nodes) if (Vector2.Distance(n.Pos, p) < n.Radius + r) return false;
-            foreach (var d in Deployables) if (Vector2.Distance(d.Pos, p) < d.Radius + r) return false;
+            foreach (var n in NodesNear(p, r)) if (Vector2.Distance(n.Pos, p) < n.Radius + r) return false;
+            foreach (var d in DeploysNear(p, r)) if (Vector2.Distance(d.Pos, p) < d.Radius + r) return false;
             foreach (var pk in Pickups) if (Vector2.Distance(pk.Pos, p) < r) return false;
             foreach (var a in Actors) if (!a.Dead && Vector2.Distance(a.Pos, p) < a.Radius + r) return false;
             return true;
@@ -231,12 +259,14 @@ namespace Rastvordd.Sim
                 NodeKind.Metal => 90,
                 _ => 60,
             };
-            Nodes.Add(new ResourceNode
+            var node = new ResourceNode
             {
                 Id = NextId(), Kind = kind, Pos = p,
                 Radius = kind == NodeKind.Tree ? Range(0.35f, 0.5f) : 0.7f,
                 Amount = amount, MaxAmount = amount,
-            });
+            };
+            Nodes.Add(node);
+            _nodeGrid.Insert(node, p - new Vector2(node.Radius), p + new Vector2(node.Radius));
         }
 
         void AddPickup(PickupKind kind, Vector2 p) => Pickups.Add(new Pickup { Id = NextId(), Kind = kind, Pos = p });
@@ -351,9 +381,9 @@ namespace Rastvordd.Sim
 
         public bool HasLineOfSight(Vector2 a, Vector2 b)
         {
-            foreach (var w in Walls)
+            foreach (var w in WallsAlong(a, b))
                 if (w.Wall.BlocksVision && Geo.SegmentAabb(a, b, w.Wall.Min, w.Wall.Max, out _)) return false;
-            foreach (var n in Nodes)
+            foreach (var n in NodesAlong(a, b))
                 if (n.BlocksVision && Geo.SegmentCircle(a, b, n.Pos, n.Radius * 0.9f, out _)) return false;
             return true;
         }
@@ -387,7 +417,7 @@ namespace Rastvordd.Sim
         {
             if (!CanSee(viewer, target.Pos, range, coneDeg)) return false;
             if (!target.Crouching || Vector2.Distance(viewer.Pos, target.Pos) < 2.5f) return true;
-            foreach (var w in Walls)
+            foreach (var w in WallsAlong(viewer.Pos, target.Pos))
                 if (!w.Wall.BlocksVision && Geo.SegmentAabb(viewer.Pos, target.Pos, w.Wall.Min, w.Wall.Max, out _)) return false;
             return true;
         }
@@ -406,7 +436,7 @@ namespace Rastvordd.Sim
 
         public bool NearBench(Vector2 p)
         {
-            foreach (var d in Deployables)
+            foreach (var d in DeploysNear(p, BenchRange))
                 if (d.Kind == DeployKind.Workbench && Vector2.Distance(d.Pos, p) < BenchRange) return true;
             return false;
         }
@@ -511,10 +541,10 @@ namespace Rastvordd.Sim
         {
             for (int pass = 0; pass < 2; pass++)
             {
-                foreach (var w in Walls)
+                foreach (var w in WallsNear(a.Pos, a.Radius + 0.5f))
                     a.Pos = Geo.PushOut(a.Pos, a.Radius, w.Wall.Min, w.Wall.Max);
-                foreach (var n in Nodes) a.Pos = PushOutCircle(a.Pos, a.Radius, n.Pos, n.Radius);
-                foreach (var d in Deployables) a.Pos = PushOutCircle(a.Pos, a.Radius, d.Pos, d.Radius);
+                foreach (var n in NodesNear(a.Pos, a.Radius)) a.Pos = PushOutCircle(a.Pos, a.Radius, n.Pos, n.Radius);
+                foreach (var d in DeploysNear(a.Pos, a.Radius)) a.Pos = PushOutCircle(a.Pos, a.Radius, d.Pos, d.Radius);
             }
             a.Pos = Vector2.Clamp(a.Pos, new Vector2(-HalfSize + a.Radius), new Vector2(HalfSize - a.Radius));
         }
@@ -744,7 +774,7 @@ namespace Rastvordd.Sim
 
             ResourceNode node = null;
             best = float.MaxValue;
-            foreach (var n in Nodes)
+            foreach (var n in NodesNear(a.Pos, wd.Range + 1f))
             {
                 float d = Vector2.Distance(n.Pos, a.Pos) - n.Radius;
                 if (d < best && InArc(n.Pos, n.Radius)) { best = d; node = n; }
@@ -765,6 +795,7 @@ namespace Rastvordd.Sim
             if (node.Amount <= 0.5f)
             {
                 Nodes.Remove(node);
+                _nodeGrid.Remove(node);
                 _nodeRespawns.Add((node.Kind, Range(90, 180)));
             }
         }
@@ -773,7 +804,7 @@ namespace Rastvordd.Sim
         {
             if (Vector2.Distance(a.Pos, at) > PlaceRange) { Info(a, "Слишком далеко"); return; }
             if (!IsFree(at, 0.65f)) { Info(a, "Здесь не поставить"); return; }
-            Deployables.Add(new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id });
+            AddDeployable(new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id });
             var held = a.Held;
             held.Count--;
             if (held.Count <= 0) a.Belt[a.Current] = null;
@@ -811,7 +842,7 @@ namespace Rastvordd.Sim
                 float d = Vector2.Distance(a.Pos, p.Pos);
                 if (d < bestD) { bestD = d; best = (InteractKind.Pickup, p); }
             }
-            foreach (var dp in Deployables)
+            foreach (var dp in DeploysNear(a.Pos, InteractRange))
             {
                 float d = Vector2.Distance(a.Pos, dp.Pos) - dp.Radius + 0.3f;
                 if (d < bestD) { bestD = d; best = (dp.Kind == DeployKind.Furnace ? InteractKind.Furnace : InteractKind.Workbench, dp); }
@@ -984,11 +1015,11 @@ namespace Rastvordd.Sim
 
                 float bestT = 2;
                 Actor hitActor = null;
-                foreach (var w in Walls)
+                foreach (var w in WallsAlong(a, b))
                     if (Geo.SegmentAabb(a, b, w.Wall.Min, w.Wall.Max, out float t) && t < bestT) bestT = t;
-                foreach (var n in Nodes)
+                foreach (var n in NodesAlong(a, b))
                     if (Geo.SegmentCircle(a, b, n.Pos, n.Radius, out float t) && t < bestT) bestT = t;
-                foreach (var d in Deployables)
+                foreach (var d in DeploysAlong(a, b))
                     if (Geo.SegmentCircle(a, b, d.Pos, d.Radius, out float t) && t < bestT) bestT = t;
                 foreach (var act in Actors)
                 {

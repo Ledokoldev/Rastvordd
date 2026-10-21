@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Numerics;
 
 namespace Rastvordd.Sim
@@ -145,6 +145,9 @@ namespace Rastvordd.Sim
             _eventsThisTick.AddRange(World.Events);
         }
 
+        readonly List<ResourceNode> _snapNodes = new();
+        readonly List<Deployable> _snapDeploys = new();
+
         public Snapshot BuildSnapshot(int clientId)
         {
             var me = World.Find(clientId);
@@ -174,7 +177,7 @@ namespace Rastvordd.Sim
                 if (Vector2.DistanceSquared(b.Pos, me.Pos) < 60 * 60 && (b.IsCrate || IsPointVisible(me, b.Pos)))
                     snap.Bags.Add(new BagSnap { Id = b.Id, Pos = b.Pos, IsCrate = b.IsCrate, Empty = b.Empty });
 
-            foreach (var n in World.Nodes)
+            foreach (var n in World.NodesInRadius(me.Pos, WorldViewRadius, _snapNodes))
                 if (Vector2.DistanceSquared(n.Pos, me.Pos) < r2)
                     snap.Nodes.Add(new NodeSnap { Id = n.Id, Kind = n.Kind, Pos = n.Pos, Radius = n.Radius, Fill = n.Amount / n.MaxAmount });
 
@@ -182,7 +185,7 @@ namespace Rastvordd.Sim
                 if (Vector2.DistanceSquared(p.Pos, me.Pos) < r2)
                     snap.Pickups.Add(new PickupSnap { Id = p.Id, Kind = p.Kind, Pos = p.Pos, Available = p.Available });
 
-            foreach (var d in World.Deployables)
+            foreach (var d in World.DeploysInRadius(me.Pos, WorldViewRadius, _snapDeploys))
                 if (Vector2.DistanceSquared(d.Pos, me.Pos) < r2)
                     snap.Deployables.Add(new DeploySnap { Id = d.Id, Kind = d.Kind, Pos = d.Pos, Burning = d.Burning });
 

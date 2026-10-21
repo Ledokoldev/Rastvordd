@@ -213,9 +213,24 @@ namespace Rastvordd.Sim
             return ClaimAllows(a, kind, own, out _, out why);
         }
 
+        /// <summary>
+        /// Что на самом деле поставит План (людям): курсор на пустом дверном проёме — дверь;
+        /// выбран фундамент, а курсор на уже стоящем фундаменте — стена на ближайшем краю.
+        /// </summary>
+        public StructKind EffectivePiece(Actor a, Vector2 at)
+        {
+            var k = a.BuildPiece;
+            if (a.IsBot) return k;
+            var (i, j, dir) = Building.NearestEdge(at);
+            if (_edges.TryGetValue((i, j, dir), out var e) && e.Kind == StructKind.Doorway && !_doors.ContainsKey((i, j, dir))) return StructKind.Door;
+            var (ci, cj) = Building.CellOf(at);
+            if (k == StructKind.Foundation && HasFoundation(ci, cj)) return StructKind.Wall;
+            return k;
+        }
+
         void TryBuild(Actor a, Vector2 at)
         {
-            var kind = a.BuildPiece;
+            var kind = EffectivePiece(a, at);
             if (!CanBuild(a, kind, at, out string why)) { Info(a, $"{Building.KindName(kind)}: {why}"); return; }
             int tier = kind == StructKind.Door ? 1 : 0;
             var cost = Building.Cost(kind, tier);

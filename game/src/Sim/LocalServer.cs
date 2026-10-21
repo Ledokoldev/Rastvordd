@@ -65,7 +65,8 @@ namespace Rastvordd.Sim
         public bool HeldDeploy;
         public bool NearBench;
         public bool HoldingPlan;        // план постройки: призрак элемента под курсором
-        public StructKind BuildPiece;
+        public StructKind BuildPiece;    // выбранный элемент
+        public StructKind GhostPiece;    // что поставится под курсором (на фундаменте — стена, на проёме — дверь)
         public bool BuildOk;
         public string Place;            // РТ, на котором стоишь
         public Vector2? Home;           // твой межевой столб (для карты)
@@ -404,11 +405,13 @@ namespace Rastvordd.Sim
             {
                 s.HoldingPlan = true;
                 s.BuildPiece = me.BuildPiece;
-                s.BuildOk = World.CanBuild(me, me.BuildPiece, me.LastAim, out string why);
-                var cost = Building.Cost(me.BuildPiece, me.BuildPiece == StructKind.Door ? 1 : 0);
+                var ghost = World.EffectivePiece(me, me.LastAim);
+                s.GhostPiece = ghost;
+                s.BuildOk = World.CanBuild(me, ghost, me.LastAim, out string why);
+                var cost = Building.Cost(ghost, ghost == StructKind.Door ? 1 : 0);
                 string price = string.Join(", ", System.Array.ConvertAll(cost, c => $"{Items.Name(c.id)} {c.n}"));
                 if (string.IsNullOrEmpty(s.InteractHint))
-                    s.InteractHint = $"{Building.KindName(me.BuildPiece)} · {price} · ПКМ — выбрать элемент{(s.BuildOk ? "" : " · " + why)}";
+                    s.InteractHint = $"ЛКМ — {Building.KindName(ghost)} · {price}{(s.BuildOk ? "" : " · " + why)}";
             }
             else if (!me.Dead && held?.Id == "tool_hammer" && World.TargetStructure(me, 2f) is Structure t && string.IsNullOrEmpty(s.InteractHint))
             {
@@ -464,10 +467,10 @@ namespace Rastvordd.Sim
             string L(bool done, string text) => (done ? "[x] " : "[ ] ") + text;
             return "КАК ПОСТРОИТЬ ДОМ\n" +
                 L(claim != null, "Шкаф: возьми его в руки, ЛКМ по земле") + "\n" +
-                L(found >= 1, $"Фундаменты: План в руки, ПКМ → Фундамент, ЛКМ ({found})") + "\n" +
-                L(walls >= 3, $"Стены по краям фундаментов: ПКМ → Стена ({walls})") + "\n" +
-                L(doorways >= 1, "Дверной проём вместо одной стены") + "\n" +
-                L(doors >= 1, "Дверь в проём: ПКМ → Дверь, ЛКМ по проёму") + "\n" +
+                L(found >= 1, $"Фундаменты: План в руки, ЛКМ по земле ({found})") + "\n" +
+                L(walls >= 3, $"Стены: наведи План на фундамент — край станет стеной, ЛКМ ({walls})") + "\n" +
+                L(doorways >= 1, "Проём: колесо мыши → Дверной проём, ЛКМ по краю") + "\n" +
+                L(doors >= 1, "Дверь: наведи План на проём, ЛКМ") + "\n" +
                 L(locked >= 1, "Замок (крафт Q) — в руки, ЛКМ по двери") + "\n" +
                 L(total > 0 && weak == 0, "Киянкой ЛКМ: каркас → дерево → камень") + "\n" +
                 L(hours >= 1, $"Ресурсы в шкаф (E), иначе сгниёт ({hours:0.0} ч)");

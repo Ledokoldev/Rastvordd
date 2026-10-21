@@ -53,6 +53,45 @@ namespace Rastvordd.Client
         }
     }
 
+    /// <summary>Полоска элементов над поясом, пока План в руках: выбранный подсвечен, колесо мыши листает.</summary>
+    public partial class BuildBar : Control
+    {
+        const float C = 40, Gap = 4;
+        static readonly string[] IconIds = { "foundation", "wall", "doorway", "window", "door" };
+        int _sel = -1, _ghost = -1;
+
+        public BuildBar()
+        {
+            MouseFilter = MouseFilterEnum.Ignore;
+            CustomMinimumSize = new Vector2(5 * C + 4 * Gap, C + 20);
+        }
+
+        public void Set(int selected, int ghost)
+        {
+            if (selected == _sel && ghost == _ghost) return;
+            _sel = selected; _ghost = ghost;
+            QueueRedraw();
+        }
+
+        public override void _Draw()
+        {
+            float w = 5 * C + 4 * Gap;
+            string cap = $"{Rastvordd.Sim.Building.KindName((Rastvordd.Sim.StructKind)_sel)}   ·   колесо — сменить   ·   ПКМ — меню";
+            var fs = UiTheme.Text.GetStringSize(cap, HorizontalAlignment.Left, -1, 12);
+            DrawString(UiTheme.Text, new Vector2((w - fs.X) / 2 + 1, 13), cap, HorizontalAlignment.Left, -1, 12, new Color(0, 0, 0, 0.8f));
+            DrawString(UiTheme.Text, new Vector2((w - fs.X) / 2, 12), cap, HorizontalAlignment.Left, -1, 12, UiTheme.Ink);
+            for (int k = 0; k < 5; k++)
+            {
+                var r = new Rect2(k * (C + Gap), 20, C, C);
+                DrawRect(r, new Color(0.07f, 0.07f, 0.07f, 0.75f));
+                var icon = Art.Get($"icons/icon_build_{IconIds[k]}");
+                if (icon != null) DrawTextureRect(icon, r.Grow(-4), false, k == _sel || k == _ghost ? Colors.White : new Color(1, 1, 1, 0.45f));
+                if (k == _sel) DrawRect(r.Grow(-1), UiTheme.Accent, false, 2);
+                else if (k == _ghost) DrawRect(r.Grow(-1), new Color(UiTheme.Accent, 0.55f), false, 1);
+            }
+        }
+    }
+
     /// <summary>Меню плана (ПКМ с Планом в руках): сетка элементов стройки, клик или цифра — выбрать.</summary>
     public partial class BuildMenu : PanelContainer
     {

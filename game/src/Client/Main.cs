@@ -25,6 +25,7 @@ namespace Rastvordd.Client
         InventoryWindow _inv;
         bool _invOpen;
         BuildMenu _buildMenu;
+        BuildBar _buildBar;
         Label _guide;
         int _setPiece = -1;
         (UiOp op, string item, int index)? _uiReq;
@@ -192,6 +193,11 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _buildMenu = new BuildMenu();
             _buildMenu.Picked += k => { _setPiece = k; _buildMenu.Visible = false; Input.MouseMode = Input.MouseModeEnum.Hidden; };
             _hud.AddChild(_buildMenu);
+            _buildBar = new BuildBar { Visible = false };
+            _buildBar.SetAnchorsPreset(Control.LayoutPreset.CenterBottom);
+            _buildBar.OffsetLeft = -_buildBar.CustomMinimumSize.X / 2; _buildBar.OffsetRight = _buildBar.CustomMinimumSize.X / 2;
+            _buildBar.OffsetTop = -205; _buildBar.OffsetBottom = -145;
+            _hud.AddChild(_buildBar);
             _guide = new Label { Position = new Vector2(0, 120), MouseFilter = Control.MouseFilterEnum.Ignore };
             _guide.AddThemeFontSizeOverride("font_size", 15);
             _guide.AddThemeColorOverride("font_color", new Color(0.85f, 0.92f, 1f));
@@ -396,7 +402,11 @@ else if (arg == "--atcrate")
                     _buildMenu.Visible = !_buildMenu.Visible;
                     Input.MouseMode = _buildMenu.Visible ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
                 }
-                if (mb.ButtonIndex == MouseButton.WheelUp) _zoom = Mathf.Min(2.6f, _zoom * 1.1f);
+                // с Планом колесо листает элементы стройки (Ctrl+колесо — зум), иначе — зум
+                bool plan = _cur?.Self != null && _cur.Self.HoldingPlan && !mb.CtrlPressed;
+                if (plan && mb.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown)
+                    _setPiece = ((int)_cur.Self.BuildPiece + (mb.ButtonIndex == MouseButton.WheelDown ? 1 : 4)) % 5;
+                else if (mb.ButtonIndex == MouseButton.WheelUp) _zoom = Mathf.Min(2.6f, _zoom * 1.1f);
                 else if (mb.ButtonIndex == MouseButton.WheelDown) _zoom = Mathf.Max(0.9f, _zoom / 1.1f);
             }
         }
@@ -1010,6 +1020,8 @@ else if (arg == "--atcrate")
             _mapView.SetState(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _cur.Actors.Find(x => x.Id == _myId).Facing, _cur.Self.Home);
 
             // меню плана и шпаргалка стройки
+            _buildBar.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_buildMenu.Visible && !UiShown;
+            if (_buildBar.Visible) _buildBar.Set((int)_cur.Self.BuildPiece, (int)_cur.Self.GhostPiece);
             if (_cur.Self.HoldingPlan) _buildMenu.Fill(_cur.Self.BuildPieces, (int)_cur.Self.BuildPiece);
             else if (_buildMenu.Visible) { _buildMenu.Visible = false; Input.MouseMode = Input.MouseModeEnum.Hidden; }
             _guide.Text = _cur.Self.BuildGuide ?? "";
@@ -1041,7 +1053,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             _build.UpdateFade(_selfPx, dt);
             if (_bghost == null) { _bghost = new BuildGhost2D(); _world.AddChild(_bghost); }
             _bghost.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_hud.CraftOpen;
-            if (_bghost.Visible) { _bghost.Set(_cur.Self.BuildPiece, _aim, _cur.Self.BuildOk); _bghost.SetZone(_cur.Self.HasZone, _cur.Self.ZoneCell); }
+            if (_bghost.Visible) { _bghost.Set(_cur.Self.GhostPiece, _aim, _cur.Self.BuildOk); _bghost.SetZone(_cur.Self.HasZone, _cur.Self.ZoneCell); }
 
             // призрак установки
             var self = _cur.Self;

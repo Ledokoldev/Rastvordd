@@ -23,11 +23,13 @@ namespace Rastvordd.Client
             _crickets = Make(parent, "amb_crickets");
         }
 
+        /// <summary>Только настоящие записи пользователя (audio/real/amb_*.mp3); синтезированный фон отключён по просьбе пользователя.</summary>
         static AudioStreamPlayer Make(Node parent, string name)
         {
-            var loop = Sfx.Loop(name, -80, 1);   // берём только поток с включённой петлёй
-            var p = new AudioStreamPlayer { Stream = loop.Stream, VolumeDb = -80 };
-            loop.QueueFree();
+            var real = $"res://audio/real/{name}.mp3";
+            AudioStream stream = ResourceLoader.Exists(real) ? GD.Load<AudioStream>(real) : null;
+            if (stream is AudioStreamMP3 mp3) mp3.Loop = true;
+            var p = new AudioStreamPlayer { Stream = stream, VolumeDb = -80 };
             parent.AddChild(p);
             if (p.Stream != null) p.Play();
             return p;

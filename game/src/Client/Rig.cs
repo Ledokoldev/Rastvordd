@@ -83,7 +83,8 @@ namespace Rastvordd.Client
         {
             // смерть: лежит на боку
             _sprite.Rotation = dead ? Mathf.Pi / 2 * (Mathf.Cos(S.Aim) >= 0 ? 1 : -1) : 0;
-            _sprite.Position = dead ? new Vector2(0, -6) : _swim ? new Vector2(0, 18) : Vector2.Zero;
+            // мёртв: лежит на боку, тело по центру точки смерти (поворот идёт вокруг стоп)
+            _sprite.Position = dead ? new Vector2(-24 * (Mathf.Cos(S.Aim) >= 0 ? 1 : -1), -4) : _swim ? new Vector2(0, 18) : Vector2.Zero;
             _sprite.Modulate = dead ? new Color(0.6f, 0.55f, 0.55f) : Colors.White;
             _canvas.QueueRedraw();
         }
@@ -181,6 +182,7 @@ namespace Rastvordd.Client
             var fwdG = new Vector2(fwd.X, fwd.Y * 0.5f);   // направление по земле с ракурсным сжатием глубины
             var footFar = Foot(s.Phase + Mathf.Pi, -3) + crouch * (-fwdG * 11);
             var footNear = Foot(s.Phase, 4) + crouch * (fwdG * 7);
+            if (s.Dead) { footFar = new Vector2(-7, -1); footNear = new Vector2(6, 0); }   // мёртв: ноги врозь (спрайт потом кладётся на бок)
             float kneeBend = -1;   // колени сгибаются «вперёд» (к взгляду)
 
             // корпус: наклон вперёд на бегу
@@ -195,6 +197,7 @@ namespace Rastvordd.Client
 
             // ---------- оружие и кисти ----------
             string held = s.Held;
+            if (s.Dead) held = null;   // оружие выпало
             bool hasItem = held != null;
             float len = (hasItem ? HeldLength(held) : 0) * 32f;
             float wAng = aim + s.Recoil * (_mirror ? -1 : 1);
@@ -256,6 +259,7 @@ namespace Rastvordd.Client
             if (s.Reload >= 0 && s.Reload > 0.3f && s.Reload < 0.7f)
                 support = grip + wDir * len * 0.25f + new Vector2(0, 6);     // вторая кисть за магазином
             if (!hasItem) { grip = shNear + new Vector2(1, 12) + fwd * 1.5f; support = shFar + new Vector2(1, 12) - fwd * 1.5f; }
+            if (s.Dead) { grip = shNear + new Vector2(9, -7); support = shFar + new Vector2(-9, -5); }   // руки раскинуты
 
             float lUp = _set.UpperArm.GetWidth() - 1, lFore = _set.ForeArm.GetWidth() - 2;
             var armNear = Ik(shNear, grip, lUp, lFore, 1);

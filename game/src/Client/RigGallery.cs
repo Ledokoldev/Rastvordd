@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 
 namespace Rastvordd.Client
 {
@@ -8,7 +8,7 @@ namespace Rastvordd.Client
     /// </summary>
     public partial class RigGallery : CanvasLayer
     {
-        const int Scale = 2, CellW = 40, CellH = 70;
+        const int Scale = 2, CellW = 38, CellH = 70;
 
         static readonly (string name, float ang)[] Angles =
         {
@@ -37,6 +37,7 @@ namespace Rastvordd.Client
             ("кирка .42", "tool_pickaxe", s => { s.Swing = 0.42f; }),
             ("кирка .5", "tool_pickaxe", s => { s.Swing = 0.5f; }),
             ("кирка .8", "tool_pickaxe", s => { s.Swing = 0.8f; }),
+            ("мёртв", "weapon_ak", s => { s.Dead = true; }),
         };
 
         public RigGallery(string who)
@@ -63,7 +64,7 @@ namespace Rastvordd.Client
                     s.Aim = Angles[r].ang;
                     s.Held = Columns[c].held;
                     Columns[c].set(s);
-                    rv.Refresh(false);
+                    rv.Refresh(s.Dead);
                 }
         }
     }

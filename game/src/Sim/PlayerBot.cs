@@ -58,13 +58,29 @@ namespace Rastvordd.Sim
             return -1;
         }
 
-        bool Has(string id) => SlotOf(id) >= 0;
+        int PackOf(string id)
+        {
+            for (int i = 0; i < Actor.PackSize; i++) if (_me.Pack[i]?.Id == id) return i;
+            return -1;
+        }
 
-        /// <summary>Взять предмет в руки. true — уже в руках.</summary>
+        /// <summary>Есть ли вещь — на поясе или в рюкзаке (пояс бывает забит, крафт уходит в рюкзак).</summary>
+        bool Has(string id) => SlotOf(id) >= 0 || PackOf(id) >= 0;
+
+        /// <summary>Взять предмет в руки. true — уже в руках. Из рюкзака — сначала на пояс (меняется с последним слотом).</summary>
         bool Hold(string id, ref InputCmd cmd)
         {
             int s = SlotOf(id);
-            if (s < 0) return false;
+            if (s < 0)
+            {
+                int p = PackOf(id);
+                if (p < 0) return false;
+                int j = Actor.BeltSize - 1;
+                if (_me.Current == j) j--;   // не трогаем то, что сейчас в руках
+                cmd.UiOp = (int)UiOp.Move;
+                cmd.UiItem = $"pack#{p}>belt#{j}";
+                return false;
+            }
             if (_me.Current == s) return true;
             cmd.SelectSlot = s;
             return false;
@@ -1039,8 +1055,9 @@ namespace Rastvordd.Sim
         {
             foreach (var (gun, ammo) in new[] { ("weapon_ak", "ammo_rifle"), ("weapon_pipe", "ammo_pistol"), ("weapon_bow", "arrow") })
             {
-                int s = SlotOf(gun);
-                if (s >= 0 && ((_me.Belt[s].State?.Ammo ?? 0) > 0 || _me.Count(ammo) > 0)) return gun;
+                int s = SlotOf(gun), p = PackOf(gun);
+                var st = s >= 0 ? _me.Belt[s].State : p >= 0 ? _me.Pack[p].State : null;
+                if ((s >= 0 || p >= 0) && ((st?.Ammo ?? 0) > 0 || _me.Count(ammo) > 0)) return gun;
             }
             return null;
         }

@@ -89,6 +89,16 @@ def process(a: dict, src: pathlib.Path) -> tuple[Image.Image, Image.Image]:
         _global_palette = keep
         return hd.convert("RGBA"), px
     im = clean(raw)
+    if a.get("rig"):
+        part = a["id"].split("_")[2]                     # rig_naked_<part>[_f|_b]
+        axis, length = RIG_SIZE[part]
+        scale = length / (im.height if axis == "h" else im.width)
+        size = (max(1, round(im.width * scale)), max(1, round(im.height * scale)))
+        keep = _global_palette
+        _global_palette = None
+        px = pixelize(im, size, colors=32)
+        _global_palette = keep
+        return im, px
     box = a.get("icon") or a.get("weapon")
     if box:
         hd = fit_square(im, box)
@@ -167,7 +177,13 @@ def sheet(items: list[tuple[str, Image.Image]], scale: int, path: pathlib.Path, 
     print(f"preview: {path}")
 
 
-OWN_PALETTE_CATS = ("grass", "plants", "clutter")
+OWN_PALETTE_CATS = ("grass", "plants", "clutter", "rig")
+
+# части тела для управляемого персонажа (кат-аут риг): длина по главной оси в пикселях (рост ~58 px при 32 px/м)
+RIG_SIZE = {
+    "head": ("h", 12), "torso": ("h", 19), "pelvis": ("h", 8),
+    "upperarm": ("w", 10), "forearm": ("w", 11), "thigh": ("h", 14), "shin": ("h", 15),
+}
 WORLD_CATS = ("trees", "plants", "nodes", "props", "tiles", "walls", "decals", "fx")
 
 

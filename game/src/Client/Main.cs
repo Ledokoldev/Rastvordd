@@ -22,7 +22,7 @@ namespace Rastvordd.Client
         readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
         Ambient _ambient;
-        bool _overview, _perf, _timeEdge, _forceCrouch;
+        bool _overview, _perf, _timeEdge, _forceCrouch, _forceSprint;
         SVec _forceWalk;
         int _pressNAt = -1;
         double _perfTime, _simTime;
@@ -140,6 +140,7 @@ namespace Rastvordd.Client
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
                 else if (arg == "--crouch") _forceCrouch = true;
+                else if (arg == "--sprint") _forceSprint = true;
                 else if (arg.StartsWith("--walk="))
                 {
                     var p = arg.Substring(7).Split(",");
@@ -251,7 +252,7 @@ namespace Rastvordd.Client
                 Eat = _eatEdge,
                 DebugKit = _debugEdge,
                 Craft = _craftReq,
-                Sprint = Input.IsPhysicalKeyPressed(Key.Shift),
+                Sprint = _forceSprint || Input.IsPhysicalKeyPressed(Key.Shift),
                 Reload = _reloadEdge,
                 Interact = _interactEdge,
                 Heal = _healEdge,
@@ -549,6 +550,7 @@ namespace Rastvordd.Client
                     _selfPx = Iso.Px(pos);
                 }
                 view.RecoilRad = Mathf.DegToRad(a.RecoilDeg);
+                view.AimDown = a.Id == _myId ? _peek : a.Peek;
                 view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId, a.Crouching);
                 if (a.Id == _myId)
                 {

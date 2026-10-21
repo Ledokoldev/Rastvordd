@@ -52,10 +52,17 @@ def prepare_input(sheet_id: str, row: int) -> pathlib.Path:
     return out
 
 
+LORA_DIR = pathlib.Path(r"C:\Users\Xbaza\ComfyUI_windows_portable\ComfyUI\models\loras")
+FAST = (LORA_DIR / "wan22_i2v_lightning_high.safetensors").exists() and (LORA_DIR / "wan22_i2v_lightning_low.safetensors").exists()
+
+
 def build_prompt(image_name: str, prefix: str) -> dict:
+    """Схема Wan 2.2 I2V. Если есть LoRA Lightning — 4 шага (2+2), CFG 1: в ~4–5 раз быстрее."""
     seed = random.randint(0, 2**48)
-    half = STEPS // 2
-    return {
+    steps = 4 if FAST else STEPS
+    cfg = 1.0 if FAST else 4
+    half = steps // 2
+    p = {
         "1": {"class_type": "LoadImage", "inputs": {"image": image_name}},
         "2": {"class_type": "UnetLoaderGGUF", "inputs": {"unet_name": "Wan2.2-I2V-A14B-HighNoise-Q4_K_S.gguf"}},
         "3": {"class_type": "UnetLoaderGGUF", "inputs": {"unet_name": "Wan2.2-I2V-A14B-LowNoise-Q4_0.gguf"}},
@@ -78,6 +85,19 @@ def build_prompt(image_name: str, prefix: str) -> dict:
         "19": {"class_type": "VAEDecode", "inputs": {"samples": ["12", 0], "vae": ["5", 0]}},
         "30": {"class_type": "SaveImage", "inputs": {"images": ["19", 0], "filename_prefix": prefix}},
     }
+    for k in ("11", "12"):
+        p[k]["inputs"]["steps"] = steps
+        p[k]["inputs"]["cfg"] = cfg
+    p["11"]["inputs"]["end_at_step"] = half
+    p["12"]["inputs"]["start_at_step"] = half
+    if FAST:
+        p["40"] = {"class_type": "LoraLoaderModelOnly", "inputs": {"model": ["2", 0], "lora_name": "wan22_i2v_lightning_high.safetensors", "strength_model": 1.0}}
+        p["41"] = {"class_type": "LoraLoaderModelOnly", "inputs": {"model": ["3", 0], "lora_name": "wan22_i2v_lightning_low.safetensors", "strength_model": 1.0}}
+        p["10"]["inputs"]["model"] = ["40", 0]
+        p["21"]["inputs"]["model"] = ["41", 0]
+        p["10"]["inputs"]["shift"] = 5
+        p["21"]["inputs"]["shift"] = 5
+    return p
 
 
 def key_green(im: Image.Image) -> Image.Image:

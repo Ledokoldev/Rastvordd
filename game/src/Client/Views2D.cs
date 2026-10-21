@@ -21,7 +21,7 @@ namespace Rastvordd.Client
 
     public partial class ActorView2D : Node2D
     {
-        const float SwingTime = 0.28f;
+        const float SwingTime = 0.45f;   // замах → удар → возврат (риг)
 
         readonly Body2D _body;
         readonly Held2D _held;
@@ -47,6 +47,15 @@ namespace Rastvordd.Client
             _held = new Held2D { Position = new Vector2(1, -Iso.H(1.05f)) };
             AddChild(_body);
             AddChild(_held);
+            // управляемый персонаж из частей (если части сгенерированы): руки по IK к оружию, ноги шагают, позы
+            var rigSet = isNpc ? null : RigSet.Load("naked");
+            if (rigSet != null)
+            {
+                _rig = new RigView(rigSet);
+                AddChild(_rig);
+                _body.Visible = false;
+                _held.Visible = false;
+            }
         }
 
         public void StartSwing() => _swing = SwingTime;
@@ -63,6 +72,9 @@ namespace Rastvordd.Client
 
         /// <summary>Увод ствола от отдачи (радианы) — оружие в руках поворачивается туда, куда реально полетят пули.</summary>
         public float RecoilRad;
+        /// <summary>0..1: прицеливание (ПКМ) — у рига оружие поднимается к голове.</summary>
+        public float AimDown;
+        readonly RigView _rig;
 
         /// <summary>Начало перезарядки: наклон, магазин выпадает, кисть за новым, возврат.</summary>
         public void StartReload(float duration)
@@ -108,7 +120,7 @@ namespace Rastvordd.Client
                 _body.Position = dead ? new Vector2(0, -4) : Vector2.Zero;
                 QueueRedraw();
             }
-            if (dead) { _body.QueueRedraw(); return; }
+            if (dead) { _body.QueueRedraw(); if (_rig != null) { _rig.S.Aim = facing; _rig.S.Dead = true; _rig.Refresh(true); } return; }
 
             if (_held.ItemId != heldId) { _held.ItemId = heldId; _held.QueueRedraw(); }
 
@@ -164,6 +176,24 @@ namespace Rastvordd.Client
             var basePos = new Vector2(right ? 2 : -2, -Iso.H(1.05f) * (crouch ? 0.78f : 1f) + (_body.Moving ? -Mathf.Abs(Mathf.Sin(_body.Phase)) : 0));
             _held.Position = (basePos - new Vector2(Mathf.Cos(facing), Mathf.Sin(facing)) * kickBack).Round();
             _held.ReloadHand = reloadHand;
+            if (_rig != null)
+            {
+                var rs = _rig.S;
+                rs.Aim = facing;
+                rs.Recoil = RecoilRad;
+                rs.Speed = speed;
+                rs.Sprint = speed > Rastvordd.Sim.World.WalkSpeed + 0.3f;
+                rs.Crouch = crouch;
+                rs.Dead = dead;
+                rs.AimDown = Mathf.MoveToward(rs.AimDown, AimDown, dt * 6);
+                rs.Phase = _body.Phase;
+                rs.Breath += dt * 1.6f;
+                rs.Held = heldId;
+                rs.Kick = _kick;
+                rs.Reload = reloading && _reloadDur > 0 ? Mathf.Clamp(_reloadT / _reloadDur, 0, 1) : -1;
+                rs.Swing = _swing > 0 ? 1f - _swing / SwingTime : -1;
+                _rig.Refresh(dead);
+            }
             _held.SwingT = _swing > 0 ? 1f - _swing / SwingTime : -1f;
             if (_swing > 0 || _held.SwingT >= 0) QueueRedraw();
         }

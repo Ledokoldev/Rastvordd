@@ -1138,10 +1138,83 @@
       "cat": "clutter",
       "h": 0.3,
       "desc": "a small patch of white snowdrop flowers and green leaves poking out of snow. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+    },
+    {
+      "id": "rig_naked_head_f",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_naked_ref_f.png",
+      "h": 0.5,
+      "desc": "the head and a short neck of this man, 3/4 front view facing down-right, same messy dark hair, beard stubble and face"
+    },
+    {
+      "id": "rig_naked_head_b",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_naked_ref_b.png",
+      "h": 0.5,
+      "desc": "the head and a short neck of this man seen from behind, 3/4 back view facing up-right, back of the messy dark hair"
+    },
+    {
+      "id": "rig_naked_torso_f",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_naked_ref_f.png",
+      "h": 0.5,
+      "desc": "the bare torso of this man from the base of the neck to the waist WITHOUT any arms (arms removed at the shoulders, clean rounded shoulder joints), 3/4 front view facing down-right"
+    },
+    {
+      "id": "rig_naked_torso_b",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_naked_ref_b.png",
+      "h": 0.5,
+      "desc": "the bare back of this man from the base of the neck to the waist WITHOUT any arms (arms removed at the shoulders), 3/4 back view facing up-right"
+    },
+    {
+      "id": "rig_naked_pelvis",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_naked_ref_f.png",
+      "h": 0.5,
+      "desc": "only his hips wearing the torn dirty grey underwear shorts, legs cut off at the top of the thighs, 3/4 front view"
+    },
+    {
+      "id": "rig_naked_upperarm",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_naked_ref_f.png",
+      "h": 0.5,
+      "desc": "only his bare upper arm from shoulder to elbow, perfectly straight and horizontal, shoulder end on the left, elbow end on the right"
+    },
+    {
+      "id": "rig_naked_forearm",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_naked_ref_f.png",
+      "h": 0.5,
+      "desc": "only his bare forearm with the hand clenched in a fist as if gripping a handle, perfectly straight and horizontal, elbow end on the left, fist on the right"
+    },
+    {
+      "id": "rig_naked_thigh",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_naked_ref_f.png",
+      "h": 0.5,
+      "desc": "only his bare thigh from hip to knee, perfectly straight and vertical, hip end at the top, knee at the bottom"
+    },
+    {
+      "id": "rig_naked_shin",
+      "cat": "rig",
+      "rig": true,
+      "ref": "assets/gen/anim/char_naked_ref_f.png",
+      "h": 0.5,
+      "desc": "only his bare shin with the bare foot, perfectly straight and vertical, knee end at the top, the foot at the bottom pointing to the right"
     }
   ],
   "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",
   "weapon_framing": "A single game sprite of a weapon or tool for a survival game: the item alone, strict side view, horizontal, pointing to the right (muzzle or business end on the right), centered, transparent background, no hands, no text, no frame, no border, no cast shadow.",
   "sheet_framing": "A character sprite sheet for a 2D top-down survival game in 3/4 view like Project Zomboid: a grid of 4 columns and 2 rows of equally spaced frames on a transparent background. Top row: the same person walking diagonally toward the camera and to the right (front 3/4 view, facing down-right), 4 frames of one walk cycle. Bottom row: the same person walking diagonally away from the camera and to the right (back 3/4 view, facing up-right), 4 frames of one walk cycle. Identical character, proportions, clothing and lighting in every frame, full body visible, feet on the same baseline within each row, arms relaxed with empty hands, no weapon, no text, no labels, no grid lines, no frame borders, no cast shadow.",
-  "clutter_style": "Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+  "clutter_style": "Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details.",
+  "rig_framing": "A single isolated body part sprite for a 2D cutout animation rig, taken from the character shown in the attached reference image: exactly the same skin tone, dirt, hair, clothing colors, lighting from the top-left and painting style. Only that one body part, cleanly separated at the joints with rounded joint ends, centered, transparent background, nothing else in the image, no shadow, no text, no frame."
 }

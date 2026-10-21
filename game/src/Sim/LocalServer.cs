@@ -9,6 +9,7 @@ namespace Rastvordd.Sim
         public Vector2 Pos;
         public float Facing;
         public float RecoilDeg;      // увод ствола — клиент поворачивает оружие в руках
+        public float Peek;           // прицеливание (ПКМ) — оружие у головы
         public bool Dead;
         public bool IsNpc;
         public string HeldId;
@@ -158,7 +159,7 @@ namespace Rastvordd.Sim
                 var w = a.Weapon;
                 snap.Actors.Add(new ActorSnap
                 {
-                    Id = a.Id, Pos = a.Pos, Facing = a.Facing, RecoilDeg = a.Weapon?.Recoil ?? 0, Dead = a.Dead, IsNpc = a.Team == Team.Npc,
+                    Id = a.Id, Pos = a.Pos, Facing = a.Facing, RecoilDeg = a.Weapon?.Recoil ?? 0, Peek = a.Peek, Dead = a.Dead, IsNpc = a.Team == Team.Npc,
                     HeldId = a.Held?.Id, Reloading = w != null && w.ReloadLeft > 0,
                     Sprinting = a.Vel.Length() > World.WalkSpeed + 0.3f,
                     Crouching = a.Crouching,

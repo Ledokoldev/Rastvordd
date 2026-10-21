@@ -24,11 +24,11 @@ foreach ($a in $manifest.assets) {
     $prompt = @"
 Generate ONE image with your image generation tool and save it as a PNG file at $rel (relative to the current directory), overwriting if it exists. Do not write any code or edit any other files.
 
-Image: $(if ($a.sheet) { $manifest.sheet_framing } elseif ($a.tile) { $manifest.tile_framing } elseif ($a.weapon) { $manifest.weapon_framing } elseif ($a.icon) { $manifest.icon_framing } else { $manifest.framing }) Subject: $($a.desc). $($manifest.style)
+Image: $(if ($a.rig) { $manifest.rig_framing } elseif ($a.sheet) { $manifest.sheet_framing } elseif ($a.tile) { $manifest.tile_framing } elseif ($a.weapon) { $manifest.weapon_framing } elseif ($a.icon) { $manifest.icon_framing } else { $manifest.framing }) Subject: $($a.desc). $($manifest.style)
 
 When done, reply with just the saved file path.
 "@
-    $todo += [pscustomobject]@{ Id = $a.id; Rel = $rel; Prompt = $prompt }
+    $todo += [pscustomobject]@{ Id = $a.id; Rel = $rel; Prompt = $prompt; Ref = $(if ($a.ref) { Join-Path $root $a.ref } else { $null }) }
 }
 
 Write-Host "К генерации: $($todo.Count)"
@@ -40,7 +40,10 @@ foreach ($t in $todo) {
     $pf = Join-Path $logDir "$($t.Id).prompt.txt"
     Set-Content -Path $pf -Value $t.Prompt -Encoding UTF8
     $log = Join-Path $logDir "$($t.Id).log"
-    $p = Start-Process -FilePath $codex -ArgumentList @("exec", "-C", "`"$root`"", "-s", "workspace-write", "-c", "model_reasoning_effort=`"medium`"", "-") `
+    $args2 = @("exec", "-C", "`"$root`"", "-s", "workspace-write", "-c", "model_reasoning_effort=`"medium`"")
+    $args2 += "-"   # промпт из stdin; -i ставим после, т.к. он принимает несколько файлов
+    if ($t.Ref) { $args2 += @("-i", "`"$($t.Ref)`"") }   # образец (например, персонаж для частей тела)
+    $p = Start-Process -FilePath $codex -ArgumentList $args2 `
         -RedirectStandardInput $pf -RedirectStandardOutput $log -RedirectStandardError "$log.err" -NoNewWindow -PassThru
     $running += $p
     Write-Host "→ $($t.Id)"

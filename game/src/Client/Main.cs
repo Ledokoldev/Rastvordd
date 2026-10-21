@@ -47,6 +47,7 @@ namespace Rastvordd.Client
         readonly Dictionary<int, NodeView2D> _nodeViews = new();
         readonly Dictionary<int, PickupView2D> _pickupViews = new();
         readonly Dictionary<int, DeployView2D> _deployViews = new();
+        readonly Dictionary<int, ThrownView2D> _thrownViews = new();
         readonly List<FlashView2D> _fx = new();
         readonly List<FloatText2D> _texts = new();
         GhostView2D _ghost;
@@ -449,6 +450,17 @@ namespace Rastvordd.Client
                         SpawnChipsAt(e.Pos, TierChips[System.Math.Clamp((int)e.Value, 0, 4)], -1, 18);
                         _shake = Mathf.Min(1.2f, _shake + 0.3f);
                         break;
+                    case SimEventKind.Explosion:
+                    {
+                        bool big = e.Text == "expl_c4";
+                        Flash(e.Pos, new Color(1f, 0.75f, 0.4f), big ? 70 : 50, 0.3f, true);
+                        Flash(e.Pos, new Color(0.3f, 0.28f, 0.26f, 0.8f), big ? 55 : 40, 1.2f);
+                        Sfx.Play(big ? "explosion_big" : "explosion_small", Iso.Px(e.Pos), 4, 300, 0.06f);
+                        float d = SVec.Distance(e.Pos, new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM));
+                        _shake = Mathf.Min(2.5f, _shake + (big ? 2.2f : 1.4f) * Mathf.Clamp(1f - d / 40f, 0.15f, 1f));
+                        SpawnChipsAt(e.Pos, new[] { new Color(0.35f, 0.33f, 0.3f), new Color(0.55f, 0.5f, 0.45f), new Color(0.2f, 0.19f, 0.18f), new Color(0.9f, 0.6f, 0.3f) }, -1, big ? 34 : 22);
+                        break;
+                    }
                     case SimEventKind.Door:
                         Sfx.Play("hit_wood", Iso.Px(e.Pos), -8, 20, 0.2f);
                         break;
@@ -472,6 +484,7 @@ namespace Rastvordd.Client
                         Flash(e.Pos, new Color(1, 0.85f, 0.5f), 3, 0.1f);
                         break;
                     case SimEventKind.Death:
+                        GD.Print($"death: {e.ActorId} by {e.OtherId} at {e.Pos}");
                         if (e.ActorId == _myId) _hud.Toast("Тебя убили.");
                         else if (e.OtherId == _myId) _hud.Toast("Убит. Лут на трупе — подойди и нажми E.");
                         break;
@@ -776,6 +789,18 @@ namespace Rastvordd.Client
                 v.Tick(dt);
             }
             RemoveMissing(_deployViews, seen);
+
+            seen.Clear();
+            foreach (var t in _cur.Throwns)
+            {
+                seen.Add(t.Id);
+                if (!_thrownViews.TryGetValue(t.Id, out var tv)) { tv = new ThrownView2D(t.ItemId); _world.AddChild(tv); _thrownViews[t.Id] = tv; }
+                tv.Position = Iso.Px(t.Pos);
+                tv.Z = t.Z;
+                tv.Fuse = t.Fuse;
+                tv.Tick(dt);
+            }
+            RemoveMissing(_thrownViews, seen);
 
             // постройки: виды, тени обзора, прозрачность стен перед персонажем, призрак плана
             _build ??= new BuildLayer(_world);

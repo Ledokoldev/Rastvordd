@@ -358,11 +358,24 @@ namespace Rastvordd.Sim
 
         void GiveDebugKit(Actor a)
         {
+            // повторное нажатие — набор для рейда: столб и факел меняются на взрывчатку
+            for (int i = 0; i < Actor.BeltSize; i++)
+                if (a.Belt[i]?.Id == "build_plan")
+                {
+                    for (int k = 0; k < Actor.BeltSize; k++)
+                        if (a.Belt[k]?.Id is "deploy_claim" or "weapon_torch" or "tool_rock") a.Belt[k] = null;
+                    a.Add("expl_c4", 10);
+                    a.Add("expl_satchel", 10);
+                    Info(a, "Отладочный набор: взрывчатка");
+                    return;
+                }
             a.AddSlot(Items.NewSlot("weapon_ak", 30));
             a.AddSlot(Items.NewSlot("build_plan"));
             a.AddSlot(Items.NewSlot("tool_hammer"));
             a.AddSlot(Items.NewSlot("deploy_claim"));
             a.AddSlot(Items.NewSlot("weapon_torch"));
+            a.Add("expl_c4", 6);
+            a.Add("expl_satchel", 10);
             a.Add("ammo_rifle", 120);
             a.Add("metal_ore", 60);
             a.Add("sulfur_ore", 30);
@@ -477,6 +490,7 @@ namespace Rastvordd.Sim
             StepPickupsAndNodes();
             StepFurnaces();
             StepClaims();
+            StepThrowns();
         }
 
         void StepActor(Actor a, InputCmd cmd)
@@ -648,6 +662,14 @@ namespace Rastvordd.Sim
             bool trigger;
             if (held == null) { a.FireHeldLastTick = cmd.Fire; return; }
             var def = held.Def;
+
+            if (def.Explosive != null)
+            {
+                trigger = cmd.Fire && !a.FireHeldLastTick;
+                a.FireHeldLastTick = cmd.Fire;
+                if (trigger && !sprint) Throw(a, cmd.Aim);
+                return;
+            }
 
             if (def.Build)
             {

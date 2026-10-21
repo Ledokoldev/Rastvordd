@@ -219,3 +219,62 @@ namespace Rastvordd.Client
         }
     }
 }
+
+namespace Rastvordd.Client
+{
+    /// <summary>Брошенная взрывчатка: летит по дуге, лежит; у связки искрит фитиль, у шашки мигает огонёк и пищит.</summary>
+    public partial class ThrownView2D : Godot.Node2D
+    {
+        public string ItemId;
+        public float Z, Fuse = -1;
+        float _t, _beep;
+        readonly Godot.PointLight2D _light;
+        readonly Godot.AudioStreamPlayer2D _hiss;
+
+        public ThrownView2D(string itemId)
+        {
+            ItemId = itemId;
+            TextureFilter = TextureFilterEnum.Nearest;
+            _light = Art.FireLight(1.6f, 0f);
+            _light.Color = itemId == "expl_c4" ? new Godot.Color(1f, 0.2f, 0.15f) : new Godot.Color(1f, 0.6f, 0.25f);
+            AddChild(_light);
+            if (itemId == "expl_satchel") { _hiss = Sfx.Loop("fuse_hiss", -10, 12); if (_hiss != null) { AddChild(_hiss); _hiss.Play(); } }
+        }
+
+        public void Tick(float dt)
+        {
+            _t += dt;
+            if (ItemId == "expl_c4" && Fuse >= 0)
+            {
+                _beep -= dt;
+                if (_beep <= 0) { _beep = Fuse < 3 ? 0.35f : 1f; Sfx.Play("c4_beep", GlobalPosition, -8, 15, 0f); }
+            }
+            QueueRedraw();
+        }
+
+        public override void _Draw()
+        {
+            float lift = Z * Iso.PPM * 0.75f;
+            DrawSetTransform(Godot.Vector2.Zero, 0, new Godot.Vector2(1, 0.45f));
+            DrawCircle(Godot.Vector2.Zero, 5, new Godot.Color(0, 0, 0, 0.3f));
+            DrawSetTransform(Godot.Vector2.Zero, 0, Godot.Vector2.One);
+            var tex = Art.Icon(ItemId);
+            var at = new Godot.Vector2(0, -6 - lift);
+            if (tex != null) DrawTextureRect(tex, new Godot.Rect2(at - new Godot.Vector2(8, 8), new Godot.Vector2(16, 16)), false);
+            else DrawRect(new Godot.Rect2(at - new Godot.Vector2(5, 4), new Godot.Vector2(10, 8)), new Godot.Color(0.5f, 0.4f, 0.3f));
+            bool on;
+            if (ItemId == "expl_c4") on = Fuse >= 0 && ((int)(_t * (Fuse < 3 ? 6 : 2)) % 2 == 0);
+            else on = true;
+            _light.Position = at + new Godot.Vector2(4, -4);
+            _light.Energy = on ? (ItemId == "expl_c4" ? 0.9f : 0.6f + 0.3f * Godot.Mathf.Sin(_t * 37)) : 0f;
+            if (!on) return;
+            if (ItemId == "expl_c4") DrawRect(new Godot.Rect2(at + new Godot.Vector2(3, -5), new Godot.Vector2(2, 2)), new Godot.Color(1f, 0.15f, 0.1f));
+            else
+                for (int i = 0; i < 3; i++)
+                {
+                    float a = _t * 23 + i * 2.1f;
+                    DrawRect(new Godot.Rect2(at + new Godot.Vector2(5 + Godot.Mathf.Cos(a) * 2, -6 + Godot.Mathf.Sin(a * 1.3f) * 2), Godot.Vector2.One), new Godot.Color(1f, 0.8f, 0.3f));
+                }
+        }
+    }
+}

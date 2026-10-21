@@ -23,6 +23,7 @@ namespace Rastvordd.Sim
     public struct NodeSnap { public int Id; public NodeKind Kind; public Vector2 Pos; public float Radius; public float Fill; }
     public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; }
     public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; }
+    public struct ThrownSnap { public int Id; public string ItemId; public Vector2 Pos; public float Z; public float Fuse; }
     public struct StructSnap { public int Id; public StructKind Kind; public int I, J, Dir, Tier; public float Hp; public bool Open; }
 
     public struct BeltSlotInfo
@@ -86,6 +87,7 @@ namespace Rastvordd.Sim
         public List<PickupSnap> Pickups = new();
         public List<DeploySnap> Deployables = new();
         public List<StructSnap> Structures = new();
+        public List<ThrownSnap> Throwns = new();
         public int StructVersion;         // меняется при любой стройке/поломке/двери
         public List<SimEvent> Events = new();
     }
@@ -198,6 +200,9 @@ namespace Rastvordd.Sim
                 if (Vector2.DistanceSquared(d.Pos, me.Pos) < r2)
                     snap.Deployables.Add(new DeploySnap { Id = d.Id, Kind = d.Kind, Pos = d.Pos, Burning = d.Burning });
 
+            foreach (var t in World.Throwns)
+                if (Vector2.DistanceSquared(t.Pos, me.Pos) < EventRadius * EventRadius)
+                    snap.Throwns.Add(new ThrownSnap { Id = t.Id, ItemId = t.ItemId, Pos = t.Pos, Z = t.Z, Fuse = t.Landed ? t.FuseLeft : -1 });
             snap.StructVersion = World.StructVersion;
             foreach (var st in World.Structures)
                 if (Vector2.DistanceSquared(st.Center, me.Pos) < r2)

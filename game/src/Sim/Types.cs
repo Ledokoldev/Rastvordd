@@ -96,9 +96,11 @@ namespace Rastvordd.Sim
         public float Food, Water, Heal;
         public DeployKind Deploy;
         public bool Build;              // план постройки: ЛКМ ставит выбранный элемент
+        public ExplosiveDef Explosive;  // бросается ЛКМ
+        public int Stack = 1;           // сколько штук в одном слоте пояса
 
         /// <summary>Предметы, которые держат в руках, живут на поясе (по одному в слоте).</summary>
-        public bool Holdable => Weapon != null || Deploy != DeployKind.None || Build;
+        public bool Holdable => Weapon != null || Deploy != DeployKind.None || Build || Explosive != null;
     }
 
     /// <summary>Предмет в слоте пояса или в контейнере. У оружия — своё состояние (патроны в магазине).</summary>
@@ -155,6 +157,13 @@ namespace Rastvordd.Sim
             Add("weapon_spear", "Деревянное копьё", ItemCategory.Weapon).Weapon = WeaponDef.MeleeTool("weapon_spear", 35, 0.9f, 2.3f, 1, 1, 1, 1, 50);
             Add("tool_hammer", "Молоток", ItemCategory.Tool).Weapon = WeaponDef.MeleeTool("tool_hammer", 6, 0.6f, 2.0f, 1, 1, 1, 1);   // улучшает и чинит постройки
             Add("build_plan", "План постройки", ItemCategory.Tool).Build = true;
+            // взрывчатка (названия — черновик docs/naming.md)
+            var satchel = Add("expl_satchel", "Связка", ItemCategory.Weapon);
+            satchel.Explosive = new ExplosiveDef { Damage = 75, Radius = 2.2f, Fuse = 5f, DudChance = 0.2f, ThrowRange = 10 };
+            satchel.Stack = 10;
+            var c4 = Add("expl_c4", "Шашка с часами", ItemCategory.Weapon);
+            c4.Explosive = new ExplosiveDef { Damage = 500, Radius = 2.5f, Fuse = 10f, ThrowRange = 8, Sticks = true };
+            c4.Stack = 10;
             Add("weapon_torch", "Факел", ItemCategory.Weapon).Weapon = WeaponDef.MeleeTool("weapon_torch", 10, 0.8f, 1.6f, 1, 1, 1, 1);   // светит ночью
 
             // огнестрел и лук
@@ -217,6 +226,8 @@ namespace Rastvordd.Sim
             new Recipe { Output = "tool_pickaxe", Cost = new[] { ("wood", 200), ("stone", 100) }, Time = 6 },
             new Recipe { Output = "weapon_spear", Cost = new[] { ("wood", 300) }, Time = 5 },
             new Recipe { Output = "deploy_claim", Cost = new[] { ("wood", 100) }, Time = 3 },
+            new Recipe { Output = "expl_satchel", Cost = new[] { ("cloth", 10), ("gunpowder", 30), ("metal_fragments", 20) }, Time = 4, Bench = 1 },
+            new Recipe { Output = "expl_c4", Cost = new[] { ("gunpowder", 200), ("metal_fragments", 100), ("scrap", 20), ("cloth", 5) }, Time = 15, Bench = 1 },
             new Recipe { Output = "build_plan", Cost = new[] { ("wood", 20) }, Time = 1 },
             new Recipe { Output = "tool_hammer", Cost = new[] { ("wood", 100) }, Time = 3 },
             new Recipe { Output = "weapon_torch", Cost = new[] { ("wood", 30), ("cloth", 5) }, Time = 2 },
@@ -289,8 +300,22 @@ namespace Rastvordd.Sim
             var def = Items.Get(id);
             if (def != null && def.Holdable)
             {
-                for (int i = 0; i < count; i++)
-                    if (!AddSlot(Items.NewSlot(id))) return false;
+                // складываемое держимое (взрывчатка) — докладываем в уже начатый слот
+                if (def.Stack > 1)
+                    foreach (var s in Belt)
+                        if (s != null && s.Id == id && s.Count < def.Stack)
+                        {
+                            int put = System.Math.Min(count, def.Stack - s.Count);
+                            s.Count += put; count -= put;
+                            if (count == 0) return true;
+                        }
+                while (count > 0)
+                {
+                    var slot = Items.NewSlot(id);
+                    slot.Count = System.Math.Min(count, def.Stack);
+                    if (!AddSlot(slot)) return false;
+                    count -= slot.Count;
+                }
                 return true;
             }
             foreach (var s in Inventory) if (s.Id == id) { s.Count += count; return true; }
@@ -422,7 +447,7 @@ namespace Rastvordd.Sim
         public bool Empty => Items.Count == 0;
     }
 
-    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted, Built, Destroyed, Door, HitStruct }
+    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted, Built, Destroyed, Door, HitStruct, Explosion }
 
     public struct SimEvent
     {

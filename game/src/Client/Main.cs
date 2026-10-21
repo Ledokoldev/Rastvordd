@@ -22,6 +22,7 @@ namespace Rastvordd.Client
         BuildLayer _build;
         BuildGhost2D _bghost;
         MapView _mapView;
+        MiniMap _miniMap;
         InventoryWindow _inv;
         bool _invOpen;
         BuildMenu _buildMenu;
@@ -102,6 +103,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("give")) { var g = a.Substring(4).Split('x'); _server.World.Find(_myId).Add(g[0], g.Length > 1 ? int.Parse(g[1]) : 1); }   // отладка: give<id>x<n>
                 else if (a.StartsWith("ui")) _uiReq = ((UiOp)int.Parse(a.Substring(2).Split('_')[0]), a.Contains('_') ? a.Substring(a.IndexOf('_') + 1).Replace('~', '#').Replace('^', '>') : null, 0);   // отладка: ui<op>_<арг> (# → ~, > → ^)
                 else if (a == "inv") _invOpen = !_invOpen;
+                else if (a == "info") GD.Print($"info: {_server.World.LastInfo.GetValueOrDefault(_myId)} | structs {_server.World.Structures.Count} | aim {_autoAim} | me {_server.World.Find(_myId).Pos}");   // отладка: последнее сообщение
                 else if (a == "map") { _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); }
                 else if (a == "crouch") _forceCrouch = true;
                 else if (a == "save") SaveWorld();
@@ -187,6 +189,10 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _mapView = new MapView(_map, monList);
             _mapView.SetAnchorsPreset(Control.LayoutPreset.FullRect);
             _hud.AddChild(_mapView);
+            _miniMap = new MiniMap(_mapView);
+            _miniMap.SetAnchorsPreset(Control.LayoutPreset.TopRight);
+            _miniMap.OffsetLeft = -MiniMap.Side - 14; _miniMap.OffsetRight = -14; _miniMap.OffsetTop = 12; _miniMap.OffsetBottom = 12 + MiniMap.Side + 18;
+            _hud.AddChild(_miniMap);
             _inv = new InventoryWindow();
             _inv.Op += (op, arg) => _uiReq = (op, arg, 0);
             _hud.AddChild(_inv);
@@ -1018,6 +1024,8 @@ else if (arg == "--atcrate")
             RemoveMissing(_fireViews, seen);
 
             _mapView.SetState(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _cur.Actors.Find(x => x.Id == _myId).Facing, _cur.Self.Home);
+            _miniMap.Visible = !_mapView.Visible && !_cur.Self.Dead;
+            if (_miniMap.Visible && _cur.Actors.Find(x => x.Id == _myId) is var meSnap) _miniMap.SetState(meSnap.Pos, meSnap.Facing, _cur.Self.Home, _cur.Self.Place, _cur.Structures, _cur.Deployables);
 
             // меню плана и шпаргалка стройки
             _buildBar.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_buildMenu.Visible && !UiShown;
@@ -1025,7 +1033,7 @@ else if (arg == "--atcrate")
             if (_cur.Self.HoldingPlan) _buildMenu.Fill(_cur.Self.BuildPieces, (int)_cur.Self.BuildPiece);
             else if (_buildMenu.Visible) { _buildMenu.Visible = false; Input.MouseMode = Input.MouseModeEnum.Hidden; }
             _guide.Text = _cur.Self.BuildGuide ?? "";
-            _guide.Position = new Vector2(GetViewport().GetVisibleRect().Size.X - _guide.GetCombinedMinimumSize().X - 16, 110);
+            _guide.Position = new Vector2(GetViewport().GetVisibleRect().Size.X - _guide.GetCombinedMinimumSize().X - 16, MiniMap.Side + 48);
 
             // окно по E (ящик, печь, столб) и крафт у верстака
             bool showInv = !_cur.Self.Dead && (_invOpen || _cur.Self.Ui != null);

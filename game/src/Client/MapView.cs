@@ -11,6 +11,9 @@ namespace Rastvordd.Client
         readonly MapInfo _map;
         readonly ImageTexture _tex;
         readonly List<(string name, SVec min, SVec max)> _monuments;
+        public MapInfo Map => _map;
+        public Texture2D Texture => _tex;
+        public List<(string name, SVec min, SVec max)> Monuments => _monuments;
         SVec _me;
         float _facing;
         SVec? _home;

@@ -1820,6 +1820,254 @@
    "cat": "walls",
    "tile": 3,
    "desc": "front elevation viewed straight-on: closed rusty Soviet steel double garage gates with vertical ribs, a small wicket door in one leaf, peeling green paint, filling the whole image"
+  },
+  {
+   "id": "gai_post",
+   "cat": "props",
+   "h": 6.95,
+   "desc": "a Soviet traffic police (GAI) roadside post: a small two-storey building, the ground floor of white silicate bricks with a steel door, the upper floor a glass observation cabin with large windows all around (many panes cracked or missing) and a flat roof with a dead rooftop searchlight and a bent antenna; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    4.2,
+    4.2,
+    3.0
+   ]
+  },
+  {
+   "id": "gai_barrier",
+   "cat": "props",
+   "h": 1.91,
+   "desc": "a long red-and-white striped steel boom barrier gate (shlagbaum) lowered horizontally, with a counterweight post on the left and a small support fork on the right, faded and rusty, side view across the image; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": {
+    "legs": [
+     7.0,
+     0.5,
+     1.1
+    ]
+   }
+  },
+  {
+   "id": "car_police_2101",
+   "cat": "props",
+   "h": 2.48,
+   "desc": "an abandoned Soviet militia police car, a boxy Lada VAZ-2101 sedan painted faded yellow with a blue stripe along the side, a dead blue roof beacon, flat tires, a cracked windshield, the front passenger door ajar; side 3/4 view with the car pointing to the right; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    4.1,
+    1.7,
+    1.4
+   ]
+  },
+  {
+   "id": "car_zhiguli_wreck",
+   "cat": "props",
+   "h": 2.8,
+   "desc": "an abandoned rusty Soviet Lada Zhiguli sedan wreck, faded pale green paint, no wheels sitting on bricks, broken windows, open trunk; side 3/4 view with the car pointing to the left; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    4.1,
+    1.7,
+    1.4
+   ]
+  },
+  {
+   "id": "bus_wreck",
+   "cat": "props",
+   "h": 7.07,
+   "desc": "an abandoned rusty Soviet city bus LiAZ-677 wreck, rounded body, faded cream and red paint, broken windows, flat tires, one door hanging open, moss on the roof; side 3/4 view, the long bus pointing to the right; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    10.5,
+    2.5,
+    3.0
+   ]
+  },
+  {
+   "id": "road_sign_round",
+   "cat": "clutter",
+   "h": 2.6,
+   "desc": "a Soviet road sign on a striped metal pole: a round red sign with a white horizontal bar (no entry), bent and rusty, bullet holes; nothing written on it; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+  },
+  {
+   "id": "phone_booth",
+   "cat": "props",
+   "h": 2.5,
+   "desc": "a Soviet street payphone booth: a narrow metal and glass cabin painted faded red-orange, cracked glass panes, a hanging receiver inside; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    1.0,
+    1.0,
+    2.3
+   ]
+  },
+  {
+   "id": "fuel_pump",
+   "cat": "props",
+   "h": 2.1,
+   "desc": "a Soviet gas station fuel dispenser column: a tall narrow grey-and-red steel cabinet with a round dial gauge, a hanging fuel nozzle on a cracked rubber hose, on a small concrete base; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    1.0,
+    0.6,
+    1.9
+   ]
+  },
+  {
+   "id": "fuel_canopy",
+   "cat": "props",
+   "h": 9.2,
+   "desc": "a big flat gas station canopy roof seen from the 3/4 top-down view: a wide flat rectangular concrete-and-metal roof slab about 14 by 8 meters with a faded red fascia band, held up by four square concrete pillars, some fascia panels hanging down, a few broken lamps underneath; the whole structure fully visible, empty ground under it; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": {
+    "legs": [
+     14.0,
+     0.6,
+     5.0
+    ]
+   }
+  },
+  {
+   "id": "car_wash_frame",
+   "cat": "props",
+   "h": 4.72,
+   "desc": "an abandoned gas station drive-through car wash gantry: a rusty steel portal frame with two big tattered cylindrical washing brushes hanging inside and pipes along the top; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": {
+    "legs": [
+     5.2,
+     0.6,
+     4.0
+    ]
+   }
+  },
+  {
+   "id": "price_pylon",
+   "cat": "props",
+   "h": 6.5,
+   "desc": "a tall freestanding gas station price sign pylon: a vertical steel post with a big rectangular blank board panel on top, faded red and white paint, empty blank price slots, rust streaks; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    0.8,
+    0.6,
+    6.0
+   ]
+  },
+  {
+   "id": "fuel_truck_wreck",
+   "cat": "props",
+   "h": 4.66,
+   "desc": "an abandoned rusty Soviet ZIL fuel tanker truck: a rounded cab and a big oval cylindrical fuel tank on the back with a ladder and a hose reel, flat tires, faded orange paint; side 3/4 view with the truck pointing to the right; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    7.5,
+    2.5,
+    2.8
+   ]
+  },
+  {
+   "id": "shop_counter",
+   "cat": "props",
+   "h": 1.47,
+   "desc": "a Soviet grocery store counter: a long wooden shop counter with a glass display case on the front holding a few dusty cans, cracked glass, a set of old mechanical scales on top; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    2.2,
+    0.8,
+    1.0
+   ]
+  },
+  {
+   "id": "shop_shelf",
+   "cat": "props",
+   "h": 2.1,
+   "desc": "a tall wooden Soviet grocery store shelving rack against a wall, loaded with three-liter jars of pickled cucumbers and tomatoes, tin cans, dusty bottles and empty spaces, one shelf sagging; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    1.8,
+    0.5,
+    2.0
+   ]
+  },
+  {
+   "id": "cash_register",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "an old heavy mechanical Soviet cash register machine with a crank handle and round keys standing on a small wooden cashier stand with a glass cover over the money drawer; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    1.0,
+    0.7,
+    1.1
+   ]
+  },
+  {
+   "id": "fridge_display",
+   "cat": "props",
+   "h": 1.9,
+   "desc": "a Soviet grocery store refrigerated display: an upright white enamel refrigerator cabinet with a glass door, a rusty frame, empty dirty shelves inside, the door slightly open; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    1.0,
+    0.7,
+    1.9
+   ]
+  },
+  {
+   "id": "bottle_crates",
+   "cat": "props",
+   "h": 1.3,
+   "desc": "a stack of old wooden and grey plastic bottle crates full of empty green glass beer and milk bottles, some bottles broken; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    1.2,
+    0.8,
+    1.2
+   ]
+  },
+  {
+   "id": "beer_kegs",
+   "cat": "props",
+   "h": 1.04,
+   "desc": "three dented aluminium beer kegs, two standing and one lying on its side, next to a wooden pallet; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": [
+    1.6,
+    0.8,
+    0.9
+   ]
+  },
+  {
+   "id": "shed_canopy",
+   "cat": "props",
+   "h": 5.33,
+   "desc": "a simple open lean-to shed canopy: a rusty corrugated metal sloped roof on four thin steel pipe posts, a few roof sheets bent, empty under it; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "foot": {
+    "legs": [
+     6.0,
+     0.3,
+     3.0
+    ]
+   }
+  },
+  {
+   "id": "wallface_storefront",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: an abandoned Soviet shop storefront wall section, a big wide glass display window in a rusty steel frame with most of the glass broken into jagged shards, dark interior behind, a low plastered plinth below and a narrow plastered band above, no text, no letters"
+  },
+  {
+   "id": "wallface_stucco",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: a weathered Soviet plastered stucco wall painted faded pale yellow, large patches of fallen plaster showing red bricks underneath, damp stains, cracks, no text"
+  },
+  {
+   "id": "floor_linoleum",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "floor viewed straight down from above: old worn Soviet brown-red linoleum with a faded geometric pattern, torn patches showing grey concrete underneath, dirt, scattered debris"
+  },
+  {
+   "id": "decal_asphalt_crack",
+   "cat": "decals",
+   "h": 1.6,
+   "desc": "a long branching crack in dark asphalt seen straight down from above with thin weeds growing out of it, transparent background around the crack, no text"
+  },
+  {
+   "id": "decal_oil_puddle",
+   "cat": "decals",
+   "h": 1.45,
+   "desc": "a flat puddle of dark water with a rainbow oily sheen on the ground seen straight down from above, irregular edges, transparent background around it, no text"
+  },
+  {
+   "id": "decal_road_line",
+   "cat": "decals",
+   "h": 2.0,
+   "desc": "a single faded worn white painted road marking dash, a long thin rectangle with chipped edges, seen straight down from above, transparent background, no text"
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

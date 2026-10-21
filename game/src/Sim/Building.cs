@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -16,6 +16,7 @@ namespace Rastvordd.Sim
         public float Hp;
         public bool Open;              // дверь открыта
         public int OwnerId;
+        public int ClaimId;            // к какому столбу привязан (бюджет и содержание)
         public readonly List<MapWall> Boxes = new();
         public float MaxHp => Building.MaxHp(Kind, Tier);
         public bool IsEdge => Kind != StructKind.Foundation;
@@ -177,8 +178,8 @@ namespace Rastvordd.Sim
                 foreach (var n in NodesNear(c, 1.5f))
                     if (Geo.CircleBox(n.Pos, n.Radius, min, max)) { why = "мешает дерево/камень"; return false; }
                 foreach (var d in DeploysNear(c, 1.5f))
-                    if (Geo.CircleBox(d.Pos, d.Radius, min, max)) { why = "мешает установленное"; return false; }
-                return true;
+                    if (d.Kind != DeployKind.Claim && Geo.CircleBox(d.Pos, d.Radius, min, max)) { why = "мешает установленное"; return false; }
+                return ClaimAllows(a, kind, (ci, cj), out _, out why);
             }
 
             var (i, j, dir) = Building.NearestEdge(at);
@@ -193,7 +194,8 @@ namespace Rastvordd.Sim
             foreach (var (min, max, _, _) in Building.Boxes(kind, i, j, dir, false))
                 foreach (var o in Actors)
                     if (!o.Dead && Geo.CircleBox(o.Pos, o.Radius, min, max)) { why = "мешает человек"; return false; }
-            return true;
+            var own = HasFoundation(ca.Item1, ca.Item2) ? ca : cb;
+            return ClaimAllows(a, kind, own, out _, out why);
         }
 
         void TryBuild(Actor a, Vector2 at)
@@ -218,6 +220,12 @@ namespace Rastvordd.Sim
                 if (kind == StructKind.Door) _doors[(i, j, dir)] = s; else _edges[(i, j, dir)] = s;
             }
             s.Hp = s.MaxHp;
+            s.ClaimId = ClaimAt(kind == StructKind.Foundation ? (s.I, s.J) : Building.CellOf(s.Center))?.Id ?? 0;
+            if (s.ClaimId == 0 && s.IsEdge)
+            {
+                var (ea, eb) = Building.EdgeCells(s.I, s.J, s.Dir);
+                s.ClaimId = (ClaimAt(ea) ?? ClaimAt(eb))?.Id ?? 0;
+            }
             Structures.Add(s);
             RebuildBoxes(s);
             StructVersion++;
@@ -334,6 +342,139 @@ namespace Rastvordd.Sim
             RebuildBoxes(door);
             StructVersion++;
             Events.Add(new SimEvent { Kind = SimEventKind.Door, ActorId = a.Id, OtherId = door.Id, Pos = door.Center, Value = door.Open ? 1 : 0 });
+        }
+
+        // ---------- межевой столб: зона, бюджет, содержание (комбинация Астры, docs/gpt/05-stability.md) ----------
+
+        public const int ClaimRadius = 8;        // клеток по d∞
+        public const int ClaimGap = 21;          // минимум между столбами
+        public const float BudgetMax = 360, FoundMax = 160, DoorMax = 48;
+        const float UpkeepPerHour = 0.04f;       // доля цены текущих элементов
+        const float DecayPerMinute = 0.01f;      // доля максимального HP
+
+        static (int, int) ClaimCell(Deployable c) => Building.CellOf(c.Pos);
+
+        static int CellDist((int i, int j) a, (int i, int j) b) => Math.Max(Math.Abs(a.i - b.i), Math.Abs(a.j - b.j));
+
+        /// <summary>Столб, в зону которого попадает клетка (зоны не пересекаются).</summary>
+        public Deployable ClaimAt((int i, int j) cell)
+        {
+            foreach (var d in Deployables)
+                if (d.Kind == DeployKind.Claim && CellDist(ClaimCell(d), cell) <= ClaimRadius) return d;
+            return null;
+        }
+
+        /// <summary>Можно ли поставить столб: зоны не должны сближаться ближе зазора.</summary>
+        public bool CanPlaceClaim(Vector2 at, out string why)
+        {
+            why = "";
+            var c = Building.CellOf(at);
+            foreach (var d in Deployables)
+                if (d.Kind == DeployKind.Claim && CellDist(ClaimCell(d), c) < ClaimGap) { why = "рядом другая база"; return false; }
+            return true;
+        }
+
+        /// <summary>Нагрузка базы: B = фундаменты + 0,5·стены/проёмы/окна + 4·двери; проём с дверью считается дверью.</summary>
+        public (float b, int found, int doors) ClaimLoad(Deployable claim)
+        {
+            float b = 0; int found = 0, doors = 0;
+            foreach (var s in Structures)
+            {
+                if (s.ClaimId != claim.Id) continue;
+                switch (s.Kind)
+                {
+                    case StructKind.Foundation: b += 1; found++; break;
+                    case StructKind.Door: b += 4; doors++; break;
+                    case StructKind.Doorway: if (!_doors.ContainsKey((s.I, s.J, s.Dir))) b += 0.5f; break;
+                    default: b += 0.5f; break;
+                }
+            }
+            return (b, found, doors);
+        }
+
+        /// <summary>Расход содержания в час по ресурсам: 4% цены текущих уровней × надбавка за размер.</summary>
+        public Dictionary<string, float> UpkeepPerHourOf(Deployable claim)
+        {
+            var need = new Dictionary<string, float>();
+            foreach (var s in Structures)
+            {
+                if (s.ClaimId != claim.Id) continue;
+                foreach (var (id, n) in Building.Cost(s.Kind, s.Tier))
+                    need[id] = need.GetValueOrDefault(id) + n * UpkeepPerHour;
+            }
+            float b = ClaimLoad(claim).b;
+            float m = 1 + MathF.Pow(MathF.Max(0, b - 120) / 120f, 2);
+            foreach (var k in new List<string>(need.Keys)) need[k] *= m;
+            return need;
+        }
+
+        /// <summary>На сколько часов хватит запаса (минимум по ресурсам).</summary>
+        public float ClaimHoursLeft(Deployable claim)
+        {
+            float hours = float.MaxValue;
+            foreach (var (id, perHour) in UpkeepPerHourOf(claim))
+                if (perHour > 0) hours = MathF.Min(hours, claim.Store.GetValueOrDefault(id) / perHour);
+            return hours == float.MaxValue ? 0 : hours;
+        }
+
+        /// <summary>Проверка правил столба для нового элемента: своя зона, лимиты нагрузки, фундаментов и дверей.</summary>
+        bool ClaimAllows(Actor a, StructKind kind, (int i, int j) cell, out Deployable claim, out string why)
+        {
+            why = "";
+            claim = ClaimAt(cell);
+            if (claim == null) { why = "нужен межевой столб рядом (зона 8 клеток)"; return false; }
+            if (!claim.Auth.Contains(a.Id)) { why = "чужая зона"; return false; }
+            var (b, found, doors) = ClaimLoad(claim);
+            float add = kind == StructKind.Foundation ? 1 : kind == StructKind.Door ? 3.5f : 0.5f;   // дверь заменяет 0,5 проёма на 4
+            if (b + add > BudgetMax) { why = $"бюджет базы исчерпан ({b:0}/{BudgetMax})"; return false; }
+            if (kind == StructKind.Foundation && found + 1 > FoundMax) { why = $"фундаментов максимум {FoundMax}"; return false; }
+            if (kind == StructKind.Door && doors + 1 > DoorMax) { why = $"дверей максимум {DoorMax}"; return false; }
+            return true;
+        }
+
+        /// <summary>E по столбу: положить запас на содержание (до ~2 часов по каждому ресурсу).</summary>
+        void UseClaim(Actor a, Deployable claim)
+        {
+            if (!claim.Auth.Contains(a.Id)) { claim.Auth.Add(a.Id); Info(a, "Ты вписан в столб: можно строить в его зоне"); return; }
+            var need = UpkeepPerHourOf(claim);
+            var parts = new List<string>();
+            foreach (var (id, perHour) in need)
+            {
+                int want = (int)MathF.Ceiling(perHour * 2f - claim.Store.GetValueOrDefault(id));
+                if (want <= 0) continue;
+                int got = a.Take(id, want);
+                if (got <= 0) continue;
+                claim.Store[id] = claim.Store.GetValueOrDefault(id) + got;
+                parts.Add($"{Items.Name(id)} {got}");
+            }
+            float h = ClaimHoursLeft(claim);
+            Info(a, parts.Count > 0 ? $"В столб: {string.Join(", ", parts)} · хватит на {h:0.0} ч" : need.Count == 0 ? "Столб: базы ещё нет — содержать нечего" : $"Столб: запас на {h:0.0} ч");
+        }
+
+        /// <summary>Раз в секунду: столбы едят запас; без запаса — отсрочка 30 минут, потом гниение тех элементов, чей ресурс кончился.</summary>
+        void StepClaims()
+        {
+            if (Tick % 30 != 0) return;
+            foreach (var claim in Deployables)
+            {
+                if (claim.Kind != DeployKind.Claim) continue;
+                var lacking = new HashSet<string>();
+                foreach (var (id, perHour) in UpkeepPerHourOf(claim))
+                {
+                    float left = claim.Store.GetValueOrDefault(id) - perHour / 3600f;
+                    if (left < 0) { lacking.Add(id); left = 0; }
+                    claim.Store[id] = left;
+                }
+                if (lacking.Count == 0) { claim.Grace = 1800f; continue; }
+                claim.Grace -= 1f;
+                if (claim.Grace > 0) continue;
+                foreach (var s in new List<Structure>(Structures))
+                {
+                    if (s.ClaimId != claim.Id) continue;
+                    foreach (var (id, _) in Building.Cost(s.Kind, s.Tier))
+                        if (lacking.Contains(id)) { DamageStructure(s, s.MaxHp * DecayPerMinute / 60f, -1); break; }
+                }
+            }
         }
 
         Structure NearestDoor(Vector2 p, float range)

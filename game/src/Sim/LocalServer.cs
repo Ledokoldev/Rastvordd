@@ -63,6 +63,8 @@ namespace Rastvordd.Sim
         public bool HoldingPlan;        // план постройки: призрак элемента под курсором
         public StructKind BuildPiece;
         public bool BuildOk;
+        public bool HasZone;            // зона столба под курсором (клетка столба, радиус World.ClaimRadius)
+        public (int i, int j) ZoneCell;
         public BeltSlotInfo?[] Belt = new BeltSlotInfo?[Actor.BeltSize];
         public int Current;
         public List<(string name, int count)> Inventory = new();
@@ -159,6 +161,7 @@ namespace Rastvordd.Sim
             var me = World.Find(clientId);
             var snap = new Snapshot { Tick = World.Tick, Time = World.Time, DayTime = World.TimeOfDay };
             snap.Self = BuildSelf(me);
+            if (me.Held?.Def?.Build == true && World.ClaimAt(Building.CellOf(me.LastAim)) is Deployable zc) { snap.Self.ZoneCell = Building.CellOf(zc.Pos); snap.Self.HasZone = true; }
             float r2 = WorldViewRadius * WorldViewRadius;
 
             foreach (var a in World.Actors)
@@ -291,7 +294,7 @@ namespace Rastvordd.Sim
             return s;
         }
 
-        static string Hint((World.InteractKind kind, object target) it) => it.kind switch
+        string Hint((World.InteractKind kind, object target) it) => it.kind switch
         {
             World.InteractKind.Bag => ((LootBag)it.target).IsCrate ? "[E] Залутать ящик" : "[E] Залутать",
             World.InteractKind.Pickup => ((Pickup)it.target).Kind switch
@@ -302,9 +305,18 @@ namespace Rastvordd.Sim
             },
             World.InteractKind.Furnace => FurnaceHint((Deployable)it.target),
             World.InteractKind.Workbench => "[E] Верстак",
+            World.InteractKind.Claim => ClaimHint(World, (Deployable)it.target),
             World.InteractKind.Door => ((Structure)it.target).Open ? "[E] Закрыть дверь" : "[E] Открыть дверь",
             _ => "",
         };
+
+        static string ClaimHint(World w, Deployable c)
+        {
+            var (b, found, doors) = w.ClaimLoad(c);
+            float h = w.ClaimHoursLeft(c);
+            string upkeep = b <= 0 ? "" : h > 0 ? $" · запас {h:0.0} ч" : c.Grace > 0 ? $" · ЗАПАСА НЕТ, гниение через {c.Grace / 60:0} мин" : " · ГНИЁТ";
+            return $"[E] Межевой столб · нагрузка {b:0}/{World.BudgetMax} · фундаменты {found}/{World.FoundMax} · двери {doors}/{World.DoorMax}{upkeep}";
+        }
 
         static string FurnaceHint(Deployable f)
         {

@@ -1318,6 +1318,12 @@
    "cat": "walls",
    "tile": 3,
    "desc": "front elevation viewed straight-on: a crude door of welded rusty steel sheet plates with rivets, weld seams and a bolted handle plate"
+  },
+  {
+   "id": "claim_post",
+   "cat": "props",
+   "desc": "a land claim post: a thick weathered wooden pole dug into the ground with a small lockable tin box nailed to it, a faded red rag tied on top and a few nails and wire, post-apocalyptic",
+   "h": 1.8
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

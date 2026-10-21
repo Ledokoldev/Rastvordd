@@ -161,6 +161,16 @@ namespace Rastvordd.Client
 
         public BuildGhost2D() { ZIndex = 6; }
 
+        bool _zone;
+        (int i, int j) _zoneCell;
+        /// <summary>Зона столба под курсором — пунктирный квадрат 17×17 клеток.</summary>
+        public void SetZone(bool has, (int i, int j) cell)
+        {
+            if (has == _zone && cell == _zoneCell) return;
+            _zone = has; _zoneCell = cell;
+            QueueRedraw();
+        }
+
         public void Set(StructKind kind, SVec aim, bool ok)
         {
             if (kind == _kind && ok == _ok && SnapKey(kind, aim) == SnapKey(_kind, _at)) return;
@@ -178,6 +188,14 @@ namespace Rastvordd.Client
         {
             var fill = _ok ? new Color(0.45f, 0.8f, 1f, 0.28f) : new Color(1f, 0.35f, 0.3f, 0.28f);
             var line = _ok ? new Color(0.6f, 0.9f, 1f, 0.85f) : new Color(1f, 0.45f, 0.4f, 0.85f);
+            if (_zone)
+            {
+                float c = Building.Cell * Iso.PPM;
+                var z = new Rect2((_zoneCell.i - World.ClaimRadius) * c, (_zoneCell.j - World.ClaimRadius) * c, (2 * World.ClaimRadius + 1) * c, (2 * World.ClaimRadius + 1) * c);
+                var zc = new Color(1f, 0.85f, 0.4f, 0.55f);
+                for (float x = z.Position.X; x < z.End.X; x += 12) { DrawLine(new Vector2(x, z.Position.Y), new Vector2(Mathf.Min(x + 6, z.End.X), z.Position.Y), zc, 1); DrawLine(new Vector2(x, z.End.Y), new Vector2(Mathf.Min(x + 6, z.End.X), z.End.Y), zc, 1); }
+                for (float y = z.Position.Y; y < z.End.Y; y += 12) { DrawLine(new Vector2(z.Position.X, y), new Vector2(z.Position.X, Mathf.Min(y + 6, z.End.Y)), zc, 1); DrawLine(new Vector2(z.End.X, y), new Vector2(z.End.X, Mathf.Min(y + 6, z.End.Y)), zc, 1); }
+            }
             if (_kind == StructKind.Foundation)
             {
                 var (i, j) = Building.CellOf(_at);

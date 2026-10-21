@@ -359,9 +359,9 @@ namespace Rastvordd.Sim
         void GiveDebugKit(Actor a)
         {
             a.AddSlot(Items.NewSlot("weapon_ak", 30));
-            a.AddSlot(Items.NewSlot("tool_hatchet"));
             a.AddSlot(Items.NewSlot("build_plan"));
             a.AddSlot(Items.NewSlot("tool_hammer"));
+            a.AddSlot(Items.NewSlot("deploy_claim"));
             a.AddSlot(Items.NewSlot("weapon_torch"));
             a.Add("ammo_rifle", 120);
             a.Add("metal_ore", 60);
@@ -476,6 +476,7 @@ namespace Rastvordd.Sim
             StepBags();
             StepPickupsAndNodes();
             StepFurnaces();
+            StepClaims();
         }
 
         void StepActor(Actor a, InputCmd cmd)
@@ -834,7 +835,14 @@ namespace Rastvordd.Sim
         {
             if (Vector2.Distance(a.Pos, at) > PlaceRange) { Info(a, "Слишком далеко"); return; }
             if (!IsFree(at, 0.65f)) { Info(a, "Здесь не поставить"); return; }
-            AddDeployable(new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id });
+            if (def.Deploy == DeployKind.Claim && !CanPlaceClaim(at, out string why)) { Info(a, $"Столб: {why}"); return; }
+            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id };
+            dep.Auth.Add(a.Id);
+            AddDeployable(dep);
+            // фундаменты без столба в его зоне — привязываются к нему
+            if (def.Deploy == DeployKind.Claim)
+                foreach (var s in Structures)
+                    if (s.ClaimId == 0 && ClaimAt(Building.CellOf(s.Center)) == dep) s.ClaimId = dep.Id;
             var held = a.Held;
             held.Count--;
             if (held.Count <= 0) a.Belt[a.Current] = null;
@@ -853,7 +861,7 @@ namespace Rastvordd.Sim
 
         // ---------- взаимодействие (E) ----------
 
-        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door }
+        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim }
 
         /// <summary>Что ближе всего под рукой. Используется и сервером, и подсказкой на экране.</summary>
         public (InteractKind kind, object target) NearestInteract(Actor a)
@@ -875,9 +883,9 @@ namespace Rastvordd.Sim
             foreach (var dp in DeploysNear(a.Pos, InteractRange))
             {
                 float d = Vector2.Distance(a.Pos, dp.Pos) - dp.Radius + 0.3f;
-                if (d < bestD) { bestD = d; best = (dp.Kind == DeployKind.Furnace ? InteractKind.Furnace : InteractKind.Workbench, dp); }
+                if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, _ => InteractKind.Workbench }, dp); }
             }
-            var door = NearestDoor(a.Pos, MathF.Min(bestD, InteractRange) + 0.4f);
+            var door = NearestDoor(a.Pos, best.Item1 == InteractKind.None ? InteractRange + 0.4f : bestD);   // дверь — если ближе остального
             if (door != null) best = (InteractKind.Door, door);
             return best;
         }
@@ -891,6 +899,7 @@ namespace Rastvordd.Sim
                 case InteractKind.Pickup: Collect(a, (Pickup)target); break;
                 case InteractKind.Furnace: UseFurnace(a, (Deployable)target); break;
                 case InteractKind.Door: ToggleDoor(a, (Structure)target); break;
+                case InteractKind.Claim: UseClaim(a, (Deployable)target); break;
                 case InteractKind.Workbench: Info(a, "Верстак: рядом с ним доступны рецепты уровня 1 (Q)"); break;
             }
         }

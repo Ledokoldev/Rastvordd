@@ -85,7 +85,7 @@ namespace Rastvordd.Sim
     }
 
     public enum ItemCategory { Resource, Component, Tool, Weapon, Ammo, Food, Medical, Deployable }
-    public enum DeployKind { None, Workbench, Furnace }
+    public enum DeployKind { None, Workbench, Furnace, Claim }
 
     public sealed class ItemDef
     {
@@ -185,6 +185,7 @@ namespace Rastvordd.Sim
 
             // устанавливаемое
             Add("deploy_workbench", "Верстак", ItemCategory.Deployable).Deploy = DeployKind.Workbench;
+            Add("deploy_claim", "Межевой столб", ItemCategory.Deployable).Deploy = DeployKind.Claim;   // центр базы: зона, бюджет, содержание
             Add("deploy_furnace", "Печь", ItemCategory.Deployable).Deploy = DeployKind.Furnace;
         }
 
@@ -215,6 +216,7 @@ namespace Rastvordd.Sim
             new Recipe { Output = "tool_hatchet", Cost = new[] { ("wood", 200), ("stone", 100) }, Time = 6 },
             new Recipe { Output = "tool_pickaxe", Cost = new[] { ("wood", 200), ("stone", 100) }, Time = 6 },
             new Recipe { Output = "weapon_spear", Cost = new[] { ("wood", 300) }, Time = 5 },
+            new Recipe { Output = "deploy_claim", Cost = new[] { ("wood", 100) }, Time = 3 },
             new Recipe { Output = "build_plan", Cost = new[] { ("wood", 20) }, Time = 1 },
             new Recipe { Output = "tool_hammer", Cost = new[] { ("wood", 100) }, Time = 3 },
             new Recipe { Output = "weapon_torch", Cost = new[] { ("wood", 30), ("cloth", 5) }, Time = 2 },
@@ -388,6 +390,11 @@ namespace Rastvordd.Sim
         public float Fuel;               // дерево внутри
         public int OutMetal, OutSulfur, OutCharcoal;
         public float SmeltTimer, CharcoalAcc;
+
+        // межевой столб (центр базы): кто может строить, запас на содержание, отсрочка гниения
+        public readonly HashSet<int> Auth = new();
+        public readonly Dictionary<string, float> Store = new();
+        public float Grace = 1800f;
         public bool Burning => Fuel > 0 && (Ore > 0 || SulfurOre > 0);
     }
 

@@ -794,7 +794,15 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            var tex = Art.Get(_kind == DeployKind.Workbench ? "props/workbench" : "props/furnace");
+            var tex = Art.Get(_kind switch { DeployKind.Workbench => "props/workbench", DeployKind.Claim => "props/claim_post", _ => "props/furnace" });
+            if (tex == null && _kind == DeployKind.Claim)
+            {
+                // запасной вид столба: столб с жестяным ящиком и красной тряпкой
+                DrawRect(new Rect2(-2, -Iso.H(1.8f), 4, Iso.H(1.8f)), new Color(0.36f, 0.27f, 0.17f));
+                DrawRect(new Rect2(-5, -Iso.H(1.1f), 10, 8), new Color(0.5f, 0.5f, 0.48f));
+                DrawRect(new Rect2(2, -Iso.H(1.8f), 5, 3), new Color(0.6f, 0.15f, 0.12f));
+                return;
+            }
             if (tex != null)
             {
                 DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.4f));

@@ -6,7 +6,7 @@ param(
     [int]$Parallel = 3,
     [string[]]$Only = @(),
     [switch]$Force,
-    [string]$Manifest = ""
+    [Alias("Manifest")][string]$ExtraManifest = ""   # не $Manifest: переменные PowerShell без учёта регистра, совпало бы с $manifest ниже
 )
 
 $root = Split-Path -Parent $PSScriptRoot
@@ -16,9 +16,9 @@ $codex = Get-ChildItem "C:\Program Files\WindowsApps" -Directory -Filter "OpenAI
 if (-not $codex) { throw "codex.exe не найден" }
 
 $manifest = Get-Content -Raw -Encoding UTF8 (Join-Path $root "assets\manifest.json") | ConvertFrom-Json
-if ($Manifest) {
+if ($extraManifest) {
     # отдельный список ассетов (параллельная работа): ассеты — из него, оформление кадра — из общего манифеста
-    $extra = Get-Content -Raw -Encoding UTF8 (Join-Path $root $Manifest) | ConvertFrom-Json
+    $extra = Get-Content -Raw -Encoding UTF8 (Join-Path $root $extraManifest) | ConvertFrom-Json
     $manifest.assets = $extra.assets
 }
 $todo = @()

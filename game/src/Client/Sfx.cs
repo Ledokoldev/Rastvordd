@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Godot;
 
 namespace Rastvordd.Client
@@ -12,6 +12,8 @@ namespace Rastvordd.Client
         static readonly Dictionary<string, AudioStream> Cache = new();
         static Node _parent;
         static readonly RandomNumberGenerator Rng = new();
+        /// <summary>Сколько раз звучал каждый звук (отладка: --sfxlog печатает при выходе).</summary>
+        public static readonly Dictionary<string, int> Played = new();
 
         public static void Init(Node parent) => _parent = parent;
 
@@ -31,6 +33,7 @@ namespace Rastvordd.Client
         {
             var s = Get(name);
             if (s == null || _parent == null) return;
+            Played[name] = Played.GetValueOrDefault(name) + 1;
             if (Acoustics.Ready)
             {
                 // звук мира — через акустику: задержка, окклюзия, эхо, бинаурал

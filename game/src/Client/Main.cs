@@ -504,6 +504,8 @@ namespace Rastvordd.Client
             if (_shotPath != null && _frame == _shotFrame)
             {
                 SaveScreenshot(_shotPath);
+                if (System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--sfxlog") >= 0)
+                    foreach (var kv in Sfx.Played) GD.Print($"sfx {kv.Key}: {kv.Value}");
                 GetTree().Quit();
             }
         }

@@ -72,7 +72,8 @@ namespace Rastvordd.Client
 
         /// <summary>Плывёт: тело по пояс в воде, круги по воде.</summary>
         public bool Swimming;
-        float _ripple;
+        float _ripple, _strokeT;
+        bool _wasSwimming;
 
         string _label;
         /// <summary>Подпись над головой (боты: имя и что делает).</summary>
@@ -226,6 +227,10 @@ namespace Rastvordd.Client
             _held.Position = (basePos - new Vector2(Mathf.Cos(facing), Mathf.Sin(facing)) * kickBack).Round();
             _held.ReloadHand = reloadHand;
             if (Swimming) { _ripple += dt; QueueRedraw(); }
+            // звук воды: всплеск при входе, гребки на ходу
+            if (Swimming && !_wasSwimming) Sfx.Play("splash", GlobalPosition, -4, 30, 0.1f);
+            _wasSwimming = Swimming;
+            if (Swimming && speed > 0.3f && (_strokeT -= dt) <= 0) { _strokeT = 0.85f; Sfx.Play("swim_stroke", GlobalPosition, -8, 22, 0.15f); }
             if (_rig != null)
             {
                 _rig.SetSwim(Swimming);

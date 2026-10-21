@@ -64,6 +64,21 @@ def whoosh(name: str) -> None:
     s.save(name, w)
 
 
+def water(name: str, length: float, bright: float, body: float) -> None:
+    # вода: шум с «пузырями» — короткие синусные всплески с падающей частотой
+    c = s.n(length)
+    hiss = [x * e for x, e in zip(s.lowpass(s.highpass(s.noise(c), 300), bright), s.env(c, 0.02 * length, length / 3))]
+    bubbles = [0.0] * c
+    for _ in range(int(30 * length)):
+        at = s.rng.randint(0, max(1, c - s.n(0.05)))
+        f0 = s.rng.uniform(400, 1400)
+        ln = s.n(s.rng.uniform(0.01, 0.04))
+        for i in range(min(ln, c - at)):
+            bubbles[at + i] += s.math.sin(2 * s.math.pi * f0 * (1 + i / ln) * i / s.SR) * (1 - i / ln) * 0.3
+    thud = [x * e for x, e in zip(s.lowpass(s.noise(c), 250), s.env(c, 0.003, 0.08))]
+    s.save(name, s.mix(hiss, bubbles, [x * body for x in thud]), 0.7)
+
+
 def main() -> None:
     glass("glass_break")
     whoosh("fire_whoosh")

@@ -1,0 +1,5 @@
+- [Раствордд concept](rastvordd-game-concept.md) — what the game is, where history and rules live
+- [UI minimal](rastvordd-ui-minimal.md) — flat minimal UI, no rusty post-apoc frames
+- [Codex delegation](codex-delegation.md) — creative tasks may go to Codex ("Астра"), effort ≤ medium
+- [Save safety](save-safety.md) — debug runs never touch the player's save; close game before relaunch
+- [Local only](local-only-repo.md) — everything goes into the folder; no remote, never push

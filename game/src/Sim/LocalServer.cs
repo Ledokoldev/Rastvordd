@@ -502,7 +502,7 @@ namespace Rastvordd.Sim
 
         string Hint((World.InteractKind kind, object target) it) => it.kind switch
         {
-            World.InteractKind.Bag => ((LootBag)it.target) is var lb && lb.Safe && !lb.Unlocked ? "[E] Сейф — нужна карта доступа" : lb.IsCrate ? "[E] Открыть ящик" : lb.Corpse ? "[E] Обыскать рюкзак" : "[E] Подобрать вещи",
+            World.InteractKind.Bag => ((LootBag)it.target) is var lb && lb.Safe && !lb.Unlocked ? "[E] Сейф — нужна карта доступа" : lb.Safe ? "[E] Открыть сейф" : lb.IsCrate ? "[E] Открыть ящик" : lb.Corpse ? "[E] Обыскать рюкзак" : "[E] Подобрать вещи",
             World.InteractKind.Recycler => "[E] Переработчик — детали в лом",
             World.InteractKind.Pickup => ((Pickup)it.target).Kind switch
             {

@@ -140,7 +140,7 @@ namespace Rastvordd.Sim
                 AddScrapSpot(NodeKind.Barrel, p);
             AddScrapSpot(NodeKind.Junk, new Vector2(33, -22));
             AddRecycler(new Vector2(20, -6));
-            AddSafe(new Vector2(6.5f, -33));
+            AddSafe(new Vector2(31, -35.5f));
             AddScrapSpot(NodeKind.Junk, new Vector2(7, -5));
 
             foreach (var p in new[] { new Vector2(15, -24), new Vector2(28, -30), new Vector2(29, -10),

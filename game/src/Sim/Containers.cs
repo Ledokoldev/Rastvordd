@@ -397,7 +397,7 @@ namespace Rastvordd.Sim
             {
                 case UiKind.Box:
                 case UiKind.Bag:
-                    v.Title = a.OpenUi == UiKind.Box ? "ЯЩИК" : a.OpenTarget is LootBag lb ? (lb.IsCrate ? "ЯЩИК" : lb.Corpse ? "РЮКЗАК" : "ВЕЩИ НА ЗЕМЛЕ") : "РЮКЗАК";
+                    v.Title = a.OpenUi == UiKind.Box ? "ЯЩИК" : a.OpenTarget is LootBag lb ? (lb.Safe ? "СЕЙФ" : lb.IsCrate ? "ЯЩИК" : lb.Corpse ? "РЮКЗАК" : "ВЕЩИ НА ЗЕМЛЕ") : "РЮКЗАК";
                     var items = UiItems(a);
                     int revealed = Math.Min(Revealed(a), items.Count);
                     int cells = CellCount(a, "cont");

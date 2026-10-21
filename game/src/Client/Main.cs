@@ -162,6 +162,15 @@ namespace Rastvordd.Client
             AddChild(_hud);
             _hud.CraftRequested += i => _craftReq = i;
             _hud.CodeEntered += (door, code) => _codeReq = (door, code);
+            _hud.WipeRequested += () =>
+            {
+                // игрок сам попросил новый вайп: стираем сохранение и перезапускаем сцену
+                _saveEnabled = false;
+                string path = ProjectSettings.GlobalizePath(SavePath);
+                if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+                Input.MouseMode = Input.MouseModeEnum.Hidden;
+                GetTree().ReloadCurrentScene();
+            };
 
             _ghost = new GhostView2D { Visible = false };
             _world.AddChild(_ghost);

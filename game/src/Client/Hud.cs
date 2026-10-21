@@ -62,6 +62,9 @@ namespace Rastvordd.Client
             var hrtf = new CheckBox { Text = SteamHrtf.Ready ? "Направление звука: Steam Audio HRTF" : "Steam Audio не загрузился — наш бинаурал", ButtonPressed = Tuning.SteamHrtf && SteamHrtf.Ready, Disabled = !SteamHrtf.Ready, FocusMode = Control.FocusModeEnum.None };
             hrtf.Toggled += on => { Tuning.SteamHrtf = on; Tuning.Save(); };
             box.AddChild(hrtf);
+            var wipe = new Button { Text = "Новый вайп (стереть сохранение и начать заново)", FocusMode = Control.FocusModeEnum.None };
+            wipe.Pressed += () => WipeRequested?.Invoke();
+            box.AddChild(wipe);
             _adminSounds = new Label();
             _adminSounds.AddThemeFontSizeOverride("font_size", 13);
             _adminSounds.AddThemeColorOverride("font_color", new Color(0.8f, 1f, 0.8f));
@@ -76,6 +79,7 @@ namespace Rastvordd.Client
         Label _adminSounds;
         public void SetAdminSounds(string text) { if (_adminSounds != null) _adminSounds.Text = text; }
         public event Action<int> CraftRequested;
+        public event Action WipeRequested;
 
         const string VisionShader = @"
 shader_type canvas_item;

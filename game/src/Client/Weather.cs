@@ -13,7 +13,7 @@ namespace Rastvordd.Client
 
         public Weather(Node world, Node root)
         {
-            _leaves = Make(world, 60, 7f, new Color(0.62f, 0.42f, 0.18f), new Vector3(10, 16, 0), new Vector3(1, 1, 0), 12, 22, 1f, 1.6f, 0.9f);
+            _leaves = Make(world, 28, 7f, new Color(0.78f, 0.68f, 0.3f), new Vector3(10, 16, 0), new Vector3(1, 1, 0), 12, 22, 1f, 1.6f, 0.9f);
             _snow = Make(world, 260, 6f, new Color(0.93f, 0.95f, 1f), new Vector3(5, 26, 0), new Vector3(0.3f, 1, 0), 18, 32, 1f, 1.5f, 0.9f);
             _dust = Make(world, 70, 4f, new Color(0.78f, 0.68f, 0.5f), new Vector3(26, 2, 0), new Vector3(1, 0.1f, 0), 25, 45, 1f, 2f, 0.45f);
 

@@ -71,6 +71,7 @@ namespace Rastvordd.Client
                 if (a == "kit") _debugEdge = true;
                 else if (a == "interact") _interactEdge = true;
                 else if (a == "eat") _eatEdge = true;
+                else if (a == "reload") _reloadEdge = true;
                 else if (a == "fire") _autoFireFrames = 4;
                 else if (a == "hold") _autoFireFrames = 100000;
                 else if (a == "release") _autoFireFrames = 0;
@@ -360,11 +361,14 @@ namespace Rastvordd.Client
                 {
                     case SimEventKind.Shot:
                         if (e.Text != "weapon_bow") Flash(e.Pos + e.Dir * 0.3f, new Color(1, 0.8f, 0.4f), 7, 0.06f, true);
+                        if (_actorViews.TryGetValue(e.ActorId, out var shooter)) shooter.Kick();
+                        if (e.Text != "weapon_bow") SpawnCasing(e.Pos, e.Dir);
                         // настоящий сэмпл выстрела для всего огнестрела (самопал — чуть выше и тише); каждый доигрывает до конца
                         if (e.Text == "weapon_bow") Sfx.Play("shot_bow", Iso.Px(e.Pos), -4, 25, 0.06f);
                         else Sfx.Play("shot_ak", Iso.Px(e.Pos), e.Text == "weapon_ak" ? 0 : -3, 120, 0.03f, e.Text == "weapon_ak" ? 1f : 1.12f);
                         break;
                     case SimEventKind.Reload:
+                        if (_actorViews.TryGetValue(e.ActorId, out var reloader)) reloader.StartReload(Items.Get(e.Text)?.Weapon?.ReloadTime ?? 2f);
                         Sfx.Play("reload_ak", Iso.Px(e.Pos), -2, 25, 0.02f);
                         break;
                     case SimEventKind.Swing:
@@ -462,6 +466,37 @@ namespace Rastvordd.Client
             };
         }
 
+        readonly List<Debris2D> _debris = new();
+        readonly RandomNumberGenerator _fxRng = new();
+
+        /// <summary>Гильза вылетает вбок от ствола, падает и отскакивает.</summary>
+        void SpawnCasing(SVec muzzle, SVec dir)
+        {
+            var d = new Vector2(dir.X, dir.Y);
+            var perp = new Vector2(-d.Y, d.X);
+            var g = new Debris2D
+            {
+                Position = Iso.Px(muzzle - dir * 0.45f), Z = Iso.GunH, VZ = _fxRng.RandfRange(70, 110),
+                Vel = perp * _fxRng.RandfRange(45, 80) + d * _fxRng.RandfRange(-25, 10), Spin = _fxRng.RandfRange(-25, 25), Life = 2.5f,
+            };
+            _world.AddChild(g);
+            _debris.Add(g);
+        }
+
+        /// <summary>Пустой магазин падает из оружия при перезарядке.</summary>
+        void SpawnMag(Vector2 heldPx, float facing)
+        {
+            float h = Iso.H(1.05f);
+            var g = new Debris2D
+            {
+                Position = heldPx + new Vector2(Mathf.Cos(facing) * 6, h), Z = h - 4, VZ = 15,
+                Vel = new Vector2(_fxRng.RandfRange(-12, 12), _fxRng.RandfRange(-4, 8)), Spin = _fxRng.RandfRange(-6, 6),
+                Life = 6f, Color = new Color(0.16f, 0.16f, 0.17f), Size = new Vector2(3, 5),
+            };
+            _world.AddChild(g);
+            _debris.Add(g);
+        }
+
         void FloatText(SVec pos, string text, Color c)
         {
             var t = new FloatText2D { Position = Iso.Px(pos), Text = text, Color = c, ZIndex = 5 };
@@ -492,6 +527,7 @@ namespace Rastvordd.Client
                 if (!_actorViews.TryGetValue(a.Id, out var view))
                 {
                     view = new ActorView2D(a.IsNpc, a.Id == _myId);
+                    view.MagDropped += SpawnMag;
                     _world.AddChild(view);
                     _actorViews[a.Id] = view;
                 }
@@ -564,6 +600,8 @@ namespace Rastvordd.Client
             for (int i = _texts.Count - 1; i >= 0; i--)
                 if (!_texts[i].Tick(dt)) { _texts[i].QueueFree(); _texts.RemoveAt(i); }
 
+            for (int i = _debris.Count - 1; i >= 0; i--)
+                if (!_debris[i].Tick(dt)) { _debris[i].QueueFree(); _debris.RemoveAt(i); }
             for (int i = _fx.Count - 1; i >= 0; i--)
             {
                 var f = _fx[i];

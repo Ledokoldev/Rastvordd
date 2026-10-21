@@ -49,8 +49,39 @@ namespace Rastvordd.Client
 
         public void StartSwing() => _swing = SwingTime;
 
+        // ---------- анимации оружия в стиле Gungeon: тело — кадры, оружие с кистями анимируется кодом ----------
+        float _kick, _reloadT, _reloadDur;
+        bool _magDropped;
+        float _facing;
+        /// <summary>Выпал магазин при перезарядке: позиция (пиксели мира) и направление ствола.</summary>
+        public event System.Action<Vector2, float> MagDropped;
+
+        /// <summary>Выстрел: ствол дёргается назад и подкидывается.</summary>
+        public void Kick() => _kick = 1f;
+
+        /// <summary>Начало перезарядки: наклон, магазин выпадает, кисть за новым, возврат.</summary>
+        public void StartReload(float duration)
+        {
+            _reloadT = 0;
+            _reloadDur = Mathf.Max(0.3f, duration);
+            _magDropped = false;
+        }
+
         public override void _Draw()
         {
+            // «смаз» удара: дуга перед персонажем по ходу замаха
+            if (_swing > 0 && !_dead)
+            {
+                float t = 1f - _swing / SwingTime;
+                if (t > 0.3f)
+                {
+                    float k = (t - 0.3f) / 0.7f;
+                    var c = new Vector2(0, -Iso.H(1.05f));
+                    float a0 = _facing - 1.1f, a1 = _facing - 1.1f + 1.9f * k;
+                    DrawArc(c, 20, a0, a1, 12, new Color(1, 1, 1, 0.35f * (1 - k)), 4f);
+                    DrawArc(c, 23, a0 + 0.3f, a1, 12, new Color(1, 1, 1, 0.18f * (1 - k)), 2f);
+                }
+            }
             // тень
             DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.45f));
             DrawCircle(Vector2.Zero, _dead ? 16 : 10, new Color(0, 0, 0, 0.28f));
@@ -97,9 +128,39 @@ namespace Rastvordd.Client
                 swingOffset = t < 0.35f ? Mathf.Lerp(0, -1.3f, t / 0.35f) : Mathf.Lerp(-1.3f, 0.5f, (t - 0.35f) / 0.65f);
                 if (!right) swingOffset = -swingOffset;
             }
-            _held.Rotation = facing + swingOffset + (reloading ? (right ? 0.9f : -0.9f) : 0);
+            _facing = facing;
+            float side = right ? 1 : -1;
+
+            // отдача: назад вдоль ствола и вверх, быстро гаснет
+            _kick = Mathf.MoveToward(_kick, 0, dt * 9f);
+            float kickBack = _kick * _kick * 4f;
+            float kickUp = -_kick * _kick * 0.18f * side;
+
+            // перезарядка по фазам: 0–20% наклон вниз, ~30% магазин выпадает, 30–75% кисть с новым магазином, 75–100% возврат
+            float tilt = 0, reloadHand = 0;
+            if (reloading)
+            {
+                if (_reloadDur <= 0) StartReload(1.5f);   // увидели перезарядку без события — всё равно анимируем
+                _reloadT += dt;
+                float t = Mathf.Clamp(_reloadT / _reloadDur, 0, 1);
+                tilt = t < 0.2f ? t / 0.2f : t > 0.75f ? 1f - (t - 0.75f) / 0.25f : 1f;
+                tilt = Mathf.SmoothStep(0, 1, tilt) * 0.85f;
+                reloadHand = t < 0.3f ? 0 : t < 0.5f ? (t - 0.3f) / 0.2f : t < 0.7f ? 1f - (t - 0.5f) / 0.2f : 0;
+                if (!_magDropped && t >= 0.3f)
+                {
+                    _magDropped = true;
+                    MagDropped?.Invoke(GlobalPosition + _held.Position, facing);
+                }
+            }
+            else _reloadDur = 0;
+
+            _held.Rotation = facing + swingOffset + kickUp + tilt * side;
             _held.Scale = new Vector2(1, right ? 1 : -1);
-            _held.Position = new Vector2(right ? 2 : -2, -Iso.H(1.05f) * (crouch ? 0.78f : 1f) + (_body.Moving ? -Mathf.Abs(Mathf.Sin(_body.Phase)) : 0));
+            var basePos = new Vector2(right ? 2 : -2, -Iso.H(1.05f) * (crouch ? 0.78f : 1f) + (_body.Moving ? -Mathf.Abs(Mathf.Sin(_body.Phase)) : 0));
+            _held.Position = (basePos - new Vector2(Mathf.Cos(facing), Mathf.Sin(facing)) * kickBack).Round();
+            _held.ReloadHand = reloadHand;
+            _held.SwingT = _swing > 0 ? 1f - _swing / SwingTime : -1f;
+            if (_swing > 0 || _held.SwingT >= 0) QueueRedraw();
         }
     }
 
@@ -163,6 +224,11 @@ namespace Rastvordd.Client
     public partial class Held2D : Node2D
     {
         public string ItemId;
+        public float ReloadHand;      // 0..1: вторая кисть уходит к магазину
+        public float SwingT = -1;
+
+        /// <summary>Держат двумя руками (вторая кисть на цевье).</summary>
+        static bool TwoHanded(string id) => id is "weapon_ak" or "weapon_pipe" or "weapon_bow" or "weapon_spear" or "tool_pickaxe" or "tool_hatchet";
 
         static readonly Color Metal = new Color(0.14f, 0.14f, 0.15f);
         static readonly Color Steel = new Color(0.55f, 0.56f, 0.58f);
@@ -194,7 +260,16 @@ namespace Rastvordd.Client
                 DrawSetTransform(new Vector2(len * 0.3f, 0), 0, new Vector2(s, s));
                 DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() / 2));
                 DrawSetTransform(Vector2.Zero, 0, Vector2.One);
-                DrawCircle(new Vector2(3, 0.5f), 2.4f, Skin);
+                // кисти — пиксельные квадратики: на рукояти и (у двуручного) на цевье; при перезарядке вторая уходит к магазину
+                DrawRect(new Rect2(1, -1, 4, 4), Skin);
+                DrawRect(new Rect2(1, 2, 4, 1), Skin.Darkened(0.25f));
+                if (TwoHanded(ItemId))
+                {
+                    var fore = new Vector2(len * 0.62f, 0).Lerp(new Vector2(len * 0.38f, 7), ReloadHand).Round();
+                    DrawRect(new Rect2(fore.X - 2, fore.Y - 1, 4, 4), Skin);
+                    DrawRect(new Rect2(fore.X - 2, fore.Y + 2, 4, 1), Skin.Darkened(0.25f));
+                    if (ReloadHand > 0.05f) DrawRect(new Rect2(fore.X - 1, fore.Y - 5, 3, 5), new Color(0.16f, 0.16f, 0.17f));   // новый магазин в руке
+                }
                 return;
             }
             switch (ItemId)
@@ -729,6 +804,45 @@ namespace Rastvordd.Client
             DrawCircle(Vector2.Zero, 0.65f * Iso.PPM, c);
             DrawArc(Vector2.Zero, 0.65f * Iso.PPM, 0, Mathf.Tau, 32, new Color(c, 0.9f), 1.5f, true);
             DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+        }
+    }
+}
+
+namespace Rastvordd.Client
+{
+    /// <summary>Гильза или выпавший магазин: летит, падает, отскакивает, лежит и тает.</summary>
+    public partial class Debris2D : Godot.Node2D
+    {
+        public Godot.Vector2 Vel;
+        public float Z, VZ, Life = 3f;
+        public Godot.Color Color = new(0.85f, 0.68f, 0.25f);
+        public Godot.Vector2 Size = new(2, 1);
+        public float Spin;
+
+        /// <summary>Шаг физики; false — пора удалить.</summary>
+        public bool Tick(float dt)
+        {
+            Life -= dt;
+            if (Life <= 0) return false;
+            VZ -= 420f * dt;
+            Z += VZ * dt;
+            Position += Vel * dt;
+            Rotation += Spin * dt;
+            if (Z <= 0)
+            {
+                Z = 0;
+                if (VZ < -30) { VZ = -VZ * 0.3f; Vel *= 0.5f; Spin *= 0.5f; }   // отскок
+                else { VZ = 0; Vel = Vel.MoveToward(Godot.Vector2.Zero, 200 * dt); Spin = 0; }
+            }
+            QueueRedraw();
+            return true;
+        }
+
+        public override void _Draw()
+        {
+            var c = new Godot.Color(Color, Godot.Mathf.Clamp(Life, 0, 1));
+            DrawSetTransform(new Godot.Vector2(0, -Z), 0, Godot.Vector2.One);
+            DrawRect(new Godot.Rect2(-Size / 2, Size), c);
         }
     }
 }

@@ -149,6 +149,7 @@ namespace Rastvordd.Sim
             // отладка: --botplan=tri|honey|classic — всем фермерам один план
             var force = Array.Find(Environment.GetCommandLineArgs(), a => a.StartsWith("--botplan="));
             if (force != null) { why = "задано отладкой"; return force.Substring(10) switch { "tri" => TrianglePlan(), "honey" => HoneycombPlan(), _ => ClassicPlan() }; }
+            if (Archetype == BotArchetype.Roamer) { why = "бродяга — быстрая кибитка, всё в снаряжение"; return TrianglePlan(); }
             if (_caution > 0.75f) { why = "осторожный — побольше буферов"; return HoneycombPlan(); }
             if (_greed > 0.65f) { why = "жадный — дешёвый старт, всё в фарм"; return TrianglePlan(); }
             why = "ровный характер — проверенная классика";
@@ -308,11 +309,16 @@ namespace Rastvordd.Sim
         bool ChooseSitePlan()
         {
             _plan ??= PickPlan(out string why);
+            // место — у «своей» РТ (по аппетиту к риску), на разумном расстоянии: за запретной зоной стройки, не на чужой базе
+            if (_fav == null && !_favTried) { _favTried = true; _fav = PickFavourite(out _favWhy); }
             var home = _me.Pos;
-            for (int tries = 0; tries < 80; tries++)
+            for (int tries = 0; tries < 160; tries++)
             {
-                float ang = (float)(_rng.NextDouble() * Math.PI * 2), dist = 15 + (float)_rng.NextDouble() * 45;
-                var p = home + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
+                bool nearFav = _fav != null && tries < 120;
+                float ang = (float)(_rng.NextDouble() * Math.PI * 2);
+                float dist = nearFav ? _fav.Radius + 48 + (float)_rng.NextDouble() * 60 : 15 + (float)_rng.NextDouble() * 45;
+                var p = (nearFav ? _fav.M.Center : home) + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
+                if (!_w.Terrain.IsLand(p) || OtherBaseNear(p, 55)) continue;
                 var (ci, cj) = Building.CellOf(p);
                 bool ok = true;
                 // весь план с соседями (треугольники выступают на клетку): мейн — строки −1..0, кибитка — 1, двор у входа — 2..3
@@ -323,9 +329,26 @@ namespace Rastvordd.Sim
                 if (_w.NearMonument(p, 40)) continue;
                 _origin = (ci, cj);
                 _site = Building.CellCenter(ci, cj);
-                Thought($"выбрал место под базу и план «{_plan.Name}»");
+                lock (Sites) Sites.Add((_w, _site.Value));
+                if (nearFav) { Thought($"строюсь у «{_fav.Short}» ({Vector2.Distance(p, _fav.M.Center):0} м): {_favWhy}; план «{_plan.Name}»"); _w.Milestone(_me, $"строится у РТ «{_fav.Short}»"); }
+                else Thought($"выбрал место под базу и план «{_plan.Name}»{(_fav != null ? $" (у «{_fav.Short}» места не нашлось)" : "")}");
                 return true;
             }
+            return false;
+        }
+
+        readonly Dictionary<int, float> _hammerSkip = new();
+        int _hammerId = -1;
+        float _hammerSince;
+        bool _favTried;
+        string _favWhy;
+        /// <summary>Места, выбранные ботами этого мира (шкафа ещё может не быть), — чтобы не строиться друг на друге.</summary>
+        static readonly List<(World w, Vector2 p)> Sites = new();
+
+        bool OtherBaseNear(Vector2 p, float r)
+        {
+            foreach (var d in _w.Deployables) if (d.Kind == DeployKind.Claim && d.OwnerId != _me.Id && Vector2.Distance(d.Pos, p) < r) return true;
+            lock (Sites) foreach (var (w, q) in Sites) if (w == _w && Vector2.Distance(q, p) < r) return true;
             return false;
         }
 
@@ -400,17 +423,21 @@ namespace Rastvordd.Sim
                     if (s.Kind == StructKind.Door && s.Locked && s.KeyLock) upgrade = false;   // дверь на ключе — деревянная: потеряю ключ — выломаю
                     bool repair = s.Hp < s.MaxHp * 0.85f;
                     if (!upgrade && !repair) continue;
+                    if (_hammerSkip.TryGetValue(s.Id, out float skipUntil) && skipUntil > _w.Time) continue;
+                    if (_hammerId != s.Id) { _hammerId = s.Id; _hammerSince = _w.Time; }
+                    else if (_w.Time - _hammerSince > 60) { _hammerSkip[s.Id] = _w.Time + 300; _hammerId = -1; continue; }   // минуту не выходит (не подойти) — пока другое
                     var cost = upgrade ? Building.Cost(s.Kind, s.Tier + 1) : Array.ConvertAll(Building.Cost(s.Kind, s.Tier), c => (c.id, Math.Max(1, c.n / 5)));
                     foreach (var (id, n) in cost) if (!Fetch(id, n, box, ref cmd)) return true;
                     Doing = upgrade ? $"улучшает до «{Building.TierNames[s.Tier + 1]}»: {Building.KindName(s.Kind)}" : $"чинит: {Building.KindName(s.Kind)}";
-                    if (!GoStand(StandFor(p), 0.4f, ref cmd)) return true;
                     var face = s.Center;
+                    bool close = Vector2.Distance(_me.Pos, face) < (Building.IsFloor(s.Kind) ? 2.4f : 1.6f) && _w.ClearLine(_me.Pos, face, s, true);
+                    if (!close && !GoStand(StandFor(p), 0.4f, ref cmd)) return true;
                     cmd.Aim = face;
                     if (Hold("tool_hammer", ref cmd) && Vector2.Dot(_me.FacingDir, Vector2.Normalize(face - _me.Pos)) > 0.9f) cmd.Fire = true;
                     return true;
                 }
             // 6. следующая стадия
-            if (_stage + 1 < _plan.Stages.Count && _plan.Stages[_stage + 1].Gate(this))
+            if (_stage + 1 < _plan.Stages.Count && _plan.Stages[_stage + 1].Gate(this) && Archetype != BotArchetype.Roamer)   // бродяга строит минимум: живёт в кибитке
             {
                 _w.Milestone(_me, $"база: готова стадия «{_plan.Stages[_stage].Name}», дальше — «{_plan.Stages[_stage + 1].Name}»");
                 Thought($"база: «{_plan.Stages[_stage].Name}» готова → начинаю «{_plan.Stages[_stage + 1].Name}»");
@@ -548,8 +575,33 @@ namespace Rastvordd.Sim
             if (_me.Count(id) >= n) return true;
             if (box != null && TakeFromBox(box, id, n, ref cmd)) return false;
             if (id == "scrap") { GetScrap(n, box, ref cmd); return false; }
-            if (id == "metal_fragments") { _metalGoal = Math.Max(_metalGoal, n + 60); Doing = "копит металл"; Gather(NodeKind.Metal, ref cmd); return false; }
+            if (id == "metal_fragments") { _metalGoal = Math.Max(_metalGoal, n + 60); SmeltOrMine(ref cmd); return false; }
             return Need(id, n, ref cmd);
+        }
+
+        /// <summary>
+        /// Нужен металл: руда в кармане — в печь (с деревом на топливо), готовое — забрать; руды нет — добыть.
+        /// Раньше стройка «финала» звала только добычу руды, и бот часами копал руду (8000 в кармане), не доходя до печи.
+        /// </summary>
+        void SmeltOrMine(ref InputCmd cmd)
+        {
+            var f = MyFurnace();
+            int ore = _me.Count("metal_ore");
+            if (f != null)
+            {
+                if (f.OutMetal > 0 && !f.Burning) { Doing = "забирает металл из печи"; Use(f, f.Pos, ref cmd, false, 1.2f); return; }
+                if ((ore >= 60 || f.Ore >= 30) && !f.Burning)
+                {
+                    int wood = (int)MathF.Min(300, (ore + f.Ore) * 0.5f + 10 - f.Fuel);
+                    if (wood > 0 && _me.Count("wood") < wood && !Need("wood", wood, ref cmd)) return;
+                    Doing = "загружает печь";
+                    Use(f, f.Pos, ref cmd, false, 1.2f);
+                    return;
+                }
+                if (f.Burning && (ore >= 60 || f.Ore > 0)) { Doing = "ждёт металл из печи"; Gather(NodeKind.Tree, ref cmd); return; }
+            }
+            Doing = "копит металл";
+            Gather(NodeKind.Metal, ref cmd);
         }
 
         bool BuildPiece(Piece p, Deployable box, ref InputCmd cmd)
@@ -582,19 +634,12 @@ namespace Rastvordd.Sim
         void Plan(ref InputCmd cmd)
         {
             int wood = _me.Count("wood"), stone = _me.Count("stone");
-            if (Archetype != BotArchetype.Roamer && RecoverLockout(ref cmd)) return;   // заперт своей дверью — раньше всего (даже раньше инструментов)
+            if (RecoverLockout(ref cmd)) return;   // заперт своей дверью — раньше всего (даже раньше инструментов)
 
             // 1. инструменты
             if (!Has("tool_hatchet")) { if (Craft("tool_hatchet", ref cmd)) { Gather(NodeKind.Tree, ref cmd); return; } }
             if (!Has("tool_pickaxe") && Has("tool_hatchet")) { if (Craft("tool_pickaxe", ref cmd)) { Gather(NodeKind.Stone, ref cmd); return; } }
             if (!Has("tool_hatchet") || !Has("tool_pickaxe")) { Gather(wood < 200 ? NodeKind.Tree : NodeKind.Stone, ref cmd); return; }
-            if (Archetype == BotArchetype.Roamer)
-            {
-                if (wood < 400) Gather(NodeKind.Tree, ref cmd);
-                else if (stone < 200) Gather(NodeKind.Stone, ref cmd);
-                else { Doing = "бродит"; Wander(ref cmd); }
-                return;
-            }
 
             // 2. план базы, место и шкаф
             var claim = MyClaim();
@@ -676,15 +721,9 @@ namespace Rastvordd.Sim
             // 7. прогрессия, вооружение, рейд
             if (Progress(box, metal, ref cmd)) return;
             if (Arm(box, furnace, ref cmd)) return;
-            if (Raid(box, furnace, ref cmd)) return;
+            if (RaidPrep(box, furnace, ref cmd)) return;
 
-            // 8. сейч: отнести добычу
-            if (wood > 500 + 400 * _greed || stone > 300 + 300 * _greed)
-            {
-                Doing = "несёт добычу домой";
-                Use(box, box.Pos, ref cmd, deposit: true);
-                return;
-            }
+            // 8. сейч — отдельная цель директора (PlayerBot.Loot.cs): излишек относится выборочно, рабочий запас остаётся при себе
 
             // 9. фарм: чего меньше — то и добываем
             Gather(stone < wood * 0.6f ? NodeKind.Stone : NodeKind.Tree, ref cmd);

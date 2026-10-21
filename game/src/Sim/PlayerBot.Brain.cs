@@ -28,6 +28,8 @@ namespace Rastvordd.Sim
         readonly List<Heard> _heard = new();
         Actor _threat;
         float _load, _stash;
+        public float Load => _load;
+        public float Stash => _stash;
         public float Aggression;   // 0..1: тяга к драке (по архетипу и характеру)
 
         /// <summary>Ценность того, что несу (в «ломах»).</summary>
@@ -82,6 +84,13 @@ namespace Rastvordd.Sim
                 else _heard.Add(new Heard { Pos = e.Pos, Time = _w.Time, Weapon = e.Text, SourceId = e.ActorId, Explosion = expl });
             }
             _heard.RemoveAll(h => _w.Time - h.Time > 90);
+            // этап 4: опасность рядом, чужие базы, рейд по моей базе, что лишнего несу
+            if (_threat != null || _w.Time - _me.LastDamagedTime < 5) _lastDanger = _w.Time;
+            foreach (var h in _heard) if (!h.Explosion && _w.Time - h.Time < 2 && Vector2.Distance(h.Pos, _me.Pos) < 80) _lastDanger = _w.Time;
+            PerceiveBases();
+            PerceiveDeaths();
+            PerceiveRaid();
+            _surplus = SurplusValue();
         }
 
         // ---------- журнал мыслей ----------
@@ -123,18 +132,35 @@ namespace Rastvordd.Sim
         public string GoalName => _goal?.Name ?? "-";
 
         /// <summary>Вес цели по архетипу: одна логика, разные характеры.</summary>
-        float W(string goal) => (Archetype, goal) switch
+        /// <summary>
+        /// Вес цели по архетипу: одна логика и одна цель вайпа у всех (верстак 3, изучение, лут РТ, своя безопасность),
+        /// архетип — только порядок и вес. Нулевых весов нет: фермер тоже ходит на РТ и дерётся, бродяга тоже строит.
+        /// </summary>
+        float W(string goal)
         {
-            (BotArchetype.Roamer, "охота") => 1.2f,
-            (BotArchetype.Roamer, "проверить бой") => 1.2f,
-            (BotArchetype.Roamer, "хозяйство") => 0.3f,
-            (BotArchetype.Farmer, "охота") => 0f,
-            (BotArchetype.Farmer, "бродить") => 0f,
-            (BotArchetype.Farmer, "снаряжение") => 0f,
-            (BotArchetype.Farmer, "антирейд") => 1.2f,
-            (BotArchetype.Roamer, "антирейд") => 0f,
-            _ => 1f,
-        };
+            bool farmer = Archetype == BotArchetype.Farmer;
+            int bench = farmer ? MyBenchLevel() : 0;
+            return goal switch
+            {
+                "охота" => farmer ? (bench >= 2 ? 0.65f : 0.3f) : 1.2f,             // фермер дерётся, когда отстроился
+                "проверить бой" => farmer ? 1f : 1.2f,
+                "бродить" => farmer ? 0.2f : 1f,
+                "снаряжение" => farmer ? 0.35f : 1f,
+                "антирейд" => farmer ? 1.2f : 0.8f,
+                "хозяйство" => farmer ? 1f : RoamerHousework(),
+                "поход на РТ" => farmer ? (bench >= 1 ? 1f : 0.4f) : 1.3f,         // фермер — после мейна с верстаком, бродяга — сразу
+                "рейд" => farmer ? 0.8f : 1.2f,
+                "сейч" => 1f,
+                _ => 1f,
+            };
+        }
+
+        /// <summary>Бродяга строит минимум: кибитку — в первую очередь, потом хозяйство урывками (окно 4 мин из 10).</summary>
+        float RoamerHousework()
+        {
+            if (MyClaim() == null || MyBox() == null) return 1.0f;
+            return (_w.Time % 600f) < 240f ? 0.6f : 0.35f;
+        }
 
         void BuildGoals()
         {
@@ -147,6 +173,10 @@ namespace Rastvordd.Sim
                 new() { Name = "нужды", Score = () => NeedsUrgency() * 70, Act = Needs },
                 new() { Name = "проверить бой", Score = () => InvestigateScore() * W("проверить бой"), Act = Investigate },
                 new() { Name = "лут трупа", Score = () => CorpseNear() != null && _me.Hp > 35 ? 60 * W("лут трупа") : 0, Act = LootCorpse },
+                new() { Name = "рейд", Score = RaidScore, Act = RaidAct },
+                new() { Name = "поход на РТ", Score = RtScore, Act = RtRun },
+                new() { Name = "сейч", Score = StashScore, Act = StashAct },
+                new() { Name = "разведка", Score = ScoutScore, Act = Scout },
                 new() { Name = "снаряжение", Score = () => GearMissing() ? 50 * W("снаряжение") : 0, Act = GearUp },
                 new() { Name = "хозяйство", Score = () => 40 * W("хозяйство"), Act = (ref InputCmd c) => { Plan(ref c); return true; } },
                 new() { Name = "бродить", Score = () => 20 * W("бродить"), Act = RoamMove },
@@ -170,7 +200,7 @@ namespace Rastvordd.Sim
             {
                 bool fresh = _w.Time - _lastSwitchLog.GetValueOrDefault(best.Name, -999) > 30;   // повтор той же смены — не чаще раза в 30 с
                 if (fresh) _lastSwitchLog[best.Name] = _w.Time;
-                if (fresh && _goal != null && best.Name is "бегство" or "бой" or "антирейд" or "проверить бой" or "охота")
+                if (fresh && _goal != null && best.Name is "бегство" or "бой" or "антирейд" or "проверить бой" or "охота" or "рейд" or "поход на РТ" or "разведка")
                     Thought($"{_goal.Name} → {best.Name}{(best.Name == "бой" || best.Name == "бегство" ? $": {_threat?.Name ?? "угроза"}, у него {Items.Name(_threat?.Held?.Id ?? "tool_rock")}" : "")}");
                 _goal = best;
             }
@@ -262,43 +292,6 @@ namespace Rastvordd.Sim
 
         bool NearMyBase(Vector2 p) => MyClaim() is Deployable c && Vector2.Distance(c.Pos, p) < 40;
 
-        float AntiRaidScore()
-        {
-            var claim = MyClaim();
-            if (claim == null || _w.Time - claim.RaidedAt > 90 || claim.RaiderId == _me.Id) { _raidAlarm = false; return 0; }   // сам ломаю свою дверь — не рейд
-            var raider = _w.Find(claim.RaiderId);
-            float worth = Math.Clamp(_stash / 300f, 0.3f, 1f);
-            bool stronger = raider == null || raider.Dead || MyPower >= KitPower(raider);
-            if (!_raidAlarm)
-            {
-                _raidAlarm = true;
-                Thought($"мой дом рейдят{(raider != null ? $" ({raider.Name}, {Items.Name(raider.Held?.Id ?? "tool_rock")})" : "")} → " +
-                        (stronger ? $"иду защищать: в ящике ≈{_stash:0} лома" : "пережидаю в стороне: он сильнее"));
-            }
-            return 90 * worth;
-        }
-        bool _raidAlarm;
-
-        bool AntiRaid(ref InputCmd cmd)
-        {
-            var claim = MyClaim();
-            if (claim == null) return false;
-            var raider = _w.Find(claim.RaiderId);
-            if (raider != null && !raider.Dead && KitPower(raider) > MyPower)
-            {
-                Doing = "дом рейдят — пережидает в стороне";
-                var away = _me.Pos - raider.Pos;
-                if (away.LengthSquared() < 0.01f) away = Vector2.UnitX;
-                if (Vector2.Distance(_me.Pos, raider.Pos) < 55) { cmd.Move = Avoid(Vector2.Normalize(away)); cmd.Sprint = true; cmd.Aim = _me.Pos + Vector2.Normalize(away) * 3; }
-                return true;
-            }
-            Doing = "бежит защищать дом";
-            var gun = Ranged();
-            if (gun != null) Hold(gun, ref cmd);
-            GoTo(claim.Pos + new Vector2(0.6f, 0.6f), 1.5f, ref cmd);
-            return true;
-        }
-
         // ---------- роумер: охота, лут трупов, снаряжение, бродить ----------
 
         Actor PickPrey()
@@ -335,7 +328,7 @@ namespace Rastvordd.Sim
             float bd = 35;
             foreach (var b in _w.Bags)
             {
-                if (b.Empty || b.IsCrate || (_badLoot.TryGetValue(b, out float until) && _w.Time < until)) continue;
+                if (b.Empty || b.IsCrate || MyDrop(b) || (_badLoot.TryGetValue(b, out float until) && _w.Time < until)) continue;
                 if (_w.FloorAt(b.Pos) is Structure f && f.OwnerId == _me.Id && !InsideBase && RecoverPending()) continue;   // за своей запертой дверью без ключа
                 float d = Vector2.Distance(b.Pos, _me.Pos);
                 if (d < bd) { bd = d; bag = b; }

@@ -220,7 +220,7 @@ namespace Rastvordd.Sim
                 int bench = 0;
                 foreach (var d in World.Deployables) if (d.Kind == DeployKind.Workbench && d.OwnerId == a.Id) bench = System.Math.Max(bench, System.Math.Max(1, d.Level));
                 string arch = b.Archetype == BotArchetype.Roamer ? "бродяга" : "фермер";
-                list.Add((a.Id, $"{a.Name} · {arch} · цель: {b.GoalName} · {(a.Dead ? "мёртв" : b.Doing)}\n   мысль: {b.LastThought}\n   HP {a.Hp:0} · {(b.PlanInfo != "" ? b.PlanInfo + " · " : "")}верстак {bench} · изучено {a.Known.Count}/{Tech.All.Count} · лом {a.Count("scrap")} · металл {a.Count("metal_fragments")} · построек {World.Structures.FindAll(s => s.OwnerId == a.Id).Count}"));
+                list.Add((a.Id, $"{a.Name} · {arch} · цель: {b.GoalName} · {(a.Dead ? "мёртв" : b.Doing)}\n   мысль: {b.LastThought}\n   HP {a.Hp:0} · {(b.PlanInfo != "" ? b.PlanInfo + " · " : "")}верстак {bench} · изучено {a.Known.Count}/{Tech.All.Count} · лом {a.Count("scrap")} · металл {a.Count("metal_fragments")} · груз ≈{b.Load:0} · ящик ≈{b.Stash:0} · построек {World.Structures.FindAll(s => s.OwnerId == a.Id).Count}"));
             }
             return list;
         }
@@ -275,6 +275,9 @@ namespace Rastvordd.Sim
             var killAt = new List<float>();
             var killArg = System.Array.Find(System.Environment.GetCommandLineArgs(), a => a.StartsWith("--killbot="));
             if (killArg != null) foreach (var k in killArg.Substring(10).Split(',')) killAt.Add(float.Parse(k, System.Globalization.CultureInfo.InvariantCulture));
+            // отладка походов на РТ: --rtkit=секунда — фермеры получают самопал, 60 патронов, 3 бинта и перфокарту I
+            var rtArg = System.Array.Find(System.Environment.GetCommandLineArgs(), a => a.StartsWith("--rtkit="));
+            float rtKitAt = rtArg != null ? float.Parse(rtArg.Substring(8), System.Globalization.CultureInfo.InvariantCulture) : -1;
             var duelArg = System.Array.Find(System.Environment.GetCommandLineArgs(), a => a.StartsWith("--duel="));
             if (duelArg != null)
             {
@@ -310,11 +313,26 @@ namespace Rastvordd.Sim
                         break;
                     }
                 }
+                if (rtKitAt >= 0 && World.Time >= rtKitAt)
+                {
+                    rtKitAt = -1;
+                    foreach (var b in _bots.Values)
+                    {
+                        if (b.Archetype == BotArchetype.Roamer || b.Me.Dead) continue;
+                        if (b.Me.Count("weapon_pipe") == 0 && !System.Array.Exists(b.Me.Belt, s => s?.Id == "weapon_pipe")) b.Me.AddSlot(Items.NewSlot("weapon_pipe", 10));
+                        b.Me.Add("ammo_pistol", 60); b.Me.Add("bandage", 3); b.Me.Add("punchcard_1", 1);
+                        log($"[{World.Time,6:0}s] отладка: {b.Me.Name} получил самопал, 60 патронов, 3 бинта, перфокарту I");
+                    }
+                }
                 if (RaidKitAt >= 0 && World.Time >= RaidKitAt)
                 {
                     RaidKitAt = -1;
+                    // --raidkitbot=N — кому выдать (по порядку ботов: 0 Сёма, 1 Жека, 2 Толян); по умолчанию первому
+                    var rkb = System.Array.Find(System.Environment.GetCommandLineArgs(), a => a.StartsWith("--raidkitbot="));
+                    int skip = rkb != null ? int.Parse(rkb.Substring(13)) : 0;
                     foreach (var b in _bots.Values)
                     {
+                        if (skip-- > 0) continue;
                         b.Me.Add("expl_satchel", 14); b.Me.Add("ammo_pistol", 60);
                         log($"[{World.Time,6:0}s] отладка: {b.Me.Name} получил 14 бомб и 60 патронов");
                         break;
@@ -331,7 +349,7 @@ namespace Rastvordd.Sim
                     }
                 if (t % (int)(30 / World.Dt) == 0)
                     foreach (var b in _bots.Values)
-                        log($"[{World.Time,6:0}s] {b.Me.Name} @({b.Me.Pos.X:0.0};{b.Me.Pos.Y:0.0}) {b.Debug}: {b.Doing} · HP {b.Me.Hp:0} · дерево {b.Me.Count("wood")} камень {b.Me.Count("stone")} металл {b.Me.Count("metal_fragments")} лом {b.Me.Count("scrap")} · изучено {b.Me.Known.Count} · E→{World.NearestInteract(b.Me).kind} · построек {World.Structures.FindAll(s => s.OwnerId == b.Me.Id).Count} · {World.LastInfo.GetValueOrDefault(b.Me.Id)}");
+                        log($"[{World.Time,6:0}s] {b.Me.Name} @({b.Me.Pos.X:0.0};{b.Me.Pos.Y:0.0}) {b.Debug}: {b.Doing} · HP {b.Me.Hp:0} · груз {b.Load:0} ящик {b.Stash:0} · дерево {b.Me.Count("wood")} камень {b.Me.Count("stone")} металл {b.Me.Count("metal_fragments")} лом {b.Me.Count("scrap")} · изучено {b.Me.Known.Count} · E→{World.NearestInteract(b.Me).kind} · построек {World.Structures.FindAll(s => s.OwnerId == b.Me.Id).Count} · {World.LastInfo.GetValueOrDefault(b.Me.Id)}");
             }
 
             if (basedump) BaseDump(log);
@@ -342,6 +360,9 @@ namespace Rastvordd.Sim
                 var parts = new List<string>();
                 foreach (var kv in b.CombatStats) parts.Add($"{kv.Key} {kv.Value}");
                 log($"БОЙ-СТАТ {b.Me.Name}: {(parts.Count > 0 ? string.Join(", ", parts) : "боёв не было")}");
+                var lp = new List<string>();
+                foreach (var kv in b.LootStats) lp.Add($"{kv.Key} {kv.Value}");
+                log($"ЛУТ-СТАТ {b.Me.Name}: ящик ≈{b.Stash:0} лома, при себе ≈{b.Load:0}; {(lp.Count > 0 ? string.Join(", ", lp) : "-")}");
             }
         }
 

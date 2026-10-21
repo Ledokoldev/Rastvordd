@@ -21,6 +21,7 @@ namespace Rastvordd.Sim
         Vector2 _foeSeenPos;
         float _foeSeenAt = -100, _foeHeardAt = -100, _foeReloadAt = -100;
         float _foeDamage, _foeHitAt = -100;   // сколько я по нему попал — оценка его HP
+        float _foeSince;                       // когда начал с ним бой
         float _foeKit = 0.1f;      // сила того, что видел у него в руках
         string _foeKitId = "tool_rock";
 
@@ -83,6 +84,7 @@ namespace Rastvordd.Sim
         {
             _foe = t;
             _foeDamage = 0; _foeHitAt = -100;
+            _foeSince = _w.Time;
             _foeSeenPos = t.Pos;
             _foeSeenAt = _w.Time;
             _foeKit = KitPower(t);
@@ -151,6 +153,12 @@ namespace Rastvordd.Sim
             if (_me.Hp < 30 && foeHp > _me.Hp) return $"мало HP ({_me.Hp:0})";
             if (_me.Hp < 45 && foeKit > MyPower) return $"ранен ({_me.Hp:0} HP), а у него {Items.Name(_foeKitId)}";
             if (AmmoLeft(gun) < (gun == "weapon_bow" ? 2 : 4)) return "кончаются патроны";
+            // охрана РТ стоит на посту за стеной: минута перестрелки без попаданий — пат, тратить патроны и HP незачем (этап 4)
+            if (t.Team == Team.Npc && _w.Time - _foeSince > 60 && _w.Time - MathF.Max(_foeHitAt, _foeSince) > 35)
+            {
+                if (_rtPhase is RtPhase.Loot or RtPhase.Travel) LeaveRt("пат с охраной — ухожу");
+                return "пат с охраной: минуту не попадаю";
+            }
             if (edge < -0.3f) return $"у него {Items.Name(_foeKitId)} — сильнее моего {Items.Name(gun)}";
             return null;
         }

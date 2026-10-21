@@ -18,8 +18,11 @@ namespace Rastvordd.Sim
     /// Управляет персонажем через тот же ввод, что и игрок: выбор слота, прицел, ЛКМ, R, E, Alt.
     /// Своё состояние почти не хранит — смотрит на мир (где мой столб, что построено), поэтому переживает смерть и загрузку.
     /// </summary>
+    public enum BotArchetype { Farmer, Roamer }
+
     public sealed class PlayerBot : IBrain
     {
+        public BotArchetype Archetype = BotArchetype.Farmer;
         public Actor Me => _me;
         readonly Actor _me;
         readonly World _w;
@@ -310,6 +313,8 @@ namespace Rastvordd.Sim
                 return cmd;
             }
 
+            if (Archetype == BotArchetype.Roamer && Roam(ref cmd)) return cmd;
+
             // угроза: уходим (к дому, если он есть), лечимся
             var threat = Threat();
             if (threat != null) _fleeTime = 3f + 4f * _caution;
@@ -348,6 +353,8 @@ namespace Rastvordd.Sim
                 Gather(wood < 200 ? NodeKind.Tree : NodeKind.Stone, ref cmd);
                 return;
             }
+            // роумер базу пока не строит: добывает то, что просит снаряжение
+            if (Archetype == BotArchetype.Roamer) { Gather(wood < 400 ? NodeKind.Tree : NodeKind.Stone, ref cmd); return; }
 
             // 2. место и столб
             var claim = MyClaim();
@@ -475,6 +482,129 @@ namespace Rastvordd.Sim
 
         bool _int;
         bool Click2() { _int = !_int; return _int; }
+
+        // ---------- роумер: охота на слабых, лут трупов, обход РТ ----------
+
+        Actor _prey;
+        float _preyTimer, _aimDrift;
+        Vector2 _roamTo;
+
+        /// <summary>Сила «кита» на глаз: что в руках (огнестрел > лук > копьё > инструменты > камень).</summary>
+        static float KitPower(Actor a)
+        {
+            var id = a.Held?.Id;
+            if (a.Weapon != null && !a.Weapon.Def.Melee) return id == "weapon_bow" ? 0.6f : 1f;
+            return id switch { "weapon_spear" => 0.4f, "tool_hatchet" or "tool_pickaxe" => 0.25f, _ => 0.1f };
+        }
+
+        float MyPower => MathF.Max(Has("weapon_bow") && _me.Count("arrow") > 0 ? 0.6f : 0, Has("weapon_spear") ? 0.4f : 0.15f);
+
+        /// <summary>true — роумер сам решил, что делать в этот тик (иначе общий план: еда, инструменты, фарм).</summary>
+        bool Roam(ref InputCmd cmd)
+        {
+            // ставка: с большим грузом — не охотимся
+            int load = _me.Count("wood") + _me.Count("stone") + _me.Count("metal_fragments") * 3 + _me.Count("scrap") * 5;
+            bool loaded = load > 900;
+            if (_me.Hp < 35) { _prey = null; return false; }   // ранен — общий план: убегает и лечится
+
+            // цель: видимый слабее меня в 45 м (голый, с камнем) или тот, кто меня бьёт
+            if (_prey == null || _prey.Dead || (_preyTimer -= World.Dt) < 0)
+            {
+                _prey = null;
+                float best = float.MaxValue;
+                foreach (var a in _w.Actors)
+                {
+                    if (a == _me || a.Dead || a.Team == Team.Npc) continue;
+                    float d = Vector2.Distance(a.Pos, _me.Pos);
+                    bool hitMe = _me.LastAttacker == a.Id && _w.Time - _me.LastDamagedTime < 5f;
+                    if (!hitMe && (loaded || d > 45 || MyPower < 0.4f || KitPower(a) > MyPower + 0.05f)) continue;   // без копья/лука первым не лезет
+                    if (!_w.HasLineOfSight(_me.Pos, a.Pos)) continue;
+                    if (d < best) { best = d; _prey = a; }
+                }
+                _preyTimer = 2f;
+            }
+            if (_prey != null) { Hunt(_prey, ref cmd); return true; }
+
+            // лут: сумка с трупа рядом
+            LootBag bag = null;
+            float bd = 35;
+            foreach (var b in _w.Bags)
+            {
+                if (b.Empty || b.IsCrate) continue;
+                float d = Vector2.Distance(b.Pos, _me.Pos);
+                if (d < bd) { bd = d; bag = b; }
+            }
+            if (bag != null)
+            {
+                Doing = "лутает труп";
+                if (MoveTo(bag.Pos, 1.0f, ref cmd)) cmd.Interact = Click2();
+                return true;
+            }
+
+            // снаряжение: копьё, потом лук и стрелы (иначе — общий фарм)
+            if (!Has("tool_hatchet")) return false;
+            if (!Has("weapon_spear")) { if (!Craft("weapon_spear", ref cmd)) Need("wood", 300, ref cmd); return true; }
+            if (!Has("weapon_bow"))
+            {
+                if (_me.Count("cloth") < 50) { Doing = "собирает коноплю"; if (UsePickup(PickupKind.Hemp, ref cmd)) return true; return false; }
+                if (!Craft("weapon_bow", ref cmd)) Need("wood", 200, ref cmd);
+                return true;
+            }
+            if (_me.Count("arrow") < 12)
+            {
+                if (Craft("arrow", ref cmd)) return true;
+                if (_me.Count("wood") < 25) { Need("wood", 150, ref cmd); return true; }
+                Need("stone", 80, ref cmd);
+                return true;
+            }
+
+            // бродит между РТ (там ходят люди), по пути смотрит по сторонам
+            if (_roamTo == default || Vector2.Distance(_roamTo, _me.Pos) < 6)
+            {
+                // чередует: окрестности РТ и пляжи, где просыпаются голые
+                if (_rng.NextDouble() < 0.5 && _w.PlayerSpawns.Count > 0)
+                    _roamTo = _w.PlayerSpawns[_rng.Next(_w.PlayerSpawns.Count)] * 0.97f;
+                else
+                {
+                    var m = _w.Monuments[_rng.Next(_w.Monuments.Count)];
+                    var ang = (float)(_rng.NextDouble() * Math.PI * 2);
+                    _roamTo = m.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * (70 + (m.Max - m.Min).Length() * 0.5f);   // дальше от охраны
+                }
+                if (!_w.Terrain.IsLand(_roamTo)) _roamTo *= 0.85f;
+            }
+            Doing = "бродит";
+            if (Hold(Has("weapon_bow") ? "weapon_bow" : "weapon_spear", ref cmd)) { }
+            MoveTo(_roamTo, 4, ref cmd);
+            return true;
+        }
+
+        void Hunt(Actor prey, ref InputCmd cmd)
+        {
+            var to = prey.Pos - _me.Pos;
+            float d = to.Length();
+            var dir = d > 0.01f ? to / d : Vector2.UnitX;
+            bool bow = Has("weapon_bow") && _me.Count("arrow") > 0 && d > 3.5f;
+            Doing = $"охотится на {prey.Name}";
+            if (bow)
+            {
+                if (!Hold("weapon_bow", ref cmd)) return;
+                // держит дистанцию 8–14 м и стрейфится
+                var side = new Vector2(-dir.Y, dir.X) * (MathF.Sin(_w.Time * 0.9f + _me.Id) > 0 ? 1 : -1);
+                var move = side * 0.6f + (d > 14 ? dir : d < 8 ? -dir * 0.7f : Vector2.Zero);
+                cmd.Move = move.LengthSquared() > 0.01f ? Avoid(Vector2.Normalize(move)) : Vector2.Zero;
+                _aimDrift = _aimDrift * 0.95f + ((float)_rng.NextDouble() - 0.5f) * 0.25f;
+                cmd.Aim = prey.Pos + prey.Vel * (d / 45f) + new Vector2(-dir.Y, dir.X) * _aimDrift * d * 0.06f;
+                cmd.Peek = 1;
+                cmd.Fire = _w.HasLineOfSight(_me.Pos, prey.Pos) && Click2();
+                return;
+            }
+            // копьё: вплотную
+            string melee = Has("weapon_spear") ? "weapon_spear" : Has("tool_hatchet") ? "tool_hatchet" : "tool_rock";
+            if (!Hold(melee, ref cmd)) return;
+            cmd.Aim = prey.Pos;
+            if (d > 1.8f) { cmd.Move = Avoid(dir); cmd.Sprint = d > 6; }
+            else cmd.Fire = true;
+        }
 
         /// <summary>Дойти до точки с учётом двери: внутрь и наружу — через проём, закрытую дверь открываем.</summary>
         bool GoTo(Vector2 p, float tol, ref InputCmd cmd)

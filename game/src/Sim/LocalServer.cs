@@ -130,7 +130,7 @@ namespace Rastvordd.Sim
         bool _botsStarted;
         readonly int _seed;
         /// <summary>Сколько ботов-игроков живёт на острове (позже — от размера карты и настроек вайпа).</summary>
-        public int BotCount = 2;
+        public int BotCount = 3;   // 2 фермера + роумер
         static readonly string[] BotNames = { "Сёма", "Жека", "Толян", "Вован", "Лёха", "Димон" };
         readonly Dictionary<int, InputCmd> _inputs = new();
         readonly List<SimEvent> _eventsThisTick = new();
@@ -182,7 +182,7 @@ namespace Rastvordd.Sim
             {
                 string name = BotNames[i] + " (бот)";
                 var a = World.FindPlayer(name) ?? World.SpawnPlayer(name);
-                var bot = new PlayerBot(a, World, _seed * 17 + i);
+                var bot = new PlayerBot(a, World, _seed * 17 + i) { Archetype = i == 2 ? BotArchetype.Roamer : BotArchetype.Farmer };
                 _bots[a.Id] = bot;
                 _brains.Add(bot);
             }
@@ -196,6 +196,9 @@ namespace Rastvordd.Sim
             {
                 if (focusId >= 0) _pending[focusId] = InputCmd.Empty;
                 Tick();
+                foreach (var e in World.Events)
+                    if (e.Kind == SimEventKind.Death)
+                        log($"[{World.Time,6:0}s] смерть: {World.Find(e.ActorId)?.Name} ← {World.Find(e.OtherId)?.Name ?? "?"}");
                 if (t % (int)(30 / World.Dt) == 0)
                     foreach (var b in _bots.Values)
                         log($"[{World.Time,6:0}s] {b.Me.Name} @({b.Me.Pos.X:0.0};{b.Me.Pos.Y:0.0}) {b.Debug}: {b.Doing} · HP {b.Me.Hp:0} · дерево {b.Me.Count("wood")} камень {b.Me.Count("stone")} · построек {World.Structures.FindAll(s => s.OwnerId == b.Me.Id).Count} · {World.LastInfo.GetValueOrDefault(b.Me.Id)}");

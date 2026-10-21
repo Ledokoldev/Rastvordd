@@ -213,6 +213,17 @@ namespace Rastvordd.Sim
             }
         }
 
+        /// <summary>Отладка: «рейд» — снять долю прочности со всех построек бота от имени attackerId.</summary>
+        public int DamageBotBase(int index, float fraction, int attackerId)
+        {
+            int i = 0, n = 0;
+            foreach (var b in _bots.Values)
+                if (i++ == index)
+                    foreach (var s in new List<Structure>(World.Structures))
+                        if (s.OwnerId == b.Me.Id) { World.DamageStructure(s, s.MaxHp * fraction, attackerId); n++; }
+            return n;
+        }
+
         public Vector2 BotHome(int index)
         {
             int i = 0;

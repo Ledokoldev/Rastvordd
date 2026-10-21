@@ -132,7 +132,12 @@ namespace Rastvordd.Client
                 var p = st.Substring(10).Split(',');
                 _server.FastForward(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), s => GD.Print(s), _myId);
                 var me = _server.World.Find(_myId);
-                int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
+int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
+                if (System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--raidtest") >= 0)
+                {
+                    GD.Print($"рейд-тест: повреждено построек {_server.DamageBotBase(bi, 0.5f, _myId)}");
+                    _server.FastForward(240, s => GD.Print(s), _myId);
+                }
                 me.Pos = (p.Length > 2 && p[2] == "home" ? _server.BotHome(bi) + new SVec(1, 6) : _server.BotPos(bi) + new SVec(-3, 2));
                 me.Dead = false; me.Hp = me.MaxHp;
             }

@@ -438,6 +438,20 @@ namespace Rastvordd.Sim
                 return;
             }
 
+            // 2б. рейд: ломают дом. Рейдер сильнее — держимся в стороне; рейдер ушёл/слабый — идём чинить (ниже)
+            if (_w.Time - claim.RaidedAt < 60)
+            {
+                var raider = _w.Find(claim.RaiderId);
+                if (raider != null && !raider.Dead && Vector2.Distance(raider.Pos, CellC(1, 1)) < 45 && KitPower(raider) > MyPower)
+                {
+                    Doing = "дом рейдят — пережидает в стороне";
+                    var away = _me.Pos - raider.Pos;
+                    if (away.LengthSquared() < 0.01f) away = Vector2.UnitX;
+                    if (Vector2.Distance(_me.Pos, raider.Pos) < 55) { cmd.Move = Avoid(Vector2.Normalize(away)); cmd.Sprint = true; cmd.Aim = _me.Pos + Vector2.Normalize(away) * 3; }
+                    return;
+                }
+            }
+
             // 3. план и молоток
             if (!Has("build_plan")) { if (!Craft("build_plan", ref cmd)) Gather(NodeKind.Tree, ref cmd); return; }
             if (!Has("tool_hammer")) { if (!Craft("tool_hammer", ref cmd)) Gather(NodeKind.Tree, ref cmd); return; }
@@ -471,6 +485,25 @@ namespace Rastvordd.Sim
                 if (!Need(cost[0].id, cost[0].n, ref cmd)) return;
                 Doing = $"улучшает: {Building.KindName(t.kind)}";
                 var (stand, face) = HammerSpot(t);
+                if (!GoTo(stand, 0.6f, ref cmd)) return;
+                cmd.Aim = face;
+                if (Hold("tool_hammer", ref cmd) && Vector2.Dot(_me.FacingDir, Vector2.Normalize(face - _me.Pos)) > 0.9f) cmd.Fire = true;
+                return;
+            }
+
+            // 5б. ремонт после рейда: повреждённое (ниже 85%) — молотком, ресурсы — из кармана/добыть
+            var repairList = new List<((StructKind kind, int i, int j, int dir) t, Structure s)>();
+            foreach (var t in Template())
+                if (Built(t) is Structure bs && !(t.kind == StructKind.Doorway && _w.DoorAt(t.i, t.j, 0) != null)) repairList.Add((t, bs));   // проём с дверью — молоток попадёт в дверь
+            if (_w.DoorAt(_origin.i, _origin.j + 2, 0) is Structure dr) repairList.Add(((StructKind.Door, dr.I, dr.J, 0), dr));
+            foreach (var (t, s) in repairList)
+            {
+                if (s.Hp >= s.MaxHp * 0.85f) continue;
+                if (!Has("tool_hammer")) break;
+                var rc = Building.Cost(t.kind, s.Tier);
+                if (!Need(rc[0].id, Math.Max(1, rc[0].n / 5), ref cmd)) return;
+                Doing = $"чинит: {Building.KindName(t.kind)}";
+                var (stand, face) = t.kind == StructKind.Door ? (CellC(0, 1) + new Vector2(0, 0.2f), DoorCenter) : HammerSpot(t);
                 if (!GoTo(stand, 0.6f, ref cmd)) return;
                 cmd.Aim = face;
                 if (Hold("tool_hammer", ref cmd) && Vector2.Dot(_me.FacingDir, Vector2.Normalize(face - _me.Pos)) > 0.9f) cmd.Fire = true;

@@ -294,6 +294,10 @@ namespace Rastvordd.Sim
         {
             if (dmg <= 0 || !Structures.Contains(s)) return 0;
             s.Hp -= dmg;
+            // столб помнит рейд: боты-хозяева решают — прятаться или идти чинить
+            if (attackerId >= 0 && s.ClaimId != 0)
+                foreach (var c in Deployables)
+                    if (c.Id == s.ClaimId) { c.RaidedAt = Time; c.RaiderId = attackerId; break; }
             if (s.Hp <= 0) RemoveStructure(s);
             return dmg;
         }

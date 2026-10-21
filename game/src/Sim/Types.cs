@@ -445,6 +445,8 @@ namespace Rastvordd.Sim
         public readonly HashSet<int> Auth = new();
         public readonly Dictionary<string, float> Store = new();
         public float Grace = 1800f;
+        public float RaidedAt = -1000;  // когда последний раз ломали постройки этой базы
+        public int RaiderId = -1;
 
         // ящик: хранилище (открыт всем — рейдер заберёт)
         public LootBag Storage;

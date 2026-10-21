@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -60,7 +60,7 @@ namespace Rastvordd.Sim
                     for (float x = min.X; x <= max.X && ok; x += 4)
                         for (float y = min.Y; y <= max.Y && ok; y += 4)
                             ok = Terrain.IsLand(new Vector2(x, y)) && Terrain.BiomeAt(new Vector2(x, y)) != Biome.Beach;
-                    foreach (var m in Monuments) ok &= Vector2.Distance(m.Center, c) > 60 + (m.Max - m.Min).Length() * 0.5f;
+                    foreach (var m in Monuments) ok &= Vector2.Distance(m.Center, c) > 130 + (m.Max - m.Min).Length() * 0.5f;   // РТ не кучкуются
                     if (!ok) continue;
                     BuildSmallMonument(name, min, max, guards, crates);
                     break;

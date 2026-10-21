@@ -68,6 +68,7 @@ namespace Rastvordd.Sim
         public StructKind BuildPiece;
         public bool BuildOk;
         public string Place;            // РТ, на котором стоишь
+        public Vector2? Home;           // твой межевой столб (для карты)
         public bool HasZone;            // зона столба под курсором (клетка столба, радиус World.ClaimRadius)
         public (int i, int j) ZoneCell;
         public BeltSlotInfo?[] Belt = new BeltSlotInfo?[Actor.BeltSize];
@@ -104,6 +105,7 @@ namespace Rastvordd.Sim
         public float HalfSize;
         public List<WallInfo> Walls = new();
         public List<(Vector2 min, Vector2 max)> Yards = new();   // площадки РТ: бетон под ногами
+        public List<string> YardNames = new();
         // рельеф и биомы (сетка N×N, клетка Cell метров) — отправляются один раз при подключении
         public int N;
         public float Cell;
@@ -146,7 +148,7 @@ namespace Rastvordd.Sim
         {
             var t = World.Terrain;
             var m = new MapInfo { HalfSize = World.HalfSize, N = t.N, Cell = TerrainMap.Cell, Biomes = t.Biomes, Heights = t.Height };
-            foreach (var mon in World.Monuments) m.Yards.Add((mon.Min, mon.Max));
+            foreach (var mon in World.Monuments) { m.Yards.Add((mon.Min, mon.Max)); m.YardNames.Add(mon.Name); }
             foreach (var w in World.Walls)
                 m.Walls.Add(new WallInfo { Min = w.Wall.Min, Max = w.Wall.Max, Height = w.Wall.Height, Kind = w.Kind });
             return m;
@@ -236,6 +238,7 @@ namespace Rastvordd.Sim
             var snap = new Snapshot { Tick = World.Tick, Time = World.Time, DayTime = World.TimeOfDay };
             snap.Self = BuildSelf(me);
             snap.Self.Place = World.MonumentAt(me.Pos)?.Name;
+            foreach (var d in World.Deployables) if (d.Kind == DeployKind.Claim && d.Auth.Contains(me.Id)) { snap.Self.Home = d.Pos; break; }
             if (me.Held?.Def?.Build == true && World.ClaimAt(Building.CellOf(me.LastAim)) is Deployable zc) { snap.Self.ZoneCell = Building.CellOf(zc.Pos); snap.Self.HasZone = true; }
             float r2 = WorldViewRadius * WorldViewRadius;
 

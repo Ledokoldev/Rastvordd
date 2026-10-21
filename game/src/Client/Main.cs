@@ -21,6 +21,7 @@ namespace Rastvordd.Client
         VisionRays _rays;
         BuildLayer _build;
         BuildGhost2D _bghost;
+        MapView _mapView;
         string _lastPlace;
         readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
@@ -88,6 +89,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("slot")) _slot = int.Parse(a.Substring(4)) - 1;
                 else if (a.StartsWith("craft")) _craftReq = int.Parse(a.Substring(5));
                 else if (a == "stop") _forceWalk = SVec.Zero;
+                else if (a == "map") { _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); }
                 else if (a == "crouch") _forceCrouch = true;
                 else if (a == "save") SaveWorld();
                 else if (a == "stand") _forceCrouch = false;
@@ -162,6 +164,11 @@ namespace Rastvordd.Client
 
             _hud = new Hud();
             AddChild(_hud);
+            var monList = new List<(string, SVec, SVec)>();
+            for (int i = 0; i < _map.Yards.Count; i++) monList.Add((_map.YardNames[i], _map.Yards[i].min, _map.Yards[i].max));
+            _mapView = new MapView(_map, monList);
+            _mapView.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+            _hud.AddChild(_mapView);
             _hud.CraftRequested += i => _craftReq = i;
             _hud.CodeEntered += (door, code) => _codeReq = (door, code);
             _hud.WipeRequested += () =>
@@ -329,6 +336,7 @@ namespace Rastvordd.Client
                         Input.MouseMode = _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
                         break;
                     case Key.Tab: _hud.ToggleInventory(); break;
+                    case Key.M: _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); break;
                     case Key.F5: SaveWorld(); _hud.Toast("Мир сохранён"); break;
                     case Key.F12: SaveScreenshot($"user://shot_{Time.GetTicksMsec()}.png"); break;
                     case Key.Escape:
@@ -927,6 +935,8 @@ namespace Rastvordd.Client
                 fv.Tick(dt);
             }
             RemoveMissing(_fireViews, seen);
+
+            _mapView.SetState(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _cur.Actors.Find(x => x.Id == _myId).Facing, _cur.Self.Home);
 
             // вход на РТ — название
             if (_cur.Self.Place != _lastPlace) { _lastPlace = _cur.Self.Place; if (_lastPlace != null) _hud.Toast(_lastPlace); }

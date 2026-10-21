@@ -1,0 +1,609 @@
+{
+ "assets": [
+  {
+   "id": "gar_car_open",
+   "cat": "props",
+   "view": "side",
+   "w": 4.17,
+   "desc": "a dusty but intact Soviet Lada VAZ-2106 Zhiguli sedan in faded dark-red paint, pointing to the right, its driver door (front door, facing the viewer) swung WIDE OPEN toward the viewer, interior seats visible, chrome bumpers, all four wheels on; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.17,
+    1.7,
+    1.44
+   ]
+  },
+  {
+   "id": "gar_guard_hut",
+   "cat": "props",
+   "view": "front",
+   "w": 3.0,
+   "desc": "a small wooden guard hut (storozhka) of a garage cooperative: planked walls painted faded blue, a little window with a curtain, a stovepipe chimney, a pitched tin roof, a wooden door on the front with one step, an old chair beside it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "gar_rakushka_angled",
+   "cat": "props",
+   "view": "angled",
+   "w": 3.6,
+   "desc": "a closed Soviet metal shell garage 'rakushka' (a single car garage with a rounded clam-shell steel roof that lifts up), rusty green-grey sheet metal, padlocked hasp, rust streaks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    4.5,
+    2.2
+   ]
+  },
+  {
+   "id": "gar_car_jacks",
+   "cat": "props",
+   "view": "angled",
+   "w": 4.4,
+   "desc": "a stripped Soviet Moskvich sedan up on brick piles with no wheels, hood open, engine missing, faded light-blue paint, rusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.4,
+    2.4,
+    1.3
+   ]
+  },
+  {
+   "id": "gar_tire_stack",
+   "cat": "props",
+   "view": "front",
+   "w": 1.0,
+   "desc": "a stack of five worn black car tires piled up, one leaning against the stack; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.9,
+    0.9,
+    1.1
+   ]
+  },
+  {
+   "id": "gar_engine_stand",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "desc": "an oily car engine block hanging from a small rusty chain hoist frame over a wooden pallet, puddle of oil, tools around; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.8,
+    1.2
+   ]
+  },
+  {
+   "id": "gar_workbench_vise",
+   "cat": "props",
+   "view": "front",
+   "w": 2.0,
+   "desc": "a heavy garage workbench of steel and thick planks with a big bench vise, a tool board with wrenches above it, oily rags, jars of bolts; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.0,
+    0.7,
+    1.0
+   ]
+  },
+  {
+   "id": "gar_scrap_heap",
+   "cat": "props",
+   "view": "front",
+   "w": 3.0,
+   "desc": "a heap of scrap car parts: doors, a rusty hood, wheel rims, exhaust pipes, a car seat, bent metal sheets; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.8,
+    1.8,
+    1.3
+   ]
+  },
+  {
+   "id": "gar_boat_trailer",
+   "cat": "props",
+   "view": "side",
+   "w": 4.4,
+   "desc": "an old aluminium rowing boat 'Kazanka' lying upside down on a small rusty car trailer, flat tire, faded paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.4,
+    1.6,
+    1.3
+   ]
+  },
+  {
+   "id": "gar_shelf_jars",
+   "cat": "props",
+   "view": "front",
+   "w": 1.6,
+   "desc": "a garage wall shelf rack of rough planks crowded with glass jars of pickles, paint cans, car batteries and spare parts; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    0.5,
+    2.0
+   ]
+  },
+  {
+   "id": "ats_relay_rack",
+   "cat": "props",
+   "view": "front",
+   "w": 3.0,
+   "desc": "a row of three tall grey steel relay racks of a Soviet telephone exchange (step-by-step / crossbar switching equipment), open frames full of rows of relays and selectors, bundles of cloth-insulated wires, dust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    0.6,
+    2.6
+   ]
+  },
+  {
+   "id": "ats_relay_rack_side",
+   "cat": "props",
+   "view": "side",
+   "w": 3.0,
+   "desc": "a row of four tall (2.6 m, taller than a man) grey steel relay rack cabinets standing side by side, seen from the side at eye level tilted down: the tall side panels of the cabinets with ventilation slots, cable bundles running along the top tray, a ladder hooked on the end; NOT seen from above, the cabinets are clearly tall and upright; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    0.6,
+    2.6
+   ]
+  },
+  {
+   "id": "ats_cross_frame",
+   "cat": "props",
+   "view": "front",
+   "w": 2.1,
+   "desc": "the main distribution frame ('kross') of a Soviet telephone exchange: a tall open steel frame covered with thousands of terminal blocks and jumper wires, colourful wire spaghetti, a ladder leaning on it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.1,
+    0.8,
+    2.8
+   ]
+  },
+  {
+   "id": "ats_patch_panel",
+   "cat": "props",
+   "view": "front",
+   "w": 2.0,
+   "desc": "a Soviet telephone exchange jumper/patch panel cabinet: a grey steel cabinet with an open door, rows of big round connection sockets with several empty sockets and a few thick plugged cables hanging down, a wiring diagram plate inside the door; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.0,
+    0.5,
+    2.0
+   ]
+  },
+  {
+   "id": "ats_switchboard",
+   "cat": "props",
+   "view": "front",
+   "w": 2.1,
+   "desc": "an old Soviet manual telephone switchboard console (kommutator): a wooden desk with an upright panel of jacks and lamps, cords with plugs, a card-reader slot, an operator chair in front of it, a headset lying on the desk; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.1,
+    1.2,
+    1.6
+   ]
+  },
+  {
+   "id": "ats_pneumo_station",
+   "cat": "props",
+   "view": "front",
+   "w": 1.2,
+   "desc": "a Soviet pneumatic tube mail receiving station: a squat grey-green steel cabinet with a hinged receiving tray and a brass capsule hatch, a thick metal tube rising from it up to the ceiling, a pressure gauge and a red lamp; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.8,
+    2.4
+   ]
+  },
+  {
+   "id": "ats_pipe_run",
+   "cat": "decals",
+   "w": 3.0,
+   "h": 3.0,
+   "desc": "a straight 3 meter run of a thick grey-green pneumatic mail steel tube with bolted flange joints and floor brackets, oriented horizontally across the image, long and thin. Seen STRAIGHT DOWN from directly above (pure top-down orthographic view, no perspective, no visible sides), lying flat, transparent background around it, no text"
+  },
+  {
+   "id": "ats_cable_bundle",
+   "cat": "props",
+   "view": "front",
+   "w": 0.9,
+   "desc": "a loose coiled bundle of thick grey telephone jumper cable with big metal plugs on both ends, lying on the floor, tied with tape; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.9,
+    0.6,
+    0.4
+   ]
+  },
+  {
+   "id": "ats_battery_rack",
+   "cat": "props",
+   "view": "side",
+   "w": 3.0,
+   "desc": "a long two-tier steel rack of big glass lead-acid battery cells of a telephone exchange battery room, copper bus bars, white corrosion crust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    0.8,
+    1.4
+   ]
+  },
+  {
+   "id": "ats_rectifier",
+   "cat": "props",
+   "view": "front",
+   "w": 1.2,
+   "desc": "a tall grey Soviet power rectifier cabinet with analog dials, toggle switches, ventilation louvres; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.6,
+    2.0
+   ]
+  },
+  {
+   "id": "ats_desk_phones",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.7,
+   "desc": "an old office desk crowded with several Soviet rotary telephones in different colours, a logbook, a desk lamp and tangled cords; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    0.8,
+    1.0
+   ]
+  },
+  {
+   "id": "ats_cable_tray_stack",
+   "cat": "props",
+   "view": "front",
+   "w": 2.0,
+   "desc": "a stack of steel cable trays and bundles of lead-sheathed telephone cable lying on wooden blocks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "id": "ats_diesel_gen",
+   "cat": "props",
+   "view": "side",
+   "w": 3.6,
+   "desc": "a rusty standby diesel generator set on a steel skid with an exhaust pipe and a fuel tank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.6,
+    1.4,
+    1.8
+   ]
+  },
+  {
+   "id": "rail_track",
+   "cat": "decals",
+   "w": 6.0,
+   "h": 6.0,
+   "desc": "a straight 6 meter section of old railway track: two rusty steel rails on dark creosoted wooden sleepers in gravel ballast, oriented horizontally across the image, weeds between sleepers, long and thin. Seen STRAIGHT DOWN from directly above (pure top-down orthographic view, no perspective, no visible sides), lying flat, transparent background around it, no text"
+  },
+  {
+   "id": "rail_switch",
+   "cat": "decals",
+   "w": 9.0,
+   "h": 9.0,
+   "desc": "an old railway turnout (switch) section: a straight track running horizontally across the image with a second track branching off and curving gently toward the upper right, rusty rails, switch blades and frog, wooden sleepers in gravel. Seen STRAIGHT DOWN from directly above (pure top-down orthographic view, no perspective, no visible sides), lying flat, transparent background around it, no text"
+  },
+  {
+   "id": "rail_switch_lever",
+   "cat": "props",
+   "view": "front",
+   "w": 1.0,
+   "desc": "a manual railway switch lever stand: a heavy cast-iron counterweight lever on a small frame beside the rail, with a round black-and-white pointer target sign on a post; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.8,
+    0.6,
+    1.2
+   ]
+  },
+  {
+   "id": "rail_freight_wagon",
+   "cat": "props",
+   "view": "side",
+   "w": 14.0,
+   "desc": "a Soviet brown covered boxcar freight wagon on two bogies, seen in exact profile, a big sliding door half open in the middle showing dark interior, faded brown-red paint, rust streaks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    14.0,
+    2.9,
+    4.0
+   ]
+  },
+  {
+   "id": "rail_locomotive",
+   "cat": "props",
+   "view": "side",
+   "w": 16.0,
+   "desc": "an old Soviet TEM2 shunting diesel locomotive in faded green with yellow stripe, cab at one end, long hood, handrails, rust, broken windows; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    16.0,
+    3.0,
+    4.6
+   ]
+  },
+  {
+   "id": "rail_cistern",
+   "cat": "props",
+   "view": "side",
+   "w": 12.0,
+   "desc": "a black oil tank wagon (cistern) on two bogies, seen in exact profile, ladder and walkway at the dome, oil drips and rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.0,
+    2.9,
+    4.0
+   ]
+  },
+  {
+   "id": "rail_loading_ramp",
+   "cat": "props",
+   "view": "front",
+   "w": 8.0,
+   "desc": "a long concrete railway loading ramp platform about 1.2 m high, with a sloped approach at one side, chipped edges with exposed rebar, rusty steel edge rail; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    8.0,
+    3.0,
+    1.2
+   ]
+  },
+  {
+   "id": "rail_schema_board",
+   "cat": "props",
+   "view": "front",
+   "w": 2.0,
+   "desc": "a big painted metal board on two legs with a diagram of railway tracks and switches drawn as lines with three round lamp markers, old, rust streaks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.0,
+    0.4,
+    2.0
+   ]
+  },
+  {
+   "id": "rail_signal_box",
+   "cat": "props",
+   "view": "front",
+   "w": 4.5,
+   "desc": "a two-storey Soviet railway signal box (post EC): brick ground floor, a glazed upper control room with wide windows on all sides, flat roof with an antenna, an external steel stair on the right side; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.5,
+    4.0,
+    6.0
+   ]
+  },
+  {
+   "id": "rail_buffer_stop",
+   "cat": "props",
+   "view": "front",
+   "w": 3.0,
+   "desc": "a railway buffer stop at the end of a track: a heavy rusty steel frame with two round buffers, painted red-white stripes faded; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    1.0,
+    1.4
+   ]
+  },
+  {
+   "id": "rail_signal",
+   "cat": "props",
+   "view": "front",
+   "w": 0.8,
+   "desc": "a tall Soviet railway light signal mast with a black round signal head with three lenses, a ladder; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.4,
+    0.4,
+    4.5
+   ]
+  },
+  {
+   "id": "rail_handcar",
+   "cat": "props",
+   "view": "side",
+   "w": 3.0,
+   "desc": "an old railway motor handcar (draisine), a small flat platform on four wheels with a pump handle and a rusty little engine box; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    1.6,
+    1.3
+   ]
+  },
+  {
+   "id": "rail_sleepers_stack",
+   "cat": "props",
+   "view": "side",
+   "w": 3.0,
+   "desc": "a stack of old dark creosoted wooden railway sleepers piled crosswise; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "id": "rail_wheelset",
+   "cat": "props",
+   "view": "side",
+   "w": 2.2,
+   "desc": "two spare railway wheelsets (steel wheel pairs on axles) standing on short rails, rusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "id": "quarry_crane_base",
+   "cat": "props",
+   "view": "front",
+   "w": 6.0,
+   "desc": "the lower body of a big rusty Soviet crawler crane: two wide caterpillar tracks and a heavy rotating turntable platform with a counterweight and engine housing, NO boom attached, yellow paint faded; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    5.0,
+    3.0
+   ]
+  },
+  {
+   "id": "quarry_crane_boom",
+   "cat": "props",
+   "w": 20.0,
+   "desc": "a long lattice steel crane boom of a crawler crane, a narrow tapering truss of yellow-painted rusty steel angles with diagonal bracing, lying perfectly horizontal across the whole image from left to right, its thick hinge end with pivot pins at the LEFT edge and a pulley sheave head at the RIGHT tip, seen from directly above (top-down), very long and thin; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "quarry_crane_cabin",
+   "cat": "props",
+   "view": "front",
+   "w": 2.6,
+   "desc": "the operator cabin of a crawler crane standing on a small steel platform with a ladder: a steel box cab with wide windows, a seat and levers visible inside, faded yellow paint, broken glass; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    2.2,
+    2.8
+   ]
+  },
+  {
+   "id": "quarry_magnet",
+   "cat": "props",
+   "w": 1.8,
+   "desc": "a big round lifting electromagnet disk of a scrap crane hanging on chains, seen from above at an angle, dark steel with a power cable; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "quarry_container",
+   "cat": "props",
+   "view": "side",
+   "w": 6.0,
+   "desc": "a 20-foot steel shipping container in faded blue paint, closed doors at one end, corrugated walls, dents and rust patches; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "quarry_rubble_pile",
+   "cat": "props",
+   "view": "front",
+   "w": 8.0,
+   "desc": "a wide pile of rubble and broken rock with chunks of concrete, rebar and boulders, sandy grey, gently mounded; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    4.0,
+    2.0
+   ]
+  },
+  {
+   "id": "quarry_excavator_wreck",
+   "cat": "props",
+   "view": "angled",
+   "w": 9.0,
+   "desc": "an abandoned big Soviet quarry excavator EKG with a rope shovel boom and bucket resting on the ground, caterpillar tracks, rusty yellow-grey body, broken cab windows; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    4.0,
+    3.5
+   ]
+  },
+  {
+   "id": "quarry_dumptruck_wreck",
+   "cat": "props",
+   "view": "side",
+   "w": 9.5,
+   "desc": "an abandoned huge BelAZ quarry dump truck in faded yellow, giant tires (one flat), dump body raised slightly, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    9.0,
+    4.0,
+    4.0
+   ]
+  },
+  {
+   "id": "quarry_conveyor",
+   "cat": "props",
+   "view": "side",
+   "w": 12.0,
+   "desc": "a long inclined belt conveyor on steel truss legs rising from left (low) to right (high), torn rubber belt, rusty rollers, a little gravel on it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     12.0,
+     1.2,
+     4.0
+    ]
+   }
+  },
+  {
+   "id": "quarry_hopper",
+   "cat": "props",
+   "view": "front",
+   "w": 4.0,
+   "desc": "a rusty steel gravel hopper bunker on four thick legs with a funnel bottom and a chute, ladder on the side; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.0,
+    3.5,
+    4.5
+   ]
+  },
+  {
+   "id": "quarry_trailer_hut",
+   "cat": "props",
+   "view": "side",
+   "w": 6.0,
+   "desc": "a construction site workers trailer hut (vagonchik-bytovka) of corrugated metal on skids, small windows, a door with two steps, a stovepipe, faded blue paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "quarry_boulders",
+   "cat": "props",
+   "view": "front",
+   "w": 2.2,
+   "desc": "a cluster of three big angular grey granite boulders blasted from a quarry, fresh broken faces; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.0,
+    1.4,
+    1.2
+   ]
+  },
+  {
+   "id": "quarry_sand_pile",
+   "cat": "props",
+   "view": "front",
+   "w": 5.0,
+   "desc": "a big conical pile of yellow-grey sand / fine gravel with tire tracks and a shovel stuck in it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.6,
+    3.0,
+    1.8
+   ]
+  },
+  {
+   "id": "quarry_drill_rig",
+   "cat": "props",
+   "view": "angled",
+   "w": 4.0,
+   "desc": "an old crawler-mounted rock blast-hole drill rig with a tall vertical drill mast, rusty orange; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    2.2,
+    5.0
+   ]
+  },
+  {
+   "id": "wallface_rock",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: a quarry bench cliff face of layered grey-brown rock strata with cracks, drill-hole marks and loose stones, filling the whole image"
+  },
+  {
+   "id": "ground_rock",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "ground viewed straight down from above: bare blasted quarry rock floor, flat grey-brown stone with cracks, rock chips and dust"
+  },
+  {
+   "id": "wallface_rail_shed",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: tall wooden double gates of a railway engine shed, dark planks with iron straps and big hinges, peeling paint, filling the whole image"
+  }
+ ]
+}

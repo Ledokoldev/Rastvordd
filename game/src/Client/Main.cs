@@ -144,8 +144,9 @@ namespace Rastvordd.Client
         {
             DisplayServer.WindowSetTitle("Раствордд — прототип 0 (2D 3/4)");
             _server = new LocalServer(1337);
-            // сохранение мира: в отладочных прогонах (скриншоты, замеры) — всегда свежий мир
-            _saveEnabled = !System.Array.Exists(OS.GetCmdlineUserArgs(), a => a.StartsWith("--shot") || a == "--fresh" || a.StartsWith("--riggallery") || a == "--perf");
+            // сохранение мира игрока — только при обычном запуске: любой отладочный флаг (прогоны ботов, скриншоты,
+            // наблюдатель) работает со свежим миром и НЕ трогает сохранение (иначе тест перезапишет мир игрока)
+            _saveEnabled = OS.GetCmdlineUserArgs().Length == 0;
             // отладка сохранений: --savefile=путь — отдельный файл, работает и в прогонах со скриншотами
             var sf = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--savefile="));
             if (sf != null) { SavePath = sf.Substring(11); _saveEnabled = true; }

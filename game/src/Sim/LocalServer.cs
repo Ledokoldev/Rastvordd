@@ -123,7 +123,7 @@ namespace Rastvordd.Sim
 
         public LocalServer(int seed)
         {
-            World = new World(seed);
+            World = new World(seed) { Seed = seed };
             int i = 0;
             foreach (var npc in World.SpawnNpcs())
                 _brains.Add(new NpcBrain(npc, World, seed * 31 + i++));
@@ -138,7 +138,19 @@ namespace Rastvordd.Sim
             return m;
         }
 
-        public int Connect(string name) => World.SpawnPlayer(name).Id;
+        /// <summary>Подключение: если в сохранении есть персонаж с этим именем — продолжаем им.</summary>
+        public int Connect(string name) => (World.FindPlayer(name) ?? World.SpawnPlayer(name)).Id;
+
+        /// <summary>Загрузить сохранение (до Connect). false — файл от другого зерна/версии.</summary>
+        public bool LoadSave(string json)
+        {
+            var save = WorldSave.FromJson(json);
+            if (save == null || save.Version != 1 || save.Seed != World.Seed) return false;
+            World.Load(save);
+            return true;
+        }
+
+        public string SaveJson() => World.Save().ToJson();
 
         public void Submit(int clientId, InputCmd cmd) => _pending[clientId] = cmd;
 

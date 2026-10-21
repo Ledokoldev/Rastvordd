@@ -87,6 +87,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("craft")) _craftReq = int.Parse(a.Substring(5));
                 else if (a == "stop") _forceWalk = SVec.Zero;
                 else if (a == "crouch") _forceCrouch = true;
+                else if (a == "save") SaveWorld();
                 else if (a == "stand") _forceCrouch = false;
                 else if (a.StartsWith("code")) _scriptCode = int.Parse(a.Substring(4));
                 else if (a.StartsWith("go"))
@@ -108,7 +109,19 @@ namespace Rastvordd.Client
         {
             DisplayServer.WindowSetTitle("Раствордд — прототип 0 (2D 3/4)");
             _server = new LocalServer(1337);
+            // сохранение мира: в отладочных прогонах (скриншоты, замеры) — всегда свежий мир
+            _saveEnabled = !System.Array.Exists(OS.GetCmdlineUserArgs(), a => a.StartsWith("--shot") || a == "--fresh" || a.StartsWith("--riggallery") || a == "--perf");
+            // отладка сохранений: --savefile=путь — отдельный файл, работает и в прогонах со скриншотами
+            var sf = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--savefile="));
+            if (sf != null) { SavePath = sf.Substring(11); _saveEnabled = true; }
+            bool loaded = false;
+            if (_saveEnabled && FileAccess.FileExists(SavePath))
+            {
+                try { loaded = _server.LoadSave(FileAccess.GetFileAsString(SavePath)); }
+                catch (System.Exception ex) { GD.PrintErr($"сохранение не прочитано: {ex.Message}"); }
+            }
             _myId = _server.Connect("Игрок");
+            if (loaded) CallDeferred(nameof(ToastLoaded));
             ParseArgs();
 
             VisionFx.Register();
@@ -269,6 +282,7 @@ namespace Rastvordd.Client
                         Input.MouseMode = _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
                         break;
                     case Key.Tab: _hud.ToggleInventory(); break;
+                    case Key.F5: SaveWorld(); _hud.Toast("Мир сохранён"); break;
                     case Key.F12: SaveScreenshot($"user://shot_{Time.GetTicksMsec()}.png"); break;
                     case Key.Escape:
                         Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Hidden ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
@@ -330,12 +344,38 @@ namespace Rastvordd.Client
             _aim = new SVec(m.X / Iso.PPM, (m.Y + Iso.GunH) / Iso.PPM);
         }
 
+        // ---------- сохранение мира ----------
+        string SavePath = "user://world_save.json";
+        bool _saveEnabled;
+        double _saveTimer;
+
+        void ToastLoaded() => _hud.Toast("Мир загружен — продолжаем с того же места");
+
+        void SaveWorld()
+        {
+            if (!_saveEnabled) return;
+            string path = ProjectSettings.GlobalizePath(SavePath);
+            try
+            {
+                System.IO.File.WriteAllText(path + ".tmp", _server.SaveJson());
+                System.IO.File.Move(path + ".tmp", path, true);   // атомарно: не оставим полуфайл при вылете
+            }
+            catch (System.Exception ex) { GD.PrintErr($"сохранение не записано: {ex.Message}"); }
+        }
+
+        public override void _Notification(int what)
+        {
+            if (what == NotificationWMCloseRequest) SaveWorld();
+        }
+
         // ---------- цикл ----------
 
         public override void _Process(double delta)
         {
             _frame++;
             if (_frame == _pressNAt) _timeEdge = true;
+            _saveTimer += delta;
+            if (_saveTimer >= 60) { _saveTimer = 0; SaveWorld(); }   // автосохранение раз в минуту
             RunScript();
             UpdateAim((float)delta);
 

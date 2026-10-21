@@ -208,7 +208,7 @@ namespace Rastvordd.Client
             pbox.AddChild(UiTheme.Header("ПОЯС", out _));
             _beltGrid = Grid(pbox, 6);
             for (int i = 0; i < Actor.BeltSize; i++) { var c = AddCell(_beltGrid, "belt", i); c.Number = (i + 1).ToString(); _belt.Add(c); }
-            pbox.AddChild(UiTheme.Small("Тащи мышкой · Shift+клик или ПКМ — перенести · Shift + провести курсором — быстро забрать всё под ним"));
+            pbox.AddChild(UiTheme.Small("Тащи мышкой · за окно — выбросить · Shift+клик или ПКМ — перенести · Shift + провести курсором — забрать всё под ним"));
 
             // ---- контейнер ----
             _contPanel = new PanelContainer();
@@ -230,6 +230,12 @@ namespace Rastvordd.Client
             _contButtons.AddThemeConstantOverride("separation", 8);
             kbox.AddChild(_contButtons);
         }
+
+        // вещь из рюкзака или пояса утащили за окно — выбросить на землю
+        public override bool _CanDropData(Vector2 atPosition, Variant data) =>
+            data.VariantType == Variant.Type.String && data.AsString() is var d && (d.StartsWith("pack#") || d.StartsWith("belt#"));
+
+        public override void _DropData(Vector2 atPosition, Variant data) => Op?.Invoke(UiOp.Drop, data.AsString());
 
         static GridContainer Grid(Control parent, int cols)
         {

@@ -28,7 +28,8 @@ namespace Rastvordd.Client
             UiTheme.DrawSlot(this, r, _hover);
             bool ok = R.CanCraft && !Blocked;
             var icon = Art.Icon(R.Output);
-            if (icon != null) DrawTextureRect(icon, r.Grow(-9), false, ok ? Colors.White : new Color(1, 1, 1, 0.35f));
+            if (icon != null) DrawTextureRect(icon, r.Grow(-9), false, ok ? Colors.White : !R.Known ? new Color(1, 1, 1, 0.2f) : new Color(1, 1, 1, 0.4f));
+            if (!R.Known) TechWindow.DrawLock(this, new Vector2(Size - 14, 6), UiTheme.Dim);
             var font = UiTheme.Text;
             if (R.Count > 1)
             {
@@ -36,12 +37,12 @@ namespace Rastvordd.Client
                 var sz = font.GetStringSize(n, HorizontalAlignment.Left, -1, 12);
                 DrawString(font, new Vector2(Size - 5 - sz.X, Size - 5), n, HorizontalAlignment.Left, -1, 12, UiTheme.Ink);
             }
-            if (R.NeedsBench) DrawString(font, new Vector2(5, 14), "В", HorizontalAlignment.Left, -1, 11, Blocked ? new Color(0.9f, 0.42f, 0.38f) : UiTheme.Dim);
+            if (R.NeedsBench) DrawString(font, new Vector2(5, 14), $"В{R.Bench}", HorizontalAlignment.Left, -1, 11, Blocked ? new Color(0.9f, 0.42f, 0.38f) : UiTheme.Dim);
             if (ok) DrawRect(new Rect2(0, Size - 2, Size, 2), new Color(0.45f, 0.8f, 0.4f, 0.8f));
             if (Selected) DrawRect(r.Grow(-1), UiTheme.Accent, false, 2);
         }
 
-        public override string _GetTooltip(Vector2 atPosition) => $"{R.Name}\n{R.CostText}";
+        public override string _GetTooltip(Vector2 atPosition) => $"{R.Name}\n{R.CostText}{(R.Known ? "" : "\nне изучено — дерево изучения у верстака")}";
 
         public override void _GuiInput(InputEvent e)
         {
@@ -61,6 +62,7 @@ namespace Rastvordd.Client
     public partial class CraftWindow : Control
     {
         public event Action<int, int> Craft;    // (индекс рецепта, сколько раз)
+        public event Action OpenTree;
         static readonly string[] Tabs = { "Всё", "Инструменты", "Оружие", "Стройка", "Рейд", "Разное" };
 
         static int TabOf(string id) => id switch
@@ -76,13 +78,13 @@ namespace Rastvordd.Client
         readonly GridContainer _grid;
         readonly List<RecipeCell> _cells = new();
         readonly TextureRect _bigIcon;
-        readonly Label _name, _desc, _time, _bench, _amountLabel;
+        readonly Label _name, _desc, _time, _bench, _amountLabel, _stats;
         readonly VBoxContainer _costs;
         readonly Button _craftBtn;
         readonly HBoxContainer _queue;
         readonly Label _queueTitle;
         List<RecipeInfo> _recipes = new();
-        bool _nearBench;
+        int _benchLevel;
         int _tab, _selected = -1, _amount = 1;
         string _gridSig, _costSig, _queueSig;
 
@@ -108,7 +110,15 @@ namespace Rastvordd.Client
             var lbox = new VBoxContainer();
             lbox.AddThemeConstantOverride("separation", 8);
             left.AddChild(lbox);
-            lbox.AddChild(UiTheme.Header("КРАФТ", out _));
+            var head = new HBoxContainer();
+            head.AddThemeConstantOverride("separation", 12);
+            lbox.AddChild(head);
+            var h = UiTheme.Header("КРАФТ", out _);
+            h.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+            head.AddChild(h);
+            var tree = new Button { Text = "ДЕРЕВО ИЗУЧЕНИЯ", FocusMode = FocusModeEnum.None };
+            tree.Pressed += () => OpenTree?.Invoke();
+            head.AddChild(tree);
             _tabs = new HBoxContainer();
             _tabs.AddThemeConstantOverride("separation", 4);
             lbox.AddChild(_tabs);
@@ -126,7 +136,7 @@ namespace Rastvordd.Client
             _grid.AddThemeConstantOverride("h_separation", 4);
             _grid.AddThemeConstantOverride("v_separation", 4);
             scroll.AddChild(_grid);
-            lbox.AddChild(UiTheme.Small("Клик — выбрать · двойной клик — скрафтить · «В» — нужен верстак рядом · Q — закрыть", null, 12));
+            lbox.AddChild(UiTheme.Small("Клик — выбрать · двойной клик — скрафтить · В1–В3 — нужен верстак этого уровня · замок — не изучено · Q — закрыть", null, 12));
 
             // ---- карточка рецепта ----
             var right = new PanelContainer { CustomMinimumSize = new Vector2(300, 0) };
@@ -148,6 +158,9 @@ namespace Rastvordd.Client
             _desc = UiTheme.Small("", UiTheme.Dim, 12);
             _desc.CustomMinimumSize = new Vector2(200, 0);
             titles.AddChild(_desc);
+            _stats = UiTheme.Small("", UiTheme.Ink, 12);
+            _stats.CustomMinimumSize = new Vector2(280, 0);
+            rbox.AddChild(_stats);
             rbox.AddChild(UiTheme.Header("НУЖНО", out _));
             _costs = new VBoxContainer();
             _costs.AddThemeConstantOverride("separation", 4);
@@ -185,7 +198,7 @@ namespace Rastvordd.Client
             rbox.AddChild(_queue);
         }
 
-        bool Blocked(RecipeInfo r) => r.NeedsBench && !_nearBench;
+        bool Blocked(RecipeInfo r) => !r.Known || r.Bench > _benchLevel;
 
         /// <summary>Сколько раз можно скрафтить выбранное прямо сейчас.</summary>
         int MaxTimes()
@@ -201,7 +214,7 @@ namespace Rastvordd.Client
         public void Refresh(SelfInfo s)
         {
             _recipes = s.Recipes;
-            _nearBench = s.NearBench;
+            _benchLevel = s.BenchLevel;
             if (_selected >= _recipes.Count) _selected = -1;
 
             // сетка: пересобираем при смене вкладки или списка
@@ -240,6 +253,8 @@ namespace Rastvordd.Client
                 _bigIcon.Texture = Art.Icon(r.Output);
                 _name.Text = r.Name;
                 _desc.Text = Items.Desc(r.Output);
+                _stats.Text = string.Join("\n", Items.Stats(r.Output).ConvertAll(x => $"{x.label}: {x.value}"));
+                _stats.Visible = _stats.Text != "";
                 string csig = _selected + "|" + _amount + "|" + string.Join(";", r.Costs.ConvertAll(c => c.id + c.have));
                 if (csig != _costSig)
                 {
@@ -263,7 +278,8 @@ namespace Rastvordd.Client
                     }
                 }
                 _time.Text = $"Время: {r.Time * _amount:0} с" + (r.Count > 1 ? $" · получишь {r.Count * _amount} шт." : "");
-                _bench.Text = !r.NeedsBench ? "Можно в руках" : _nearBench ? "Верстак рядом ✓" : "Нужен верстак рядом";
+                _bench.Text = !r.Known ? $"Не изучено — изучи в дереве у верстака {Math.Max(1, Tech.Get(r.Output)?.Bench ?? 1)}"
+                    : !r.NeedsBench ? "Можно в руках" : _benchLevel >= r.Bench ? $"Верстак {r.Bench} рядом ✓" : $"Нужен верстак {r.Bench} рядом";
                 _bench.AddThemeColorOverride("font_color", Blocked(r) ? new Color(0.9f, 0.42f, 0.38f) : UiTheme.Dim);
                 _amountLabel.Text = $"×{_amount}";
                 _craftBtn.Disabled = MaxTimes() < _amount;

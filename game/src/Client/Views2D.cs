@@ -824,9 +824,12 @@ namespace Rastvordd.Client
         readonly PointLight2D _light;
         readonly AudioStreamPlayer2D _crackle;
 
-        public DeployView2D(DeployKind kind)
+        readonly int _level;
+
+        public DeployView2D(DeployKind kind, int level = 0)
         {
             _kind = kind;
+            _level = level;
             Material = VisionFx.ObjectMat;
             TextureFilter = TextureFilterEnum.Nearest;
             if (kind == DeployKind.Furnace)
@@ -850,7 +853,7 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            var tex = Art.Get(_kind switch { DeployKind.Workbench => "props/workbench", DeployKind.Claim => "props/claim_post", DeployKind.Box => "props/crate_wood", DeployKind.SleepBag => "props/sleeping_bag", _ => "props/furnace" });
+            var tex = Art.Get(_kind switch { DeployKind.Workbench => _level >= 2 ? $"props/workbench{_level}" : "props/workbench", DeployKind.Claim => "props/claim_post", DeployKind.Box => "props/crate_wood", DeployKind.SleepBag => "props/sleeping_bag", _ => "props/furnace" });
             if (tex == null && _kind == DeployKind.Claim)
             {
                 // запасной вид столба: столб с жестяным ящиком и красной тряпкой

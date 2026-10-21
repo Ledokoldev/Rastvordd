@@ -15,13 +15,14 @@ namespace Rastvordd.Client
         ColorRect _hpFill, _foodFill, _waterFill, _damageRect, _deathRect, _vision;
         PanelContainer _invPanel;
         CraftWindow _craftWin;
+        TechWindow _techWin;
         HBoxContainer _belt;
         readonly List<(PanelContainer panel, Label label, StyleBoxFlat style, TextureRect icon)> _beltSlots = new();
         ShaderMaterial _visionMat;
         float _toastTime, _damageFlash;
 
         public Crosshair Crosshair { get; private set; }
-        public bool CraftOpen => _craftWin.Visible;
+        public bool CraftOpen => _craftWin.Visible || _techWin.Visible;   // любое окно крафта/изучения: мышь видна, не стреляем
         PanelContainer _adminPanel;
         public bool AdminOpen => _adminPanel != null && _adminPanel.Visible;
 
@@ -79,6 +80,7 @@ namespace Rastvordd.Client
         Label _adminSounds;
         public void SetAdminSounds(string text) { if (_adminSounds != null) _adminSounds.Text = text; }
         public event Action<int, int> CraftRequested;   // (рецепт, сколько раз)
+        public event Action<string> ResearchRequested;
         public event Action WipeRequested;
 
         const string VisionShader = @"
@@ -204,7 +206,12 @@ void fragment() {
         {
             _craftWin = new CraftWindow();
             _craftWin.Craft += (i, n) => CraftRequested?.Invoke(i, n);
+            _craftWin.OpenTree += OpenTech;
             AddChild(_craftWin);
+            _techWin = new TechWindow();
+            _techWin.Research += id => ResearchRequested?.Invoke(id);
+            _techWin.OpenCraft += () => { _techWin.Visible = false; _craftWin.Visible = true; };
+            AddChild(_techWin);
         }
 
         ColorRect FullRect(Color c)
@@ -285,7 +292,15 @@ void fragment() {
 
         public void FlashDamage() => _damageFlash = 0.45f;
         public void ToggleInventory() => _invPanel.Visible = !_invPanel.Visible;
-        public void ToggleCraft() => _craftWin.Visible = !_craftWin.Visible;
+        /// <summary>Q: открыть крафт; если открыто любое из окон — закрыть.</summary>
+        public void ToggleCraft()
+        {
+            bool open = CraftOpen;
+            _craftWin.Visible = !open;
+            _techWin.Visible = false;
+        }
+
+        public void OpenTech() { _craftWin.Visible = false; _techWin.Visible = true; }
 
         public void SetVision(Vector2 playerPx, Vector2 facing, float pxPerM, float rangeM, float cosHalf, Texture2D rays, bool enabled)
         {
@@ -341,6 +356,7 @@ void fragment() {
 
 
             if (_craftWin.Visible) _craftWin.Refresh(s);
+            if (_techWin.Visible) _techWin.Refresh(s);
 
             _deathRect.Visible = s.Dead;
             if (s.Dead)

@@ -130,6 +130,8 @@ namespace Rastvordd.Client
             ["build_plan"] = "weapons/weapon_build_plan",
             ["deploy_furnace"] = "icons/icon_furnace",
             ["deploy_workbench"] = "icons/icon_workbench",
+            ["deploy_workbench2"] = "icons/icon_workbench2",
+            ["deploy_workbench3"] = "icons/icon_workbench3",
             ["deploy_sleepbag"] = "icons/icon_sleeping_bag",
             ["deploy_box"] = "icons/icon_wood_box",
             ["deploy_claim"] = "icons/icon_tool_cupboard",

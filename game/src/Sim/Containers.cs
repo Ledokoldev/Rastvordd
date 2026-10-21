@@ -12,7 +12,7 @@ namespace Rastvordd.Sim
     /// «fur» (печь: 0 руда, 1 серная руда, 2 топливо, 3–5 готовое), «claim» (шкаф: дерево, камень, металл, лом).
     /// Move — перетаскивание A→B, Quick — «на другую сторону» (Shift+клик, ховер-лут).
     /// </summary>
-    public enum UiOp { None, Close, Move, Quick, TakeAll, PutAll, Toggle, TakeOut }
+    public enum UiOp { None, Close, Move, Quick, TakeAll, PutAll, Toggle, TakeOut, Drop }
 
     /// <summary>Ячейка для отрисовки.</summary>
     public struct CellView
@@ -69,13 +69,15 @@ namespace Rastvordd.Sim
             _ => null,
         };
 
-        /// <summary>Контейнер, который надо обыскивать: чужие ящики, рюкзаки, ящики РТ. Свой ящик — сразу.</summary>
+        /// <summary>Контейнер, который надо обыскивать: только ящики РТ и вещи с трупов. Выброшенное и ящики баз — сразу.</summary>
         LootBag SearchBag(Actor a) => a.OpenTarget switch
         {
-            LootBag b => b,
-            Deployable d when d.Storage != null && !d.Auth.Contains(a.Id) && d.OwnerId != a.Id => d.Storage,
+            LootBag b when b.IsCrate || b.Corpse => b,
             _ => null,
         };
+
+        /// <summary>Отметка «обыскал до конца»: повторно не обыскивается, даже если туда что-то положат.</summary>
+        const int Searched = 1_000_000;
 
         int Revealed(Actor a)
         {
@@ -241,6 +243,7 @@ namespace Rastvordd.Sim
             {
                 if (op == UiOp.Move) DoMove(a, cmd.UiItem);
                 else if (op == UiOp.Quick) DoQuick(a, cmd.UiItem);
+                else if (op == UiOp.Drop) DoDrop(a, cmd.UiItem);
                 return;
             }
             var pos = UiTargetPos(a);
@@ -253,7 +256,8 @@ namespace Rastvordd.Sim
             if (SearchBag(a) is LootBag sb)
             {
                 var st = sb.Search.GetValueOrDefault(a.Id);
-                if (st.n < sb.Items.Count)
+                if (st.n < Searched && st.n >= sb.Items.Count) sb.Search[a.Id] = (Searched, 0);
+                else if (st.n < sb.Items.Count)
                 {
                     st.t += Dt;
                     var it = sb.Items[st.n];
@@ -269,6 +273,7 @@ namespace Rastvordd.Sim
             {
                 case UiOp.Move: DoMove(a, cmd.UiItem); break;
                 case UiOp.Quick: DoQuick(a, cmd.UiItem); break;
+                case UiOp.Drop: DoDrop(a, cmd.UiItem); break;
                 case UiOp.TakeAll:
                     string inv = a.OpenUi switch { UiKind.Furnace => "fur", UiKind.Claim => "claim", _ => "cont" };
                     for (int i = CellCount(a, inv) - 1; i >= 0; i--) if (inv != "fur" || i >= 3) QuickCell(a, inv, i);
@@ -317,11 +322,32 @@ namespace Rastvordd.Sim
         void DropOverflow(Actor a)
         {
             if (a.Overflow.Count == 0) return;
-            var bag = new LootBag { Id = NextId(), Pos = a.Pos + new Vector2(0.4f, 0.3f), Despawn = 300f };
-            bag.Items.AddRange(a.Overflow);
+            foreach (var s in a.Overflow) DropAtFeet(a, s);
             a.Overflow.Clear();
-            Bags.Add(bag);
             Info(a, "Рюкзак полон — лишнее выпало рядом");
+        }
+
+        /// <summary>Выбросить предмет из своего рюкзака или пояса.</summary>
+        void DoDrop(Actor a, string arg)
+        {
+            var (inv, i) = ParseCell(arg);
+            if (inv is not ("pack" or "belt")) return;
+            var s = GetCell(a, inv, i);
+            if (s == null) return;
+            SetCell(a, inv, i, null);
+            DropAtFeet(a, s);
+        }
+
+        /// <summary>Положить вещь под ноги: в лежащую рядом выброшенную сумку или новую. Открывается сразу, без обыска.</summary>
+        void DropAtFeet(Actor a, ItemSlot s)
+        {
+            var at = a.Pos + new Vector2(0.4f, 0.3f);
+            LootBag bag = null;
+            foreach (var b in Bags)
+                if (!b.IsCrate && !b.Corpse && Vector2.Distance(b.Pos, at) < 1f) { bag = b; break; }
+            if (bag == null) { bag = new LootBag { Id = NextId(), Pos = at }; Bags.Add(bag); }
+            bag.Despawn = 300f;
+            bag.Items.Add(s);
         }
 
         // ---------- для снапшота ----------
@@ -340,7 +366,7 @@ namespace Rastvordd.Sim
             {
                 case UiKind.Box:
                 case UiKind.Bag:
-                    v.Title = a.OpenUi == UiKind.Box ? "ЯЩИК" : a.OpenTarget is LootBag lb && lb.IsCrate ? "ЯЩИК" : "РЮКЗАК";
+                    v.Title = a.OpenUi == UiKind.Box ? "ЯЩИК" : a.OpenTarget is LootBag lb ? (lb.IsCrate ? "ЯЩИК" : lb.Corpse ? "РЮКЗАК" : "ВЕЩИ НА ЗЕМЛЕ") : "РЮКЗАК";
                     var items = UiItems(a);
                     int revealed = Math.Min(Revealed(a), items.Count);
                     int cells = CellCount(a, "cont");

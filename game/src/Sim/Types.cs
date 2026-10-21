@@ -28,6 +28,7 @@ namespace Rastvordd.Sim
         public string UiItem;
         public int UiIndex;
         public int SetPiece;      // выбор элемента плана из меню (−1 — нет)
+        public string Research;   // изучить узел дерева (id предмета) у верстака
 
         public static InputCmd Empty => new InputCmd { SelectSlot = -1, Craft = -1, Code = -1, SetPiece = -1 };
     }
@@ -207,6 +208,8 @@ namespace Rastvordd.Sim
 
             // устанавливаемое
             Add("deploy_workbench", "Верстак", ItemCategory.Deployable).Deploy = DeployKind.Workbench;
+            Add("deploy_workbench2", "Верстак 2", ItemCategory.Deployable).Deploy = DeployKind.Workbench;
+            Add("deploy_workbench3", "Верстак 3", ItemCategory.Deployable).Deploy = DeployKind.Workbench;
             Add("deploy_sleepbag", "Спальник", ItemCategory.Deployable).Deploy = DeployKind.SleepBag;
             Add("deploy_box", "Ящик", ItemCategory.Deployable).Deploy = DeployKind.Box;
             Add("deploy_claim", "Шкаф", ItemCategory.Deployable).Deploy = DeployKind.Claim;   // центр базы: зона, бюджет, содержание
@@ -222,6 +225,55 @@ namespace Rastvordd.Sim
             return null;
         }
         public static string Name(string id) => Get(id)?.Name ?? id;
+
+        /// <summary>Уровень верстака, который ставит предмет (0 — не верстак).</summary>
+        public static int BenchLevel(string id) => id switch { "deploy_workbench" => 1, "deploy_workbench2" => 2, "deploy_workbench3" => 3, _ => 0 };
+
+        /// <summary>Характеристики для карточек крафта и изучения: (название, значение).</summary>
+        public static List<(string label, string value)> Stats(string id)
+        {
+            var list = new List<(string, string)>();
+            var def = Get(id);
+            if (def == null) return list;
+            if (def.Weapon is WeaponDef w)
+            {
+                if (w.Melee)
+                {
+                    list.Add(("Урон", $"{w.Damage:0}"));
+                    list.Add(("Удары", $"{60f / w.FireInterval:0} в минуту"));
+                    if (w.GatherTree > 1 || w.GatherStone > 1)
+                    {
+                        list.Add(("Дерево за удар", $"{w.GatherTree:0}"));
+                        list.Add(("Камень за удар", $"{w.GatherStone:0}"));
+                        list.Add(("Руда за удар", $"{w.GatherMetal:0}"));
+                    }
+                }
+                else
+                {
+                    list.Add(("Урон", $"{w.Damage:0}"));
+                    list.Add(("Скорострельность", $"{60f / w.FireInterval:0} выстр./мин" + (w.Auto ? ", автомат" : "")));
+                    list.Add(("Магазин", $"{w.Magazine}"));
+                    list.Add(("Перезарядка", $"{w.ReloadTime:0.0} с"));
+                    list.Add(("Дальность", $"{w.Range:0} м"));
+                    if (w.AmmoId != null) list.Add(("Патроны", Name(w.AmmoId)));
+                }
+            }
+            if (def.Explosive is ExplosiveDef e)
+            {
+                if (e.FireTime > 0) { list.Add(("Горит", $"{e.FireTime:0} с")); list.Add(("Радиус огня", $"{e.Radius:0.0} м")); }
+                else
+                {
+                    list.Add(("Урон", $"{e.Damage:0}"));
+                    list.Add(("Радиус", $"{e.Radius:0.0} м"));
+                    list.Add(("Фитиль", $"{e.Fuse:0} с"));
+                    if (e.DudChance > 0) list.Add(("Осечка", $"{e.DudChance * 100:0}%"));
+                    if (e.Sticks) list.Add(("Крепится", "к стене"));
+                }
+                list.Add(("Бросок", $"до {e.ThrowRange:0} м"));
+            }
+            if (BenchLevel(id) > 0) list.Add(("Открывает", $"крафт уровня {BenchLevel(id)}"));
+            return list;
+        }
 
         /// <summary>Для чего предмет — одна строка в подсказке инвентаря.</summary>
         public static string Desc(string id) => id switch
@@ -258,7 +310,9 @@ namespace Rastvordd.Sim
             "weapon_bow" => "Тихое оружие, нужны стрелы",
             "weapon_pipe" => "Простой огнестрел на пист. патронах",
             "weapon_ak" => "Автомат на патронах 5.56",
-            "deploy_workbench" => "Крафт пороха, патронов, оружия",
+            "deploy_workbench" => "E — дерево изучения. Открывает крафт уровня 1: порох, патроны, самопал",
+            "deploy_workbench2" => "Изучение и крафт уровня 2: патроны 5.56, самодельная бомба",
+            "deploy_workbench3" => "Изучение и крафт уровня 3: калаш, взрывчатка",
             "deploy_sleepbag" => "Место респауна (B)",
             "deploy_box" => "Хранилище на 30 ячеек",
             "deploy_claim" => "Центр базы: даёт строить рядом; клади ресурсы, иначе база гниёт",
@@ -309,7 +363,7 @@ namespace Rastvordd.Sim
         public int Count = 1;
         public (string id, int count)[] Cost;
         public float Time;
-        public int Bench;        // 0 — в руках, 1 — нужен верстак рядом
+        public int Bench;        // какой уровень верстака нужен рядом: 0 — можно в руках, 1–3
     }
 
     public static class Recipes
@@ -322,8 +376,8 @@ namespace Rastvordd.Sim
             new Recipe { Output = "deploy_sleepbag", Cost = new[] { ("cloth", 30) }, Time = 3 },
             new Recipe { Output = "deploy_box", Cost = new[] { ("wood", 75) }, Time = 3 },
             new Recipe { Output = "deploy_claim", Cost = new[] { ("wood", 50) }, Time = 3 },
-            new Recipe { Output = "expl_satchel", Cost = new[] { ("cloth", 10), ("gunpowder", 30), ("metal_fragments", 20) }, Time = 4, Bench = 1 },
-            new Recipe { Output = "expl_c4", Cost = new[] { ("gunpowder", 200), ("metal_fragments", 100), ("scrap", 20), ("cloth", 5) }, Time = 15, Bench = 1 },
+            new Recipe { Output = "expl_satchel", Cost = new[] { ("cloth", 10), ("gunpowder", 30), ("metal_fragments", 20) }, Time = 4, Bench = 2 },
+            new Recipe { Output = "expl_c4", Cost = new[] { ("gunpowder", 200), ("metal_fragments", 100), ("scrap", 20), ("cloth", 5) }, Time = 15, Bench = 3 },
             new Recipe { Output = "lock_key", Cost = new[] { ("wood", 75) }, Time = 2 },
             new Recipe { Output = "lock_code", Cost = new[] { ("metal_fragments", 100) }, Time = 4 },
             new Recipe { Output = "expl_fire", Cost = new[] { ("cloth", 10), ("sulfur", 15), ("charcoal", 10) }, Time = 3 },
@@ -337,9 +391,43 @@ namespace Rastvordd.Sim
             new Recipe { Output = "deploy_workbench", Cost = new[] { ("wood", 150), ("metal_fragments", 50), ("scrap", 25) }, Time = 10 },
             new Recipe { Output = "gunpowder", Count = 5, Cost = new[] { ("charcoal", 15), ("sulfur", 10) }, Time = 3, Bench = 1 },
             new Recipe { Output = "ammo_pistol", Count = 5, Cost = new[] { ("metal_fragments", 10), ("gunpowder", 5) }, Time = 3, Bench = 1 },
-            new Recipe { Output = "ammo_rifle", Count = 5, Cost = new[] { ("metal_fragments", 10), ("gunpowder", 10) }, Time = 4, Bench = 1 },
+            new Recipe { Output = "ammo_rifle", Count = 5, Cost = new[] { ("metal_fragments", 10), ("gunpowder", 10) }, Time = 4, Bench = 2 },
             new Recipe { Output = "weapon_pipe", Cost = new[] { ("metal_fragments", 100), ("wood", 50), ("scrap", 10) }, Time = 10, Bench = 1 },
+            new Recipe { Output = "weapon_ak", Cost = new[] { ("metal_fragments", 250), ("wood", 50), ("scrap", 60) }, Time = 20, Bench = 3 },
+            new Recipe { Output = "deploy_workbench2", Cost = new[] { ("metal_fragments", 200), ("scrap", 75) }, Time = 15, Bench = 1 },
+            new Recipe { Output = "deploy_workbench3", Cost = new[] { ("metal_fragments", 400), ("scrap", 200) }, Time = 25, Bench = 2 },
         };
+    }
+
+    /// <summary>Узел дерева изучения: изучается за металлолом у верстака нужного уровня после предков.</summary>
+    public sealed class TechNode
+    {
+        public string Id;                // id предмета, рецепт которого открывается
+        public int Bench;                // уровень верстака
+        public int Scrap;                // цена в металлоломе
+        public string[] Requires = System.Array.Empty<string>();
+    }
+
+    /// <summary>Дерево изучения (D28). Всё, чего в дереве нет, известно с начала (примитив, станки).</summary>
+    public static class Tech
+    {
+        public static readonly List<TechNode> All = new()
+        {
+            new TechNode { Id = "gunpowder", Bench = 1, Scrap = 20 },
+            new TechNode { Id = "lock_code", Bench = 1, Scrap = 30 },
+            new TechNode { Id = "expl_fire", Bench = 1, Scrap = 30 },
+            new TechNode { Id = "ammo_pistol", Bench = 1, Scrap = 30, Requires = new[] { "gunpowder" } },
+            new TechNode { Id = "weapon_pipe", Bench = 1, Scrap = 60, Requires = new[] { "ammo_pistol" } },
+            new TechNode { Id = "ammo_rifle", Bench = 2, Scrap = 75, Requires = new[] { "ammo_pistol" } },
+            new TechNode { Id = "expl_satchel", Bench = 2, Scrap = 75, Requires = new[] { "gunpowder" } },
+            new TechNode { Id = "weapon_ak", Bench = 3, Scrap = 200, Requires = new[] { "weapon_pipe", "ammo_rifle" } },
+            new TechNode { Id = "expl_c4", Bench = 3, Scrap = 250, Requires = new[] { "expl_satchel" } },
+        };
+
+        public static TechNode Get(string id) => All.Find(n => n.Id == id);
+
+        /// <summary>Знает ли игрок рецепт. Боты знают всё — у них свои сценарии.</summary>
+        public static bool Knows(Actor a, string id) => a.IsBot || Get(id) == null || a.Known.Contains(id);
     }
 
     public sealed class CraftJob
@@ -374,7 +462,8 @@ namespace Rastvordd.Sim
         public bool Crouching;
         public bool Swimming;           // в воде: медленно, без оружия
         public bool IsBot;              // бот: E — быстрые действия, у живого игрока — окна
-        public bool WantsCraftMenu;     // нажал E у верстака — клиент откроет крафт
+        public bool WantsCraftMenu;     // нажал E у верстака — клиент откроет дерево изучения
+        public readonly HashSet<string> Known = new();   // изученные узлы дерева (примитив известен всегда, см. Tech)
         public UiKind OpenUi;
         public object OpenTarget;
         public float PendingSwingAt = -1;   // удар инструментом засчитывается с задержкой — когда он опускается на цель
@@ -535,6 +624,7 @@ namespace Rastvordd.Sim
         public float Radius = 0.6f;
         public int OwnerId;
         public float Hp = 300;          // ломается взрывчаткой
+        public int Level;               // верстак: 1–3
 
         // печь
         public int Ore, SulfurOre;
@@ -576,6 +666,7 @@ namespace Rastvordd.Sim
         public int Id;
         public Vector2 Pos;
         public bool IsCrate;            // ящик на РТ (респавнится), иначе сумка с трупа
+        public bool Corpse;             // вещи с трупа: обыскиваются по ячейке, как ящик РТ; выброшенное — открыто сразу
         public int Tier = 2;            // уровень лута ящика: 0 — без охраны, 1 — малая охрана, 2 — крупный РТ
         /// <summary>Обыск по игрокам: сколько ячеек уже раскрыто и сколько идёт текущая.</summary>
         public readonly Dictionary<int, (int n, float t)> Search = new();

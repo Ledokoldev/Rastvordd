@@ -24,7 +24,17 @@ namespace Rastvordd.Sim
     public struct BagSnap { public int Id; public Vector2 Pos; public bool IsCrate; public bool Empty; }
     public struct NodeSnap { public int Id; public NodeKind Kind; public Vector2 Pos; public float Radius; public float Fill; }
     public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; }
-    public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; }
+    public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; public int Level; }
+
+    /// <summary>Узел дерева изучения для окна верстака.</summary>
+    public struct TechInfo
+    {
+        public string Id, Name;
+        public int Bench, Scrap;
+        public string[] Requires;
+        public bool Known, CanResearch;
+        public string Why;          // почему нельзя изучить сейчас
+    }
     public struct FireSnap { public int Id; public Vector2 Pos; public float Radius, Left; }
     public struct ThrownSnap { public int Id; public string ItemId; public Vector2 Pos; public float Z; public float Fuse; }
     public struct StructSnap { public int Id; public StructKind Kind; public int I, J, Dir, Tier; public float Hp; public bool Open; public bool Locked; }
@@ -47,6 +57,8 @@ namespace Rastvordd.Sim
         public string CostText;
         public bool CanCraft;
         public bool NeedsBench;
+        public int Bench;          // уровень верстака
+        public bool Known;         // изучен ли рецепт
         public float Time;
         public int Count;                                     // сколько штук за раз
         public List<(string id, int n, int have)> Costs;      // ингредиенты: нужно / есть
@@ -87,6 +99,9 @@ namespace Rastvordd.Sim
         public List<CellView> BeltCells = new();     // пояс 6 ячеек
         public List<(string id, string name, float progress)> CraftQueue = new();
         public List<RecipeInfo> Recipes = new();
+        public List<TechInfo> Tech = new();
+        public int BenchLevel;          // уровень верстака рядом (0 — нет)
+        public int Scrap;
     }
 
     /// <summary>То, что сервер отправляет клиенту за тик. Только видимое этому клиенту.</summary>
@@ -321,7 +336,7 @@ namespace Rastvordd.Sim
 
             foreach (var d in World.DeploysInRadius(me.Pos, WorldViewRadius, _snapDeploys))
                 if (Vector2.DistanceSquared(d.Pos, me.Pos) < r2)
-                    snap.Deployables.Add(new DeploySnap { Id = d.Id, Kind = d.Kind, Pos = d.Pos, Burning = d.Burning });
+                    snap.Deployables.Add(new DeploySnap { Id = d.Id, Kind = d.Kind, Pos = d.Pos, Burning = d.Burning, Level = d.Level });
 
             foreach (var t in World.Throwns)
                 if (Vector2.DistanceSquared(t.Pos, me.Pos) < EventRadius * EventRadius)
@@ -364,7 +379,14 @@ namespace Rastvordd.Sim
                 Current = me.Current,
                 HeldDeploy = held?.Def?.Deploy is DeployKind.Workbench or DeployKind.Furnace,
                 NearBench = World.NearBench(me.Pos),
+                BenchLevel = World.BenchLevel(me.Pos),
+                Scrap = me.Count("scrap"),
             };
+            foreach (var n in Tech.All)
+            {
+                bool can = World.CanResearch(me, n, out string why);
+                s.Tech.Add(new TechInfo { Id = n.Id, Name = Items.Name(n.Id), Bench = n.Bench, Scrap = n.Scrap, Requires = n.Requires, Known = me.Known.Contains(n.Id), CanResearch = can, Why = why });
+            }
 
             for (int i = 0; i < Actor.BeltSize; i++)
             {
@@ -399,6 +421,8 @@ namespace Rastvordd.Sim
                     CostText = string.Join(", ", cost),
                     CanCraft = World.CanCraft(me, r),
                     NeedsBench = r.Bench > 0,
+                    Bench = r.Bench,
+                    Known = Tech.Knows(me, r.Output),
                     Time = r.Time,
                     Count = r.Count,
                     Costs = costs,
@@ -433,7 +457,7 @@ namespace Rastvordd.Sim
 
         string Hint((World.InteractKind kind, object target) it) => it.kind switch
         {
-            World.InteractKind.Bag => ((LootBag)it.target).IsCrate ? "[E] Открыть ящик" : "[E] Открыть рюкзак",
+            World.InteractKind.Bag => ((LootBag)it.target) is var lb && lb.IsCrate ? "[E] Открыть ящик" : lb.Corpse ? "[E] Обыскать рюкзак" : "[E] Подобрать вещи",
             World.InteractKind.Pickup => ((Pickup)it.target).Kind switch
             {
                 PickupKind.Hemp => "[E] Собрать коноплю",
@@ -441,7 +465,7 @@ namespace Rastvordd.Sim
                 _ => "[E] Попить",
             },
             World.InteractKind.Furnace => FurnaceHint((Deployable)it.target),
-            World.InteractKind.Workbench => "[E] Верстак — крафт",
+            World.InteractKind.Workbench => "[E] Верстак — изучение и крафт",
             World.InteractKind.Box => ((Deployable)it.target).Storage.Empty ? "[E] Ящик (пуст)" : $"[E] Ящик ({((Deployable)it.target).Storage.Items.Count} шт.)",
             World.InteractKind.Claim => ClaimHint(World, (Deployable)it.target),
             World.InteractKind.Door => (((Structure)it.target).Open ? "[E] Закрыть дверь" : "[E] Открыть дверь") + (((Structure)it.target).Locked ? " · замок" : ""),

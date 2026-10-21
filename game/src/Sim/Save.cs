@@ -29,13 +29,13 @@ namespace Rastvordd.Sim
         public sealed class StructS { public int Id, Kind, I, J, Dir, Tier, OwnerId, ClaimId, Code; public float Hp; public bool Open, Locked, KeyLock; public List<int> LockAuth = new(); }
         public sealed class DeployS
         {
-            public int Id, Kind, OwnerId, Ore, SulfurOre, OutMetal, OutSulfur, OutCharcoal;
+            public int Id, Kind, OwnerId, Ore, SulfurOre, OutMetal, OutSulfur, OutCharcoal, Level;
             public float X, Y, Hp, Fuel, Grace, ReadyAt;
             public List<int> Auth = new();
             public Dictionary<string, float> Store = new();
             public List<SlotS> Storage;
         }
-        public sealed class BagS { public int Id, Tier = 2; public float X, Y, Despawn, RespawnLeft; public bool IsCrate; public List<SlotS> Items = new(); }
+        public sealed class BagS { public int Id, Tier = 2; public float X, Y, Despawn, RespawnLeft; public bool IsCrate, Corpse; public List<SlotS> Items = new(); }
         public sealed class PlayerS
         {
             public int Id, Current, BuildPiece;
@@ -44,6 +44,7 @@ namespace Rastvordd.Sim
             public bool Dead;
             public List<SlotS> Belt = new();
             public List<SlotS> Inventory = new();
+            public List<string> Known = new();
         }
 
         static readonly JsonSerializerOptions Opts = new() { IncludeFields = true, WriteIndented = false };
@@ -80,7 +81,7 @@ namespace Rastvordd.Sim
             {
                 var ds = new WorldSave.DeployS
                 {
-                    Id = d.Id, Kind = (int)d.Kind, OwnerId = d.OwnerId, X = d.Pos.X, Y = d.Pos.Y, Hp = d.Hp,
+                    Id = d.Id, Kind = (int)d.Kind, OwnerId = d.OwnerId, X = d.Pos.X, Y = d.Pos.Y, Hp = d.Hp, Level = d.Level,
                     Ore = d.Ore, SulfurOre = d.SulfurOre, Fuel = d.Fuel, OutMetal = d.OutMetal, OutSulfur = d.OutSulfur, OutCharcoal = d.OutCharcoal, Grace = d.Grace, ReadyAt = d.ReadyAt - Time,
                 };
                 ds.Auth.AddRange(d.Auth);
@@ -89,7 +90,7 @@ namespace Rastvordd.Sim
                 w.Deployables.Add(ds);
             }
             foreach (var b in Bags)
-                w.Bags.Add(new WorldSave.BagS { Id = b.Id, X = b.Pos.X, Y = b.Pos.Y, Despawn = b.Despawn, RespawnLeft = b.RespawnLeft, IsCrate = b.IsCrate, Tier = b.Tier, Items = b.Items.ConvertAll(SaveSlot) });
+                w.Bags.Add(new WorldSave.BagS { Id = b.Id, X = b.Pos.X, Y = b.Pos.Y, Despawn = b.Despawn, RespawnLeft = b.RespawnLeft, IsCrate = b.IsCrate, Corpse = b.Corpse, Tier = b.Tier, Items = b.Items.ConvertAll(SaveSlot) });
             foreach (var p in Pickups) w.PickupRespawn.Add(p.RespawnLeft);
             foreach (var a in Actors)
             {
@@ -101,6 +102,7 @@ namespace Rastvordd.Sim
                 };
                 foreach (var s in a.Belt) ps.Belt.Add(SaveSlot(s));
                 foreach (var it in a.Pack) ps.Inventory.Add(SaveSlot(it));
+                ps.Known.AddRange(a.Known);
                 w.Players.Add(ps);
             }
             return w;
@@ -129,7 +131,7 @@ namespace Rastvordd.Sim
             {
                 var d = new Deployable
                 {
-                    Id = ds.Id, Kind = (DeployKind)ds.Kind, OwnerId = ds.OwnerId, Pos = new Vector2(ds.X, ds.Y), Hp = ds.Hp,
+                    Id = ds.Id, Kind = (DeployKind)ds.Kind, OwnerId = ds.OwnerId, Pos = new Vector2(ds.X, ds.Y), Hp = ds.Hp, Level = ds.Level,
                     Ore = ds.Ore, SulfurOre = ds.SulfurOre, Fuel = ds.Fuel, OutMetal = ds.OutMetal, OutSulfur = ds.OutSulfur, OutCharcoal = ds.OutCharcoal, Grace = ds.Grace, ReadyAt = Time + ds.ReadyAt,
                 };
                 foreach (var id in ds.Auth) d.Auth.Add(id);
@@ -161,7 +163,7 @@ namespace Rastvordd.Sim
             Bags.Clear();
             foreach (var bs in w.Bags)
             {
-                var b = new LootBag { Id = bs.Id, Pos = new Vector2(bs.X, bs.Y), Despawn = bs.Despawn, RespawnLeft = bs.RespawnLeft, IsCrate = bs.IsCrate, Tier = bs.Tier };
+                var b = new LootBag { Id = bs.Id, Pos = new Vector2(bs.X, bs.Y), Despawn = bs.Despawn, RespawnLeft = bs.RespawnLeft, IsCrate = bs.IsCrate, Corpse = bs.Corpse, Tier = bs.Tier };
                 foreach (var s in bs.Items) if (LoadSlot(s) is ItemSlot slot) b.Items.Add(slot);
                 Bags.Add(b);
             }
@@ -174,6 +176,8 @@ namespace Rastvordd.Sim
                 for (int i = 0; i < Actor.PackSize && i < ps.Inventory.Count; i++) a.Pack[i] = LoadSlot(ps.Inventory[i]);
                 a.Current = ps.Current;
                 a.BuildPiece = (StructKind)ps.BuildPiece;
+                a.Known.Clear();
+                if (ps.Known != null) foreach (var k in ps.Known) a.Known.Add(k);
                 Actors.Add(a);
             }
             _nextId = Math.Max(_nextId, w.NextId);

@@ -1402,6 +1402,30 @@
    "cat": "icons",
    "icon": 128,
    "desc": "a glass bottle filled with amber lamp oil, a twisted cloth wick stuffed in the neck with a small flame on its tip"
+  },
+  {
+   "id": "workbench2",
+   "cat": "props",
+   "h": 1.1,
+   "desc": "an upgraded metal workbench: welded steel frame, sheet-metal top, a drill press, a vice, hanging tools and a work lamp"
+  },
+  {
+   "id": "workbench3",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "an advanced heavy industrial workbench: thick steel table, a small lathe, a welding torch with gas bottles, toolboxes and bright work lights"
+  },
+  {
+   "id": "icon_workbench2",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an upgraded welded steel workbench with a drill press and a vice"
+  },
+  {
+   "id": "icon_workbench3",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an advanced heavy industrial steel workbench with a small lathe and gas bottles"
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

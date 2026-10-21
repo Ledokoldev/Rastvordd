@@ -31,6 +31,7 @@ namespace Rastvordd.Client
         PickupFeed _feed;
         Label _guide;
         int _setPiece = -1;
+        string _researchReq;      // изучить узел дерева (id)
         (UiOp op, string item, int index)? _uiReq;
         bool UiShown => _inv.Visible;
         bool _uiWasOpen;
@@ -99,6 +100,8 @@ namespace Rastvordd.Client
                 else if (a == "hold") _autoFireFrames = 100000;
                 else if (a == "release") _autoFireFrames = 0;
                 else if (a == "craftmenu") _hud.ToggleCraft();
+                else if (a == "tech") _hud.OpenTech();
+                else if (a.StartsWith("learn")) _researchReq = a.Substring(5);   // отладка: learn<id>
                 else if (a.StartsWith("slot")) _slot = int.Parse(a.Substring(4)) - 1;
                 else if (a.StartsWith("craft")) _craftReq = int.Parse(a.Substring(5));
                 else if (a == "stop") _forceWalk = SVec.Zero;
@@ -223,6 +226,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _guide.AddThemeConstantOverride("outline_size", 5);
             _hud.AddChild(_guide);
             _hud.CraftRequested += (i, n) => { _craftPendIdx = i; _craftPendLeft = n; };
+            _hud.ResearchRequested += id => _researchReq = id;
             _hud.CodeEntered += (door, code) => _codeReq = (door, code);
             _hud.WipeRequested += () =>
             {
@@ -407,6 +411,10 @@ else if (arg == "--atcrate")
                         _invOpen = false;
                         if (_cur.Self.Ui != null) _uiReq = (UiOp.Close, null, 0);
                         break;
+                    case Key.Escape when _hud.CraftOpen:
+                        _hud.ToggleCraft();
+                        Input.MouseMode = Input.MouseModeEnum.Hidden;
+                        break;
                     case Key.Escape:
                         Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Hidden ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
                         break;
@@ -446,6 +454,7 @@ else if (arg == "--atcrate")
                 Code = _codeReq?.code ?? -1,
                 UiOp = (int)(_uiReq?.op ?? UiOp.None),
                 SetPiece = _setPiece,
+                Research = _researchReq,
                 UiItem = _uiReq?.item,
                 UiIndex = _uiReq?.index ?? 0,
                 CodeDoor = _codeReq?.door ?? 0,
@@ -542,6 +551,7 @@ else if (arg == "--atcrate")
                 _codeReq = null;
                 _uiReq = null;
                 _setPiece = -1;
+                _researchReq = null;
                 if (_autoFireFrames > 0) _autoFireFrames--;
                 HandleEvents();
                 _acc -= World.Dt;
@@ -1002,7 +1012,7 @@ else if (arg == "--atcrate")
                 seen.Add(d.Id);
                 if (!_deployViews.TryGetValue(d.Id, out var v))
                 {
-                    v = new DeployView2D(d.Kind) { Position = Iso.Px(d.Pos) };
+                    v = new DeployView2D(d.Kind, d.Level) { Position = Iso.Px(d.Pos) };
                     _world.AddChild(v);
                     _deployViews[d.Id] = v;
                 }
@@ -1057,7 +1067,7 @@ else if (arg == "--atcrate")
                 if (!_inv.Visible) _invOpen = false;
                 Input.MouseMode = _inv.Visible || _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
             }
-            if (_cur.Self.OpenCraft && !_hud.CraftOpen) { _hud.ToggleCraft(); Input.MouseMode = Input.MouseModeEnum.Visible; }
+            if (_cur.Self.OpenCraft) { _hud.OpenTech(); Input.MouseMode = Input.MouseModeEnum.Visible; }   // E у верстака — дерево изучения
 
             // вход на РТ — название
             if (_cur.Self.Place != _lastPlace) { _lastPlace = _cur.Self.Place; if (_lastPlace != null) _hud.Toast(_lastPlace); }

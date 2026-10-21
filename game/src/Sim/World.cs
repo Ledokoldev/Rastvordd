@@ -498,16 +498,21 @@ namespace Rastvordd.Sim
             return HasLineOfSight(viewer.Pos, target);
         }
 
-        public bool NearBench(Vector2 p)
+        public bool NearBench(Vector2 p) => BenchLevel(p) > 0;
+
+        /// <summary>Самый высокий уровень верстака рядом (0 — нет).</summary>
+        public int BenchLevel(Vector2 p)
         {
+            int best = 0;
             foreach (var d in DeploysNear(p, BenchRange))
-                if (d.Kind == DeployKind.Workbench && Vector2.Distance(d.Pos, p) < BenchRange) return true;
-            return false;
+                if (d.Kind == DeployKind.Workbench && Vector2.Distance(d.Pos, p) < BenchRange) best = Math.Max(best, Math.Max(1, d.Level));
+            return best;
         }
 
         public bool CanCraft(Actor a, Recipe r)
         {
-            if (r.Bench > 0 && !NearBench(a.Pos)) return false;
+            if (!Tech.Knows(a, r.Output)) return false;
+            if (r.Bench > 0 && BenchLevel(a.Pos) < r.Bench) return false;
             foreach (var (id, n) in r.Cost) if (a.Count(id) < n) return false;
             return true;
         }
@@ -595,6 +600,7 @@ namespace Rastvordd.Sim
             if (cmd.ToggleTime && a.Team == Team.Player) ToggleDayNight();
 
             if (cmd.Craft >= 0 && cmd.Craft < Recipes.All.Count) QueueCraft(a, Recipes.All[cmd.Craft]);
+            if (!string.IsNullOrEmpty(cmd.Research)) Research(a, cmd.Research);
             StepCrafting(a);
 
             if (a.PendingSwingAt > 0 && Time >= a.PendingSwingAt)
@@ -677,10 +683,34 @@ namespace Rastvordd.Sim
         void QueueCraft(Actor a, Recipe r)
         {
             if (a.CraftQueue.Count >= 8) { Info(a, "Очередь крафта заполнена"); return; }
-            if (r.Bench > 0 && !NearBench(a.Pos)) { Info(a, "Нужен верстак рядом"); return; }
+            if (!Tech.Knows(a, r.Output)) { Info(a, $"{Items.Name(r.Output)}: сначала изучи на верстаке"); return; }
+            if (r.Bench > 0 && BenchLevel(a.Pos) < r.Bench) { Info(a, $"Нужен верстак {r.Bench} рядом"); return; }
             if (!CanCraft(a, r)) { Info(a, "Не хватает ресурсов"); return; }
             foreach (var (id, n) in r.Cost) a.Take(id, n);   // как в Расте: ресурсы списываются сразу
             a.CraftQueue.Add(new CraftJob { Recipe = r, Left = r.Time });
+        }
+
+        /// <summary>Можно ли изучить узел прямо сейчас; причина — для подсказки.</summary>
+        public bool CanResearch(Actor a, TechNode n, out string why)
+        {
+            why = "";
+            if (a.Known.Contains(n.Id)) { why = "уже изучено"; return false; }
+            foreach (var r in n.Requires) if (!a.Known.Contains(r)) { why = $"сначала: {Items.Name(r)}"; return false; }
+            int lvl = BenchLevel(a.Pos);
+            if (lvl == 0) { why = "подойди к верстаку"; return false; }
+            if (lvl < n.Bench) { why = $"нужен верстак {n.Bench}"; return false; }
+            if (a.Count("scrap") < n.Scrap) { why = $"нужно {n.Scrap} металлолома"; return false; }
+            return true;
+        }
+
+        void Research(Actor a, string id)
+        {
+            var n = Tech.Get(id);
+            if (n == null) return;
+            if (!CanResearch(a, n, out string why)) { Info(a, $"{Items.Name(id)}: {why}"); return; }
+            a.Take("scrap", n.Scrap);
+            a.Known.Add(id);
+            Info(a, $"Изучено: {Items.Name(id)}");
         }
 
         void StepCrafting(Actor a)
@@ -914,7 +944,7 @@ namespace Rastvordd.Sim
             if (Vector2.Distance(a.Pos, at) > PlaceRange) { Info(a, "Слишком далеко"); return; }
             float rad = def.Deploy switch { DeployKind.Claim or DeployKind.SleepBag => 0.3f, DeployKind.Box => 0.45f, _ => 0.6f };
             if (def.Deploy == DeployKind.Claim && !CanPlaceClaim(at, out string why)) { Info(a, $"Шкаф: {why}"); return; }
-            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = rad };   // столб тонкий, спальник плоский, ящик компактный
+            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = rad, Level = Items.BenchLevel(def.Id) };   // столб тонкий, спальник плоский, ящик компактный
             if (def.Deploy == DeployKind.Box) dep.Storage = new LootBag { Id = NextId(), Pos = at };
             dep.Auth.Add(a.Id);
             if (def.Deploy == DeployKind.Furnace && !a.IsBot) dep.On = false;   // игрок зажигает сам в окне печи
@@ -1225,7 +1255,7 @@ namespace Rastvordd.Sim
             a.Hp = 0;
             a.Dead = true;
             a.DeadTime = Time;
-            var bag = new LootBag { Id = NextId(), Pos = a.Pos, Despawn = 300f };
+            var bag = new LootBag { Id = NextId(), Pos = a.Pos, Despawn = 300f, Corpse = true };
             foreach (var s in a.Pack) if (s != null) bag.Items.Add(s);
             foreach (var s in a.Belt)
                 if (s != null)

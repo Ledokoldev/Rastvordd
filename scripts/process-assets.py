@@ -211,14 +211,30 @@ def build_global_palette(manifest: dict) -> Image.Image | None:
     return sheet.quantize(colors=GLOBAL_COLORS, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
 
 
+PALETTE_FILE = ROOT / "assets" / "global_palette.png"
+
+
 def main() -> None:
+    # --only=id1,id2 — обработать только эти ассеты; палитра мира заморожена в assets/global_palette.png,
+    # чтобы новые ассеты не перекрашивали старые. --new-palette — пересобрать палитру (меняет всё!).
+    # --palette-exclude=id1,id2 — собрать палитру без этих ассетов (восстановить прежнюю).
     global _global_palette
+    import sys
+    args = {k: v for k, _, v in (s.lstrip("-").partition("=") for s in sys.argv[1:])}
+    only = set(args["only"].split(",")) if args.get("only") else None
     manifest = json.loads((ROOT / "assets" / "manifest.json").read_text(encoding="utf-8"))
-    _global_palette = build_global_palette(manifest)
+    if PALETTE_FILE.exists() and "new-palette" not in args:
+        _global_palette = Image.open(PALETTE_FILE)
+        _global_palette.load()
+    else:
+        excl = set(args.get("palette-exclude", "").split(","))
+        _global_palette = build_global_palette({"assets": [a for a in manifest["assets"] if a["id"] not in excl]})
+        if _global_palette is not None:
+            _global_palette.save(PALETTE_FILE)
     pix, compare = [], []
     for a in manifest["assets"]:
         src = ROOT / "assets" / "gen" / a["cat"] / f"{a['id']}.png"
-        if not src.exists():
+        if not src.exists() or (only and a["id"] not in only):
             continue
         if a.get("sheet"):
             strip = process_sheet(a, src)
@@ -236,7 +252,7 @@ def main() -> None:
             compare.append((a["id"] + " px", px.resize((px.width * 2, px.height * 2), Image.NEAREST)))
         print(f"{a['id']:<24} {px.width}x{px.height}")
 
-    if pix:
+    if pix and not only:
         world = [(n, im) for n, im in pix if not n.startswith(("icon_", "weapon_"))]
         icons = [(n, im) for n, im in pix if n.startswith(("icon_", "weapon_"))]
         if world:

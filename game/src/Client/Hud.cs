@@ -159,6 +159,14 @@ void fragment() {
             AddChild(Crosshair);
         }
 
+        /// <summary>Наблюдатель: прячем всё «своё» — пояс, полоски, подсказки управления, прицел.</summary>
+        public void SpectatorMode()
+        {
+            foreach (var c in new CanvasItem[] { _belt, _hintLabel, _hpFill.GetParent<CanvasItem>(), _foodFill.GetParent<CanvasItem>(), _waterFill.GetParent<CanvasItem>(), _promptLabel, _modeLabel, _ammoLabel, _buildLabel, Crosshair, _vision })
+                if (c != null) c.Visible = false;
+            _hintLabel.Text = "";
+        }
+
         (ColorRect fill, Label label) MakeBar(float y, float h, Color color, int font)
         {
             var back = new ColorRect { Color = new Color(0, 0, 0, 0.55f), Size = new Vector2(BarW, h), MouseFilter = Control.MouseFilterEnum.Ignore };

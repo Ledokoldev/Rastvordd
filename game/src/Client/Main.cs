@@ -106,6 +106,7 @@ namespace Rastvordd.Client
                 else if (a == "release") _autoFireFrames = 0;
                 else if (a == "craftmenu") _hud.ToggleCraft();
                 else if (a == "tech") _hud.OpenTech();
+                else if (a.StartsWith("speckey")) SpectatorKey(a.Substring(7) switch { "tab" => Key.Tab, "f" => Key.F, "2" => Key.Key2, "3" => Key.Key3, "4" => Key.Key4, _ => Key.Key1 });   // отладка: клавиши наблюдателя
                 else if (a.StartsWith("learn")) _researchReq = a.Substring(5);   // отладка: learn<id>
                 else if (a.StartsWith("slot")) _slot = int.Parse(a.Substring(4)) - 1;
                 else if (a.StartsWith("craft")) _craftReq = int.Parse(a.Substring(5));
@@ -466,7 +467,8 @@ else if (arg == "--atcrate")
         {
             if (_specPanel == null)
             {
-                _specPanel = new Label { Position = new Vector2(16, 96), MouseFilter = Control.MouseFilterEnum.Ignore };
+                _hud.SpectatorMode();
+                _specPanel = new Label { Position = new Vector2(16, 14), MouseFilter = Control.MouseFilterEnum.Ignore };
                 _specPanel.AddThemeFontSizeOverride("font_size", 14);
                 _specPanel.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.9f));
                 _specPanel.AddThemeConstantOverride("outline_size", 5);

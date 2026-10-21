@@ -164,7 +164,7 @@ namespace Rastvordd.Client
             {
                 _dead = dead;
                 _body.Dead = dead;
-                _held.Visible = !dead;
+                _held.Visible = !dead && _rig == null;   // у скелетной модели оружие рисует сама модель
                 _body.Rotation = dead ? (right ? Mathf.Pi / 2 : -Mathf.Pi / 2) : 0;
                 _body.Position = dead ? new Vector2(0, -4) : Vector2.Zero;
                 QueueRedraw();

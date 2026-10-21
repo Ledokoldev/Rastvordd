@@ -27,6 +27,7 @@ namespace Rastvordd.Client
         bool _invOpen;
         BuildMenu _buildMenu;
         BuildBar _buildBar;
+        StructTip _structTip;
         Label _guide;
         int _setPiece = -1;
         (UiOp op, string item, int index)? _uiReq;
@@ -206,6 +207,8 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _buildBar.OffsetLeft = -_buildBar.CustomMinimumSize.X / 2; _buildBar.OffsetRight = _buildBar.CustomMinimumSize.X / 2;
             _buildBar.OffsetTop = -205; _buildBar.OffsetBottom = -145;
             _hud.AddChild(_buildBar);
+            _structTip = new StructTip();
+            _hud.AddChild(_structTip);
             _guide = new Label { Position = new Vector2(0, 120), MouseFilter = Control.MouseFilterEnum.Ignore };
             _guide.AddThemeFontSizeOverride("font_size", 15);
             _guide.AddThemeColorOverride("font_color", new Color(0.85f, 0.92f, 1f));
@@ -1027,6 +1030,7 @@ else if (arg == "--atcrate")
             if (_miniMap.Visible && _cur.Actors.Find(x => x.Id == _myId) is var meSnap) _miniMap.SetState(meSnap.Pos, meSnap.Facing, _cur.Self.Home, _cur.Self.Place, _cur.Structures, _cur.Deployables);
 
             // меню плана и шпаргалка стройки
+            _structTip.Set(_cur.Self.Dead || UiShown || _buildMenu.Visible || _mapView.Visible ? null : StructTip.Pick(_cur.Structures, _aim));
             _buildBar.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_buildMenu.Visible && !UiShown;
             if (_buildBar.Visible) _buildBar.Set((int)_cur.Self.BuildPiece, (int)_cur.Self.GhostPiece);
             if (_cur.Self.HoldingPlan) _buildMenu.Fill(_cur.Self.BuildPieces, (int)_cur.Self.BuildPiece);

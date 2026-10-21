@@ -114,6 +114,7 @@ namespace Rastvordd.Sim
         bool MoveTo(Vector2 p, float tol, ref InputCmd cmd)
         {
             var d = p - _me.Pos;
+            CloseDoorBehind();
             if (d.Length() <= tol) { _path = null; return true; }
 
             // прогресс к цели: 1,5 с без приближения — застряли
@@ -121,7 +122,6 @@ namespace Rastvordd.Sim
             if (d.Length() < _goalBest - 0.2f) { _goalBest = d.Length(); _goalStuck = 0; } else _goalStuck += World.Dt;
 
             // идём по маршруту
-            CloseDoorBehind(ref cmd);
             if (_path != null && Vector2.Distance(_pathGoal, p) < 1.5f && (_pathAge += World.Dt) < 15f && _goalStuck < 2.5f)
             {
                 while (_pathIdx < _path.Count - 1 && Vector2.Distance(_me.Pos, _path[_pathIdx]) < 0.4f) _pathIdx++;
@@ -150,7 +150,15 @@ namespace Rastvordd.Sim
                     cmd.Aim = path[0];
                     return false;
                 }
+                // маршрута нет, потому что сам стою «в стене» (зажало в углу между треугольниками) — сначала выбраться на свободное место
+                if (path == null && _w.WalkBlocked(_me.Pos, _me.Radius) && FreeSpotNear(_me.Pos) is Vector2 free)
+                {
+                    _path = new List<Vector2> { free }; _pathIdx = 0; _pathGoal = p; _pathAge = 13f;
+                    cmd.Move = Vector2.Normalize(free - _me.Pos + new Vector2(1e-4f, 0));
+                    return false;
+                }
             }
+            if (OpenDoorAhead(p, ref cmd)) return false;   // напрямую: закрытую свою дверь — открыть, открытую — запомнить, чтобы закрыть за собой
             var want = Vector2.Normalize(d);
             // РТ с охраной обходим стороной, если цель не на самом РТ
             foreach (var m in _w.Monuments)
@@ -174,13 +182,29 @@ namespace Rastvordd.Sim
             return false;
         }
 
+        /// <summary>Ближайшая свободная точка (кольца до 1,5 м), куда видно напрямую.</summary>
+        Vector2? FreeSpotNear(Vector2 at)
+        {
+            for (float r = 0.25f; r <= 1.5f; r += 0.25f)
+                for (int k = 0; k < 16; k++)
+                {
+                    float a = k * MathF.Tau / 16;
+                    var c = at + new Vector2(MathF.Cos(a), MathF.Sin(a)) * r;
+                    if (!_w.WalkBlocked(c, _me.Radius + 0.05f) && _w.ClearLine(at, c, null, true)) return c;
+                }
+            return null;
+        }
+
         // ---------- свои двери: маршрут проходит сквозь них, бот открывает перед собой и закрывает за собой ----------
 
-        bool MineDoor(Structure s) => s.Kind == StructKind.Door && (s.OwnerId == _me.Id || (_w.ClaimAt(Building.CellOf(s.Center)) is Deployable c && c.Auth.Contains(_me.Id)));
+        /// <summary>Своя дверь, которую я могу открыть: без замка, с моим ключом в кармане или с моим кодом.</summary>
+        bool MineDoor(Structure s) => s.Kind == StructKind.Door && (s.OwnerId == _me.Id || (_w.ClaimAt(Building.CellOf(s.Center)) is Deployable c && c.Auth.Contains(_me.Id))) && CanUnlock(s);
+        bool CanUnlock(Structure s) => !s.Locked || (s.KeyLock ? _me.Count("key_" + s.Id) > 0 : s.LockAuth.Contains(_me.Id));
         bool OwnDoor(MapWall w) => w.Owner is Structure s && MineDoor(s);
 
-        Structure _doorToClose;
-        float _closeSide;
+        // двери, которые надо закрыть за собой (раньше помнилась одна: проходя тамбур — две двери подряд — бот «забывал» наружную,
+        // а через уже открытую дверь проходил, не запоминая её вовсе, — база стояла нараспашку весь прогон)
+        readonly List<(Structure door, float side)> _toClose = new();
 
         static float SideOf(Structure door, Vector2 p)
         {
@@ -188,35 +212,44 @@ namespace Rastvordd.Sim
             return MathF.Sign((p.X - door.A.X) * d.Y - (p.Y - door.A.Y) * d.X);
         }
 
-        /// <summary>На пути к точке закрытая своя дверь — подойти и открыть.</summary>
+        void NoteToClose(Structure s)
+        {
+            if (!_toClose.Exists(t => t.door == s)) _toClose.Add((s, SideOf(s, _me.Pos)));
+        }
+
+        /// <summary>
+        /// На пути к точке своя дверь: закрытую — подойти и открыть, открытую — пройти, но запомнить, чтобы закрыть за собой.
+        /// </summary>
         bool OpenDoorAhead(Vector2 wp, ref InputCmd cmd)
         {
             foreach (var s in _w.Structures)
             {
-                if (s.Kind != StructKind.Door || s.Open || !MineDoor(s) || Vector2.DistanceSquared(s.Center, _me.Pos) > 9) continue;
+                if (s.Kind != StructKind.Door || !MineDoor(s) || Vector2.DistanceSquared(s.Center, _me.Pos) > 9) continue;
                 bool crosses = false;
-                foreach (var b in s.Boxes) if (Geo.SegmentAabb(_me.Pos, wp, b.Wall.Min, b.Wall.Max, out _)) { crosses = true; break; }
+                foreach (var (min, max, _, _) in Building.Boxes(StructKind.Door, s.A, s.B, false)) if (Geo.SegmentAabb(_me.Pos, wp, min, max, out _)) { crosses = true; break; }
                 if (!crosses) continue;
+                if (s.Open) { if (Vector2.Distance(_me.Pos, s.Center) < 1.5f) NoteToClose(s); continue; }
                 cmd.Aim = s.Center;
                 if (Vector2.Distance(_me.Pos, s.Center) > 1.4f) { cmd.Move = Vector2.Normalize(s.Center - _me.Pos); return true; }
-                if (_w.BotToggleDoor(_me, s)) { _doorToClose = s; _closeSide = SideOf(s, _me.Pos); }
+                if (_w.BotToggleDoor(_me, s)) NoteToClose(s);
                 return true;
             }
             return false;
         }
 
-        /// <summary>Прошёл дверь и отошёл — закрыть за собой (база не стоит нараспашку).</summary>
-        void CloseDoorBehind(ref InputCmd cmd)
+        /// <summary>
+        /// Прошёл дверь и отошёл — закрыть за собой (база не стоит нараспашку). Передумал и ушёл от двери с той же стороны — тоже закрыть.
+        /// Вызывается каждый тик (не только в пути): бот, дошедший до ящика сразу за дверью, тоже закрывает её.
+        /// </summary>
+        void CloseDoorBehind()
         {
-            if (_doorToClose == null) return;
-            var d = _doorToClose;
-            float dist = Vector2.Distance(_me.Pos, d.Center);
-            if (!d.Open || dist > 3f || !_w.Structures.Contains(d)) { _doorToClose = null; return; }
-            if (SideOf(d, _me.Pos) != _closeSide && dist > 1.1f)
+            for (int i = _toClose.Count - 1; i >= 0; i--)
             {
-                cmd.Aim = d.Center;
-                _w.BotToggleDoor(_me, d);
-                _doorToClose = null;
+                var (d, side) = _toClose[i];
+                float dist = Vector2.Distance(_me.Pos, d.Center);
+                if (!d.Open || !_w.Structures.Contains(d) || dist > 6f) { _toClose.RemoveAt(i); continue; }   // ушёл далеко — закроет «обход дома»
+                if ((SideOf(d, _me.Pos) != side && dist > 1.1f) || dist > 1.9f)
+                    if (_w.BotToggleDoor(_me, d) || !d.Open) _toClose.RemoveAt(i);
             }
         }
 
@@ -408,6 +441,7 @@ namespace Rastvordd.Sim
 
             Perceive();
             Decide(ref cmd);
+            CloseDoorBehind();
             return cmd;
         }
 
@@ -434,10 +468,10 @@ namespace Rastvordd.Sim
         // ---------- прогрессия: верстаки и изучение ----------
 
         int _metalGoal = 300;
-        static readonly string[] ResearchOrder = { "gunpowder", "ammo_pistol", "weapon_pipe", "ammo_rifle", "expl_satchel", "weapon_ak", "expl_c4" };
+        static readonly string[] ResearchOrder = { "lock_code", "gunpowder", "ammo_pistol", "weapon_pipe", "ammo_rifle", "expl_satchel", "weapon_ak", "expl_c4" };
         static readonly string[] BenchIds = { "deploy_workbench", "deploy_workbench2", "deploy_workbench3" };
 
-        /// <summary>Где у дома стоят верстаки (с востока, в ряд) и откуда с ними работать.</summary>
+        /// <summary>Где в доме стоят верстаки (мастерская мейна) и откуда с ними работать.</summary>
         Vector2 BenchSpot(int level) => AtPlan(_plan.Benches[Math.Clamp(level - 1, 0, 2)]);
         Vector2 BenchStand => AtPlan(_plan.BenchStand);
 
@@ -493,8 +527,7 @@ namespace Rastvordd.Sim
             {
                 Doing = $"ставит {Items.Name(bench)}";
                 var spot = BenchSpot(lvl + 1);
-                if (!GoTo(spot + new Vector2(1.6f, 0), 0.5f, ref cmd)) return true;
-                cmd.Aim = spot;
+                if (!Reach(spot, ref cmd, 1.3f)) return true;   // место — в мастерской внутри дома, подходим изнутри
                 if (Hold(bench, ref cmd)) Click(ref cmd);
                 return true;
             }

@@ -256,6 +256,10 @@ namespace Rastvordd.Sim
             }
             int shown = World.Milestones.Count;
             var thoughtsShown = new Dictionary<int, int>();
+            bool basedump = System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--basedump") >= 0;
+            var killAt = new List<float>();
+            var killArg = System.Array.Find(System.Environment.GetCommandLineArgs(), a => a.StartsWith("--killbot="));
+            if (killArg != null) foreach (var k in killArg.Substring(10).Split(',')) killAt.Add(float.Parse(k, System.Globalization.CultureInfo.InvariantCulture));
             var duelArg = System.Array.Find(System.Environment.GetCommandLineArgs(), a => a.StartsWith("--duel="));
             if (duelArg != null)
             {
@@ -275,6 +279,22 @@ namespace Rastvordd.Sim
                     thoughtsShown[b.Me.Id] = b.ThoughtTotal;
                 }
                 if (_duel != null) DuelStep(log);
+                // отладка замков: --killbot=секунда[,ещё] — первый фермер умирает (ключи остаются на трупе)
+                if (killAt.Count > 0 && World.Time >= killAt[0])
+                {
+                    killAt.RemoveAt(0);
+                    foreach (var b in _bots.Values)
+                    {
+                        if (b.Archetype == BotArchetype.Roamer || b.Me.Dead) continue;
+                        log($"[{World.Time,6:0}s] отладка: убит {b.Me.Name} @({b.Me.Pos.X:0.0};{b.Me.Pos.Y:0.0})");
+                        var keys = new List<string>();
+                        foreach (var it in b.Me.Pack) if (it != null && it.Id.StartsWith("key_")) keys.Add(it.Id);
+                        foreach (var it in b.Me.Belt) if (it != null && it.Id.StartsWith("key_")) keys.Add(it.Id);
+                        World.Damage(b.Me, 1000, -1, b.Me.Pos);
+                        log($"[{World.Time,6:0}s] отладка: ключи на трупе: {(keys.Count > 0 ? string.Join(", ", keys) : "нет")}");
+                        break;
+                    }
+                }
                 if (RaidKitAt >= 0 && World.Time >= RaidKitAt)
                 {
                     RaidKitAt = -1;
@@ -288,11 +308,18 @@ namespace Rastvordd.Sim
                 foreach (var e in World.Events)
                     if (e.Kind == SimEventKind.Death)
                         log($"[{World.Time,6:0}s] смерть: {World.Find(e.ActorId)?.Name} ← {World.Find(e.OtherId)?.Name ?? "?"}");
+                if (basedump && t % (int)(30 / World.Dt) == 0)
+                    foreach (var b in _bots.Values)
+                    {
+                        var mine = World.Structures.FindAll(s => s.OwnerId == b.Me.Id && s.Kind == StructKind.Door);
+                        if (mine.Count > 0) log($"[{World.Time,6:0}s] ДВЕРИ {b.Me.Name}: открыто {mine.FindAll(s => s.Open).Count} из {mine.Count}, с замком {mine.FindAll(s => s.Locked).Count}");
+                    }
                 if (t % (int)(30 / World.Dt) == 0)
                     foreach (var b in _bots.Values)
                         log($"[{World.Time,6:0}s] {b.Me.Name} @({b.Me.Pos.X:0.0};{b.Me.Pos.Y:0.0}) {b.Debug}: {b.Doing} · HP {b.Me.Hp:0} · дерево {b.Me.Count("wood")} камень {b.Me.Count("stone")} металл {b.Me.Count("metal_fragments")} лом {b.Me.Count("scrap")} · изучено {b.Me.Known.Count} · E→{World.NearestInteract(b.Me).kind} · построек {World.Structures.FindAll(s => s.OwnerId == b.Me.Id).Count} · {World.LastInfo.GetValueOrDefault(b.Me.Id)}");
             }
 
+            if (basedump) BaseDump(log);
             // итог боёв: укрытия, пики, перезарядки, отходы (счётчики PlayerBot.CombatStats)
             if (_duel != null) log($"ДУЭЛЬ итог: {_duel.KitA} {_duel.WinA} — {_duel.KitB} {_duel.WinB}, ничьих {_duel.Draw}, раундов {_duel.Round}");
             foreach (var b in _bots.Values)
@@ -300,6 +327,38 @@ namespace Rastvordd.Sim
                 var parts = new List<string>();
                 foreach (var kv in b.CombatStats) parts.Add($"{kv.Key} {kv.Value}");
                 log($"БОЙ-СТАТ {b.Me.Name}: {(parts.Count > 0 ? string.Join(", ", parts) : "боёв не было")}");
+            }
+        }
+
+        /// <summary>
+        /// Отладка баз (--basedump): у каждого бота — проёмы, двери (с замком или без) и установленное:
+        /// где стоит и на своём ли полу («внутри»/«СНАРУЖИ»), ящики — сколько внутри предметов.
+        /// </summary>
+        void BaseDump(System.Action<string> log)
+        {
+            foreach (var b in _bots.Values)
+            {
+                var a = b.Me;
+                int doorways = 0, doors = 0, locked = 0, floors = 0, walls = 0;
+                foreach (var s in World.Structures)
+                {
+                    if (s.OwnerId != a.Id) continue;
+                    switch (s.Kind)
+                    {
+                        case StructKind.Doorway: doorways++; break;
+                        case StructKind.Door: doors++; if (s.Locked) locked++; log($"БАЗА {a.Name}: дверь @({s.Center.X:0.0};{s.Center.Y:0.0}) {Building.TierNames[s.Tier]}, {(s.Locked ? (s.KeyLock ? "замок с ключом" : "кодовый замок") : "БЕЗ ЗАМКА")}{(s.Open ? ", ОТКРЫТА" : ", закрыта")}"); break;
+                        case StructKind.Foundation or StructKind.TriFoundation: floors++; break;
+                        default: walls++; break;
+                    }
+                }
+                log($"БАЗА {a.Name}: {b.PlanInfo} · полов {floors}, стен/окон {walls}, проёмов {doorways}, дверей {doors}, с замком {locked}");
+                foreach (var d in World.Deployables)
+                {
+                    if (d.OwnerId != a.Id) continue;
+                    bool inside = World.FloorAt(d.Pos) is Structure f && f.OwnerId == a.Id;
+                    string extra = d.Storage != null ? $", предметов {d.Storage.Items.Count}" : "";
+                    log($"БАЗА {a.Name}: {d.Kind} ур.{d.Level} @({d.Pos.X:0.0};{d.Pos.Y:0.0}) {(inside ? "внутри" : "СНАРУЖИ")}{extra}");
+                }
             }
         }
 

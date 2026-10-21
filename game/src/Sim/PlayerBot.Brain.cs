@@ -265,7 +265,7 @@ namespace Rastvordd.Sim
         float AntiRaidScore()
         {
             var claim = MyClaim();
-            if (claim == null || _w.Time - claim.RaidedAt > 90) { _raidAlarm = false; return 0; }
+            if (claim == null || _w.Time - claim.RaidedAt > 90 || claim.RaiderId == _me.Id) { _raidAlarm = false; return 0; }   // сам ломаю свою дверь — не рейд
             var raider = _w.Find(claim.RaiderId);
             float worth = Math.Clamp(_stash / 300f, 0.3f, 1f);
             bool stronger = raider == null || raider.Dead || MyPower >= KitPower(raider);
@@ -325,13 +325,18 @@ namespace Rastvordd.Sim
         }
         Actor _lastPrey;
 
+        readonly Dictionary<LootBag, float> _badLoot = new();
+        LootBag _lootBag;
+        float _lootSince;
+
         LootBag CorpseNear()
         {
             LootBag bag = null;
             float bd = 35;
             foreach (var b in _w.Bags)
             {
-                if (b.Empty || b.IsCrate) continue;
+                if (b.Empty || b.IsCrate || (_badLoot.TryGetValue(b, out float until) && _w.Time < until)) continue;
+                if (_w.FloorAt(b.Pos) is Structure f && f.OwnerId == _me.Id && !InsideBase && RecoverPending()) continue;   // за своей запертой дверью без ключа
                 float d = Vector2.Distance(b.Pos, _me.Pos);
                 if (d < bd) { bd = d; bag = b; }
             }
@@ -343,6 +348,9 @@ namespace Rastvordd.Sim
             var bag = CorpseNear();
             if (bag == null) return false;
             Doing = bag.Corpse ? "лутает труп" : "подбирает вещи";
+            // не дойти за 30 с (за стеной, в чужом доме) — на 3 минуты забыть про эту сумку
+            if (bag != _lootBag) { _lootBag = bag; _lootSince = _w.Time; }
+            else if (_w.Time - _lootSince > 30) { _badLoot[bag] = _w.Time + 180; _lootBag = null; return false; }
             Use(bag, bag.Pos, ref cmd);
             return true;
         }

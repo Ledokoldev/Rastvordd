@@ -11,10 +11,12 @@ namespace Rastvordd.Sim
         public string Sprite;          // путь в game/art без .png, например "props/subst_transformer"
         public Vector2 Pos;
         public bool Flip;
+        public bool Flat;              // декаль на земле (трещины, разметка, лужи): без тени, под всеми объектами
+        public float Scale = 1, Rot;   // для декалей: масштаб и поворот (градусы)
     }
 
     /// <summary>Участок земли другой текстурой (гравий ОРУ, асфальт, кафель в корпусе) — под всеми объектами.</summary>
-    public struct MapPatch { public string Tile; public Vector2 Min, Max; }
+    public struct MapPatch { public string Tile; public Vector2 Min, Max; public Vector2[] Poly; }   // Poly — неровный участок (иначе прямоугольник Min–Max)
 
     /// <summary>Крыша над комнатой: снаружи прячет, что внутри; клиент растворяет её, когда игрок внутри (D40).</summary>
     public struct MapRoof { public string Tile; public Vector2 Min, Max; public List<RoofItem> Items; }
@@ -82,7 +84,7 @@ namespace Rastvordd.Sim
         {
             var d = Decor(sprite, p, flip);
             string id = sprite[(sprite.LastIndexOf('/') + 1)..];
-            if (!Foot.TryGetValue(id, out var f)) return d;
+            if (!Foot.TryGetValue(id, out var f) && !Tier0Layouts.Foot.TryGetValue(id, out f)) return d;
             if (f.legs)
             {
                 AddHiddenWall(p.X - f.w / 2, p.Y - f.d, p.X - f.w / 2 + f.d, p.Y, f.h);
@@ -137,9 +139,9 @@ namespace Rastvordd.Sim
         /// Место под готовую РТ размером size: суша без пляжа, нужный биом, далеко от других РТ и от спавнов.
         /// Свой генератор случайных чисел — чтобы новая РТ не сдвигала остальную раскладку мира (и старые сохранения).
         /// </summary>
-        Vector2? FindPrefabSpot(Random rng, Vector2 size, Biome[] biomes, float minR, float maxR)
+        Vector2? FindPrefabSpot(Random rng, Vector2 size, Biome[] biomes, float minR, float maxR, float gap = 110)
         {
-            for (int tries = 0; tries < 600; tries++)
+            for (int tries = 0; tries < 1500; tries++)
             {
                 float ang = (float)rng.NextDouble() * MathF.Tau, r = minR + (float)rng.NextDouble() * (maxR - minR);
                 var o = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * r - size * 0.5f;
@@ -152,7 +154,7 @@ namespace Rastvordd.Sim
                         ok = Terrain.IsLand(p) && Terrain.BiomeAt(p) != Biome.Beach;
                     }
                 var c = o + size * 0.5f;
-                foreach (var m in Monuments) ok &= Vector2.Distance(m.Center, c) > 110 + (m.Max - m.Min).Length() * 0.5f + size.Length() * 0.5f;
+                foreach (var m in Monuments) ok &= Vector2.Distance(m.Center, c) > gap + (m.Max - m.Min).Length() * 0.5f + size.Length() * 0.5f;
                 if (ok) return o;
             }
             return null;
@@ -180,6 +182,7 @@ namespace Rastvordd.Sim
                 for (int i = Nodes.Count - 1; i >= 0; i--)
                     if (m.Contains(Nodes[i].Pos, 3)) { _nodeGrid.Remove(Nodes[i]); Nodes.RemoveAt(i); }
             foreach (var s in Substations) { s.Relink(this); ResetSubstation(s); }   // состояние РТ не сохраняется: после загрузки — свежая
+            foreach (var t in Tier0) ResetTier0(t);
         }
     }
 }

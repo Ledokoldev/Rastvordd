@@ -854,10 +854,10 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            if (_kind == PickupKind.Fuse)
+            if (_kind is PickupKind.Fuse or PickupKind.PunchCard)
             {
-                // пробка Подстанции: маленькая, но с бликом, чтобы её было видно на полу
-                var ft = Available ? Art.Get("icons/icon_fuse") : null;
+                // пробка Подстанции, перфокарта: маленькие, но с бликом, чтобы их было видно
+                var ft = Available ? Art.Get(_kind == PickupKind.Fuse ? "icons/icon_fuse" : "icons/icon_punchcard_1") : null;
                 if (ft == null) return;
                 DrawSetTransform(new Vector2(0, -2), 0, new Vector2(0.32f, 0.32f));
                 DrawTexture(ft, new Vector2(-ft.GetWidth() / 2, -ft.GetHeight()));

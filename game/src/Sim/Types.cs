@@ -677,7 +677,7 @@ namespace Rastvordd.Sim
         };
     }
 
-    public enum PickupKind { Hemp, Berries, WaterBarrel, Fuse }
+    public enum PickupKind { Hemp, Berries, WaterBarrel, Fuse, PunchCard }
 
     /// <summary>То, что собирают руками по E: конопля, ягоды, бочка с водой.</summary>
     public sealed class Pickup

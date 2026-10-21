@@ -2292,6 +2292,66 @@
    "desc": "a small rusty cylindrical water tank on a steel stand; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime",
    "view": "front",
    "w": 1.4
+  },
+  {
+   "id": "porch_front",
+   "cat": "props",
+   "view": "front",
+   "w": 2.4,
+   "foot": [
+    2.4,
+    1.4,
+    0.5
+   ],
+   "desc": "a small concrete entrance porch: three wide concrete steps leading up toward the viewer-facing direction away from camera, with thin rusty metal handrails on both sides and a doormat; Soviet-era, weathered concrete and rusty metal, abandoned"
+  },
+  {
+   "id": "porch_side",
+   "cat": "props",
+   "view": "side",
+   "w": 2.4,
+   "foot": [
+    2.4,
+    1.4,
+    0.5
+   ],
+   "desc": "a small concrete entrance porch seen from the side: three concrete steps going up from left to right toward a wall, with a thin rusty handrail; Soviet-era, weathered concrete and rusty metal, abandoned"
+  },
+  {
+   "id": "garage_ramp",
+   "cat": "props",
+   "view": "front",
+   "w": 3.4,
+   "foot": [
+    3.4,
+    1.6,
+    0.3
+   ],
+   "desc": "a wide low concrete vehicle ramp (apron) sloping up toward a garage gate, cracked, with tire marks and oil stains; Soviet-era, weathered concrete and rusty metal, abandoned"
+  },
+  {
+   "id": "gate_leaf_open",
+   "cat": "props",
+   "view": "side",
+   "w": 2.6,
+   "foot": [
+    0.3,
+    0.3,
+    2.0
+   ],
+   "desc": "one leaf of a steel mesh fence gate standing wide open, attached to a rusty square post, barbed wire on top; Soviet-era, weathered concrete and rusty metal, abandoned"
+  },
+  {
+   "id": "door_lamp_post",
+   "cat": "props",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.3,
+    0.3,
+    2.5
+   ],
+   "desc": "a short metal post with a small old wall-style lamp and a cage over the bulb, marking an entrance; Soviet-era, weathered concrete and rusty metal, abandoned"
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

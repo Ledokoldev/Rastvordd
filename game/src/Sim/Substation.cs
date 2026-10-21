@@ -121,6 +121,7 @@ namespace Rastvordd.Sim
                                            ((18f, 20f), (18f, 22.4f)), ((18f, 23.6f), (18f, 34f)), ((18f, 27f), (34f, 27f)), ((6f, 34f), (11.4f, 34f)), ((12.6f, 34f), (18f, 34f)) })
                 WallT(P(a.Item1, a.Item2), P(b.Item1, b.Item2), 2.8f, B);
             s.Shutter = WallT(P(34, 28), P(34, 33), 2.8f, SH, 0.35f);
+            RemovableWalls.Add(s.Shutter);
             // мастерская с гаражными воротами
             foreach (var (a, b) in new[] { ((54f, 52f), (76f, 52f)), ((54f, 52f), (54f, 56f)), ((54f, 57.2f), (54f, 64f)), ((76f, 52f), (76f, 64f)),
                                            ((54f, 64f), (57f, 64f)), ((63f, 64f), (66f, 64f)), ((72f, 64f), (76f, 64f)) })
@@ -131,6 +132,20 @@ namespace Rastvordd.Sim
             Roof("tiles/roof_tar", P(6, 20), P(34, 34), rng);
             Roof("tiles/roof_tar", P(6, 34), P(18, 46), rng);
             Roof("tiles/roof_metal", P(54, 52), P(76, 64), rng);
+
+            // входы, которых не видно с камеры (боковые и задние стены, под крышей): крыльцо, пандус, створки, фонари
+            Prop("props/porch_side", P(52.7f, 57.6f));                 // мастерская, западная дверь
+            Prop("props/door_lamp_post", P(52.6f, 55.4f));
+            Prop("props/porch_front", P(12, 47.6f));                   // дежурка
+            Prop("props/garage_ramp", P(36, 31.6f));                   // роллета склада (восток)
+            Prop("props/door_lamp_post", P(35.2f, 27.4f));
+            Prop("props/garage_ramp", P(60, 66));                      // гаражные ворота мастерской
+            Prop("props/garage_ramp", P(69, 66));
+            Prop("props/gate_leaf_open", P(93.4f, 57.2f));             // калитка (восток)
+            Prop("props/gate_leaf_open", P(93.4f, 61.4f), true);
+            Prop("props/door_lamp_post", P(93, 56.2f));
+            Prop("props/door_lamp_post", P(8.4f, 73));                  // ворота (юг)
+            Prop("props/door_lamp_post", P(19.6f, 73));
 
             // ОРУ: три ячейки портал → разъединитель → выключатель → разъединитель → трансформатор
             foreach (var bx in new[] { 52f, 66f, 80f })
@@ -341,7 +356,7 @@ namespace Rastvordd.Sim
         /// <summary>Убранные сейчас стены готовых РТ (поднятая роллета) — клиент их не рисует.</summary>
         public void CollectGoneWalls(List<int> into)
         {
-            foreach (var s in Substations) if (!Walls.Contains(s.Shutter)) into.Add(s.Shutter.Id);
+            foreach (var w in RemovableWalls) if (!Walls.Contains(w)) into.Add(w.Id);
         }
     }
 }

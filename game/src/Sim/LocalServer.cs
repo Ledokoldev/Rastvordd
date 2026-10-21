@@ -194,10 +194,10 @@ namespace Rastvordd.Sim
             foreach (var mon in World.Monuments) { m.Yards.Add((mon.Min, mon.Max)); m.YardNames.Add(mon.Name); m.YardPrefab.Add(World.Prefabs.Contains(mon)); }
             foreach (var w in World.Walls)
                 m.Walls.Add(new WallInfo { Min = w.Wall.Min, Max = w.Wall.Max, Height = w.Wall.Height, Kind = w.Kind, Id = w.Id, Tex = w.Tex, Hidden = w.Hidden });
-            foreach (var s in World.Substations)
-                if (!World.Walls.Contains(s.Shutter))   // поднятая роллета тоже нужна клиенту — чтобы опустить её при обновлении
-                    m.Walls.Add(new WallInfo { Min = s.Shutter.Wall.Min, Max = s.Shutter.Wall.Max, Height = s.Shutter.Wall.Height, Kind = s.Shutter.Kind, Id = s.Shutter.Id, Tex = s.Shutter.Tex });
-            foreach (var d in World.Decors) m.Decors.Add(new MapDecor { Id = d.Id, Sprite = d.Sprite, Pos = d.Pos, Flip = d.Flip });
+            foreach (var w in World.RemovableWalls)
+                if (!World.Walls.Contains(w))   // поднятая роллета, выбитая дверь — тоже нужны клиенту, чтобы вернуть их при обновлении РТ
+                    m.Walls.Add(new WallInfo { Min = w.Wall.Min, Max = w.Wall.Max, Height = w.Wall.Height, Kind = w.Kind, Id = w.Id, Tex = w.Tex });
+            foreach (var d in World.Decors) m.Decors.Add(new MapDecor { Id = d.Id, Sprite = d.Sprite, Pos = d.Pos, Flip = d.Flip, Flat = d.Flat, Scale = d.Scale, Rot = d.Rot });
             m.Patches.AddRange(World.Patches);
             m.Roofs.AddRange(World.Roofs);
             m.Wires.AddRange(World.Wires);
@@ -715,6 +715,7 @@ namespace Rastvordd.Sim
 
         string Hint((World.InteractKind kind, object target) it) => it.kind switch
         {
+            World.InteractKind.Stash => "[E] " + ((Stash)it.target).Verb,
             World.InteractKind.Panel => ((Substation)it.target).Powered ? "Главный щиток — включён" : $"[E] Главный щиток — вставить пробку ({((Substation)it.target).FusesIn}/2)",
             World.InteractKind.Bag when ((LootBag)it.target).Punch && !((LootBag)it.target).Unlocked => "[E] Крейт — перфокарта I",
             World.InteractKind.Bag => ((LootBag)it.target) is var lb && lb.Safe && !lb.Unlocked ? "[E] Сейф — нужна карта доступа" : lb.Safe ? "[E] Открыть сейф" : lb.IsCrate ? "[E] Открыть ящик" : lb.Corpse ? "[E] Обыскать рюкзак" : "[E] Подобрать вещи",
@@ -724,6 +725,7 @@ namespace Rastvordd.Sim
                 PickupKind.Hemp => "[E] Собрать коноплю",
                 PickupKind.Berries => "[E] Собрать ягоды",
                 PickupKind.Fuse => "[E] Взять пробку",
+                PickupKind.PunchCard => "[E] Взять перфокарту I",
                 _ => "[E] Попить",
             },
             World.InteractKind.Furnace => FurnaceHint((Deployable)it.target),

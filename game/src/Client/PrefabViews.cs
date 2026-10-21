@@ -67,6 +67,20 @@ namespace Rastvordd.Client
             foreach (var p in _patches)
             {
                 var tex = Art.Get(p.Tile);
+                if (p.Poly != null)
+                {
+                    // неровный участок: текстура мира по координатам (UV в пикселях, повтор)
+                    var pts = new Vector2[p.Poly.Length];
+                    var uvs = new Vector2[p.Poly.Length];
+                    for (int i = 0; i < pts.Length; i++)
+                    {
+                        pts[i] = Iso.Px(p.Poly[i]);
+                        uvs[i] = tex != null ? pts[i] / tex.GetSize() : Vector2.Zero;
+                    }
+                    if (tex != null) DrawPolygon(pts, new[] { Colors.White }, uvs, tex);
+                    else DrawColoredPolygon(pts, new Color(0.35f, 0.34f, 0.3f));
+                    continue;
+                }
                 var r = new Rect2(Iso.Px(p.Min), Iso.Px(p.Max) - Iso.Px(p.Min));
                 if (tex != null) DrawTextureRect(tex, r, true);
                 else DrawRect(r, new Color(0.35f, 0.34f, 0.3f));
@@ -132,6 +146,31 @@ namespace Rastvordd.Client
         }
     }
 
+    /// <summary>Декали готовых РТ: трещины, разметка, лужи, пятна — плоско на земле, без теней.</summary>
+    public partial class FlatDecorLayer : Node2D
+    {
+        readonly List<MapDecor> _items;
+
+        public FlatDecorLayer(List<MapDecor> items)
+        {
+            _items = items;
+            TextureFilter = TextureFilterEnum.Nearest;
+            Material = VisionFx.ObjectMat;
+        }
+
+        public override void _Draw()
+        {
+            foreach (var d in _items)
+            {
+                var tex = Art.Get(d.Sprite);
+                if (tex == null) continue;
+                DrawSetTransform(Iso.Px(d.Pos), Mathf.DegToRad(-d.Rot), new Vector2(d.Scale, d.Scale));
+                DrawTexture(tex, -tex.GetSize() / 2);
+            }
+            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+        }
+    }
+
     /// <summary>Провода ОРУ и ЛЭП: тонкие линии с провисом, на своей высоте.</summary>
     public partial class WireLayer : Node2D
     {
@@ -172,8 +211,11 @@ namespace Rastvordd.Client
 
         public PrefabLayer(MapInfo map, Node world, Node root)
         {
+            var flat = map.Decors.FindAll(d => d.Flat);
+            if (flat.Count > 0) root.AddChild(new FlatDecorLayer(flat) { ZIndex = -9 });
             foreach (var d in map.Decors)
             {
+                if (d.Flat) continue;
                 var v = new DecorView2D(d);
                 world.AddChild(v);
                 _decors[d.Id] = v;

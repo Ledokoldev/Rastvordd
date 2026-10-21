@@ -168,6 +168,7 @@ namespace Rastvordd.Sim
 
             // готовые РТ — в самом конце и своим генератором: остальная раскладка мира (и старые сохранения) не сдвигается
             PlaceSubstation();
+            PlaceTier0();
         }
 
         // площадь на один объект (м²) и веса: дерево, камень, металл, сера, конопля, ягоды, бочка воды, ящик-укрытие, руины
@@ -605,6 +606,7 @@ namespace Rastvordd.Sim
             StepThrowns();
             StepFires();
             StepSubstations();
+            StepTier0();
         }
 
         void StepActor(Actor a, InputCmd cmd)
@@ -1101,7 +1103,7 @@ namespace Rastvordd.Sim
 
         // ---------- взаимодействие (E) ----------
 
-        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box, Recycler, Panel }
+        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box, Recycler, Panel, Stash }
 
         /// <summary>Что ближе всего под рукой. Используется и сервером, и подсказкой на экране.</summary>
         public (InteractKind kind, object target) NearestInteract(Actor a)
@@ -1126,6 +1128,12 @@ namespace Rastvordd.Sim
                 float d = Vector2.Distance(a.Pos, dp.Pos) - dp.Radius + 0.3f;
                 if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, DeployKind.Recycler => InteractKind.Recycler, _ => InteractKind.Workbench }, dp); }
             }
+            foreach (var rt in Tier0)
+                foreach (var st in rt.Stashes)
+                {
+                    float d = Vector2.Distance(a.Pos, st.Pos);
+                    if (!st.Done && d < bestD && ClearLine(a.Pos, st.Pos, null, true)) { bestD = d; best = (InteractKind.Stash, st); }
+                }
             foreach (var s in Substations)
             {
                 float d = Vector2.Distance(a.Pos, s.PanelPos);
@@ -1175,6 +1183,7 @@ namespace Rastvordd.Sim
             {
                 // у живого игрока — окна, боты пользуются быстрыми действиями
                 case InteractKind.Panel: UsePanel(a, (Substation)target); break;
+                case InteractKind.Stash: UseStash(a, (Stash)target); break;
                 case InteractKind.Bag when ((LootBag)target).Punch && !((LootBag)target).Unlocked: UsePunchCrate(a, (LootBag)target); break;
                 case InteractKind.Bag when ((LootBag)target).Safe && !((LootBag)target).Unlocked:
                     if (a.Take("keycard", 1) > 0) { ((LootBag)target).Unlocked = true; Info(a, "Сейф открыт картой доступа"); if (!a.IsBot) OpenUi(a, UiKind.Bag, target); }
@@ -1302,6 +1311,12 @@ namespace Rastvordd.Sim
                 case PickupKind.WaterBarrel:
                     a.Water = MathF.Min(100, a.Water + 40);
                     Info(a, "Напился воды");
+                    break;
+                case PickupKind.PunchCard:
+                    a.Add("punchcard_1", 1);
+                    p.RespawnLeft = 1e9f;   // вернётся при обновлении РТ
+                    Events.Add(new SimEvent { Kind = SimEventKind.Gather, ActorId = a.Id, Pos = p.Pos, Value = 1, Text = "Перфокарта I" });
+                    Info(a, "Перфокарта I у тебя — ей открывается крейт Подстанции");
                     break;
                 case PickupKind.Fuse:
                     a.Add("fuse", 1);

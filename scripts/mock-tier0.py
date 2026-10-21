@@ -33,6 +33,9 @@ class Scene:
         self.objs, self.zones, self.marks, self.plan_walls, self.plan_props, self.notes = [], [], [], [], [], []
         self.keepout = []          # прямоугольники, где не сажать лес и траву
         self.roofs = []            # крыши: (x0, y0, x1, y1, высота стен, текстура) — рисуются поверх всего
+        # планировка для игры (scripts/mock-tier0.py → game/src/Sim/Tier0Layouts.g.cs): то же, что на макете
+        self.ex = {'grounds': [], 'walls': [], 'props': [], 'decals': []}
+        self._skip = False
         random.seed(seed)
 
     def px(self, x, y):
@@ -58,6 +61,8 @@ class Scene:
         for i in range(0, reg.width, t.width):
             for j in range(0, reg.height, t.height):
                 reg.paste(t, (i, j))
+        if not self._skip:
+            self.ex['grounds'].append((name, poly if poly is not None else self.rect(-self.M, -self.M, self.W + self.M, self.H + self.M)))
         if poly is None:
             self.img.paste(reg, (0, 0))
         else:
@@ -72,6 +77,8 @@ class Scene:
         d = L('decals/' + n) if '/' not in n else L(n)
         if d is None:
             return
+        if not self._skip:
+            self.ex['decals'].append(('decals/' + n if '/' not in n else n, x, y, s, rot))
         if s != 1:
             d = d.resize((max(1, int(d.width * s)), max(1, int(d.height * s))), Image.NEAREST)
         if rot:
@@ -111,6 +118,7 @@ class Scene:
         if y0 == y1:
             y0, y1 = y0 - t / 2, y1 + t / 2
         self.plan_walls.append((x0, y0, x1, y1, tex))
+        self.ex['walls'].append((x0, y0, x1, y1, h, tex))
         self.keepout.append((x0 - 1, y0 - 1, x1 + 1, y1 + 1))
         self.wall_shadow(x0, y0, x1, y1, h)
 
@@ -169,6 +177,8 @@ class Scene:
         s = L(n)
         if s is None:
             return
+        if not self._skip:
+            self.ex['props'].append((n, x, y, bool(flip), plan[0] if plan else None))
         if flip:
             s = s.transpose(Image.FLIP_LEFT_RIGHT)
         if scale != 1:
@@ -214,6 +224,7 @@ class Scene:
                 self.prop('plants/bush_1', x, y, random.random() < .5)
             else:
                 self.prop(random.choice(GR), x, y, random.random() < .5, shadow=False)
+        self._skip = False
 
     def forest(self, keep, density=0.5, grass=900):
         """Лес и трава вокруг: keep — прямоугольники территории/дороги, где не сажать."""
@@ -221,6 +232,7 @@ class Scene:
         TR = ['trees/tree_pine_1', 'trees/tree_pine_2', 'trees/tree_birch', 'trees/tree_leafy', 'trees/tree_oak_dead', 'plants/bush_1']
         GR = ['grass/grass_meadow_1', 'grass/grass_meadow_2', 'grass/grass_forest_1', 'grass/grass_forest_2']
         free = lambda x, y, pad: not any(a - pad <= x <= c + pad and b - pad <= y <= d + pad for (a, b, c, d) in keep + self.keepout)
+        self._skip = True   # лес вокруг — в игре свой, из мира
         for _ in range(int((W + 2 * M) * (H + 2 * M) * density / 4)):
             x, y = random.uniform(-M, W + M), random.uniform(-M + 2, H + M + 4)
             if free(x, y, 1.5):
@@ -280,6 +292,12 @@ class Scene:
         for _, f in sorted(self.objs, key=lambda o: o[0]):
             f()
         self.draw_roofs()
+        import json
+        lay = {'W': self.W, 'H': self.H, 'M': self.M, 'grounds': self.ex['grounds'], 'walls': self.ex['walls'], 'props': self.ex['props'],
+               'decals': self.ex['decals'], 'roofs': self.roofs, 'marks': [(x, y, lab) for (x, y, col, lab) in self.marks]}
+        os.makedirs(ROOT_LAYOUT, exist_ok=True)
+        with open(os.path.join(ROOT_LAYOUT, f't0-{key}.json'), 'w', encoding='utf-8') as fh:
+            json.dump(lay, fh, ensure_ascii=False)
         im = self.img.convert('RGB')
         im.save(OUT + f't0-{key}-mock.png')
         im.resize((im.width // 2, im.height // 2), Image.LANCZOS).save(OUT + f't0-{key}-mock-half.png')
@@ -329,6 +347,8 @@ class Scene:
                 y += 20
         im.save(OUT + f't0-{key}-plan.png')
 
+
+ROOT_LAYOUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'assets', 'layouts')
 
 # ---------- общие куски ----------
 ROOF_ITEMS = ['roof_vent_box', 'roof_vent_mushroom', 'roof_chimney_brick', 'roof_exhaust_pipe', 'roof_hatch', 'roof_ac_unit', 'roof_antenna', 'roof_panels', 'roof_junk', 'roof_water_tank']
@@ -523,6 +543,8 @@ def shop():
     s.wall(10, 33, 19, 33, 3.2, SF); s.wall(21.6, 33, 34, 33, 3.2, SF)
     s.labels = [(29.8, 18.6, 'дверь заклинило'), (19, 34.2, 'вход'), (42.6, 12.2, 'вход в склад')]
     s.roof(10, 20, 34, 33, 3.2, 'roof_slate'); s.roof(24, 8, 42, 20, 3.2, 'roof_slate')
+    # вход в склад со двора (восточная стена) — крыльцо и фонарь, чтобы дверь читалась под крышей
+    s.prop('props/porch_side', 43.5, 15.2, True); s.prop('props/door_lamp_post', 43.4, 11.6)
     # зал
     for x in (12, 14, 16, 18, 20.6):
         s.prop('props/shop_shelf', x, 20.7, plan=(C_COVER, ''))
@@ -660,6 +682,8 @@ def fuel():
     s.wall(52, 8, 53.5, 8, 3.2, "wallface_door_metal")
     s.wall(34, 18, 39.5, 18, 3.2, SF); s.wall(41.8, 18, 50, 18, 3.2, SF)
     s.roof(34, 8, 56, 18, 3.2, 'roof_metal')
+    # задняя дверь павильона (северная стена) — крыльцо и фонарь
+    s.prop('props/porch_front', 52.75, 7.7); s.prop('props/door_lamp_post', 54.6, 7.6)
     s.walls([(50, 8), (50, 18)], 3.2, ST, gaps=[(50, 14, 50, 15.6)])
     s.prop('props/shop_counter', 39.2, 12.4, plan=(C_COVER, ''))
     s.prop('props/shop_counter', 41.6, 12.4, plan=(C_COVER, ''))
@@ -741,3 +765,22 @@ if __name__ == '__main__':
     which = sys.argv[1:] or ['gai', 'shop', 'fuel']
     for w in which:
         {'gai': gai, 'shop': shop, 'fuel': fuel}[w]()
+    # планировки → C# (строка JSON на РТ; игра строит РТ по ним — макет и игра совпадают)
+    out = ['// Сгенерировано scripts/mock-tier0.py — не править руками.', 'namespace Rastvordd.Sim', '{', '    public static class Tier0Layouts', '    {']
+    for k in ('gai', 'shop', 'fuel'):
+        fp = os.path.join(ROOT_LAYOUT, f't0-{k}.json')
+        if os.path.exists(fp):
+            js = open(fp, encoding='utf-8').read().replace('"', '""')
+            out.append(f'        public const string {k.capitalize()} = @"{js}";')
+    # хитбоксы всех пропсов из манифеста — общая таблица для готовых РТ
+    out.append('        public static readonly System.Collections.Generic.Dictionary<string, (float w, float d, float h, bool legs)> Foot = new()')
+    out.append('        {')
+    for a in MAN.values():
+        f = a.get('foot')
+        if not f: continue
+        legs = isinstance(f, dict)
+        w, d, h = f['legs'] if legs else f
+        out.append(f'            ["{a["id"]}"] = ({w}f, {d}f, {h}f, {"true" if legs else "false"}),')
+    out.append('        };')
+    out += ['    }', '}', '']
+    open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'game', 'src', 'Sim', 'Tier0Layouts.g.cs'), 'w', encoding='utf-8').write(chr(10).join(out))

@@ -311,6 +311,13 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     var sub = _server.World.Substations[0];
                     _server.World.Find(_myId).Pos = sub.At(float.Parse(p[0], inv), float.Parse(p[1], inv));
                 }
+                else if (arg.StartsWith("--att0="))
+                {
+                    // отладка: встать на РТ тира 0 номер N в точке (x, y) от её угла: --att0=0,40,30
+                    var p = arg.Substring(7).Split(',');
+                    var rt = _server.World.Tier0[int.Parse(p[0])];
+                    _server.World.Find(_myId).Pos = rt.At(float.Parse(p[1], inv), float.Parse(p[2], inv));
+                }
                 else if (arg.StartsWith("--atmon="))
                 {
                     // отладка: встать у южных ворот РТ номер N
@@ -802,6 +809,9 @@ else if (arg == "--atcrate")
                             case "shutter": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), 0, 40, 0.1f); break;
                             case "reader": Sfx.Play("c4_beep", Iso.Px(e.Pos), 0, 60, 0f); Flash(e.Pos, new Color(0.4f, 1f, 0.5f), 5, 0.2f, true); break;
                             case "crate": Sfx.Play("craft_done", Iso.Px(e.Pos), 2, 40, 0f); Flash(e.Pos, new Color(0.4f, 1f, 0.5f), 14, 0.5f, true); break;
+                            case "pry": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), -2, 25, 0.15f); break;
+                            case "glass": Sfx.Play("glass_break", Iso.Px(e.Pos), -4, 30, 0.12f); break;
+                            case "bang": Sfx.Play("hit_wood", Iso.Px(e.Pos), 2, 40, 0.1f); _shake = Mathf.Min(0.6f, _shake + 0.15f); break;
                         }
                         break;
                     case SimEventKind.Locked:

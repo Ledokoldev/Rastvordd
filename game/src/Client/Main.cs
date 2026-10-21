@@ -96,6 +96,7 @@ namespace Rastvordd.Client
             AddChild(flatDecals);
             _decals = new DecalLayer(_map, flatDecals, _world);
             Sfx.Init(_world);
+            Acoustics.Init(this, _map);
             Tuning.Load();
             _steps = new FootstepLoop(this);
             _ambient = new Ambient(this, _map);
@@ -312,6 +313,11 @@ namespace Rastvordd.Client
             Render(alpha, dt);
             UpdateCamera(dt);
             if (!_overview) _decals.Update(_cam.Position);
+            {
+                var me = new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
+                bool yard = me.X > 4 && me.X < 36 && me.Y > -36 && me.Y < -4;
+                Acoustics.Update(me, _cur.Nodes, TerrainView.BiomeAt(_map, me), yard, delta);
+            }
             _ambient.Update(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _forcedDay ?? _cur.DayTime, dt);
             _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime);
             UpdateHud(dt);
@@ -322,6 +328,7 @@ namespace Rastvordd.Client
                 _perfTime += delta; _perfFrames++;
                 if (_perfTime >= 3)
                 {
+                    GD.Print(PlayingSounds() + $" buses {AudioServer.BusCount}");
                     GD.Print($"amb: biome {TerrainView.BiomeAt(_map, new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM))} | {_ambient.Debug}");
                     GD.Print($"perf: {_perfFrames / _perfTime:F0} fps, sim {_simTime / (_perfTime * 30):F2} ms/tick, nodes {_server.World.Nodes.Count}, views {_world.GetChildCount()}");
                     _perfTime = 0; _perfFrames = 0; _simTime = 0;
@@ -432,7 +439,7 @@ namespace Rastvordd.Client
             foreach (var n in FindChildren("*", "", true, false))
             {
                 if (n is AudioStreamPlayer ap && ap.Playing && !ap.StreamPaused && ap.VolumeDb > -60)
-                    sb.Append($"  {System.IO.Path.GetFileName(ap.Stream?.ResourcePath)}  {ap.VolumeDb:F0} дБ\n");
+                    sb.Append($"  {System.IO.Path.GetFileName(ap.Stream?.ResourcePath)}  {ap.VolumeDb:F0} дБ  [{ap.Bus}]\n");
                 else if (n is AudioStreamPlayer2D p2 && p2.Playing && p2.VolumeDb > -60)
                     sb.Append($"  {System.IO.Path.GetFileName(p2.Stream?.ResourcePath)}  (в мире) {p2.VolumeDb:F0} дБ\n");
             }

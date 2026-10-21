@@ -15,6 +15,9 @@ namespace Rastvordd.Sim
         public int Tier;               // 0 разметка, 1 дерево, 2 камень, 3 металл, 4 сталь
         public float Hp;
         public bool Open;              // дверь открыта
+        public bool Locked;            // на двери кодовый замок
+        public int Code;
+        public readonly HashSet<int> LockAuth = new();
         public int OwnerId;
         public int ClaimId;            // к какому столбу привязан (бюджет и содержание)
         public readonly List<MapWall> Boxes = new();
@@ -331,9 +334,49 @@ namespace Rastvordd.Sim
             Events.Add(new SimEvent { Kind = SimEventKind.Built, ActorId = a.Id, OtherId = s.Id, Pos = s.Center, Text = Building.TierNames[s.Tier], Value = s.Tier });
         }
 
+        /// <summary>ЛКМ с замком в руках по двери: поставить кодовый замок, код — случайный, сообщается установщику.</summary>
+        void InstallLock(Actor a)
+        {
+            var door = TargetStructure(a, 2f);
+            if (door == null || door.Kind != StructKind.Door) { Info(a, "Замок ставится на дверь — подойди и наведи на неё"); return; }
+            if (door.Locked) { Info(a, "На двери уже есть замок"); return; }
+            door.Locked = true;
+            door.Code = Rng.Next(1000, 10000);
+            door.LockAuth.Add(a.Id);
+            var held = a.Held;
+            held.Count--;
+            if (held.Count <= 0) a.Belt[a.Current] = null;
+            StructVersion++;
+            Info(a, $"Кодовый замок поставлен. Код: {door.Code} — запомни");
+        }
+
+        /// <summary>Ввод кода у запертой двери: верный — доступ и дверь открывается; неверный — удар током.</summary>
+        void EnterCode(Actor a, int doorId, int code)
+        {
+            Structure door = null;
+            foreach (var s in Structures) if (s.Id == doorId) { door = s; break; }
+            if (door == null || !door.Locked || Vector2.Distance(door.Center, a.Pos) > 3f) return;
+            if (code == door.Code)
+            {
+                door.LockAuth.Add(a.Id);
+                Info(a, "Код принят");
+                if (!door.Open) ToggleDoor(a, door);
+            }
+            else
+            {
+                Damage(a, 5, -1, a.Pos);
+                Info(a, "Неверный код — бьёт током");
+            }
+        }
+
         /// <summary>E по двери: открыть/закрыть. Закрыть нельзя, если в проёме кто-то стоит.</summary>
         void ToggleDoor(Actor a, Structure door)
         {
+            if (door.Locked && !door.LockAuth.Contains(a.Id))
+            {
+                Events.Add(new SimEvent { Kind = SimEventKind.Locked, ActorId = a.Id, OtherId = door.Id, Pos = door.Center });
+                return;
+            }
             if (door.Open)
                 foreach (var (min, max, _, _) in Building.Boxes(StructKind.Door, door.I, door.J, door.Dir, false))
                     foreach (var o in Actors)

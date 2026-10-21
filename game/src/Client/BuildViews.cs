@@ -30,7 +30,7 @@ namespace Rastvordd.Client
                 _seen.Add(s.Id);
                 if (_items.TryGetValue(s.Id, out var cur))
                 {
-                    if (cur.snap.Tier == s.Tier && cur.snap.Open == s.Open && cur.snap.Kind == s.Kind)
+                    if (cur.snap.Tier == s.Tier && cur.snap.Open == s.Open && cur.snap.Kind == s.Kind && cur.snap.Locked == s.Locked)
                     {
                         if (Mathf.Abs(cur.snap.Hp - s.Hp) > 0.01f) { SetDamage(cur.views, s.Hp); _items[s.Id] = (s, cur.views); }
                         continue;
@@ -72,7 +72,7 @@ namespace Rastvordd.Client
             {
                 foreach (var (min, max, h, _) in Building.Boxes(s.Kind, s.I, s.J, s.Dir, s.Open))
                 {
-                    var w = new WallView2D(new WallInfo { Min = min, Max = max, Height = h, Kind = WallKind.Built, Tier = s.Tier, Door = s.Kind == StructKind.Door, StructId = s.Id });
+                    var w = new WallView2D(new WallInfo { Min = min, Max = max, Height = h, Kind = WallKind.Built, Tier = s.Tier, Door = s.Kind == StructKind.Door, Locked = s.Locked, StructId = s.Id });
                     _world.AddChild(w);
                     views.Add(w);
                     Walls.Add(w);

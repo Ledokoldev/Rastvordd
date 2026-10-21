@@ -54,6 +54,7 @@ namespace Rastvordd.Client
 
         bool _reloadEdge, _interactEdge, _healEdge, _respawnEdge, _eatEdge, _debugEdge;
         int _slot = -1, _craftReq = -1;
+        (int door, int code)? _codeReq;
         SVec _aim;
         Vector2 _screenDir;
         float _peek;
@@ -67,6 +68,7 @@ namespace Rastvordd.Client
         SVec? _autoAim;
         readonly Dictionary<int, List<string>> _script = new();
         int _autoFireFrames;
+        int _scriptCode = -1;   // отладка: код, который сценарий «вводит» у запертой двери
 
         void RunScript()
         {
@@ -84,6 +86,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("slot")) _slot = int.Parse(a.Substring(4)) - 1;
                 else if (a.StartsWith("craft")) _craftReq = int.Parse(a.Substring(5));
                 else if (a == "stop") _forceWalk = SVec.Zero;
+                else if (a.StartsWith("code")) _scriptCode = int.Parse(a.Substring(4));
                 else if (a.StartsWith("go"))
                 {
                     var p = a.Substring(2).Split(';');
@@ -132,6 +135,7 @@ namespace Rastvordd.Client
             _hud = new Hud();
             AddChild(_hud);
             _hud.CraftRequested += i => _craftReq = i;
+            _hud.CodeEntered += (door, code) => _codeReq = (door, code);
 
             _ghost = new GhostView2D { Visible = false };
             _world.AddChild(_ghost);
@@ -279,10 +283,11 @@ namespace Rastvordd.Client
         InputCmd BuildCmd()
         {
             var move = SVec.Zero;
-            if (Input.IsPhysicalKeyPressed(Key.W)) move.Y -= 1;
-            if (Input.IsPhysicalKeyPressed(Key.S)) move.Y += 1;
-            if (Input.IsPhysicalKeyPressed(Key.A)) move.X -= 1;
-            if (Input.IsPhysicalKeyPressed(Key.D)) move.X += 1;
+            bool typing = _hud.CodeOpen;
+            if (!typing && Input.IsPhysicalKeyPressed(Key.W)) move.Y -= 1;
+            if (!typing && Input.IsPhysicalKeyPressed(Key.S)) move.Y += 1;
+            if (!typing && Input.IsPhysicalKeyPressed(Key.A)) move.X -= 1;
+            if (!typing && Input.IsPhysicalKeyPressed(Key.D)) move.X += 1;
             move += _forceWalk;
             return new InputCmd
             {
@@ -292,6 +297,8 @@ namespace Rastvordd.Client
                 Eat = _eatEdge,
                 DebugKit = _debugEdge,
                 Craft = _craftReq,
+                Code = _codeReq?.code ?? -1,
+                CodeDoor = _codeReq?.door ?? 0,
                 Sprint = _forceSprint || Input.IsPhysicalKeyPressed(Key.Shift),
                 Reload = _reloadEdge,
                 Interact = _interactEdge,
@@ -346,6 +353,7 @@ namespace Rastvordd.Client
                 _cur = _server.BuildSnapshot(_myId);
                 _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = _timeEdge = false;
                 _slot = _craftReq = -1;
+                _codeReq = null;
                 if (_autoFireFrames > 0) _autoFireFrames--;
                 HandleEvents();
                 _acc -= World.Dt;
@@ -449,6 +457,10 @@ namespace Rastvordd.Client
                         Sfx.Play((int)e.Value >= 2 ? "hit_stone" : "hit_wood", Iso.Px(e.Pos), 2, 40, 0.05f);
                         SpawnChipsAt(e.Pos, TierChips[System.Math.Clamp((int)e.Value, 0, 4)], -1, 18);
                         _shake = Mathf.Min(1.2f, _shake + 0.3f);
+                        break;
+                    case SimEventKind.Locked:
+                        Sfx.Play("lock_click", Iso.Px(e.Pos), -4, 10, 0f);
+                        if (e.ActorId == _myId) { if (_scriptCode >= 0) _codeReq = (e.OtherId, _scriptCode); else _hud.ShowCode(e.OtherId); }
                         break;
                     case SimEventKind.Explosion:
                     {

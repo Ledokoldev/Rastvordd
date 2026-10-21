@@ -399,7 +399,7 @@ namespace Rastvordd.Client
         readonly Color _topC, _frontC;
         readonly WallKind _kind;
         readonly int _tier;
-        readonly bool _door;
+        readonly bool _door, _locked;
         float _alpha = 1;
 
         readonly Biome _biome;
@@ -411,6 +411,7 @@ namespace Rastvordd.Client
             _kind = w.Kind;
             _tier = w.Tier;
             _door = w.Door;
+            _locked = w.Locked;
             TextureFilter = TextureFilterEnum.Nearest;
             TextureRepeat = TextureRepeatEnum.Enabled;
             float cx = (w.Min.X + w.Max.X) * 0.5f * Iso.PPM;
@@ -486,6 +487,13 @@ namespace Rastvordd.Client
                 DrawTextureRect(frontTex, frontR, true, new Color(0.78f * tint.R, 0.78f * tint.G, 0.78f * tint.B, a));
                 DrawTextureRect(topTex, topR, true, new Color(1.05f * tint.R, 1.05f * tint.G, 1.05f * tint.B, a));
                 if (_cut) DrawRect(topR, new Color(0, 0, 0, 0.35f), false, 1);
+                if (_locked && !_cut)
+                {
+                    // кодовый замок: серая коробочка с красным огоньком
+                    var lp = new Vector2(_front.End.X - Mathf.Min(9, _front.Size.X * 0.4f), _front.Position.Y + _front.Size.Y * 0.42f);
+                    DrawRect(new Rect2(lp, new Vector2(4, 5)), new Color(0.35f, 0.36f, 0.38f, a));
+                    DrawRect(new Rect2(lp + new Vector2(1, 1), new Vector2(2, 1)), new Color(0.9f, 0.15f, 0.1f, a));
+                }
                 if (_door && !_cut) DrawRect(new Rect2(_front.End.X - Mathf.Min(6, _front.Size.X * 0.3f), _front.Position.Y + _front.Size.Y * 0.5f, 2, 3), new Color(0.15f, 0.13f, 0.1f, a));   // ручка
                 DrawLine(new Vector2(topR.Position.X, topR.End.Y), topR.End, new Color(0, 0, 0, 0.35f), 1);
                 DrawRect(topR, new Color(0, 0, 0, 0.25f), false, 1);

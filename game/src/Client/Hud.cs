@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Godot;
 using Rastvordd.Sim;
@@ -254,6 +254,50 @@ void fragment() {
         {
             c.Size = c.GetCombinedMinimumSize();
             c.Position = new Vector2((screen.X - c.Size.X) * ax, (screen.Y - c.Size.Y) * ay) + offset;
+        }
+
+        // ---------- ввод кода замка ----------
+        PanelContainer _codePanel;
+        LineEdit _codeEdit;
+        int _codeDoor;
+        public bool CodeOpen => _codePanel != null && _codePanel.Visible;
+        /// <summary>Игрок ввёл код: (id двери, код).</summary>
+        public event System.Action<int, int> CodeEntered;
+
+        public void ShowCode(int doorId)
+        {
+            if (_codePanel == null)
+            {
+                _codePanel = new PanelContainer { Visible = false };
+                AddChild(_codePanel);
+                var box = new VBoxContainer();
+                _codePanel.AddChild(box);
+                box.AddChild(new Label { Text = "Заперто. Код (4 цифры), Enter — ввести, Esc — отмена" });
+                _codeEdit = new LineEdit { MaxLength = 4, PlaceholderText = "____", Alignment = HorizontalAlignment.Center };
+                _codeEdit.AddThemeFontSizeOverride("font_size", 28);
+                box.AddChild(_codeEdit);
+                _codeEdit.TextSubmitted += txt =>
+                {
+                    if (int.TryParse(txt, out int code)) CodeEntered?.Invoke(_codeDoor, code);
+                    HideCode();
+                };
+                _codeEdit.GuiInput += e => { if (e is InputEventKey k && k.Pressed && k.Keycode == Key.Escape) HideCode(); };
+            }
+            _codeDoor = doorId;
+            _codeEdit.Text = "";
+            _codePanel.Visible = true;
+            var vs = GetViewport().GetVisibleRect().Size;
+            _codePanel.Size = _codePanel.GetCombinedMinimumSize();
+            _codePanel.Position = (vs - _codePanel.Size) / 2;
+            _codeEdit.GrabFocus();
+            Input.MouseMode = Input.MouseModeEnum.Visible;
+        }
+
+        void HideCode()
+        {
+            _codePanel.Visible = false;
+            _codeEdit.ReleaseFocus();
+            Input.MouseMode = Input.MouseModeEnum.Hidden;
         }
 
         public void Toast(string text)

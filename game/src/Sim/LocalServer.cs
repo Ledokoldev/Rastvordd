@@ -24,7 +24,7 @@ namespace Rastvordd.Sim
     public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; }
     public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; }
     public struct ThrownSnap { public int Id; public string ItemId; public Vector2 Pos; public float Z; public float Fuse; }
-    public struct StructSnap { public int Id; public StructKind Kind; public int I, J, Dir, Tier; public float Hp; public bool Open; }
+    public struct StructSnap { public int Id; public StructKind Kind; public int I, J, Dir, Tier; public float Hp; public bool Open; public bool Locked; }
 
     public struct BeltSlotInfo
     {
@@ -92,7 +92,7 @@ namespace Rastvordd.Sim
         public List<SimEvent> Events = new();
     }
 
-    public struct WallInfo { public Vector2 Min, Max; public float Height; public WallKind Kind; public int Tier; public bool Door; public int StructId; }
+    public struct WallInfo { public Vector2 Min, Max; public float Height; public WallKind Kind; public int Tier; public bool Door; public bool Locked; public int StructId; }
 
     public sealed class MapInfo
     {
@@ -206,13 +206,13 @@ namespace Rastvordd.Sim
             snap.StructVersion = World.StructVersion;
             foreach (var st in World.Structures)
                 if (Vector2.DistanceSquared(st.Center, me.Pos) < r2)
-                    snap.Structures.Add(new StructSnap { Id = st.Id, Kind = st.Kind, I = st.I, J = st.J, Dir = st.Dir, Tier = st.Tier, Hp = st.Hp / st.MaxHp, Open = st.Open });
+                    snap.Structures.Add(new StructSnap { Id = st.Id, Kind = st.Kind, I = st.I, J = st.J, Dir = st.Dir, Tier = st.Tier, Hp = st.Hp / st.MaxHp, Open = st.Open, Locked = st.Locked });
 
             foreach (var e in _eventsThisTick)
             {
                 bool mine = e.ActorId == me.Id || e.OtherId == me.Id;
                 bool personal = e.Kind is SimEventKind.Loot or SimEventKind.Gather or SimEventKind.Info
-                                       or SimEventKind.Crafted or SimEventKind.Placed;   // Built видят все рядом: слышно стройку
+                                       or SimEventKind.Crafted or SimEventKind.Placed or SimEventKind.Locked;   // Built видят все рядом: слышно стройку
                 if (personal && e.ActorId != me.Id) continue;
                 if (!mine && Vector2.DistanceSquared(e.Pos, me.Pos) > EventRadius * EventRadius) continue;
                 snap.Events.Add(e);
@@ -311,7 +311,7 @@ namespace Rastvordd.Sim
             World.InteractKind.Furnace => FurnaceHint((Deployable)it.target),
             World.InteractKind.Workbench => "[E] Верстак",
             World.InteractKind.Claim => ClaimHint(World, (Deployable)it.target),
-            World.InteractKind.Door => ((Structure)it.target).Open ? "[E] Закрыть дверь" : "[E] Открыть дверь",
+            World.InteractKind.Door => (((Structure)it.target).Open ? "[E] Закрыть дверь" : "[E] Открыть дверь") + (((Structure)it.target).Locked ? " · замок" : ""),
             _ => "",
         };
 

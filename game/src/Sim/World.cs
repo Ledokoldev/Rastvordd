@@ -366,6 +366,7 @@ namespace Rastvordd.Sim
                         if (a.Belt[k]?.Id is "deploy_claim" or "weapon_torch" or "tool_rock") a.Belt[k] = null;
                     a.Add("expl_c4", 10);
                     a.Add("expl_satchel", 10);
+                    a.Add("lock_code", 1);
                     Info(a, "Отладочный набор: взрывчатка");
                     return;
                 }
@@ -511,6 +512,7 @@ namespace Rastvordd.Sim
             bool sprint = false;
             var toAimDir = cmd.Aim - a.Pos;
             a.LastAim = cmd.Aim;
+            if (cmd.Code >= 0) EnterCode(a, cmd.CodeDoor, cmd.Code);
             if (cmd.Sprint && !a.Crouching && move.LengthSquared() > 0.01f && a.Peek < 0.3f && toAimDir.LengthSquared() > 0.01f)
             {
                 // спринт только вперёд: чем сильнее смотришь в сторону от бега, тем ближе к шагу
@@ -662,6 +664,14 @@ namespace Rastvordd.Sim
             bool trigger;
             if (held == null) { a.FireHeldLastTick = cmd.Fire; return; }
             var def = held.Def;
+
+            if (def.Lock)
+            {
+                trigger = cmd.Fire && !a.FireHeldLastTick;
+                a.FireHeldLastTick = cmd.Fire;
+                if (trigger) InstallLock(a);
+                return;
+            }
 
             if (def.Explosive != null)
             {

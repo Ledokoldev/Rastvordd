@@ -1142,7 +1142,16 @@ namespace Rastvordd.Sim
         /// <summary>Бот берёт из своего ящика только нужное (рукой: рядом и без стены между).</summary>
         public bool BotTake(Actor a, Deployable box, string id, int n)
         {
-            if (box.Storage == null || Vector2.Distance(a.Pos, box.Pos) > InteractRange || !ClearLine(a.Pos, box.Pos, null, true)) return false;
+            if (box.Storage == null || Vector2.Distance(a.Pos, box.Pos) > InteractRange) { LastInfo[a.Id] = $"ящик далеко {Vector2.Distance(a.Pos, box.Pos):0.0} м"; return false; }
+            if (!ClearLine(a.Pos, box.Pos, null, true)) { LastInfo[a.Id] = "ящик за стеной"; return false; }
+            int freePack = 0;
+            foreach (var p in a.Pack) if (p == null) freePack++;
+            if (freePack == 0 && a.Count(id) == 0)
+            {
+                var kinds = new List<string>();
+                foreach (var p in a.Pack) if (p != null && !kinds.Contains(p.Id)) kinds.Add(p.Id);
+                LastInfo[a.Id] = $"рюкзак полон: {string.Join(",", kinds)} · в ящике {box.Storage.Items.Count}/{BoxSlots}";
+            }
             int got = 0;
             for (int i = box.Storage.Items.Count - 1; i >= 0 && got < n; i--)
             {

@@ -838,7 +838,7 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            var tex = Art.Get(_kind switch { DeployKind.Workbench => "props/workbench", DeployKind.Claim => "props/claim_post", DeployKind.Box => "props/crate_wood", _ => "props/furnace" });
+            var tex = Art.Get(_kind switch { DeployKind.Workbench => "props/workbench", DeployKind.Claim => "props/claim_post", DeployKind.Box => "props/crate_wood", DeployKind.SleepBag => "props/sleeping_bag", _ => "props/furnace" });
             if (tex == null && _kind == DeployKind.Claim)
             {
                 // запасной вид столба: столб с жестяным ящиком и красной тряпкой

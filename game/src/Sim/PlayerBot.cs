@@ -247,19 +247,32 @@ namespace Rastvordd.Sim
                 float best = float.MaxValue;
                 foreach (var n in _w.NodesInRadius(_me.Pos, 70, _nodeBuf))
                 {
-                    if (n.Kind != kind) continue;
+                    if (n.Kind != kind || _badNodes.Contains(n)) continue;
                     if (_w.NearMonument(n.Pos, 22)) continue;
                     float d = Vector2.Distance(n.Pos, _me.Pos);
                     if (d < best) { best = d; _node = n; }
                 }
                 _nodeTimer = 20;
+                _nodeBest = float.MaxValue; _nodeNoProgress = 0;
                 if (_node == null) { Wander(ref cmd); return; }
+            }
+            // не можем подойти к узлу — в чёрный список, ищем другой
+            float nd = Vector2.Distance(_me.Pos, _node.Pos);
+            if (nd < _nodeBest - 0.3f) { _nodeBest = nd; _nodeNoProgress = 0; }
+            else if ((_nodeNoProgress += World.Dt) > 5f && nd > _node.Radius + 1.0f)
+            {
+                _badNodes.Add(_node);
+                if (_badNodes.Count > 40) _badNodes.Clear();
+                _node = null; _nodeBest = float.MaxValue; _nodeNoProgress = 0;
+                return;
             }
             if (!GoTo(_node.Pos, _node.Radius + 1.0f, ref cmd)) return;
             cmd.Aim = _node.Pos;
             if (Hold(tool, ref cmd)) cmd.Fire = true;
         }
         readonly List<ResourceNode> _nodeBuf = new();
+        readonly HashSet<ResourceNode> _badNodes = new();
+        float _nodeBest = float.MaxValue, _nodeNoProgress;
 
         Vector2 _wanderTo;
         void Wander(ref InputCmd cmd)
@@ -320,7 +333,7 @@ namespace Rastvordd.Sim
             {
                 Doing = "мёртв";
                 _deadTime += World.Dt;
-                if (_deadTime > 6) { cmd.Respawn = true; _deadTime = 0; _node = null; }
+                if (_deadTime > 6) { cmd.RespawnBag = _w.ReadyBag(_me) is Deployable b && _w.Time >= b.ReadyAt; cmd.Respawn = !cmd.RespawnBag; _deadTime = 0; _node = null; }
                 return cmd;
             }
 
@@ -450,6 +463,24 @@ namespace Rastvordd.Sim
                 cmd.Aim = CellC(1, 0) + new Vector2(0.12f, -0.12f);   // ящик радиусом 0,6 — не ближе 0,65 к стенам
                 if (Hold("deploy_box", ref cmd)) Click(ref cmd);
                 return;
+            }
+
+            // 7а. спальник дома: после смерти — проснуться у себя, а не на пляже
+            if (_w.ReadyBag(_me) == null)
+            {
+                if (!Has("deploy_sleepbag"))
+                {
+                    if (Craft("deploy_sleepbag", ref cmd)) return;
+                    if (_me.Count("cloth") < 30) { Doing = "собирает коноплю"; if (UsePickup(PickupKind.Hemp, ref cmd)) return; }
+                }
+                else
+                {
+                    Doing = "стелет спальник";
+                    if (!GoTo(CellC(0, 1) + new Vector2(0.3f, 0), 0.5f, ref cmd)) return;
+                    cmd.Aim = CellC(1, 1) + new Vector2(0.1f, 0.1f);
+                    if (Hold("deploy_sleepbag", ref cmd)) Click(ref cmd);
+                    return;
+                }
             }
 
             // 7б. замок с ключом на дверь (ключ остаётся в кармане; убьют — заберут и откроют)

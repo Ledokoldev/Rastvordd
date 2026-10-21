@@ -316,9 +316,23 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Как в Расте: просыпаешься голым на пляже с булыжником.</summary>
-        public void RespawnPlayer(Actor a)
+        public const float BagCooldown = 300f;
+
+        /// <summary>Свой спальник, в котором можно проснуться сейчас (null — нет или перезаряжается).</summary>
+        public Deployable ReadyBag(Actor a)
         {
-            a.Pos = PlayerSpawns[Rng.Next(PlayerSpawns.Count)];
+            Deployable best = null;
+            foreach (var d in Deployables)
+                if (d.Kind == DeployKind.SleepBag && d.OwnerId == a.Id && (best == null || d.ReadyAt < best.ReadyAt)) best = d;
+            return best;
+        }
+
+        public void RespawnPlayer(Actor a, bool inBag = false)
+        {
+            var bag = inBag ? ReadyBag(a) : null;
+            if (bag != null && Time < bag.ReadyAt) bag = null;
+            a.Pos = bag != null ? bag.Pos + new Vector2(0.9f, 0) : PlayerSpawns[Rng.Next(PlayerSpawns.Count)];
+            if (bag != null) bag.ReadyAt = Time + BagCooldown;
             a.Vel = Vector2.Zero;
             a.Hp = a.MaxHp;
             a.Food = 60;
@@ -488,7 +502,7 @@ namespace Rastvordd.Sim
                 if (a.Dead)
                 {
                     if (a.Team == Team.Npc && Time - a.DeadTime > NpcRespawnTime) RespawnNpc(a);
-                    else if (a.Team == Team.Player && cmd.Respawn) RespawnPlayer(a);
+                    else if (a.Team == Team.Player && (cmd.Respawn || cmd.RespawnBag)) RespawnPlayer(a, cmd.RespawnBag);
                     continue;
                 }
                 StepActor(a, cmd);
@@ -871,7 +885,7 @@ namespace Rastvordd.Sim
             if (Vector2.Distance(a.Pos, at) > PlaceRange) { Info(a, "Слишком далеко"); return; }
             if (!IsFree(at, 0.65f)) { Info(a, "Здесь не поставить"); return; }
             if (def.Deploy == DeployKind.Claim && !CanPlaceClaim(at, out string why)) { Info(a, $"Столб: {why}"); return; }
-            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = def.Deploy == DeployKind.Claim ? 0.3f : 0.6f };   // столб тонкий
+            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = def.Deploy is DeployKind.Claim or DeployKind.SleepBag ? 0.3f : 0.6f };   // столб тонкий, спальник плоский
             if (def.Deploy == DeployKind.Box) dep.Storage = new LootBag { Id = NextId(), Pos = at };
             dep.Auth.Add(a.Id);
             AddDeployable(dep);

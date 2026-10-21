@@ -55,7 +55,7 @@ namespace Rastvordd.Client
         readonly List<FloatText2D> _texts = new();
         GhostView2D _ghost;
 
-        bool _reloadEdge, _interactEdge, _healEdge, _respawnEdge, _eatEdge, _debugEdge;
+        bool _reloadEdge, _interactEdge, _healEdge, _respawnEdge, _eatEdge, _debugEdge, _bagEdge;
         int _slot = -1, _craftReq = -1;
         (int door, int code)? _codeReq;
         SVec _aim;
@@ -318,6 +318,7 @@ namespace Rastvordd.Client
                     case Key.E: _interactEdge = true; break;
                     case Key.H: _healEdge = true; break;
                     case Key.Enter: case Key.KpEnter: _respawnEdge = true; break;
+                    case Key.B: _bagEdge = true; break;
                     case Key.Key1: _slot = 0; break;
                     case Key.Key2: _slot = 1; break;
                     case Key.Key3: _slot = 2; break;
@@ -375,6 +376,7 @@ namespace Rastvordd.Client
                 Interact = _interactEdge,
                 Heal = _healEdge,
                 Respawn = _respawnEdge,
+                RespawnBag = _bagEdge,
                 SelectSlot = _slot,
                 Peek = _peek,
                 ToggleTime = _timeEdge,
@@ -456,7 +458,7 @@ namespace Rastvordd.Client
                 _server.Tick();
                 _simTime += (Time.GetTicksUsec() - t0) / 1000.0;
                 _cur = _server.BuildSnapshot(_myId);
-                _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = _timeEdge = false;
+                _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = _timeEdge = _bagEdge = false;
                 _slot = _craftReq = -1;
                 _codeReq = null;
                 if (_autoFireFrames > 0) _autoFireFrames--;

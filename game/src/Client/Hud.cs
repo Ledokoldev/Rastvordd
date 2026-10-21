@@ -390,6 +390,8 @@ void fragment() {
             }
 
             _deathRect.Visible = s.Dead;
+            if (s.Dead)
+                _deathLabel.Text = "ТЕБЯ УБИЛИ\nвесь лут остался на трупе\n\nEnter — проснуться на пляже" + (s.HasBag ? (s.BagReadyIn > 0 ? $"\nспальник будет готов через {s.BagReadyIn:0} с" : "\nB — проснуться в спальнике") : "");
 
             _toastTime -= dt;
             _toastLabel.Modulate = new Color(1, 1, 1, Mathf.Clamp(_toastTime, 0, 1));

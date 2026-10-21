@@ -15,6 +15,7 @@ namespace Rastvordd.Sim
         public bool Heal;
         public bool Eat;
         public bool Respawn;
+        public bool RespawnBag;   // проснуться в своём спальнике
         public bool DebugKit;
         public bool ToggleTime;   // отладка: день/ночь
         public bool Crouch;       // присед (зажат Alt)
@@ -87,7 +88,7 @@ namespace Rastvordd.Sim
     }
 
     public enum ItemCategory { Resource, Component, Tool, Weapon, Ammo, Food, Medical, Deployable }
-    public enum DeployKind { None, Workbench, Furnace, Claim, Box }
+    public enum DeployKind { None, Workbench, Furnace, Claim, Box, SleepBag }
 
     public sealed class ItemDef
     {
@@ -202,6 +203,7 @@ namespace Rastvordd.Sim
 
             // устанавливаемое
             Add("deploy_workbench", "Верстак", ItemCategory.Deployable).Deploy = DeployKind.Workbench;
+            Add("deploy_sleepbag", "Спальник", ItemCategory.Deployable).Deploy = DeployKind.SleepBag;
             Add("deploy_box", "Ящик", ItemCategory.Deployable).Deploy = DeployKind.Box;
             Add("deploy_claim", "Межевой столб", ItemCategory.Deployable).Deploy = DeployKind.Claim;   // центр базы: зона, бюджет, содержание
             Add("deploy_furnace", "Печь", ItemCategory.Deployable).Deploy = DeployKind.Furnace;
@@ -241,6 +243,7 @@ namespace Rastvordd.Sim
             new Recipe { Output = "tool_hatchet", Cost = new[] { ("wood", 200), ("stone", 100) }, Time = 6 },
             new Recipe { Output = "tool_pickaxe", Cost = new[] { ("wood", 200), ("stone", 100) }, Time = 6 },
             new Recipe { Output = "weapon_spear", Cost = new[] { ("wood", 300) }, Time = 5 },
+            new Recipe { Output = "deploy_sleepbag", Cost = new[] { ("cloth", 30) }, Time = 3 },
             new Recipe { Output = "deploy_box", Cost = new[] { ("wood", 100) }, Time = 3 },
             new Recipe { Output = "deploy_claim", Cost = new[] { ("wood", 100) }, Time = 3 },
             new Recipe { Output = "expl_satchel", Cost = new[] { ("cloth", 10), ("gunpowder", 30), ("metal_fragments", 20) }, Time = 4, Bench = 1 },
@@ -445,6 +448,9 @@ namespace Rastvordd.Sim
 
         // ящик: хранилище (открыт всем — рейдер заберёт)
         public LootBag Storage;
+
+        // спальник: после возрождения в нём — перезарядка
+        public float ReadyAt;
         public bool Burning => Fuel > 0 && (Ore > 0 || SulfurOre > 0);
     }
 

@@ -30,7 +30,7 @@ namespace Rastvordd.Sim
         public sealed class DeployS
         {
             public int Id, Kind, OwnerId, Ore, SulfurOre, OutMetal, OutSulfur, OutCharcoal;
-            public float X, Y, Hp, Fuel, Grace;
+            public float X, Y, Hp, Fuel, Grace, ReadyAt;
             public List<int> Auth = new();
             public Dictionary<string, float> Store = new();
             public List<SlotS> Storage;
@@ -81,7 +81,7 @@ namespace Rastvordd.Sim
                 var ds = new WorldSave.DeployS
                 {
                     Id = d.Id, Kind = (int)d.Kind, OwnerId = d.OwnerId, X = d.Pos.X, Y = d.Pos.Y, Hp = d.Hp,
-                    Ore = d.Ore, SulfurOre = d.SulfurOre, Fuel = d.Fuel, OutMetal = d.OutMetal, OutSulfur = d.OutSulfur, OutCharcoal = d.OutCharcoal, Grace = d.Grace,
+                    Ore = d.Ore, SulfurOre = d.SulfurOre, Fuel = d.Fuel, OutMetal = d.OutMetal, OutSulfur = d.OutSulfur, OutCharcoal = d.OutCharcoal, Grace = d.Grace, ReadyAt = d.ReadyAt - Time,
                 };
                 ds.Auth.AddRange(d.Auth);
                 foreach (var kv in d.Store) ds.Store[kv.Key] = kv.Value;
@@ -130,7 +130,7 @@ namespace Rastvordd.Sim
                 var d = new Deployable
                 {
                     Id = ds.Id, Kind = (DeployKind)ds.Kind, OwnerId = ds.OwnerId, Pos = new Vector2(ds.X, ds.Y), Hp = ds.Hp,
-                    Ore = ds.Ore, SulfurOre = ds.SulfurOre, Fuel = ds.Fuel, OutMetal = ds.OutMetal, OutSulfur = ds.OutSulfur, OutCharcoal = ds.OutCharcoal, Grace = ds.Grace,
+                    Ore = ds.Ore, SulfurOre = ds.SulfurOre, Fuel = ds.Fuel, OutMetal = ds.OutMetal, OutSulfur = ds.OutSulfur, OutCharcoal = ds.OutCharcoal, Grace = ds.Grace, ReadyAt = Time + ds.ReadyAt,
                 };
                 foreach (var id in ds.Auth) d.Auth.Add(id);
                 foreach (var kv in ds.Store) d.Store[kv.Key] = kv.Value;

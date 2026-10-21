@@ -69,6 +69,8 @@ namespace Rastvordd.Sim
         public bool BuildOk;
         public string Place;            // РТ, на котором стоишь
         public Vector2? Home;           // твой межевой столб (для карты)
+        public bool HasBag;             // есть свой спальник
+        public float BagReadyIn;        // секунд до готовности спальника
         public bool HasZone;            // зона столба под курсором (клетка столба, радиус World.ClaimRadius)
         public (int i, int j) ZoneCell;
         public BeltSlotInfo?[] Belt = new BeltSlotInfo?[Actor.BeltSize];
@@ -242,6 +244,9 @@ namespace Rastvordd.Sim
             snap.Self = BuildSelf(me);
             snap.Self.Place = World.MonumentAt(me.Pos)?.Name;
             foreach (var d in World.Deployables) if (d.Kind == DeployKind.Claim && d.Auth.Contains(me.Id)) { snap.Self.Home = d.Pos; break; }
+            var myBag = World.ReadyBag(me);
+            snap.Self.HasBag = myBag != null;
+            snap.Self.BagReadyIn = myBag != null ? System.Math.Max(0, myBag.ReadyAt - World.Time) : 0;
             if (me.Held?.Def?.Build == true && World.ClaimAt(Building.CellOf(me.LastAim)) is Deployable zc) { snap.Self.ZoneCell = Building.CellOf(zc.Pos); snap.Self.HasZone = true; }
             float r2 = WorldViewRadius * WorldViewRadius;
 

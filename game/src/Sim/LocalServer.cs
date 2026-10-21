@@ -194,6 +194,15 @@ namespace Rastvordd.Sim
             }
         }
 
+        public Vector2 BotHome(int index)
+        {
+            int i = 0;
+            foreach (var b in _bots.Values)
+                if (i++ == index)
+                    foreach (var d in World.Deployables) if (d.Kind == DeployKind.Claim && d.OwnerId == b.Me.Id) return d.Pos;
+            return BotPos(index);
+        }
+
         public Vector2 BotPos(int index) { int i = 0; foreach (var b in _bots.Values) if (i++ == index) return b.Me.Pos; return Vector2.Zero; }
 
         public string BotLabel(int actorId) => _bots.TryGetValue(actorId, out var b) ? $"{b.Me.Name}: {b.Doing}" : null;

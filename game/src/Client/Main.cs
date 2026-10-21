@@ -128,7 +128,8 @@ namespace Rastvordd.Client
                 var p = st.Substring(10).Split(',');
                 _server.FastForward(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), s => GD.Print(s), _myId);
                 var me = _server.World.Find(_myId);
-                me.Pos = _server.BotPos(p.Length > 1 ? int.Parse(p[1]) : 0) + new SVec(-3, 2);
+                int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
+                me.Pos = (p.Length > 2 && p[2] == "home" ? _server.BotHome(bi) + new SVec(1, 6) : _server.BotPos(bi) + new SVec(-3, 2));
                 me.Dead = false; me.Hp = me.MaxHp;
             }
             if (loaded) CallDeferred(nameof(ToastLoaded));

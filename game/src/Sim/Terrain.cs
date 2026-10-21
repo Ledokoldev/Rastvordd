@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Numerics;
 
 namespace Rastvordd.Sim
@@ -61,12 +61,13 @@ namespace Rastvordd.Sim
                 else if (h < 0.09f) b = Biome.Beach;
                 else
                 {
-                    // широта с шумом: север (y < 0) холодный, юг сухой
-                    float lat = p.Y / HalfSize + _climate.Fbm(p / 110f, 3) * 0.35f;
-                    if (lat < -0.42f) b = Biome.Tundra;
-                    else if (lat > 0.45f) b = Biome.Arid;
-                    else if (_wet.Fbm(p / 45f, 3) > 0.33f && h < 0.45f) b = Biome.Swamp;
-                    else b = _forest.Fbm(p / 55f, 3) > 0.05f ? Biome.Forest : Biome.Grassland;
+                    // биомы пятнами (D25): крупный «климат» даёт холодные и сухие пятна по всему острову,
+                    // внутри умеренной зоны — болота в низинах, леса и поля
+                    float clim = _climate.Fbm(p / 210f, 3) + _climate.Fbm(p / 70f + new Vector2(31, 17), 2) * 0.25f;
+                    if (clim < -0.13f) b = Biome.Tundra;
+                    else if (clim > 0.15f) b = Biome.Arid;
+                    else if (_wet.Fbm(p / 60f, 3) > 0.2f && h < 0.6f) b = Biome.Swamp;
+                    else b = _forest.Fbm(p / 75f, 3) > 0.02f ? Biome.Forest : Biome.Grassland;
                 }
                 Biomes[y * N + x] = b;
             }

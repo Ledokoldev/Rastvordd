@@ -305,7 +305,7 @@ namespace Rastvordd.Sim
             float dl = toAim.Length();
             var hit = dl > 0.05f ? a.Pos + toAim / dl * MathF.Min(dl, reach + 0.3f) : a.Pos + a.FacingDir * MathF.Min(reach, 1.3f);
             Structure best = null;
-            float bestD = 1.25f;
+            float bestD = 0.75f;   // дальше от ребра — значит целимся в пол (фундамент)
             var (i, j, dir) = Building.NearestEdge(hit);
             foreach (var key in new[] { (i, j, dir) })
             {

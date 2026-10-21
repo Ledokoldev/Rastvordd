@@ -27,7 +27,7 @@ namespace Rastvordd.Sim
     public sealed partial class World
     {
         public const float Dt = 1f / 30f;
-        public const float HalfSize = 200f;
+        public const float HalfSize = 500f;   // остров 1×1 км (шаг к 2×2 км, D25)
         public const float WalkSpeed = 4.5f;
         public const float SprintSpeed = 6.8f;
         public const float Accel = 40f;

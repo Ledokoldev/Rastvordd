@@ -566,6 +566,17 @@ namespace Rastvordd.Client
 
     public partial class WallView2D
     {
+        /// <summary>Лицевая и верхняя текстуры построенной стены по уровню (дверь — свои).</summary>
+        public static (Texture2D front, Texture2D top) BuiltTextures(int tier, bool door) => door
+            ? (Art.Get(tier >= 3 ? "walls/wallface_door_metal" : "walls/wallface_door_wood") ?? Art.Get("walls/wallface_wood"), Art.Get("tiles/floor_wood"))
+            : tier switch
+            {
+                0 => (Art.Get("walls/wallface_twig"), Art.Get("tiles/floor_wood")),
+                1 => (Art.Get("walls/wallface_wood"), Art.Get("tiles/floor_wood")),
+                2 => (Art.Get("walls/wallface_stone"), Art.Get("tiles/ground_gravel")),
+                _ => (Art.Get("walls/wallface_metal"), Art.Get("tiles/ground_concrete")),
+            };
+
         /// <summary>Закрывает ли стена персонажа, стоящего ногами в feet (он позади неё).</summary>
         public bool Covers(Vector2 feet)
         {

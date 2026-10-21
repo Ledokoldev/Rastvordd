@@ -73,7 +73,12 @@ namespace Rastvordd.Client
             // постройки: фундаменты — светлые клетки, стены — линии
             foreach (var s in _structs)
             {
-                if (s.Kind == StructKind.Foundation)
+                if (s.Kind == StructKind.TriFoundation)
+                {
+                    var tri = new[] { P(s.A), P(s.B), P(s.C) };
+                    if (box.HasPoint(tri[0]) && box.HasPoint(tri[1]) && box.HasPoint(tri[2])) DrawColoredPolygon(tri, new Color(0.42f, 0.34f, 0.26f, 0.95f));
+                }
+                else if (s.Kind == StructKind.Foundation)
                 {
                     var a = P(new SVec(s.I * Building.Cell, s.J * Building.Cell));
                     var r = new Rect2(a, new Vector2(Building.Cell * k, Building.Cell * k));
@@ -81,9 +86,7 @@ namespace Rastvordd.Client
                 }
                 else if (s.Kind != StructKind.Door)
                 {
-                    var e = Building.EdgeCenter(s.I, s.J, s.Dir);
-                    var half = s.Dir == 0 ? new SVec(Building.Cell / 2, 0) : new SVec(0, Building.Cell / 2);
-                    var a = P(e - half); var b = P(e + half);
+                    var a = P(s.A); var b = P(s.B);
                     if (box.HasPoint(a) && box.HasPoint(b)) DrawLine(a, b, new Color(0.12f, 0.1f, 0.08f), 2f);
                 }
             }

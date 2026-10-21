@@ -15,21 +15,19 @@ namespace Rastvordd.Client
         /// <summary>Постройка под точкой (метры): сначала дверь/стена у ближайшего ребра, потом фундамент.</summary>
         public static StructSnap? Pick(List<StructSnap> all, SVec p)
         {
-            var (i, j, dir) = Building.NearestEdge(p);
-            float d = dir == 0 ? Mathf.Abs(p.Y - j * Building.Cell) : Mathf.Abs(p.X - i * Building.Cell);
-            if (d < 0.5f)
+            StructSnap? frame = null;
+            float best = 0.5f;
+            foreach (var s in all)
             {
-                StructSnap? frame = null;
-                foreach (var s in all)
-                    if (s.Kind != StructKind.Foundation && s.I == i && s.J == j && s.Dir == dir)
-                    {
-                        if (s.Kind == StructKind.Door) return s;
-                        frame = s;
-                    }
-                if (frame != null) return frame;
+                if (Building.IsFloor(s.Kind)) continue;
+                float d = Building.SegDist(p, s.A, s.B);
+                if (s.Kind == StructKind.Door && d < 0.5f) return s;
+                if (d < best) { best = d; frame = s; }
             }
+            if (frame != null) return frame;
             var (ci, cj) = Building.CellOf(p);
-            foreach (var s in all) if (s.Kind == StructKind.Foundation && s.I == ci && s.J == cj) return s;
+            foreach (var s in all)
+                if ((s.Kind == StructKind.Foundation && s.I == ci && s.J == cj) || (s.Kind == StructKind.TriFoundation && Building.PointInPoly(p, s.Poly))) return s;
             return null;
         }
 

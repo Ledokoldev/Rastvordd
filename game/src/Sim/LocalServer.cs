@@ -37,7 +37,14 @@ namespace Rastvordd.Sim
     }
     public struct FireSnap { public int Id; public Vector2 Pos; public float Radius, Left; }
     public struct ThrownSnap { public int Id; public string ItemId; public Vector2 Pos; public float Z; public float Fuse; }
-    public struct StructSnap { public int Id; public StructKind Kind; public int I, J, Dir, Tier; public float Hp; public bool Open; public bool Locked; public bool Seen; }   // Seen = видна сейчас, иначе запомнена
+    public struct StructSnap
+    {
+        public int Id; public StructKind Kind; public int I, J, Dir, Tier; public float Hp; public bool Open; public bool Locked;
+        public bool Seen;                // видна сейчас, иначе запомнена
+        public Vector2 A, B, C;          // ребро A–B; треугольник A, B, C
+        public Vector2 Center => Building.Center(Kind, I, J, A, B, C);
+        public Vector2[] Poly => Kind == StructKind.Foundation ? Building.SquarePoly(I, J) : new[] { A, B, C };
+    }
 
     public struct BeltSlotInfo
     {
@@ -81,6 +88,8 @@ namespace Rastvordd.Sim
         public bool HoldingPlan;        // план постройки: призрак элемента под курсором
         public StructKind BuildPiece;    // выбранный элемент
         public StructKind GhostPiece;    // что поставится под курсором (на фундаменте — стена, на проёме — дверь)
+        public Vector2[] GhostPoly;      // призрак пола (квадрат или треугольник)
+        public Vector2 GhostA, GhostB;   // призрак ребра
         public bool BuildOk;
         public string Place;            // РТ, на котором стоишь
         public Vector2? Home;           // твой межевой столб (для карты)
@@ -320,9 +329,10 @@ namespace Rastvordd.Sim
             snap.Self.Ui = World.BuildUi(me);
             if (!me.Dead && me.Held?.Id is "build_plan" or "tool_hammer" or "deploy_claim") snap.Self.BuildGuide = BuildGuide(me);
             if (!me.Dead && me.Held?.Def?.Build == true)
-                for (int k = 0; k <= (int)StructKind.Door; k++)
+                foreach (var pk in Building.PieceOrder)
                 {
-                    var cost = Building.Cost((StructKind)k, k == (int)StructKind.Door ? 1 : 0);
+                    int k = (int)pk;
+                    var cost = Building.Cost(pk, pk == StructKind.Door ? 1 : 0);
                     snap.Self.BuildPieces.Add((k, Building.KindName((StructKind)k), string.Join(", ", System.Array.ConvertAll(cost, c => $"{Items.Name(c.id)} {c.n}")), System.Array.TrueForAll(cost, c => me.Count(c.id) >= c.n)));
                 }
             snap.Self.OpenCraft = me.WantsCraftMenu;
@@ -397,14 +407,13 @@ namespace Rastvordd.Sim
                 if (Vector2.DistanceSquared(st.Center, me.Pos) >= r2) continue;
                 aliveS.Add(st.Id);
                 bool seen = me.Spectator || !me.Dead && (World.IsOwnBase(me, st) || World.SeesStructure(me, st, vr, vc));
-                if (seen) smem[st.Id] = new StructSnap { Id = st.Id, Kind = st.Kind, I = st.I, J = st.J, Dir = st.Dir, Tier = st.Tier, Hp = st.Hp / st.MaxHp, Open = st.Open, Locked = st.Locked, Seen = true };
+                if (seen) smem[st.Id] = new StructSnap { Id = st.Id, Kind = st.Kind, I = st.I, J = st.J, Dir = st.Dir, Tier = st.Tier, Hp = st.Hp / st.MaxHp, Open = st.Open, Locked = st.Locked, Seen = true, A = st.A, B = st.B, C = st.C };
                 else if (smem.TryGetValue(st.Id, out var old)) { old.Seen = false; smem[st.Id] = old; }
             }
-            Forget(smem, aliveS, id => smem[id].Kind == StructKind.Foundation ? Building.CellCenter(smem[id].I, smem[id].J) : Building.EdgeCenter(smem[id].I, smem[id].J, smem[id].Dir), me, vr, vc);
+            Forget(smem, aliveS, id => smem[id].Center, me, vr, vc);
             foreach (var st in smem.Values)
             {
-                var c = st.Kind == StructKind.Foundation ? Building.CellCenter(st.I, st.J) : Building.EdgeCenter(st.I, st.J, st.Dir);
-                if (Vector2.DistanceSquared(c, me.Pos) < r2) snap.Structures.Add(st);
+                if (Vector2.DistanceSquared(st.Center, me.Pos) < r2) snap.Structures.Add(st);
             }
 
             foreach (var e in _eventsThisTick)
@@ -494,6 +503,7 @@ namespace Rastvordd.Sim
                 s.BuildPiece = me.BuildPiece;
                 var ghost = World.EffectivePiece(me, me.LastAim);
                 s.GhostPiece = ghost;
+                (s.GhostPoly, s.GhostA, s.GhostB) = World.GhostOf(ghost, me.LastAim);
                 s.BuildOk = World.CanBuild(me, ghost, me.LastAim, out string why);
                 var cost = Building.Cost(ghost, ghost == StructKind.Door ? 1 : 0);
                 string price = string.Join(", ", System.Array.ConvertAll(cost, c => $"{Items.Name(c.id)} {c.n}"));
@@ -545,7 +555,7 @@ namespace Rastvordd.Sim
                     if (s.Tier == 0) weak++;
                     switch (s.Kind)
                     {
-                        case StructKind.Foundation: found++; break;
+                        case StructKind.Foundation: case StructKind.TriFoundation: found++; break;
                         case StructKind.Wall: case StructKind.Window: walls++; break;
                         case StructKind.Doorway: doorways++; break;
                         case StructKind.Door: doors++; if (s.Locked) locked++; break;

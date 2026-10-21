@@ -106,6 +106,7 @@ namespace Rastvordd.Client
                 else if (a == "release") _autoFireFrames = 0;
                 else if (a == "craftmenu") _hud.ToggleCraft();
                 else if (a == "tech") _hud.OpenTech();
+                else if (a.StartsWith("piece")) _setPiece = int.Parse(a.Substring(5));   // отладка: элемент плана (5 — треугольник)
                 else if (a == "rec") foreach (var d in _server.World.Deployables) { if (d.Kind == DeployKind.Recycler) GD.Print($"рециклер {d.Pos}: on={d.On} [{string.Join(", ", d.Storage.Items.ConvertAll(x => x.Id + "×" + x.Count))}] · у меня шестерни {_server.World.Find(_myId).Count("comp_gears")}"); }   // отладка
                 else if (a == "peace") { foreach (var n in _server.World.Actors) if (n.Team == Team.Npc) { n.Dead = true; n.DeadTime = _server.World.Time; } }   // отладка: охрана РТ «спит»
                 else if (a.StartsWith("speckey")) SpectatorKey(a.Substring(7) switch { "tab" => Key.Tab, "f" => Key.F, "2" => Key.Key2, "3" => Key.Key3, "4" => Key.Key4, _ => Key.Key1 });   // отладка: клавиши наблюдателя
@@ -442,7 +443,7 @@ else if (arg == "--atcrate")
                 // с Планом колесо листает элементы стройки (Ctrl+колесо — зум), иначе — зум
                 bool plan = _cur?.Self != null && _cur.Self.HoldingPlan && !mb.CtrlPressed;
                 if (plan && mb.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown)
-                    _setPiece = ((int)_cur.Self.BuildPiece + (mb.ButtonIndex == MouseButton.WheelDown ? 1 : 4)) % 5;
+                    _setPiece = (int)Building.NextPiece(_cur.Self.BuildPiece, mb.ButtonIndex == MouseButton.WheelDown ? 1 : -1);
                 else if (mb.ButtonIndex == MouseButton.WheelUp) _zoom = Mathf.Min(2.6f, _zoom * 1.1f);
                 else if (mb.ButtonIndex == MouseButton.WheelDown) _zoom = Mathf.Max(0.9f, _zoom / 1.1f);
             }
@@ -1146,7 +1147,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             _build.UpdateFade(_selfPx, dt);
             if (_bghost == null) { _bghost = new BuildGhost2D(); _world.AddChild(_bghost); }
             _bghost.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_hud.CraftOpen;
-            if (_bghost.Visible) { _bghost.Set(_cur.Self.GhostPiece, _aim, _cur.Self.BuildOk); _bghost.SetZone(_cur.Self.HasZone, _cur.Self.ZoneCell); }
+            if (_bghost.Visible) { _bghost.Set(_cur.Self.GhostPiece, _cur.Self.GhostPoly, _cur.Self.GhostA, _cur.Self.GhostB, _cur.Self.BuildOk); _bghost.SetZone(_cur.Self.HasZone, _cur.Self.ZoneCell); }
 
             // призрак установки
             var self = _cur.Self;

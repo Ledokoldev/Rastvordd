@@ -8,13 +8,13 @@ namespace Rastvordd.Client
     public partial class BuildBar : Control
     {
         const float C = 40, Gap = 4;
-        static readonly string[] IconIds = { "foundation", "wall", "doorway", "window", "door" };
+        static readonly string[] IconIds = { "foundation", "wall", "doorway", "window", "door", "triangle" };   // по номеру вида
         int _sel = -1, _ghost = -1;
 
         public BuildBar()
         {
             MouseFilter = MouseFilterEnum.Ignore;
-            CustomMinimumSize = new Vector2(5 * C + 4 * Gap, C + 20);
+            CustomMinimumSize = new Vector2(6 * C + 5 * Gap, C + 20);
         }
 
         public void Set(int selected, int ghost)
@@ -26,14 +26,15 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            float w = 5 * C + 4 * Gap;
+            float w = 6 * C + 5 * Gap;
             string cap = $"{Rastvordd.Sim.Building.KindName((Rastvordd.Sim.StructKind)_sel)}   ·   зажми ПКМ — колесо";
             var fs = UiTheme.Text.GetStringSize(cap, HorizontalAlignment.Left, -1, 12);
             DrawString(UiTheme.Text, new Vector2((w - fs.X) / 2 + 1, 13), cap, HorizontalAlignment.Left, -1, 12, new Color(0, 0, 0, 0.8f));
             DrawString(UiTheme.Text, new Vector2((w - fs.X) / 2, 12), cap, HorizontalAlignment.Left, -1, 12, UiTheme.Ink);
-            for (int k = 0; k < 5; k++)
+            for (int slot = 0; slot < Rastvordd.Sim.Building.PieceOrder.Length; slot++)
             {
-                var r = new Rect2(k * (C + Gap), 20, C, C);
+                int k = (int)Rastvordd.Sim.Building.PieceOrder[slot];
+                var r = new Rect2(slot * (C + Gap), 20, C, C);
                 DrawRect(r, new Color(0.07f, 0.07f, 0.07f, 0.75f));
                 var icon = Art.Get($"icons/icon_build_{IconIds[k]}");
                 if (icon != null) DrawTextureRect(icon, r.Grow(-4), false, k == _sel || k == _ghost ? Colors.White : new Color(1, 1, 1, 0.45f));
@@ -51,13 +52,14 @@ namespace Rastvordd.Client
     {
         public event Action<int> Picked;
         const float Outer = 160, Inner = 58, IconR = 110, IconSize = 58;
-        static readonly string[] IconIds = { "foundation", "wall", "doorway", "window", "door" };
+        static readonly string[] IconIds = { "foundation", "wall", "doorway", "window", "door", "triangle" };   // по номеру вида
         static readonly Dictionary<string, string> Hints = new()
         {
             ["Фундамент"] = "пол 2×2 м, с него всё начинается",
             ["Стена"] = "на край фундамента",
             ["Дверной проём"] = "стена с проходом под дверь",
             ["Окно"] = "видно и можно стрелять",
+            ["Треугольный фундамент"] = "к любому свободному краю пола",
             ["Дверь"] = "в дверной проём",
         };
         List<(int kind, string name, string cost, bool can)> _pieces = new();

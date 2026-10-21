@@ -1468,6 +1468,12 @@
    "cat": "props",
    "h": 0.9,
    "desc": "a heavy steel safe box with a card reader panel and a thick door, painted dark grey with worn edges"
+  },
+  {
+   "id": "icon_build_triangle",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a triangular wooden floor foundation slab (equilateral triangle shape) made of planks on a low frame, seen from above at an angle"
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

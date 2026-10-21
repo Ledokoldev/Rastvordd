@@ -656,7 +656,7 @@ namespace Rastvordd.Sim
             if (cmd.Interact) Interact(a);
             StepUi(a, cmd);
             DropOverflow(a);
-            if (cmd.SetPiece >= 0 && cmd.SetPiece <= (int)StructKind.Door) a.BuildPiece = (StructKind)cmd.SetPiece;
+            if (cmd.SetPiece >= 0 && cmd.SetPiece <= (int)StructKind.TriFoundation) a.BuildPiece = (StructKind)cmd.SetPiece;
         }
 
         void ResolveCollisions(Actor a)
@@ -814,7 +814,7 @@ namespace Rastvordd.Sim
             if (def.Build)
             {
                 // план постройки: R — следующий элемент, ЛКМ — поставить
-                if (cmd.Reload) a.BuildPiece = (StructKind)(((int)a.BuildPiece + 1) % 5);
+                if (cmd.Reload) a.BuildPiece = Building.NextPiece(a.BuildPiece);
                 trigger = cmd.Fire && !a.FireHeldLastTick;
                 a.FireHeldLastTick = cmd.Fire;
                 if (trigger) TryBuild(a, cmd.Aim);

@@ -54,7 +54,7 @@ namespace Rastvordd.Sim
                 foreach (var s in new List<Structure>(Structures))
                 {
                     if (s.Tier > 1) continue;
-                    float dist = s.IsEdge ? DistToEdge(s, f.Pos) : Vector2.Distance(Building.CellCenter(s.I, s.J), f.Pos) - 0.8f;
+                    float dist = s.IsEdge ? DistToEdge(s, f.Pos) : Vector2.Distance(s.Center, f.Pos) - 0.8f;
                     if (dist < f.Radius) DamageStructure(s, (s.Tier == 0 ? 6f : 9f) * Dt, f.OwnerId);
                 }
                 foreach (var a in Actors)
@@ -128,6 +128,13 @@ namespace Rastvordd.Sim
             }
         }
 
+        static float MinPolyDist(Vector2 p, Vector2[] poly)
+        {
+            float d = float.MaxValue;
+            for (int i = 0; i < poly.Length; i++) d = MathF.Min(d, Building.SegDist(p, poly[i], poly[(i + 1) % poly.Length]));
+            return d;
+        }
+
         void Explode(Thrown t)
         {
             var ex = Items.Get(t.ItemId).Explosive;
@@ -139,11 +146,11 @@ namespace Rastvordd.Sim
                 if (s.IsEdge)
                 {
                     dist = float.MaxValue;
-                    foreach (var (min, max, _, _) in Building.Boxes(s.Kind, s.I, s.J, s.Dir, s.Open))
+                    foreach (var (min, max, _, _) in Building.Boxes(s.Kind, s.A, s.B, s.Open))
                         dist = MathF.Min(dist, Vector2.Distance(Vector2.Clamp(t.Pos, min, max), t.Pos));
                     if (s.Boxes.Count == 0) dist = Vector2.Distance(s.Center, t.Pos);
                 }
-                else dist = Vector2.Distance(Vector2.Clamp(t.Pos, new Vector2(s.I, s.J) * Building.Cell, new Vector2(s.I + 1, s.J + 1) * Building.Cell), t.Pos) + 0.6f;
+                else dist = Building.PointInPoly(t.Pos, s.Poly) ? 0.6f : MinPolyDist(t.Pos, s.Poly) + 0.6f;
                 if (dist > r) continue;
                 float fall = 1f - 0.5f * dist / r;
                 DamageStructure(s, ex.Damage * fall * BlastTierMult[Math.Clamp(s.Tier, 0, 4)], t.OwnerId);

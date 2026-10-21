@@ -15,6 +15,7 @@ namespace Rastvordd.Client
         readonly Dictionary<int, (StructSnap snap, List<Node2D> views)> _items = new();
         readonly HashSet<int> _seen = new();
         public readonly List<WallView2D> Walls = new();
+        public readonly List<SlantWallView2D> Slants = new();
         public readonly List<WallInfo> Occluders = new();
         int _version = -1;
 
@@ -53,7 +54,7 @@ namespace Rastvordd.Client
 
         void Free(List<Node2D> views)
         {
-            foreach (var v in views) { if (v is WallView2D w) Walls.Remove(w); v.QueueFree(); }
+            foreach (var v in views) { if (v is WallView2D w) Walls.Remove(w); if (v is SlantWallView2D sw) Slants.Remove(sw); v.QueueFree(); }
         }
 
         /// <summary>Туман войны: постройка не в обзоре — серая, «как запомнил».</summary>
@@ -80,9 +81,15 @@ namespace Rastvordd.Client
                 _world.AddChild(f);
                 views.Add(f);
             }
-            else
+            else if (s.Kind == StructKind.TriFoundation)
             {
-                foreach (var (min, max, h, _) in Building.Boxes(s.Kind, s.I, s.J, s.Dir, s.Open))
+                var f = new TriFloorView2D(s.A, s.B, s.C, s.Tier);
+                _world.AddChild(f);
+                views.Add(f);
+            }
+            else if (System.MathF.Abs(s.A.X - s.B.X) < 0.01f || System.MathF.Abs(s.A.Y - s.B.Y) < 0.01f)
+            {
+                foreach (var (min, max, h, _) in Building.Boxes(s.Kind, s.A, s.B, s.Open))
                 {
                     var w = new WallView2D(new WallInfo { Min = min, Max = max, Height = h, Kind = WallKind.Built, Tier = s.Tier, Door = s.Kind == StructKind.Door, Locked = s.Locked, StructId = s.Id });
                     _world.AddChild(w);
@@ -90,24 +97,46 @@ namespace Rastvordd.Client
                     Walls.Add(w);
                 }
             }
+            else
+            {
+                // наклонное ребро (треугольник): каждая часть — гладкая призма
+                foreach (var (t0, t1, h, _) in Building.Spans(s.Kind, s.Open))
+                {
+                    var w = new SlantWallView2D(SVec.Lerp(s.A, s.B, t0), SVec.Lerp(s.A, s.B, t1), h, s.Tier, s.Kind == StructKind.Door);
+                    _world.AddChild(w);
+                    views.Add(w);
+                    Slants.Add(w);
+                }
+            }
             SetDamage(views, s.Hp);
             return views;
         }
 
         readonly HashSet<(int, int)> _floors = new();
+        readonly List<SVec[]> _triFloors = new();
 
         /// <summary>Точка на полу (фундаменте) постройки.</summary>
-        public bool OnFloor(SVec p) => _floors.Contains(Building.CellOf(p));
+        public bool OnFloor(SVec p)
+        {
+            if (_floors.Contains(Building.CellOf(p))) return true;
+            foreach (var t in _triFloors) if (Building.PointInPoly(p, t)) return true;
+            return false;
+        }
 
         void RebuildOccluders()
         {
             _floors.Clear();
-            foreach (var (snap, _) in _items.Values) if (snap.Kind == StructKind.Foundation) _floors.Add((snap.I, snap.J));
+            _triFloors.Clear();
+            foreach (var (snap, _) in _items.Values)
+            {
+                if (snap.Kind == StructKind.Foundation) _floors.Add((snap.I, snap.J));
+                else if (snap.Kind == StructKind.TriFoundation) _triFloors.Add(snap.Poly);
+            }
             Occluders.Clear();
             Acoustics.DynamicWalls.Clear();
             foreach (var (snap, _) in _items.Values)
-                if (snap.Kind != StructKind.Foundation)
-                    foreach (var (min, max, h, pass) in Building.Boxes(snap.Kind, snap.I, snap.J, snap.Dir, snap.Open))
+                if (!Building.IsFloor(snap.Kind))
+                    foreach (var (min, max, h, pass) in Building.Boxes(snap.Kind, snap.A, snap.B, snap.Open))
                     {
                         Occluders.Add(new WallInfo { Min = min, Max = max, Height = h, Kind = WallKind.Built });
                         if (!pass) Acoustics.DynamicWalls.Add((min, max));
@@ -118,10 +147,15 @@ namespace Rastvordd.Client
         public void UpdateFade(Vector2 selfPx, float dt)
         {
             // внутри дома (стоим на фундаменте) — стены ниже по экрану поблизости срезаются
-            var (ci, cj) = Building.CellOf(new SVec(selfPx.X / Iso.PPM, selfPx.Y / Iso.PPM));
-            bool inside = _floors.Contains((ci, cj));
+            bool inside = OnFloor(new SVec(selfPx.X / Iso.PPM, selfPx.Y / Iso.PPM));
             float near = 12f * Iso.PPM;
             foreach (var w in Walls)
+            {
+                bool cut = inside && w.Position.Y > selfPx.Y && w.Position.Y - selfPx.Y < near && Mathf.Abs(w.Position.X - selfPx.X) < near;
+                w.SetCut(cut);
+                w.SetFade(!cut && w.Covers(selfPx), dt);
+            }
+            foreach (var w in Slants)
             {
                 bool cut = inside && w.Position.Y > selfPx.Y && w.Position.Y - selfPx.Y < near && Mathf.Abs(w.Position.X - selfPx.X) < near;
                 w.SetCut(cut);
@@ -186,17 +220,16 @@ namespace Rastvordd.Client
             QueueRedraw();
         }
 
-        public void Set(StructKind kind, SVec aim, bool ok)
-        {
-            if (kind == _kind && ok == _ok && SnapKey(kind, aim) == SnapKey(_kind, _at)) return;
-            _kind = kind; _at = aim; _ok = ok;
-            QueueRedraw();
-        }
+        SVec[] _poly;
+        SVec _ea, _eb;
 
-        static (int, int, int) SnapKey(StructKind k, SVec p)
+        /// <summary>Призрак: пол (многоугольник) или ребро — как посчитал сервер.</summary>
+        public void Set(StructKind kind, SVec[] poly, SVec a, SVec b, bool ok)
         {
-            if (k == StructKind.Foundation) { var (i, j) = Building.CellOf(p); return (i, j, -1); }
-            return Building.NearestEdge(p);
+            bool same = kind == _kind && ok == _ok && a == _ea && b == _eb && (poly == null) == (_poly == null) && (poly == null || (poly.Length == _poly.Length && poly[0] == _poly[0] && poly[^1] == _poly[^1]));
+            if (same) return;
+            _kind = kind; _poly = poly; _ea = a; _eb = b; _ok = ok;
+            QueueRedraw();
         }
 
         public override void _Draw()
@@ -211,17 +244,17 @@ namespace Rastvordd.Client
                 for (float x = z.Position.X; x < z.End.X; x += 12) { DrawLine(new Vector2(x, z.Position.Y), new Vector2(Mathf.Min(x + 6, z.End.X), z.Position.Y), zc, 1); DrawLine(new Vector2(x, z.End.Y), new Vector2(Mathf.Min(x + 6, z.End.X), z.End.Y), zc, 1); }
                 for (float y = z.Position.Y; y < z.End.Y; y += 12) { DrawLine(new Vector2(z.Position.X, y), new Vector2(z.Position.X, Mathf.Min(y + 6, z.End.Y)), zc, 1); DrawLine(new Vector2(z.End.X, y), new Vector2(z.End.X, Mathf.Min(y + 6, z.End.Y)), zc, 1); }
             }
-            if (_kind == StructKind.Foundation)
+            if (Building.IsFloor(_kind))
             {
-                var (i, j) = Building.CellOf(_at);
-                float s = Building.Cell * Iso.PPM;
-                var r = new Rect2(i * s, j * s - 4, s, s);
-                DrawRect(r, fill);
-                DrawRect(r, line, false, 1);
+                if (_poly == null) return;
+                var pts = new Vector2[_poly.Length];
+                for (int i = 0; i < pts.Length; i++) pts[i] = Iso.Px(_poly[i]) + new Vector2(0, -4);
+                DrawColoredPolygon(pts, fill);
+                for (int i = 0; i < pts.Length; i++) DrawLine(pts[i], pts[(i + 1) % pts.Length], line, 1);
                 return;
             }
-            var (ei, ej, dir) = Building.NearestEdge(_at);
-            var boxes = Building.Boxes(_kind, ei, ej, dir, false);
+            if (_ea == _eb) return;
+            var boxes = Building.Boxes(_kind, _ea, _eb, false);
             foreach (var (min, max, h, _) in boxes)
             {
                 float x0 = min.X * Iso.PPM, x1 = max.X * Iso.PPM, y0 = min.Y * Iso.PPM, y1 = max.Y * Iso.PPM, hh = Iso.H(h);

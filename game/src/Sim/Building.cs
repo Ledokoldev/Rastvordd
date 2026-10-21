@@ -1,17 +1,22 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
 namespace Rastvordd.Sim
 {
-    /// <summary>Элементы базы. Фундамент — клетка 2×2 м, остальное стоит на рёбрах клеток.</summary>
-    public enum StructKind { Foundation, Wall, Doorway, Window, Door }
+    /// <summary>
+    /// Элементы базы. Фундамент — клетка 2×2 м; треугольный фундамент — равносторонний треугольник со стороной 2 м,
+    /// приставленный к свободному краю любого пола. Стены, проёмы, окна и двери стоят на рёбрах полов (в том числе наклонных).
+    /// Новые виды — только в конец (числа сохраняются в сейве и снапшоте).
+    /// </summary>
+    public enum StructKind { Foundation, Wall, Doorway, Window, Door, TriFoundation }
 
     public sealed class Structure
     {
         public int Id;
         public StructKind Kind;
-        public int I, J, Dir;          // клетка; для ребра Dir: 0 — горизонтальное (y = J·2), 1 — вертикальное (x = I·2)
+        public int I, J, Dir;          // квадратный фундамент — клетка; у рёбер сетки — тоже (для ботов и старых сейвов)
+        public Vector2 A, B, C;        // ребро: A–B; треугольник: A–B — край, к которому приставлен, C — вершина
         public int Tier;               // 0 разметка, 1 дерево, 2 камень, 3 металл, 4 сталь
         public float Hp;
         public bool Open;              // дверь открыта
@@ -23,13 +28,16 @@ namespace Rastvordd.Sim
         public int ClaimId;            // к какому столбу привязан (бюджет и содержание)
         public readonly List<MapWall> Boxes = new();
         public float MaxHp => Building.MaxHp(Kind, Tier);
-        public bool IsEdge => Kind != StructKind.Foundation;
-        public Vector2 Center => IsEdge ? Building.EdgeCenter(I, J, Dir) : Building.CellCenter(I, J);
+        public bool IsFloor => Building.IsFloor(Kind);
+        public bool IsEdge => !IsFloor;
+        public Vector2 Center => Kind == StructKind.Foundation ? Building.CellCenter(I, J) : Kind == StructKind.TriFoundation ? (A + B + C) / 3f : (A + B) * 0.5f;
+        public Vector2[] Poly => Kind == StructKind.Foundation ? Building.SquarePoly(I, J) : new[] { A, B, C };
+        public long EdgeKey => Building.EdgeKey(A, B);
     }
 
     /// <summary>
     /// Геометрия и цены строительства. Общая для сервера и клиента: клиент по тем же правилам
-    /// строит картинку и тени обзора из снапшота (id, вид, клетка, уровень).
+    /// строит картинку и тени обзора из снапшота (id, вид, вершины, уровень).
     /// </summary>
     public static class Building
     {
@@ -40,13 +48,30 @@ namespace Rastvordd.Sim
         public const float PostW = 0.5f;       // косяк дверного проёма
         public const float BuildRange = 6f;
         public const int MaxTier = 4;
+        public static readonly float TriHeight = Cell * MathF.Sqrt(3) / 2f;
 
         public static readonly string[] TierNames = { "каркас", "дерево", "камень", "металл", "сталь" };
         static readonly float[] TierHp = { 10, 250, 500, 1000, 2000 };
 
+        public static bool IsFloor(StructKind k) => k is StructKind.Foundation or StructKind.TriFoundation;
+
+        /// <summary>Порядок элементов в колесе и при листании.</summary>
+        public static readonly StructKind[] PieceOrder = { StructKind.Foundation, StructKind.TriFoundation, StructKind.Wall, StructKind.Doorway, StructKind.Window, StructKind.Door };
+
+        public static StructKind NextPiece(StructKind k, int step = 1)
+        {
+            int i = Array.IndexOf(PieceOrder, k);
+            return PieceOrder[((i < 0 ? 0 : i) + step + PieceOrder.Length) % PieceOrder.Length];
+        }
+
+        /// <summary>Центр элемента из снапшота.</summary>
+        public static Vector2 Center(StructKind k, int i, int j, Vector2 a, Vector2 b, Vector2 c) =>
+            k == StructKind.Foundation ? CellCenter(i, j) : k == StructKind.TriFoundation ? (a + b + c) / 3f : (a + b) * 0.5f;
+
         public static string KindName(StructKind k) => k switch
         {
             StructKind.Foundation => "Фундамент",
+            StructKind.TriFoundation => "Треугольный фундамент",
             StructKind.Wall => "Стена",
             StructKind.Doorway => "Дверной проём",
             StructKind.Window => "Окно",
@@ -54,13 +79,13 @@ namespace Rastvordd.Sim
         };
 
         public static float MaxHp(StructKind k, int tier) =>
-            TierHp[Math.Clamp(tier, 0, MaxTier)] * (k == StructKind.Foundation ? 1.5f : k == StructKind.Door ? 0.8f : 1f);
+            TierHp[Math.Clamp(tier, 0, MaxTier)] * (IsFloor(k) ? 1.5f : k == StructKind.Door ? 0.8f : 1f);
 
         /// <summary>Цена установки (tier 0; дверь сразу деревянная) или улучшения до tier.</summary>
         public static (string id, int n)[] Cost(StructKind k, int tier)
         {
-            float m = k == StructKind.Foundation ? 1.5f : k == StructKind.Window || k == StructKind.Doorway ? 0.7f : 1f;
-            int N(float v) => (int)MathF.Round(v * m / 5f) * 5;
+            float m = k == StructKind.Foundation ? 1.5f : k == StructKind.TriFoundation ? 0.75f : k == StructKind.Window || k == StructKind.Doorway ? 0.7f : 1f;
+            int N(float v) => Math.Max(5, (int)MathF.Round(v * m / 5f) * 5);
             if (k == StructKind.Door)
                 return tier <= 1 ? new[] { ("wood", 50) } : tier == 2 ? new[] { ("stone", 75) } : tier == 3 ? new[] { ("metal_fragments", 40) } : new[] { ("metal_fragments", 75), ("scrap", 10) };
             // в 4–6 раз дешевле растовского: дерево даёт 120–200, камень 150 (2026-10-21) — дом 2×2 из дерева ≈ 4 дерева
@@ -84,56 +109,119 @@ namespace Rastvordd.Sim
         public static Vector2 EdgeCenter(int i, int j, int dir) =>
             dir == 0 ? new Vector2((i + 0.5f) * Cell, j * Cell) : new Vector2(i * Cell, (j + 0.5f) * Cell);
 
-        /// <summary>Ближайшее к точке ребро сетки.</summary>
-        public static (int i, int j, int dir) NearestEdge(Vector2 p)
-        {
-            int hj = (int)MathF.Round(p.Y / Cell), hi = (int)MathF.Floor(p.X / Cell);
-            int vi = (int)MathF.Round(p.X / Cell), vj = (int)MathF.Floor(p.Y / Cell);
-            float dh = MathF.Abs(p.Y - hj * Cell), dv = MathF.Abs(p.X - vi * Cell);
-            return dh <= dv ? (hi, hj, 0) : (vi, vj, 1);
-        }
+        /// <summary>Концы ребра сетки.</summary>
+        public static (Vector2 a, Vector2 b) EdgeEnds(int i, int j, int dir) =>
+            dir == 0 ? (new Vector2(i * Cell, j * Cell), new Vector2((i + 1) * Cell, j * Cell))
+                     : (new Vector2(i * Cell, j * Cell), new Vector2(i * Cell, (j + 1) * Cell));
 
-        /// <summary>Клетки по обе стороны ребра.</summary>
+        public static Vector2[] SquarePoly(int i, int j) => new[]
+        {
+            new Vector2(i * Cell, j * Cell), new Vector2((i + 1) * Cell, j * Cell),
+            new Vector2((i + 1) * Cell, (j + 1) * Cell), new Vector2(i * Cell, (j + 1) * Cell),
+        };
+
+        /// <summary>Клетки по обе стороны ребра сетки (для ботов).</summary>
         public static ((int, int) a, (int, int) b) EdgeCells(int i, int j, int dir) =>
             dir == 0 ? ((i, j - 1), (i, j)) : ((i - 1, j), (i, j));
 
-        /// <summary>Рамка вдоль ребра от доли t0 до t1 его длины.</summary>
-        static (Vector2 min, Vector2 max) Span(int i, int j, int dir, float t0, float t1)
+        // ---------- ключи вершин и рёбер: квадраты и треугольники делят рёбра по совпадающим вершинам ----------
+
+        /// <summary>Вершина, квантованная до 5 см (погрешность вычисления вершин треугольников не мешает совпадению).</summary>
+        public static long VKey(Vector2 p) => ((long)(ushort)(short)MathF.Round(p.X * 20) << 16) | (ushort)(short)MathF.Round(p.Y * 20);
+
+        public static long EdgeKey(Vector2 a, Vector2 b)
         {
-            float h = Thick * 0.5f;
-            if (dir == 0)
-            {
-                float x0 = i * Cell, y = j * Cell;
-                return (new Vector2(x0 + t0 * Cell, y - h), new Vector2(x0 + t1 * Cell, y + h));
-            }
-            float x = i * Cell, y0 = j * Cell;
-            return (new Vector2(x - h, y0 + t0 * Cell), new Vector2(x + h, y0 + t1 * Cell));
+            long ka = VKey(a), kb = VKey(b);
+            return ka < kb ? (ka << 32) | kb : (kb << 32) | ka;
         }
 
-        /// <summary>Твёрдые части элемента: рамки, высота, пропускает ли пули.</summary>
-        public static List<(Vector2 min, Vector2 max, float h, bool passBullets)> Boxes(StructKind k, int i, int j, int dir, bool open)
+        public static long EdgeKey(int i, int j, int dir) { var (a, b) = EdgeEnds(i, j, dir); return EdgeKey(a, b); }
+
+        /// <summary>Вершина треугольника, приставленного к ребру a–b со стороны точки toward.</summary>
+        public static Vector2 TriApex(Vector2 a, Vector2 b, Vector2 toward)
         {
-            var list = new List<(Vector2, Vector2, float, bool)>();
+            var mid = (a + b) * 0.5f;
+            var d = Vector2.Normalize(b - a);
+            var n = new Vector2(-d.Y, d.X);
+            if (Vector2.Dot(toward - mid, n) < 0) n = -n;
+            return mid + n * TriHeight;
+        }
+
+        public static float SegDist(Vector2 p, Vector2 a, Vector2 b)
+        {
+            var ab = b - a;
+            float t = Math.Clamp(Vector2.Dot(p - a, ab) / MathF.Max(1e-6f, ab.LengthSquared()), 0, 1);
+            return Vector2.Distance(p, a + ab * t);
+        }
+
+        public static bool PointInPoly(Vector2 p, Vector2[] poly)
+        {
+            bool inside = false;
+            for (int i = 0, j = poly.Length - 1; i < poly.Length; j = i++)
+                if ((poly[i].Y > p.Y) != (poly[j].Y > p.Y) &&
+                    p.X < (poly[j].X - poly[i].X) * (p.Y - poly[i].Y) / (poly[j].Y - poly[i].Y) + poly[i].X) inside = !inside;
+            return inside;
+        }
+
+        /// <summary>Пересекаются ли выпуклые многоугольники (касание по краю — не пересечение).</summary>
+        public static bool PolysOverlap(Vector2[] a, Vector2[] b)
+        {
+            foreach (var poly in new[] { a, b })
+                for (int i = 0; i < poly.Length; i++)
+                {
+                    var e = poly[(i + 1) % poly.Length] - poly[i];
+                    var axis = new Vector2(-e.Y, e.X);
+                    float amin = float.MaxValue, amax = float.MinValue, bmin = float.MaxValue, bmax = float.MinValue;
+                    foreach (var v in a) { float d = Vector2.Dot(v, axis); amin = MathF.Min(amin, d); amax = MathF.Max(amax, d); }
+                    foreach (var v in b) { float d = Vector2.Dot(v, axis); bmin = MathF.Min(bmin, d); bmax = MathF.Max(bmax, d); }
+                    float eps = 0.06f * axis.Length();
+                    if (amax <= bmin + eps || bmax <= amin + eps) return false;
+                }
+            return true;
+        }
+
+        /// <summary>Части элемента вдоль ребра: доли длины [t0, t1], высота, пропускает ли пули.</summary>
+        public static List<(float t0, float t1, float h, bool pass)> Spans(StructKind k, bool open)
+        {
+            var list = new List<(float, float, float, bool)>();
             float post = PostW / Cell;
             switch (k)
             {
-                case StructKind.Wall:
-                    { var (a, b) = Span(i, j, dir, 0, 1); list.Add((a, b, WallH, false)); }
-                    break;
-                case StructKind.Doorway:
-                    { var (a, b) = Span(i, j, dir, 0, post); list.Add((a, b, WallH, false)); }
-                    { var (a, b) = Span(i, j, dir, 1 - post, 1); list.Add((a, b, WallH, false)); }
-                    break;
-                case StructKind.Window:
-                    { var (a, b) = Span(i, j, dir, 0, 0.3f); list.Add((a, b, WallH, false)); }
-                    { var (a, b) = Span(i, j, dir, 0.7f, 1); list.Add((a, b, WallH, false)); }
-                    { var (a, b) = Span(i, j, dir, 0.3f, 0.7f); list.Add((a, b, WindowH, true)); }
-                    break;
-                case StructKind.Door:
-                    if (!open) { var (a, b) = Span(i, j, dir, post, 1 - post); list.Add((a, b, WallH, false)); }
-                    break;
+                case StructKind.Wall: list.Add((0, 1, WallH, false)); break;
+                case StructKind.Doorway: list.Add((0, post, WallH, false)); list.Add((1 - post, 1, WallH, false)); break;
+                case StructKind.Window: list.Add((0, 0.3f, WallH, false)); list.Add((0.7f, 1, WallH, false)); list.Add((0.3f, 0.7f, WindowH, true)); break;
+                case StructKind.Door: if (!open) list.Add((post, 1 - post, WallH, false)); break;
             }
             return list;
+        }
+
+        /// <summary>
+        /// Твёрдые части элемента на ребре a–b. Ребро по оси — одна рамка на часть; наклонное — цепочка мелких рамок
+        /// по 0,25 м (столкновения, пули и обзор работают с прямоугольниками).
+        /// </summary>
+        public static List<(Vector2 min, Vector2 max, float h, bool passBullets)> Boxes(StructKind k, Vector2 a, Vector2 b, bool open)
+        {
+            var list = new List<(Vector2, Vector2, float, bool)>();
+            float ht = Thick * 0.5f;
+            bool axis = MathF.Abs(a.X - b.X) < 0.01f || MathF.Abs(a.Y - b.Y) < 0.01f;
+            float len = Vector2.Distance(a, b);
+            foreach (var (t0, t1, h, pass) in Spans(k, open))
+            {
+                int n = axis ? 1 : Math.Max(1, (int)MathF.Ceiling(len * (t1 - t0) / 0.25f));
+                for (int s = 0; s < n; s++)
+                {
+                    var p0 = Vector2.Lerp(a, b, t0 + (t1 - t0) * s / n);
+                    var p1 = Vector2.Lerp(a, b, t0 + (t1 - t0) * (s + 1) / n);
+                    list.Add((Vector2.Min(p0, p1) - new Vector2(ht), Vector2.Max(p0, p1) + new Vector2(ht), h, pass));
+                }
+            }
+            return list;
+        }
+
+        public static List<(Vector2 min, Vector2 max, float h, bool passBullets)> Boxes(StructKind k, int i, int j, int dir, bool open)
+        {
+            var (a, b) = EdgeEnds(i, j, dir);
+            return Boxes(k, a, b, open);
         }
     }
 
@@ -141,8 +229,11 @@ namespace Rastvordd.Sim
     {
         public readonly List<Structure> Structures = new();
         readonly Dictionary<(int, int), Structure> _foundations = new();
-        readonly Dictionary<(int, int, int), Structure> _edges = new();
-        readonly Dictionary<(int, int, int), Structure> _doors = new();
+        readonly List<Structure> _tris = new();
+        readonly Dictionary<long, Structure> _edges = new();
+        readonly Dictionary<long, Structure> _doors = new();
+        /// <summary>Рёбра полов: концы и сколько полов их делит (1 — край базы, 2 — внутреннее).</summary>
+        readonly Dictionary<long, (Vector2 a, Vector2 b, int n)> _floorEdges = new();
         readonly List<Actor> _qActors = new();
 
         /// <summary>Постройки поменялись (для клиента: пересобрать тени обзора и акустику).</summary>
@@ -150,8 +241,67 @@ namespace Rastvordd.Sim
 
         bool HasFoundation(int i, int j) => _foundations.ContainsKey((i, j));
         public Structure FoundationAt(int i, int j) => _foundations.GetValueOrDefault((i, j));
-        public Structure EdgeAt(int i, int j, int dir) => _edges.GetValueOrDefault((i, j, dir));
-        public Structure DoorAt(int i, int j, int dir) => _doors.GetValueOrDefault((i, j, dir));
+        public Structure EdgeAt(int i, int j, int dir) => _edges.GetValueOrDefault(Building.EdgeKey(i, j, dir));
+        public Structure DoorAt(int i, int j, int dir) => _doors.GetValueOrDefault(Building.EdgeKey(i, j, dir));
+
+        /// <summary>Пол (квадрат или треугольник) под точкой.</summary>
+        public Structure FloorAt(Vector2 p)
+        {
+            var (ci, cj) = Building.CellOf(p);
+            if (_foundations.TryGetValue((ci, cj), out var f)) return f;
+            foreach (var t in _tris) if (Vector2.DistanceSquared(t.Center, p) < 2.5f && Building.PointInPoly(p, t.Poly)) return t;
+            return null;
+        }
+
+        IEnumerable<Structure> FloorsNear(Vector2 p, float r)
+        {
+            var (ci, cj) = Building.CellOf(p);
+            int cr = (int)MathF.Ceiling(r / Building.Cell);
+            for (int i = ci - cr; i <= ci + cr; i++)
+                for (int j = cj - cr; j <= cj + cr; j++)
+                    if (_foundations.TryGetValue((i, j), out var f)) yield return f;
+            foreach (var t in _tris) if (Vector2.Distance(t.Center, p) < r + 1.5f) yield return t;
+        }
+
+        /// <summary>Учёт рёбер пола: +1 при постановке, −1 при сносе; ребро без полов уносит стоящие на нём стены и двери.</summary>
+        void CountFloorEdges(Structure f, int delta, bool dropOrphans = true)
+        {
+            var poly = f.Poly;
+            for (int i = 0; i < poly.Length; i++)
+            {
+                var a = poly[i]; var b = poly[(i + 1) % poly.Length];
+                long key = Building.EdgeKey(a, b);
+                int n = (_floorEdges.TryGetValue(key, out var e) ? e.n : 0) + delta;
+                if (n > 0) { _floorEdges[key] = (a, b, n); continue; }
+                _floorEdges.Remove(key);
+                if (!dropOrphans) continue;
+                if (_doors.TryGetValue(key, out var door)) RemoveStructure(door);
+                if (_edges.TryGetValue(key, out var piece)) RemoveStructure(piece);
+            }
+        }
+
+        /// <summary>Ближайшее к точке ребро пола (не дальше maxDist).</summary>
+        public bool NearestFloorEdge(Vector2 p, float maxDist, out Vector2 a, out Vector2 b, out long key, out int floors)
+        {
+            a = b = default; key = 0; floors = 0;
+            float best = maxDist;
+            foreach (var (k, e) in _floorEdges)
+            {
+                if (MathF.Abs(e.a.X - p.X) > 3 || MathF.Abs(e.a.Y - p.Y) > 3) continue;
+                float d = Building.SegDist(p, e.a, e.b);
+                if (d < best) { best = d; a = e.a; b = e.b; key = k; floors = e.n; }
+            }
+            return key != 0;
+        }
+
+        /// <summary>Сторона ребра, где пола нет (наружу), — единичная нормаль.</summary>
+        public Vector2 OutwardOf(Vector2 a, Vector2 b)
+        {
+            var d = Vector2.Normalize(b - a);
+            var n = new Vector2(-d.Y, d.X);
+            var mid = (a + b) * 0.5f;
+            return FloorAt(mid + n * 0.5f) == null ? n : -n;
+        }
 
         /// <summary>Клетка свободна под фундамент по геометрии (без правил столба): суша, не РТ, нет препятствий.</summary>
         public bool FoundationGeoOk(int ci, int cj, out string why)
@@ -164,12 +314,39 @@ namespace Rastvordd.Sim
             { why = "вода"; return false; }
             if (NearMonument(min, 8) || NearMonument(max, 8) || NearMonument((min + max) * 0.5f, 8)) { why = "рядом с РТ нельзя"; return false; }
             var c = (min + max) * 0.5f;
+            var sq = Building.SquarePoly(ci, cj);
+            foreach (var t in _tris) if (Vector2.Distance(t.Center, c) < 3 && Building.PolysOverlap(sq, t.Poly)) { why = "мешает треугольный фундамент"; return false; }
             foreach (var w in WallsNear(c, 1.5f))
                 if (w.Owner == null && Geo.BoxOverlap(min, max, w.Wall.Min, w.Wall.Max)) { why = "мешает препятствие"; return false; }
             foreach (var n in NodesNear(c, 1.5f))
                 if (Geo.CircleBox(n.Pos, n.Radius, min, max)) { why = "мешает дерево/камень"; return false; }
             foreach (var d in DeploysNear(c, 1.5f))
                 if (d.Kind != DeployKind.Claim && Geo.CircleBox(d.Pos, d.Radius, min, max)) { why = "мешает установленное"; return false; }
+            return true;
+        }
+
+        /// <summary>Куда встанет треугольник: на ближайший свободный край пола, вершиной наружу.</summary>
+        public bool TriSpot(Vector2 at, out Vector2[] tri, out string why)
+        {
+            tri = null; why = "";
+            if (!NearestFloorEdge(at, 2.1f, out var a, out var b, out _, out int floors)) { why = "наведи на край фундамента"; return false; }
+            if (floors >= 2) { why = "край занят: с обеих сторон пол"; return false; }
+            var mid = (a + b) * 0.5f;
+            var c = mid + OutwardOf(a, b) * Building.TriHeight;
+            tri = new[] { a, b, c };
+            var centroid = (a + b + c) / 3f;
+            foreach (var f in FloorsNear(centroid, 2.5f)) if (Building.PolysOverlap(tri, f.Poly)) { why = "мешает другой фундамент"; return false; }
+            foreach (var p in new[] { centroid, Vector2.Lerp(centroid, a, 0.8f), Vector2.Lerp(centroid, b, 0.8f), Vector2.Lerp(centroid, c, 0.8f) })
+            {
+                if (!Terrain.IsLand(p)) { why = "вода"; return false; }
+                if (NearMonument(p, 8)) { why = "рядом с РТ нельзя"; return false; }
+            }
+            foreach (var w in WallsNear(centroid, 1.5f))
+                if (w.Owner == null && Building.PolysOverlap(tri, new[] { w.Wall.Min, new Vector2(w.Wall.Max.X, w.Wall.Min.Y), w.Wall.Max, new Vector2(w.Wall.Min.X, w.Wall.Max.Y) })) { why = "мешает препятствие"; return false; }
+            foreach (var n in NodesNear(centroid, 1.5f))
+                if (Building.PointInPoly(n.Pos, tri) || Building.SegDist(n.Pos, a, c) < n.Radius || Building.SegDist(n.Pos, b, c) < n.Radius) { why = "мешает дерево/камень"; return false; }
+            foreach (var d in DeploysNear(centroid, 1.5f))
+                if (d.Kind != DeployKind.Claim && (Building.PointInPoly(d.Pos, tri) || Building.SegDist(d.Pos, a, c) < d.Radius || Building.SegDist(d.Pos, b, c) < d.Radius)) { why = "мешает установленное"; return false; }
             return true;
         }
 
@@ -186,6 +363,16 @@ namespace Rastvordd.Sim
             foreach (var (id, n) in cost) a.Take(id, n);
         }
 
+        /// <summary>Клетка столба для элемента на ребре: со стороны пола.</summary>
+        (int, int) EdgeOwnerCell(Vector2 a, Vector2 b)
+        {
+            var mid = (a + b) * 0.5f;
+            var d = Vector2.Normalize(b - a);
+            var n = new Vector2(-d.Y, d.X);
+            var side = FloorAt(mid + n * 0.5f) != null ? mid + n * 0.5f : mid - n * 0.5f;
+            return Building.CellOf(FloorAt(side)?.Center ?? side);
+        }
+
         /// <summary>Можно ли поставить элемент в эту точку; причина отказа — для подсказки.</summary>
         public bool CanBuild(Actor a, StructKind kind, Vector2 at, out string why)
         {
@@ -197,36 +384,50 @@ namespace Rastvordd.Sim
                 if (!FoundationGeoOk(ci, cj, out why)) return false;
                 return ClaimAllows(a, kind, (ci, cj), out _, out why);
             }
+            if (kind == StructKind.TriFoundation)
+            {
+                if (!TriSpot(at, out var tri, out why)) return false;
+                return ClaimAllows(a, kind, Building.CellOf((tri[0] + tri[1] + tri[2]) / 3f), out _, out why);
+            }
 
-            var (i, j, dir) = Building.NearestEdge(at);
-            var (ca, cb) = Building.EdgeCells(i, j, dir);
-            if (!HasFoundation(ca.Item1, ca.Item2) && !HasFoundation(cb.Item1, cb.Item2)) { why = "нужен фундамент рядом"; return false; }
+            if (!NearestFloorEdge(at, 1.3f, out var ea, out var eb, out long key, out _)) { why = "нужен край фундамента"; return false; }
             if (kind == StructKind.Door)
             {
-                if (!_edges.TryGetValue((i, j, dir), out var frame) || frame.Kind != StructKind.Doorway) { why = "нужен дверной проём"; return false; }
-                if (_doors.ContainsKey((i, j, dir))) { why = "дверь уже есть"; return false; }
+                if (!_edges.TryGetValue(key, out var frame) || frame.Kind != StructKind.Doorway) { why = "нужен дверной проём"; return false; }
+                if (_doors.ContainsKey(key)) { why = "дверь уже есть"; return false; }
             }
-            else if (_edges.ContainsKey((i, j, dir))) { why = "занято"; return false; }
-            foreach (var (min, max, _, _) in Building.Boxes(kind, i, j, dir, false))
+            else if (_edges.ContainsKey(key)) { why = "занято"; return false; }
+            foreach (var (min, max, _, _) in Building.Boxes(kind, ea, eb, false))
                 foreach (var o in Actors)
-                    if (!o.Dead && Geo.CircleBox(o.Pos, o.Radius, min, max)) { why = "мешает человек"; return false; }
-            var own = HasFoundation(ca.Item1, ca.Item2) ? ca : cb;
-            return ClaimAllows(a, kind, own, out _, out why);
+                    if (!o.Dead && !o.Spectator && Geo.CircleBox(o.Pos, o.Radius, min, max)) { why = "мешает человек"; return false; }
+            return ClaimAllows(a, kind, EdgeOwnerCell(ea, eb), out _, out why);
         }
 
         /// <summary>
         /// Что на самом деле поставит План (людям): курсор на пустом дверном проёме — дверь;
-        /// выбран фундамент, а курсор на уже стоящем фундаменте — стена на ближайшем краю.
+        /// выбран фундамент (любой), а курсор на уже стоящем полу — стена на ближайшем краю.
         /// </summary>
         public StructKind EffectivePiece(Actor a, Vector2 at)
         {
             var k = a.BuildPiece;
             if (a.IsBot) return k;
-            var (i, j, dir) = Building.NearestEdge(at);
-            if (_edges.TryGetValue((i, j, dir), out var e) && e.Kind == StructKind.Doorway && !_doors.ContainsKey((i, j, dir))) return StructKind.Door;
-            var (ci, cj) = Building.CellOf(at);
-            if (k == StructKind.Foundation && HasFoundation(ci, cj)) return StructKind.Wall;
+            if (NearestFloorEdge(at, 1.0f, out _, out _, out long key, out _) && _edges.TryGetValue(key, out var e) && e.Kind == StructKind.Doorway && !_doors.ContainsKey(key)) return StructKind.Door;
+            if (Building.IsFloor(k) && FloorAt(at) != null) return StructKind.Wall;
             return k;
+        }
+
+        /// <summary>Призрак: многоугольник пола или ребро, куда встанет элемент.</summary>
+        public (Vector2[] poly, Vector2 a, Vector2 b) GhostOf(StructKind kind, Vector2 at)
+        {
+            if (kind == StructKind.Foundation) { var (ci, cj) = Building.CellOf(at); return (Building.SquarePoly(ci, cj), default, default); }
+            if (kind == StructKind.TriFoundation)
+            {
+                TriSpot(at, out var tri, out _);
+                if (tri == null && NearestFloorEdge(at, 1.8f, out var ta, out var tb, out _, out _)) tri = new[] { ta, tb, Building.TriApex(ta, tb, at) };
+                return (tri, default, default);
+            }
+            if (NearestFloorEdge(at, 1.3f, out var a, out var b, out _, out _)) return (null, a, b);
+            return (null, default, default);
         }
 
         void TryBuild(Actor a, Vector2 at)
@@ -237,27 +438,27 @@ namespace Rastvordd.Sim
             var cost = Building.Cost(kind, tier);
             if (!CanPay(a, cost)) { Info(a, $"Не хватает: {CostText(cost)}"); return; }
             Pay(a, cost);
-            Structure s;
+            var s = new Structure { Id = NextId(), Kind = kind, Dir = -1, Tier = tier, OwnerId = a.Id };
             if (kind == StructKind.Foundation)
             {
-                var (ci, cj) = Building.CellOf(at);
-                s = new Structure { Id = NextId(), Kind = kind, I = ci, J = cj, Dir = -1, Tier = tier, OwnerId = a.Id };
-                _foundations[(ci, cj)] = s;
+                (s.I, s.J) = Building.CellOf(at);
+                _foundations[(s.I, s.J)] = s;
+            }
+            else if (kind == StructKind.TriFoundation)
+            {
+                TriSpot(at, out var tri, out _);
+                (s.A, s.B, s.C) = (tri[0], tri[1], tri[2]);
+                _tris.Add(s);
             }
             else
             {
-                var (i, j, dir) = Building.NearestEdge(at);
-                s = new Structure { Id = NextId(), Kind = kind, I = i, J = j, Dir = dir, Tier = tier, OwnerId = a.Id };
-                if (kind == StructKind.Door) _doors[(i, j, dir)] = s; else _edges[(i, j, dir)] = s;
+                NearestFloorEdge(at, 1.3f, out s.A, out s.B, out long key, out _);
+                if (kind == StructKind.Door) _doors[key] = s; else _edges[key] = s;
             }
             s.Hp = s.MaxHp;
-            s.ClaimId = ClaimAt(kind == StructKind.Foundation ? (s.I, s.J) : Building.CellOf(s.Center))?.Id ?? 0;
-            if (s.ClaimId == 0 && s.IsEdge)
-            {
-                var (ea, eb) = Building.EdgeCells(s.I, s.J, s.Dir);
-                s.ClaimId = (ClaimAt(ea) ?? ClaimAt(eb))?.Id ?? 0;
-            }
+            s.ClaimId = ClaimAt(s.IsFloor ? Building.CellOf(s.Center) : EdgeOwnerCell(s.A, s.B))?.Id ?? 0;
             Structures.Add(s);
+            if (s.IsFloor) CountFloorEdges(s, +1);
             RebuildBoxes(s);
             StructVersion++;
             Events.Add(new SimEvent { Kind = SimEventKind.Built, ActorId = a.Id, OtherId = s.Id, Pos = s.Center, Text = Building.KindName(kind) });
@@ -268,7 +469,7 @@ namespace Rastvordd.Sim
             foreach (var w in s.Boxes) { Walls.Remove(w); _wallGrid.Remove(w); }
             s.Boxes.Clear();
             if (!s.IsEdge) return;
-            foreach (var (min, max, h, pass) in Building.Boxes(s.Kind, s.I, s.J, s.Dir, s.Open))
+            foreach (var (min, max, h, pass) in Building.Boxes(s.Kind, s.A, s.B, s.Open))
             {
                 var w = new MapWall { Wall = new Wall(min, max, h), Kind = WallKind.Built, Owner = s, PassBullets = pass };
                 s.Boxes.Add(w);
@@ -288,21 +489,28 @@ namespace Rastvordd.Sim
             {
                 case StructKind.Foundation:
                     _foundations.Remove((s.I, s.J));
-                    // рёбра, у которых не осталось фундамента ни с одной стороны, падают
-                    foreach (var e in new List<Structure>(_edges.Values))
-                    {
-                        var (ca, cb) = Building.EdgeCells(e.I, e.J, e.Dir);
-                        if (!HasFoundation(ca.Item1, ca.Item2) && !HasFoundation(cb.Item1, cb.Item2)) RemoveStructure(e);
-                    }
+                    CountFloorEdges(s, -1);   // рёбра, у которых не осталось пола ни с одной стороны, падают
+                    break;
+                case StructKind.TriFoundation:
+                    _tris.Remove(s);
+                    CountFloorEdges(s, -1);
                     break;
                 case StructKind.Door:
-                    _doors.Remove((s.I, s.J, s.Dir));
+                    _doors.Remove(s.EdgeKey);
                     break;
                 default:
-                    _edges.Remove((s.I, s.J, s.Dir));
-                    if (_doors.TryGetValue((s.I, s.J, s.Dir), out var door)) RemoveStructure(door);
+                    _edges.Remove(s.EdgeKey);
+                    if (_doors.TryGetValue(s.EdgeKey, out var door)) RemoveStructure(door);
                     break;
             }
+        }
+
+        /// <summary>Пересобрать учёт рёбер полов (после загрузки).</summary>
+        void RebuildFloorEdges()
+        {
+            _floorEdges.Clear();
+            foreach (var f in _foundations.Values) CountFloorEdges(f, +1, false);
+            foreach (var t in _tris) CountFloorEdges(t, +1, false);
         }
 
         /// <summary>Урон постройке. Возвращает реально нанесённый урон (0 — уровень слишком прочный для этого оружия).</summary>
@@ -327,23 +535,20 @@ namespace Rastvordd.Sim
             var hit = dl > 0.05f ? a.Pos + toAim / dl * MathF.Min(dl, reach + 0.3f) : a.Pos + a.FacingDir * MathF.Min(reach, 1.3f);
             Structure best = null;
             float bestD = 0.75f;   // дальше от ребра — значит целимся в пол (фундамент)
-            var (i, j, dir) = Building.NearestEdge(hit);
-            foreach (var key in new[] { (i, j, dir) })
+            foreach (var d in _doors.Values)
+                if (Vector2.DistanceSquared(d.Center, hit) < 9 && DistToEdge(d, hit) < 0.85f) return d;   // дверь — только если целимся почти в неё
+            foreach (var e in _edges.Values)
             {
-                if (_doors.TryGetValue(key, out var d) && Vector2.Distance(d.Center, hit) < bestD + 0.1f) return d;   // дверь — только если целимся почти в неё
-                if (_edges.TryGetValue(key, out var e)) { float dd = DistToEdge(e, hit); if (dd < bestD) { bestD = dd; best = e; } }
+                if (Vector2.DistanceSquared(e.Center, hit) > 9) continue;
+                float dd = DistToEdge(e, hit);
+                if (dd < bestD) { bestD = dd; best = e; }
             }
             if (best != null) return best;
-            var (ci, cj) = Building.CellOf(hit);
-            return _foundations.TryGetValue((ci, cj), out var f) && Vector2.Distance(a.Pos, f.Center) < reach + 1.6f ? f : null;
+            var f = FloorAt(hit);
+            return f != null && Vector2.Distance(a.Pos, f.Center) < reach + 1.6f ? f : null;
         }
 
-        internal static float DistToEdge(Structure e, Vector2 p)
-        {
-            var c = e.Center;
-            return e.Dir == 0 ? MathF.Abs(p.Y - c.Y) + MathF.Max(0, MathF.Abs(p.X - c.X) - Building.Cell / 2)
-                              : MathF.Abs(p.X - c.X) + MathF.Max(0, MathF.Abs(p.Y - c.Y) - Building.Cell / 2);
-        }
+        internal static float DistToEdge(Structure e, Vector2 p) => Building.SegDist(p, e.A, e.B);
 
         /// <summary>Молоток: улучшить на уровень или починить.</summary>
         void HammerHit(Actor a, Structure s)
@@ -425,7 +630,7 @@ namespace Rastvordd.Sim
                 return;
             }
             if (door.Open)
-                foreach (var (min, max, _, _) in Building.Boxes(StructKind.Door, door.I, door.J, door.Dir, false))
+                foreach (var (min, max, _, _) in Building.Boxes(StructKind.Door, door.A, door.B, false))
                     foreach (var o in Actors)
                         if (!o.Dead && Geo.CircleBox(o.Pos, o.Radius, min, max)) { Info(a, "В проёме кто-то стоит"); return; }
             door.Open = !door.Open;
@@ -474,8 +679,9 @@ namespace Rastvordd.Sim
                 switch (s.Kind)
                 {
                     case StructKind.Foundation: b += 1; found++; break;
+                    case StructKind.TriFoundation: b += 0.5f; found++; break;
                     case StructKind.Door: b += 4; doors++; break;
-                    case StructKind.Doorway: if (!_doors.ContainsKey((s.I, s.J, s.Dir))) b += 0.5f; break;
+                    case StructKind.Doorway: if (!_doors.ContainsKey(s.EdgeKey)) b += 0.5f; break;
                     default: b += 0.5f; break;
                 }
             }
@@ -515,9 +721,9 @@ namespace Rastvordd.Sim
             if (claim == null) { why = "нужен шкаф рядом (зона 8 клеток)"; return false; }
             if (!claim.Auth.Contains(a.Id)) { why = "чужая зона"; return false; }
             var (b, found, doors) = ClaimLoad(claim);
-            float add = kind == StructKind.Foundation ? 1 : kind == StructKind.Door ? 3.5f : 0.5f;   // дверь заменяет 0,5 проёма на 4
+            float add = kind == StructKind.Foundation ? 1 : kind == StructKind.Door ? 3.5f : 0.5f;   // дверь заменяет 0,5 проёма на 4; треугольник — полфундамента
             if (b + add > BudgetMax) { why = $"бюджет базы исчерпан ({b:0}/{BudgetMax})"; return false; }
-            if (kind == StructKind.Foundation && found + 1 > FoundMax) { why = $"фундаментов максимум {FoundMax}"; return false; }
+            if (Building.IsFloor(kind) && found + 1 > FoundMax) { why = $"фундаментов максимум {FoundMax}"; return false; }
             if (kind == StructKind.Door && doors + 1 > DoorMax) { why = $"дверей максимум {DoorMax}"; return false; }
             return true;
         }
@@ -567,7 +773,7 @@ namespace Rastvordd.Sim
             }
         }
 
-        static bool SameEdge(Structure x, Structure y) => x.IsEdge && y.IsEdge && x.I == y.I && x.J == y.J && x.Dir == y.Dir;
+        static bool SameEdge(Structure x, Structure y) => x.IsEdge && y.IsEdge && x.EdgeKey == y.EdgeKey;
 
         /// <summary>
         /// Чистая линия между точками, не считая самой постройки ignore (и её ребра — косяков проёма).
@@ -605,11 +811,11 @@ namespace Rastvordd.Sim
             if (SeesPoint(v, c, range, coneDeg, st)) return true;
             if (st.IsEdge)
             {
-                var along = st.Dir == 0 ? new Vector2(0.7f, 0) : new Vector2(0, 0.7f);
+                var along = Vector2.Normalize(st.B - st.A) * 0.7f;
                 return SeesPoint(v, c + along, range, coneDeg, st) || SeesPoint(v, c - along, range, coneDeg, st);
             }
-            foreach (var o in new[] { new Vector2(0.7f, 0.7f), new Vector2(-0.7f, 0.7f), new Vector2(0.7f, -0.7f), new Vector2(-0.7f, -0.7f) })
-                if (SeesPoint(v, c + o, range, coneDeg, st)) return true;
+            foreach (var corner in st.Poly)
+                if (SeesPoint(v, Vector2.Lerp(c, corner, 0.7f), range, coneDeg, st)) return true;
             return false;
         }
 

@@ -1012,13 +1012,7 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Точка снаружи двери: со стороны клетки без фундамента.</summary>
-        Vector2 DoorOutside(Structure door)
-        {
-            var (ca, cb) = Building.EdgeCells(door.I, door.J, door.Dir);
-            var outsideCell = _w.FoundationAt(ca.Item1, ca.Item2) == null ? ca : cb;
-            var c = Building.CellCenter(outsideCell.Item1, outsideCell.Item2);
-            return door.Center + Vector2.Normalize(c - door.Center) * 1.6f;
-        }
+        Vector2 DoorOutside(Structure door) => door.Center + _w.OutwardOf(door.A, door.B) * 1.6f;
 
         /// <summary>Скрафтить у своего верстака: ресурсы из кармана или ящика.</summary>
         bool CraftAtBench(string output, Deployable box, ref InputCmd cmd)

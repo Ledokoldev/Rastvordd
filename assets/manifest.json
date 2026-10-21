@@ -1478,69 +1478,128 @@
   {
    "id": "subst_transformer",
    "cat": "props",
-   "h": 4.6,
-   "desc": "a huge abandoned high-voltage oil power transformer: a heavy steel tank on a concrete pad, rows of radiator cooling fins on both sides, three tall brown porcelain bushings on top, a cylindrical conservator oil tank on struts, oil stains; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+   "h": 6.6,
+   "desc": "a huge abandoned high-voltage oil power transformer: a heavy steel tank on a concrete pad, rows of radiator cooling fins on both sides, three tall brown porcelain bushings on top, a cylindrical conservator oil tank on struts, oil stains; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt",
+   "foot": [
+    6.6,
+    3.4,
+    3.5
+   ]
   },
   {
    "id": "subst_portal",
    "cat": "props",
-   "h": 6.0,
-   "desc": "a tall switchyard steel lattice gantry portal: two lattice legs and a lattice crossbeam with hanging strings of glass disc insulators and a few sagging broken wires; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+   "h": 9.0,
+   "desc": "a tall switchyard steel lattice gantry portal: two lattice legs and a lattice crossbeam with hanging strings of glass disc insulators and a few sagging broken wires; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt",
+   "foot": {
+    "legs": [
+     10.2,
+     1.0,
+     1.1
+    ]
+   }
   },
   {
    "id": "subst_breaker",
    "cat": "props",
-   "h": 3.0,
-   "desc": "a high-voltage oil circuit breaker: three big cylindrical grey steel tanks in a row on a steel frame with porcelain bushings and a control box; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+   "h": 4.2,
+   "desc": "a high-voltage oil circuit breaker: three big cylindrical grey steel tanks in a row on a steel frame with porcelain bushings and a control box; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt",
+   "foot": [
+    4.0,
+    1.6,
+    2.5
+   ]
   },
   {
    "id": "subst_disconnector",
    "cat": "props",
-   "h": 2.8,
-   "desc": "a high-voltage disconnect switch on two concrete posts with ribbed porcelain insulator columns and a rusty switch blade; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+   "h": 3.8,
+   "desc": "a high-voltage disconnect switch on two concrete posts with ribbed porcelain insulator columns and a rusty switch blade; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt",
+   "foot": {
+    "legs": [
+     3.0,
+     0.7,
+     0.7
+    ]
+   }
   },
   {
    "id": "subst_pylon_fallen",
    "cat": "props",
-   "h": 4.0,
-   "desc": "a collapsed steel lattice power-line pylon lying on the ground diagonally, twisted and bent, with snapped wires and insulators, a dramatic landmark; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+   "h": 6.0,
+   "desc": "a collapsed steel lattice power-line pylon lying on the ground diagonally, twisted and bent, with snapped wires and insulators, a dramatic landmark; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt",
+   "foot": [
+    8.0,
+    2.2,
+    1.0
+   ]
   },
   {
    "id": "subst_cable_drum",
    "cat": "props",
-   "h": 1.7,
-   "desc": "a big wooden cable reel drum standing on its edge, wound with thick black power cable, weathered planks; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+   "h": 2.4,
+   "desc": "a big wooden cable reel drum standing on its edge, wound with thick black power cable, weathered planks; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt",
+   "foot": [
+    2.2,
+    1.0,
+    2.2
+   ]
   },
   {
    "id": "subst_truck",
    "cat": "props",
-   "h": 3.0,
-   "desc": "an abandoned Soviet utility truck with a folded aerial lift bucket boom on its back, flat tires, rusted orange cab; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+   "h": 4.4,
+   "desc": "an abandoned Soviet utility truck with a folded aerial lift bucket boom on its back, flat tires, rusted orange cab; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt",
+   "foot": [
+    6.2,
+    2.6,
+    2.8
+   ]
   },
   {
    "id": "subst_kpp",
    "cat": "props",
-   "h": 3.0,
-   "desc": "a small square guard booth checkpoint made of white silicate bricks with a flat roof, a dirty window and a steel door, a lamp above the door; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+   "h": 3.8,
+   "desc": "a small square guard booth checkpoint made of white silicate bricks with a flat roof, a dirty window and a steel door, a lamp above the door; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt",
+   "foot": [
+    3.4,
+    3.0,
+    3.0
+   ]
   },
   {
    "id": "subst_main_panel",
    "cat": "props",
-   "h": 2.0,
-   "desc": "a big wall-mounted main electrical switchboard panel: grey steel cabinet with two empty round sockets for big ceramic plug fuses, a large knife switch lever in the off position, analog dial gauges, dead indicator lamps; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+   "h": 2.2,
+   "desc": "a big wall-mounted main electrical switchboard panel: grey steel cabinet with two empty round sockets for big ceramic plug fuses, a large knife switch lever in the off position, analog dial gauges, dead indicator lamps; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt",
+   "foot": [
+    1.4,
+    0.5,
+    2.0
+   ]
   },
   {
    "id": "subst_main_panel_on",
    "cat": "props",
-   "h": 2.0,
+   "h": 2.2,
    "desc": "exactly the same electrical switchboard panel as in the attached reference image, same angle and style, but now powered: two white ceramic plug fuses screwed into the sockets, the big knife switch lever up in the on position, warm red and green indicator lamps glowing",
-   "ref": "assets/gen/props/subst_main_panel.png"
+   "ref": "assets/gen/props/subst_main_panel.png",
+   "foot": [
+    1.4,
+    0.5,
+    2.0
+   ]
   },
   {
    "id": "subst_switchgear",
    "cat": "props",
-   "h": 2.3,
-   "desc": "a row of four tall grey metal switchgear cabinets side by side, small inspection windows, door handles, warning stripes; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt"
+   "h": 2.5,
+   "desc": "a row of four tall grey metal switchgear cabinets side by side, small inspection windows, door handles, warning stripes; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt",
+   "foot": [
+    3.4,
+    0.8,
+    2.2
+   ]
   },
   {
    "id": "subst_sign",
@@ -1552,13 +1611,23 @@
    "id": "crate_punch",
    "cat": "props",
    "h": 1.1,
-   "desc": "a heavy locked steel loot crate, olive drab with yellow hazard stripes, an old electromechanical punch-card reader box bolted on the front with a card slot and a dark indicator lamp, reinforced corners"
+   "desc": "a heavy locked steel loot crate, olive drab with yellow hazard stripes, an old electromechanical punch-card reader box bolted on the front with a card slot and a dark indicator lamp, reinforced corners",
+   "foot": [
+    1.5,
+    0.8,
+    1.0
+   ]
   },
   {
    "id": "crate_punch_open",
    "cat": "props",
    "h": 1.3,
-   "desc": "the same heavy steel loot crate, olive drab with yellow hazard stripes, now with its lid swung open and empty inside, the punch-card reader on the front with a glowing green indicator lamp"
+   "desc": "the same heavy steel loot crate, olive drab with yellow hazard stripes, now with its lid swung open and empty inside, the punch-card reader on the front with a glowing green indicator lamp",
+   "foot": [
+    1.5,
+    0.8,
+    1.0
+   ]
   },
   {
    "id": "icon_punchcard_1",
@@ -1613,6 +1682,144 @@
    "cat": "decals",
    "h": 0.9,
    "desc": "thick black power cables lying tangled on the ground seen from above"
+  },
+  {
+   "id": "int_desk",
+   "cat": "props",
+   "h": 1.1,
+   "desc": "an old Soviet office desk with drawers, scattered yellowed papers, a black rotary telephone and a desk lamp; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "foot": [
+    1.4,
+    0.7,
+    0.8
+   ]
+  },
+  {
+   "id": "int_lockers",
+   "cat": "props",
+   "h": 1.9,
+   "desc": "a row of three tall grey metal clothing lockers, one door hanging open, dents; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "foot": [
+    1.4,
+    0.5,
+    1.9
+   ]
+  },
+  {
+   "id": "int_shelf",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "a tall metal shelving rack loaded with cardboard boxes, spare electrical parts, coils of wire and porcelain insulators; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "foot": [
+    1.3,
+    0.5,
+    2.0
+   ]
+  },
+  {
+   "id": "int_cot",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a metal army cot with a dirty striped mattress and a crumpled blanket; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "foot": [
+    0.8,
+    1.9,
+    0.5
+   ]
+  },
+  {
+   "id": "int_table",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a small wooden table with two chairs, an enamel kettle, mugs and a dirty ashtray; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "foot": [
+    1.2,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "id": "int_burzhuika",
+   "cat": "props",
+   "h": 1.7,
+   "desc": "a small cast-iron wood stove (burzhuika) with a rusty chimney pipe going up and a pile of firewood next to it; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "foot": [
+    0.7,
+    0.7,
+    1.0
+   ]
+  },
+  {
+   "id": "subst_ktp",
+   "cat": "props",
+   "h": 3.4,
+   "desc": "a small compact transformer kiosk substation: a grey metal box building with louvered double doors, a high-voltage warning plate without text, rust streaks; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "foot": [
+    3.4,
+    2.6,
+    3.0
+   ]
+  },
+  {
+   "id": "subst_oil_tank",
+   "cat": "props",
+   "h": 3.4,
+   "desc": "a large horizontal cylindrical transformer oil storage tank on concrete saddle supports with a ladder and pipes; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "foot": [
+    5.0,
+    2.2,
+    2.6
+   ]
+  },
+  {
+   "id": "subst_lamp",
+   "cat": "props",
+   "h": 8.5,
+   "desc": "a tall concrete street lamp post with an old bent cobra-head lamp, cracked concrete; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "foot": [
+    0.5,
+    0.5,
+    8
+   ]
+  },
+  {
+   "id": "subst_relay_cabinet",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "an outdoor grey steel relay control cabinet on short legs with a padlock and cable conduits going into the ground; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "foot": [
+    1.2,
+    0.6,
+    1.8
+   ]
+  },
+  {
+   "id": "subst_insulator_pallet",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a wooden pallet stacked with brown porcelain insulators and coils of aluminum wire; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "foot": [
+    1.2,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "id": "subst_reel_stack",
+   "cat": "props",
+   "h": 1.7,
+   "desc": "three small wooden cable reels lying on their sides stacked next to each other with tangled wire; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "foot": [
+    2.4,
+    1.0,
+    1.2
+   ]
+  },
+  {
+   "id": "wallface_garage",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: closed rusty Soviet steel double garage gates with vertical ribs, a small wicket door in one leaf, peeling green paint, filling the whole image"
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

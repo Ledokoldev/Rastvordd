@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Numerics;
 
 namespace Rastvordd.Sim
@@ -53,6 +53,12 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Выталкивает круг из прямоугольника.</summary>
+        public static bool BoxOverlap(Vector2 aMin, Vector2 aMax, Vector2 bMin, Vector2 bMax) =>
+            aMin.X < bMax.X && aMax.X > bMin.X && aMin.Y < bMax.Y && aMax.Y > bMin.Y;
+
+        public static bool CircleBox(Vector2 c, float r, Vector2 min, Vector2 max) =>
+            Vector2.DistanceSquared(Vector2.Clamp(c, min, max), c) < r * r;
+
         public static Vector2 PushOut(Vector2 p, float r, Vector2 min, Vector2 max)
         {
             var closest = Vector2.Clamp(p, min, max);

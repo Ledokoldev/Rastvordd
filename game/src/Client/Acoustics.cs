@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Godot;
 using Rastvordd.Sim;
 using SVec = System.Numerics.Vector2;
@@ -34,6 +34,8 @@ namespace Rastvordd.Client
         static SVec _listener;
         static readonly List<(SVec a, SVec b)> _wallBoxes = new();
         static readonly List<(SVec c, float r)> _trees = new();
+        /// <summary>Стены построек — тоже глушат звук.</summary>
+        public static readonly List<(SVec a, SVec b)> DynamicWalls = new();
         static readonly List<(double at, System.Action play)> _pending = new();
         static double _clock;
         static readonly RandomNumberGenerator Rng = new();
@@ -164,6 +166,8 @@ namespace Rastvordd.Client
         static bool Occluded(SVec a, SVec b)
         {
             foreach (var (min, max) in _wallBoxes)
+                if (Geo.SegmentAabb(a, b, min, max, out _)) return true;
+            foreach (var (min, max) in DynamicWalls)
                 if (Geo.SegmentAabb(a, b, min, max, out _)) return true;
             foreach (var (c, r) in _trees)
                 if (Geo.SegmentCircle(a, b, c, r, out float t) && t > 0.02f && t < 0.98f) return true;

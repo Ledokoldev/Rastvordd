@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using Rastvordd.Sim;
@@ -19,6 +19,8 @@ namespace Rastvordd.Client
         float _shake;   // тряска камеры от своих выстрелов
         Weather _weather;
         VisionRays _rays;
+        BuildLayer _build;
+        BuildGhost2D _bghost;
         readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
         Ambient _ambient;
@@ -80,6 +82,19 @@ namespace Rastvordd.Client
                 else if (a == "craftmenu") _hud.ToggleCraft();
                 else if (a.StartsWith("slot")) _slot = int.Parse(a.Substring(4)) - 1;
                 else if (a.StartsWith("craft")) _craftReq = int.Parse(a.Substring(5));
+                else if (a == "stop") _forceWalk = SVec.Zero;
+                else if (a.StartsWith("go"))
+                {
+                    var p = a.Substring(2).Split(';');
+                    _forceWalk = new SVec(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture));
+                }
+                else if (a.StartsWith("at"))
+                {
+                    // прицел относительно себя, метры: at1.5;-2
+                    var p = a.Substring(2).Split(';');
+                    var me = _server.World.Find(_myId).Pos;
+                    _autoAim = me + new SVec(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture));
+                }
             }
         }
 
@@ -424,6 +439,25 @@ namespace Rastvordd.Client
                         _hud.Toast("Скрафчено: " + e.Text);
                         Sfx.Play("craft_done", _selfPx, -6, 10, 0f);
                         break;
+                    case SimEventKind.Built:
+                        Sfx.Play(e.Value >= 2 ? "hit_stone" : "hit_wood", Iso.Px(e.Pos), -3, 25, 0.1f);
+                        SpawnChipsAt(e.Pos, TierChips[System.Math.Clamp((int)e.Value, 0, 4)], e.ActorId, 5);
+                        if (e.ActorId == _myId && e.Value > 0) _hud.Toast($"{e.Text}: улучшено");
+                        break;
+                    case SimEventKind.Destroyed:
+                        Sfx.Play((int)e.Value >= 2 ? "hit_stone" : "hit_wood", Iso.Px(e.Pos), 2, 40, 0.05f);
+                        SpawnChipsAt(e.Pos, TierChips[System.Math.Clamp((int)e.Value, 0, 4)], -1, 18);
+                        _shake = Mathf.Min(1.2f, _shake + 0.3f);
+                        break;
+                    case SimEventKind.Door:
+                        Sfx.Play("hit_wood", Iso.Px(e.Pos), -8, 20, 0.2f);
+                        break;
+                    case SimEventKind.HitStruct:
+                        Sfx.Play(e.Text is "камень" or "металл" or "сталь" ? "hit_metal_ore" : "hit_wood", Iso.Px(e.Pos), -2, 30, 0.1f);
+                        SpawnChipsAt(e.Pos, TierChips[e.Text == "разметка" ? 0 : e.Text == "дерево" ? 1 : e.Text == "камень" ? 2 : 3], e.ActorId, e.Value > 0 ? 6 : 3);
+                        if (_actorViews.TryGetValue(e.ActorId, out var sh)) sh.HitStop(0.07f);
+                        if (e.ActorId == _myId) _shake = Mathf.Min(1.2f, _shake + 0.4f);
+                        break;
                     case SimEventKind.Placed:
                         _hud.Toast("Установлено: " + e.Text);
                         Sfx.Play("hit_wood", Iso.Px(e.Pos), -4, 20);
@@ -529,9 +563,23 @@ namespace Rastvordd.Client
                 NodeKind.Sulfur => new[] { new Color(0.6f, 0.6f, 0.55f), new Color(0.92f, 0.85f, 0.3f), new Color(0.8f, 0.72f, 0.2f) },
                 _ => new[] { new Color(0.6f, 0.59f, 0.56f), new Color(0.42f, 0.41f, 0.4f), new Color(0.75f, 0.74f, 0.7f) },
             };
-            var from = _actorViews.TryGetValue(actorId, out var av) ? av.Position : Iso.Px(nodePos);
+            SpawnChipsAt(nodePos, cols, actorId, _fxRng.RandiRange(4, 7));
+        }
+
+        static readonly Color[][] TierChips =
+        {
+            new[] { new Color(0.55f, 0.45f, 0.3f), new Color(0.7f, 0.6f, 0.4f) },
+            new[] { new Color(0.62f, 0.45f, 0.26f), new Color(0.8f, 0.66f, 0.42f), new Color(0.45f, 0.32f, 0.18f) },
+            new[] { new Color(0.6f, 0.59f, 0.56f), new Color(0.42f, 0.41f, 0.4f), new Color(0.75f, 0.74f, 0.7f) },
+            new[] { new Color(0.55f, 0.52f, 0.5f), new Color(0.75f, 0.42f, 0.2f), new Color(0.9f, 0.85f, 0.6f) },
+            new[] { new Color(0.45f, 0.47f, 0.52f), new Color(0.95f, 0.9f, 0.7f) },
+        };
+
+        /// <summary>Разлёт крошки от точки удара в сторону от бьющего.</summary>
+        void SpawnChipsAt(SVec nodePos, Color[] cols, int actorId, int count)
+        {
+            var from = _actorViews.TryGetValue(actorId, out var av) ? av.Position : Iso.Px(nodePos) + new Vector2(0, 10);
             var away = (Iso.Px(nodePos) - from).Normalized();
-            int count = _fxRng.RandiRange(4, 7);
             for (int i = 0; i < count; i++)
             {
                 var dir = (-away).Rotated(_fxRng.RandfRange(-1.2f, 1.2f));
@@ -729,6 +777,14 @@ namespace Rastvordd.Client
             }
             RemoveMissing(_deployViews, seen);
 
+            // постройки: виды, тени обзора, прозрачность стен перед персонажем, призрак плана
+            _build ??= new BuildLayer(_world);
+            if (_build.Sync(_cur.Structures, _cur.StructVersion) && _rays != null) { _rays.Dynamic.Clear(); _rays.Dynamic.AddRange(_build.Occluders); }
+            _build.UpdateFade(_selfPx, dt);
+            if (_bghost == null) { _bghost = new BuildGhost2D(); _world.AddChild(_bghost); }
+            _bghost.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_hud.CraftOpen;
+            if (_bghost.Visible) _bghost.Set(_cur.Self.BuildPiece, _aim, _cur.Self.BuildOk);
+
             // призрак установки
             var self = _cur.Self;
             _ghost.Visible = self.HeldDeploy && !self.Dead && !_hud.CraftOpen;
@@ -807,7 +863,7 @@ namespace Rastvordd.Client
             var selfM = new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
             var dir = new Vector2(_aim.X - selfM.X, _aim.Y - selfM.Y);
             float range = (50 + 30 * _peek) * (1f - 0.4f * World.NightFactorAt(_forcedDay ?? _cur.DayTime));
-            _rays ??= new VisionRays(_map);
+            if (_rays == null) { _rays = new VisionRays(_map); if (_build != null) _rays.Dynamic.AddRange(_build.Occluders); }
             _rays.Update(selfM, range, _cur.Nodes);
             VisionFx.Update(_selfPx, dir.LengthSquared() > 0.01f ? dir.Normalized() : Vector2.Right,
                             Mathf.Cos(Mathf.DegToRad((130 - 70 * _peek) * 0.5f)), range, _rays.Texture, !s.Dead);

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Godot;
 using Rastvordd.Sim;
 using SVec = System.Numerics.Vector2;
@@ -19,6 +19,8 @@ namespace Rastvordd.Client
         public readonly ImageTexture Texture;
         readonly List<WallInfo> _walls = new();
         readonly List<(SVec c, float r)> _circles = new();
+        /// <summary>Стены построек (меняются по ходу игры).</summary>
+        public readonly List<WallInfo> Dynamic = new();
 
         public VisionRays(MapInfo map)
         {
@@ -31,11 +33,12 @@ namespace Rastvordd.Client
         {
             // только то, что может попасть в радиус
             var nearWalls = new List<WallInfo>();
-            foreach (var w in _walls)
-            {
-                var c = SVec.Clamp(origin, w.Min, w.Max);
-                if (SVec.Distance(c, origin) < range) nearWalls.Add(w);
-            }
+            foreach (var list in new[] { _walls, Dynamic })
+                foreach (var w in list)
+                {
+                    var c = SVec.Clamp(origin, w.Min, w.Max);
+                    if (w.Height >= 2f && SVec.Distance(c, origin) < range) nearWalls.Add(w);
+                }
             _circles.Clear();
             foreach (var n in nodes)
                 if (n.Kind == NodeKind.Tree && SVec.Distance(n.Pos, origin) < range + 1) _circles.Add((n.Pos, n.Radius * 0.9f));

@@ -95,9 +95,10 @@ namespace Rastvordd.Sim
         public WeaponDef Weapon;
         public float Food, Water, Heal;
         public DeployKind Deploy;
+        public bool Build;              // план постройки: ЛКМ ставит выбранный элемент
 
         /// <summary>Предметы, которые держат в руках, живут на поясе (по одному в слоте).</summary>
-        public bool Holdable => Weapon != null || Deploy != DeployKind.None;
+        public bool Holdable => Weapon != null || Deploy != DeployKind.None || Build;
     }
 
     /// <summary>Предмет в слоте пояса или в контейнере. У оружия — своё состояние (патроны в магазине).</summary>
@@ -152,6 +153,8 @@ namespace Rastvordd.Sim
             Add("tool_hatchet", "Каменный топор", ItemCategory.Tool).Weapon = WeaponDef.MeleeTool("tool_hatchet", 15, 0.8f, 1.8f, 16, 3, 2, 2);
             Add("tool_pickaxe", "Каменная кирка", ItemCategory.Tool).Weapon = WeaponDef.MeleeTool("tool_pickaxe", 14, 0.9f, 1.8f, 3, 14, 10, 9);
             Add("weapon_spear", "Деревянное копьё", ItemCategory.Weapon).Weapon = WeaponDef.MeleeTool("weapon_spear", 35, 0.9f, 2.3f, 1, 1, 1, 1, 50);
+            Add("tool_hammer", "Молоток", ItemCategory.Tool).Weapon = WeaponDef.MeleeTool("tool_hammer", 6, 0.6f, 2.0f, 1, 1, 1, 1);   // улучшает и чинит постройки
+            Add("build_plan", "План постройки", ItemCategory.Tool).Build = true;
             Add("weapon_torch", "Факел", ItemCategory.Weapon).Weapon = WeaponDef.MeleeTool("weapon_torch", 10, 0.8f, 1.6f, 1, 1, 1, 1);   // светит ночью
 
             // огнестрел и лук
@@ -212,6 +215,8 @@ namespace Rastvordd.Sim
             new Recipe { Output = "tool_hatchet", Cost = new[] { ("wood", 200), ("stone", 100) }, Time = 6 },
             new Recipe { Output = "tool_pickaxe", Cost = new[] { ("wood", 200), ("stone", 100) }, Time = 6 },
             new Recipe { Output = "weapon_spear", Cost = new[] { ("wood", 300) }, Time = 5 },
+            new Recipe { Output = "build_plan", Cost = new[] { ("wood", 20) }, Time = 1 },
+            new Recipe { Output = "tool_hammer", Cost = new[] { ("wood", 100) }, Time = 3 },
             new Recipe { Output = "weapon_torch", Cost = new[] { ("wood", 30), ("cloth", 5) }, Time = 2 },
             new Recipe { Output = "weapon_bow", Cost = new[] { ("wood", 200), ("cloth", 50) }, Time = 8 },
             new Recipe { Output = "arrow", Count = 2, Cost = new[] { ("wood", 25), ("stone", 10) }, Time = 2 },
@@ -257,6 +262,8 @@ namespace Rastvordd.Sim
         public bool Crouching;
         public float PendingSwingAt = -1;   // удар инструментом засчитывается с задержкой — когда он опускается на цель
         public WeaponState PendingSwing;
+        public StructKind BuildPiece = StructKind.Foundation;   // что ставит план постройки (R — сменить)
+        public Vector2 LastAim;
         public readonly ItemSlot[] Belt = new ItemSlot[BeltSize];
         public int Current;
         public readonly List<ItemStack> Inventory = new();
@@ -408,7 +415,7 @@ namespace Rastvordd.Sim
         public bool Empty => Items.Count == 0;
     }
 
-    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted }
+    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted, Built, Destroyed, Door, HitStruct }
 
     public struct SimEvent
     {

@@ -23,6 +23,7 @@ namespace Rastvordd.Sim
     public struct NodeSnap { public int Id; public NodeKind Kind; public Vector2 Pos; public float Radius; public float Fill; }
     public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; }
     public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; }
+    public struct StructSnap { public int Id; public StructKind Kind; public int I, J, Dir, Tier; public float Hp; public bool Open; }
 
     public struct BeltSlotInfo
     {
@@ -59,6 +60,9 @@ namespace Rastvordd.Sim
         public string InteractHint;     // пусто — рядом ничего нет
         public bool HeldDeploy;
         public bool NearBench;
+        public bool HoldingPlan;        // план постройки: призрак элемента под курсором
+        public StructKind BuildPiece;
+        public bool BuildOk;
         public BeltSlotInfo?[] Belt = new BeltSlotInfo?[Actor.BeltSize];
         public int Current;
         public List<(string name, int count)> Inventory = new();
@@ -79,10 +83,12 @@ namespace Rastvordd.Sim
         public List<NodeSnap> Nodes = new();
         public List<PickupSnap> Pickups = new();
         public List<DeploySnap> Deployables = new();
+        public List<StructSnap> Structures = new();
+        public int StructVersion;         // меняется при любой стройке/поломке/двери
         public List<SimEvent> Events = new();
     }
 
-    public struct WallInfo { public Vector2 Min, Max; public float Height; public WallKind Kind; }
+    public struct WallInfo { public Vector2 Min, Max; public float Height; public WallKind Kind; public int Tier; public bool Door; public int StructId; }
 
     public sealed class MapInfo
     {
@@ -189,11 +195,16 @@ namespace Rastvordd.Sim
                 if (Vector2.DistanceSquared(d.Pos, me.Pos) < r2)
                     snap.Deployables.Add(new DeploySnap { Id = d.Id, Kind = d.Kind, Pos = d.Pos, Burning = d.Burning });
 
+            snap.StructVersion = World.StructVersion;
+            foreach (var st in World.Structures)
+                if (Vector2.DistanceSquared(st.Center, me.Pos) < r2)
+                    snap.Structures.Add(new StructSnap { Id = st.Id, Kind = st.Kind, I = st.I, J = st.J, Dir = st.Dir, Tier = st.Tier, Hp = st.Hp / st.MaxHp, Open = st.Open });
+
             foreach (var e in _eventsThisTick)
             {
                 bool mine = e.ActorId == me.Id || e.OtherId == me.Id;
                 bool personal = e.Kind is SimEventKind.Loot or SimEventKind.Gather or SimEventKind.Info
-                                       or SimEventKind.Crafted or SimEventKind.Placed;
+                                       or SimEventKind.Crafted or SimEventKind.Placed;   // Built видят все рядом: слышно стройку
                 if (personal && e.ActorId != me.Id) continue;
                 if (!mine && Vector2.DistanceSquared(e.Pos, me.Pos) > EventRadius * EventRadius) continue;
                 snap.Events.Add(e);
@@ -257,6 +268,26 @@ namespace Rastvordd.Sim
             }
 
             if (!me.Dead) s.InteractHint = Hint(World.NearestInteract(me));
+            if (!me.Dead && held?.Def?.Build == true)
+            {
+                s.HoldingPlan = true;
+                s.BuildPiece = me.BuildPiece;
+                s.BuildOk = World.CanBuild(me, me.BuildPiece, me.LastAim, out string why);
+                var cost = Building.Cost(me.BuildPiece, me.BuildPiece == StructKind.Door ? 1 : 0);
+                string price = string.Join(", ", System.Array.ConvertAll(cost, c => $"{Items.Name(c.id)} {c.n}"));
+                if (string.IsNullOrEmpty(s.InteractHint))
+                    s.InteractHint = $"{Building.KindName(me.BuildPiece)} · {price} · R — другой элемент{(s.BuildOk ? "" : " · " + why)}";
+            }
+            else if (!me.Dead && held?.Id == "tool_hammer" && World.TargetStructure(me, 2f) is Structure t && string.IsNullOrEmpty(s.InteractHint))
+            {
+                string state = $"{Building.KindName(t.Kind)} ({Building.TierNames[t.Tier]}) {(int)t.Hp}/{(int)t.MaxHp}";
+                if (t.Tier < Building.MaxTier)
+                {
+                    var up = Building.Cost(t.Kind, t.Tier + 1);
+                    s.InteractHint = $"{state} · ЛКМ — {Building.TierNames[t.Tier + 1]}: " + string.Join(", ", System.Array.ConvertAll(up, c => $"{Items.Name(c.id)} {c.n}"));
+                }
+                else s.InteractHint = state + (t.Hp < t.MaxHp ? " · ЛКМ — починить" : "");
+            }
             return s;
         }
 
@@ -271,6 +302,7 @@ namespace Rastvordd.Sim
             },
             World.InteractKind.Furnace => FurnaceHint((Deployable)it.target),
             World.InteractKind.Workbench => "[E] Верстак",
+            World.InteractKind.Door => ((Structure)it.target).Open ? "[E] Закрыть дверь" : "[E] Открыть дверь",
             _ => "",
         };
 

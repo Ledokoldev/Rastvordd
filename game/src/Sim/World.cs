@@ -5,12 +5,14 @@ using System.Numerics;
 namespace Rastvordd.Sim
 {
     /// <summary>Concrete/Crate/Rock — стены РТ и укрытия-блоки; остальное — пропсы-спрайты (машины, блоки, хлам), тоже укрытия.</summary>
-    public enum WallKind { Concrete, Crate, Rock, Car, Barrier, Junk, Barrel, WoodCrate }
+    public enum WallKind { Concrete, Crate, Rock, Car, Barrier, Junk, Barrel, WoodCrate, Built }
 
     public sealed class MapWall
     {
         public Wall Wall;
         public WallKind Kind;
+        public Structure Owner;        // часть постройки игрока (иначе — карта)
+        public bool PassBullets;       // проём окна: пули и взгляд проходят
     }
 
     public struct Noise
@@ -22,7 +24,7 @@ namespace Rastvordd.Sim
     }
 
     /// <summary>Авторитарная симуляция мира. Ничего не знает про Godot.</summary>
-    public sealed class World
+    public sealed partial class World
     {
         public const float Dt = 1f / 30f;
         public const float HalfSize = 200f;
@@ -358,14 +360,13 @@ namespace Rastvordd.Sim
         {
             a.AddSlot(Items.NewSlot("weapon_ak", 30));
             a.AddSlot(Items.NewSlot("tool_hatchet"));
-            a.AddSlot(Items.NewSlot("tool_pickaxe"));
+            a.AddSlot(Items.NewSlot("build_plan"));
+            a.AddSlot(Items.NewSlot("tool_hammer"));
             a.AddSlot(Items.NewSlot("weapon_torch"));
-            a.AddSlot(Items.NewSlot("deploy_furnace"));
-            a.AddSlot(Items.NewSlot("deploy_workbench"));
             a.Add("ammo_rifle", 120);
             a.Add("metal_ore", 60);
             a.Add("sulfur_ore", 30);
-            foreach (var (id, n) in new[] { ("wood", 1000), ("stone", 1000), ("metal_fragments", 300), ("cloth", 100), ("scrap", 100), ("charcoal", 100), ("sulfur", 100), ("bandage", 5) })
+            foreach (var (id, n) in new[] { ("wood", 5000), ("stone", 5000), ("metal_fragments", 3000), ("cloth", 100), ("scrap", 500), ("charcoal", 100), ("sulfur", 100), ("bandage", 5) })
                 a.Add(id, n);
             Info(a, "Отладочный набор выдан");
         }
@@ -494,6 +495,7 @@ namespace Rastvordd.Sim
             float speed = WalkSpeed * (1f - 0.45f * a.Peek) * (a.Crouching ? 0.5f : 1f);   // прицел и присед — медленнее
             bool sprint = false;
             var toAimDir = cmd.Aim - a.Pos;
+            a.LastAim = cmd.Aim;
             if (cmd.Sprint && !a.Crouching && move.LengthSquared() > 0.01f && a.Peek < 0.3f && toAimDir.LengthSquared() > 0.01f)
             {
                 // спринт только вперёд: чем сильнее смотришь в сторону от бега, тем ближе к шагу
@@ -646,6 +648,16 @@ namespace Rastvordd.Sim
             if (held == null) { a.FireHeldLastTick = cmd.Fire; return; }
             var def = held.Def;
 
+            if (def.Build)
+            {
+                // план постройки: R — следующий элемент, ЛКМ — поставить
+                if (cmd.Reload) a.BuildPiece = (StructKind)(((int)a.BuildPiece + 1) % 5);
+                trigger = cmd.Fire && !a.FireHeldLastTick;
+                a.FireHeldLastTick = cmd.Fire;
+                if (trigger) TryBuild(a, cmd.Aim);
+                return;
+            }
+
             if (def.Deploy != DeployKind.None)
             {
                 trigger = cmd.Fire && !a.FireHeldLastTick;
@@ -759,6 +771,12 @@ namespace Rastvordd.Sim
                 return MathF.Abs(Geo.AngleDiff(a.Facing, MathF.Atan2(d.Y, d.X))) <= halfArc;
             }
 
+            if (wd.Id == "tool_hammer")
+            {
+                var target = TargetStructure(a, wd.Range);
+                if (target != null) { HammerHit(a, target); return; }
+            }
+
             Actor victim = null;
             float best = float.MaxValue;
             foreach (var o in Actors)
@@ -780,7 +798,18 @@ namespace Rastvordd.Sim
                 float d = Vector2.Distance(n.Pos, a.Pos) - n.Radius;
                 if (d < best && InArc(n.Pos, n.Radius)) { best = d; node = n; }
             }
-            if (node == null) return;
+            if (node == null)
+            {
+                // по постройке: инструментом ломаются только разметка и дерево
+                var st = TargetStructure(a, wd.Range);
+                if (st != null)
+                {
+                    float dealt = DamageStructure(st, wd.Damage * Building.MeleeMult(st.Kind, st.Tier) * 2f, a.Id);
+                    Events.Add(new SimEvent { Kind = SimEventKind.HitStruct, ActorId = a.Id, OtherId = st.Id, Pos = st.Center, Value = dealt, Text = Building.TierNames[st.Tier] });
+                    if (dealt <= 0) Info(a, $"{Building.KindName(st.Kind)} ({Building.TierNames[st.Tier]}) — инструментом не взять");
+                }
+                return;
+            }
 
             float yield = MathF.Min(node.Amount, wd.Gather(node.Kind));
             int got = (int)MathF.Round(yield);
@@ -824,7 +853,7 @@ namespace Rastvordd.Sim
 
         // ---------- взаимодействие (E) ----------
 
-        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench }
+        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door }
 
         /// <summary>Что ближе всего под рукой. Используется и сервером, и подсказкой на экране.</summary>
         public (InteractKind kind, object target) NearestInteract(Actor a)
@@ -848,6 +877,8 @@ namespace Rastvordd.Sim
                 float d = Vector2.Distance(a.Pos, dp.Pos) - dp.Radius + 0.3f;
                 if (d < bestD) { bestD = d; best = (dp.Kind == DeployKind.Furnace ? InteractKind.Furnace : InteractKind.Workbench, dp); }
             }
+            var door = NearestDoor(a.Pos, MathF.Min(bestD, InteractRange) + 0.4f);
+            if (door != null) best = (InteractKind.Door, door);
             return best;
         }
 
@@ -859,6 +890,7 @@ namespace Rastvordd.Sim
                 case InteractKind.Bag: LootBagInto(a, (LootBag)target); break;
                 case InteractKind.Pickup: Collect(a, (Pickup)target); break;
                 case InteractKind.Furnace: UseFurnace(a, (Deployable)target); break;
+                case InteractKind.Door: ToggleDoor(a, (Structure)target); break;
                 case InteractKind.Workbench: Info(a, "Верстак: рядом с ним доступны рецепты уровня 1 (Q)"); break;
             }
         }
@@ -1016,12 +1048,13 @@ namespace Rastvordd.Sim
 
                 float bestT = 2;
                 Actor hitActor = null;
+                MapWall hitWall = null;
                 foreach (var w in WallsAlong(a, b))
-                    if (Geo.SegmentAabb(a, b, w.Wall.Min, w.Wall.Max, out float t) && t < bestT) bestT = t;
+                    if (!w.PassBullets && Geo.SegmentAabb(a, b, w.Wall.Min, w.Wall.Max, out float t) && t < bestT) { bestT = t; hitWall = w; }
                 foreach (var n in NodesAlong(a, b))
-                    if (Geo.SegmentCircle(a, b, n.Pos, n.Radius, out float t) && t < bestT) bestT = t;
+                    if (Geo.SegmentCircle(a, b, n.Pos, n.Radius, out float t) && t < bestT) { bestT = t; hitWall = null; }
                 foreach (var d in DeploysAlong(a, b))
-                    if (Geo.SegmentCircle(a, b, d.Pos, d.Radius, out float t) && t < bestT) bestT = t;
+                    if (Geo.SegmentCircle(a, b, d.Pos, d.Radius, out float t) && t < bestT) { bestT = t; hitWall = null; }
                 foreach (var act in Actors)
                 {
                     if (act.Dead || act.Id == p.OwnerId) continue;
@@ -1037,7 +1070,12 @@ namespace Rastvordd.Sim
                 {
                     var hitPos = a + (b - a) * bestT;
                     if (hitActor != null) Damage(hitActor, p.Damage, p.OwnerId, hitPos);
-                    else Events.Add(new SimEvent { Kind = SimEventKind.HitWall, Pos = hitPos, Dir = p.Dir, OtherId = p.OwnerId });
+                    else
+                    {
+                        // пули ломают двери и разметку (D22), стены — нет
+                        if (hitWall?.Owner is Structure st) DamageStructure(st, p.Damage * Building.BulletMult(st.Kind, st.Tier), p.OwnerId);
+                        Events.Add(new SimEvent { Kind = SimEventKind.HitWall, Pos = hitPos, Dir = p.Dir, OtherId = p.OwnerId });
+                    }
                     Projectiles.RemoveAt(i);
                     continue;
                 }

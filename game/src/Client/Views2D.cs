@@ -398,6 +398,9 @@ namespace Rastvordd.Client
         readonly Rect2 _top, _front;
         readonly Color _topC, _frontC;
         readonly WallKind _kind;
+        readonly int _tier;
+        readonly bool _door;
+        float _alpha = 1;
 
         readonly Biome _biome;
 
@@ -406,6 +409,8 @@ namespace Rastvordd.Client
             _biome = biome;
             Material = VisionFx.ObjectMat;
             _kind = w.Kind;
+            _tier = w.Tier;
+            _door = w.Door;
             TextureFilter = TextureFilterEnum.Nearest;
             TextureRepeat = TextureRepeatEnum.Enabled;
             float cx = (w.Min.X + w.Max.X) * 0.5f * Iso.PPM;
@@ -450,8 +455,25 @@ namespace Rastvordd.Client
                 }
             }
             DrawRect(new Rect2(_front.Position.X + 3, -2, _front.Size.X, 6), new Color(0, 0, 0, 0.2f));
+            // срез: изнутри дома стены перед персонажем рисуются низкими, как в Project Zomboid
+            var frontR = _front;
+            var topR = _top;
+            if (_cut)
+            {
+                float hc = Mathf.Min(_front.Size.Y, Iso.H(0.45f));
+                frontR = new Rect2(_front.Position.X, -hc, _front.Size.X, hc);
+                topR = new Rect2(_top.Position.X, -hc - _top.Size.Y, _top.Size.X, _top.Size.Y);
+            }
             var (frontTex, topTex) = _kind switch
             {
+                WallKind.Built when _door => (Art.Get(_tier >= 3 ? "walls/wallface_door_metal" : "walls/wallface_door_wood") ?? Art.Get("walls/wallface_wood"), Art.Get("tiles/floor_wood")),
+                WallKind.Built => _tier switch
+                {
+                    0 => (Art.Get("walls/wallface_twig"), Art.Get("tiles/floor_wood")),
+                    1 => (Art.Get("walls/wallface_wood"), Art.Get("tiles/floor_wood")),
+                    2 => (Art.Get("walls/wallface_stone"), Art.Get("tiles/ground_gravel")),
+                    _ => (Art.Get("walls/wallface_metal"), Art.Get("tiles/ground_concrete")),
+                },
                 WallKind.Crate => (Art.Get("walls/wallface_wood"), Art.Get("tiles/floor_wood")),
                 WallKind.Rock => (Art.Get("walls/wallface_stone"), Art.Get("tiles/ground_gravel")),
                 _ => (Art.Get("walls/wallface_concrete"), Art.Get("tiles/ground_concrete")),
@@ -459,12 +481,17 @@ namespace Rastvordd.Client
             if (frontTex != null && topTex != null)
             {
                 // лицевая сторона темнее (в тени), верх светлее — так читается высота
-                DrawTextureRect(frontTex, _front, true, new Color(0.78f, 0.78f, 0.78f));
-                DrawTextureRect(topTex, _top, true, new Color(1.05f, 1.05f, 1.05f));
-                DrawLine(new Vector2(_top.Position.X, _top.End.Y), _top.End, new Color(0, 0, 0, 0.35f), 1);
-                DrawRect(_top, new Color(0, 0, 0, 0.25f), false, 1);
+                float a = _alpha;
+                var tint = _kind == WallKind.Built && _tier == 0 ? new Color(0.85f, 0.92f, 1.05f) : _kind == WallKind.Built && _tier >= 4 ? new Color(0.62f, 0.66f, 0.74f) : Colors.White;
+                DrawTextureRect(frontTex, frontR, true, new Color(0.78f * tint.R, 0.78f * tint.G, 0.78f * tint.B, a));
+                DrawTextureRect(topTex, topR, true, new Color(1.05f * tint.R, 1.05f * tint.G, 1.05f * tint.B, a));
+                if (_cut) DrawRect(topR, new Color(0, 0, 0, 0.35f), false, 1);
+                if (_door && !_cut) DrawRect(new Rect2(_front.End.X - Mathf.Min(6, _front.Size.X * 0.3f), _front.Position.Y + _front.Size.Y * 0.5f, 2, 3), new Color(0.15f, 0.13f, 0.1f, a));   // ручка
+                DrawLine(new Vector2(topR.Position.X, topR.End.Y), topR.End, new Color(0, 0, 0, 0.35f), 1);
+                DrawRect(topR, new Color(0, 0, 0, 0.25f), false, 1);
                 return;
             }
+            if (_kind == WallKind.Built) { DrawRect(_front, new Color(0.45f, 0.36f, 0.25f, _alpha)); DrawRect(_top, new Color(0.6f, 0.5f, 0.35f, _alpha)); return; }
             DrawRect(_front, _frontC);
             DrawRect(_top, _topC);
             DrawRect(_top, _topC.Darkened(0.2f), false, 1);
@@ -478,6 +505,37 @@ namespace Rastvordd.Client
                 for (float x = _front.Position.X + 32; x < _front.End.X; x += 32)
                     DrawLine(new Vector2(x, _front.Position.Y), new Vector2(x, 0), _frontC.Darkened(0.12f), 1);
             }
+        }
+    }
+
+    public partial class WallView2D
+    {
+        /// <summary>Закрывает ли стена персонажа, стоящего ногами в feet (он позади неё).</summary>
+        public bool Covers(Vector2 feet)
+        {
+            if (feet.Y >= Position.Y - 1) return false;
+            float bodyTop = feet.Y - Iso.H(1.9f);
+            var front = new Rect2(_front.Position + Position, _front.Size);
+            var top = new Rect2(_top.Position + Position, _top.Size);
+            var body = new Rect2(feet.X - 8, bodyTop, 16, feet.Y - bodyTop);
+            return body.Intersects(front) || body.Intersects(top);
+        }
+
+        bool _cut;
+        /// <summary>Срезать стену до низкой (персонаж внутри дома, стена перед ним).</summary>
+        public void SetCut(bool cut)
+        {
+            if (cut == _cut) return;
+            _cut = cut;
+            QueueRedraw();
+        }
+
+        public void SetFade(bool fade, float dt)
+        {
+            float target = fade ? 0.3f : 1f;
+            if (Mathf.Abs(target - _alpha) < 0.01f) return;
+            _alpha = Mathf.MoveToward(_alpha, target, dt * 5);
+            QueueRedraw();
         }
     }
 
@@ -531,6 +589,15 @@ namespace Rastvordd.Client
         }
 
         /// <summary>Крона полупрозрачна, если под ней игрок — чтобы не терять персонажа.</summary>
+        bool _cut;
+        /// <summary>Срезать стену до низкой (персонаж внутри дома, стена перед ним).</summary>
+        public void SetCut(bool cut)
+        {
+            if (cut == _cut) return;
+            _cut = cut;
+            QueueRedraw();
+        }
+
         public void SetFade(bool fade, float dt)
         {
             float target = fade ? 0.35f : 1f;

@@ -57,7 +57,7 @@ namespace Rastvordd.Client
             DrawSetTransform(Vector2.Zero, 0, Vector2.One);
         }
 
-        public void SetState(Vector2 pos, float facing, bool dead, bool reloading, float speed, float dt, string heldId)
+        public void SetState(Vector2 pos, float facing, bool dead, bool reloading, float speed, float dt, string heldId, bool crouch = false)
         {
             Position = pos;
             bool right = Mathf.Cos(facing) >= 0;
@@ -76,7 +76,8 @@ namespace Rastvordd.Client
 
             if (_held.ItemId != heldId) { _held.ItemId = heldId; _held.QueueRedraw(); }
 
-            _body.Scale = new Vector2(right ? 1 : -1, 1);
+            // присед: тело ниже (пока сжатием спрайта; позже — свои кадры)
+            _body.Scale = new Vector2(right ? 1 : -1, crouch ? 0.8f : 1f);
             if (back != _back)
             {
                 _back = back;
@@ -98,7 +99,7 @@ namespace Rastvordd.Client
             }
             _held.Rotation = facing + swingOffset + (reloading ? (right ? 0.9f : -0.9f) : 0);
             _held.Scale = new Vector2(1, right ? 1 : -1);
-            _held.Position = new Vector2(right ? 2 : -2, -Iso.H(1.05f) + (_body.Moving ? -Mathf.Abs(Mathf.Sin(_body.Phase)) : 0));
+            _held.Position = new Vector2(right ? 2 : -2, -Iso.H(1.05f) * (crouch ? 0.78f : 1f) + (_body.Moving ? -Mathf.Abs(Mathf.Sin(_body.Phase)) : 0));
         }
     }
 

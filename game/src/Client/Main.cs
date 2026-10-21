@@ -19,7 +19,7 @@ namespace Rastvordd.Client
         readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
         Ambient _ambient;
-        bool _overview, _perf, _timeEdge;
+        bool _overview, _perf, _timeEdge, _forceCrouch;
         int _pressNAt = -1;
         double _perfTime, _simTime;
         int _perfFrames;
@@ -130,6 +130,7 @@ namespace Rastvordd.Client
                 }
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
+                else if (arg == "--crouch") _forceCrouch = true;
                 else if (arg == "--press-n") _pressNAt = 5;
                 else if (arg.StartsWith("--day=")) _forcedDay = float.Parse(arg.Substring(6), inv);
                 else if (arg.StartsWith("--zoom=")) _zoom = float.Parse(arg.Substring(7), inv);
@@ -239,6 +240,7 @@ namespace Rastvordd.Client
                 SelectSlot = _slot,
                 Peek = _peek,
                 ToggleTime = _timeEdge,
+                Crouch = _forceCrouch || Input.IsPhysicalKeyPressed(Key.Alt),
             };
         }
 
@@ -388,7 +390,7 @@ namespace Rastvordd.Client
         }
 
         /// <summary>Шаги: звук каждые ~0.8 м пути; по траве мягко, по гравию/песку/снегу/бетону жёстче.</summary>
-        void Footstep(int id, SVec pos, float speed, float dt)
+        void Footstep(int id, SVec pos, float speed, float dt, bool crouch = false)
         {
             if (speed < 0.5f) return;
             _stepAcc.TryGetValue(id, out var acc);
@@ -398,7 +400,7 @@ namespace Rastvordd.Client
                 acc = 0;
                 var b = TerrainView.BiomeAt(_map, pos);
                 bool hard = b is Biome.Arid or Biome.Tundra or Biome.Beach || (pos.X > 4 && pos.X < 36 && pos.Y > -36 && pos.Y < -4);
-                Sfx.Play(hard ? "step_gravel" : "step_grass", Iso.Px(pos), id == _myId ? -10 : -6, 18, 0.15f);
+                Sfx.Play(hard ? "step_gravel" : "step_grass", Iso.Px(pos), (id == _myId ? -10 : -6) - (crouch ? 8 : 0), crouch ? 8 : 18, 0.15f);
             }
             _stepAcc[id] = acc;
         }
@@ -451,8 +453,8 @@ namespace Rastvordd.Client
                     if (d.LengthSquared() > 0.04f) facing = Mathf.Atan2(d.Y, d.X);
                     _selfPx = Iso.Px(pos);
                 }
-                view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId);
-                if (!a.Dead) Footstep(a.Id, pos, speed, dt);
+                view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId, a.Crouching);
+                if (!a.Dead) Footstep(a.Id, pos, speed, dt, a.Crouching);
             }
             foreach (var kv in _actorViews)
                 if (!seen.Contains(kv.Key)) kv.Value.Visible = false;

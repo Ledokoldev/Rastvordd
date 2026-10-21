@@ -63,7 +63,7 @@ void fragment() {
             _damageRect = FullRect(new Color(0.8f, 0, 0, 0));
 
             _hintLabel = MakeLabel(this, new Vector2(16, 12), 15, new Color(1, 1, 1, 0.75f));
-            _hintLabel.Text = "WASD — ходьба · Shift — бег · ЛКМ — удар/выстрел/поставить · ПКМ — прицелиться · R — перезарядка\nE — взаимодействие · 1–6 — пояс · Q — крафт · Tab — инвентарь · F — съесть · H — бинт · N — день/ночь · F9 — отладочный набор";
+            _hintLabel.Text = "WASD — ходьба · Shift — бег · Alt — присед · ЛКМ — удар/выстрел/поставить · ПКМ — прицелиться · R — перезарядка\nE — взаимодействие · 1–6 — пояс · Q — крафт · Tab — инвентарь · F — съесть · H — бинт · N — день/ночь · F9 — отладочный набор";
             _modeLabel = MakeLabel(this, new Vector2(16, 58), 15, new Color(1, 0.9f, 0.6f, 0.85f));
 
             (_hpFill, _hpLabel) = MakeBar(-50, 26, new Color(0.45f, 0.75f, 0.3f), 16);

@@ -13,6 +13,7 @@ namespace Rastvordd.Sim
         public string HeldId;
         public bool Reloading;
         public bool Sprinting;
+        public bool Crouching;
     }
 
     public struct ProjSnap { public int Id; public Vector2 Pos; public Vector2 Dir; public bool Arrow; }
@@ -159,6 +160,7 @@ namespace Rastvordd.Sim
                     Id = a.Id, Pos = a.Pos, Facing = a.Facing, Dead = a.Dead, IsNpc = a.Team == Team.Npc,
                     HeldId = a.Held?.Id, Reloading = w != null && w.ReloadLeft > 0,
                     Sprinting = a.Vel.Length() > World.WalkSpeed + 0.3f,
+                    Crouching = a.Crouching,
                 });
             }
 
@@ -278,7 +280,7 @@ namespace Rastvordd.Sim
         bool IsVisibleTo(Actor viewer, Actor target)
         {
             if (viewer.Dead) return Vector2.Distance(viewer.Pos, target.Pos) < 30;
-            if (World.CanSee(viewer, target.Pos, World.ViewRange(viewer), World.ViewCone(viewer))) return true;
+            if (World.CanSeeActor(viewer, target, World.ViewRange(viewer), World.ViewCone(viewer))) return true;
             // выстрел выдаёт стрелка, если между нами нет стен
             bool shotRecently = World.Time - target.LastShotTime < 0.6f;
             return shotRecently && Vector2.Distance(viewer.Pos, target.Pos) < 60 && World.HasLineOfSight(viewer.Pos, target.Pos);

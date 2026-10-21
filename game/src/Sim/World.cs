@@ -382,6 +382,16 @@ namespace Rastvordd.Sim
         }
         public static float ViewCone(Actor a) => 130f - 70f * a.Peek;
 
+        /// <summary>Видит ли наблюдатель человека. Присевшего прячут и низкие укрытия (машины, блоки, ящики).</summary>
+        public bool CanSeeActor(Actor viewer, Actor target, float range, float coneDeg)
+        {
+            if (!CanSee(viewer, target.Pos, range, coneDeg)) return false;
+            if (!target.Crouching || Vector2.Distance(viewer.Pos, target.Pos) < 2.5f) return true;
+            foreach (var w in Walls)
+                if (!w.Wall.BlocksVision && Geo.SegmentAabb(viewer.Pos, target.Pos, w.Wall.Min, w.Wall.Max, out _)) return false;
+            return true;
+        }
+
         /// <summary>Видит ли наблюдатель цель: конус обзора, дальность, стены. Вплотную чувствуется всегда.</summary>
         public bool CanSee(Actor viewer, Vector2 target, float range = 45f, float coneDeg = 120f)
         {
@@ -449,10 +459,11 @@ namespace Rastvordd.Sim
             var move = cmd.Move;
             if (move.LengthSquared() > 1) move = Vector2.Normalize(move);
             a.Peek = Math.Clamp(cmd.Peek, 0f, 1f);
-            float speed = WalkSpeed * (1f - 0.45f * a.Peek);   // прицеливаешься — идёшь медленнее
+            a.Crouching = cmd.Crouch;
+            float speed = WalkSpeed * (1f - 0.45f * a.Peek) * (a.Crouching ? 0.5f : 1f);   // прицел и присед — медленнее
             bool sprint = false;
             var toAimDir = cmd.Aim - a.Pos;
-            if (cmd.Sprint && move.LengthSquared() > 0.01f && a.Peek < 0.3f && toAimDir.LengthSquared() > 0.01f)
+            if (cmd.Sprint && !a.Crouching && move.LengthSquared() > 0.01f && a.Peek < 0.3f && toAimDir.LengthSquared() > 0.01f)
             {
                 // спринт только вперёд: чем сильнее смотришь в сторону от бега, тем ближе к шагу
                 float off = MathF.Abs(Geo.AngleDiff(MathF.Atan2(move.Y, move.X), MathF.Atan2(toAimDir.Y, toAimDir.X))) * 180f / MathF.PI;
@@ -739,7 +750,7 @@ namespace Rastvordd.Sim
             if (w == null || w.Def.Melee) return 0;
             float moving = a.Vel.Length() / WalkSpeed;
             float spread = w.Def.BaseSpreadDeg + w.Bloom + MathF.Min(1.5f, moving) * 3f;
-            return spread * (1f - 0.35f * a.Peek);
+            return spread * (1f - 0.35f * a.Peek) * (a.Crouching ? 0.75f : 1f);   // в приседе точнее
         }
 
         // ---------- взаимодействие (E) ----------

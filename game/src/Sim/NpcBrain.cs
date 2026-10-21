@@ -107,6 +107,7 @@ namespace Rastvordd.Sim
             float dist = Vector2.Distance(_me.Pos, target.Pos);
             float rate = dist < 8 ? 2.2f : dist < 16 ? 1.1f : 0.6f;
             if (target.Vel.Length() > World.WalkSpeed + 0.3f) rate *= 1.5f;   // бегущего заметить проще
+            if (target.Crouching) rate *= 0.5f;   // присевшего замечают вдвое дольше
             _notice += World.Dt * rate;
             if (_provoked || _notice >= 1f) { EnterCombat(target); return; }
             cmd.Aim = target.Pos;   // поворачивается и присматривается
@@ -134,7 +135,7 @@ namespace Rastvordd.Sim
                 if (a.Dead || a.Team == Team.Npc) continue;
                 bool shotAtMe = _me.LastAttacker == a.Id && _w.Time - _me.LastDamagedTime < 1.5f;
                 if (shotAtMe) _provoked = true;
-                if (!shotAtMe && !_w.CanSee(_me, a.Pos, SightRange, SightCone)) continue;
+                if (!shotAtMe && !_w.CanSeeActor(_me, a, a.Crouching ? SightRange * 0.7f : SightRange, SightCone)) continue;
                 if (shotAtMe && !_w.HasLineOfSight(_me.Pos, a.Pos)) { _lastKnown = a.Pos; continue; }
                 float d = Vector2.Distance(_me.Pos, a.Pos);
                 if (d < bestD) { bestD = d; best = a; }

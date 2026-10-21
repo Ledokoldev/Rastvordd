@@ -17,6 +17,7 @@ namespace Rastvordd.Sim
         public bool Respawn;
         public bool DebugKit;
         public bool ToggleTime;   // отладка: день/ночь
+        public bool Crouch;       // присед (зажат Alt)
         public float Peek;        // 0..1: насколько игрок прицеливается (ПКМ)
         public int SelectSlot;    // -1 — без смены слота пояса
         public int Craft;         // индекс рецепта, -1 — ничего
@@ -238,6 +239,7 @@ namespace Rastvordd.Sim
         public float HealCooldown;
         public bool FireHeldLastTick;
         public float Peek;
+        public bool Crouching;
         public readonly ItemSlot[] Belt = new ItemSlot[BeltSize];
         public int Current;
         public readonly List<ItemStack> Inventory = new();

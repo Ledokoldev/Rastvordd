@@ -136,6 +136,10 @@ namespace Rastvordd.Sim
             AddCrate(new Vector2(31, -31));
             AddCrate(new Vector2(30, -9));
             AddPickup(PickupKind.WaterBarrel, new Vector2(8, -31));
+            foreach (var p in new[] { new Vector2(4, -36), new Vector2(36, -36), new Vector2(36, -2.5f), new Vector2(4, -20), new Vector2(18, -36), new Vector2(36, -18) })
+                AddScrapSpot(NodeKind.Barrel, p);
+            AddScrapSpot(NodeKind.Junk, new Vector2(33, -22));
+            AddScrapSpot(NodeKind.Junk, new Vector2(7, -5));
 
             foreach (var p in new[] { new Vector2(15, -24), new Vector2(28, -30), new Vector2(29, -10),
                                       new Vector2(10, -15), new Vector2(22, -20), new Vector2(20, 2) })
@@ -204,8 +208,10 @@ namespace Rastvordd.Sim
                 case 6: AddPickup(PickupKind.WaterBarrel, p); break;
                 case 7:
                     // мелкие укрытия: ящик, бочка, хлам
-                    int r7 = Rng.Next(3);
-                    AddProp(r7 == 0 ? WallKind.WoodCrate : r7 == 1 ? WallKind.Barrel : WallKind.Junk, p);
+                    int r7 = Rng.Next(5);
+                    if (r7 == 3) AddScrapSpot(NodeKind.Barrel, p);
+                    else if (r7 == 4) AddScrapSpot(NodeKind.Junk, p);
+                    else AddProp(r7 == 0 ? WallKind.WoodCrate : r7 == 1 ? WallKind.Barrel : WallKind.Junk, p);
                     break;
                 default:
                     // крупные укрытия: сгоревшая машина, бетонный блок, хлам
@@ -263,12 +269,14 @@ namespace Rastvordd.Sim
                 NodeKind.Tree => Range(120, 200),
                 NodeKind.Stone => 150,
                 NodeKind.Metal => 90,
+                NodeKind.Barrel => 30,               // прочность бочки
+                NodeKind.Junk => Range(10, 16),      // лома в куче
                 _ => 60,
             };
             var node = new ResourceNode
             {
                 Id = NextId(), Kind = kind, Pos = p,
-                Radius = kind == NodeKind.Tree ? Range(0.35f, 0.5f) : 0.7f,
+                Radius = kind switch { NodeKind.Tree => Range(0.35f, 0.5f), NodeKind.Barrel => 0.35f, NodeKind.Junk => 0.6f, _ => 0.7f },
                 Amount = amount, MaxAmount = amount,
             };
             Nodes.Add(node);
@@ -920,7 +928,15 @@ namespace Rastvordd.Sim
                 return;
             }
 
-            float yield = MathF.Min(node.Amount, wd.Gather(node.Kind));
+            if (node.Kind == NodeKind.Barrel)
+            {
+                Events.Add(new SimEvent { Kind = SimEventKind.HitNode, ActorId = a.Id, OtherId = node.Id, Pos = node.Pos });
+                HitBarrel(node, wd.Damage, a.Id);
+                return;
+            }
+            float yield = node.Kind == NodeKind.Junk
+                ? MathF.Min(node.Amount, wd.Id == "tool_pickaxe" || wd.Id == "tool_hatchet" ? 2 : 1)   // хлам ковыряют: инструментом быстрее
+                : MathF.Min(node.Amount, wd.Gather(node.Kind));
             int got = (int)MathF.Round(yield);
             node.Amount -= yield;
             Events.Add(new SimEvent { Kind = SimEventKind.HitNode, ActorId = a.Id, OtherId = node.Id, Pos = node.Pos });
@@ -929,14 +945,44 @@ namespace Rastvordd.Sim
                 a.Add(node.ResourceId, got);
                 // при добыче металла и серы попадается немного камня
                 if (node.Kind is NodeKind.Metal or NodeKind.Sulfur) a.Add("stone", Math.Max(1, got / 3));
+                if (node.Kind == NodeKind.Junk && Rng.NextDouble() < 0.18) a.Add("metal_fragments", Rng.Next(3, 8));
                 Events.Add(new SimEvent { Kind = SimEventKind.Gather, ActorId = a.Id, OtherId = node.Id, Pos = node.Pos, Value = got, Text = Items.Name(node.ResourceId) });
             }
-            if (node.Amount <= 0.5f)
-            {
-                Nodes.Remove(node);
-                _nodeGrid.Remove(node);
-                _nodeRespawns.Add((node.Kind, Range(90, 180)));
-            }
+            if (node.Amount <= 0.5f) RemoveNode(node);
+        }
+
+        // ---------- металлолом: бочки и кучи хлама (D31) ----------
+
+        readonly List<(NodeKind kind, Vector2 pos, float left)> _spotRespawns = new();
+
+        /// <summary>Бочка или куча хлама на постоянном месте: после разграбления появляется там же.</summary>
+        void AddScrapSpot(NodeKind kind, Vector2 p) => AddNode(kind, p);
+
+        void RemoveNode(ResourceNode node)
+        {
+            Nodes.Remove(node);
+            _nodeGrid.Remove(node);
+            if (node.Kind is NodeKind.Barrel or NodeKind.Junk) _spotRespawns.Add((node.Kind, node.Pos, Range(180, 300)));
+            else _nodeRespawns.Add((node.Kind, Range(90, 180)));
+        }
+
+        /// <summary>Удар или пуля по бочке; разбита — под ней сумка с хламом (открывается сразу).</summary>
+        void HitBarrel(ResourceNode node, float dmg, int byId)
+        {
+            node.Amount -= dmg;
+            if (node.Amount > 0) return;
+            var bag = new LootBag { Id = NextId(), Pos = node.Pos, Despawn = 120f };
+            void Put(string id, int n) { if (n > 0) bag.Items.Add(new ItemSlot(id, n)); }
+            bool rich = NearMonument(node.Pos, 2);
+            Put("scrap", Rng.Next(2, 6) + (rich ? 2 : 0));
+            if (Rng.NextDouble() < 0.35) Put("metal_fragments", Rng.Next(10, 26));
+            if (Rng.NextDouble() < 0.25) Put("cloth", Rng.Next(4, 9));
+            if (Rng.NextDouble() < (rich ? 0.2 : 0.1)) Put("ammo_pistol", Rng.Next(4, 9));
+            if (Rng.NextDouble() < 0.08) Put("gunpowder", Rng.Next(5, 11));
+            if (Rng.NextDouble() < 0.05) Put("bandage", 1);
+            Bags.Add(bag);
+            Events.Add(new SimEvent { Kind = SimEventKind.Destroyed, ActorId = byId, Pos = node.Pos, Text = "Бочка" });
+            RemoveNode(node);
         }
 
         void TryPlace(Actor a, Vector2 at, ItemDef def)
@@ -980,24 +1026,24 @@ namespace Rastvordd.Sim
             float bestD = InteractRange;
             foreach (var b in Bags)
             {
-                if (b.Empty) continue;
+                if (b.Empty || !ClearLine(a.Pos, b.Pos, null, true)) continue;   // сквозь стены и двери не достать
                 float d = Vector2.Distance(a.Pos, b.Pos);
                 if (d < bestD) { bestD = d; best = (InteractKind.Bag, b); }
             }
             foreach (var p in Pickups)
             {
-                if (!p.Available) continue;
+                if (!p.Available || !ClearLine(a.Pos, p.Pos, null, true)) continue;
                 float d = Vector2.Distance(a.Pos, p.Pos);
                 if (d < bestD) { bestD = d; best = (InteractKind.Pickup, p); }
             }
             foreach (var dp in DeploysNear(a.Pos, InteractRange))
             {
-                if (dp.Kind == DeployKind.SleepBag) continue;   // спальник — не для E
+                if (dp.Kind == DeployKind.SleepBag || !ClearLine(a.Pos, dp.Pos, null, true)) continue;   // спальник — не для E
                 float d = Vector2.Distance(a.Pos, dp.Pos) - dp.Radius + 0.3f;
                 if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, _ => InteractKind.Workbench }, dp); }
             }
             var door = NearestDoor(a.Pos, best.Item1 == InteractKind.None ? InteractRange + 0.4f : bestD);   // дверь — если ближе остального
-            if (door != null) best = (InteractKind.Door, door);
+            if (door != null && ClearLine(a.Pos, door.Center, door, true)) best = (InteractKind.Door, door);
             return best;
         }
 
@@ -1155,6 +1201,13 @@ namespace Rastvordd.Sim
         {
             foreach (var p in Pickups)
                 if (p.RespawnLeft > 0) p.RespawnLeft -= Dt;
+            for (int i = _spotRespawns.Count - 1; i >= 0; i--)
+            {
+                var (kind, pos, left) = _spotRespawns[i];
+                left -= Dt;
+                if (left <= 0 && IsFree(pos, 0.8f)) { AddNode(kind, pos); _spotRespawns.RemoveAt(i); }
+                else _spotRespawns[i] = (kind, pos, left);
+            }
             for (int i = _nodeRespawns.Count - 1; i >= 0; i--)
             {
                 var (kind, left) = _nodeRespawns[i];
@@ -1204,12 +1257,13 @@ namespace Rastvordd.Sim
                 float bestT = 2;
                 Actor hitActor = null;
                 MapWall hitWall = null;
+                ResourceNode hitNode = null;
                 foreach (var w in WallsAlong(a, b))
                     if (!w.PassBullets && Geo.SegmentAabb(a, b, w.Wall.Min, w.Wall.Max, out float t) && t < bestT) { bestT = t; hitWall = w; }
                 foreach (var n in NodesAlong(a, b))
-                    if (Geo.SegmentCircle(a, b, n.Pos, n.Radius, out float t) && t < bestT) { bestT = t; hitWall = null; }
+                    if (Geo.SegmentCircle(a, b, n.Pos, n.Radius, out float t) && t < bestT) { bestT = t; hitWall = null; hitNode = n; }
                 foreach (var d in DeploysAlong(a, b))
-                    if (Geo.SegmentCircle(a, b, d.Pos, d.Radius, out float t) && t < bestT) { bestT = t; hitWall = null; }
+                    if (Geo.SegmentCircle(a, b, d.Pos, d.Radius, out float t) && t < bestT) { bestT = t; hitWall = null; hitNode = null; }
                 foreach (var act in Actors)
                 {
                     if (act.Dead || act.Id == p.OwnerId) continue;
@@ -1218,6 +1272,7 @@ namespace Rastvordd.Sim
                     {
                         bestT = t;
                         hitActor = act;
+                        hitNode = null;
                     }
                 }
 
@@ -1229,6 +1284,7 @@ namespace Rastvordd.Sim
                     {
                         // пули ломают двери и разметку (D22), стены — нет
                         if (hitWall?.Owner is Structure st) DamageStructure(st, p.Damage * Building.BulletMult(st.Kind, st.Tier), p.OwnerId);
+                        if (hitNode != null && hitNode.Kind == NodeKind.Barrel && Nodes.Contains(hitNode)) HitBarrel(hitNode, p.Damage, p.OwnerId);
                         Events.Add(new SimEvent { Kind = SimEventKind.HitWall, Pos = hitPos, Dir = p.Dir, OtherId = p.OwnerId });
                     }
                     Projectiles.RemoveAt(i);

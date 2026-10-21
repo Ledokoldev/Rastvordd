@@ -567,6 +567,66 @@ namespace Rastvordd.Sim
             }
         }
 
+        static bool SameEdge(Structure x, Structure y) => x.IsEdge && y.IsEdge && x.I == y.I && x.J == y.J && x.Dir == y.Dir;
+
+        /// <summary>
+        /// Чистая линия между точками, не считая самой постройки ignore (и её ребра — косяков проёма).
+        /// reach — «достать рукой»: мешает любая часть постройки (стена, окно, закрытая дверь) и высокие стены карты, низкие укрытия — нет;
+        /// иначе — обзор: мешают высокие стены и стволы.
+        /// </summary>
+        public bool ClearLine(Vector2 a, Vector2 b, Structure ignore, bool reach)
+        {
+            foreach (var w in WallsAlong(a, b))
+            {
+                if (ignore != null && w.Owner != null && (w.Owner == ignore || SameEdge(w.Owner, ignore))) continue;
+                bool blocks = reach ? (w.Owner != null || w.Wall.Height >= 1.2f) : w.Wall.BlocksVision;
+                if (blocks && Geo.SegmentAabb(a, b, w.Wall.Min, w.Wall.Max, out _)) return false;
+            }
+            if (!reach)
+                foreach (var n in NodesAlong(a, b))
+                    if (n.BlocksVision && Geo.SegmentCircle(a, b, n.Pos, n.Radius * 0.9f, out _)) return false;
+            return true;
+        }
+
+        /// <summary>Видна ли точка: дальность, конус, линия обзора (без стен постройки ignore).</summary>
+        public bool SeesPoint(Actor v, Vector2 p, float range, float coneDeg, Structure ignore = null)
+        {
+            var d = p - v.Pos;
+            float dist = d.Length();
+            if (dist > range) return false;
+            if (dist > 1.5f && MathF.Abs(Geo.AngleDiff(v.Facing, MathF.Atan2(d.Y, d.X))) > coneDeg * 0.5f * MathF.PI / 180f) return false;
+            return ClearLine(v.Pos, p, ignore, false);
+        }
+
+        /// <summary>Видна ли постройка хоть краем: центр и края стены, центр и углы пола.</summary>
+        public bool SeesStructure(Actor v, Structure st, float range, float coneDeg)
+        {
+            var c = st.Center;
+            if (SeesPoint(v, c, range, coneDeg, st)) return true;
+            if (st.IsEdge)
+            {
+                var along = st.Dir == 0 ? new Vector2(0.7f, 0) : new Vector2(0, 0.7f);
+                return SeesPoint(v, c + along, range, coneDeg, st) || SeesPoint(v, c - along, range, coneDeg, st);
+            }
+            foreach (var o in new[] { new Vector2(0.7f, 0.7f), new Vector2(-0.7f, 0.7f), new Vector2(0.7f, -0.7f), new Vector2(-0.7f, -0.7f) })
+                if (SeesPoint(v, c + o, range, coneDeg, st)) return true;
+            return false;
+        }
+
+        /// <summary>Своя база: постройка привязана к шкафу, где игрок авторизован.</summary>
+        public bool IsOwnBase(Actor a, Structure st)
+        {
+            if (st.OwnerId == a.Id) return true;
+            foreach (var d in Deployables) if (d.Id == st.ClaimId && d.Kind == DeployKind.Claim) return d.Auth.Contains(a.Id);
+            return false;
+        }
+
+        public bool IsOwnBase(Actor a, Deployable dp)
+        {
+            if (dp.OwnerId == a.Id || (dp.Kind == DeployKind.Claim && dp.Auth.Contains(a.Id))) return true;
+            return ClaimAt(Building.CellOf(dp.Pos)) is Deployable c && c.Auth.Contains(a.Id);
+        }
+
         Structure NearestDoor(Vector2 p, float range)
         {
             Structure best = null;

@@ -1017,6 +1017,7 @@ else if (arg == "--atcrate")
                     _deployViews[d.Id] = v;
                 }
                 if (v.Burning != d.Burning) { v.Burning = d.Burning; v.QueueRedraw(); }
+                v.Modulate = d.Seen ? Colors.White : BuildLayer.FogTint;   // не в обзоре — как запомнил
                 v.Tick(dt);
             }
             RemoveMissing(_deployViews, seen);

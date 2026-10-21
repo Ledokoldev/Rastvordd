@@ -119,6 +119,21 @@ namespace Rastvordd.Sim
                 AddCrate(new Vector2(Range(min.X + 3, max.X - 3), Range(c.Y + 2, max.Y - 3)), tier);
             if (Rng.NextDouble() < 0.7) AddPickup(PickupKind.WaterBarrel, new Vector2(max.X - 3, min.Y + 3));
 
+            // металлолом без боя: бочки вдоль забора и кучи хлама во дворе (D31)
+            int barrels = 3 + guards * 2;
+            for (int i = 0, tries = 0; i < barrels && tries < 60; tries++)
+            {
+                var p = Rng.Next(2) == 0
+                    ? new Vector2(Range(min.X + 1.5f, max.X - 1.5f), Rng.Next(2) == 0 ? min.Y + 1.2f : max.Y - 1.2f)
+                    : new Vector2(Rng.Next(2) == 0 ? min.X + 1.2f : max.X - 1.2f, Range(min.Y + 1.5f, max.Y - 1.5f));
+                if (IsFree(p, 0.7f)) { AddScrapSpot(NodeKind.Barrel, p); i++; }
+            }
+            for (int i = 0, tries = 0; i < 1 + guards && tries < 40; tries++)
+            {
+                var p = new Vector2(Range(c.X, max.X - 3), Range(min.Y + 3, max.Y - 3));
+                if (IsFree(p, 1.2f)) { AddScrapSpot(NodeKind.Junk, p); i++; }
+            }
+
             // охрана: в постройке и во дворе
             for (int g = 0; g < guards; g++)
                 NpcHomes[-NpcHomes.Count - 1] = g == 0 ? (b0 + b1) * 0.5f + new Vector2(1, 1) : new Vector2(Range(c.X, max.X - 3), Range(c.Y, max.Y - 3));

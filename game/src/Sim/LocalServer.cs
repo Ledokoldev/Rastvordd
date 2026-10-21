@@ -24,7 +24,7 @@ namespace Rastvordd.Sim
     public struct BagSnap { public int Id; public Vector2 Pos; public bool IsCrate; public bool Empty; }
     public struct NodeSnap { public int Id; public NodeKind Kind; public Vector2 Pos; public float Radius; public float Fill; }
     public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; }
-    public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; public int Level; }
+    public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; public int Level; public bool Seen; }
 
     /// <summary>Узел дерева изучения для окна верстака.</summary>
     public struct TechInfo
@@ -37,7 +37,7 @@ namespace Rastvordd.Sim
     }
     public struct FireSnap { public int Id; public Vector2 Pos; public float Radius, Left; }
     public struct ThrownSnap { public int Id; public string ItemId; public Vector2 Pos; public float Z; public float Fuse; }
-    public struct StructSnap { public int Id; public StructKind Kind; public int I, J, Dir, Tier; public float Hp; public bool Open; public bool Locked; }
+    public struct StructSnap { public int Id; public StructKind Kind; public int I, J, Dir, Tier; public float Hp; public bool Open; public bool Locked; public bool Seen; }   // Seen = видна сейчас, иначе запомнена
 
     public struct BeltSlotInfo
     {
@@ -334,9 +334,21 @@ namespace Rastvordd.Sim
                 if (Vector2.DistanceSquared(p.Pos, me.Pos) < r2)
                     snap.Pickups.Add(new PickupSnap { Id = p.Id, Kind = p.Kind, Pos = p.Pos, Available = p.Available });
 
+            // туман войны для построек и установленного (D32): своё видно всегда, чужое — только в обзоре, остальное — как запомнил
+            float vr = World.ViewRange(me), vc = World.ViewCone(me);
+            var dmem = Memory(_deployMem, clientId);
+            var aliveD = new HashSet<int>();
             foreach (var d in World.DeploysInRadius(me.Pos, WorldViewRadius, _snapDeploys))
-                if (Vector2.DistanceSquared(d.Pos, me.Pos) < r2)
-                    snap.Deployables.Add(new DeploySnap { Id = d.Id, Kind = d.Kind, Pos = d.Pos, Burning = d.Burning, Level = d.Level });
+            {
+                if (Vector2.DistanceSquared(d.Pos, me.Pos) >= r2) continue;
+                aliveD.Add(d.Id);
+                bool seen = !me.Dead && (World.IsOwnBase(me, d) || Vector2.Distance(me.Pos, d.Pos) < 1.5f || World.SeesPoint(me, d.Pos, vr, vc));
+                if (seen) dmem[d.Id] = new DeploySnap { Id = d.Id, Kind = d.Kind, Pos = d.Pos, Burning = d.Burning, Level = d.Level, Seen = true };
+                else if (dmem.TryGetValue(d.Id, out var old)) { old.Seen = false; dmem[d.Id] = old; }
+            }
+            Forget(dmem, aliveD, id => dmem[id].Pos, me, vr, vc);
+            foreach (var d in dmem.Values)
+                if (Vector2.DistanceSquared(d.Pos, me.Pos) < r2) snap.Deployables.Add(d);
 
             foreach (var t in World.Throwns)
                 if (Vector2.DistanceSquared(t.Pos, me.Pos) < EventRadius * EventRadius)
@@ -345,9 +357,22 @@ namespace Rastvordd.Sim
                 if (Vector2.DistanceSquared(f.Pos, me.Pos) < EventRadius * EventRadius)
                     snap.Fires.Add(new FireSnap { Id = f.Id, Pos = f.Pos, Radius = f.Radius, Left = f.Left });
             snap.StructVersion = World.StructVersion;
+            var smem = Memory(_structMem, clientId);
+            var aliveS = new HashSet<int>();
             foreach (var st in World.Structures)
-                if (Vector2.DistanceSquared(st.Center, me.Pos) < r2)
-                    snap.Structures.Add(new StructSnap { Id = st.Id, Kind = st.Kind, I = st.I, J = st.J, Dir = st.Dir, Tier = st.Tier, Hp = st.Hp / st.MaxHp, Open = st.Open, Locked = st.Locked });
+            {
+                if (Vector2.DistanceSquared(st.Center, me.Pos) >= r2) continue;
+                aliveS.Add(st.Id);
+                bool seen = !me.Dead && (World.IsOwnBase(me, st) || World.SeesStructure(me, st, vr, vc));
+                if (seen) smem[st.Id] = new StructSnap { Id = st.Id, Kind = st.Kind, I = st.I, J = st.J, Dir = st.Dir, Tier = st.Tier, Hp = st.Hp / st.MaxHp, Open = st.Open, Locked = st.Locked, Seen = true };
+                else if (smem.TryGetValue(st.Id, out var old)) { old.Seen = false; smem[st.Id] = old; }
+            }
+            Forget(smem, aliveS, id => smem[id].Kind == StructKind.Foundation ? Building.CellCenter(smem[id].I, smem[id].J) : Building.EdgeCenter(smem[id].I, smem[id].J, smem[id].Dir), me, vr, vc);
+            foreach (var st in smem.Values)
+            {
+                var c = st.Kind == StructKind.Foundation ? Building.CellCenter(st.I, st.J) : Building.EdgeCenter(st.I, st.J, st.Dir);
+                if (Vector2.DistanceSquared(c, me.Pos) < r2) snap.Structures.Add(st);
+            }
 
             foreach (var e in _eventsThisTick)
             {
@@ -537,6 +562,30 @@ namespace Rastvordd.Sim
             // выстрел выдаёт стрелка, если между нами нет стен
             bool shotRecently = World.Time - target.LastShotTime < 0.6f;
             return shotRecently && Vector2.Distance(viewer.Pos, target.Pos) < 60 && World.HasLineOfSight(viewer.Pos, target.Pos);
+        }
+
+        // память тумана войны: что каждый игрок видел из построек и установленного
+        readonly Dictionary<int, Dictionary<int, StructSnap>> _structMem = new();
+        readonly Dictionary<int, Dictionary<int, DeploySnap>> _deployMem = new();
+
+        static Dictionary<int, T> Memory<T>(Dictionary<int, Dictionary<int, T>> all, int clientId)
+        {
+            if (!all.TryGetValue(clientId, out var m)) all[clientId] = m = new Dictionary<int, T>();
+            return m;
+        }
+
+        /// <summary>Запомненное, чего больше нет: забываем, только когда место снова в обзоре (иначе так и висит в тумане).</summary>
+        void Forget<T>(Dictionary<int, T> mem, HashSet<int> alive, System.Func<int, Vector2> posOf, Actor me, float vr, float vc)
+        {
+            List<int> gone = null;
+            foreach (var id in mem.Keys)
+            {
+                if (alive.Contains(id)) continue;
+                var p = posOf(id);
+                if (Vector2.DistanceSquared(p, me.Pos) < WorldViewRadius * WorldViewRadius && !World.SeesPoint(me, p, vr, vc)) continue;
+                (gone ??= new()).Add(id);
+            }
+            if (gone != null) foreach (var id in gone) mem.Remove(id);
         }
 
         bool IsPointVisible(Actor viewer, Vector2 p) =>

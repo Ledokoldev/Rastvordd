@@ -247,7 +247,7 @@ namespace Rastvordd.Sim
                 return;
             }
             var pos = UiTargetPos(a);
-            if (a.Dead || pos == null || Vector2.Distance(pos.Value, a.Pos) > UiRange || op == UiOp.Close)
+            if (a.Dead || pos == null || Vector2.Distance(pos.Value, a.Pos) > UiRange || op == UiOp.Close || !ClearLine(a.Pos, pos.Value, null, true))
             {
                 a.OpenUi = UiKind.None; a.OpenTarget = null;
                 return;

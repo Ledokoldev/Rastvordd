@@ -33,7 +33,7 @@ namespace Rastvordd.Sim
         public static InputCmd Empty => new InputCmd { SelectSlot = -1, Craft = -1, Code = -1, SetPiece = -1 };
     }
 
-    public enum NodeKind { Tree, Stone, Metal, Sulfur }
+    public enum NodeKind { Tree, Stone, Metal, Sulfur, Barrel, Junk }   // Barrel — бочка с хламом (ломается), Junk — куча хлама (ковыряется, даёт лом)
 
     public sealed class WeaponDef
     {
@@ -600,6 +600,7 @@ namespace Rastvordd.Sim
             NodeKind.Tree => "wood",
             NodeKind.Stone => "stone",
             NodeKind.Metal => "metal_ore",
+            NodeKind.Barrel or NodeKind.Junk => "scrap",
             _ => "sulfur_ore",
         };
     }

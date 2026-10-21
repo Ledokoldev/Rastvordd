@@ -32,12 +32,16 @@ namespace Rastvordd.Client
                 {
                     if (cur.snap.Tier == s.Tier && cur.snap.Open == s.Open && cur.snap.Kind == s.Kind && cur.snap.Locked == s.Locked)
                     {
-                        if (Mathf.Abs(cur.snap.Hp - s.Hp) > 0.01f) { SetDamage(cur.views, s.Hp); _items[s.Id] = (s, cur.views); }
+                        if (Mathf.Abs(cur.snap.Hp - s.Hp) > 0.01f) SetDamage(cur.views, s.Hp);
+                        if (cur.snap.Seen != s.Seen) SetFog(cur.views, s.Seen);
+                        _items[s.Id] = (s, cur.views);
                         continue;
                     }
                     Free(cur.views);
                 }
-                _items[s.Id] = (s, Create(s));
+                var created = Create(s);
+                SetFog(created, s.Seen);
+                _items[s.Id] = (s, created);
                 changed = true;
             }
             List<int> gone = null;
@@ -50,6 +54,14 @@ namespace Rastvordd.Client
         void Free(List<Node2D> views)
         {
             foreach (var v in views) { if (v is WallView2D w) Walls.Remove(w); v.QueueFree(); }
+        }
+
+        /// <summary>Туман войны: постройка не в обзоре — серая, «как запомнил».</summary>
+        public static readonly Color FogTint = new(0.55f, 0.58f, 0.64f, 0.9f);
+
+        static void SetFog(List<Node2D> views, bool seen)
+        {
+            foreach (var v in views) v.Modulate = seen ? Colors.White : FogTint;
         }
 
         static void SetDamage(List<Node2D> views, float hp)

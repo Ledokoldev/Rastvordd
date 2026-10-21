@@ -101,6 +101,8 @@ namespace Rastvordd.Client
         /// <summary>Камни и руды под биом: в тайге со снегом, в пустоши выгоревшие, на болоте во мху; в поле/лесу — обычные.</summary>
         public static Texture2D Node(NodeKind kind, int seed, Biome biome)
         {
+            if (kind == NodeKind.Barrel) return Get("props/barrel_oil");
+            if (kind == NodeKind.Junk) return Styled("props/junk_pile", biome);
             string k = kind switch { NodeKind.Metal => "metal", NodeKind.Sulfur => "sulfur", _ => "stone" };
             string suffix = biome switch { Biome.Tundra => "tundra", Biome.Arid => "arid", Biome.Beach => "arid", Biome.Swamp => "swamp", _ => null };
             return (suffix != null ? Get($"nodes/node_{k}_{suffix}") : null) ?? Node(kind, seed);

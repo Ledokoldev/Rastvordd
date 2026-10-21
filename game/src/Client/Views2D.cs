@@ -702,6 +702,7 @@ namespace Rastvordd.Client
             Material = VisionFx.ObjectMat;
             _kind = kind;
             _tex = Art.Node(kind, seed, biome);
+            if (kind == NodeKind.Barrel) SelfModulate = new Color(0.7f, 0.85f, 1.2f);   // лутовая бочка — синеватая, в отличие от декоративной
             TextureFilter = TextureFilterEnum.Nearest;
             var rng = new RandomNumberGenerator { Seed = (ulong)seed };
             float r = radiusM * Iso.PPM;
@@ -720,7 +721,7 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            float s = 0.55f + 0.45f * Mathf.Sqrt(Mathf.Clamp(Fill, 0, 1));
+            float s = _kind == NodeKind.Barrel ? 1f : 0.55f + 0.45f * Mathf.Sqrt(Mathf.Clamp(Fill, 0, 1));   // бочка не уменьшается от ударов
             DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.4f));
             DrawCircle(new Vector2(4, 0), 24 * s, new Color(0, 0, 0, 0.22f));
             DrawSetTransform(Vector2.Zero, 0, new Vector2(s, s));

@@ -21,6 +21,7 @@ namespace Rastvordd.Client
         CanvasModulate _daylight;
         Ambient _ambient;
         bool _overview, _perf, _timeEdge, _forceCrouch;
+        SVec _forceWalk;
         int _pressNAt = -1;
         double _perfTime, _simTime;
         int _perfFrames;
@@ -134,6 +135,11 @@ namespace Rastvordd.Client
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
                 else if (arg == "--crouch") _forceCrouch = true;
+                else if (arg.StartsWith("--walk="))
+                {
+                    var p = arg.Substring(7).Split(",");
+                    _forceWalk = new SVec(float.Parse(p[0], inv), float.Parse(p[1], inv));
+                }
                 else if (arg == "--press-n") _pressNAt = 5;
                 else if (arg.StartsWith("--day=")) _forcedDay = float.Parse(arg.Substring(6), inv);
                 else if (arg.StartsWith("--zoom=")) _zoom = float.Parse(arg.Substring(7), inv);
@@ -231,6 +237,7 @@ namespace Rastvordd.Client
             if (Input.IsPhysicalKeyPressed(Key.S)) move.Y += 1;
             if (Input.IsPhysicalKeyPressed(Key.A)) move.X -= 1;
             if (Input.IsPhysicalKeyPressed(Key.D)) move.X += 1;
+            move += _forceWalk;
             return new InputCmd
             {
                 Move = move,
@@ -309,11 +316,13 @@ namespace Rastvordd.Client
             _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime);
             UpdateHud(dt);
 
+            if (_hud.AdminOpen && _frame % 15 == 0) _hud.SetAdminSounds(PlayingSounds());
             if (_perf)
             {
                 _perfTime += delta; _perfFrames++;
                 if (_perfTime >= 3)
                 {
+                    GD.Print($"amb: biome {TerrainView.BiomeAt(_map, new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM))} | {_ambient.Debug}");
                     GD.Print($"perf: {_perfFrames / _perfTime:F0} fps, sim {_simTime / (_perfTime * 30):F2} ms/tick, nodes {_server.World.Nodes.Count}, views {_world.GetChildCount()}");
                     _perfTime = 0; _perfFrames = 0; _simTime = 0;
                 }
@@ -414,6 +423,20 @@ namespace Rastvordd.Client
                 Sfx.Play(hard ? "step_gravel" : "step_grass", Iso.Px(pos), (id == _myId ? -10 : -6) - (crouch ? 8 : 0), crouch ? 8 : 18, 0.15f);
             }
             _stepAcc[id] = acc;
+        }
+
+        /// <summary>Для админки: что сейчас реально звучит (имя файла и громкость).</summary>
+        string PlayingSounds()
+        {
+            var sb = new System.Text.StringBuilder("Сейчас играет:\n");
+            foreach (var n in FindChildren("*", "", true, false))
+            {
+                if (n is AudioStreamPlayer ap && ap.Playing && !ap.StreamPaused && ap.VolumeDb > -60)
+                    sb.Append($"  {System.IO.Path.GetFileName(ap.Stream?.ResourcePath)}  {ap.VolumeDb:F0} дБ\n");
+                else if (n is AudioStreamPlayer2D p2 && p2.Playing && p2.VolumeDb > -60)
+                    sb.Append($"  {System.IO.Path.GetFileName(p2.Stream?.ResourcePath)}  (в мире) {p2.VolumeDb:F0} дБ\n");
+            }
+            return sb.ToString();
         }
 
         StepSurface SurfaceAt(SVec p)

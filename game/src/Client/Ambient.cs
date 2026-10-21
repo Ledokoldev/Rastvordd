@@ -56,10 +56,12 @@ namespace Rastvordd.Client
             Fade(_crickets, ref _gCrickets, green ? 0.3f * night : 0, dt);
         }
 
+        public string Debug => $"wind {_gWind:F2} ({_wind.VolumeDb:F0}dB, playing {_wind.Playing}), surf {_gSurf:F2} ({_surf.VolumeDb:F0}dB), birds {_gBirds:F2}, crickets {_gCrickets:F2}";
+
         static void Fade(AudioStreamPlayer p, ref float gain, float target, float dt)
         {
             gain = Mathf.MoveToward(gain, target, dt * 0.5f);
-            p.VolumeDb = gain <= 0.001f ? -80 : Mathf.LinearToDb(gain);
+            p.VolumeDb = gain <= 0.001f ? -80 : Mathf.LinearToDb(gain) + Tuning.AmbientVolumeDb;
         }
     }
 }

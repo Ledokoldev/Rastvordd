@@ -10,6 +10,8 @@ namespace Rastvordd.Client
         /// <summary>Скорость записи шагов по поверхностям (1 = как записано при обычном шаге).</summary>
         public static float StepsConcrete = 1f, StepsGrass = 1f, StepsSnow = 1f;
         public static float StepsVolumeDb = -6f;
+        public static float AmbientVolumeDb = 0f;          // общий фон (ветер, прибой, птицы, сверчки)
+        public static bool StepsStretch = true;            // растяжение без изменения высоты (можно выключить для сравнения)
 
         public static void Load()
         {
@@ -19,6 +21,8 @@ namespace Rastvordd.Client
             StepsGrass = (float)cfg.GetValue("steps", "grass", StepsGrass);
             StepsSnow = (float)cfg.GetValue("steps", "snow", StepsSnow);
             StepsVolumeDb = (float)cfg.GetValue("steps", "volume_db", StepsVolumeDb);
+            AmbientVolumeDb = (float)cfg.GetValue("ambient", "volume_db", AmbientVolumeDb);
+            StepsStretch = (bool)cfg.GetValue("steps", "stretch", StepsStretch);
         }
 
         public static void Save()
@@ -28,6 +32,8 @@ namespace Rastvordd.Client
             cfg.SetValue("steps", "grass", StepsGrass);
             cfg.SetValue("steps", "snow", StepsSnow);
             cfg.SetValue("steps", "volume_db", StepsVolumeDb);
+            cfg.SetValue("ambient", "volume_db", AmbientVolumeDb);
+            cfg.SetValue("steps", "stretch", StepsStretch);
             cfg.Save(Path);
         }
     }
@@ -103,7 +109,7 @@ namespace Rastvordd.Client
             float tune = surface switch { StepSurface.Concrete => Tuning.StepsConcrete, StepSurface.Snow => Tuning.StepsSnow, _ => Tuning.StepsGrass };
             float rate = Mathf.Clamp(speed / Sim.World.WalkSpeed, 0.45f, 1.7f) * tune;
             _active.PitchScale = rate;
-            _shift.PitchScale = 1f / rate;
+            _shift.PitchScale = Tuning.StepsStretch ? 1f / rate : 1f;
             _active.VolumeDb = Gain(_fade);
         }
 

@@ -55,6 +55,14 @@ namespace Rastvordd.Client
             Slider("Скорость шагов: трава", 0.4f, 1.8f, 0.01f, () => Tuning.StepsGrass, v => Tuning.StepsGrass = v, "0.00");
             Slider("Скорость шагов: снег", 0.4f, 1.8f, 0.01f, () => Tuning.StepsSnow, v => Tuning.StepsSnow = v, "0.00");
             Slider("Громкость шагов, дБ", -30f, 6f, 0.5f, () => Tuning.StepsVolumeDb, v => Tuning.StepsVolumeDb = v, "0.0");
+            Slider("Громкость фона, дБ", -40f, 6f, 0.5f, () => Tuning.AmbientVolumeDb, v => Tuning.AmbientVolumeDb = v, "0.0");
+            var stretch = new CheckBox { Text = "Шаги: растяжение без изменения высоты", ButtonPressed = Tuning.StepsStretch, FocusMode = Control.FocusModeEnum.None };
+            stretch.Toggled += on => { Tuning.StepsStretch = on; Tuning.Save(); };
+            box.AddChild(stretch);
+            _adminSounds = new Label();
+            _adminSounds.AddThemeFontSizeOverride("font_size", 13);
+            _adminSounds.AddThemeColorOverride("font_color", new Color(0.8f, 1f, 0.8f));
+            box.AddChild(_adminSounds);
             var hint = new Label { Text = "1.00 = как записано при обычном шаге. Присед и спринт меняют темп сами." };
             hint.AddThemeFontSizeOverride("font_size", 13);
             hint.AddThemeColorOverride("font_color", new Color(1, 1, 1, 0.6f));
@@ -62,6 +70,8 @@ namespace Rastvordd.Client
         }
 
         public void ToggleAdmin() => _adminPanel.Visible = !_adminPanel.Visible;
+        Label _adminSounds;
+        public void SetAdminSounds(string text) { if (_adminSounds != null) _adminSounds.Text = text; }
         public event Action<int> CraftRequested;
 
         const string VisionShader = @"

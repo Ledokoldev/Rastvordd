@@ -91,67 +91,89 @@
    "id": "barrel_water",
    "cat": "props",
    "h": 1.0,
-   "desc": "an old faded blue plastic water drum with scratches, dirt streaks and a rusty metal lid"
+   "desc": "an old faded blue plastic water drum with scratches, dirt streaks and a rusty metal lid",
+   "view": "front",
+   "w": 0.6
   },
   {
    "id": "barrel_oil",
    "cat": "props",
    "h": 1.0,
-   "desc": "a dented rusty red oil barrel with peeling paint and a faded hazard sticker"
+   "desc": "a dented rusty red oil barrel with peeling paint and a faded hazard sticker",
+   "view": "front",
+   "w": 0.6
   },
   {
    "id": "crate_wood",
    "cat": "props",
    "h": 0.8,
-   "desc": "a weathered wooden supply crate made of grey planks with rusty nails and metal corner braces"
+   "desc": "a weathered wooden supply crate made of grey planks with rusty nails and metal corner braces",
+   "view": "front",
+   "w": 0.9
   },
   {
    "id": "crate_military",
    "cat": "props",
    "h": 0.7,
-   "desc": "a military loot crate, olive-green painted metal with chipped paint, worn yellow stripes and heavy latches"
+   "desc": "a military loot crate, olive-green painted metal with chipped paint, worn yellow stripes and heavy latches",
+   "view": "front",
+   "w": 1.2
   },
   {
    "id": "loot_bag",
    "cat": "props",
    "h": 0.5,
-   "desc": "a dropped dirty canvas duffel bag / sack with straps, lying on the ground, stuffed with loot"
+   "desc": "a dropped dirty canvas duffel bag / sack with straps, lying on the ground, stuffed with loot",
+   "view": "front",
+   "w": 0.8
   },
   {
    "id": "furnace",
    "cat": "props",
    "h": 1.4,
-   "desc": "a crude survival furnace built from stacked stones and clay with a small metal chimney and a dark opening at the front, unlit"
+   "desc": "a crude survival furnace built from stacked stones and clay with a small metal chimney and a dark opening at the front, unlit",
+   "view": "front",
+   "w": 1.0
   },
   {
    "id": "furnace_lit",
    "cat": "props",
    "h": 1.4,
-   "desc": "a crude survival furnace built from stacked stones and clay with a small metal chimney, bright orange fire glowing in the front opening, a few sparks"
+   "desc": "a crude survival furnace built from stacked stones and clay with a small metal chimney, bright orange fire glowing in the front opening, a few sparks",
+   "view": "front",
+   "w": 1.0
   },
   {
    "id": "workbench",
    "cat": "props",
    "h": 1.0,
-   "desc": "a sturdy improvised workbench made of planks and scrap metal with a vice, scattered tools, a saw and a lamp"
+   "desc": "a sturdy improvised workbench made of planks and scrap metal with a vice, scattered tools, a saw and a lamp",
+   "view": "front",
+   "w": 1.6
   },
   {
    "id": "concrete_barrier",
    "cat": "props",
    "h": 0.9,
-   "desc": "a cracked concrete jersey road barrier with faded red-white paint and exposed rebar"
+   "desc": "a cracked concrete jersey road barrier with faded red-white paint and exposed rebar",
+   "view": "front",
+   "w": 2.0
   },
   {
    "id": "car_wreck",
    "cat": "props",
    "h": 1.5,
-   "desc": "a burnt-out rusty abandoned sedan car wreck with broken windows and flat tires, seen from the 3/4 top-down view"
+   "desc": "a burnt-out rusty abandoned sedan car wreck with broken windows and flat tires, seen from the 3/4 top-down view",
+   "view": "side",
+   "w": 4.3
   },
   {
    "id": "junk_pile",
    "cat": "props",
    "h": 0.8,
-   "desc": "a pile of junk: old tires, rusty sheet metal, broken pipes and a cracked plastic crate"
+   "desc": "a pile of junk: old tires, rusty sheet metal, broken pipes and a cracked plastic crate",
+   "view": "front",
+   "w": 1.4
   },
   {
    "id": "ground_grass",
@@ -981,13 +1003,17 @@
    "id": "car_wreck_snow",
    "cat": "props",
    "h": 1.5,
-   "desc": "a burnt-out rusty abandoned sedan car wreck covered with a thick layer of snow, icicles, seen from the 3/4 top-down view"
+   "desc": "a burnt-out rusty abandoned sedan car wreck covered with a thick layer of snow, icicles, seen from the 3/4 top-down view",
+   "view": "side",
+   "w": 4.3
   },
   {
    "id": "car_wreck_sand",
    "cat": "props",
    "h": 1.5,
-   "desc": "a sun-bleached rusty abandoned sedan car wreck half buried in drifting desert sand, seen from the 3/4 top-down view"
+   "desc": "a sun-bleached rusty abandoned sedan car wreck half buried in drifting desert sand, seen from the 3/4 top-down view",
+   "view": "side",
+   "w": 4.3
   },
   {
    "id": "junk_pile_snow",
@@ -1323,13 +1349,17 @@
    "id": "claim_post",
    "cat": "props",
    "desc": "a land claim post: a thick weathered wooden pole dug into the ground with a small lockable tin box nailed to it, a faded red rag tied on top and a few nails and wire, post-apocalyptic",
-   "h": 1.8
+   "h": 1.8,
+   "view": "front",
+   "w": 0.8
   },
   {
    "id": "sleeping_bag",
    "cat": "props",
    "h": 0.9,
-   "desc": "a dirty olive-green sleeping bag rolled out flat on the ground with a folded rag as a pillow, patched and stained, post-apocalyptic"
+   "desc": "a dirty olive-green sleeping bag rolled out flat on the ground with a folded rag as a pillow, patched and stained, post-apocalyptic",
+   "view": "front",
+   "w": 0.9
   },
   {
    "id": "ui_panel",
@@ -1407,13 +1437,17 @@
    "id": "workbench2",
    "cat": "props",
    "h": 1.1,
-   "desc": "an upgraded metal workbench: welded steel frame, sheet-metal top, a drill press, a vice, hanging tools and a work lamp"
+   "desc": "an upgraded metal workbench: welded steel frame, sheet-metal top, a drill press, a vice, hanging tools and a work lamp",
+   "view": "front",
+   "w": 1.8
   },
   {
    "id": "workbench3",
    "cat": "props",
    "h": 1.2,
-   "desc": "an advanced heavy industrial workbench: thick steel table, a small lathe, a welding torch with gas bottles, toolboxes and bright work lights"
+   "desc": "an advanced heavy industrial workbench: thick steel table, a small lathe, a welding torch with gas bottles, toolboxes and bright work lights",
+   "view": "front",
+   "w": 2.0
   },
   {
    "id": "icon_workbench2",
@@ -1461,13 +1495,17 @@
    "id": "recycler",
    "cat": "props",
    "h": 1.6,
-   "desc": "a big industrial recycling machine: a rusty green steel box with an input hopper on top, a conveyor, a crusher and an output tray"
+   "desc": "a big industrial recycling machine: a rusty green steel box with an input hopper on top, a conveyor, a crusher and an output tray",
+   "view": "front",
+   "w": 2.8
   },
   {
    "id": "safe",
    "cat": "props",
    "h": 0.9,
-   "desc": "a heavy steel safe box with a card reader panel and a thick door, painted dark grey with worn edges"
+   "desc": "a heavy steel safe box with a card reader panel and a thick door, painted dark grey with worn edges",
+   "view": "front",
+   "w": 0.8
   },
   {
    "id": "icon_build_triangle",
@@ -1484,7 +1522,9 @@
     6.6,
     3.4,
     3.5
-   ]
+   ],
+   "view": "front",
+   "w": 6.6
   },
   {
    "id": "subst_portal",
@@ -1497,7 +1537,9 @@
      1.0,
      1.1
     ]
-   }
+   },
+   "view": "front",
+   "w": 10.2
   },
   {
    "id": "subst_breaker",
@@ -1508,7 +1550,9 @@
     4.0,
     1.6,
     2.5
-   ]
+   ],
+   "view": "front",
+   "w": 4.0
   },
   {
    "id": "subst_disconnector",
@@ -1521,18 +1565,22 @@
      0.7,
      0.7
     ]
-   }
+   },
+   "view": "front",
+   "w": 3.0
   },
   {
    "id": "subst_pylon_fallen",
    "cat": "props",
    "h": 6.0,
-   "desc": "a collapsed steel lattice power-line pylon lying on the ground diagonally, twisted and bent, with snapped wires and insulators, a dramatic landmark; Soviet-era 1970s-80s electrical substation equipment, abandoned for years, rust, flaking grey-green paint, dirt",
+   "desc": "a long collapsed steel lattice power-line pylon lying flat on the ground along its full length, bent in the middle, broken insulator strings and snapped wires, dark rusty steel, clearly readable silhouette",
    "foot": [
     8.0,
     2.2,
     1.0
-   ]
+   ],
+   "view": "side",
+   "w": 9.0
   },
   {
    "id": "subst_cable_drum",
@@ -1543,7 +1591,9 @@
     2.2,
     1.0,
     2.2
-   ]
+   ],
+   "view": "front",
+   "w": 2.0
   },
   {
    "id": "subst_truck",
@@ -1554,7 +1604,9 @@
     6.2,
     2.6,
     2.8
-   ]
+   ],
+   "view": "side",
+   "w": 7.2
   },
   {
    "id": "subst_kpp",
@@ -1565,7 +1617,9 @@
     3.4,
     3.0,
     3.0
-   ]
+   ],
+   "view": "front",
+   "w": 3.4
   },
   {
    "id": "subst_main_panel",
@@ -1576,7 +1630,9 @@
     1.4,
     0.5,
     2.0
-   ]
+   ],
+   "view": "front",
+   "w": 1.4
   },
   {
    "id": "subst_main_panel_on",
@@ -1588,7 +1644,9 @@
     1.4,
     0.5,
     2.0
-   ]
+   ],
+   "view": "front",
+   "w": 1.4
   },
   {
    "id": "subst_switchgear",
@@ -1599,13 +1657,17 @@
     3.4,
     0.8,
     2.2
-   ]
+   ],
+   "view": "front",
+   "w": 3.4
   },
   {
    "id": "subst_sign",
    "cat": "clutter",
    "h": 1.2,
-   "desc": "a rusty yellow triangular high-voltage warning sign with a black lightning bolt on a metal post, no text. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details."
+   "desc": "a rusty yellow triangular high-voltage warning sign with a black lightning bolt on a metal post, no text. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details.",
+   "view": "front",
+   "w": 0.7
   },
   {
    "id": "crate_punch",
@@ -1616,7 +1678,9 @@
     1.5,
     0.8,
     1.0
-   ]
+   ],
+   "view": "front",
+   "w": 1.5
   },
   {
    "id": "crate_punch_open",
@@ -1627,7 +1691,9 @@
     1.5,
     0.8,
     1.0
-   ]
+   ],
+   "view": "front",
+   "w": 1.5
   },
   {
    "id": "icon_punchcard_1",
@@ -1692,7 +1758,9 @@
     1.4,
     0.7,
     0.8
-   ]
+   ],
+   "view": "front",
+   "w": 1.4
   },
   {
    "id": "int_lockers",
@@ -1703,7 +1771,9 @@
     1.4,
     0.5,
     1.9
-   ]
+   ],
+   "view": "front",
+   "w": 1.4
   },
   {
    "id": "int_shelf",
@@ -1714,18 +1784,22 @@
     1.3,
     0.5,
     2.0
-   ]
+   ],
+   "view": "front",
+   "w": 1.3
   },
   {
    "id": "int_cot",
    "cat": "props",
    "h": 1.5,
-   "desc": "a metal army cot with a dirty striped mattress and a crumpled blanket; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt",
+   "desc": "a metal army cot seen from its foot end: the striped dirty mattress and a crumpled blanket visible from above, a metal foot rail in front, Soviet-era, abandoned",
    "foot": [
     0.8,
     1.9,
     0.5
-   ]
+   ],
+   "view": "front",
+   "w": 1.0
   },
   {
    "id": "int_table",
@@ -1736,7 +1810,9 @@
     1.2,
     0.8,
     0.8
-   ]
+   ],
+   "view": "front",
+   "w": 1.6
   },
   {
    "id": "int_burzhuika",
@@ -1747,7 +1823,9 @@
     0.7,
     0.7,
     1.0
-   ]
+   ],
+   "view": "front",
+   "w": 1.0
   },
   {
    "id": "subst_ktp",
@@ -1758,7 +1836,9 @@
     3.4,
     2.6,
     3.0
-   ]
+   ],
+   "view": "front",
+   "w": 3.4
   },
   {
    "id": "subst_oil_tank",
@@ -1769,7 +1849,9 @@
     5.0,
     2.2,
     2.6
-   ]
+   ],
+   "view": "side",
+   "w": 5.2
   },
   {
    "id": "subst_lamp",
@@ -1780,7 +1862,9 @@
     0.5,
     0.5,
     8
-   ]
+   ],
+   "view": "front",
+   "w": 1.6
   },
   {
    "id": "subst_relay_cabinet",
@@ -1791,7 +1875,9 @@
     1.2,
     0.6,
     1.8
-   ]
+   ],
+   "view": "front",
+   "w": 1.0
   },
   {
    "id": "subst_insulator_pallet",
@@ -1802,7 +1888,9 @@
     1.2,
     1.0,
     1.0
-   ]
+   ],
+   "view": "front",
+   "w": 1.2
   },
   {
    "id": "subst_reel_stack",
@@ -1813,7 +1901,9 @@
     2.4,
     1.0,
     1.2
-   ]
+   ],
+   "view": "front",
+   "w": 2.4
   },
   {
    "id": "wallface_garage",
@@ -1830,7 +1920,9 @@
     4.2,
     4.2,
     3.0
-   ]
+   ],
+   "view": "front",
+   "w": 4.2
   },
   {
    "id": "gai_barrier",
@@ -1843,7 +1935,9 @@
      0.5,
      1.1
     ]
-   }
+   },
+   "view": "front",
+   "w": 7.0
   },
   {
    "id": "car_police_2101",
@@ -1854,7 +1948,9 @@
     4.1,
     1.7,
     1.4
-   ]
+   ],
+   "view": "side",
+   "w": 4.1
   },
   {
    "id": "car_zhiguli_wreck",
@@ -1865,7 +1961,9 @@
     4.1,
     1.7,
     1.4
-   ]
+   ],
+   "view": "side",
+   "w": 4.1
   },
   {
    "id": "bus_wreck",
@@ -1876,7 +1974,9 @@
     10.5,
     2.5,
     3.0
-   ]
+   ],
+   "view": "side",
+   "w": 10.5
   },
   {
    "id": "road_sign_round",
@@ -1893,7 +1993,9 @@
     1.0,
     1.0,
     2.3
-   ]
+   ],
+   "view": "front",
+   "w": 1.0
   },
   {
    "id": "fuel_pump",
@@ -1904,20 +2006,24 @@
     1.0,
     0.6,
     1.9
-   ]
+   ],
+   "view": "front",
+   "w": 1.0
   },
   {
    "id": "fuel_canopy",
    "cat": "props",
    "h": 9.2,
-   "desc": "a big flat gas station canopy roof seen from the 3/4 top-down view: a wide flat rectangular concrete-and-metal roof slab about 14 by 8 meters with a faded red fascia band, held up by four square concrete pillars, some fascia panels hanging down, a few broken lamps underneath; the whole structure fully visible, empty ground under it; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "desc": "a tall Soviet gas station canopy: a wide flat rusty roof slab held up HIGH on four thin steel columns, tall enough for a truck to drive under (about 5 meters), the space under the roof empty and open, peeling red-white paint on the roof edge; weathered",
    "foot": {
     "legs": [
      14.0,
      0.6,
      5.0
     ]
-   }
+   },
+   "view": "front",
+   "w": 14.0
   },
   {
    "id": "car_wash_frame",
@@ -1930,7 +2036,9 @@
      0.6,
      4.0
     ]
-   }
+   },
+   "view": "front",
+   "w": 5.2
   },
   {
    "id": "price_pylon",
@@ -1941,7 +2049,9 @@
     0.8,
     0.6,
     6.0
-   ]
+   ],
+   "view": "front",
+   "w": 1.6
   },
   {
    "id": "fuel_truck_wreck",
@@ -1952,7 +2062,9 @@
     7.5,
     2.5,
     2.8
-   ]
+   ],
+   "view": "side",
+   "w": 7.5
   },
   {
    "id": "shop_counter",
@@ -1963,7 +2075,9 @@
     2.2,
     0.8,
     1.0
-   ]
+   ],
+   "view": "front",
+   "w": 2.2
   },
   {
    "id": "shop_shelf",
@@ -1974,7 +2088,9 @@
     1.8,
     0.5,
     2.0
-   ]
+   ],
+   "view": "front",
+   "w": 1.8
   },
   {
    "id": "cash_register",
@@ -1985,7 +2101,9 @@
     1.0,
     0.7,
     1.1
-   ]
+   ],
+   "view": "front",
+   "w": 1.0
   },
   {
    "id": "fridge_display",
@@ -1996,7 +2114,9 @@
     1.0,
     0.7,
     1.9
-   ]
+   ],
+   "view": "front",
+   "w": 1.0
   },
   {
    "id": "bottle_crates",
@@ -2007,7 +2127,9 @@
     1.2,
     0.8,
     1.2
-   ]
+   ],
+   "view": "front",
+   "w": 1.2
   },
   {
    "id": "beer_kegs",
@@ -2018,20 +2140,24 @@
     1.6,
     0.8,
     0.9
-   ]
+   ],
+   "view": "front",
+   "w": 1.6
   },
   {
    "id": "shed_canopy",
    "cat": "props",
    "h": 5.33,
-   "desc": "a simple open lean-to shed canopy: a rusty corrugated metal sloped roof on four thin steel pipe posts, a few roof sheets bent, empty under it; Soviet-era 1970s-80s, abandoned for years, rust, flaking paint, dirt, no text, no letters, no numbers",
+   "desc": "a tall open shed canopy: a corrugated rusty metal roof held up high on six thin steel posts, about 4 meters high, open on all sides, empty underneath; weathered",
    "foot": {
     "legs": [
      6.0,
      0.3,
      3.0
     ]
-   }
+   },
+   "view": "front",
+   "w": 6.0
   },
   {
    "id": "wallface_storefront",
@@ -2091,61 +2217,81 @@
    "id": "roof_vent_box",
    "cat": "props",
    "h": 1.0,
-   "desc": "a rooftop ventilation box: a square galvanized sheet metal vent with louvered sides and a small hood on top; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+   "desc": "a rooftop ventilation box: a square galvanized sheet metal vent with louvered sides and a small hood on top; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime",
+   "view": "front",
+   "w": 1.0
   },
   {
    "id": "roof_vent_mushroom",
    "cat": "props",
    "h": 0.8,
-   "desc": "a round rooftop mushroom-cap exhaust vent on a short pipe; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+   "desc": "a round rooftop mushroom-cap exhaust vent on a short pipe; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime",
+   "view": "front",
+   "w": 0.7
   },
   {
    "id": "roof_chimney_brick",
    "cat": "props",
    "h": 1.6,
-   "desc": "a short brick chimney stack with a rusty metal cap and soot stains; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+   "desc": "a short brick chimney stack with a rusty metal cap and soot stains; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime",
+   "view": "front",
+   "w": 0.9
   },
   {
    "id": "roof_exhaust_pipe",
    "cat": "props",
    "h": 2.2,
-   "desc": "a thin rusty metal exhaust pipe with guy wires and a rain cap sticking up from the roof; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+   "desc": "a thin rusty metal exhaust pipe with guy wires and a rain cap sticking up from the roof; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime",
+   "view": "front",
+   "w": 0.6
   },
   {
    "id": "roof_hatch",
    "cat": "props",
    "h": 0.6,
-   "desc": "a closed square steel roof access hatch with hinges and a padlock on a low concrete curb; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+   "desc": "a closed square steel roof access hatch with hinges and a padlock on a low concrete curb; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime",
+   "view": "front",
+   "w": 1.0
   },
   {
    "id": "roof_ac_unit",
    "cat": "props",
    "h": 0.9,
-   "desc": "an old boxy rooftop air conditioning unit with a big round fan grille on top; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+   "desc": "an old boxy rooftop air conditioning unit with a big round fan grille on top; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime",
+   "view": "front",
+   "w": 1.2
   },
   {
    "id": "roof_antenna",
    "cat": "props",
    "h": 2.4,
-   "desc": "a bent old TV antenna mast with crooked aerial rods and a dangling cable; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+   "desc": "a bent old TV antenna mast with crooked aerial rods and a dangling cable; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime",
+   "view": "front",
+   "w": 1.4
   },
   {
    "id": "roof_panels",
    "cat": "props",
    "h": 0.7,
-   "desc": "two old dusty solar panels on a tilted rusty frame, one cracked; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+   "desc": "two old dusty solar panels on a tilted rusty frame, one cracked; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime",
+   "view": "front",
+   "w": 1.8
   },
   {
    "id": "roof_junk",
    "cat": "props",
    "h": 0.6,
-   "desc": "a small heap of roof junk: broken slate pieces, a bucket of tar, a rolled piece of ruberoid and bricks; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+   "desc": "a small heap of roof junk: broken slate pieces, a bucket of tar, a rolled piece of ruberoid and bricks; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime",
+   "view": "front",
+   "w": 1.2
   },
   {
    "id": "roof_water_tank",
    "cat": "props",
    "h": 1.8,
-   "desc": "a small rusty cylindrical water tank on a steel stand; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+   "desc": "a small rusty cylindrical water tank on a steel stand; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime",
+   "view": "front",
+   "w": 1.4
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",
@@ -2153,5 +2299,7 @@
  "sheet_framing": "A character sprite sheet for a 2D top-down survival game in 3/4 view like Project Zomboid: a grid of 4 columns and 2 rows of equally spaced frames on a transparent background. Top row: the same person walking diagonally toward the camera and to the right (front 3/4 view, facing down-right), 4 frames of one walk cycle. Bottom row: the same person walking diagonally away from the camera and to the right (back 3/4 view, facing up-right), 4 frames of one walk cycle. Identical character, proportions, clothing and lighting in every frame, full body visible, feet on the same baseline within each row, arms relaxed with empty hands, no weapon, no text, no labels, no grid lines, no frame borders, no cast shadow.",
  "clutter_style": "Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details.",
  "rig_framing": "A single isolated body part sprite for a 2D cutout animation rig, taken from the character shown in the attached reference image: exactly the same skin tone, dirt, hair, clothing colors, lighting from the top-left and painting style. Only that one body part, cleanly separated at the joints with rounded joint ends, centered, transparent background, nothing else in the image, no shadow, no text, no frame.",
- "ui_framing": "A single flat user-interface element texture for a gritty post-apocalyptic survival game HUD, seen straight-on (orthographic, no perspective), crisp readable shapes, the element fills the image edge to edge, transparent background outside the element, no text, no letters, no numbers, no logos."
+ "ui_framing": "A single flat user-interface element texture for a gritty post-apocalyptic survival game HUD, seen straight-on (orthographic, no perspective), crisp readable shapes, the element fills the image edge to edge, transparent background outside the element, no text, no letters, no numbers, no logos.",
+ "front_framing": "A single game sprite for a 2D top-down survival game. The camera looks from the SOUTH straight on, tilted down about 50 degrees (NOT isometric, NOT rotated, NO diagonal 45-degree angle): the object's front side faces the viewer squarely, its bottom edge perfectly horizontal and parallel to the bottom of the image; the left and right sides are not visible. The top surface of the object is visible above that face. Like the straight-on top-down perspective of RimWorld or classic top-down RPGs, but painted in high detail. The whole object fully visible and centered, its base at the bottom center. Transparent background, no ground, no cast shadow, no text, no frame, no border.",
+ "side_framing": "A single game sprite for a 2D top-down survival game. The camera looks from the SOUTH straight on, tilted down about 50 degrees (NOT isometric, NOT rotated, NO diagonal 45-degree angle): the object is turned sideways so we see its long side in exact profile, its long axis perfectly horizontal and parallel to the bottom of the image; the front and back ends are not visible. The top surface of the object is visible above that face. Like the straight-on top-down perspective of RimWorld or classic top-down RPGs, but painted in high detail. The whole object fully visible and centered, its base at the bottom center. Transparent background, no ground, no cast shadow, no text, no frame, no border."
 }

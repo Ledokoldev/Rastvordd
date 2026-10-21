@@ -118,6 +118,9 @@ def process(a: dict, src: pathlib.Path) -> tuple[Image.Image, Image.Image]:
         px = Image.new("RGBA", (px_box, px_box), (0, 0, 0, 0))
         px.paste(sprite, ((px_box - size[0]) // 2, (px_box - size[1]) // 2), sprite)
         return hd, px
+    if a.get("w"):
+        # размер по реальной ширине (м): у прямых видов спереди/сбоку ширина известна точнее высоты картинки
+        a = dict(a, h=a["w"] * im.height / im.width)
     h_hd = max(8, round(a["h"] * PX_HD))
     hd = im.resize((max(1, round(im.width * h_hd / im.height)), h_hd), Image.LANCZOS)
     # мелочи на земле — крупнее реальных, иначе в пикселе не читаются

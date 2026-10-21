@@ -24,7 +24,7 @@ foreach ($a in $manifest.assets) {
     $prompt = @"
 Generate ONE image with your image generation tool and save it as a PNG file at $rel (relative to the current directory), overwriting if it exists. Do not write any code or edit any other files.
 
-Image: $(if ($a.ui) { $manifest.ui_framing } elseif ($a.rig) { $manifest.rig_framing } elseif ($a.sheet) { $manifest.sheet_framing } elseif ($a.tile) { $manifest.tile_framing } elseif ($a.weapon) { $manifest.weapon_framing } elseif ($a.icon) { $manifest.icon_framing } else { $manifest.framing }) Subject: $($a.desc). $($manifest.style)
+Image: $(if ($a.ui) { $manifest.ui_framing } elseif ($a.rig) { $manifest.rig_framing } elseif ($a.sheet) { $manifest.sheet_framing } elseif ($a.tile) { $manifest.tile_framing } elseif ($a.weapon) { $manifest.weapon_framing } elseif ($a.view -eq 'side') { $manifest.side_framing } elseif ($a.view -eq 'front') { $manifest.front_framing } elseif ($a.icon) { $manifest.icon_framing } else { $manifest.framing }) Subject: $($a.desc). $($manifest.style)
 
 When done, reply with just the saved file path.
 "@

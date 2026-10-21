@@ -24,8 +24,12 @@ namespace Rastvordd.Sim
         public int Craft;         // индекс рецепта, -1 — ничего
         public int Code;          // введённый код замка, -1 — нет
         public int CodeDoor;      // id двери, к которой вводят код
+        public int UiOp;          // действие в открытом окне (см. UiOp)
+        public string UiItem;
+        public int UiIndex;
+        public int SetPiece;      // выбор элемента плана из меню (−1 — нет)
 
-        public static InputCmd Empty => new InputCmd { SelectSlot = -1, Craft = -1, Code = -1 };
+        public static InputCmd Empty => new InputCmd { SelectSlot = -1, Craft = -1, Code = -1, SetPiece = -1 };
     }
 
     public enum NodeKind { Tree, Stone, Metal, Sulfur }
@@ -297,6 +301,10 @@ namespace Rastvordd.Sim
         public float Peek;
         public bool Crouching;
         public bool Swimming;           // в воде: медленно, без оружия
+        public bool IsBot;              // бот: E — быстрые действия, у живого игрока — окна
+        public bool WantsCraftMenu;     // нажал E у верстака — клиент откроет крафт
+        public UiKind OpenUi;
+        public object OpenTarget;
         public float PendingSwingAt = -1;   // удар инструментом засчитывается с задержкой — когда он опускается на цель
         public WeaponState PendingSwing;
         public StructKind BuildPiece = StructKind.Foundation;   // что ставит план постройки (R — сменить)
@@ -453,7 +461,8 @@ namespace Rastvordd.Sim
 
         // спальник: после возрождения в нём — перезарядка
         public float ReadyAt;
-        public bool Burning => Fuel > 0 && (Ore > 0 || SulfurOre > 0);
+        public bool On = true;           // печь зажжена (игрок включает в окне)
+        public bool Burning => On && Fuel > 0 && (Ore > 0 || SulfurOre > 0);
     }
 
     public sealed class Projectile

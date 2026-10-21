@@ -22,6 +22,9 @@ namespace Rastvordd.Client
         BuildLayer _build;
         BuildGhost2D _bghost;
         MapView _mapView;
+        UiPanel _uiPanel;
+        (UiOp op, string item, int index)? _uiReq;
+        bool _uiWasOpen;
         string _lastPlace;
         readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
@@ -174,6 +177,9 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _mapView = new MapView(_map, monList);
             _mapView.SetAnchorsPreset(Control.LayoutPreset.FullRect);
             _hud.AddChild(_mapView);
+            _uiPanel = new UiPanel();
+            _uiPanel.Action += (op, item, index) => _uiReq = (op, item, index);
+            _hud.AddChild(_uiPanel);
             _hud.CraftRequested += i => _craftReq = i;
             _hud.CodeEntered += (door, code) => _codeReq = (door, code);
             _hud.WipeRequested += () =>
@@ -345,6 +351,9 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     case Key.M: _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); break;
                     case Key.F5: SaveWorld(); _hud.Toast("Мир сохранён"); break;
                     case Key.F12: SaveScreenshot($"user://shot_{Time.GetTicksMsec()}.png"); break;
+                    case Key.Escape when _uiPanel.Visible:
+                        _uiReq = (UiOp.Close, null, 0);
+                        break;
                     case Key.Escape:
                         Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Hidden ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
                         break;
@@ -370,11 +379,14 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             {
                 Move = move,
                 Aim = _aim,
-                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
+                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !_uiPanel.Visible && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
                 Eat = _eatEdge,
                 DebugKit = _debugEdge,
                 Craft = _craftReq,
                 Code = _codeReq?.code ?? -1,
+                UiOp = (int)(_uiReq?.op ?? UiOp.None),
+                UiItem = _uiReq?.item,
+                UiIndex = _uiReq?.index ?? 0,
                 CodeDoor = _codeReq?.door ?? 0,
                 Sprint = _forceSprint || Input.IsPhysicalKeyPressed(Key.Shift),
                 Reload = _reloadEdge,
@@ -466,6 +478,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = _timeEdge = _bagEdge = false;
                 _slot = _craftReq = -1;
                 _codeReq = null;
+                _uiReq = null;
                 if (_autoFireFrames > 0) _autoFireFrames--;
                 HandleEvents();
                 _acc -= World.Dt;
@@ -953,6 +966,15 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             RemoveMissing(_fireViews, seen);
 
             _mapView.SetState(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _cur.Actors.Find(x => x.Id == _myId).Facing, _cur.Self.Home);
+
+            // окно по E (ящик, печь, столб) и крафт у верстака
+            _uiPanel.Show(_cur.Self.Ui);
+            if (_uiPanel.Visible != _uiWasOpen)
+            {
+                _uiWasOpen = _uiPanel.Visible;
+                Input.MouseMode = _uiPanel.Visible || _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
+            }
+            if (_cur.Self.OpenCraft && !_hud.CraftOpen) { _hud.ToggleCraft(); Input.MouseMode = Input.MouseModeEnum.Visible; }
 
             // вход на РТ — название
             if (_cur.Self.Place != _lastPlace) { _lastPlace = _cur.Self.Place; if (_lastPlace != null) _hud.Toast(_lastPlace); }

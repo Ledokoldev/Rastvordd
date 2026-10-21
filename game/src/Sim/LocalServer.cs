@@ -72,6 +72,8 @@ namespace Rastvordd.Sim
         public bool HasBag;             // есть свой спальник
         public float BagReadyIn;        // секунд до готовности спальника
         public string BuildStatus;      // с планом в руках: лимиты базы под курсором
+        public UiView Ui;               // открытое окно (ящик, печь, столб…)
+        public bool OpenCraft;          // открыть крафт (E у верстака)
         public bool HasZone;            // зона столба под курсором (клетка столба, радиус World.ClaimRadius)
         public (int i, int j) ZoneCell;
         public BeltSlotInfo?[] Belt = new BeltSlotInfo?[Actor.BeltSize];
@@ -185,6 +187,7 @@ namespace Rastvordd.Sim
             {
                 string name = BotNames[i] + " (бот)";
                 var a = World.FindPlayer(name) ?? World.SpawnPlayer(name);
+                a.IsBot = true;
                 var bot = new PlayerBot(a, World, _seed * 17 + i) { Archetype = i == 2 ? BotArchetype.Roamer : BotArchetype.Farmer };
                 _bots[a.Id] = bot;
                 _brains.Add(bot);
@@ -260,6 +263,9 @@ namespace Rastvordd.Sim
             var snap = new Snapshot { Tick = World.Tick, Time = World.Time, DayTime = World.TimeOfDay };
             snap.Self = BuildSelf(me);
             snap.Self.Place = World.MonumentAt(me.Pos)?.Name;
+            snap.Self.Ui = World.BuildUi(me);
+            snap.Self.OpenCraft = me.WantsCraftMenu;
+            me.WantsCraftMenu = false;
             foreach (var d in World.Deployables) if (d.Kind == DeployKind.Claim && d.Auth.Contains(me.Id)) { snap.Self.Home = d.Pos; break; }
             var myBag = World.ReadyBag(me);
             snap.Self.HasBag = myBag != null;

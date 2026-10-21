@@ -606,6 +606,8 @@ namespace Rastvordd.Sim
             else a.FireHeldLastTick = cmd.Fire;
 
             if (cmd.Interact) Interact(a);
+            StepUi(a, cmd);
+            if (cmd.SetPiece >= 0 && cmd.SetPiece <= (int)StructKind.Door) a.BuildPiece = (StructKind)cmd.SetPiece;
         }
 
         void ResolveCollisions(Actor a)
@@ -970,6 +972,12 @@ namespace Rastvordd.Sim
             var (kind, target) = NearestInteract(a);
             switch (kind)
             {
+                // у живого игрока — окна, боты пользуются быстрыми действиями
+                case InteractKind.Bag when !a.IsBot: OpenUi(a, UiKind.Bag, target); break;
+                case InteractKind.Furnace when !a.IsBot: OpenUi(a, UiKind.Furnace, target); break;
+                case InteractKind.Claim when !a.IsBot: OpenUi(a, UiKind.Claim, target); break;
+                case InteractKind.Box when !a.IsBot: OpenUi(a, UiKind.Box, target); break;
+                case InteractKind.Workbench when !a.IsBot: a.WantsCraftMenu = true; break;
                 case InteractKind.Bag: LootBagInto(a, (LootBag)target); break;
                 case InteractKind.Pickup: Collect(a, (Pickup)target); break;
                 case InteractKind.Furnace: UseFurnace(a, (Deployable)target); break;
@@ -1060,6 +1068,7 @@ namespace Rastvordd.Sim
         /// <summary>Печь: забираешь готовое, потом загружаешь руду и дерево из инвентаря.</summary>
         void UseFurnace(Actor a, Deployable f)
         {
+            f.On = true;
             var got = new List<string>();
             if (f.OutMetal > 0) { a.Add("metal_fragments", f.OutMetal); got.Add($"Металл ×{f.OutMetal}"); f.OutMetal = 0; }
             if (f.OutSulfur > 0) { a.Add("sulfur", f.OutSulfur); got.Add($"Сера ×{f.OutSulfur}"); f.OutSulfur = 0; }

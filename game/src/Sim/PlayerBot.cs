@@ -145,6 +145,14 @@ namespace Rastvordd.Sim
             return null;
         }
 
+        static NodeKind NodeFor(string id) => id switch { "wood" => NodeKind.Tree, "metal_ore" => NodeKind.Metal, "sulfur_ore" => NodeKind.Sulfur, _ => NodeKind.Stone };
+
+        Deployable MyFurnace()
+        {
+            foreach (var d in _w.Deployables) if (d.Kind == DeployKind.Furnace && d.OwnerId == _me.Id) return d;
+            return null;
+        }
+
         Deployable MyBox()
         {
             foreach (var d in _w.Deployables) if (d.Kind == DeployKind.Box && d.OwnerId == _me.Id) return d;
@@ -241,11 +249,11 @@ namespace Rastvordd.Sim
         /// <summary>Нужно count ресурса: если не хватает — идём добывать порцию (не меньше минимальной), true — уже есть.</summary>
         bool Need(string id, int count, ref InputCmd cmd)
         {
-            if (_stockId == id && _me.Count(id) < _stockTarget) { Gather(id == "wood" ? NodeKind.Tree : NodeKind.Stone, ref cmd); return false; }
+            if (_stockId == id && _me.Count(id) < _stockTarget) { Gather(NodeFor(id), ref cmd); return false; }
             if (_me.Count(id) >= count) { if (_stockId == id) _stockId = null; return true; }
             _stockId = id;
             _stockTarget = Math.Max(count, id == "wood" ? 350 : 250);
-            Gather(id == "wood" ? NodeKind.Tree : NodeKind.Stone, ref cmd);
+            Gather(NodeFor(id), ref cmd);
             return false;
         }
 
@@ -570,6 +578,43 @@ namespace Rastvordd.Sim
                 cmd.Aim = face;
                 if (Hold("tool_hammer", ref cmd) && Vector2.Dot(_me.FacingDir, Vector2.Normalize(face - _me.Pos)) > 0.9f) cmd.Fire = true;
                 return;
+            }
+
+            // 8в. печь у дома: металл на будущие улучшения (руда → печь → металл → в ящик)
+            if (stoneDone)
+            {
+                int metal = _me.Count("metal_fragments");
+                foreach (var it in box.Storage.Items) if (it.Id == "metal_fragments") metal += it.Count;
+                var furnace = MyFurnace();
+                if (furnace == null && metal < 300)
+                {
+                    if (!Has("deploy_furnace"))
+                    {
+                        if (Craft("deploy_furnace", ref cmd)) return;
+                        if (!Need("stone", 200, ref cmd) || !Need("wood", 100, ref cmd)) return;
+                        return;
+                    }
+                    Doing = "ставит печь";
+                    var spot = CellC(1, 2) + new Vector2(0.6f, 1.0f);
+                    if (!GoTo(spot + new Vector2(-1.2f, 0), 0.5f, ref cmd)) return;
+                    cmd.Aim = spot;
+                    if (Hold("deploy_furnace", ref cmd)) Click(ref cmd);
+                    return;
+                }
+                if (furnace != null)
+                {
+                    bool ready = (!furnace.Burning && furnace.OutMetal + furnace.OutCharcoal > 0) || furnace.OutMetal >= 40;   // забираем пачкой, а не по 2
+                    bool haveOre = _me.Count("metal_ore") >= 60 && _me.Count("wood") >= 40;
+                    if (ready || (haveOre && !furnace.Burning))
+                    {
+                        Doing = ready ? "забирает металл из печи" : "загружает печь";
+                        if (!GoTo(furnace.Pos + new Vector2(-1.0f, 0.3f), 0.4f, ref cmd)) return;
+                        cmd.Aim = furnace.Pos;
+                        cmd.Interact = Click2();
+                        return;
+                    }
+                    if (metal < 300 && !furnace.Burning && _me.Count("metal_ore") < 60 && !Need("metal_ore", 60, ref cmd)) return;
+                }
             }
 
             // 9. отнести добычу (камень копим, пока дом не каменный)

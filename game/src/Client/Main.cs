@@ -60,6 +60,7 @@ namespace Rastvordd.Client
 
         string _shotPath;
         int _shotFrame = -1, _frame;
+        (int start, int count, int step) _burst;
         SVec? _autoAim;
         readonly Dictionary<int, List<string>> _script = new();
         int _autoFireFrames;
@@ -133,6 +134,11 @@ namespace Rastvordd.Client
             {
                 if (arg.StartsWith("--shot=")) _shotPath = arg.Substring(7);
                 else if (arg.StartsWith("--frames=")) _shotFrame = int.Parse(arg.Substring(9));
+                else if (arg.StartsWith("--burst="))
+                {
+                    var p = arg.Substring(8).Split(',');
+                    _burst = (int.Parse(p[0]), int.Parse(p[1]), int.Parse(p[2]));
+                }
                 else if (arg.StartsWith("--spawn="))
                 {
                     var p = arg.Substring(8).Split(',');
@@ -172,6 +178,22 @@ namespace Rastvordd.Client
                 {
                     var p = arg.Substring(6).Split(',');
                     _autoAim = new SVec(float.Parse(p[0], inv), float.Parse(p[1], inv));
+                }
+                else if (arg.StartsWith("--near="))
+                {
+                    // встать рядом с ближайшим узлом вида (tree/stone/metal/sulfur) и смотреть на него: --near=tree[,угол°]
+                    var p = arg.Substring(7).Split(',');
+                    var kind = System.Enum.Parse<NodeKind>(p[0], true);
+                    float ang = p.Length > 1 ? Mathf.DegToRad(float.Parse(p[1], inv)) : Mathf.Pi;
+                    var me = _server.World.Find(_myId);
+                    ResourceNode best = null;
+                    foreach (var n in _server.World.Nodes)
+                        if (n.Kind == kind && (best == null || SVec.Distance(n.Pos, me.Pos) < SVec.Distance(best.Pos, me.Pos))) best = n;
+                    if (best != null)
+                    {
+                        me.Pos = best.Pos + new SVec(Mathf.Cos(ang), Mathf.Sin(ang)) * (best.Radius + 0.9f);
+                        _autoAim = best.Pos;
+                    }
                 }
             }
         }
@@ -344,6 +366,10 @@ namespace Rastvordd.Client
                     _perfTime = 0; _perfFrames = 0; _simTime = 0;
                 }
             }
+            // серия кадров для разбора анимаций: --burst=начало,сколько,шаг → <shot>_N.png
+            if (_shotPath != null && _burst.count > 0 && _frame >= _burst.start && (_frame - _burst.start) % _burst.step == 0
+                && (_frame - _burst.start) / _burst.step < _burst.count)
+                SaveScreenshot(_shotPath.Replace(".png", $"_{(_frame - _burst.start) / _burst.step:00}.png"));
             if (_shotPath != null && _frame == _shotFrame)
             {
                 SaveScreenshot(_shotPath);
@@ -384,6 +410,7 @@ namespace Rastvordd.Client
                         if (_nodeViews.TryGetValue(e.OtherId, out var nv)) nv.Hit();
                         Sfx.Play(NodeHitSound(e.OtherId), Iso.Px(e.Pos), -2, 30, 0.1f);
                         SpawnChips(e.OtherId, e.Pos, e.ActorId);
+                        if (_actorViews.TryGetValue(e.ActorId, out var hitter)) hitter.HitStop(0.07f);   // стоп-кадр: инструмент «вязнет» в цели
                         if (e.ActorId == _myId) _shake = Mathf.Min(1.2f, _shake + 0.45f);
                         break;
                     case SimEventKind.Gather:
@@ -669,7 +696,7 @@ namespace Rastvordd.Client
                 v.Tick(dt);
                 // кроны над игроком становятся прозрачными
                 if (v is TreeView2D t)
-                    t.SetFade(head.DistanceSquaredTo(t.CanopyCenter) < t.CanopyR * t.CanopyR * 1.4f && _selfPx.Y < t.Base.Y + 4, dt);
+                    t.SetFade(t.Covers(_selfPx), dt);
             }
             RemoveMissing(_nodeViews, seen);
 

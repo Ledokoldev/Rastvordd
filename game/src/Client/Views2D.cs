@@ -60,6 +60,10 @@ namespace Rastvordd.Client
 
         public void StartSwing() => _swing = SwingTime;
 
+        float _hitStop;
+        /// <summary>Попадание: анимация удара замирает на мгновение — удар ощущается тяжёлым.</summary>
+        public void HitStop(float seconds) => _hitStop = seconds;
+
         // ---------- анимации оружия в стиле Gungeon: тело — кадры, оружие с кистями анимируется кодом ----------
         float _kick, _reloadT, _reloadDur;
         bool _magDropped;
@@ -140,7 +144,8 @@ namespace Rastvordd.Client
             float swingOffset = 0;
             if (_swing > 0)
             {
-                _swing -= dt;
+                if (_hitStop > 0) _hitStop -= dt;
+                else _swing -= dt;
                 float t = 1f - Mathf.Clamp(_swing / SwingTime, 0, 1);
                 swingOffset = t < 0.35f ? Mathf.Lerp(0, -1.3f, t / 0.35f) : Mathf.Lerp(-1.3f, 0.5f, (t - 0.35f) / 0.65f);
                 if (!right) swingOffset = -swingOffset;
@@ -497,6 +502,16 @@ namespace Rastvordd.Client
             _seed = seed;
             if (_tex != null) CanopyR = _tex.GetWidth() * 0.42f;
             TextureFilter = TextureFilterEnum.Nearest;
+        }
+
+        /// <summary>Закрывает ли дерево персонажа, стоящего ногами в feet: тело (≈1,8 м) пересекает силуэт дерева, а сам он позади ствола.</summary>
+        public bool Covers(Vector2 feet)
+        {
+            if (feet.Y > Base.Y + 4) return false;                       // стоит перед деревом — рисуется поверх
+            float halfW = _tex != null ? _tex.GetWidth() * 0.4f : CanopyR;
+            float top = Base.Y - (_tex != null ? _tex.GetHeight() * 0.95f : Iso.H(4.5f));
+            float bodyTop = feet.Y - Iso.H(1.9f);
+            return Mathf.Abs(feet.X - Base.X) < halfW + 8 && bodyTop < Base.Y - 6 && feet.Y > top;
         }
 
         /// <summary>Крона полупрозрачна, если под ней игрок — чтобы не терять персонажа.</summary>

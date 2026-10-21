@@ -32,6 +32,7 @@ class Scene:
         self.shadow = Image.new('L', self.img.size, 0)
         self.objs, self.zones, self.marks, self.plan_walls, self.plan_props, self.notes = [], [], [], [], [], []
         self.keepout = []          # прямоугольники, где не сажать лес и траву
+        self.roofs = []            # крыши: (x0, y0, x1, y1, высота стен, текстура) — рисуются поверх всего
         random.seed(seed)
 
     def px(self, x, y):
@@ -229,6 +230,27 @@ class Scene:
             if free(x, y, 0.2):
                 self.prop(random.choice(GR), x, y, random.random() < .5, shadow=False)
 
+    # ---------- крыши ----------
+    def roof(self, x0, y0, x1, y1, h, tile='roof_slate'):
+        self.roofs.append((x0, y0, x1, y1, h, tile))
+
+    def draw_roofs(self):
+        for (x0, y0, x1, y1, h, tile) in self.roofs:
+            H = int(h * PPM * HS)
+            a, b = self.px(x0 - 0.25, y0 - 0.25); c, d = self.px(x1 + 0.25, y1 + 0.25)
+            b, d = b - H, d - H
+            t = L('tiles/' + tile)
+            reg = Image.new('RGBA', (c - a, d - b))
+            for i in range(0, reg.width, t.width):
+                for j in range(0, reg.height, t.height):
+                    reg.paste(t, (i, j))
+            self.img.alpha_composite(reg, (a, b))
+            dr = ImageDraw.Draw(self.img, 'RGBA')
+            fascia = int(0.35 * PPM * HS) + 2
+            dr.rectangle([a, d - 1, c - 1, d - 1 + fascia], fill=(38, 34, 30, 255))     # торец крыши (свес) над лицом стены
+            dr.rectangle([a, b, c - 1, b + 2], fill=(255, 248, 230, 50))                  # кромка на свету
+            dr.rectangle([a, b, c - 1, d - 1 + fascia], outline=(18, 16, 14, 200), width=2)
+
     # ---------- вывод ----------
     def render(self, key):
         sh = self.shadow.filter(ImageFilter.GaussianBlur(1.2)).point(lambda v: int(v * 0.42))
@@ -237,6 +259,7 @@ class Scene:
         self.img.alpha_composite(dark)
         for _, f in sorted(self.objs, key=lambda o: o[0]):
             f()
+        self.draw_roofs()
         im = self.img.convert('RGB')
         im.save(OUT + f't0-{key}-mock.png')
         im.resize((im.width // 2, im.height // 2), Image.LANCZOS).save(OUT + f't0-{key}-mock-half.png')
@@ -478,6 +501,7 @@ def shop():
     s.wall(33, 8, 33, 20, 3.2, ST)                                 # подсобка | склад — глухая
     s.wall(10, 33, 19, 33, 3.2, SF); s.wall(21.6, 33, 34, 33, 3.2, SF)
     s.labels = [(29.8, 18.6, 'дверь заклинило'), (19, 34.2, 'вход'), (42.6, 12.2, 'вход в склад')]
+    s.roof(10, 20, 34, 33, 3.2, 'roof_slate'); s.roof(24, 8, 42, 20, 3.2, 'roof_slate')
     # зал
     for x in (12, 14, 16, 18, 20.6):
         s.prop('props/shop_shelf', x, 20.7, plan=(C_COVER, ''))
@@ -614,6 +638,7 @@ def fuel():
     s.walls([(34, 18), (34, 8), (56, 8), (56, 18), (50, 18)], 3.2, ST, gaps=[(52, 8, 53.5, 8)])
     s.wall(52, 8, 53.5, 8, 3.2, "wallface_door_metal")
     s.wall(34, 18, 39.5, 18, 3.2, SF); s.wall(41.8, 18, 50, 18, 3.2, SF)
+    s.roof(34, 8, 56, 18, 3.2, 'roof_metal')
     s.walls([(50, 8), (50, 18)], 3.2, ST, gaps=[(50, 14, 50, 15.6)])
     s.prop('props/shop_counter', 39.2, 12.4, plan=(C_COVER, ''))
     s.prop('props/shop_counter', 41.6, 12.4, plan=(C_COVER, ''))

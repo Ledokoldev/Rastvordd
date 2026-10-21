@@ -2068,6 +2068,24 @@
    "cat": "decals",
    "h": 2.0,
    "desc": "a single faded worn white painted road marking dash, a long thin rectangle with chipped edges, seen straight down from above, transparent background, no text"
+  },
+  {
+   "id": "roof_tar",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "flat roof viewed straight down from above: old black tar paper (ruberoid) roofing with overlapping seams, patches, puddle stains, moss and a few rusty bolts"
+  },
+  {
+   "id": "roof_slate",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: old grey corrugated asbestos slate sheets (shifer) in overlapping rows, lichen, cracks and a broken sheet"
+  },
+  {
+   "id": "roof_metal",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "roof viewed straight down from above: rusty corrugated metal roofing sheets with parallel ribs, rust streaks, dents and patched holes"
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

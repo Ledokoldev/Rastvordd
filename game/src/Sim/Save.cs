@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text.Json;
@@ -177,6 +177,65 @@ namespace Rastvordd.Sim
                 Actors.Add(a);
             }
             _nextId = Math.Max(_nextId, w.NextId);
+        }
+
+        /// <summary>
+        /// Досчёт офлайна (D24): мир прожил seconds без игроков. Упрощённо и сразу: столбы съедают запас,
+        /// без запаса — отсрочка и гниение; ресурсы, ягоды и ящики РТ восстанавливаются, сумки исчезают.
+        /// Возвращает короткий отчёт для игрока.
+        /// </summary>
+        public List<string> CatchUp(float seconds)
+        {
+            var report = new List<string>();
+            if (seconds < 60) return report;
+            float hours = seconds / 3600f;
+
+            foreach (var claim in new List<Deployable>(Deployables))
+            {
+                if (claim.Kind != DeployKind.Claim) continue;
+                var eaten = new List<string>();
+                int lost = 0;
+                foreach (var (id, perHour) in UpkeepPerHourOf(claim))
+                {
+                    if (perHour <= 0) continue;
+                    float have = claim.Store.GetValueOrDefault(id);
+                    float need = perHour * hours;
+                    if (have >= need) { claim.Store[id] = have - need; eaten.Add($"{Items.Name(id)} {need:0}"); continue; }
+                    claim.Store[id] = 0;
+                    if (have > 0) eaten.Add($"{Items.Name(id)} {have:0}");
+                    // запас кончился через have/perHour часов; дальше отсрочка, потом гниение 1%/мин
+                    float rotMin = (seconds - have / perHour * 3600f - claim.Grace) / 60f;
+                    if (rotMin <= 0) { claim.Grace -= seconds - have / perHour * 3600f; continue; }
+                    claim.Grace = 0;
+                    report.Add($"база без запаса гнила {rotMin:0} мин (−{MathF.Min(100, rotMin * DecayPerMinute * 100):0}% прочности)");
+                    foreach (var s in new List<Structure>(Structures))
+                    {
+                        if (s.ClaimId != claim.Id) continue;
+                        foreach (var (cid, _) in Building.Cost(s.Kind, s.Tier))
+                            if (cid == id)
+                            {
+                                bool gone = s.Hp <= s.MaxHp * DecayPerMinute * rotMin;
+                                DamageStructure(s, s.MaxHp * DecayPerMinute * rotMin, -1);
+                                if (gone) lost++;
+                                break;
+                            }
+                    }
+                }
+                if (eaten.Count > 0) report.Add("столб съел: " + string.Join(", ", eaten));
+                if (lost > 0) report.Add($"без запаса сгнило элементов: {lost}");
+            }
+
+            for (int i = _nodeRespawns.Count - 1; i >= 0; i--)
+                _nodeRespawns[i] = (_nodeRespawns[i].kind, _nodeRespawns[i].left - seconds);   // вырастут в первый же тик
+            foreach (var p in Pickups) p.RespawnLeft = MathF.Max(0, p.RespawnLeft - seconds);
+            for (int i = Bags.Count - 1; i >= 0; i--)
+            {
+                var b = Bags[i];
+                if (b.IsCrate) { if (b.Empty && b.RespawnLeft > 0) { b.RespawnLeft = 0.01f; } }
+                else if ((b.Despawn -= seconds) <= 0) Bags.RemoveAt(i);
+            }
+            Time += seconds;
+            return report;
         }
 
         /// <summary>Игрок по имени (после загрузки — его сохранённый персонаж).</summary>

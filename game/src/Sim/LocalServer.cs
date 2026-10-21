@@ -142,11 +142,17 @@ namespace Rastvordd.Sim
         public int Connect(string name) => (World.FindPlayer(name) ?? World.SpawnPlayer(name)).Id;
 
         /// <summary>Загрузить сохранение (до Connect). false — файл от другого зерна/версии.</summary>
-        public bool LoadSave(string json)
+        public bool LoadSave(string json, out string report)
         {
+            report = null;
             var save = WorldSave.FromJson(json);
             if (save == null || save.Version != 1 || save.Seed != World.Seed) return false;
             World.Load(save);
+            // мир жил, пока игра была закрыта (не больше суток за раз)
+            float away = (float)System.Math.Min(24 * 3600, (System.DateTime.UtcNow - save.SavedAtUtc).TotalSeconds);
+            var lines = World.CatchUp(away);
+            if (away >= 60)
+                report = $"Тебя не было {(away >= 3600 ? $"{away / 3600:0.0} ч" : $"{away / 60:0} мин")}" + (lines.Count > 0 ? ": " + string.Join("; ", lines) : "");
             return true;
         }
 

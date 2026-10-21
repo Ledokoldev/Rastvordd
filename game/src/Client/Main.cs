@@ -117,7 +117,7 @@ namespace Rastvordd.Client
             bool loaded = false;
             if (_saveEnabled && FileAccess.FileExists(SavePath))
             {
-                try { loaded = _server.LoadSave(FileAccess.GetFileAsString(SavePath)); }
+                try { loaded = _server.LoadSave(FileAccess.GetFileAsString(SavePath), out _awayReport); }
                 catch (System.Exception ex) { GD.PrintErr($"сохранение не прочитано: {ex.Message}"); }
             }
             _myId = _server.Connect("Игрок");
@@ -349,7 +349,8 @@ namespace Rastvordd.Client
         bool _saveEnabled;
         double _saveTimer;
 
-        void ToastLoaded() => _hud.Toast("Мир загружен — продолжаем с того же места");
+        string _awayReport;
+        void ToastLoaded() => _hud.Toast(_awayReport ?? "Мир загружен — продолжаем с того же места");
 
         void SaveWorld()
         {

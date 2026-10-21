@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -111,6 +111,24 @@ namespace Rastvordd.Sim
                 float fall = 1f - 0.5f * dist / r;
                 DamageStructure(s, ex.Damage * fall * BlastTierMult[Math.Clamp(s.Tier, 0, 4)], t.OwnerId);
             }
+            // установленное: ящик рассыпается лутом, столб падает
+            foreach (var d in new List<Deployable>(Deployables))
+            {
+                float dist = Vector2.Distance(d.Pos, t.Pos);
+                if (dist > r + d.Radius || !HasLineOfSight(t.Pos, d.Pos)) continue;
+                d.Hp -= ex.Damage * (1f - 0.5f * dist / (r + d.Radius));
+                if (d.Hp > 0) continue;
+                Deployables.Remove(d);
+                _deployGrid.Remove(d);
+                if (d.Storage != null && !d.Storage.Empty)
+                {
+                    var spill = new LootBag { Id = NextId(), Pos = d.Pos, Despawn = 600 };
+                    spill.Items.AddRange(d.Storage.Items);
+                    Bags.Add(spill);
+                }
+                Events.Add(new SimEvent { Kind = SimEventKind.Destroyed, OtherId = d.Id, Pos = d.Pos, Text = Items.Name(d.Kind.ToString()), Value = 1 });
+            }
+
             // люди: только если между взрывом и человеком нет стены
             foreach (var a in Actors)
             {

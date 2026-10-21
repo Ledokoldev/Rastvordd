@@ -86,6 +86,8 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("slot")) _slot = int.Parse(a.Substring(4)) - 1;
                 else if (a.StartsWith("craft")) _craftReq = int.Parse(a.Substring(5));
                 else if (a == "stop") _forceWalk = SVec.Zero;
+                else if (a == "crouch") _forceCrouch = true;
+                else if (a == "stand") _forceCrouch = false;
                 else if (a.StartsWith("code")) _scriptCode = int.Parse(a.Substring(4));
                 else if (a.StartsWith("go"))
                 {

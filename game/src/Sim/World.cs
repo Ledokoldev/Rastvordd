@@ -363,10 +363,11 @@ namespace Rastvordd.Sim
                 if (a.Belt[i]?.Id == "build_plan")
                 {
                     for (int k = 0; k < Actor.BeltSize; k++)
-                        if (a.Belt[k]?.Id is "deploy_claim" or "weapon_torch" or "tool_rock") a.Belt[k] = null;
+                        if (a.Belt[k]?.Id is "deploy_claim" or "weapon_torch" or "tool_rock" or "tool_hammer") a.Belt[k] = null;
                     a.Add("expl_c4", 10);
                     a.Add("expl_satchel", 10);
                     a.Add("lock_code", 1);
+                    a.Add("deploy_box", 1);
                     Info(a, "Отладочный набор: взрывчатка");
                     return;
                 }
@@ -869,6 +870,7 @@ namespace Rastvordd.Sim
             if (!IsFree(at, 0.65f)) { Info(a, "Здесь не поставить"); return; }
             if (def.Deploy == DeployKind.Claim && !CanPlaceClaim(at, out string why)) { Info(a, $"Столб: {why}"); return; }
             var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id };
+            if (def.Deploy == DeployKind.Box) dep.Storage = new LootBag { Id = NextId(), Pos = at };
             dep.Auth.Add(a.Id);
             AddDeployable(dep);
             // фундаменты без столба в его зоне — привязываются к нему
@@ -893,7 +895,7 @@ namespace Rastvordd.Sim
 
         // ---------- взаимодействие (E) ----------
 
-        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim }
+        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box }
 
         /// <summary>Что ближе всего под рукой. Используется и сервером, и подсказкой на экране.</summary>
         public (InteractKind kind, object target) NearestInteract(Actor a)
@@ -915,7 +917,7 @@ namespace Rastvordd.Sim
             foreach (var dp in DeploysNear(a.Pos, InteractRange))
             {
                 float d = Vector2.Distance(a.Pos, dp.Pos) - dp.Radius + 0.3f;
-                if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, _ => InteractKind.Workbench }, dp); }
+                if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, _ => InteractKind.Workbench }, dp); }
             }
             var door = NearestDoor(a.Pos, best.Item1 == InteractKind.None ? InteractRange + 0.4f : bestD);   // дверь — если ближе остального
             if (door != null) best = (InteractKind.Door, door);
@@ -932,8 +934,30 @@ namespace Rastvordd.Sim
                 case InteractKind.Furnace: UseFurnace(a, (Deployable)target); break;
                 case InteractKind.Door: ToggleDoor(a, (Structure)target); break;
                 case InteractKind.Claim: UseClaim(a, (Deployable)target); break;
+                case InteractKind.Box: UseBox(a, (Deployable)target); break;
                 case InteractKind.Workbench: Info(a, "Верстак: рядом с ним доступны рецепты уровня 1 (Q)"); break;
             }
+        }
+
+        /// <summary>Ящик: E — забрать всё, Alt+E (присед) — сложить весь инвентарь (пояс остаётся при себе).</summary>
+        void UseBox(Actor a, Deployable box)
+        {
+            if (a.Crouching)
+            {
+                if (a.Inventory.Count == 0) { Info(a, "Инвентарь пуст — класть нечего"); return; }
+                var parts = new List<string>();
+                foreach (var st in a.Inventory)
+                {
+                    var same = box.Storage.Items.Find(s => s.Id == st.Id && s.State == null);
+                    if (same != null) same.Count += st.Count; else box.Storage.Items.Add(new ItemSlot(st.Id, st.Count));
+                    parts.Add($"{Items.Name(st.Id)} ×{st.Count}");
+                }
+                a.Inventory.Clear();
+                Info(a, parts.Count <= 3 ? "В ящик: " + string.Join(", ", parts) : $"В ящик: {string.Join(", ", parts.GetRange(0, 3))} и ещё {parts.Count - 3}");
+                return;
+            }
+            if (box.Storage.Empty) { Info(a, "Ящик пуст · Alt+E — сложить инвентарь"); return; }
+            LootBagInto(a, box.Storage);
         }
 
         void LootBagInto(Actor a, LootBag bag)

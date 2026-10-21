@@ -310,6 +310,7 @@ namespace Rastvordd.Sim
             },
             World.InteractKind.Furnace => FurnaceHint((Deployable)it.target),
             World.InteractKind.Workbench => "[E] Верстак",
+            World.InteractKind.Box => ((Deployable)it.target).Storage.Empty ? "[E] Ящик (пуст) · Alt+E — сложить" : $"[E] Забрать из ящика ({((Deployable)it.target).Storage.Items.Count} шт.) · Alt+E — сложить",
             World.InteractKind.Claim => ClaimHint(World, (Deployable)it.target),
             World.InteractKind.Door => (((Structure)it.target).Open ? "[E] Закрыть дверь" : "[E] Открыть дверь") + (((Structure)it.target).Locked ? " · замок" : ""),
             _ => "",

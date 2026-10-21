@@ -350,6 +350,7 @@ else if (arg == "--atcrate")
         {
             if (e is InputEventKey k && k.Pressed && !k.Echo)
             {
+                if (_buildMenu.PickByKey(k.PhysicalKeycode)) return;
                 switch (k.PhysicalKeycode)
                 {
                     case Key.R: _reloadEdge = true; break;

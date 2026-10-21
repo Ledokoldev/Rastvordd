@@ -21,9 +21,9 @@ namespace Rastvordd.Client
             return f;
         }
 
-        public static readonly Color Ink = new(0.92f, 0.88f, 0.78f);
-        public static readonly Color Dim = new(0.62f, 0.6f, 0.55f);
-        public static readonly Color Accent = new(1f, 0.78f, 0.3f);
+        public static readonly Color Ink = new(0.9f, 0.9f, 0.88f);
+        public static readonly Color Dim = new(0.58f, 0.58f, 0.56f);
+        public static readonly Color Accent = new(0.95f, 0.72f, 0.32f);
 
         /// <summary>Цвета рамок по редкости: обычное, необычное, редкое, эпическое, легендарное.</summary>
         public static Color RarityColor(int r) => r switch
@@ -37,65 +37,57 @@ namespace Rastvordd.Client
 
         public static string RarityName(int r) => r switch { 1 => "необычное", 2 => "редкое", 3 => "эпическое", 4 => "легендарное", _ => "обычное" };
 
-        public static StyleBox Box(string tex, int margin, float alpha = 1f, Color? fallback = null)
+        static StyleBoxFlat Flat(Color bg, int margin, int radius = 2)
         {
-            var t = Art.Get($"ui/{tex}");
-            if (t == null)
-            {
-                var f = new StyleBoxFlat { BgColor = fallback ?? new Color(0.1f, 0.09f, 0.08f, 0.94f), BorderColor = new Color(0.5f, 0.38f, 0.25f) };
-                f.SetBorderWidthAll(3);
-                f.SetContentMarginAll(margin);
-                return f;
-            }
-            var s = new StyleBoxTexture { Texture = t, ModulateColor = new Color(1, 1, 1, alpha) };
-            s.TextureMarginLeft = s.TextureMarginRight = s.TextureMarginTop = s.TextureMarginBottom = margin;
-            s.SetContentMarginAll(margin + 4);
-            return s;
+            var f = new StyleBoxFlat { BgColor = bg };
+            f.SetCornerRadiusAll(radius);
+            f.SetContentMarginAll(margin);
+            return f;
         }
+
+        public static readonly Color PanelBg = new(0.07f, 0.07f, 0.07f, 0.86f);
+        public static readonly Color SlotBg = new(1f, 1f, 1f, 0.07f);
+        public static readonly Color SlotHover = new(1f, 1f, 1f, 0.13f);
+
+        /// <summary>Пустая квадратная ячейка: плоская полупрозрачная плашка без рамок.</summary>
+        public static void DrawSlot(CanvasItem c, Rect2 r, bool hover = false, bool dim = false) =>
+            c.DrawRect(r, dim ? new Color(1, 1, 1, 0.035f) : hover ? SlotHover : SlotBg);
 
         public static Theme Theme
         {
             get
             {
                 if (_theme != null) return _theme;
-                var t = new Theme { DefaultFont = Text, DefaultFontSize = 15 };
-                t.SetStylebox("panel", "PanelContainer", Box("ui_panel", 14));
-                var btn = Box("ui_button", 10, 1f, new Color(0.3f, 0.32f, 0.2f));
-                var hover = Box("ui_button", 10, 1f, new Color(0.36f, 0.38f, 0.25f));
-                if (hover is StyleBoxTexture ht) ht.ModulateColor = new Color(1.25f, 1.2f, 1.05f);
-                var pressed = Box("ui_button", 10, 1f, new Color(0.25f, 0.26f, 0.17f));
-                if (pressed is StyleBoxTexture pt) pt.ModulateColor = new Color(0.8f, 0.8f, 0.75f);
-                t.SetStylebox("normal", "Button", btn);
-                t.SetStylebox("hover", "Button", hover);
-                t.SetStylebox("pressed", "Button", pressed);
+                var t = new Theme { DefaultFont = Text, DefaultFontSize = 14 };
+                t.SetStylebox("panel", "PanelContainer", Flat(PanelBg, 14));
+                t.SetStylebox("normal", "Button", Flat(new Color(1, 1, 1, 0.08f), 8));
+                t.SetStylebox("hover", "Button", Flat(new Color(1, 1, 1, 0.15f), 8));
+                t.SetStylebox("pressed", "Button", Flat(new Color(1, 1, 1, 0.04f), 8));
+                t.SetStylebox("disabled", "Button", Flat(new Color(1, 1, 1, 0.03f), 8));
                 t.SetStylebox("focus", "Button", new StyleBoxEmpty());
                 t.SetColor("font_color", "Button", Ink);
-                t.SetColor("font_hover_color", "Button", Accent);
-                t.SetFont("font", "Button", Pixel);
-                t.SetFontSize("font_size", "Button", 10);
+                t.SetColor("font_hover_color", "Button", Colors.White);
+                t.SetColor("font_pressed_color", "Button", Accent);
+                t.SetFontSize("font_size", "Button", 13);
                 t.SetColor("font_color", "Label", Ink);
-                t.SetColor("font_outline_color", "Label", new Color(0, 0, 0, 0.85f));
-                t.SetConstant("outline_size", "Label", 3);
-                var tip = new StyleBoxFlat { BgColor = new Color(0.06f, 0.06f, 0.05f, 0.96f), BorderColor = Accent };
-                tip.SetBorderWidthAll(1);
-                tip.SetContentMarginAll(8);
+                var tip = Flat(new Color(0.05f, 0.05f, 0.05f, 0.95f), 8);
                 t.SetStylebox("panel", "TooltipPanel", tip);
                 t.SetColor("font_color", "TooltipLabel", Ink);
                 return _theme = t;
             }
         }
 
-        /// <summary>Заголовок окна: пиксельный шрифт на плашке.</summary>
+        /// <summary>Заголовок блока: мелкие приглушённые прописные буквы и тонкая линия под ними.</summary>
         public static Control Header(string text, out Label label)
         {
-            var plate = new PanelContainer { CustomMinimumSize = new Vector2(0, 34) };
-            plate.AddThemeStyleboxOverride("panel", Box("ui_header", 12, 1f, new Color(0.15f, 0.14f, 0.12f)));
-            label = new Label { Text = text, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-            label.AddThemeFontOverride("font", Pixel);
+            var box = new VBoxContainer();
+            box.AddThemeConstantOverride("separation", 4);
+            label = new Label { Text = text, Uppercase = true };
             label.AddThemeFontSizeOverride("font_size", 12);
-            label.AddThemeColorOverride("font_color", Accent);
-            plate.AddChild(label);
-            return plate;
+            label.AddThemeColorOverride("font_color", Dim);
+            box.AddChild(label);
+            box.AddChild(new ColorRect { Color = new Color(1, 1, 1, 0.12f), CustomMinimumSize = new Vector2(0, 1) });
+            return box;
         }
 
         public static Label Small(string text, Color? color = null, int size = 13)

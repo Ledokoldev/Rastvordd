@@ -74,7 +74,7 @@ namespace Rastvordd.Sim
         public string BuildStatus;      // с планом в руках: лимиты базы под курсором
         public UiView Ui;               // открытое окно (ящик, печь, столб…)
         public string BuildGuide;       // шпаргалка «как построить дом» с отметками
-        public List<(int kind, string name, string cost)> BuildPieces = new();   // меню плана
+        public List<(int kind, string name, string cost, bool can)> BuildPieces = new();   // меню плана
         public bool OpenCraft;          // открыть крафт (E у верстака)
         public bool HasZone;            // зона столба под курсором (клетка столба, радиус World.ClaimRadius)
         public (int i, int j) ZoneCell;
@@ -272,7 +272,7 @@ namespace Rastvordd.Sim
                 for (int k = 0; k <= (int)StructKind.Door; k++)
                 {
                     var cost = Building.Cost((StructKind)k, k == (int)StructKind.Door ? 1 : 0);
-                    snap.Self.BuildPieces.Add((k, Building.KindName((StructKind)k), string.Join(", ", System.Array.ConvertAll(cost, c => $"{Items.Name(c.id)} {c.n}"))));
+                    snap.Self.BuildPieces.Add((k, Building.KindName((StructKind)k), string.Join(", ", System.Array.ConvertAll(cost, c => $"{Items.Name(c.id)} {c.n}")), System.Array.TrueForAll(cost, c => me.Count(c.id) >= c.n)));
                 }
             snap.Self.OpenCraft = me.WantsCraftMenu;
             me.WantsCraftMenu = false;

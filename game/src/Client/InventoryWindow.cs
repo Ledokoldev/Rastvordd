@@ -23,13 +23,16 @@ namespace Rastvordd.Client
         public event Action<string, int, string, int> Moved;   // (откуда, i, куда, j)
         public event Action<string, int> Quick;
         float _pop;
+        bool _hover;
 
         public SlotCell() { CustomMinimumSize = new Vector2(Size, Size); MouseFilter = MouseFilterEnum.Stop; }
 
         public override void _Ready()
         {
+            MouseExited += () => { _hover = false; QueueRedraw(); };
             MouseEntered += () =>
             {
+                _hover = true; QueueRedraw();
                 // ховер-лут: держишь Shift и ведёшь курсором — вещи перелетают
                 if (Input.IsKeyPressed(Key.Shift) && Cell.Id != null) Quick?.Invoke(Inv, Index);
             };
@@ -47,14 +50,12 @@ namespace Rastvordd.Client
         public override void _Draw()
         {
             var r = new Rect2(Vector2.Zero, CustomMinimumSize);
-            var slot = Art.Get("ui/ui_slot");
-            if (slot != null) DrawTextureRect(slot, r, false, Cell.Hidden ? new Color(0.55f, 0.55f, 0.55f) : Colors.White);
-            else DrawRect(r, new Color(0.12f, 0.12f, 0.11f));
+            UiTheme.DrawSlot(this, r, _hover, Cell.Hidden);
 
             if (Cell.Hidden)
             {
-                var font = UiTheme.Pixel;
-                DrawString(font, new Vector2(Size / 2 - 7, Size / 2 + 7), "?", HorizontalAlignment.Left, -1, 16, new Color(0.6f, 0.58f, 0.5f, Searching ? 1 : 0.5f));
+                var font = UiTheme.Text;
+                DrawString(font, new Vector2(Size / 2 - 7, Size / 2 + 7), "?", HorizontalAlignment.Left, -1, 20, new Color(0.6f, 0.58f, 0.5f, Searching ? 1 : 0.5f));
                 if (Searching)
                 {
                     // полоска обыска
@@ -69,18 +70,18 @@ namespace Rastvordd.Client
                 if (Cell.Rarity > 0)
                 {
                     // свечение редкости снизу
-                    DrawRect(new Rect2(5, Size - 8, Size - 10, 3), new Color(rc, 0.9f));
-                    DrawRect(new Rect2(4, 4, Size - 8, Size - 8), new Color(rc, 0.10f));
+                    DrawRect(new Rect2(0, Size - 2, Size, 2), new Color(rc, 0.9f));
+                    DrawRect(new Rect2(0, 0, Size, Size), new Color(rc, 0.08f));
                 }
                 var icon = Art.Icon(Cell.Id);
                 if (icon != null) DrawTextureRect(icon, new Rect2(7, 5, Size - 14, Size - 14), false);
-                var font = UiTheme.Pixel;
+                var font = UiTheme.Text;
                 string n = Cell.Magazine > 0 ? $"{Cell.Ammo}/{Cell.Magazine}" : Cell.Count > 1 ? (Cell.Count >= 10000 ? $"{Cell.Count / 1000}k" : Cell.Count.ToString()) : "";
                 if (n != "")
                 {
-                    var sz = font.GetStringSize(n, HorizontalAlignment.Left, -1, 8);
-                    DrawString(font, new Vector2(Size - 6 - sz.X + 1, Size - 6 + 1), n, HorizontalAlignment.Left, -1, 8, new Color(0, 0, 0, 0.9f));
-                    DrawString(font, new Vector2(Size - 6 - sz.X, Size - 6), n, HorizontalAlignment.Left, -1, 8, UiTheme.Ink);
+                    var sz = font.GetStringSize(n, HorizontalAlignment.Left, -1, 12);
+                    DrawString(font, new Vector2(Size - 6 - sz.X + 1, Size - 6 + 1), n, HorizontalAlignment.Left, -1, 12, new Color(0, 0, 0, 0.9f));
+                    DrawString(font, new Vector2(Size - 6 - sz.X, Size - 6), n, HorizontalAlignment.Left, -1, 12, UiTheme.Ink);
                 }
                 if (_pop > 0)
                 {
@@ -94,8 +95,8 @@ namespace Rastvordd.Client
                 var sz = font.GetStringSize(Cell.Label, HorizontalAlignment.Left, -1, 11);
                 DrawString(font, new Vector2((Size - sz.X) / 2, Size / 2 + 4), Cell.Label, HorizontalAlignment.Left, -1, 11, new Color(0.5f, 0.48f, 0.42f));
             }
-            if (Number != null) DrawString(UiTheme.Pixel, new Vector2(6, 14), Number, HorizontalAlignment.Left, -1, 8, Selected ? UiTheme.Accent : UiTheme.Dim);
-            if (Selected) DrawRect(r.Grow(-1), UiTheme.Accent, false, 2);
+            if (Number != null) DrawString(UiTheme.Text, new Vector2(6, 14), Number, HorizontalAlignment.Left, -1, 12, Selected ? UiTheme.Accent : UiTheme.Dim);
+            if (Selected) DrawRect(r.Grow(-1), UiTheme.Accent, false, 2);  // выбранный слот пояса
         }
 
         public override string _GetTooltip(Vector2 atPosition)

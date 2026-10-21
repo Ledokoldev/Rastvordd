@@ -85,6 +85,7 @@ namespace Rastvordd.Client
         readonly Rect2 _rect;          // след комнаты на земле, пиксели мира
         readonly float _h;
         readonly Texture2D _tex;
+        readonly List<RoofItem> _items;
         float _alpha = 1;
 
         public RoofView2D(MapRoof r, float wallH = 2.8f)
@@ -92,6 +93,8 @@ namespace Rastvordd.Client
             _rect = new Rect2(Iso.Px(r.Min), Iso.Px(r.Max) - Iso.Px(r.Min));
             _h = Iso.H(wallH);
             _tex = Art.Get(r.Tile) ?? Art.Get("tiles/ground_asphalt");
+            _items = r.Items ?? new List<RoofItem>();
+            _items.Sort((a, b) => a.Pos.Y.CompareTo(b.Pos.Y));
             ZIndex = 4;
             TextureFilter = TextureFilterEnum.Nearest;
             TextureRepeat = TextureRepeatEnum.Enabled;
@@ -117,6 +120,15 @@ namespace Rastvordd.Client
             DrawRect(new Rect2(r.Position, new Vector2(r.Size.X, 3)), new Color(1, 0.97f, 0.9f, 0.18f * _alpha));
             DrawRect(new Rect2(r.Position.X, r.End.Y - 4, r.Size.X, 4), new Color(0, 0, 0, 0.35f * _alpha));
             DrawRect(r, new Color(0, 0, 0, 0.45f * _alpha), false, 2);
+            // вентиляция, трубы, антенны — стоят на крыше, с тенью по тому же свету
+            foreach (var it in _items)
+            {
+                var tex = Art.Get(it.Sprite);
+                if (tex == null) continue;
+                var at = Iso.Px(it.Pos) - new Vector2(0, _h);
+                Shade.Sprite(this, tex, 1f, 0.3f * _alpha, 2f, at);
+                DrawTexture(tex, at + new Vector2(-tex.GetWidth() / 2f, -tex.GetHeight() + 2), new Color(1, 1, 1, _alpha));
+            }
         }
     }
 

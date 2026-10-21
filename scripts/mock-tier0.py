@@ -250,6 +250,26 @@ class Scene:
             dr.rectangle([a, d - 1, c - 1, d - 1 + fascia], fill=(38, 34, 30, 255))     # торец крыши (свес) над лицом стены
             dr.rectangle([a, b, c - 1, b + 2], fill=(255, 248, 230, 50))                  # кромка на свету
             dr.rectangle([a, b, c - 1, d - 1 + fascia], outline=(18, 16, 14, 200), width=2)
+            # начинка крыши: вентиляция, трубы, антенны — как в игре (1 предмет на ~25 м²)
+            rng = random.Random(int(x0 * 131 + y0 * 17))
+            n = max(1, min(9, int((x1 - x0) * (y1 - y0) / 25)))
+            items = []
+            for _ in range(n * 12):
+                if len(items) >= n: break
+                q = (x0 + 1.2 + rng.random() * (x1 - x0 - 2.4), y0 + 1.6 + rng.random() * (y1 - y0 - 2.4))
+                if any((q[0] - o[0]) ** 2 + (q[1] - o[1]) ** 2 < 2.6 ** 2 for o in items): continue
+                items.append(q)
+            for q in sorted(items, key=lambda v: v[1]):
+                spr = L('props/' + rng.choice(ROOF_ITEMS))
+                if spr is None: continue
+                qa, qb = self.px(*q); qb -= H
+                al = spr.getchannel('A').point(lambda v: 255 if v > 100 else 0)
+                sh_h = max(2, int(spr.height * 0.42)); al = al.resize((spr.width, sh_h), Image.NEAREST)
+                shear = int(sh_h * 1.1); sm = Image.new('L', (spr.width + shear, sh_h), 0)
+                for row in range(sh_h): sm.paste(al.crop((0, row, spr.width, row + 1)), (int(shear * (1 - row / sh_h)), row))
+                shd = Image.new('RGBA', sm.size, (12, 14, 10, 255)); shd.putalpha(sm.point(lambda v: int(v * 0.35)))
+                self.img.alpha_composite(shd, (qa - spr.width // 2, qb - sh_h))
+                self.img.alpha_composite(spr, (qa - spr.width // 2, qb - spr.height + 2))
 
     # ---------- вывод ----------
     def render(self, key):
@@ -311,6 +331,7 @@ class Scene:
 
 
 # ---------- общие куски ----------
+ROOF_ITEMS = ['roof_vent_box', 'roof_vent_mushroom', 'roof_chimney_brick', 'roof_exhaust_pipe', 'roof_hatch', 'roof_ac_unit', 'roof_antenna', 'roof_panels', 'roof_junk', 'roof_water_tank']
 CL = ['clutter/clutter_tire', 'clutter/clutter_pallet', 'clutter/clutter_planks', 'clutter/clutter_canister', 'clutter/clutter_bucket']
 SCRAP = ['props/barrel_oil', 'props/barrel_oil', 'props/barrel_water']
 C_ZONE = {'asph': (70, 72, 70), 'grav': (88, 86, 76), 'dirt': (86, 72, 56), 'conc': (110, 108, 100), 'floor': (122, 98, 80), 'yard': (78, 70, 54)}

@@ -45,6 +45,7 @@ namespace Rastvordd.Client
     {
         public const int VW = 112, VH = 96;
         public static readonly Vector2 Feet = new(56, 90);
+        public const float BodyScale = 0.8f;
 
         readonly SubViewport _vp;
         readonly RigCanvas _canvas;
@@ -63,12 +64,14 @@ namespace Rastvordd.Client
             AddChild(_vp);
             _canvas = new RigCanvas(set) { TextureFilter = TextureFilterEnum.Nearest };
             _vp.AddChild(_canvas);
-            _sprite = new Sprite2D { Texture = _vp.GetTexture(), Centered = false, Offset = -Feet, TextureFilter = TextureFilterEnum.Nearest };
+            // рост: части нарисованы 1:1 (≈1,8 м = 58 px), а мир по высоте сжат как вид 3/4 (Iso.HS = 0,75) — иначе человек
+            // ростом почти со стену и огромный рядом с мебелью и техникой РТ
+            _sprite = new Sprite2D { Texture = _vp.GetTexture(), Centered = false, Offset = -Feet, TextureFilter = TextureFilterEnum.Nearest, Scale = new Vector2(BodyScale, BodyScale) };
             AddChild(_sprite);
         }
 
         /// <summary>Конец предмета в руках относительно ног персонажа (пиксели мира).</summary>
-        public Vector2 TipLocal => _canvas.TipPx - Feet;
+        public Vector2 TipLocal => (_canvas.TipPx - Feet) * BodyScale;
 
         bool _swim;
         /// <summary>В воде: видно только выше пояса, тело опущено, срез — по воде.</summary>
@@ -85,7 +88,7 @@ namespace Rastvordd.Client
             // смерть: лежит на боку
             _sprite.Rotation = dead ? Mathf.Pi / 2 * (Mathf.Cos(S.Aim) >= 0 ? 1 : -1) : 0;
             // мёртв: лежит на боку, тело по центру точки смерти (поворот идёт вокруг стоп)
-            _sprite.Position = dead ? new Vector2(-24 * (Mathf.Cos(S.Aim) >= 0 ? 1 : -1), -4) : _swim ? new Vector2(0, 18) : Vector2.Zero;
+            _sprite.Position = (dead ? new Vector2(-24 * (Mathf.Cos(S.Aim) >= 0 ? 1 : -1), -4) : _swim ? new Vector2(0, 18) : Vector2.Zero) * BodyScale;
             _sprite.Modulate = dead ? new Color(0.6f, 0.55f, 0.55f) : Colors.White;
             _canvas.QueueRedraw();
         }

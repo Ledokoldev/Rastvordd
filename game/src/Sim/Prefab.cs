@@ -17,7 +17,10 @@ namespace Rastvordd.Sim
     public struct MapPatch { public string Tile; public Vector2 Min, Max; }
 
     /// <summary>Крыша над комнатой: снаружи прячет, что внутри; клиент растворяет её, когда игрок внутри (D40).</summary>
-    public struct MapRoof { public string Tile; public Vector2 Min, Max; }
+    public struct MapRoof { public string Tile; public Vector2 Min, Max; public List<RoofItem> Items; }
+
+    /// <summary>Что стоит на крыше (вентиляция, труба, антенна…) — только картинка, исчезает вместе с крышей.</summary>
+    public struct RoofItem { public string Sprite; public Vector2 Pos; }
 
     /// <summary>Провод между двумя точками на высоте (ОРУ, ЛЭП) — только картинка.</summary>
     public struct MapWire { public Vector2 A, B; public float Ha, Hb, Sag; }
@@ -108,7 +111,26 @@ namespace Rastvordd.Sim
         }
 
         void Patch(string tile, Vector2 min, Vector2 max) => Patches.Add(new MapPatch { Tile = tile, Min = min, Max = max });
-        void Roof(string tile, Vector2 min, Vector2 max) => Roofs.Add(new MapRoof { Tile = tile, Min = min, Max = max });
+        static readonly string[] RoofSprites =
+        {
+            "props/roof_vent_box", "props/roof_vent_mushroom", "props/roof_chimney_brick", "props/roof_exhaust_pipe", "props/roof_hatch",
+            "props/roof_ac_unit", "props/roof_antenna", "props/roof_panels", "props/roof_junk", "props/roof_water_tank",
+        };
+
+        /// <summary>Крыша с «начинкой»: 1 предмет на ~25 м², случайно, не вплотную друг к другу и к краю.</summary>
+        void Roof(string tile, Vector2 min, Vector2 max, Random rng)
+        {
+            var items = new List<RoofItem>();
+            var size = max - min;
+            int n = Math.Clamp((int)(size.X * size.Y / 25f), 1, 9);
+            for (int tries = 0; tries < n * 12 && items.Count < n; tries++)
+            {
+                var p = min + new Vector2(1.2f + (float)rng.NextDouble() * (size.X - 2.4f), 1.6f + (float)rng.NextDouble() * (size.Y - 2.4f));
+                if (items.Exists(it => Vector2.Distance(it.Pos, p) < 2.6f)) continue;
+                items.Add(new RoofItem { Sprite = RoofSprites[rng.Next(RoofSprites.Length)], Pos = p });
+            }
+            Roofs.Add(new MapRoof { Tile = tile, Min = min, Max = max, Items = items });
+        }
         void Wire(Vector2 a, float ha, Vector2 b, float hb, float sag = 0.5f) => Wires.Add(new MapWire { A = a, B = b, Ha = ha, Hb = hb, Sag = sag });
 
         /// <summary>

@@ -128,9 +128,9 @@ namespace Rastvordd.Sim
             WallT(P(57, 64), P(63, 64), 3.0f, G);
             WallT(P(66, 64), P(72, 64), 3.0f, G);
             foreach (var x in new[] { 59f, 73f }) WallT(P(x, 30), P(x, 42), 3.4f, B, 1.0f);   // огнестены
-            Roof("tiles/roof_tar", P(6, 20), P(34, 34));
-            Roof("tiles/roof_tar", P(6, 34), P(18, 46));
-            Roof("tiles/roof_tar", P(54, 52), P(76, 64));
+            Roof("tiles/roof_tar", P(6, 20), P(34, 34), rng);
+            Roof("tiles/roof_tar", P(6, 34), P(18, 46), rng);
+            Roof("tiles/roof_metal", P(54, 52), P(76, 64), rng);
 
             // ОРУ: три ячейки портал → разъединитель → выключатель → разъединитель → трансформатор
             foreach (var bx in new[] { 52f, 66f, 80f })

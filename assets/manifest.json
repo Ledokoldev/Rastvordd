@@ -1650,7 +1650,7 @@
   {
    "id": "wallface_brick",
    "cat": "walls",
-   "tile": 3,
+   "tile": 1.5,
    "desc": "front elevation viewed straight-on: a weathered wall of grey-white Soviet silicate bricks with dirty mortar, water stains and chipped corners"
   },
   {
@@ -1662,13 +1662,13 @@
   {
    "id": "wallface_shutter",
    "cat": "walls",
-   "tile": 3,
+   "tile": 1.5,
    "desc": "front elevation viewed straight-on: a closed rusty corrugated steel roller shutter door filling the whole image, dented, flaking grey paint"
   },
   {
    "id": "floor_tile",
    "cat": "tiles",
-   "tile": 3,
+   "tile": 1.5,
    "desc": "floor viewed straight down from above: old Soviet brown and beige ceramic floor tiles, cracked and dirty, some tiles missing"
   },
   {
@@ -2086,6 +2086,66 @@
    "cat": "tiles",
    "tile": 3,
    "desc": "roof viewed straight down from above: rusty corrugated metal roofing sheets with parallel ribs, rust streaks, dents and patched holes"
+  },
+  {
+   "id": "roof_vent_box",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a rooftop ventilation box: a square galvanized sheet metal vent with louvered sides and a small hood on top; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+  },
+  {
+   "id": "roof_vent_mushroom",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a round rooftop mushroom-cap exhaust vent on a short pipe; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+  },
+  {
+   "id": "roof_chimney_brick",
+   "cat": "props",
+   "h": 1.6,
+   "desc": "a short brick chimney stack with a rusty metal cap and soot stains; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+  },
+  {
+   "id": "roof_exhaust_pipe",
+   "cat": "props",
+   "h": 2.2,
+   "desc": "a thin rusty metal exhaust pipe with guy wires and a rain cap sticking up from the roof; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+  },
+  {
+   "id": "roof_hatch",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a closed square steel roof access hatch with hinges and a padlock on a low concrete curb; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+  },
+  {
+   "id": "roof_ac_unit",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "an old boxy rooftop air conditioning unit with a big round fan grille on top; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+  },
+  {
+   "id": "roof_antenna",
+   "cat": "props",
+   "h": 2.4,
+   "desc": "a bent old TV antenna mast with crooked aerial rods and a dangling cable; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+  },
+  {
+   "id": "roof_panels",
+   "cat": "props",
+   "h": 0.7,
+   "desc": "two old dusty solar panels on a tilted rusty frame, one cracked; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+  },
+  {
+   "id": "roof_junk",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a small heap of roof junk: broken slate pieces, a bucket of tar, a rolled piece of ruberoid and bricks; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
+  },
+  {
+   "id": "roof_water_tank",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a small rusty cylindrical water tank on a steel stand; seen from above at a steep 3/4 angle as an object standing on a flat roof, Soviet-era, weathered, rust and grime"
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

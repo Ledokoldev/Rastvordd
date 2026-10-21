@@ -25,9 +25,9 @@ namespace Rastvordd.Client
     {
         public const float Flat = 0.42f, Skew = 0.46f;
 
-        public static void Sprite(CanvasItem ci, Texture2D tex, float scale = 1f, float alpha = 0.32f, float sink = 2f)
+        public static void Sprite(CanvasItem ci, Texture2D tex, float scale = 1f, float alpha = 0.32f, float sink = 2f, Vector2 at = default)
         {
-            ci.DrawSetTransformMatrix(new Transform2D(new Vector2(scale, 0), new Vector2(-Skew * scale, Flat * scale), Vector2.Zero));
+            ci.DrawSetTransformMatrix(new Transform2D(new Vector2(scale, 0), new Vector2(-Skew * scale, Flat * scale), at));
             ci.DrawTexture(tex, new Vector2(-tex.GetWidth() / 2f, -tex.GetHeight() + sink), new Color(0, 0, 0, alpha));
             ci.DrawSetTransform(Vector2.Zero, 0, Vector2.One);
         }

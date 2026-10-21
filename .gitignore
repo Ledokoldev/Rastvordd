@@ -1,3 +1,4 @@
 ﻿# Steam Audio (godot-steam-audio v0.3.1, github.com/stechyo/godot-steam-audio/releases) — бинарники не храним в git
 game/addons/godot-steam-audio/bin/*.dll
 game/addons/godot-steam-audio/bin/*.lib
+dist/

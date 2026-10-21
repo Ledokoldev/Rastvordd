@@ -11,18 +11,17 @@ namespace Rastvordd.Client
         const int BarW = 260;
 
         Label _buildLabel;
-        Label _hpLabel, _foodLabel, _waterLabel, _ammoLabel, _hintLabel, _toastLabel, _promptLabel, _invLabel, _deathLabel, _modeLabel, _queueLabel;
+        Label _hpLabel, _foodLabel, _waterLabel, _ammoLabel, _hintLabel, _toastLabel, _promptLabel, _invLabel, _deathLabel, _modeLabel;
         ColorRect _hpFill, _foodFill, _waterFill, _damageRect, _deathRect, _vision;
-        PanelContainer _invPanel, _craftPanel;
-        VBoxContainer _recipeBox;
-        readonly List<Button> _recipeButtons = new();
+        PanelContainer _invPanel;
+        CraftWindow _craftWin;
         HBoxContainer _belt;
         readonly List<(PanelContainer panel, Label label, StyleBoxFlat style, TextureRect icon)> _beltSlots = new();
         ShaderMaterial _visionMat;
         float _toastTime, _damageFlash;
 
         public Crosshair Crosshair { get; private set; }
-        public bool CraftOpen => _craftPanel.Visible;
+        public bool CraftOpen => _craftWin.Visible;
         PanelContainer _adminPanel;
         public bool AdminOpen => _adminPanel != null && _adminPanel.Visible;
 
@@ -79,7 +78,7 @@ namespace Rastvordd.Client
         public void ToggleAdmin() => _adminPanel.Visible = !_adminPanel.Visible;
         Label _adminSounds;
         public void SetAdminSounds(string text) { if (_adminSounds != null) _adminSounds.Text = text; }
-        public event Action<int> CraftRequested;
+        public event Action<int, int> CraftRequested;   // (рецепт, сколько раз)
         public event Action WipeRequested;
 
         const string VisionShader = @"
@@ -203,38 +202,9 @@ void fragment() {
 
         void BuildCraftPanel()
         {
-            _craftPanel = new PanelContainer { Visible = false, Position = new Vector2(20, 110) };
-            AddChild(_craftPanel);
-            var box = new VBoxContainer();
-            box.AddThemeConstantOverride("separation", 4);
-            _craftPanel.AddChild(box);
-            var title = new Label { Text = "КРАФТ  (Q — закрыть)" };
-            title.AddThemeFontSizeOverride("font_size", 18);
-            box.AddChild(title);
-            _recipeBox = new VBoxContainer();
-            _recipeBox.AddThemeConstantOverride("separation", 3);
-            box.AddChild(_recipeBox);
-            _queueLabel = new Label();
-            _queueLabel.AddThemeFontSizeOverride("font_size", 14);
-            _queueLabel.AddThemeColorOverride("font_color", new Color(1, 0.9f, 0.6f));
-            box.AddChild(_queueLabel);
-        }
-
-        void EnsureRecipeButtons(List<RecipeInfo> recipes)
-        {
-            if (_recipeButtons.Count == recipes.Count) return;
-            foreach (var b in _recipeButtons) b.QueueFree();
-            _recipeButtons.Clear();
-            foreach (var r in recipes)
-            {
-                int index = r.Index;
-                var b = new Button { Alignment = HorizontalAlignment.Left, FocusMode = Control.FocusModeEnum.None, Icon = Art.Icon(r.Output), TextureFilter = CanvasItem.TextureFilterEnum.Nearest };
-                b.AddThemeConstantOverride("icon_max_width", 32);
-                b.AddThemeFontSizeOverride("font_size", 14);
-                b.Pressed += () => CraftRequested?.Invoke(index);
-                _recipeBox.AddChild(b);
-                _recipeButtons.Add(b);
-            }
+            _craftWin = new CraftWindow();
+            _craftWin.Craft += (i, n) => CraftRequested?.Invoke(i, n);
+            AddChild(_craftWin);
         }
 
         ColorRect FullRect(Color c)
@@ -315,7 +285,7 @@ void fragment() {
 
         public void FlashDamage() => _damageFlash = 0.45f;
         public void ToggleInventory() => _invPanel.Visible = !_invPanel.Visible;
-        public void ToggleCraft() => _craftPanel.Visible = !_craftPanel.Visible;
+        public void ToggleCraft() => _craftWin.Visible = !_craftWin.Visible;
 
         public void SetVision(Vector2 playerPx, Vector2 facing, float pxPerM, float rangeM, float cosHalf, Texture2D rays, bool enabled)
         {
@@ -370,25 +340,7 @@ void fragment() {
 
 
 
-            if (_craftPanel.Visible)
-            {
-                EnsureRecipeButtons(s.Recipes);
-                for (int i = 0; i < s.Recipes.Count; i++)
-                {
-                    var r = s.Recipes[i];
-                    string bench = r.NeedsBench ? (s.NearBench ? " · верстак ✓" : " · нужен верстак") : "";
-                    _recipeButtons[i].Text = $"{r.Name} — {r.CostText} · {r.Time:0} с{bench}";
-                    _recipeButtons[i].Disabled = !r.CanCraft;
-                }
-                var q = new System.Text.StringBuilder();
-                if (s.CraftQueue.Count > 0) q.Append("Очередь: ");
-                for (int i = 0; i < s.CraftQueue.Count; i++)
-                {
-                    var (name, progress) = s.CraftQueue[i];
-                    q.Append(i == 0 ? $"{name} {Mathf.RoundToInt(progress * 100)}%" : $" · {name}");
-                }
-                _queueLabel.Text = q.ToString();
-            }
+            if (_craftWin.Visible) _craftWin.Refresh(s);
 
             _deathRect.Visible = s.Dead;
             if (s.Dead)

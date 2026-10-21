@@ -1396,6 +1396,12 @@
    "cat": "icons",
    "icon": 128,
    "desc": "a crude wooden plank door with metal hinges and a handle, standing upright"
+  },
+  {
+   "id": "icon_molotov",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a glass bottle filled with amber lamp oil, a twisted cloth wick stuffed in the neck with a small flame on its tip"
   }
  ],
  "icon_framing": "A single inventory icon for a survival game: the item alone, centered, filling most of the square image, shown at a slight 3/4 angle, transparent background, no text, no letters, no frame, no border, no cast shadow.",

@@ -69,6 +69,7 @@ namespace Rastvordd.Client
 
         bool _reloadEdge, _interactEdge, _healEdge, _respawnEdge, _eatEdge, _debugEdge, _bagEdge;
         int _slot = -1, _craftReq = -1;
+        int _craftPendIdx = -1, _craftPendLeft;   // «скрафтить ×N»: по одному заказу за тик
         (int door, int code)? _codeReq;
         SVec _aim;
         Vector2 _screenDir;
@@ -221,7 +222,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _guide.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.9f));
             _guide.AddThemeConstantOverride("outline_size", 5);
             _hud.AddChild(_guide);
-            _hud.CraftRequested += i => _craftReq = i;
+            _hud.CraftRequested += (i, n) => { _craftPendIdx = i; _craftPendLeft = n; };
             _hud.CodeEntered += (door, code) => _codeReq = (door, code);
             _hud.WipeRequested += () =>
             {
@@ -530,6 +531,7 @@ else if (arg == "--atcrate")
                 _prevProjs.Clear();
                 foreach (var p in _cur.Projectiles) _prevProjs[p.Id] = p;
 
+                if (_craftReq < 0 && _craftPendLeft > 0) { _craftReq = _craftPendIdx; _craftPendLeft--; }
                 _server.Submit(_myId, BuildCmd());
                 var t0 = Time.GetTicksUsec();
                 _server.Tick();

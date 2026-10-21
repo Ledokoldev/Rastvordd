@@ -62,14 +62,15 @@ namespace Rastvordd.Sim
             float m = k == StructKind.Foundation ? 1.5f : k == StructKind.Window || k == StructKind.Doorway ? 0.7f : 1f;
             int N(float v) => (int)MathF.Round(v * m / 5f) * 5;
             if (k == StructKind.Door)
-                return tier <= 1 ? new[] { ("wood", 150) } : tier == 2 ? new[] { ("stone", 200) } : tier == 3 ? new[] { ("metal_fragments", 150) } : new[] { ("metal_fragments", 250), ("scrap", 25) };
+                return tier <= 1 ? new[] { ("wood", 50) } : tier == 2 ? new[] { ("stone", 75) } : tier == 3 ? new[] { ("metal_fragments", 40) } : new[] { ("metal_fragments", 75), ("scrap", 10) };
+            // в 4–6 раз дешевле растовского: дерево даёт 120–200, камень 150 (2026-10-21) — дом 2×2 из дерева ≈ 4 дерева
             return tier switch
             {
-                0 => new[] { ("wood", N(30)) },
-                1 => new[] { ("wood", N(200)) },
-                2 => new[] { ("stone", N(300)) },
-                3 => new[] { ("metal_fragments", N(200)) },
-                _ => new[] { ("metal_fragments", N(300)), ("scrap", N(25)) },
+                0 => new[] { ("wood", N(10)) },
+                1 => new[] { ("wood", N(30)) },
+                2 => new[] { ("stone", N(50)) },
+                3 => new[] { ("metal_fragments", N(35)) },
+                _ => new[] { ("metal_fragments", N(50)), ("scrap", N(5)) },
             };
         }
 

@@ -48,6 +48,8 @@ namespace Rastvordd.Sim
         public bool CanCraft;
         public bool NeedsBench;
         public float Time;
+        public int Count;                                     // сколько штук за раз
+        public List<(string id, int n, int have)> Costs;      // ингредиенты: нужно / есть
     }
 
     public sealed class SelfInfo
@@ -83,7 +85,7 @@ namespace Rastvordd.Sim
         public int Current;
         public List<CellView> Pack = new();          // рюкзак 24 ячейки
         public List<CellView> BeltCells = new();     // пояс 6 ячеек
-        public List<(string name, float progress)> CraftQueue = new();
+        public List<(string id, string name, float progress)> CraftQueue = new();
         public List<RecipeInfo> Recipes = new();
     }
 
@@ -381,13 +383,14 @@ namespace Rastvordd.Sim
             foreach (var it in me.Pack) s.Pack.Add(World.Cell(it));
             foreach (var it in me.Belt) s.BeltCells.Add(World.Cell(it));
             foreach (var job in me.CraftQueue)
-                s.CraftQueue.Add((Items.Name(job.Recipe.Output), 1f - job.Left / job.Recipe.Time));
+                s.CraftQueue.Add((job.Recipe.Output, Items.Name(job.Recipe.Output), 1f - job.Left / job.Recipe.Time));
 
             for (int i = 0; i < Recipes.All.Count; i++)
             {
                 var r = Recipes.All[i];
                 var cost = new List<string>();
-                foreach (var (id, n) in r.Cost) cost.Add($"{Items.Name(id)} {n}");
+                var costs = new List<(string, int, int)>();
+                foreach (var (id, n) in r.Cost) { cost.Add($"{Items.Name(id)} {n}"); costs.Add((id, n, me.Count(id))); }
                 s.Recipes.Add(new RecipeInfo
                 {
                     Index = i,
@@ -397,6 +400,8 @@ namespace Rastvordd.Sim
                     CanCraft = World.CanCraft(me, r),
                     NeedsBench = r.Bench > 0,
                     Time = r.Time,
+                    Count = r.Count,
+                    Costs = costs,
                 });
             }
 

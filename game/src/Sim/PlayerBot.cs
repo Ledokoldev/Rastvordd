@@ -513,7 +513,7 @@ namespace Rastvordd.Sim
             // 6. дверь
             if (_w.DoorAt(_origin.i, _origin.j + 2, 0) == null)
             {
-                if (!Need("wood", 150, ref cmd)) return;
+                if (!Need("wood", 50, ref cmd)) return;
                 Doing = "ставит дверь";
                 if (!GoTo(CellC(0, 1) + new Vector2(0.3f, -0.4f), 0.4f, ref cmd)) return;
                 if (!Hold("build_plan", ref cmd)) return;
@@ -624,7 +624,7 @@ namespace Rastvordd.Sim
                     if (!Has("deploy_furnace"))
                     {
                         if (Craft("deploy_furnace", ref cmd)) return;
-                        if (!Need("stone", 200, ref cmd) || !Need("wood", 100, ref cmd)) return;
+                        if (!Need("stone", 100, ref cmd) || !Need("wood", 50, ref cmd)) return;
                         return;
                     }
                     Doing = "ставит печь";
@@ -728,12 +728,12 @@ namespace Rastvordd.Sim
 
             // снаряжение: копьё, потом лук и стрелы (иначе — общий фарм)
             if (!Has("tool_hatchet")) return false;
-            if (!Has("weapon_spear")) { if (!Craft("weapon_spear", ref cmd)) Need("wood", 300, ref cmd); return true; }
+            if (!Has("weapon_spear")) { if (!Craft("weapon_spear", ref cmd)) Need("wood", 150, ref cmd); return true; }
             bool hempNear = NearestPickup(PickupKind.Hemp) != null;
             if (!Has("weapon_bow") && (_me.Count("cloth") >= 50 || hempNear))
             {
                 if (_me.Count("cloth") < 50) { Doing = "собирает коноплю"; UsePickup(PickupKind.Hemp, ref cmd); return true; }
-                if (!Craft("weapon_bow", ref cmd)) Need("wood", 200, ref cmd);
+                if (!Craft("weapon_bow", ref cmd)) Need("wood", 100, ref cmd);
                 return true;
             }
             if (Has("weapon_bow") && _me.Count("arrow") < 12)

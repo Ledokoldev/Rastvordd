@@ -130,6 +130,14 @@ namespace Rastvordd.Client
             ["build_plan"] = "weapons/weapon_build_plan",
             ["deploy_furnace"] = "icons/icon_furnace",
             ["deploy_workbench"] = "icons/icon_workbench",
+            ["deploy_sleepbag"] = "icons/icon_sleeping_bag",
+            ["deploy_box"] = "icons/icon_wood_box",
+            ["deploy_claim"] = "icons/icon_tool_cupboard",
+            ["expl_satchel"] = "icons/icon_satchel",
+            ["expl_c4"] = "icons/icon_c4",
+            ["expl_fire"] = "icons/icon_molotov",
+            ["lock_code"] = "icons/icon_code_lock",
+            ["lock_key"] = "icons/icon_key_lock",
         };
 
         /// <summary>Иконка предмета для интерфейса.</summary>

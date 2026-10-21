@@ -359,6 +359,7 @@ namespace Rastvordd.Sim
             a.AddSlot(Items.NewSlot("weapon_ak", 30));
             a.AddSlot(Items.NewSlot("tool_hatchet"));
             a.AddSlot(Items.NewSlot("tool_pickaxe"));
+            a.AddSlot(Items.NewSlot("weapon_torch"));
             a.AddSlot(Items.NewSlot("deploy_furnace"));
             a.AddSlot(Items.NewSlot("deploy_workbench"));
             a.Add("ammo_rifle", 120);
@@ -389,7 +390,7 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Обзор персонажа: прицеливание увеличивает дальность и сужает конус.</summary>
-        public float ViewRange(Actor a) => (50f + 30f * a.Peek) * (1f - 0.4f * NightFactorAt(TimeOfDay));
+        public float ViewRange(Actor a) => (50f + 30f * a.Peek) * (1f - 0.4f * NightFactorAt(TimeOfDay) * (a.Held?.Id == "weapon_torch" ? 0.35f : 1f));   // факел почти снимает ночной штраф
 
         // ---------- время суток ----------
         public const float DayLength = 1200f;   // 20 минут на сутки

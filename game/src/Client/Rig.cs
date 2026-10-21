@@ -66,6 +66,9 @@ namespace Rastvordd.Client
             AddChild(_sprite);
         }
 
+        /// <summary>Конец предмета в руках относительно ног персонажа (пиксели мира).</summary>
+        public Vector2 TipLocal => _canvas.TipPx - Feet;
+
         public void Refresh(bool dead)
         {
             // смерть: лежит на боку
@@ -84,12 +87,15 @@ namespace Rastvordd.Client
         public RigCanvas(RigSet set) => _set = set;
 
         static bool TwoHanded(string id) => id is "weapon_ak" or "weapon_pipe" or "weapon_bow" or "weapon_spear" or "tool_pickaxe" or "tool_hatchet";
-        static bool IsTool(string id) => id is "tool_rock" or "tool_hatchet" or "tool_pickaxe" or "weapon_spear";
+        static bool IsTool(string id) => id is "tool_rock" or "tool_hatchet" or "tool_pickaxe" or "weapon_spear" or "weapon_torch";
+
+        /// <summary>Конец предмета в руках (пиксели буфера) — для пламени и света факела.</summary>
+        public Vector2 TipPx;
 
         static float HeldLength(string id) => id switch
         {
             "tool_rock" => 0.3f, "tool_hatchet" => 0.78f, "tool_pickaxe" => 0.85f, "weapon_spear" => 1.5f,
-            "weapon_bow" => 0.85f, "weapon_pipe" => 0.5f, "weapon_ak" => 0.92f, _ => 0.6f,
+            "weapon_bow" => 0.85f, "weapon_pipe" => 0.5f, "weapon_ak" => 0.92f, "weapon_torch" => 0.55f, _ => 0.6f,
         };
 
         bool _mirror;
@@ -224,6 +230,14 @@ namespace Rastvordd.Client
                 }
                 wAng = aim + down + s.Recoil * (_mirror ? -1 : 1) - s.Kick * 0.12f;
                 grip -= new Vector2(Mathf.Cos(wAng), Mathf.Sin(wAng)) * s.Kick * 3f;
+                if (held == "weapon_torch")
+                {
+                    // факел подняли перед собой — огонь выше головы-плеча, на бегу опускается
+                    grip = shNear + new Vector2(1, s.Sprint ? 6 : 3) + fwd * 4;
+                    float up = s.Sprint ? 0.5f : 1.0f;
+                    var td = new Vector2(fwd.X * Mathf.Cos(up), fwd.Y * 0.5f * Mathf.Cos(up) - Mathf.Sin(up));
+                    wAng = Mathf.Atan2(td.Y, td.X) + Mathf.Sin(s.Breath * 1.3f) * 0.04f;
+                }
             }
             var wDir = new Vector2(Mathf.Cos(wAng), Mathf.Sin(wAng));
             bool toolGrip = hasItem && IsTool(held) && held != "weapon_spear";
@@ -250,6 +264,29 @@ namespace Rastvordd.Client
                 // оружие не переворачиваем вверх ногами: зеркалим по Y, а не по X
                 DrawSetTransform(p.Round(), _mirror ? Mathf.Pi - wAng : wAng, new Vector2(sc, _mirror ? -sc : sc));
                 DrawTexture(tex, -tex.GetSize() / 2);
+
+                var tip = center + wDir * len * 0.47f + RigView.Feet;
+                if (_mirror) tip.X = RigView.VW - tip.X;
+                TipPx = tip;
+                if (held == "weapon_torch") DrawFlame(tip.Round());
+            }
+
+            // пиксельное пламя: язычки разной высоты, мерцают; всегда тянутся вверх
+            void DrawFlame(Vector2 at)
+            {
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                int f = (int)(s.Breath * 9f);
+                for (int i = -2; i <= 2; i++)
+                {
+                    uint hsh = (uint)(f * 73856093 ^ (i + 7) * 19349663);
+                    int h = 2 + (int)(hsh % 4) - Mathf.Abs(i);
+                    if (h <= 0) continue;
+                    var x = at.X + i;
+                    DrawRect(new Rect2(x, at.Y - h - 1, 1, h + 1), new Color(0.95f, 0.35f, 0.1f));
+                    if (h > 1) DrawRect(new Rect2(x, at.Y - h + 1, 1, h - 1), new Color(1f, 0.72f, 0.2f));
+                    if (Mathf.Abs(i) <= 1 && h > 2) DrawRect(new Rect2(x, at.Y - 1, 1, 1), new Color(1f, 0.95f, 0.65f));
+                }
+                if ((f & 3) == 0) DrawRect(new Rect2(at.X + ((f >> 2) % 3) - 1, at.Y - 7, 1, 1), new Color(1f, 0.6f, 0.2f, 0.8f));   // искра
             }
 
             void DrawArm((float a1, float a2, Vector2 joint) arm, Vector2 sh)

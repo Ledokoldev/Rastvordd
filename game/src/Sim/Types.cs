@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Numerics;
 
 namespace Rastvordd.Sim
@@ -152,6 +152,7 @@ namespace Rastvordd.Sim
             Add("tool_hatchet", "Каменный топор", ItemCategory.Tool).Weapon = WeaponDef.MeleeTool("tool_hatchet", 15, 0.8f, 1.8f, 16, 3, 2, 2);
             Add("tool_pickaxe", "Каменная кирка", ItemCategory.Tool).Weapon = WeaponDef.MeleeTool("tool_pickaxe", 14, 0.9f, 1.8f, 3, 14, 10, 9);
             Add("weapon_spear", "Деревянное копьё", ItemCategory.Weapon).Weapon = WeaponDef.MeleeTool("weapon_spear", 35, 0.9f, 2.3f, 1, 1, 1, 1, 50);
+            Add("weapon_torch", "Факел", ItemCategory.Weapon).Weapon = WeaponDef.MeleeTool("weapon_torch", 10, 0.8f, 1.6f, 1, 1, 1, 1);   // светит ночью
 
             // огнестрел и лук
             Add("weapon_bow", "Лук", ItemCategory.Weapon).Weapon = new WeaponDef
@@ -211,6 +212,7 @@ namespace Rastvordd.Sim
             new Recipe { Output = "tool_hatchet", Cost = new[] { ("wood", 200), ("stone", 100) }, Time = 6 },
             new Recipe { Output = "tool_pickaxe", Cost = new[] { ("wood", 200), ("stone", 100) }, Time = 6 },
             new Recipe { Output = "weapon_spear", Cost = new[] { ("wood", 300) }, Time = 5 },
+            new Recipe { Output = "weapon_torch", Cost = new[] { ("wood", 30), ("cloth", 5) }, Time = 2 },
             new Recipe { Output = "weapon_bow", Cost = new[] { ("wood", 200), ("cloth", 50) }, Time = 8 },
             new Recipe { Output = "arrow", Count = 2, Cost = new[] { ("wood", 25), ("stone", 10) }, Time = 2 },
             new Recipe { Output = "bandage", Cost = new[] { ("cloth", 4) }, Time = 2 },

@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 using Rastvordd.Sim;
 using SVec = System.Numerics.Vector2;
 
@@ -56,7 +56,13 @@ namespace Rastvordd.Client
                 _body.Visible = false;
                 _held.Visible = false;
             }
+            _torch = Art.FireLight(7f, 0f);
+            _torch.Visible = false;
+            AddChild(_torch);
         }
+
+        readonly PointLight2D _torch;
+        float _flicker;
 
         public void StartSwing() => _swing = SwingTime;
 
@@ -124,7 +130,7 @@ namespace Rastvordd.Client
                 _body.Position = dead ? new Vector2(0, -4) : Vector2.Zero;
                 QueueRedraw();
             }
-            if (dead) { _body.QueueRedraw(); if (_rig != null) { _rig.S.Aim = facing; _rig.S.Dead = true; _rig.Refresh(true); } return; }
+            if (dead) { _torch.Visible = false; _body.QueueRedraw(); if (_rig != null) { _rig.S.Aim = facing; _rig.S.Dead = true; _rig.Refresh(true); } return; }
 
             if (_held.ItemId != heldId) { _held.ItemId = heldId; _held.QueueRedraw(); }
 
@@ -198,6 +204,16 @@ namespace Rastvordd.Client
                 rs.Reload = reloading && _reloadDur > 0 ? Mathf.Clamp(_reloadT / _reloadDur, 0, 1) : -1;
                 rs.Swing = _swing > 0 ? 1f - _swing / SwingTime : -1;
                 _rig.Refresh(dead);
+            }
+            // факел: тёплый свет у огня, мерцает
+            bool torch = heldId == "weapon_torch";
+            _torch.Visible = torch;
+            if (torch)
+            {
+                _flicker = Mathf.Lerp(_flicker, (float)GD.RandRange(-1.0, 1.0), Mathf.Min(1, dt * 14));
+                _torch.Position = _rig != null ? _rig.TipLocal : new Vector2(side * 12, -Iso.H(1.5f));
+                _torch.Energy = 1.15f + _flicker * 0.18f;
+                _torch.TextureScale = (7f + _flicker * 0.25f) * Iso.PPM * 2 / 256f;
             }
             _held.SwingT = _swing > 0 ? 1f - _swing / SwingTime : -1f;
             if (_swing > 0 || _held.SwingT >= 0) QueueRedraw();

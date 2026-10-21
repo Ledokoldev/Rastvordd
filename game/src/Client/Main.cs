@@ -21,6 +21,7 @@ namespace Rastvordd.Client
         VisionRays _rays;
         BuildLayer _build;
         BuildGhost2D _bghost;
+        string _lastPlace;
         readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
         Ambient _ambient;
@@ -199,6 +200,13 @@ namespace Rastvordd.Client
                     var p = arg.Substring(8).Split(',');
                     _server.World.Find(_myId).Pos = new SVec(float.Parse(p[0], inv), float.Parse(p[1], inv));
                 }
+                else if (arg.StartsWith("--atmon="))
+                {
+                    // отладка: встать у южных ворот РТ номер N
+                    var mons = _server.World.Monuments;
+                    var m = mons[System.Math.Clamp(int.Parse(arg.Substring(8)), 0, mons.Count - 1)];
+                    _server.World.Find(_myId).Pos = new SVec(m.Center.X, m.Max.Y + 4);
+                }
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
                 else if (arg.StartsWith("--riggallery")) AddChild(new RigGallery(arg.Contains('=') ? arg.Split('=')[1] : "naked"));
@@ -364,6 +372,13 @@ namespace Rastvordd.Client
             _aim = new SVec(m.X / Iso.PPM, (m.Y + Iso.GunH) / Iso.PPM);
         }
 
+        bool InYard(SVec p)
+        {
+            foreach (var (mn, mx) in _map.Yards)
+                if (p.X > mn.X + 2 && p.X < mx.X - 2 && p.Y > mn.Y + 2 && p.Y < mx.Y - 2) return true;
+            return false;
+        }
+
         // ---------- сохранение мира ----------
         string SavePath = "user://world_save.json";
         bool _saveEnabled;
@@ -431,7 +446,7 @@ namespace Rastvordd.Client
             if (!_overview) _decals.Update(_cam.Position);
             {
                 var me = new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
-                bool yard = me.X > 4 && me.X < 36 && me.Y > -36 && me.Y < -4;
+                bool yard = InYard(me);
                 Acoustics.Update(me, _cur.Nodes, TerrainView.BiomeAt(_map, me), yard, delta);
                 if (!_overview)
                     _weather.Update(_cam.Position, GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X, TerrainView.BiomeAt(_map, me),
@@ -613,7 +628,7 @@ namespace Rastvordd.Client
 
         StepSurface SurfaceAt(SVec p)
         {
-            if (p.X > 4 && p.X < 36 && p.Y > -36 && p.Y < -4) return StepSurface.Concrete;   // площадка РТ
+            if (InYard(p)) return StepSurface.Concrete;   // площадка РТ
             return TerrainView.BiomeAt(_map, p) switch
             {
                 Biome.Tundra => StepSurface.Snow,
@@ -877,6 +892,9 @@ namespace Rastvordd.Client
                 tv.Tick(dt);
             }
             RemoveMissing(_thrownViews, seen);
+
+            // вход на РТ — название
+            if (_cur.Self.Place != _lastPlace) { _lastPlace = _cur.Self.Place; if (_lastPlace != null) _hud.Toast(_lastPlace); }
 
             // постройки: виды, тени обзора, прозрачность стен перед персонажем, призрак плана
             _build ??= new BuildLayer(_world);

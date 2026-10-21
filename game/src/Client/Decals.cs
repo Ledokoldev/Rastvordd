@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Godot;
 using Rastvordd.Sim;
 using SVec = System.Numerics.Vector2;
@@ -72,12 +72,13 @@ namespace Rastvordd.Client
             var center = new SVec((cx + 0.5f) * Chunk, (cy + 0.5f) * Chunk);
             var biome = TerrainView.BiomeAt(_map, center);
             if (!Fill.TryGetValue(biome, out var fill)) return list;
+            bool OnYard(SVec q) { foreach (var (mn, mx) in _map.Yards) if (q.X > mn.X + 1 && q.X < mx.X - 1 && q.Y > mn.Y + 1 && q.Y < mx.Y - 1) return true; return false; }
 
             for (int i = 0; i < fill.count; i++)
             {
                 var p = new SVec(cx * Chunk + rng.Randf() * Chunk, cy * Chunk + rng.Randf() * Chunk);
                 if (TerrainView.BiomeAt(_map, p) == Biome.Water) continue;
-                if (p.X > 4 && p.X < 36 && p.Y > -36 && p.Y < -4) continue;   // не на площадке РТ
+                if (OnYard(p)) continue;   // не на площадках РТ
                 // биом берём в самой точке: на границе биомов трава смешивается естественно
                 var here = TerrainView.BiomeAt(_map, p);
                 var set = Fill.TryGetValue(here, out var f2) ? f2.ids : fill.ids;

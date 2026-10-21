@@ -190,7 +190,7 @@ namespace Rastvordd.Sim
                     for (int dj = -1; dj <= 3 && ok; dj++)
                         ok = _w.FoundationGeoOk(ci + di, cj + dj, out _);
                 if (!ok || !_w.CanPlaceClaim(Building.CellCenter(ci, cj), out _)) continue;
-                if (Vector2.Distance(p, new Vector2(20, -20)) < 45) continue;   // подальше от РТ с охраной
+                if (_w.NearMonument(p, 40)) continue;   // подальше от РТ с охраной
                 _origin = (ci, cj);
                 _site = Building.CellCenter(ci, cj);
                 return true;
@@ -234,7 +234,7 @@ namespace Rastvordd.Sim
                 foreach (var n in _w.NodesInRadius(_me.Pos, 70, _nodeBuf))
                 {
                     if (n.Kind != kind) continue;
-                    if (Vector2.Distance(n.Pos, new Vector2(20, -20)) < 40) continue;
+                    if (_w.NearMonument(n.Pos, 22)) continue;
                     float d = Vector2.Distance(n.Pos, _me.Pos);
                     if (d < best) { best = d; _node = n; }
                 }
@@ -266,7 +266,7 @@ namespace Rastvordd.Sim
             foreach (var p in _w.Pickups)
             {
                 if (p.Kind != kind || !p.Available) continue;
-                if (Vector2.Distance(p.Pos, new Vector2(20, -20)) < 35) continue;
+                if (_w.NearMonument(p.Pos, 18)) continue;
                 float d = Vector2.Distance(p.Pos, _me.Pos);
                 if (d < bd) { bd = d; best = p; }
             }

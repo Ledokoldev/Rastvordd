@@ -107,11 +107,12 @@ namespace Rastvordd.Sim
             _wallGrid.Insert(w, min, max);
         }
 
-        static bool InMonument(Vector2 p) => p.X > 2 && p.X < 38 && p.Y > -38 && p.Y < 2;
+        bool InMonument(Vector2 p) => NearMonument(p, 2);
 
         void BuildMap()
         {
             const float t = 0.35f, h = 2.6f;
+            Monuments.Add(new Monument { Name = "Склад «Центральный»", Min = new Vector2(2, -38), Max = new Vector2(38, 2) });
             // РТ: огороженный склад (x 5..35, y -35..-5) с проходами
             AddWall(5, -35 - t, 18, -35 + t, h, WallKind.Concrete);
             AddWall(22, -35 - t, 35, -35 + t, h, WallKind.Concrete);
@@ -139,6 +140,9 @@ namespace Rastvordd.Sim
             foreach (var p in new[] { new Vector2(15, -24), new Vector2(28, -30), new Vector2(29, -10),
                                       new Vector2(10, -15), new Vector2(22, -20), new Vector2(20, 2) })
                 NpcHomes[-NpcHomes.Count - 1] = p;   // ключи временные, заменяются при спавне
+
+            // малые РТ по острову
+            PlaceSmallMonuments();
 
             // раскладка по биомам: плотность и что встречается
             ScatterByBiome();

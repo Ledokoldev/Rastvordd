@@ -160,7 +160,7 @@ namespace Rastvordd.Sim
             var max = min + new Vector2(Building.Cell);
             if (!Terrain.IsLand(min) || !Terrain.IsLand(max) || !Terrain.IsLand(new Vector2(min.X, max.Y)) || !Terrain.IsLand(new Vector2(max.X, min.Y)))
             { why = "вода"; return false; }
-            if (min.X < 38 && max.X > 2 && min.Y < 2 && max.Y > -38) { why = "на объекте нельзя"; return false; }
+            if (NearMonument(min, 8) || NearMonument(max, 8) || NearMonument((min + max) * 0.5f, 8)) { why = "рядом с РТ нельзя"; return false; }
             var c = (min + max) * 0.5f;
             foreach (var w in WallsNear(c, 1.5f))
                 if (w.Owner == null && Geo.BoxOverlap(min, max, w.Wall.Min, w.Wall.Max)) { why = "мешает препятствие"; return false; }

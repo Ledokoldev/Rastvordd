@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 using Rastvordd.Sim;
 using SVec = System.Numerics.Vector2;
 
@@ -167,8 +167,16 @@ void fragment() {
                 for (int i = 0; i < 7; i++) acc[i] /= cnt;
 
                 var p = new Vector2((mx + 0.5f) * step - map.HalfSize, (my + 0.5f) * step - map.HalfSize);
-                float pad = Box(p, new Vector2(5, -35), new Vector2(35, -5), 1.5f);
-                float gravel = Box(p, new Vector2(2, -38), new Vector2(38, -2), 3f) * (1 - pad);
+                // площадки РТ: бетон внутри забора, гравий по краю
+                float pad = 0, gravel = 0;
+                foreach (var (ymin, ymax) in map.Yards)
+                {
+                    var mn = new Vector2(ymin.X, ymin.Y); var mx2 = new Vector2(ymax.X, ymax.Y);
+                    if (p.X < mn.X - 6 || p.X > mx2.X + 6 || p.Y < mn.Y - 6 || p.Y > mx2.Y + 6) continue;
+                    float pd = Box(p, mn + new Vector2(3, 3), mx2 - new Vector2(3, 3), 1.5f);
+                    pad = Mathf.Max(pad, pd);
+                    gravel = Mathf.Max(gravel, Box(p, mn, mx2, 3f) * (1 - pd));
+                }
                 float d = float.MaxValue;
                 for (int i = 0; i < path.Length - 1; i++) d = Mathf.Min(d, SegDist(p, path[i], path[i + 1]));
                 float dirt = Mathf.Clamp(1.1f - d / 3f, 0, 1);

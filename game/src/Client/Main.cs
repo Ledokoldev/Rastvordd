@@ -33,6 +33,7 @@ namespace Rastvordd.Client
         // наблюдатель (песочница ботов)
         bool _spectate;
         int _followId, _timeScale = 1;
+        float _effSpeed = 1;   // сколько секунд мира проходит за секунду на деле (песочница может не успевать)
         float _specRefresh;
         Label _specPanel;
         string _researchReq;      // изучить узел дерева (id)
@@ -129,7 +130,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("piece")) _setPiece = int.Parse(a.Substring(5));   // отладка: элемент плана (5 — треугольник)
                 else if (a == "rec") foreach (var d in _server.World.Deployables) { if (d.Kind == DeployKind.Recycler) GD.Print($"рециклер {d.Pos}: on={d.On} [{string.Join(", ", d.Storage.Items.ConvertAll(x => x.Id + "×" + x.Count))}] · у меня шестерни {_server.World.Find(_myId).Count("comp_gears")}"); }   // отладка
                 else if (a == "peace") { foreach (var n in _server.World.Actors) if (n.Team == Team.Npc) { n.Dead = true; n.DeadTime = _server.World.Time; } }   // отладка: охрана РТ «спит»
-                else if (a.StartsWith("speckey")) SpectatorKey(a.Substring(7) switch { "tab" => Key.Tab, "f" => Key.F, "2" => Key.Key2, "3" => Key.Key3, "4" => Key.Key4, _ => Key.Key1 });   // отладка: клавиши наблюдателя
+                else if (a.StartsWith("speckey")) SpectatorKey(a.Substring(7) switch { "tab" => Key.Tab, "f" => Key.F, "2" => Key.Key2, "3" => Key.Key3, "4" => Key.Key4, "5" => Key.Key5, "6" => Key.Key6, _ => Key.Key1 });   // отладка: клавиши наблюдателя
                 else if (a.StartsWith("learn")) _researchReq = a.Substring(5);   // отладка: learn<id>
                 else if (a.StartsWith("slot")) _slot = int.Parse(a.Substring(4)) - 1;
                 else if (a.StartsWith("craft")) _craftReq = int.Parse(a.Substring(5));
@@ -541,6 +542,8 @@ else if (arg == "--atcrate")
                 case Key.Key2: _timeScale = 2; return true;
                 case Key.Key3: _timeScale = 4; return true;
                 case Key.Key4: _timeScale = 8; return true;
+                case Key.Key5: _timeScale = 10; return true;
+                case Key.Key6: _timeScale = 20; return true;
             }
             return false;
         }
@@ -559,9 +562,21 @@ else if (arg == "--atcrate")
             if ((_specRefresh -= dt) > 0) return;
             _specRefresh = 0.4f;
             var sb = new System.Text.StringBuilder();
-            sb.Append($"НАБЛЮДАТЕЛЬ · скорость ×{_timeScale} · время {(int)(_server.World.Time / 60):00}:{(int)(_server.World.Time % 60):00}\n");
-            sb.Append("Tab — следующий бот · F — свободная камера · WASD/Shift — лететь · 1–4 — скорость ×1/×2/×4/×8\n\n");
-            foreach (var (id, line) in _server.BotLines()) sb.Append(id == _followId ? "▶ " : "   ").Append(line).Append('\n');
+            sb.Append($"НАБЛЮДАТЕЛЬ · скорость ×{_timeScale}{(_timeScale > 1 && _effSpeed < _timeScale * 0.85f ? $" (факт ×{_effSpeed:0.#})" : "")} · время {(int)(_server.World.Time / 60):00}:{(int)(_server.World.Time % 60):00}\n");
+            sb.Append("Tab — следующий бот · F — свободная камера · WASD/Shift — лететь · 1–6 — скорость ×1/×2/×4/×8/×10/×20\n\n");
+            var lines = _server.BotLines();
+            if (lines.Count <= 5)
+                foreach (var (id, line) in lines) sb.Append(id == _followId ? "▶ " : "   ").Append(line).Append('\n');
+            else
+            {
+                // много ботов: подробно — тот, за кем следим; остальные — таблица гонки (кто впереди)
+                var f = lines.Find(l => l.id == _followId);
+                if (f.line != null) sb.Append("▶ ").Append(f.line).Append("\n\n");
+                sb.Append("ГОНКА\n");
+                int n = 0;
+                foreach (var (id, _, line) in _server.BotShortLines())
+                    if (n++ < 24) sb.Append(id == _followId ? " ▶ " : "    ").Append(line).Append('\n');
+            }
             var ms = _server.World.Milestones;
             if (ms.Count > 0)
             {
@@ -671,8 +686,23 @@ else if (arg == "--atcrate")
 
             _acc += delta * _timeScale;
             int steps = 0, maxSteps = 5 * _timeScale;
-            while (_acc >= World.Dt && steps < maxSteps)
+            // ускорение (песочница): на шаги мира — не больше ~25 мс за кадр, снапшот — один раз за кадр;
+            // не успеваем — честно отстаём (скорость «факт» в панели), а картинка остаётся плавной
+            bool fast = _timeScale > 2;
+            ulong frameT0 = Time.GetTicksUsec();
+            while (_acc >= World.Dt && steps < maxSteps && (!fast || Time.GetTicksUsec() - frameT0 < 25000))
             {
+                if (fast)
+                {
+                    if (_craftReq < 0 && _craftPendLeft > 0) { _craftReq = _craftPendIdx; _craftPendLeft--; }
+                    _server.Submit(_myId, BuildCmd());
+                    var tf = Time.GetTicksUsec();
+                    _server.Tick();
+                    _simTime += (Time.GetTicksUsec() - tf) / 1000.0;
+                    _acc -= World.Dt;
+                    steps++;
+                    continue;
+                }
                 _prevActors.Clear();
                 foreach (var a in _cur.Actors) _prevActors[a.Id] = a;
                 _prevProjs.Clear();
@@ -695,7 +725,23 @@ else if (arg == "--atcrate")
                 _acc -= World.Dt;
                 steps++;
             }
-            if (steps == maxSteps) _acc = 0;
+            if (fast && steps > 0)
+            {
+                _prevActors.Clear();
+                foreach (var a in _cur.Actors) _prevActors[a.Id] = a;
+                _prevProjs.Clear();
+                foreach (var p in _cur.Projectiles) _prevProjs[p.Id] = p;
+                _cur = _server.BuildSnapshot(_myId);
+                _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = _timeEdge = _bagEdge = false;
+                _slot = _craftReq = -1;
+                _codeReq = null;
+                _uiReq = null;
+                _setPiece = -1;
+                _researchReq = null;
+                HandleEvents();
+            }
+            _effSpeed = Mathf.Lerp(_effSpeed, (float)(steps * World.Dt / System.Math.Max(delta, 1e-4)), 0.05f);
+            if (steps == maxSteps || _acc > World.Dt * maxSteps) _acc = 0;
             if (_spectate) UpdateSpectatorPanel((float)delta);
 
             float alpha = (float)(_acc / World.Dt);

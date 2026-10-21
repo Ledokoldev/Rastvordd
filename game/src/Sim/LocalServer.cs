@@ -173,8 +173,36 @@ namespace Rastvordd.Sim
         bool _botsStarted;
         readonly int _seed;
         /// <summary>Сколько ботов-игроков живёт на острове (позже — от размера карты и настроек вайпа).</summary>
-        public int BotCount = 3;   // 2 фермера + роумер
-        static readonly string[] BotNames = { "Сёма", "Жека", "Толян", "Вован", "Лёха", "Димон" };
+        public int BotCount = BotsFromArgs();   // по умолчанию 3: 2 фермера + бродяга; песочница: --bots=N
+        static readonly string[] BotNames =
+        {
+            "Сёма", "Жека", "Толян", "Вован", "Лёха", "Димон", "Серёга", "Колян", "Витёк", "Саня", "Петрович", "Гоша", "Миха", "Стас",
+            "Валера", "Гена", "Борян", "Эдик", "Юрец", "Костян", "Тёма", "Рома", "Славик", "Игорёк", "Макс", "Паша", "Дэн", "Женёк",
+            "Вадик", "Лёва", "Шурик", "Федя", "Кирюха", "Антоха", "Ванёк", "Гриша", "Егор", "Ильич", "Тимоха", "Михалыч",
+        };
+
+        static int BotsFromArgs()
+        {
+            var a = System.Array.Find(System.Environment.GetCommandLineArgs(), x => x.StartsWith("--bots="));
+            return a != null && int.TryParse(a.Substring(7), out int n) ? System.Math.Clamp(n, 1, BotNames.Length) : 3;
+        }
+
+        /// <summary>Строка для таблицы песочницы: кто впереди в гонке (верстак, изучено, лом в ящике).</summary>
+        public List<(int id, int score, string line)> BotShortLines()
+        {
+            var list = new List<(int, int, string)>();
+            foreach (var b in _bots.Values)
+            {
+                var a = b.Me;
+                int bench = 0;
+                foreach (var d in World.Deployables) if (d.Kind == DeployKind.Workbench && d.OwnerId == a.Id) bench = System.Math.Max(bench, System.Math.Max(1, d.Level));
+                string arch = b.Archetype == BotArchetype.Roamer ? "бродяга" : "фермер";
+                int score = bench * 1000 + a.Known.Count * 50 + (int)(b.Stash / 10);
+                list.Add((a.Id, score, $"{a.Name,-18} {arch,-8} верстак {bench} · изуч. {a.Known.Count,2} · ящик ≈{b.Stash,5:0} · {(a.Dead ? "мёртв" : b.GoalName)}"));
+            }
+            list.Sort((x, y) => y.Item2.CompareTo(x.Item2));
+            return list;
+        }
         readonly Dictionary<int, InputCmd> _inputs = new();
         readonly List<SimEvent> _eventsThisTick = new();
 
@@ -251,7 +279,7 @@ namespace Rastvordd.Sim
                 string name = BotNames[i] + " (бот)";
                 var a = World.FindPlayer(name) ?? World.SpawnPlayer(name);
                 a.IsBot = true;
-                var bot = new PlayerBot(a, World, _seed * 17 + i) { Archetype = i == 2 ? BotArchetype.Roamer : BotArchetype.Farmer };
+                var bot = new PlayerBot(a, World, _seed * 17 + i) { Archetype = i % 3 == 2 ? BotArchetype.Roamer : BotArchetype.Farmer };
                 _bots[a.Id] = bot;
                 _brains.Add(bot);
             }

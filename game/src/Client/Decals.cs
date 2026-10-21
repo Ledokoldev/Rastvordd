@@ -22,14 +22,24 @@ namespace Rastvordd.Client
         static readonly string[] Flat = { "decal_pebbles", "decal_leaves", "decal_puddle", "decal_debris" };
 
         // крупные куртины травы своего цвета в каждом биоме (мелкие декали в пикселе были кляксами)
+        // трава своего цвета + мелочи и цветы по биому (повтор id = чаще встречается)
+        const string M1 = "grass/grass_meadow_1", M2 = "grass/grass_meadow_2", F1 = "grass/grass_forest_1", F2 = "grass/grass_forest_2",
+                     S1 = "grass/grass_swamp_1", S2 = "grass/grass_swamp_2", A1 = "grass/grass_arid_1", A2 = "grass/grass_arid_2",
+                     T1 = "grass/grass_tundra_1", T2 = "grass/grass_tundra_2", B1 = "grass/grass_beach_1", B2 = "grass/grass_beach_2",
+                     Bush = "plants/bush_1";
+        static string C(string id) => "clutter/" + id;
+
         static readonly Dictionary<Biome, (int count, string[] ids)> Fill = new()
         {
-            [Biome.Grassland] = (6, new[] { "grass/grass_meadow_1", "grass/grass_meadow_1", "grass/grass_meadow_2", "plants/bush_1" }),
-            [Biome.Forest] = (5, new[] { "grass/grass_forest_1", "grass/grass_forest_2", "grass/grass_forest_1", "plants/bush_1" }),
-            [Biome.Swamp] = (7, new[] { "grass/grass_swamp_1", "grass/grass_swamp_2", "grass/grass_swamp_1" }),
-            [Biome.Arid] = (3, new[] { "grass/grass_arid_1", "grass/grass_arid_1", "grass/grass_arid_2" }),
-            [Biome.Tundra] = (3, new[] { "grass/grass_tundra_1", "grass/grass_tundra_2" }),
-            [Biome.Beach] = (3, new[] { "grass/grass_beach_1", "grass/grass_beach_2" }),
+            // в поле хлам редко (по одному на ~25 штук), иначе повторяется; трава и цветы — основа
+            [Biome.Grassland] = (9, new[] { M1, M1, M1, M1, M1, M2, M2, M2, Bush, Bush, C("flowers_poppy"), C("flowers_poppy"), C("flowers_dandelion"), C("flowers_dandelion"),
+                                            C("flowers_chamomile"), C("flowers_chamomile"), C("flowers_lupine"), M1, M2, C("clutter_tire"), C("clutter_planks"), C("clutter_bucket"),
+                                            M1, M2, C("flowers_dandelion"), C("clutter_fence"), M1, M2, C("clutter_bicycle"), M1, C("clutter_sign"), M2 }),
+            [Biome.Forest] = (8, new[] { F1, F1, F2, F2, Bush, C("clutter_stump"), C("clutter_log"), C("clutter_mushrooms"), C("clutter_mushrooms"), C("flowers_heather"), C("clutter_bones") }),
+            [Biome.Swamp] = (9, new[] { S1, S1, S2, S2, C("clutter_log"), C("clutter_mushrooms"), C("clutter_bones"), C("clutter_stump") }),
+            [Biome.Arid] = (5, new[] { A1, A1, A2, C("clutter_bones"), C("clutter_tire"), C("clutter_canister"), C("clutter_mattress"), C("clutter_cone"), C("clutter_sign") }),
+            [Biome.Tundra] = (5, new[] { T1, T1, T2, C("flowers_snowdrop"), C("clutter_log"), C("clutter_stump"), C("clutter_bones") }),
+            [Biome.Beach] = (5, new[] { B1, B1, B2, C("clutter_planks"), C("clutter_tire"), C("clutter_canister"), C("clutter_pallet"), C("clutter_bones") }),
         };
         public DecalLayer(MapInfo map, Node2D flatParent, Node2D sortedParent)
         {
@@ -71,7 +81,8 @@ namespace Rastvordd.Client
                 // биом берём в самой точке: на границе биомов трава смешивается естественно
                 var here = TerrainView.BiomeAt(_map, p);
                 var set = Fill.TryGetValue(here, out var f2) ? f2.ids : fill.ids;
-                var tex = Art.Get(set[rng.RandiRange(0, set.Length - 1)]);
+                string texPath = set[rng.RandiRange(0, set.Length - 1)];
+                var tex = Art.Get(texPath);
                 if (tex == null) continue;
 
                 bool flat = false;
@@ -83,7 +94,7 @@ namespace Rastvordd.Client
                     Position = Iso.Px(p).Floor(),
                     FlipH = rng.Randf() < 0.5f,
                     TextureFilter = CanvasItem.TextureFilterEnum.Nearest,
-                    Material = VisionFx.ObjectMat,
+                    Material = set == null ? VisionFx.ObjectMat : (texPath.StartsWith("grass/") || texPath.StartsWith("plants/") || texPath.Contains("flowers_") ? VisionFx.GrassMat : VisionFx.ObjectMat),
                     Modulate = new Color(1, 1, 1, flat ? 0.85f : 1f) * (0.9f + rng.Randf() * 0.15f),
                 };
                 (flat ? _flatParent : _sortedParent).AddChild(s);

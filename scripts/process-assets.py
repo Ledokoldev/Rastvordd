@@ -77,13 +77,13 @@ def fit_square(im: Image.Image, box: int) -> Image.Image:
 
 def process(a: dict, src: pathlib.Path) -> tuple[Image.Image, Image.Image]:
     """Возвращает (hd, pixel)."""
+    global _global_palette
     raw = Image.open(src)
     if a.get("tile"):
         hd = make_seamless(raw, round(a["tile"] * PX_HD))
         # земля — фон: мягче и спокойнее, чтобы после ужатия не было ряби; детали дают декали
         soft = ImageEnhance.Contrast(hd.filter(ImageFilter.GaussianBlur(1.3))).enhance(0.78)
         soft = ImageEnhance.Color(soft).enhance(1.15)
-        global _global_palette
         keep, _global_palette = _global_palette, None   # у земли своя палитра: в общей мало зелёного
         px = pixelize(soft.convert("RGBA"), (round(a["tile"] * PX_PIXEL),) * 2, colors=64, opaque=True)
         _global_palette = keep
@@ -102,8 +102,8 @@ def process(a: dict, src: pathlib.Path) -> tuple[Image.Image, Image.Image]:
         return hd, px
     h_hd = max(8, round(a["h"] * PX_HD))
     hd = im.resize((max(1, round(im.width * h_hd / im.height)), h_hd), Image.LANCZOS)
-    h_px = max(4, round(a["h"] * PX_PIXEL))
-    global _global_palette
+    # мелочи на земле — крупнее реальных, иначе в пикселе не читаются
+    h_px = max(4, round(a["h"] * PX_PIXEL * (1.9 if a["cat"] == "clutter" else 1.0)))
     keep = _global_palette
     if a["cat"] in OWN_PALETTE_CATS:
         # трава и растения: своя палитра — в общей мало зелёного, и они превращались в тёмные кляксы
@@ -167,7 +167,7 @@ def sheet(items: list[tuple[str, Image.Image]], scale: int, path: pathlib.Path, 
     print(f"preview: {path}")
 
 
-OWN_PALETTE_CATS = ("grass", "plants")
+OWN_PALETTE_CATS = ("grass", "plants", "clutter")
 WORLD_CATS = ("trees", "plants", "nodes", "props", "tiles", "walls", "decals", "fx")
 
 

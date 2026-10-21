@@ -372,7 +372,7 @@ namespace Rastvordd.Client
         public TreeView2D(Vector2 basePx, float radiusM, int seed = 0, Biome biome = Biome.Grassland)
         {
             Base = Position = basePx;
-            Material = VisionFx.ObjectMat;
+            Material = VisionFx.TreeMat;
             _trunkW = radiusM * 2 * Iso.PPM * 0.7f;
             _tex = Art.Tree(seed, biome);
             _tuft = Art.Get(biome is Biome.Arid or Biome.Tundra or Biome.Beach ? "decals/decal_grass_tuft_2" : "decals/decal_grass_tuft_1");
@@ -487,7 +487,7 @@ namespace Rastvordd.Client
         {
             _kind = kind;
             _biome = biome;
-            Material = VisionFx.ObjectMat;
+            Material = kind == PickupKind.WaterBarrel ? VisionFx.ObjectMat : VisionFx.GrassMat;
             TextureFilter = TextureFilterEnum.Nearest;
         }
 

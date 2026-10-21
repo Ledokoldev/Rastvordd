@@ -43,6 +43,35 @@ void vertex() { base_px = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xy; }
 void fragment() { COLOR.rgb = vis_apply(COLOR.rgb, vis_at(base_px)); }
 ";
 
+        const string SwayShader = "shader_type canvas_item;\n" + Lib + @"
+uniform float sway_amp = 1.5;
+uniform float sway_height = 120.0;
+varying vec2 base_px;
+void vertex() {
+    base_px = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xy;
+    // ветер: верх качается, основание и тень на земле стоят; смещение целыми пикселями (пиксель-арт)
+    float h = clamp(-VERTEX.y / sway_height, 0.0, 1.0);
+    float ph = base_px.x * 0.031 + base_px.y * 0.017;
+    float off = (sin(TIME * 1.3 + ph) * 0.7 + sin(TIME * 2.9 + ph * 1.7) * 0.3) * sway_amp * h * h;
+    VERTEX.x += round(off);
+}
+void fragment() { COLOR.rgb = vis_apply(COLOR.rgb, vis_at(base_px)); }
+";
+
+        static ShaderMaterial _treeMat, _grassMat;
+        /// <summary>Деревья: видимость + покачивание кроны.</summary>
+        public static ShaderMaterial TreeMat => _treeMat ??= Sway(2.2f, 170f);
+        /// <summary>Трава, кусты, цветы: видимость + лёгкое покачивание.</summary>
+        public static ShaderMaterial GrassMat => _grassMat ??= Sway(1.3f, 40f);
+
+        static ShaderMaterial Sway(float amp, float height)
+        {
+            var m = new ShaderMaterial { Shader = new Shader { Code = SwayShader } };
+            m.SetShaderParameter("sway_amp", amp);
+            m.SetShaderParameter("sway_height", height);
+            return m;
+        }
+
         static ShaderMaterial _objectMat;
         /// <summary>Материал для объектов мира (не персонажей): видимость по точке основания узла.</summary>
         public static ShaderMaterial ObjectMat => _objectMat ??= new ShaderMaterial { Shader = new Shader { Code = ObjectShader } };

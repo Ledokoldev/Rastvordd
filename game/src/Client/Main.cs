@@ -16,6 +16,7 @@ namespace Rastvordd.Client
         MapInfo _map;
         DecalLayer _decals;
         FootstepLoop _steps;
+        Weather _weather;
         VisionRays _rays;
         readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
@@ -97,6 +98,7 @@ namespace Rastvordd.Client
             _decals = new DecalLayer(_map, flatDecals, _world);
             Sfx.Init(_world);
             Acoustics.Init(this, _map);
+            _weather = new Weather(_world, this);
             Tuning.Load();
             _steps = new FootstepLoop(this);
             _ambient = new Ambient(this, _map);
@@ -317,6 +319,9 @@ namespace Rastvordd.Client
                 var me = new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
                 bool yard = me.X > 4 && me.X < 36 && me.Y > -36 && me.Y < -4;
                 Acoustics.Update(me, _cur.Nodes, TerrainView.BiomeAt(_map, me), yard, delta);
+                if (!_overview)
+                    _weather.Update(_cam.Position, GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X, TerrainView.BiomeAt(_map, me),
+                                    World.NightFactorAt(_forcedDay ?? _cur.DayTime));
             }
             _ambient.Update(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _forcedDay ?? _cur.DayTime, dt);
             _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime);

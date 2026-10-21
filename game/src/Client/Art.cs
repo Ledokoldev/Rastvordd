@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Godot;
 using Rastvordd.Sim;
 
@@ -126,6 +126,8 @@ namespace Rastvordd.Client
             ["tool_rock"] = "weapons/weapon_rock",
             ["tool_hatchet"] = "weapons/weapon_hatchet",
             ["tool_pickaxe"] = "weapons/weapon_pickaxe",
+            ["tool_hammer"] = "weapons/weapon_hammer",
+            ["build_plan"] = "weapons/weapon_build_plan",
             ["deploy_furnace"] = "icons/icon_furnace",
             ["deploy_workbench"] = "icons/icon_workbench",
         };

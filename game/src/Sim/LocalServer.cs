@@ -205,7 +205,7 @@ namespace Rastvordd.Sim
                 int bench = 0;
                 foreach (var d in World.Deployables) if (d.Kind == DeployKind.Workbench && d.OwnerId == a.Id) bench = System.Math.Max(bench, System.Math.Max(1, d.Level));
                 string arch = b.Archetype == BotArchetype.Roamer ? "бродяга" : "фермер";
-                list.Add((a.Id, $"{a.Name} · {arch} · цель: {b.GoalName} · {(a.Dead ? "мёртв" : b.Doing)}\n   мысль: {b.LastThought}\n   HP {a.Hp:0} · верстак {bench} · изучено {a.Known.Count}/{Tech.All.Count} · лом {a.Count("scrap")} · металл {a.Count("metal_fragments")} · построек {World.Structures.FindAll(s => s.OwnerId == a.Id).Count}"));
+                list.Add((a.Id, $"{a.Name} · {arch} · цель: {b.GoalName} · {(a.Dead ? "мёртв" : b.Doing)}\n   мысль: {b.LastThought}\n   HP {a.Hp:0} · {(b.PlanInfo != "" ? b.PlanInfo + " · " : "")}верстак {bench} · изучено {a.Known.Count}/{Tech.All.Count} · лом {a.Count("scrap")} · металл {a.Count("metal_fragments")} · построек {World.Structures.FindAll(s => s.OwnerId == a.Id).Count}"));
             }
             return list;
         }

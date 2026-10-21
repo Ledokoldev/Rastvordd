@@ -28,7 +28,7 @@ namespace Rastvordd.Sim
         readonly World _w;
         readonly Random _rng;
         public string Doing = "";              // для отладки и подписи над головой
-        public string Debug => _site == null ? "без базы" : $"база ({_origin.i},{_origin.j}) внутри={InsideBase} узел={(_node == null ? "-" : $"{_node.Pos.X:0};{_node.Pos.Y:0}")}{(MyFurnace() is Deployable f ? $" печь={f.Pos.X:0.0};{f.Pos.Y:0.0}" : "")}";
+        public string Debug => _site == null ? "без базы" : $"база ({_origin.i},{_origin.j}) путь={(_path == null ? "-" : $"{_pathIdx}/{_path.Count}")} застрял={_goalStuck:0.0} внутри={InsideBase} узел={(_node == null ? "-" : $"{_node.Pos.X:0};{_node.Pos.Y:0}")}{(MyFurnace() is Deployable f ? $" печь={f.Pos.X:0.0};{f.Pos.Y:0.0}" : "")}";
 
         // характер (0..1): осторожность, жадность до ресурсов
         readonly float _caution, _greed;
@@ -121,12 +121,14 @@ namespace Rastvordd.Sim
             if (d.Length() < _goalBest - 0.2f) { _goalBest = d.Length(); _goalStuck = 0; } else _goalStuck += World.Dt;
 
             // идём по маршруту
+            CloseDoorBehind(ref cmd);
             if (_path != null && Vector2.Distance(_pathGoal, p) < 1.5f && (_pathAge += World.Dt) < 15f && _goalStuck < 2.5f)
             {
                 while (_pathIdx < _path.Count - 1 && Vector2.Distance(_me.Pos, _path[_pathIdx]) < 0.4f) _pathIdx++;
                 var wp = _path[_pathIdx];
                 if (_pathIdx < _path.Count - 1 || Vector2.Distance(_me.Pos, wp) > 0.4f)
                 {
+                    if (OpenDoorAhead(wp, ref cmd)) return false;
                     cmd.Move = Vector2.Normalize(wp - _me.Pos);
                     cmd.Aim = wp;
                     return false;
@@ -140,7 +142,7 @@ namespace Rastvordd.Sim
             {
                 _pathCheck = 0.6f;
                 var goal = d.Length() < 35 ? p : _me.Pos + Vector2.Normalize(d) * 25;
-                var path = Pathfinder.Find(_w, _me.Pos, goal, _me.Radius + 0.05f, d.Length() < 35 ? tol : 1.5f);
+                var path = Pathfinder.Find(_w, _me.Pos, goal, _me.Radius, d.Length() < 35 ? tol : 1.5f, OwnDoor);
                 if (path != null && path.Count > 0)
                 {
                     _path = path; _pathIdx = 0; _pathGoal = p; _pathAge = 0; _goalStuck = 0;
@@ -170,6 +172,52 @@ namespace Rastvordd.Sim
             else cmd.Move = Avoid(want);
             cmd.Aim = p;
             return false;
+        }
+
+        // ---------- свои двери: маршрут проходит сквозь них, бот открывает перед собой и закрывает за собой ----------
+
+        bool MineDoor(Structure s) => s.Kind == StructKind.Door && (s.OwnerId == _me.Id || (_w.ClaimAt(Building.CellOf(s.Center)) is Deployable c && c.Auth.Contains(_me.Id)));
+        bool OwnDoor(MapWall w) => w.Owner is Structure s && MineDoor(s);
+
+        Structure _doorToClose;
+        float _closeSide;
+
+        static float SideOf(Structure door, Vector2 p)
+        {
+            var d = door.B - door.A;
+            return MathF.Sign((p.X - door.A.X) * d.Y - (p.Y - door.A.Y) * d.X);
+        }
+
+        /// <summary>На пути к точке закрытая своя дверь — подойти и открыть.</summary>
+        bool OpenDoorAhead(Vector2 wp, ref InputCmd cmd)
+        {
+            foreach (var s in _w.Structures)
+            {
+                if (s.Kind != StructKind.Door || s.Open || !MineDoor(s) || Vector2.DistanceSquared(s.Center, _me.Pos) > 9) continue;
+                bool crosses = false;
+                foreach (var b in s.Boxes) if (Geo.SegmentAabb(_me.Pos, wp, b.Wall.Min, b.Wall.Max, out _)) { crosses = true; break; }
+                if (!crosses) continue;
+                cmd.Aim = s.Center;
+                if (Vector2.Distance(_me.Pos, s.Center) > 1.4f) { cmd.Move = Vector2.Normalize(s.Center - _me.Pos); return true; }
+                if (_w.BotToggleDoor(_me, s)) { _doorToClose = s; _closeSide = SideOf(s, _me.Pos); }
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>Прошёл дверь и отошёл — закрыть за собой (база не стоит нараспашку).</summary>
+        void CloseDoorBehind(ref InputCmd cmd)
+        {
+            if (_doorToClose == null) return;
+            var d = _doorToClose;
+            float dist = Vector2.Distance(_me.Pos, d.Center);
+            if (!d.Open || dist > 3f || !_w.Structures.Contains(d)) { _doorToClose = null; return; }
+            if (SideOf(d, _me.Pos) != _closeSide && dist > 1.1f)
+            {
+                cmd.Aim = d.Center;
+                _w.BotToggleDoor(_me, d);
+                _doorToClose = null;
+            }
         }
 
         Vector2 Avoid(Vector2 move)
@@ -214,87 +262,6 @@ namespace Rastvordd.Sim
         {
             foreach (var d in _w.Deployables) if (d.Kind == DeployKind.Box && d.OwnerId == _me.Id) return d;
             return null;
-        }
-
-        Vector2 CellC(int di, int dj) => Building.CellCenter(_origin.i + di, _origin.j + dj);
-        Vector2 DoorCenter => Building.EdgeCenter(_origin.i, _origin.j + 2, 0);
-        bool InsideBase => _site != null && Building.CellOf(_me.Pos) is var c && c.i >= _origin.i && c.i <= _origin.i + 1 && c.j >= _origin.j && c.j <= _origin.j + 1;
-
-        /// <summary>Шаблон дома 2×2: фундаменты, стены, проём на юг (в клетке (0,1)).</summary>
-        IEnumerable<(StructKind kind, int i, int j, int dir)> Template()
-        {
-            int i0 = _origin.i, j0 = _origin.j;
-            yield return (StructKind.Foundation, i0, j0, -1);
-            yield return (StructKind.Foundation, i0 + 1, j0, -1);
-            yield return (StructKind.Foundation, i0, j0 + 1, -1);
-            yield return (StructKind.Foundation, i0 + 1, j0 + 1, -1);
-            yield return (StructKind.Doorway, i0, j0 + 2, 0);   // проём первым: в дом всегда есть вход
-            yield return (StructKind.Wall, i0, j0, 0);
-            yield return (StructKind.Wall, i0 + 1, j0, 0);
-            yield return (StructKind.Wall, i0, j0, 1);
-            yield return (StructKind.Wall, i0, j0 + 1, 1);
-            yield return (StructKind.Wall, i0 + 2, j0, 1);
-            yield return (StructKind.Wall, i0 + 2, j0 + 1, 1);
-            yield return (StructKind.Wall, i0 + 1, j0 + 2, 0);
-        }
-
-        Structure Built((StructKind kind, int i, int j, int dir) t) =>
-            t.kind == StructKind.Foundation ? _w.FoundationAt(t.i, t.j) : _w.EdgeAt(t.i, t.j, t.dir);
-
-        /// <summary>Куда встать и куда смотреть, чтобы молотком достать элемент (изнутри дома).</summary>
-        (Vector2 stand, Vector2 face) HammerSpot((StructKind kind, int i, int j, int dir) t)
-        {
-            int di = t.i - _origin.i, dj = t.j - _origin.j;
-            if (t.kind == StructKind.Foundation)
-            {
-                // из соседней клетки смотрим на центр этой
-                var target = CellC(di, dj);
-                var from = CellC(di == 0 ? 1 : 0, dj);
-                if (di == 0 && dj == 0) from = CellC(0, 1);
-                if (di == 1 && dj == 1) from = CellC(0, 1);
-                return (from, target);
-            }
-            var c = Building.EdgeCenter(t.i, t.j, t.dir);
-            // клетка дома, примыкающая к ребру изнутри
-            var (ca, cb) = Building.EdgeCells(t.i, t.j, t.dir);
-            var inside = ca.Item1 >= _origin.i && ca.Item1 <= _origin.i + 1 && ca.Item2 >= _origin.j && ca.Item2 <= _origin.j + 1 ? ca : cb;
-            var stand = Building.CellCenter(inside.Item1, inside.Item2);
-            stand += Vector2.Normalize(c - stand) * 0.2f;
-            // точку занял ящик/спальник/столб — сдвигаемся вдоль стены от него
-            var tangent = t.dir == 0 ? Vector2.UnitX : Vector2.UnitY;
-            foreach (var d in _w.DeploysInRadius(stand, 1.1f, _depBuf))
-            {
-                if (Vector2.Distance(d.Pos, stand) > d.Radius + 0.6f) continue;   // сетка отдаёт соседей с запасом
-                float side = Vector2.Dot(stand - d.Pos, tangent);
-                stand += tangent * (side >= 0 ? 1 : -1) * 0.7f;
-                break;
-            }
-            // не дальше 0,45 от центра клетки вдоль стены — иначе упрёмся в поперечную стену
-            var cc = Building.CellCenter(inside.Item1, inside.Item2);
-            float along = Math.Clamp(Vector2.Dot(stand - cc, tangent), -0.45f, 0.45f);
-            stand = cc + tangent * along + (stand - cc - tangent * Vector2.Dot(stand - cc, tangent));
-            return (stand, c);
-        }
-
-        bool ChooseSite()
-        {
-            var home = _me.Pos;
-            for (int tries = 0; tries < 60; tries++)
-            {
-                float ang = (float)(_rng.NextDouble() * Math.PI * 2), dist = 15 + (float)_rng.NextDouble() * 45;
-                var p = home + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
-                var (ci, cj) = Building.CellOf(p);
-                bool ok = true;
-                for (int di = -1; di <= 2 && ok; di++)
-                    for (int dj = -1; dj <= 3 && ok; dj++)
-                        ok = _w.FoundationGeoOk(ci + di, cj + dj, out _);
-                if (!ok || !_w.CanPlaceClaim(Building.CellCenter(ci, cj), out _)) continue;
-                if (_w.NearMonument(p, 40)) continue;   // подальше от РТ с охраной
-                _origin = (ci, cj);
-                _site = Building.CellCenter(ci, cj);
-                return true;
-            }
-            return false;
         }
 
         // ---------- ресурсы ----------
@@ -403,7 +370,7 @@ namespace Rastvordd.Sim
             if (p != _pickTarget) { _pickTarget = p; _pickBest = d; _pickNoProgress = 0; }
             else if (d < _pickBest - 0.3f) { _pickBest = d; _pickNoProgress = 0; }
             else if ((_pickNoProgress += World.Dt) > 8f) { _badPickups.Add(p); _pickTarget = null; return false; }
-            if (GoTo(p.Pos, 1.2f, ref cmd)) cmd.Interact = Click2();
+            Use(p, p.Pos, ref cmd);
             return true;
         }
         Pickup _pickTarget;
@@ -461,293 +428,6 @@ namespace Rastvordd.Sim
             return false;
         }
 
-        void Plan(ref InputCmd cmd)
-        {
-            int wood = _me.Count("wood"), stone = _me.Count("stone");
-
-            // 1. инструменты
-            if (!Has("tool_hatchet")) { if (Craft("tool_hatchet", ref cmd)) { Gather(NodeKind.Tree, ref cmd); return; } }
-            if (!Has("tool_pickaxe") && Has("tool_hatchet")) { if (Craft("tool_pickaxe", ref cmd)) { Gather(NodeKind.Stone, ref cmd); return; } }
-            if (!Has("tool_hatchet") || !Has("tool_pickaxe"))
-            {
-                Gather(wood < 200 ? NodeKind.Tree : NodeKind.Stone, ref cmd);
-                return;
-            }
-            // роумер базу пока не строит: добывает то, что просит снаряжение
-            if (Archetype == BotArchetype.Roamer)
-            {
-                if (wood < 400) Gather(NodeKind.Tree, ref cmd);
-                else if (stone < 200) Gather(NodeKind.Stone, ref cmd);
-                else { Doing = "бродит"; Wander(ref cmd); }   // запас есть — не копит бесконечно
-                return;
-            }
-
-            // 2. место и столб
-            var claim = MyClaim();
-            if (claim != null && _site == null)
-            {
-                // после загрузки или смерти: дом там, где мой столб
-                var c = Building.CellOf(claim.Pos);
-                _origin = c;
-                _site = Building.CellCenter(c.i, c.j);
-            }
-            if (_site == null && !ChooseSite()) { Doing = "ищет место"; Wander(ref cmd); return; }
-            if (claim == null)
-            {
-                if (!Has("deploy_claim")) { if (!Craft("deploy_claim", ref cmd)) Gather(NodeKind.Tree, ref cmd); return; }
-                Doing = "ставит шкаф";
-                // столб — в северо-западный угол, чтобы не мешал ходить по дому
-                if (!MoveTo(CellC(0, 0) + new Vector2(0.3f, 1.2f), 0.6f, ref cmd)) return;
-                cmd.Aim = CellC(0, 0) + new Vector2(-0.55f, -0.55f);
-                if (Hold("deploy_claim", ref cmd)) Click(ref cmd);
-                return;
-            }
-
-            // 2б. рейд: ломают дом. Рейдер сильнее — держимся в стороне; рейдер ушёл/слабый — идём чинить (ниже)
-            if (_w.Time - claim.RaidedAt < 60)
-            {
-                var raider = _w.Find(claim.RaiderId);
-                if (raider != null && !raider.Dead && Vector2.Distance(raider.Pos, CellC(1, 1)) < 45 && KitPower(raider) > MyPower)
-                {
-                    Doing = "дом рейдят — пережидает в стороне";
-                    var away = _me.Pos - raider.Pos;
-                    if (away.LengthSquared() < 0.01f) away = Vector2.UnitX;
-                    if (Vector2.Distance(_me.Pos, raider.Pos) < 55) { cmd.Move = Avoid(Vector2.Normalize(away)); cmd.Sprint = true; cmd.Aim = _me.Pos + Vector2.Normalize(away) * 3; }
-                    return;
-                }
-            }
-
-            // 3. план и молоток
-            if (!Has("build_plan")) { if (!Craft("build_plan", ref cmd)) Gather(NodeKind.Tree, ref cmd); return; }
-            if (!Has("tool_hammer")) { if (!Craft("tool_hammer", ref cmd)) Gather(NodeKind.Tree, ref cmd); return; }
-
-            // 4. шаблон: ставим недостающее (снаружи, с юга)
-            foreach (var t in Template())
-            {
-                if (Built(t) != null) continue;
-                var cost = Building.Cost(t.kind, 0);
-                if (!Need(cost[0].id, cost[0].n, ref cmd)) return;
-                Doing = $"строит: {Building.KindName(t.kind)}";
-                var aim = t.kind == StructKind.Foundation ? Building.CellCenter(t.i, t.j) : Building.EdgeCenter(t.i, t.j, t.dir);
-                // ставим с места, если дотягиваемся; иначе — изнутри дома, из соседней с элементом клетки
-                var stand = t.kind == StructKind.Foundation ? Building.CellCenter(t.i, t.j) : HammerSpot(t).stand;
-                // сам стою на месте будущей стены — отойти на точку внутри; мешает другой — взять следующий элемент
-                bool selfBlock = false, otherBlock = false;
-                foreach (var (min, max, _, _) in Building.Boxes(t.kind, t.i, t.j, t.dir, false))
-                    foreach (var o in _w.Actors)
-                        if (!o.Dead && !o.Spectator && Geo.CircleBox(o.Pos, o.Radius, min, max)) { if (o == _me) selfBlock = true; else otherBlock = true; }
-                if (otherBlock) continue;
-                if ((selfBlock || Vector2.Distance(_me.Pos, aim) > 4.5f) && !GoTo(stand, 0.3f, ref cmd)) return;
-                if (selfBlock)
-                {
-                    // точка стояния тоже на линии — шаг от ребра внутрь клетки
-                    var off = _me.Pos - aim;
-                    var nrm = t.dir == 0 ? new Vector2(0, MathF.Sign(off.Y == 0 ? -1 : off.Y)) : new Vector2(MathF.Sign(off.X == 0 ? 1 : off.X), 0);
-                    cmd.Move = nrm; cmd.Aim = aim;
-                    return;
-                }
-                if (!Hold("build_plan", ref cmd)) return;
-                cmd.Aim = aim;
-                if (_me.BuildPiece != t.kind) { cmd.Reload = !_fireEdge; _fireEdge = !_fireEdge; return; }
-                Click(ref cmd);
-                return;
-            }
-
-            // 5. улучшить до дерева (проём — до двери: потом молоток попадает в дверь)
-            const int targetTier = 1;   // сначала весь дом в дерево; камень — когда база готова (шаг 8б)
-            foreach (var t in Template())
-            {
-                var s = Built(t);
-                if (s == null || s.Tier >= targetTier) continue;
-                if (t.kind == StructKind.Doorway && _w.DoorAt(t.i, t.j, 0) != null) continue;
-                var cost = Building.Cost(t.kind, s.Tier + 1);
-                if (!Need(cost[0].id, cost[0].n, ref cmd)) return;
-                Doing = $"улучшает: {Building.KindName(t.kind)}";
-                var (stand, face) = HammerSpot(t);
-                if (!GoTo(stand, 0.6f, ref cmd)) return;
-                cmd.Aim = face;
-                if (Hold("tool_hammer", ref cmd) && Vector2.Dot(_me.FacingDir, Vector2.Normalize(face - _me.Pos)) > 0.9f) cmd.Fire = true;
-                return;
-            }
-
-            // 5б. ремонт после рейда: повреждённое (ниже 85%) — молотком, ресурсы — из кармана/добыть
-            var repairList = new List<((StructKind kind, int i, int j, int dir) t, Structure s)>();
-            foreach (var t in Template())
-                if (Built(t) is Structure bs && !(t.kind == StructKind.Doorway && _w.DoorAt(t.i, t.j, 0) != null)) repairList.Add((t, bs));   // проём с дверью — молоток попадёт в дверь
-            if (_w.DoorAt(_origin.i, _origin.j + 2, 0) is Structure dr) repairList.Add(((StructKind.Door, dr.I, dr.J, 0), dr));
-            foreach (var (t, s) in repairList)
-            {
-                if (s.Hp >= s.MaxHp * 0.85f) continue;
-                if (!Has("tool_hammer")) break;
-                var rc = Building.Cost(t.kind, s.Tier);
-                if (!Need(rc[0].id, Math.Max(1, rc[0].n / 5), ref cmd)) return;
-                Doing = $"чинит: {Building.KindName(t.kind)}";
-                var (stand, face) = t.kind == StructKind.Door ? (CellC(0, 1) + new Vector2(0, 0.2f), DoorCenter) : HammerSpot(t);
-                if (!GoTo(stand, 0.6f, ref cmd)) return;
-                cmd.Aim = face;
-                if (Hold("tool_hammer", ref cmd) && Vector2.Dot(_me.FacingDir, Vector2.Normalize(face - _me.Pos)) > 0.9f) cmd.Fire = true;
-                return;
-            }
-
-            // 6. дверь
-            if (_w.DoorAt(_origin.i, _origin.j + 2, 0) == null)
-            {
-                if (!Need("wood", 50, ref cmd)) return;
-                Doing = "ставит дверь";
-                if (!GoTo(CellC(0, 1) + new Vector2(0.3f, -0.4f), 0.4f, ref cmd)) return;
-                if (!Hold("build_plan", ref cmd)) return;
-                cmd.Aim = DoorCenter;
-                if (_me.BuildPiece != StructKind.Door) { cmd.Reload = !_fireEdge; _fireEdge = !_fireEdge; return; }
-                Click(ref cmd);
-                return;
-            }
-
-            // 7. ящик
-            var box = MyBox();
-            if (box == null)
-            {
-                if (!Has("deploy_box")) { if (!Craft("deploy_box", ref cmd)) Gather(NodeKind.Tree, ref cmd); return; }
-                Doing = "ставит ящик";
-                if (!GoTo(CellC(1, 1), 0.5f, ref cmd)) return;
-                cmd.Aim = CellC(1, 0) + new Vector2(0.33f, -0.33f);   // ящик в северо-восточный угол, не мешает ходить
-                if (Hold("deploy_box", ref cmd)) Click(ref cmd);
-                return;
-            }
-
-            // 7а. спальник дома: после смерти — проснуться у себя, а не на пляже
-            if (_w.ReadyBag(_me) == null)
-            {
-                if (!Has("deploy_sleepbag"))
-                {
-                    if (Craft("deploy_sleepbag", ref cmd)) return;
-                    if (_me.Count("cloth") < 30) { Doing = "собирает коноплю"; if (UsePickup(PickupKind.Hemp, ref cmd)) return; }
-                }
-                else
-                {
-                    Doing = "стелет спальник";
-                    if (!GoTo(CellC(0, 1) + new Vector2(0.3f, 0), 0.5f, ref cmd)) return;
-                    cmd.Aim = CellC(1, 1) + new Vector2(0.1f, 0.1f);
-                    if (Hold("deploy_sleepbag", ref cmd)) Click(ref cmd);
-                    return;
-                }
-            }
-
-            // 7б. замок с ключом на дверь (ключ остаётся в кармане; убьют — заберут и откроют)
-            var myDoor = _w.DoorAt(_origin.i, _origin.j + 2, 0);
-            if (myDoor != null && !myDoor.Locked)
-            {
-                if (!Has("lock_key")) { if (!Craft("lock_key", ref cmd)) Need("wood", 75, ref cmd); return; }
-                Doing = "ставит замок";
-                if (!GoTo(CellC(0, 1) + new Vector2(0.2f, 0.1f), 0.5f, ref cmd)) return;
-                cmd.Aim = DoorCenter;
-                if (Hold("lock_key", ref cmd)) Click(ref cmd);
-                return;
-            }
-
-            // 8. содержание: запас на ~2 часа
-            if (_w.ClaimHoursLeft(claim) < 1.5f && _w.ClaimLoad(claim).b > 0)
-            {
-                foreach (var (id, perHour) in _w.UpkeepPerHourOf(claim))
-                    if (!Need(id, (int)MathF.Ceiling(perHour * 2), ref cmd)) return;
-                Doing = "кормит шкаф";
-                if (!GoTo(claim.Pos + new Vector2(0.6f, 0.6f), 0.35f, ref cmd)) return;   // вплотную к столбу, дальше от двери
-                cmd.Aim = claim.Pos;
-                cmd.Interact = Click2();
-                return;
-            }
-
-            // 8б. дом в камень: камень из кармана, не хватает — забираем из ящика, иначе добываем
-            bool stoneDone = true;
-            var upgrades = new List<((StructKind kind, int i, int j, int dir) t, Structure s)>();
-            foreach (var t in Template())
-                if (Built(t) is Structure s && s.Tier < 2 && !(t.kind == StructKind.Doorway && _w.DoorAt(t.i, t.j, 0) != null)) upgrades.Add((t, s));
-            if (myDoor != null && myDoor.Tier < 2) upgrades.Add(((StructKind.Door, myDoor.I, myDoor.J, 0), myDoor));
-            if (upgrades.Count > 0)
-            {
-                stoneDone = false;
-                var (t, s) = upgrades[0];
-                var cost = Building.Cost(t.kind, s.Tier + 1);
-                var (id, n) = cost[0];
-                if (_me.Count(id) < n)
-                {
-                    int inBox = 0;
-                    foreach (var it in box.Storage.Items) if (it.Id == id) inBox += it.Count;
-                    if (inBox >= n - _me.Count(id))
-                    {
-                        Doing = "берёт камень из ящика";
-                        if (!GoTo(CellC(1, 0) + new Vector2(-0.35f, 0.35f), 0.4f, ref cmd)) return;
-                        cmd.Aim = box.Pos;
-                        cmd.Interact = Click2();
-                        return;
-                    }
-                    if (!Need(id, n, ref cmd)) return;
-                }
-                Doing = $"в камень: {Building.KindName(t.kind)}";
-                Vector2 stand, face;
-                if (t.kind == StructKind.Door) { stand = CellC(0, 1) + new Vector2(0, 0.2f); face = DoorCenter; }
-                else (stand, face) = HammerSpot(t);
-                if (!GoTo(stand, 0.6f, ref cmd)) return;
-                cmd.Aim = face;
-                if (Hold("tool_hammer", ref cmd) && Vector2.Dot(_me.FacingDir, Vector2.Normalize(face - _me.Pos)) > 0.9f) cmd.Fire = true;
-                return;
-            }
-
-            // 8в. печь у дома: металл на будущие улучшения (руда → печь → металл → в ящик)
-            if (stoneDone)
-            {
-                int metal = _me.Count("metal_fragments");
-                foreach (var it in box.Storage.Items) if (it.Id == "metal_fragments") metal += it.Count;
-                var furnace = MyFurnace();
-                if (furnace == null && metal < _metalGoal)
-                {
-                    if (!Has("deploy_furnace"))
-                    {
-                        if (Craft("deploy_furnace", ref cmd)) return;
-                        if (!Need("stone", 100, ref cmd) || !Need("wood", 50, ref cmd)) return;
-                        return;
-                    }
-                    Doing = "ставит печь";
-                    var spot = CellC(1, 2) + new Vector2(0.6f, 1.0f);
-                    if (!GoTo(spot + new Vector2(-1.2f, 0), 0.5f, ref cmd)) return;
-                    cmd.Aim = spot;
-                    if (Hold("deploy_furnace", ref cmd)) Click(ref cmd);
-                    return;
-                }
-                if (furnace != null)
-                {
-                    bool ready = (!furnace.Burning && furnace.OutMetal + furnace.OutCharcoal > 0) || furnace.OutMetal >= 40;   // забираем пачкой, а не по 2
-                    bool haveOre = (_me.Count("metal_ore") >= 60 || _me.Count("sulfur_ore") >= 40) && _me.Count("wood") >= 40;
-                    if (ready || (haveOre && !furnace.Burning))
-                    {
-                        Doing = ready ? "забирает металл из печи" : "загружает печь";
-                        if (!GoTo(furnace.Pos + new Vector2(-1.0f, 0.3f), 0.4f, ref cmd)) return;
-                        cmd.Aim = furnace.Pos;
-                        cmd.Interact = Click2();
-                        return;
-                    }
-                    if (metal < _metalGoal && !furnace.Burning && _me.Count("metal_ore") < 60 && !Need("metal_ore", 60, ref cmd)) return;
-                }
-                // 8г. прогрессия: лом → верстак 1 → изучение → верстак 2 → … → верстак 3
-                if (Progress(box, metal, ref cmd)) return;
-                if (Arm(box, furnace, ref cmd)) return;
-                if (Raid(box, furnace, ref cmd)) return;
-            }
-
-            // 9. отнести добычу (камень копим, пока дом не каменный)
-            if (wood > 500 + 400 * _greed || (stoneDone && stone > 300 + 300 * _greed))
-            {
-                Doing = "несёт добычу домой";
-                if (!GoTo(CellC(1, 0) + new Vector2(-0.35f, 0.35f), 0.4f, ref cmd)) return;
-                cmd.Aim = box.Pos;
-                cmd.Crouch = true;
-                cmd.Interact = Click2();
-                return;
-            }
-
-            // 10. фарм: чего меньше — то и добываем; камень нужен на будущий апгрейд
-            Gather(stone < wood * 0.6f ? NodeKind.Stone : NodeKind.Tree, ref cmd);
-        }
-
         bool _int;
         bool Click2() { _int = !_int; return _int; }
 
@@ -758,8 +438,8 @@ namespace Rastvordd.Sim
         static readonly string[] BenchIds = { "deploy_workbench", "deploy_workbench2", "deploy_workbench3" };
 
         /// <summary>Где у дома стоят верстаки (с востока, в ряд) и откуда с ними работать.</summary>
-        Vector2 BenchSpot(int level) => level switch { 1 => CellC(2, 0) + new Vector2(0.2f, -0.3f), 2 => CellC(2, 1) + new Vector2(0.2f, 0.3f), _ => CellC(3, 0) + new Vector2(0.6f, 1.0f) };
-        Vector2 BenchStand => CellC(3, 1) + new Vector2(-0.4f, -0.6f);
+        Vector2 BenchSpot(int level) => AtPlan(_plan.Benches[Math.Clamp(level - 1, 0, 2)]);
+        Vector2 BenchStand => AtPlan(_plan.BenchStand);
 
         int MyBenchLevel()
         {
@@ -780,7 +460,7 @@ namespace Rastvordd.Sim
         {
             if (_me.Count(id) >= n || InBox(box, id) == 0) return false;
             Doing = $"берёт из ящика: {Items.Name(id)}";
-            if (!GoTo(CellC(1, 0) + new Vector2(-0.35f, 0.35f), 0.4f, ref cmd)) return true;
+            if (!Reach(box.Pos, ref cmd)) return true;
             cmd.Aim = box.Pos;
             _w.BotTake(_me, box, id, n - _me.Count(id));   // только нужное, а не всё (иначе «сложить — забрать» по кругу)
             return true;
@@ -858,9 +538,7 @@ namespace Rastvordd.Sim
             Doing = "делает порох: ждёт серу и уголь из печи";
             if (furnace.OutSulfur > 0 || furnace.OutCharcoal >= 15 || (!furnace.Burning && _me.Count("sulfur_ore") > 0))
             {
-                if (!GoTo(furnace.Pos + new Vector2(-1.0f, 0.3f), 0.4f, ref cmd)) return true;
-                cmd.Aim = furnace.Pos;
-                cmd.Interact = Click2();
+                Use(furnace, furnace.Pos, ref cmd, false, 1.2f);
                 return true;
             }
             return false;   // печь работает — пока фармим
@@ -957,9 +635,7 @@ namespace Rastvordd.Sim
                 else
                 {
                     Doing = "выносит чужой ящик";
-                    if (!MoveTo(enemyBox.Pos, 1.1f, ref cmd)) return true;
-                    cmd.Aim = enemyBox.Pos;
-                    cmd.Interact = Click2();
+                    if (!Use(enemyBox, enemyBox.Pos, ref cmd)) return true;
                     if (Vector2.Distance(_me.Pos, enemyBox.Pos) < 1.6f && _w.Time - _lootTry > 2f)
                     {
                         _lootTry = _w.Time;
@@ -1019,7 +695,7 @@ namespace Rastvordd.Sim
             {
                 if (b.Empty || b.IsCrate || Vector2.Distance(b.Pos, _me.Pos) > 8) continue;
                 Doing = "подбирает хлам";
-                if (MoveTo(b.Pos, 0.9f, ref cmd)) cmd.Interact = Click2();
+                Use(b, b.Pos, ref cmd);
                 return true;
             }
             if (_scrapNode == null || !_w.Nodes.Contains(_scrapNode) || (_scrapTimer -= World.Dt) < 0)
@@ -1115,36 +791,7 @@ namespace Rastvordd.Sim
             else cmd.Fire = true;
         }
 
-        /// <summary>Дойти до точки с учётом двери: внутрь и наружу — через проём, закрытую дверь открываем.</summary>
-        bool GoTo(Vector2 p, float tol, ref InputCmd cmd)
-        {
-            if (_site == null) return MoveTo(p, tol, ref cmd);
-            var (pi, pj) = Building.CellOf(p);
-            bool targetInside = pi >= _origin.i && pi <= _origin.i + 1 && pj >= _origin.j && pj <= _origin.j + 1;
-            bool walled = _w.EdgeAt(_origin.i, _origin.j + 2, 0) != null && _w.EdgeAt(_origin.i + 1, _origin.j + 2, 0) != null
-                          && _w.EdgeAt(_origin.i, _origin.j, 0) != null;
-            if (targetInside == InsideBase || !walled)
-            {
-                // снаружи дом обходит маршрут A* в MoveTo
-                return MoveTo(p, tol, ref cmd);
-            }
-            // через дверь: точка перед дверью с нужной стороны → открыть → пройти
-            var outside = DoorCenter + new Vector2(0, 1.0f);
-            var inside = DoorCenter - new Vector2(0, 1.0f);
-            var door = _w.DoorAt(_origin.i, _origin.j + 2, 0);
-            var near = InsideBase ? inside : outside;
-            var far = InsideBase ? outside : inside;
-            if (door != null && !door.Open)
-            {
-                if (!MoveTo(near, 0.4f, ref cmd)) return false;
-                cmd.Aim = DoorCenter;
-                cmd.Interact = Click2();
-                return false;
-            }
-            if (Vector2.Distance(_me.Pos, near) > 0.5f && Vector2.Distance(_me.Pos, DoorCenter) > 0.6f)
-                return MoveTo(near, 0.4f, ref cmd) && false;
-            MoveTo(far, 0.3f, ref cmd);
-            return false;
-        }
+        /// <summary>Дойти до точки: маршрут A* сам ведёт через свои двери (откроет и закроет).</summary>
+        bool GoTo(Vector2 p, float tol, ref InputCmd cmd) => MoveTo(p, tol, ref cmd);
     }
 }

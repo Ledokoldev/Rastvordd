@@ -106,6 +106,21 @@ namespace Rastvordd.Client
                 else if (a == "release") _autoFireFrames = 0;
                 else if (a == "craftmenu") _hud.ToggleCraft();
                 else if (a == "tech") _hud.OpenTech();
+                else if (a == "pathtest")
+                {
+                    // отладка: маршрут от игрока до ближайшего чужого шкафа, двери проходимы
+                    var w = _server.World; var me = w.Find(_myId);
+                    Deployable claim = null; float bd = 1e9f;
+                    foreach (var d in w.Deployables) if (d.Kind == DeployKind.Claim && SVec.Distance(d.Pos, me.Pos) < bd) { bd = SVec.Distance(d.Pos, me.Pos); claim = d; }
+                    if (claim != null)
+                    {
+                        System.Func<MapWall, bool> doors = mw => mw.Owner is Structure st && st.Kind == StructKind.Door;
+                        var path = Pathfinder.Find(w, me.Pos, claim.Pos, me.Radius + 0.05f, 1.0f, doors);
+                        GD.Print($"pathtest: от {me.Pos} к шкафу {claim.Pos}: {(path == null ? "НЕТ ПУТИ" : string.Join(" ", path.ConvertAll(q => $"({q.X:0.0};{q.Y:0.0})")))}");
+                        foreach (var st in w.Structures) if (st.Kind is StructKind.Door or StructKind.Doorway && SVec.Distance(st.Center, claim.Pos) < 6)
+                            GD.Print($"  {st.Kind} {st.A}-{st.B} open={st.Open} центр свободен={!w.WalkBlocked(st.Center, me.Radius + 0.05f, doors)}");
+                    }
+                }
                 else if (a.StartsWith("piece")) _setPiece = int.Parse(a.Substring(5));   // отладка: элемент плана (5 — треугольник)
                 else if (a == "rec") foreach (var d in _server.World.Deployables) { if (d.Kind == DeployKind.Recycler) GD.Print($"рециклер {d.Pos}: on={d.On} [{string.Join(", ", d.Storage.Items.ConvertAll(x => x.Id + "×" + x.Count))}] · у меня шестерни {_server.World.Find(_myId).Count("comp_gears")}"); }   // отладка
                 else if (a == "peace") { foreach (var n in _server.World.Actors) if (n.Team == Team.Npc) { n.Dead = true; n.DeadTime = _server.World.Time; } }   // отладка: охрана РТ «спит»
@@ -175,7 +190,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     GD.Print($"рейд-тест: повреждено построек {_server.DamageBotBase(bi, 0.5f, _myId)}");
                     _server.FastForward(240, s => GD.Print(s), _myId);
                 }
-                me.Pos = (p.Length > 2 && p[2] == "home" ? _server.BotHome(bi) + new SVec(1, 6) : _server.BotPos(bi) + new SVec(-3, 2));
+                me.Pos = (p.Length > 2 && p[2] == "home" ? _server.BotHome(bi) + new SVec(1, 6) : p.Length > 2 && p[2] == "base" ? _server.BotHome(bi) + new SVec(-2.5f, 0.5f) : _server.BotPos(bi) + new SVec(-3, 2));   // base — камера на сам дом
                 me.Dead = false; me.Hp = me.MaxHp;
             }
             if (loaded) CallDeferred(nameof(ToastLoaded));

@@ -1113,6 +1113,38 @@ namespace Rastvordd.Sim
             return best;
         }
 
+        /// <summary>
+        /// Бот использует конкретную цель (а не «ближайшее под рукой»): шкаф, печь, ящик (deposit — сложить всё), мешок, находку.
+        /// Проверка «рукой»: рядом и без стены между.
+        /// </summary>
+        public bool BotUse(Actor a, object target, bool deposit = false)
+        {
+            Vector2 pos; float r;
+            switch (target)
+            {
+                case Deployable d when Deployables.Contains(d): pos = d.Pos; r = d.Radius; break;
+                case LootBag b when Bags.Contains(b) && !b.Empty: pos = b.Pos; r = 0.3f; break;
+                case Pickup p when p.Available: pos = p.Pos; r = 0.3f; break;
+                default: return false;
+            }
+            if (Vector2.Distance(a.Pos, pos) > InteractRange + r || !ClearLine(a.Pos, pos, null, true)) return false;
+            switch (target)
+            {
+                case Deployable d when d.Kind == DeployKind.Claim: UseClaim(a, d); break;
+                case Deployable d when d.Kind == DeployKind.Furnace: UseFurnace(a, d); break;
+                case Deployable d when d.Kind == DeployKind.Box:
+                    bool was = a.Crouching;
+                    a.Crouching = deposit;   // присед + E — сложить всё
+                    UseBox(a, d);
+                    a.Crouching = was;
+                    break;
+                case LootBag b when !b.Safe || b.Unlocked: LootBagInto(a, b); break;
+                case Pickup p: Collect(a, p); break;
+                default: return false;
+            }
+            return true;
+        }
+
         void Interact(Actor a)
         {
             var (kind, target) = NearestInteract(a);

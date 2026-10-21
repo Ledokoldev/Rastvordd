@@ -7,10 +7,10 @@ namespace Rastvordd.Sim
     public sealed partial class World
     {
         /// <summary>Займёт ли круг (человек) эту точку: стены, глыбы и стволы, установленное — как при движении.</summary>
-        public bool WalkBlocked(Vector2 p, float r)
+        public bool WalkBlocked(Vector2 p, float r, Func<MapWall, bool> passable = null)
         {
             foreach (var w in WallsNear(p, r + 0.5f))
-                if (Geo.CircleBox(p, r, w.Wall.Min, w.Wall.Max)) return true;
+                if (Geo.CircleBox(p, r, w.Wall.Min, w.Wall.Max) && (passable == null || !passable(w))) return true;
             foreach (var n in NodesNear(p, r + 1f))
                 if (Vector2.DistanceSquared(p, n.Pos) < (r + n.Radius) * (r + n.Radius)) return true;
             foreach (var d in DeploysNear(p, r + 1f))
@@ -19,29 +19,32 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Проходим ли отрезок (шагом 0,35 м); последние stopShort метров не проверяются (цель бывает внутри препятствия).</summary>
-        public bool SegmentWalkable(Vector2 a, Vector2 b, float r, float stopShort = 0)
+        public bool SegmentWalkable(Vector2 a, Vector2 b, float r, float stopShort = 0, Func<MapWall, bool> passable = null)
         {
             float len = Vector2.Distance(a, b) - stopShort;
             if (len <= 0) return true;
             var dir = Vector2.Normalize(b - a);
             for (float t = 0.35f; t < len; t += 0.35f)
-                if (WalkBlocked(a + dir * t, r)) return false;
+                if (WalkBlocked(a + dir * t, r, passable)) return false;
             return true;
         }
     }
 
     /// <summary>
-    /// A* по сетке 0,5 м вокруг бота: обход стен, деревьев, камней, установленного. Вода проходима, но дорогая.
+    /// A* по сетке 0,25 м вокруг бота: обход стен, деревьев, камней, установленного. Вода проходима, но дорогая.
     /// Путь «натягивается» — лишние точки выкидываются, где видна прямая.
     /// </summary>
     public static class Pathfinder
     {
-        const float Step = 0.5f;
-        const int MaxCells = 48000;
+        const float Step = 0.25f;
+        const int MaxCells = 60000;
 
-        public static List<Vector2> Find(World w, Vector2 from, Vector2 to, float r, float tol)
+        /// <summary>passable — какие стены можно «пройти» (свои двери: бот их откроет по пути).</summary>
+        public static List<Vector2> Find(World w, Vector2 from, Vector2 to, float r, float tol, Func<MapWall, bool> passable = null)
         {
+            // сетка выровнена по миру (кратно 0,5 м): центр клетки попадает ровно в середину дверного проёма
             var min = Vector2.Min(from, to) - new Vector2(8);
+            min = new Vector2(MathF.Floor(min.X / Step) * Step, MathF.Floor(min.Y / Step) * Step);
             var max = Vector2.Max(from, to) + new Vector2(8);
             int nx = (int)((max.X - min.X) / Step) + 1, ny = (int)((max.Y - min.Y) / Step) + 1;
             if (nx * ny > MaxCells) return null;
@@ -55,7 +58,7 @@ namespace Rastvordd.Sim
             int Idx(Vector2 p) => Math.Clamp((int)MathF.Round((p.Y - min.Y) / Step), 0, ny - 1) * nx + Math.Clamp((int)MathF.Round((p.X - min.X) / Step), 0, nx - 1);
             bool Free(int i)
             {
-                if (state[i] == 0) state[i] = (byte)(w.WalkBlocked(P(i), r) ? 2 : 1);
+                if (state[i] == 0) state[i] = (byte)(w.WalkBlocked(P(i), r, passable) ? 2 : 1);
                 return state[i] == 1;
             }
 
@@ -103,7 +106,7 @@ namespace Rastvordd.Sim
             {
                 int far = k;
                 for (int j = raw.Count - 1; j > k; j--)
-                    if (w.SegmentWalkable(cur, raw[j], r)) { far = j; break; }
+                    if (w.SegmentWalkable(cur, raw[j], r, 0, passable)) { far = j; break; }
                 path.Add(raw[far]);
                 cur = raw[far];
                 k = far + 1;

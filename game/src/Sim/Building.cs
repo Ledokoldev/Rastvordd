@@ -208,11 +208,15 @@ namespace Rastvordd.Sim
             foreach (var (t0, t1, h, pass) in Spans(k, open))
             {
                 int n = axis ? 1 : Math.Max(1, (int)MathF.Ceiling(len * (t1 - t0) / 0.25f));
+                var dir = Vector2.Normalize(b - a);
+                var nrm = new Vector2(-dir.Y, dir.X) * ht;   // толщина — только поперёк ребра (иначе косяки съедают проём)
                 for (int s = 0; s < n; s++)
                 {
                     var p0 = Vector2.Lerp(a, b, t0 + (t1 - t0) * s / n);
                     var p1 = Vector2.Lerp(a, b, t0 + (t1 - t0) * (s + 1) / n);
-                    list.Add((Vector2.Min(p0, p1) - new Vector2(ht), Vector2.Max(p0, p1) + new Vector2(ht), h, pass));
+                    var mn = Vector2.Min(Vector2.Min(p0 + nrm, p0 - nrm), Vector2.Min(p1 + nrm, p1 - nrm));
+                    var mx = Vector2.Max(Vector2.Max(p0 + nrm, p0 - nrm), Vector2.Max(p1 + nrm, p1 - nrm));
+                    list.Add((mn, mx, h, pass));
                 }
             }
             return list;
@@ -243,6 +247,8 @@ namespace Rastvordd.Sim
         public Structure FoundationAt(int i, int j) => _foundations.GetValueOrDefault((i, j));
         public Structure EdgeAt(int i, int j, int dir) => _edges.GetValueOrDefault(Building.EdgeKey(i, j, dir));
         public Structure DoorAt(int i, int j, int dir) => _doors.GetValueOrDefault(Building.EdgeKey(i, j, dir));
+        public Structure EdgeByKey(long key) => _edges.GetValueOrDefault(key);
+        public Structure DoorByKey(long key) => _doors.GetValueOrDefault(key);
 
         /// <summary>Пол (квадрат или треугольник) под точкой.</summary>
         public Structure FloorAt(Vector2 p)
@@ -537,6 +543,7 @@ namespace Rastvordd.Sim
             float bestD = 0.75f;   // дальше от ребра — значит целимся в пол (фундамент)
             foreach (var d in _doors.Values)
                 if (Vector2.DistanceSquared(d.Center, hit) < 9 && DistToEdge(d, hit) < 0.85f) return d;   // дверь — только если целимся почти в неё
+            if (FloorAt(hit) != null) bestD = 0.45f;   // целимся в пол (у треугольника всё близко к рёбрам) — стена только вплотную
             foreach (var e in _edges.Values)
             {
                 if (Vector2.DistanceSquared(e.Center, hit) > 9) continue;
@@ -618,6 +625,15 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>E по двери: открыть/закрыть. Закрыть нельзя, если в проёме кто-то стоит.</summary>
+        /// <summary>Бот открывает или закрывает конкретную дверь (рукой: рядом и без стены между).</summary>
+        public bool BotToggleDoor(Actor a, Structure door)
+        {
+            if (!Structures.Contains(door) || Vector2.Distance(a.Pos, door.Center) > InteractRange + 0.4f || !ClearLine(a.Pos, door.Center, door, true)) return false;
+            bool was = door.Open;
+            ToggleDoor(a, door);
+            return door.Open != was;
+        }
+
         void ToggleDoor(Actor a, Structure door)
         {
             if (door.Locked && door.KeyLock)

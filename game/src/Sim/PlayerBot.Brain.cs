@@ -360,7 +360,7 @@ namespace Rastvordd.Sim
             var bag = CorpseNear();
             if (bag == null) return false;
             Doing = bag.Corpse ? "лутает труп" : "подбирает вещи";
-            if (MoveTo(bag.Pos, 1.0f, ref cmd)) cmd.Interact = Click2();
+            Use(bag, bag.Pos, ref cmd);
             return true;
         }
 

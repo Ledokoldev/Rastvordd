@@ -28,7 +28,7 @@ namespace Rastvordd.Sim
         readonly World _w;
         readonly Random _rng;
         public string Doing = "";              // для отладки и подписи над головой
-        public string Debug => _site == null ? "без базы" : $"база ({_origin.i},{_origin.j}) внутри={InsideBase} узел={(_node == null ? "-" : $"{_node.Pos.X:0};{_node.Pos.Y:0}")}";
+        public string Debug => _site == null ? "без базы" : $"база ({_origin.i},{_origin.j}) внутри={InsideBase} узел={(_node == null ? "-" : $"{_node.Pos.X:0};{_node.Pos.Y:0}")}{(MyFurnace() is Deployable f ? $" печь={f.Pos.X:0.0};{f.Pos.Y:0.0}" : "")}";
 
         // характер (0..1): осторожность, жадность до ресурсов
         readonly float _caution, _greed;
@@ -104,10 +104,51 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Идти к точке; true — дошли (в пределах tol).</summary>
+        // маршрут A* (когда прямая закрыта или застряли)
+        List<Vector2> _path;
+        int _pathIdx;
+        Vector2 _pathGoal;
+        float _pathAge, _pathCheck, _goalBest = float.MaxValue, _goalStuck;
+        Vector2 _goalFor;
+
         bool MoveTo(Vector2 p, float tol, ref InputCmd cmd)
         {
             var d = p - _me.Pos;
-            if (d.Length() <= tol) return true;
+            if (d.Length() <= tol) { _path = null; return true; }
+
+            // прогресс к цели: 1,5 с без приближения — застряли
+            if (Vector2.Distance(_goalFor, p) > 0.5f) { _goalFor = p; _goalBest = float.MaxValue; _goalStuck = 0; }
+            if (d.Length() < _goalBest - 0.2f) { _goalBest = d.Length(); _goalStuck = 0; } else _goalStuck += World.Dt;
+
+            // идём по маршруту
+            if (_path != null && Vector2.Distance(_pathGoal, p) < 1.5f && (_pathAge += World.Dt) < 15f && _goalStuck < 2.5f)
+            {
+                while (_pathIdx < _path.Count - 1 && Vector2.Distance(_me.Pos, _path[_pathIdx]) < 0.4f) _pathIdx++;
+                var wp = _path[_pathIdx];
+                if (_pathIdx < _path.Count - 1 || Vector2.Distance(_me.Pos, wp) > 0.4f)
+                {
+                    cmd.Move = Vector2.Normalize(wp - _me.Pos);
+                    cmd.Aim = wp;
+                    return false;
+                }
+                _path = null;   // дошли до конца маршрута (для дальней цели — до промежуточной точки)
+            }
+            else _path = null;
+
+            // прямая закрыта (дом, дерево у угла, печь) или застряли — строим маршрут
+            if ((_pathCheck -= World.Dt) <= 0 && (_goalStuck > 1.5f || (d.Length() < 35 && !_w.SegmentWalkable(_me.Pos, p, _me.Radius + 0.05f, tol + 0.4f))))
+            {
+                _pathCheck = 0.6f;
+                var goal = d.Length() < 35 ? p : _me.Pos + Vector2.Normalize(d) * 25;
+                var path = Pathfinder.Find(_w, _me.Pos, goal, _me.Radius + 0.05f, d.Length() < 35 ? tol : 1.5f);
+                if (path != null && path.Count > 0)
+                {
+                    _path = path; _pathIdx = 0; _pathGoal = p; _pathAge = 0; _goalStuck = 0;
+                    cmd.Move = Vector2.Normalize(path[0] - _me.Pos + new Vector2(1e-4f, 0));
+                    cmd.Aim = path[0];
+                    return false;
+                }
+            }
             var want = Vector2.Normalize(d);
             // РТ с охраной обходим стороной, если цель не на самом РТ
             foreach (var m in _w.Monuments)
@@ -517,7 +558,21 @@ namespace Rastvordd.Sim
                 var aim = t.kind == StructKind.Foundation ? Building.CellCenter(t.i, t.j) : Building.EdgeCenter(t.i, t.j, t.dir);
                 // ставим с места, если дотягиваемся; иначе — изнутри дома, из соседней с элементом клетки
                 var stand = t.kind == StructKind.Foundation ? Building.CellCenter(t.i, t.j) : HammerSpot(t).stand;
-                if (Vector2.Distance(_me.Pos, aim) > 4.5f && !GoTo(stand, 0.7f, ref cmd)) return;
+                // сам стою на месте будущей стены — отойти на точку внутри; мешает другой — взять следующий элемент
+                bool selfBlock = false, otherBlock = false;
+                foreach (var (min, max, _, _) in Building.Boxes(t.kind, t.i, t.j, t.dir, false))
+                    foreach (var o in _w.Actors)
+                        if (!o.Dead && !o.Spectator && Geo.CircleBox(o.Pos, o.Radius, min, max)) { if (o == _me) selfBlock = true; else otherBlock = true; }
+                if (otherBlock) continue;
+                if ((selfBlock || Vector2.Distance(_me.Pos, aim) > 4.5f) && !GoTo(stand, 0.3f, ref cmd)) return;
+                if (selfBlock)
+                {
+                    // точка стояния тоже на линии — шаг от ребра внутрь клетки
+                    var off = _me.Pos - aim;
+                    var nrm = t.dir == 0 ? new Vector2(0, MathF.Sign(off.Y == 0 ? -1 : off.Y)) : new Vector2(MathF.Sign(off.X == 0 ? 1 : off.X), 0);
+                    cmd.Move = nrm; cmd.Aim = aim;
+                    return;
+                }
                 if (!Hold("build_plan", ref cmd)) return;
                 cmd.Aim = aim;
                 if (_me.BuildPiece != t.kind) { cmd.Reload = !_fireEdge; _fireEdge = !_fireEdge; return; }
@@ -1187,33 +1242,7 @@ namespace Rastvordd.Sim
                           && _w.EdgeAt(_origin.i, _origin.j, 0) != null;
             if (targetInside == InsideBase || !walled)
             {
-                // снаружи — обходим дом по углам, если он стоит на пути
-                if (!InsideBase && !targetInside && _w.FoundationAt(_origin.i, _origin.j) != null)
-                {
-                    var min = new Vector2(_origin.i * Building.Cell, _origin.j * Building.Cell) - new Vector2(0.7f);
-                    var max = new Vector2((_origin.i + 2) * Building.Cell, (_origin.j + 2) * Building.Cell) + new Vector2(0.7f);
-                    // стоим вплотную к дому снаружи (например, только что вышли из проёма) — сначала шаг прочь
-                    if (_me.Pos.X > min.X && _me.Pos.X < max.X && _me.Pos.Y > min.Y && _me.Pos.Y < max.Y)
-                    {
-                        var ctr = (min + max) * 0.5f;
-                        var off = _me.Pos - ctr;
-                        var outDir = MathF.Abs(off.X) / (max.X - min.X) > MathF.Abs(off.Y) / (max.Y - min.Y) ? new Vector2(MathF.Sign(off.X), 0) : new Vector2(0, MathF.Sign(off.Y));
-                        cmd.Move = outDir;
-                        cmd.Aim = _me.Pos + outDir * 3;
-                        return false;
-                    }
-                    if (Geo.SegmentAabb(_me.Pos, p, min, max, out _))
-                    {
-                        Vector2 best = p; float bd = float.MaxValue;
-                        foreach (var c in new[] { min - new Vector2(0.6f), new Vector2(max.X + 0.6f, min.Y - 0.6f), max + new Vector2(0.6f), new Vector2(min.X - 0.6f, max.Y + 0.6f) })
-                        {
-                            if (Vector2.Distance(_me.Pos, c) < 0.8f || Geo.SegmentAabb(_me.Pos, c, min, max, out _)) continue;   // у этого угла уже стоим
-                            float cost = Vector2.Distance(_me.Pos, c) + Vector2.Distance(c, p);
-                            if (cost < bd) { bd = cost; best = c; }
-                        }
-                        if (best != p) { MoveTo(best, 0.5f, ref cmd); return false; }
-                    }
-                }
+                // снаружи дом обходит маршрут A* в MoveTo
                 return MoveTo(p, tol, ref cmd);
             }
             // через дверь: точка перед дверью с нужной стороны → открыть → пройти

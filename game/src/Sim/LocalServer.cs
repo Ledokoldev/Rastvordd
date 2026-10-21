@@ -266,7 +266,7 @@ namespace Rastvordd.Sim
                         log($"[{World.Time,6:0}s] смерть: {World.Find(e.ActorId)?.Name} ← {World.Find(e.OtherId)?.Name ?? "?"}");
                 if (t % (int)(30 / World.Dt) == 0)
                     foreach (var b in _bots.Values)
-                        log($"[{World.Time,6:0}s] {b.Me.Name} @({b.Me.Pos.X:0.0};{b.Me.Pos.Y:0.0}) {b.Debug}: {b.Doing} · HP {b.Me.Hp:0} · дерево {b.Me.Count("wood")} камень {b.Me.Count("stone")} металл {b.Me.Count("metal_fragments")} лом {b.Me.Count("scrap")} · изучено {b.Me.Known.Count} · построек {World.Structures.FindAll(s => s.OwnerId == b.Me.Id).Count} · {World.LastInfo.GetValueOrDefault(b.Me.Id)}");
+                        log($"[{World.Time,6:0}s] {b.Me.Name} @({b.Me.Pos.X:0.0};{b.Me.Pos.Y:0.0}) {b.Debug}: {b.Doing} · HP {b.Me.Hp:0} · дерево {b.Me.Count("wood")} камень {b.Me.Count("stone")} металл {b.Me.Count("metal_fragments")} лом {b.Me.Count("scrap")} · изучено {b.Me.Known.Count} · E→{World.NearestInteract(b.Me).kind} · построек {World.Structures.FindAll(s => s.OwnerId == b.Me.Id).Count} · {World.LastInfo.GetValueOrDefault(b.Me.Id)}");
             }
         }
 

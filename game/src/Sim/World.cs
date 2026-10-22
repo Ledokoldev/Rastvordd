@@ -301,6 +301,28 @@ namespace Rastvordd.Sim
         /// Через сколько секунд пустой ящик РТ наполнится снова: тир 0 — 5–7 мин, тир 1 — 15–21, тир 2 — 20–30.
         /// Было 90 с — пользователь: «ящики откатываются очень быстро», лутать РТ без риска можно было по кругу.
         /// </summary>
+        T Pick<T>(T[] arr) => arr[Rng.Next(arr.Length)];
+
+        // ---------- детали тира 3: режиссёр выпускает с середины вайпа и дозирует в час (D46 «темп вайпа») ----------
+        /// <summary>С какой секунды вайпа в лут попадают детали тира 3 (ствольная коробка АК, хромированный ствол, газоотвод).</summary>
+        public const float Tier3From = 4.5f * 3600f;
+        /// <summary>Сколько деталей тира 3 на весь мир за час (ящики, сейфы, ивенты).</summary>
+        public const int Tier3PerHour = 3;
+        readonly Dictionary<int, int> _tier3ByHour = new();
+
+        /// <summary>Можно ли сейчас выпустить деталь тира 3 (фаза режиссёра, время, лимит в час).</summary>
+        public bool Tier3Allowed() => Time >= Tier3From && (Director?.Phase ?? 0) >= 1 && _tier3ByHour.GetValueOrDefault((int)(Time / 3600)) < Tier3PerHour;
+
+        /// <summary>С шансом положить деталь тира 3 (если режиссёр разрешает).</summary>
+        public bool TryTier3(LootBag bag, double chance)
+        {
+            if (Rng.NextDouble() >= chance || !Tier3Allowed()) return false;
+            int h = (int)(Time / 3600);
+            _tier3ByHour[h] = _tier3ByHour.GetValueOrDefault(h) + 1;
+            bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier3Parts), 1));
+            return true;
+        }
+
         public float CrateRespawnTime(LootBag bag) => bag.Tier switch { 0 => Range(300, 420), 1 => Range(900, 1260), _ => Range(1200, 1800) };
 
         void AddCrate(Vector2 pos, int tier = 2)
@@ -318,26 +340,29 @@ namespace Rastvordd.Sim
             {
                 if (Rng.NextDouble() < chance) bag.Items.Add(new ItemSlot(id, Rng.Next(min, max + 1)));
             }
-            // уровень по карточкам Астры: без охраны — бытовое, малая охрана — компоненты и патроны, склад — оружие
+            // уровень по карточкам Астры: без охраны — бытовое, малая охрана — компоненты и патроны, склад (РТ 2) — детали тира 2–3 (D46)
             bag.Unlocked = false;
             if (bag.Safe)
             {
-                // сейф: гарантированно лом и детали, шанс на оружие и взрывчатку
+                // сейф: гарантированно лом и детали, шанс на ствол тира 2, деталь тира 3 (по режиссёру) и взрывчатку
                 bag.Items.Add(new ItemSlot("scrap", Rng.Next(25, 46)));
-                bag.Items.Add(new ItemSlot(Rng.Next(2) == 0 ? "comp_gears" : "comp_spring", Rng.Next(1, 3)));
-                Maybe(0.6, "comp_pipe", 1, 2);
+                bag.Items.Add(new ItemSlot(Pick(Weaponry.CommonParts), Rng.Next(1, 3)));
+                bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier2Parts), 1));
                 Maybe(0.5, "metal_fragments", 50, 120);
                 Maybe(0.4, "gunpowder", 30, 60);
-                if (Rng.NextDouble() < 0.25) bag.Items.Add(Items.NewSlot("weapon_ak"));
+                Maybe(0.4, "ammo_762", 10, 30);
+                if (Rng.NextDouble() < 0.15) bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_grach", "weapon_pps43", "weapon_svt40" })));
+                if (Rng.NextDouble() < 0.12) bag.Items.Add(new ItemSlot(Pick(Weaponry.FactoryAtts), 1));
+                TryTier3(bag, 0.3);
                 if (Rng.NextDouble() < 0.2) bag.Items.Add(Items.NewSlot("expl_satchel"));
                 if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot("expl_c4"));
                 return;
             }
-            // детали — во всех ящиках; карта доступа — в охраняемых
+            // общие детали — во всех ящиках; карта доступа — в охраняемых
             Maybe(0.35, "comp_tape", 1, 2);
-            Maybe(bag.Tier == 0 ? 0.15 : 0.35, "comp_gears", 1, 2);
-            Maybe(bag.Tier == 0 ? 0.15 : 0.3, "comp_spring", 1, 1);
-            Maybe(bag.Tier == 0 ? 0.1 : 0.3, "comp_pipe", 1, 2);
+            Maybe(bag.Tier == 0 ? 0.2 : 0.35, "comp_gears", 1, 2);
+            Maybe(bag.Tier == 0 ? 0.35 : 0.3, "comp_spring", 1, 2);
+            Maybe(bag.Tier == 0 ? 0.25 : 0.3, "comp_pipe", 1, 2);
             if (bag.Tier >= 1) Maybe(0.18, "keycard", 1, 1);
             switch (bag.Tier)
             {
@@ -348,28 +373,47 @@ namespace Rastvordd.Sim
                     Maybe(0.5, "water_bottle", 1, 2);
                     Maybe(0.35, "bandage", 1, 2);
                     Maybe(0.3, "metal_fragments", 10, 30);
-                    Maybe(0.2, "ammo_pistol", 5, 15);
+                    Maybe(0.2, "ammo_9mm", 5, 15);
+                    Maybe(0.12, "ammo_12g", 3, 8);
+                    Maybe(0.12, "comp_oil", 1, 1);
+                    Maybe(0.05, "comp_lens", 1, 1);
+                    Maybe(0.05, "comp_circuit", 1, 1);
+                    if (Rng.NextDouble() < 0.04) bag.Items.Add(Items.NewSlot("weapon_pipeshotgun"));
+                    if (Rng.NextDouble() < 0.05) bag.Items.Add(new ItemSlot(Pick(new[] { "att_grip_wood", "att_suppressor_can", "att_mag_twin_crude", "att_torch" }), 1));
                     break;
                 case 1:
                     Maybe(0.85, "scrap", 10, 25);
                     Maybe(0.6, "metal_fragments", 25, 70);
                     Maybe(0.45, "gunpowder", 15, 35);
-                    Maybe(0.45, "ammo_pistol", 10, 30);
-                    Maybe(0.3, "ammo_rifle", 10, 25);
+                    Maybe(0.45, "ammo_9mm", 10, 30);
+                    Maybe(0.25, "ammo_12g", 5, 12);
+                    Maybe(0.15, "ammo_762", 5, 15);
                     Maybe(0.4, "bandage", 1, 3);
                     Maybe(0.3, "canned", 1, 2);
-                    if (Rng.NextDouble() < 0.15) bag.Items.Add(Items.NewSlot("weapon_pipe"));
+                    Maybe(0.2, "comp_oil", 1, 2);
+                    Maybe(0.12, "comp_lens", 1, 1);
+                    Maybe(0.12, "comp_circuit", 1, 1);
+                    if (Rng.NextDouble() < 0.12) bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier2Parts), 1));
+                    if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot(Rng.Next(2) == 0 ? "weapon_pipeshotgun" : "weapon_sawnoff"));
                     if (Rng.NextDouble() < 0.12) bag.Items.Add(Items.NewSlot("lock_code"));
                     break;
                 default:
-                    Maybe(0.5, "ammo_rifle", 20, 45);
-                    Maybe(0.5, "ammo_pistol", 10, 30);
+                    // РТ 2 (склад с калашами): детали тира 2, редко — тира 3 (режиссёр дозирует), армейские обвесы
+                    Maybe(0.4, "ammo_762", 15, 35);
+                    Maybe(0.5, "ammo_9mm", 10, 30);
+                    Maybe(0.25, "ammo_12g", 6, 14);
                     Maybe(0.85, "scrap", 20, 40);
                     Maybe(0.5, "bandage", 2, 4);
                     Maybe(0.55, "metal_fragments", 40, 90);
                     Maybe(0.45, "gunpowder", 25, 50);
-                    if (Rng.NextDouble() < 0.18) bag.Items.Add(Items.NewSlot("weapon_pipe"));
-                    if (Rng.NextDouble() < 0.12) bag.Items.Add(Items.NewSlot("weapon_ak"));
+                    Maybe(0.3, "comp_oil", 1, 2);
+                    Maybe(0.15, "comp_lens", 1, 1);
+                    Maybe(0.15, "comp_circuit", 1, 1);
+                    if (Rng.NextDouble() < 0.35) bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier2Parts), 1));
+                    if (Rng.NextDouble() < 0.08) bag.Items.Add(new ItemSlot(Pick(Weaponry.FactoryAtts), 1));
+                    if (Rng.NextDouble() < 0.03) bag.Items.Add(new ItemSlot(Pick(Weaponry.ArmyAtts), 1));
+                    if (Rng.NextDouble() < 0.05) bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_sawnoff", "weapon_mp133", "weapon_grach" })));
+                    TryTier3(bag, 0.12);
                     if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot("expl_satchel"));
                     break;
             }
@@ -454,13 +498,15 @@ namespace Rastvordd.Sim
             }
             else if (kit == "pipe")
             {
-                a.AddSlot(Items.NewSlot("weapon_pipe"));   // тир 1: сторож с самопалом, не калаш
-                a.Add("ammo_pistol", Rng.Next(10, 25));
+                // тир 1: сторож с самопалом (12 к) или наганом, не калаш
+                bool shotgun = Rng.NextDouble() < 0.4;
+                a.AddSlot(Items.NewSlot(shotgun ? "weapon_pipeshotgun" : "weapon_nagant", shotgun ? 1 : 7));
+                a.Add(shotgun ? "ammo_12g" : "ammo_9mm", Rng.Next(10, 25));
             }
             else
             {
-                a.AddSlot(Items.NewSlot("weapon_ak", 30));
-                a.Add("ammo_rifle", Rng.Next(30, 75));
+                a.AddSlot(Items.NewSlot("weapon_akm", 30));
+                a.Add("ammo_762", Rng.Next(30, 75));
             }
             a.Add("scrap", Rng.Next(5, 20));
             if (Rng.NextDouble() < 0.12) a.Add("keycard", 1);
@@ -484,14 +530,16 @@ namespace Rastvordd.Sim
                     Info(a, "Отладочный набор: взрывчатка");
                     return;
                 }
-            a.AddSlot(Items.NewSlot("weapon_ak", 30));
+            a.AddSlot(Items.NewSlot("weapon_akm", 30));
             a.AddSlot(Items.NewSlot("build_plan"));
             a.AddSlot(Items.NewSlot("tool_hammer"));
             a.AddSlot(Items.NewSlot("deploy_claim"));
             a.AddSlot(Items.NewSlot("weapon_torch"));
             a.Add("expl_c4", 6);
             a.Add("expl_satchel", 10);
-            a.Add("ammo_rifle", 120);
+            a.Add("ammo_762", 120);
+            a.Add("comp_oil", 3);
+            foreach (var at in new[] { "att_reddot", "att_mag_ext" }) a.Add(at, 1);
             a.Add("punchcard_1", 2);   // проверить Подстанцию, пока РТ тира 0 нет в игре
             a.Add("metal_ore", 60);
             a.Add("sulfur_ore", 30);
@@ -524,7 +572,7 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Обзор персонажа: прицеливание увеличивает дальность и сужает конус.</summary>
-        public float ViewRange(Actor a) => (50f + 30f * a.Peek) * (1f - 0.4f * NightFactorAt(TimeOfDay) * (a.Held?.Id == "weapon_torch" ? 0.35f : 1f));   // факел почти снимает ночной штраф
+        public float ViewRange(Actor a) => (50f + 30f * a.Peek) * (1f - 0.4f * NightFactorAt(TimeOfDay) * (a.Held?.Id == "weapon_torch" || a.Weapon?.Flashlight == true ? 0.35f : 1f));   // факел (и фонарь на стволе) почти снимает ночной штраф
 
         // ---------- время суток ----------
         public const float DayLength = 1200f;   // 20 минут на сутки
@@ -623,6 +671,8 @@ namespace Rastvordd.Sim
             StepPickupsAndNodes();
             StepFurnaces();
             StepRecyclers();
+            StepLathes();
+            if (Tick % 30 == 0) TrackArms();
             StepClaims();
             StepThrowns();
             StepFires();
@@ -782,6 +832,7 @@ namespace Rastvordd.Sim
             why = "";
             if (a.Known.Contains(n.Id)) { why = "уже изучено"; return false; }
             foreach (var r in n.Requires) if (!a.Known.Contains(r)) { why = $"сначала: {Items.Name(r)}"; return false; }
+            if (n.RequiresAny.Length > 0 && !System.Array.Exists(n.RequiresAny, a.Known.Contains)) { why = $"сначала: {string.Join(" или ", System.Array.ConvertAll(n.RequiresAny, Items.Name))}"; return false; }
             int lvl = BenchLevel(a.Pos);
             if (lvl == 0) { why = "подойди к верстаку"; return false; }
             if (lvl < n.Bench) { why = $"нужен верстак {n.Bench}"; return false; }
@@ -798,6 +849,31 @@ namespace Rastvordd.Sim
             if (!_milestoneKeys.Add(a.Id + "|" + what)) return;
             int m = (int)(Time / 60), s = (int)(Time % 60);
             Milestones.Add($"[{m:00}:{s:00}] {a.Name} — {what}");
+        }
+
+        readonly HashSet<(int id, int tier)> _armsSeen = new();
+        readonly HashSet<int> _armsWorld = new();
+
+        /// <summary>
+        /// Летопись темпа вайпа (D46): первый ствол каждого тира у каждого игрока/бота и впервые в мире —
+        /// неважно, скрафтил, нашёл или снял с трупа. Тир 4 — элита.
+        /// </summary>
+        void TrackArms()
+        {
+            foreach (var a in Actors)
+            {
+                if (a.Team != Team.Player || a.Spectator || a.Dead) continue;
+                for (int k = 0; k < Actor.BeltSize + Actor.PackSize; k++)
+                {
+                    var s = k < Actor.BeltSize ? a.Belt[k] : a.Pack[k - Actor.BeltSize];
+                    if (s?.State?.Def is not WeaponDef wd || wd.Melee || wd.Tier < 1) continue;
+                    if (!_armsSeen.Add((a.Id, wd.Tier))) continue;
+                    string tier = wd.Tier >= 4 ? "элита" : $"тир {wd.Tier}";
+                    int m = (int)(Time / 60), sec = (int)(Time % 60);
+                    Milestones.Add($"[{m:00}:{sec:00}] {a.Name} — первый ствол ({tier}): {Items.Name(wd.Id)}");
+                    if (_armsWorld.Add(wd.Tier)) Milestones.Add($"[{m:00}:{sec:00}] МИР — впервые ствол ({tier}): {Items.Name(wd.Id)} у {a.Name}");
+                }
+            }
         }
 
         void Research(Actor a, string id)
@@ -900,57 +976,99 @@ namespace Rastvordd.Sim
                 if (w.ReloadLeft <= 0)
                 {
                     w.ReloadLeft = 0;
-                    w.Ammo += a.Take(wd.AmmoId, wd.Magazine - w.Ammo);
+                    w.Ammo += a.Take(wd.AmmoId, w.MagSize - w.Ammo);
                 }
             }
-            else if (cmd.Reload && w.Ammo < wd.Magazine && a.Count(wd.AmmoId) > 0)
+            else if (cmd.Reload && w.Ammo < w.MagSize && a.Count(wd.AmmoId) > 0)
             {
-                w.ReloadLeft = wd.ReloadTime;
+                w.BurstLeft = 0;
+                w.ReloadLeft = w.Reload;
                 Events.Add(new SimEvent { Kind = SimEventKind.Reload, ActorId = a.Id, Pos = a.Pos, Text = wd.Id });
             }
 
-            trigger = wd.Auto ? cmd.Fire : cmd.Fire && !a.FireHeldLastTick;
+            bool edge = cmd.Fire && !a.FireHeldLastTick;
             a.FireHeldLastTick = cmd.Fire;
+            // отсечка (АН-94): начатая очередь доигрывается сама
+            if (w.BurstLeft > 0)
+            {
+                if (w.Cooldown > 0 || w.ReloadLeft > 0) return;
+                if (w.Ammo <= 0 || sprint || w.Broken) { w.BurstLeft = 0; w.Cooldown = wd.FireInterval; return; }
+                w.BurstLeft--;
+                FireShot(a, w, wd);
+                w.Cooldown = w.BurstLeft > 0 ? wd.BurstInterval : wd.FireInterval;
+                return;
+            }
+
+            trigger = wd.Auto ? cmd.Fire : edge;
             if (!trigger || sprint || w.ReloadLeft > 0 || w.Cooldown > 0) return;
+            if (w.Broken)
+            {
+                if (edge) Info(a, $"{Items.Name(wd.Id)} сломан: почини маслом у верстака (Alt+E со стволом в руках)");
+                return;
+            }
 
             if (w.Ammo <= 0)
             {
                 if (a.Count(wd.AmmoId) > 0)
                 {
-                    w.ReloadLeft = wd.ReloadTime;
+                    w.ReloadLeft = w.Reload;
                     Events.Add(new SimEvent { Kind = SimEventKind.Reload, ActorId = a.Id, Pos = a.Pos, Text = wd.Id });
                 }
                 return;
             }
 
+            FireShot(a, w, wd);
+            if (wd.Burst > 1) { w.BurstLeft = wd.Burst - 1; w.Cooldown = wd.BurstInterval; }
+            else w.Cooldown = wd.FireInterval;
+        }
+
+        /// <summary>Один выстрел: патрон, износ, разброс и отдача (с обвесами), дробь — несколько пуль конусом.</summary>
+        void FireShot(Actor a, WeaponState w, WeaponDef wd)
+        {
             w.Ammo--;
-            w.Cooldown = wd.FireInterval;
+            if (wd.MaxDurability > 0) w.Durability = MathF.Max(0, w.Durability - 1);
+            // обвесы с ресурсом (кустарный глушитель — 40 выстрелов) изнашиваются и отваливаются
+            for (int k = 0; k < w.Att.Length; k++)
+                if (Weaponry.Att(w.Att[k]) is AttachmentDef ad && ad.MaxShots > 0 && (w.AttDur[k] -= 1) <= 0)
+                {
+                    Info(a, $"{Items.Name(w.Att[k])} развалился");
+                    w.Att[k] = null;
+                }
             float spreadDeg = CurrentSpreadDeg(a);
             w.Bloom = MathF.Min(wd.MaxBloomDeg, w.Bloom + wd.BloomPerShotDeg);
             // разброс: сумма двух случайных — чаще ближе к центру
             float r = ((float)Rng.NextDouble() + (float)Rng.NextDouble() - 1f) * 0.5f;
-            float ang = a.Facing + (w.Recoil + r * spreadDeg) * MathF.PI / 180f;
-            // увод ствола следующим выстрелам: по узору ствола, с нарастанием; в приседе меньше, на ходу больше
+            float baseAng = a.Facing + (w.Recoil + r * spreadDeg) * MathF.PI / 180f;
+            // увод ствола следующим выстрелам: по узору ствола, с нарастанием; в приседе меньше, на ходу больше; обвесы гасят
             if (wd.RecoilDeg > 0)
             {
                 int sign = wd.RecoilPattern != null ? wd.RecoilPattern[w.Streak % wd.RecoilPattern.Length] : (Rng.Next(2) == 0 ? -1 : 1);
                 float step = (wd.RecoilDeg + wd.RecoilGrowDeg * w.Streak) * sign + ((float)Rng.NextDouble() - 0.5f) * 0.8f;
-                step *= (a.Crouching ? 0.7f : 1f) * (a.Vel.Length() > 0.5f ? 1.3f : 1f);
+                step *= (a.Crouching ? 0.7f : 1f) * (a.Vel.Length() > 0.5f ? 1.3f : 1f) * w.RecoilMul;
                 w.Recoil = Math.Clamp(w.Recoil + step, -wd.RecoilMaxDeg, wd.RecoilMaxDeg);
             }
             w.Streak++;
             w.SinceShot = 0;
-            var dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
-            var muzzle = a.Pos + dir * (a.Radius + 0.35f);
-            Projectiles.Add(new Projectile
+            var dir0 = new Vector2(MathF.Cos(baseAng), MathF.Sin(baseAng));
+            var muzzle = a.Pos + dir0 * (a.Radius + 0.35f);
+            bool arrow = wd.AmmoId is "arrow" or "ammo_bolt";
+            PelletsFired += Math.Max(1, wd.Pellets);
+            for (int p = 0; p < Math.Max(1, wd.Pellets); p++)
             {
-                Id = NextId(), OwnerId = a.Id, Pos = muzzle, Dir = dir,
-                Speed = wd.BulletSpeed, RangeLeft = wd.Range, Arrow = wd.AmmoId == "arrow",
-                Damage = wd.Damage * (a.Team == Team.Npc ? NpcDamageScale : 1f),
-            });
+                float ang = baseAng;
+                if (wd.Pellets > 1) ang += ((float)Rng.NextDouble() + (float)Rng.NextDouble() - 1f) * 0.5f * wd.PelletSpreadDeg * MathF.PI / 180f;
+                var dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
+                Projectiles.Add(new Projectile
+                {
+                    Id = NextId(), OwnerId = a.Id, Pos = muzzle, Dir = dir,
+                    Speed = wd.BulletSpeed * (wd.Pellets > 1 ? 0.92f + 0.16f * (float)Rng.NextDouble() : 1f),
+                    RangeLeft = wd.Range, Arrow = arrow,
+                    Damage = wd.Damage * (a.Team == Team.Npc ? NpcDamageScale : 1f),
+                });
+            }
             a.LastShotTime = Time;
-            Noises.Add(new Noise { Pos = a.Pos, Radius = wd.NoiseRadius, SourceId = a.Id, Time = Time });
-            Events.Add(new SimEvent { Kind = SimEventKind.Shot, ActorId = a.Id, Pos = muzzle, Dir = dir, Text = wd.Id });
+            Noises.Add(new Noise { Pos = a.Pos, Radius = w.Noise, SourceId = a.Id, Time = Time });
+            Events.Add(new SimEvent { Kind = SimEventKind.Shot, ActorId = a.Id, Pos = muzzle, Dir = dir0, Text = wd.Id, Value = w.NoFlash ? 1 : 0 });
         }
 
         /// <summary>Удар инструментом: сначала люди в дуге перед собой, потом ресурсы.</summary>
@@ -1085,11 +1203,15 @@ namespace Rastvordd.Sim
             Put("scrap", Rng.Next(2, 6) + (rich ? 2 : 0));
             if (Rng.NextDouble() < 0.35) Put("metal_fragments", Rng.Next(10, 26));
             if (Rng.NextDouble() < 0.25) Put("cloth", Rng.Next(4, 9));
-            if (Rng.NextDouble() < (rich ? 0.2 : 0.1)) Put("ammo_pistol", Rng.Next(4, 9));
+            if (Rng.NextDouble() < (rich ? 0.2 : 0.1)) Put("ammo_9mm", Rng.Next(4, 9));
+            if (Rng.NextDouble() < (rich ? 0.1 : 0.04)) Put("ammo_12g", Rng.Next(2, 6));
+            if (Rng.NextDouble() < 0.08) Put("comp_oil", 1);
+            if (Rng.NextDouble() < (rich ? 0.04 : 0.015)) Put(Rng.Next(2) == 0 ? "comp_lens" : "comp_circuit", 1);
+            if (rich && Rng.NextDouble() < 0.01) bag.Items.Add(Items.NewSlot("weapon_pipeshotgun"));
             if (Rng.NextDouble() < 0.08) Put("gunpowder", Rng.Next(5, 11));
             if (Rng.NextDouble() < 0.05) Put("bandage", 1);
             if (Rng.NextDouble() < 0.2) Put("comp_tape", 1);
-            if (Rng.NextDouble() < 0.12) Put(Rng.Next(3) switch { 0 => "comp_gears", 1 => "comp_spring", _ => "comp_pipe" }, 1);
+            if (Rng.NextDouble() < 0.2) Put(Rng.Next(10) switch { < 4 => "comp_spring", < 7 => "comp_pipe", _ => "comp_gears" }, 1);   // пружины и трубы — на Наган (D46)
             Bags.Add(bag);
             Events.Add(new SimEvent { Kind = SimEventKind.Destroyed, ActorId = byId, Pos = node.Pos, Text = "Бочка" });
             RemoveNode(node);
@@ -1101,8 +1223,9 @@ namespace Rastvordd.Sim
             float rad = def.Deploy switch { DeployKind.Claim or DeployKind.SleepBag => 0.3f, DeployKind.Box => 0.45f, _ => 0.6f };
             if (def.Deploy == DeployKind.Claim && !CanPlaceClaim(at, out string why)) { Info(a, $"Шкаф: {why}"); return; }
             var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = rad, Level = Items.BenchLevel(def.Id) };
-            if (def.Deploy is DeployKind.Workbench or DeployKind.Claim or DeployKind.Furnace) Milestone(a, $"поставил: {def.Name}");   // столб тонкий, спальник плоский, ящик компактный
-            if (def.Deploy == DeployKind.Box) dep.Storage = new LootBag { Id = NextId(), Pos = at };
+            if (def.Deploy is DeployKind.Workbench or DeployKind.Claim or DeployKind.Furnace or DeployKind.Lathe) Milestone(a, $"поставил: {def.Name}");   // столб тонкий, спальник плоский, ящик компактный
+            if (def.Deploy is DeployKind.Box or DeployKind.Lathe) dep.Storage = new LootBag { Id = NextId(), Pos = at };
+            if (def.Deploy == DeployKind.Lathe) { dep.On = false; dep.Radius = 0.7f; }
             dep.Auth.Add(a.Id);
             if (def.Deploy == DeployKind.Furnace && !a.IsBot) dep.On = false;   // игрок зажигает сам в окне печи
             AddDeployable(dep);
@@ -1122,13 +1245,16 @@ namespace Rastvordd.Sim
             var w = a.Weapon;
             if (w == null || w.Def.Melee) return 0;
             float moving = a.Vel.Length() / WalkSpeed;
-            float spread = w.Def.BaseSpreadDeg + w.Bloom + MathF.Min(1.5f, moving) * 5f;   // на ходу заметно хуже
-            return spread * (1f - 0.35f * a.Peek) * (a.Crouching ? 0.75f : 1f);   // в приседе точнее
+            // обвесы: ЛЦУ — от бедра, приклад — на ходу, прицел — в прицеливании (D46)
+            float hip = 1f + (w.HipSpreadMul - 1f) * (1f - a.Peek), ads = 1f + (w.AdsSpreadMul - 1f) * a.Peek;
+            float spread = (w.Def.BaseSpreadDeg + w.Bloom) * hip + MathF.Min(1.5f, moving) * 5f * w.MoveSpreadMul;   // на ходу заметно хуже
+            if (w.Def.MaxDurability > 0 && w.Durability < w.Def.MaxDurability * 0.2f) spread *= 1.25f;   // изношенный ствол бьёт хуже
+            return spread * (1f - 0.35f * a.Peek) * ads * (a.Crouching ? 0.75f : 1f);   // в приседе точнее
         }
 
         // ---------- взаимодействие (E) ----------
 
-        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box, Recycler, Panel, Stash }
+        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box, Recycler, Panel, Stash, Lathe }
 
         /// <summary>Что ближе всего под рукой. Используется и сервером, и подсказкой на экране.</summary>
         public (InteractKind kind, object target) NearestInteract(Actor a)
@@ -1151,7 +1277,7 @@ namespace Rastvordd.Sim
             {
                 if (dp.Kind == DeployKind.SleepBag || !ClearLine(a.Pos, dp.Pos, null, true)) continue;   // спальник — не для E
                 float d = Vector2.Distance(a.Pos, dp.Pos) - dp.Radius + 0.3f;
-                if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, DeployKind.Recycler => InteractKind.Recycler, _ => InteractKind.Workbench }, dp); }
+                if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, DeployKind.Recycler => InteractKind.Recycler, DeployKind.Lathe => InteractKind.Lathe, _ => InteractKind.Workbench }, dp); }
             }
             foreach (var st in AllStashes())
             {
@@ -1219,6 +1345,8 @@ namespace Rastvordd.Sim
                     break;
                 case InteractKind.Bag when !a.IsBot: OpenUi(a, UiKind.Bag, target); break;
                 case InteractKind.Recycler when !a.IsBot: OpenUi(a, UiKind.Recycler, target); break;
+                case InteractKind.Lathe when !a.IsBot: OpenUi(a, UiKind.Recycler, target); break;   // окно переработчика, данные станка (UiView.Machine = "lathe")
+                case InteractKind.Workbench when a.Crouching && a.Weapon is WeaponState rw && !rw.Def.Melee: Repair(a, rw); break;   // Alt+E у верстака со стволом — починка маслом
                 case InteractKind.Furnace when !a.IsBot: OpenUi(a, UiKind.Furnace, target); break;
                 case InteractKind.Claim when !a.IsBot: OpenUi(a, UiKind.Claim, target); break;
                 case InteractKind.Box when !a.IsBot: OpenUi(a, UiKind.Box, target); break;
@@ -1558,7 +1686,17 @@ namespace Rastvordd.Sim
         void NpcDrop(Actor a, LootBag bag)
         {
             void Put(string id, int n) { if (n > 0) bag.Items.Add(new ItemSlot(id, n)); }
-            if (Rng.NextDouble() < 0.6) Put("ammo_rifle", Math.Min(a.Count("ammo_rifle"), Rng.Next(5, 16)));
+            // ствол — редко и только не выше тира 2 (самопал/наган у охраны тира 1); калаши со склада не падают
+            foreach (var s in a.Belt)
+                if (s?.State is WeaponState ws && !ws.Def.Melee && ws.Def.Tier is >= 1 and <= 2 && Rng.NextDouble() < 0.1)
+                {
+                    ws.Durability = ws.Def.MaxDurability * (0.2f + 0.4f * (float)Rng.NextDouble());   // потрёпанный
+                    ws.ReloadLeft = 0;
+                    bag.Items.Add(s);
+                    break;
+                }
+            foreach (var ammo in new[] { "ammo_762", "ammo_9mm", "ammo_12g" })
+                if (a.Count(ammo) > 0 && Rng.NextDouble() < 0.6) Put(ammo, Math.Min(a.Count(ammo), Rng.Next(5, 16)));
             Put("scrap", a.Count("scrap"));
             Put("keycard", a.Count("keycard"));
             if (Rng.NextDouble() < 0.5) Put("bandage", a.Count("bandage"));

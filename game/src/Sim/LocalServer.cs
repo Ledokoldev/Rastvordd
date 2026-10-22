@@ -82,6 +82,8 @@ namespace Rastvordd.Sim
         public int Ammo, Magazine, Reserve;
         public float ReloadProgress;    // 0..1, 0 — не перезаряжается
         public float SpreadDeg;
+        public float Durability = -1;   // износ ствола в руках 0..1 (−1 — не изнашивается)
+        public float SightZoom;         // кратность прицела на стволе в руках (0 — нет; механика прицеливания — позже)
         public int Bandages;
         public int Fuses;
         public string InteractHint;     // пусто — рядом ничего нет
@@ -324,6 +326,7 @@ namespace Rastvordd.Sim
                 var crates = World.Bags.FindAll(b => b.IsCrate && b.Tier == tier);
                 log($"ящики уровня {tier}: {crates.Count} · пример: {(crates.Count > 0 ? string.Join(", ", crates[0].Items.ConvertAll(s => $"{Items.Name(s.Id)} ×{s.Count}")) : "-")}");
             }
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--weapontest") >= 0) World.WeaponSelfTest(log);   // самопроверка ветки оружия D46
             int shown = World.Milestones.Count;
             var thoughtsShown = new Dictionary<int, int>();
             bool basedump = System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--basedump") >= 0;
@@ -374,9 +377,9 @@ namespace Rastvordd.Sim
                     foreach (var b in _bots.Values)
                     {
                         if (b.Archetype == BotArchetype.Roamer || b.Me.Dead) continue;
-                        if (b.Me.Count("weapon_pipe") == 0 && !System.Array.Exists(b.Me.Belt, s => s?.Id == "weapon_pipe")) b.Me.AddSlot(Items.NewSlot("weapon_pipe", 10));
-                        b.Me.Add("ammo_pistol", 60); b.Me.Add("bandage", 3); b.Me.Add("punchcard_1", 1);
-                        log($"[{World.Time,6:0}s] отладка: {b.Me.Name} получил самопал, 60 патронов, 3 бинта, перфокарту I");
+                        if (b.Me.Count("weapon_nagant") == 0 && !System.Array.Exists(b.Me.Belt, s => s?.Id == "weapon_nagant")) b.Me.AddSlot(Items.NewSlot("weapon_nagant", 7));
+                        b.Me.Add("ammo_9mm", 60); b.Me.Add("bandage", 3); b.Me.Add("punchcard_1", 1);
+                        log($"[{World.Time,6:0}s] отладка: {b.Me.Name} получил наган, 60 патронов, 3 бинта, перфокарту I");
                     }
                 }
                 if (RaidKitAt >= 0 && World.Time >= RaidKitAt)
@@ -388,7 +391,7 @@ namespace Rastvordd.Sim
                     foreach (var b in _bots.Values)
                     {
                         if (skip-- > 0) continue;
-                        b.Me.Add("expl_satchel", 14); b.Me.Add("ammo_pistol", 60);
+                        b.Me.Add("expl_satchel", 14); b.Me.Add("ammo_9mm", 60);
                         log($"[{World.Time,6:0}s] отладка: {b.Me.Name} получил 14 бомб и 60 патронов");
                         break;
                     }
@@ -397,6 +400,8 @@ namespace Rastvordd.Sim
                 // здоровье мозга: доля времени в бегстве и в бою/охоте за 10 мин (> 30 % — тревога)
                 if (t > 0 && t % (int)(600 / World.Dt) == 0)
                     foreach (var b in _bots.Values) log($"[{World.Time,6:0}s] ЗДОРОВЬЕ {b.Me.Name}: {b.HealthReport()}");
+                if (t > 0 && t % (int)(1800 / World.Dt) == 0)
+                    foreach (var b in _bots.Values) log($"[{World.Time,6:0}s] АРСЕНАЛ {b.Me.Name}: {b.ArmsReport()}");
                 foreach (var e in World.Events)
                     if (e.Kind == SimEventKind.Death)
                         log($"[{World.Time,6:0}s] смерть: {World.Find(e.ActorId)?.Name} ← {World.Find(e.OtherId)?.Name ?? "?"}");
@@ -472,7 +477,7 @@ namespace Rastvordd.Sim
         readonly System.Random _duelRng = new(7);
         readonly List<ResourceNode> _duelNodes = new();
 
-        static string DuelGun(string k) => k switch { "ak" => "weapon_ak", "pipe" => "weapon_pipe", "bow" => "weapon_bow", "spear" => "weapon_spear", _ => k };
+        static string DuelGun(string k) => k switch { "ak" => "weapon_akm", "pipe" => "weapon_nagant", "bow" => "weapon_bow", "spear" => "weapon_spear", _ => k.StartsWith("weapon_") ? k : "weapon_" + k };
 
         void DuelStep(System.Action<string> log)
         {
@@ -543,7 +548,7 @@ namespace Rastvordd.Sim
             x.Belt[0] = Items.NewSlot(gun, wd.Melee ? 0 : wd.Magazine);
             x.Current = 0;
             if (old != null) x.AddSlot(old);
-            if (!wd.Melee) x.Add(wd.AmmoId, gun == "weapon_bow" ? 25 : gun == "weapon_pipe" ? 40 : 90);
+            if (!wd.Melee) x.Add(wd.AmmoId, gun == "weapon_bow" ? 25 : wd.Magazine <= 10 ? 40 : 90);
             if (x.Count("bandage") < 3) x.Add("bandage", 3 - x.Count("bandage"));
             x.Hp = x.MaxHp; x.Food = 100; x.Water = 100;
             x.Pos = at; x.Vel = Vector2.Zero;
@@ -747,9 +752,11 @@ namespace Rastvordd.Sim
                 Id = me.Id, Dead = me.Dead, Hp = me.Hp, MaxHp = me.MaxHp, Food = me.Food, Water = me.Water,
                 WeaponName = held != null ? Items.Name(held.Id) : "пустые руки",
                 HoldingGun = gun,
-                Ammo = gun ? w.Ammo : 0, Magazine = gun ? w.Def.Magazine : 0,
+                Ammo = gun ? w.Ammo : 0, Magazine = gun ? w.MagSize : 0,
+                Durability = gun && w.Def.MaxDurability > 0 ? w.Durability / w.Def.MaxDurability : -1,
+                SightZoom = gun ? w.SightZoom : 0,
                 Reserve = gun ? me.Count(w.Def.AmmoId) : 0,
-                ReloadProgress = gun && w.ReloadLeft > 0 ? 1f - w.ReloadLeft / w.Def.ReloadTime : 0,
+                ReloadProgress = gun && w.ReloadLeft > 0 ? 1f - w.ReloadLeft / w.Reload : 0,
                 SpreadDeg = World.CurrentSpreadDeg(me),
                 Bandages = me.Count("bandage"),
                 Fuses = me.Fuses,
@@ -774,7 +781,7 @@ namespace Rastvordd.Sim
                 s.Belt[i] = new BeltSlotInfo
                 {
                     Id = slot.Id, Name = Items.Name(slot.Id), Count = slot.Count,
-                    IsGun = isGun, Ammo = isGun ? st.Ammo : 0, Magazine = isGun ? st.Def.Magazine : 0,
+                    IsGun = isGun, Ammo = isGun ? st.Ammo : 0, Magazine = isGun ? st.MagSize : 0,
                     IsDeployable = slot.Def?.Deploy != DeployKind.None,
                 };
             }
@@ -807,7 +814,7 @@ namespace Rastvordd.Sim
             }
 
             s.Armor = World.ArmorReduction(me);
-            if (!me.Dead) s.InteractHint = Hint(World.NearestInteract(me));
+            if (!me.Dead) s.InteractHint = Hint(World.NearestInteract(me), me);
             if (!me.Dead && held?.Def?.Build == true)
             {
                 s.HoldingPlan = true;
@@ -834,7 +841,7 @@ namespace Rastvordd.Sim
             return s;
         }
 
-        string Hint((World.InteractKind kind, object target) it) => it.kind switch
+        string Hint((World.InteractKind kind, object target) it, Actor me = null) => it.kind switch
         {
             World.InteractKind.Stash => "[E] " + ((Stash)it.target).Verb,
             World.InteractKind.Bag when World.Director?.Events.Find(e => e.Crate == it.target) is { } ev && !ev.Open => ev.Kind == "airdrop" ? $"Сброс груза — откроется через {System.MathF.Ceiling(ev.StartsAt - World.Time)} с" : ev.StartsAt > 0 ? $"Закрытый ящик — взлом, {System.MathF.Ceiling(ev.StartsAt - World.Time)} с" : "Закрытый ящик — запусти взлом рядом [E]",
@@ -842,6 +849,7 @@ namespace Rastvordd.Sim
             World.InteractKind.Bag when ((LootBag)it.target).Punch && !((LootBag)it.target).Unlocked => "[E] Крейт — перфокарта I",
             World.InteractKind.Bag => ((LootBag)it.target) is var lb && lb.Safe && !lb.Unlocked ? "[E] Сейф — нужна карта доступа" : lb.Safe ? "[E] Открыть сейф" : lb.IsCrate ? "[E] Открыть ящик" : lb.Corpse ? "[E] Обыскать рюкзак" : "[E] Подобрать вещи",
             World.InteractKind.Recycler => "[E] Переработчик — детали в лом",
+            World.InteractKind.Lathe => ((Deployable)it.target).On ? "[E] Токарный станок — работает" : "[E] Токарный станок — детали из деталей",
             World.InteractKind.Pickup => ((Pickup)it.target).Kind switch
             {
                 PickupKind.Hemp => "[E] Собрать коноплю",
@@ -852,7 +860,7 @@ namespace Rastvordd.Sim
                 _ => "[E] Попить",
             },
             World.InteractKind.Furnace => FurnaceHint((Deployable)it.target),
-            World.InteractKind.Workbench => "[E] Верстак — изучение и крафт",
+            World.InteractKind.Workbench => "[E] Верстак — изучение и крафт" + (me?.Weapon is WeaponState hw && hw.Def.MaxDurability > 0 && hw.Durability < hw.Def.MaxDurability ? $" · Alt+E — починить ({hw.Durability / hw.Def.MaxDurability * 100:0}%)" : ""),
             World.InteractKind.Box => ((Deployable)it.target).Storage.Empty ? "[E] Ящик (пуст)" : $"[E] Ящик ({((Deployable)it.target).Storage.Items.Count} шт.)",
             World.InteractKind.Claim => ClaimHint(World, (Deployable)it.target),
             World.InteractKind.Door => (((Structure)it.target).Open ? "[E] Закрыть дверь" : "[E] Открыть дверь") + (((Structure)it.target).Locked ? " · замок" : ""),

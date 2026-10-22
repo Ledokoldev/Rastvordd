@@ -12,7 +12,7 @@ namespace Rastvordd.Sim
     /// «fur» (печь: 0 руда, 1 серная руда, 2 топливо, 3–5 готовое), «claim» (шкаф: дерево, камень, металл, лом).
     /// Move — перетаскивание A→B, Quick — «на другую сторону» (Shift+клик, ховер-лут).
     /// </summary>
-    public enum UiOp { None, Close, Move, Quick, TakeAll, PutAll, Toggle, TakeOut, Drop }
+    public enum UiOp { None, Close, Move, Quick, TakeAll, PutAll, Toggle, TakeOut, Drop, Detach, Repair }   // Detach — снять обвесы со ствола в ячейке, Repair — починить ствол маслом у верстака
 
     /// <summary>Ячейка для отрисовки.</summary>
     public struct CellView
@@ -22,6 +22,9 @@ namespace Rastvordd.Sim
         public bool Hidden;          // ещё не обыскана
         public int Ammo, Magazine;   // у оружия
         public string Label;         // подпись под ячейкой (печь, шкаф)
+        public float Durability;     // у оружия: 0..1 (−1 — не изнашивается)
+        public string[] Att;         // у оружия: id обвесов по слотам (прицел, дуло, цевьё, магазин, приклад), null — пусто
+        public float SightZoom;      // кратность прицела на стволе (0 — нет)
     }
 
     /// <summary>Что показать в окне справа (контейнер); рюкзак и пояс приходят в SelfInfo всегда.</summary>
@@ -39,6 +42,10 @@ namespace Rastvordd.Sim
         public float Hours = -1, Grace;                              // шкаф: запас содержания, часов; отсрочка гниения, с
         public List<(string label, float value, float max)> Gauges = new();   // шкаф: нагрузка, фундаменты, двери
         public List<(string id, float perHour)> Upkeep = new();               // шкаф: расход в час
+        // токарный станок (окно переработчика, Kind = Recycler, Machine = "lathe")
+        public string Machine;                                                // "recycler" / "lathe"
+        public string Making;                                                 // что сейчас точится (id), null — ничего
+        public List<(string output, string inputs, bool can)> Makes = new();  // рецепты станка: выход, вход, доступно ли здесь
     }
 
     public sealed partial class World
@@ -72,6 +79,131 @@ namespace Rastvordd.Sim
                 Events.Add(new SimEvent { Kind = SimEventKind.HitNode, Pos = d.Pos, OtherId = -1 });   // лязг — слышно
             }
         }
+        // ---------- токарный станок (D46): как печь — кладёшь детали ниже, получаешь выше; шумит ----------
+
+        /// <summary>Что станок будет точить из того, что в нём лежит: самый сложный выполнимый рецепт (тир 3 — только у верстака 3).</summary>
+        Weaponry.LatheRecipe LatheJob(Deployable d)
+        {
+            bool b3 = BenchLevel(d.Pos) >= 3;
+            var items = d.Storage.Items;
+            for (int i = Weaponry.Lathe.Count - 1; i >= 0; i--)
+            {
+                var r = Weaponry.Lathe[i];
+                if (r.Bench3 && !b3) continue;
+                bool ok = true;
+                foreach (var (id, n) in r.In)
+                {
+                    int have = 0;
+                    foreach (var s in items) if (s.Id == id && s.State == null) have += s.Count;
+                    if (have < n) { ok = false; break; }
+                }
+                if (ok) return r;
+            }
+            return null;
+        }
+
+        void StepLathes()
+        {
+            foreach (var d in Deployables)
+            {
+                if (d.Kind != DeployKind.Lathe || !d.On) continue;
+                var r = LatheJob(d);
+                if (r == null) { d.On = false; d.SmeltTimer = 0; continue; }
+                float before = d.SmeltTimer;
+                d.SmeltTimer += Dt;
+                if ((int)(before / 2f) != (int)(d.SmeltTimer / 2f))
+                {
+                    Noises.Add(new Noise { Pos = d.Pos, Radius = 45f, SourceId = d.OwnerId, Time = Time });   // визг резца — слышно издалека
+                    Events.Add(new SimEvent { Kind = SimEventKind.HitNode, Pos = d.Pos, OtherId = -2 });   // −2 — звук станка (клиент: lathe_work)
+                }
+                if (d.SmeltTimer < r.Time) continue;
+                d.SmeltTimer = 0;
+                var items = d.Storage.Items;
+                if (items.Count >= RecyclerSlots && !items.Exists(s => s.Id == r.Output && s.Count < Items.MaxStack(r.Output)))
+                {
+                    // некуда класть: сначала проверим, освободится ли ячейка после списания
+                    int freed = 0;
+                    foreach (var (id, n) in r.In) { int have = 0; foreach (var s in items) if (s.Id == id) have += s.Count; if (have == n) freed++; }
+                    if (freed == 0) { d.On = false; continue; }
+                }
+                foreach (var (id, n) in r.In)
+                {
+                    int left = n;
+                    for (int i = items.Count - 1; i >= 0 && left > 0; i--)
+                    {
+                        var s = items[i];
+                        if (s.Id != id || s.State != null) continue;
+                        int t = Math.Min(left, s.Count);
+                        s.Count -= t; left -= t;
+                        if (s.Count <= 0) items.RemoveAt(i);
+                    }
+                }
+                var same = items.Find(s => s.Id == r.Output && s.Count < Items.MaxStack(r.Output));
+                if (same != null) same.Count++; else items.Add(new ItemSlot(r.Output, 1));
+                Events.Add(new SimEvent { Kind = SimEventKind.Machine, ActorId = d.OwnerId, Pos = d.Pos, Text = $"станок: {Items.Name(r.Output)}" });
+            }
+        }
+
+        // ---------- обвесы и ремонт (D46) ----------
+
+        /// <summary>Поставить обвес на ствол. Старый обвес из того же слота — в рюкзак (кустарный изношенный — в мусор).</summary>
+        public bool Attach(Actor a, WeaponState w, string attId, out string msg)
+        {
+            var ad = Weaponry.Att(attId);
+            msg = null;
+            if (ad == null || w == null || w.Def.Melee) { msg = "Обвес ставится только на ствол"; return false; }
+            if (!w.Def.Accepts(ad.Slot)) { msg = $"{Items.Name(w.Def.Id)}: нет места под «{Weaponry.SlotNames[(int)ad.Slot]}»"; return false; }
+            int k = (int)ad.Slot;
+            TakeOff(a, w, k);
+            w.Att[k] = attId;
+            w.AttDur[k] = ad.MaxShots;
+            msg = $"{Items.Name(attId)} → {Items.Name(w.Def.Id)}";
+            return true;
+        }
+
+        /// <summary>Снять обвес из слота k в рюкзак; патроны сверх нового магазина — тоже в рюкзак.</summary>
+        void TakeOff(Actor a, WeaponState w, int k)
+        {
+            var old = w.Att[k];
+            if (old == null) return;
+            var ad = Weaponry.Att(old);
+            w.Att[k] = null;
+            if (ad != null && ad.MaxShots > 0 && w.AttDur[k] < ad.MaxShots) Info(a, $"{Items.Name(old)} помят — выброшен");
+            else a.Add(old, 1);
+            if (w.Ammo > w.MagSize) { a.Add(w.Def.AmmoId, w.Ammo - w.MagSize); w.Ammo = w.MagSize; }
+        }
+
+        /// <summary>Снять все обвесы со ствола в ячейке своего рюкзака/пояса.</summary>
+        void DoDetach(Actor a, string arg)
+        {
+            var (inv, i) = ParseCell(arg);
+            if (inv is not ("pack" or "belt") || GetCell(a, inv, i)?.State is not WeaponState w) return;
+            if (w.AttCount == 0) { Info(a, "Обвесов нет"); return; }
+            for (int k = 0; k < w.Att.Length; k++) TakeOff(a, w, k);
+            Info(a, $"Обвесы сняты: {Items.Name(w.Def.Id)}");
+        }
+
+        /// <summary>
+        /// Ремонт (D46, минимально): у любого верстака, 1 оружейное масло — +50% износа и свежие обвесы с ресурсом;
+        /// сломанный (0%) — ещё и пружина. Игрок: Alt+E у верстака со стволом в руках или UiOp.Repair по ячейке.
+        /// </summary>
+        public bool Repair(Actor a, WeaponState w)
+        {
+            if (w == null || w.Def.Melee || w.Def.MaxDurability <= 0) { Info(a, "Чинить нечего: возьми ствол в руки"); return false; }
+            if (BenchLevel(a.Pos) < 1) { Info(a, "Чинить — у верстака"); return false; }
+            bool worn = w.Durability < w.Def.MaxDurability - 0.5f;
+            for (int k = 0; k < w.Att.Length; k++) if (Weaponry.Att(w.Att[k]) is AttachmentDef ad && ad.MaxShots > 0 && w.AttDur[k] < ad.MaxShots) worn = true;
+            if (!worn) { Info(a, $"{Items.Name(w.Def.Id)} в порядке"); return false; }
+            if (a.Count("comp_oil") < 1) { Info(a, "Нужно оружейное масло (бочки, ящики, токарный станок)"); return false; }
+            if (w.Broken && a.Count("comp_spring") < 1) { Info(a, "Ствол сломан: нужно масло и пружина"); return false; }
+            a.Take("comp_oil", 1);
+            if (w.Broken) a.Take("comp_spring", 1);
+            w.Durability = MathF.Min(w.Def.MaxDurability, w.Durability + w.Def.MaxDurability * 0.5f);
+            for (int k = 0; k < w.Att.Length; k++) if (Weaponry.Att(w.Att[k]) is AttachmentDef ad) w.AttDur[k] = ad.MaxShots;
+            Info(a, $"{Items.Name(w.Def.Id)} починен: {w.Durability / w.Def.MaxDurability * 100:0}%");
+            return true;
+        }
+
         static readonly string[] FurnaceIds = { "metal_ore", "sulfur_ore", "wood", "metal_fragments", "sulfur", "charcoal" };
         static readonly string[] ClaimIds = { "wood", "stone", "metal_fragments", "scrap" };
 
@@ -209,6 +341,17 @@ namespace Rastvordd.Sim
         {
             if (src == dst && si == di) return;
             var s = GetCell(a, src, si);
+            // обвес на ствол в своём рюкзаке/поясе — встаёт на ствол (D46)
+            if (s?.Def?.Attachment != null && dst is "pack" or "belt" && GetCell(a, dst, di)?.State is WeaponState tw && !tw.Def.Melee)
+            {
+                if (Attach(a, tw, s.Id, out string msg))
+                {
+                    s.Count--;
+                    SetCell(a, src, si, s.Count > 0 ? s : null);
+                }
+                Info(a, msg);
+                return;
+            }
             if (s == null || di < 0 || di >= CellCount(a, dst) || !Accepts(a, dst, di, s)) return;
             if (dst == "cont" && di >= Revealed(a) && di < (UiItems(a)?.Count ?? 0)) return;   // в необысканную — нельзя
             var d = GetCell(a, dst, di);
@@ -276,6 +419,8 @@ namespace Rastvordd.Sim
                 if (op == UiOp.Move) DoMove(a, cmd.UiItem);
                 else if (op == UiOp.Quick) DoQuick(a, cmd.UiItem);
                 else if (op == UiOp.Drop) DoDrop(a, cmd.UiItem);
+                else if (op == UiOp.Detach) DoDetach(a, cmd.UiItem);
+                else if (op == UiOp.Repair && ParseCell(cmd.UiItem) is var (ri, rj) && ri is "pack" or "belt") Repair(a, GetCell(a, ri, rj)?.State);
                 return;
             }
             var pos = UiTargetPos(a);
@@ -306,6 +451,8 @@ namespace Rastvordd.Sim
                 case UiOp.Move: DoMove(a, cmd.UiItem); break;
                 case UiOp.Quick: DoQuick(a, cmd.UiItem); break;
                 case UiOp.Drop: DoDrop(a, cmd.UiItem); break;
+                case UiOp.Detach: DoDetach(a, cmd.UiItem); break;
+                case UiOp.Repair when ParseCell(cmd.UiItem) is var (ri, rj) && ri is "pack" or "belt": Repair(a, GetCell(a, ri, rj)?.State); break;
                 case UiOp.TakeAll:
                     string inv = a.OpenUi switch { UiKind.Furnace => "fur", UiKind.Claim => "claim", _ => "cont" };
                     for (int i = CellCount(a, inv) - 1; i >= 0; i--) if (inv != "fur" || i >= 3) QuickCell(a, inv, i);
@@ -316,6 +463,10 @@ namespace Rastvordd.Sim
                     break;
                 case UiOp.TakeOut:
                     for (int i = 3; i < 6; i++) QuickCell(a, "fur", i);
+                    break;
+                case UiOp.Toggle when a.OpenTarget is Deployable lt && lt.Kind == DeployKind.Lathe:
+                    lt.On = !lt.On;
+                    if (lt.On && LatheJob(lt) == null) { lt.On = false; Info(a, "Станку не из чего точить: положи металл, ткань, уголь или детали по рецепту"); }
                     break;
                 case UiOp.Toggle when a.OpenTarget is Deployable rc && rc.Kind == DeployKind.Recycler:
                     rc.On = !rc.On;
@@ -391,7 +542,10 @@ namespace Rastvordd.Sim
         public static CellView Cell(ItemSlot s, string label = null) => s == null ? new CellView { Label = label } : new CellView
         {
             Id = s.Id, Name = Items.Name(s.Id), Count = s.Count, Rarity = Items.Rarity(s.Id), Label = label,
-            Ammo = s.State?.Ammo ?? 0, Magazine = s.State != null && !s.State.Def.Melee ? s.State.Def.Magazine : 0,
+            Ammo = s.State?.Ammo ?? 0, Magazine = s.State != null && !s.State.Def.Melee ? s.State.MagSize : 0,
+            Durability = s.State != null && s.State.Def.MaxDurability > 0 ? s.State.Durability / s.State.Def.MaxDurability : -1,
+            Att = s.State != null && s.State.AttCount > 0 ? (string[])s.State.Att.Clone() : null,
+            SightZoom = s.State?.SightZoom ?? 0,
         };
 
         public UiView BuildUi(Actor a)
@@ -423,8 +577,30 @@ namespace Rastvordd.Sim
                     v.OreSeconds = (f.Ore + f.SulfurOre) * 0.4f;
                     v.Info = f.Burning ? "Горит: руда плавится, дерево горит, копится уголь" : f.On ? "Зажжена, но не хватает руды или дерева" : "Потушена: положи руду и дерево, нажми «Зажечь»";
                     break;
+                case UiKind.Recycler when a.OpenTarget is Deployable lt && lt.Kind == DeployKind.Lathe:
+                {
+                    v.Title = "ТОКАРНЫЙ СТАНОК";
+                    v.Machine = "lathe";
+                    for (int i = 0; i < RecyclerSlots; i++) v.Cells.Add(i < lt.Storage.Items.Count ? Cell(lt.Storage.Items[i]) : new CellView());
+                    var job = lt.On ? LatheJob(lt) : null;
+                    v.On = lt.On; v.Burning = job != null;
+                    v.Making = job?.Output;
+                    if (job != null) v.Progress = Math.Clamp(lt.SmeltTimer / job.Time, 0, 1);
+                    bool b3 = BenchLevel(lt.Pos) >= 3;
+                    foreach (var r in Weaponry.Lathe)
+                    {
+                        var inp = new List<string>();
+                        foreach (var (id, n) in r.In) inp.Add($"{Items.Name(id)} {n}");
+                        v.Makes.Add((r.Output, string.Join(" + ", inp), !r.Bench3 || b3));
+                    }
+                    v.Info = job != null ? $"Точит: {Items.Name(job.Output)} ({lt.SmeltTimer:0}/{job.Time:0} с). Шумно — слышно издалека"
+                                         : "Положи материалы и нажми «Запустить»: труба ← металл 40, изолента ← ткань 15, шестерни ← металл 60 + лом 10, масло ← уголь 20, " +
+                                           "УСМ, затворная группа, нарезной ствол — из пружин, шестерней и труб" + (b3 ? "; рядом верстак 3 — можно хром. ствол и газоотвод" : "; детали тира 3 — только рядом с верстаком 3");
+                    break;
+                }
                 case UiKind.Recycler when a.OpenTarget is Deployable rc:
                     v.Title = "ПЕРЕРАБОТЧИК";
+                    v.Machine = "recycler";
                     for (int i = 0; i < RecyclerSlots; i++) v.Cells.Add(i < rc.Storage.Items.Count ? Cell(rc.Storage.Items[i]) : new CellView());
                     v.On = rc.On; v.Burning = rc.On;
                     v.Info = rc.On ? "Работает: детали и вещи превращаются в лом и металл (шумно — слышно издалека)"

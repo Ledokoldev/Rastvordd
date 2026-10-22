@@ -49,13 +49,16 @@ namespace Rastvordd.Sim
         internal LootBag NewPunchCrate(Vector2 p)
         {
             var bag = new LootBag { Id = NextId(), Pos = p, IsCrate = true, Tier = 1, Punch = true };
-            FillPunchCrate(bag);
+            FillPunchCrate(bag, true);
             Bags.Add(bag);
             return bag;
         }
 
-        /// <summary>Главная награда тира 1: перфокарта II, лом, детали, патроны; изредка самопал.</summary>
-        void FillPunchCrate(LootBag bag)
+        /// <summary>
+        /// Главная награда тира 1 (D46): перфокарта II, лом, корпуса и детали тира 2 (УСМ, затворная группа, нарезной ствол),
+        /// линза, плата (АТС и Подстанция — электроника — чаще), патроны; с малым шансом Обрез или МР-133.
+        /// </summary>
+        void FillPunchCrate(LootBag bag, bool electronics = false)
         {
             bag.Items.Clear();
             bag.Search.Clear();
@@ -63,10 +66,18 @@ namespace Rastvordd.Sim
             bag.Items.Add(new ItemSlot("punchcard_2", 1));
             bag.Items.Add(new ItemSlot("scrap", Rng.Next(30, 61)));
             bag.Items.Add(new ItemSlot(Rng.Next(2) == 0 ? "comp_gears" : "comp_spring", Rng.Next(1, 3)));
-            if (Rng.NextDouble() < 0.6) bag.Items.Add(new ItemSlot("comp_pipe", 1));
-            if (Rng.NextDouble() < 0.6) bag.Items.Add(new ItemSlot("ammo_pistol", Rng.Next(10, 25)));
+            bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier2Parts), 1));
+            if (Rng.NextDouble() < 0.45) bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier2Parts), 1));
+            if (Rng.NextDouble() < (electronics ? 0.75 : 0.25)) bag.Items.Add(new ItemSlot("comp_circuit", 1));
+            if (Rng.NextDouble() < (electronics ? 0.35 : 0.3)) bag.Items.Add(new ItemSlot("comp_lens", 1));
+            if (Rng.NextDouble() < 0.5) bag.Items.Add(new ItemSlot("comp_pipe", 1));
+            if (Rng.NextDouble() < 0.5) bag.Items.Add(new ItemSlot("comp_spring", Rng.Next(1, 3)));
+            if (Rng.NextDouble() < 0.6) bag.Items.Add(new ItemSlot("ammo_9mm", Rng.Next(10, 25)));
+            if (Rng.NextDouble() < 0.3) bag.Items.Add(new ItemSlot("ammo_12g", Rng.Next(5, 12)));
+            if (Rng.NextDouble() < 0.3) bag.Items.Add(new ItemSlot("comp_oil", 1));
             if (Rng.NextDouble() < 0.5) bag.Items.Add(new ItemSlot("bandage", Rng.Next(1, 3)));
-            if (Rng.NextDouble() < 0.15) bag.Items.Add(Items.NewSlot("weapon_pipe"));
+            if (Rng.NextDouble() < 0.1) bag.Items.Add(new ItemSlot(Pick(Weaponry.FactoryAtts), 1));
+            if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot(Rng.Next(4) == 0 ? "weapon_mp133" : "weapon_sawnoff"));
         }
 
         void PlaceSubstation()
@@ -344,7 +355,7 @@ namespace Rastvordd.Sim
             s.Panel.Sprite = "props/subst_main_panel";
             if (!Walls.Contains(s.Shutter)) { Walls.Add(s.Shutter); _wallGrid.Insert(s.Shutter, s.Shutter.Wall.Min, s.Shutter.Wall.Max); }
             if (!Bags.Contains(s.Crate)) Bags.Add(s.Crate);
-            FillPunchCrate(s.Crate);
+            FillPunchCrate(s.Crate, true);
             foreach (var p in s.FuseSpots) p.RespawnLeft = 1e9f;
             ScatterFuses(s, 2);
             PrefabVersion++;

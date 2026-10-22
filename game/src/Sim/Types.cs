@@ -53,6 +53,17 @@ namespace Rastvordd.Sim
         public bool Auto;
         public float NoiseRadius;
 
+        // ветка оружия (D46, Weaponry.cs)
+        public int Tier;                   // 0 лук/арбалет, 1–3, 4 — элита
+        public FireMode Mode;
+        public int Pellets = 1;            // дробь: дробин за выстрел (урон Damage — за дробину)
+        public float PelletSpreadDeg;      // конус дроби
+        public int Burst;                  // отсечка: выстрелов в очереди (АН-94 — 2)
+        public float BurstInterval;        // интервал внутри очереди; FireInterval — между очередями
+        public float MaxDurability;        // выстрелов до поломки (0 — не ломается)
+        public int Slots;                  // какие обвесы ставятся: биты AttSlot
+        public bool Accepts(AttSlot s) => (Slots & (1 << (int)s)) != 0;
+
         // отдача: ствол уводит в сторону по узору (знаки по очереди выстрелов), с нарастанием; мышкой компенсируется
         public float RecoilDeg;            // увод за первый выстрел очереди
         public float RecoilGrowDeg;        // прибавка за каждый следующий
@@ -90,11 +101,35 @@ namespace Rastvordd.Sim
         public int Streak;          // выстрелов в текущей очереди
         public float SinceShot = 10;
         public float ReloadLeft;   // > 0 — идёт перезарядка
-        public WeaponState(WeaponDef def, int ammo) { Def = def; Ammo = ammo; }
+        public int BurstLeft;      // отсечка: сколько ещё выстрелов в текущей очереди
+        public float Durability;   // выстрелов до поломки (Def.MaxDurability — новый)
+        public readonly string[] Att = new string[5];     // обвесы по слотам AttSlot
+        public readonly float[] AttDur = new float[5];    // износ обвеса (кустарный глушитель — 40 выстрелов)
+        public WeaponState(WeaponDef def, int ammo) { Def = def; Ammo = ammo; Durability = def.MaxDurability; }
+
+        float Mul(System.Func<AttachmentDef, float> f)
+        {
+            float m = 1f;
+            foreach (var id in Att) if (Weaponry.Att(id) is AttachmentDef a) m *= f(a);
+            return m;
+        }
+        public bool Broken => Def.MaxDurability > 0 && Durability <= 0;
+        public int MagSize => System.Math.Max(1, (int)System.MathF.Round(Def.Magazine * Mul(a => a.MagMul)));
+        public float Reload => Def.ReloadTime * Mul(a => a.ReloadMul);
+        public float Noise => Def.NoiseRadius * Mul(a => a.NoiseMul);
+        public float RecoilMul => Mul(a => a.RecoilMul);
+        public float HipSpreadMul => Mul(a => a.HipSpreadMul);
+        public float MoveSpreadMul => Mul(a => a.MoveSpreadMul);
+        public float AdsSpreadMul => Mul(a => a.AdsSpreadMul);
+        /// <summary>Кратность прицела: 0 — без прицела, 1 коллиматор, 1.5 — 2×, 2.2 — 4× (механику прицеливания сделает пользователь).</summary>
+        public float SightZoom => Weaponry.Att(Att[(int)AttSlot.Sight])?.SightZoom ?? 0f;
+        public bool Flashlight { get { foreach (var id in Att) if (Weaponry.Att(id)?.Flashlight == true) return true; return false; } }
+        public bool NoFlash => Weaponry.Att(Att[(int)AttSlot.Muzzle])?.NoFlash == true;
+        public int AttCount { get { int n = 0; foreach (var id in Att) if (id != null) n++; return n; } }
     }
 
     public enum ItemCategory { Resource, Component, Tool, Weapon, Ammo, Food, Medical, Deployable }
-    public enum DeployKind { None, Workbench, Furnace, Claim, Box, SleepBag, Recycler }   // Recycler — переработчик на РТ (ничей, не ломается)
+    public enum DeployKind { None, Workbench, Furnace, Claim, Box, SleepBag, Recycler, Lathe }   // Recycler — переработчик на РТ (ничей, не ломается); Lathe — токарный станок (D46)
 
     public sealed class ItemDef
     {
@@ -108,6 +143,7 @@ namespace Rastvordd.Sim
         public ExplosiveDef Explosive;  // бросается ЛКМ
         public bool Lock;               // кодовый замок: ЛКМ по двери — поставить
         public int Stack = 1;           // сколько штук в одном слоте пояса
+        public AttachmentDef Attachment;  // обвес на ствол (att_*)
 
         /// <summary>Предметы, которые держат в руках, живут на поясе (по одному в слоте).</summary>
         public bool Holdable => Weapon != null || Deploy != DeployKind.None || Build || Explosive != null || Lock;
@@ -123,7 +159,7 @@ namespace Rastvordd.Sim
         public ItemDef Def => Items.Get(Id);
     }
 
-    public static class Items
+    public static partial class Items
     {
         static readonly Dictionary<string, ItemDef> Defs = new();
 
@@ -146,10 +182,6 @@ namespace Rastvordd.Sim
             Add("charcoal", "Уголь", ItemCategory.Resource);
             Add("cloth", "Ткань", ItemCategory.Resource);
             Add("gunpowder", "Порох", ItemCategory.Component);
-            Add("comp_gears", "Шестерни", ItemCategory.Component);
-            Add("comp_spring", "Пружина", ItemCategory.Component);
-            Add("comp_pipe", "Труба", ItemCategory.Component);
-            Add("comp_tape", "Изолента", ItemCategory.Component);
             Add("keycard", "Карта доступа", ItemCategory.Component);
             Add("punchcard_1", "Перфокарта I", ItemCategory.Component);
             Add("punchcard_2", "Перфокарта II", ItemCategory.Component);
@@ -158,9 +190,7 @@ namespace Rastvordd.Sim
             Add("rt_cable", "Кабель-перемычка", ItemCategory.Component);
             Add("scrap", "Металлолом", ItemCategory.Component);
 
-            // патроны
-            Add("ammo_pistol", "Патроны (пист.)", ItemCategory.Ammo);
-            Add("ammo_rifle", "Патроны 5.56", ItemCategory.Ammo);
+            // патроны (калибры — Weaponry)
             Add("arrow", "Стрела", ItemCategory.Ammo);
 
             // еда и медицина
@@ -191,31 +221,9 @@ namespace Rastvordd.Sim
             molotov.Stack = 10;
             Add("weapon_torch", "Факел", ItemCategory.Weapon).Weapon = WeaponDef.MeleeTool("weapon_torch", 10, 0.8f, 1.6f, 1, 1, 1, 1);   // светит ночью
 
-            // огнестрел и лук
-            Add("weapon_bow", "Лук", ItemCategory.Weapon).Weapon = new WeaponDef
-            {
-                Id = "weapon_bow", AmmoId = "arrow",
-                Damage = 45, FireInterval = 0.8f, Magazine = 1, ReloadTime = 0.7f,
-                BaseSpreadDeg = 1.5f, BloomPerShotDeg = 0, MaxBloomDeg = 0, BloomRecoverDeg = 10,
-                BulletSpeed = 55, Range = 40, Auto = false, NoiseRadius = 12,
-            };
-            Add("weapon_pipe", "Самопал", ItemCategory.Weapon).Weapon = new WeaponDef
-            {
-                Id = "weapon_pipe", AmmoId = "ammo_pistol",
-                Damage = 22, FireInterval = 0.2f, Magazine = 10, ReloadTime = 1.7f,
-                BaseSpreadDeg = 2.5f, BloomPerShotDeg = 2.5f, MaxBloomDeg = 11f, BloomRecoverDeg = 14f,
-                RecoilDeg = 3.2f, RecoilGrowDeg = 0.4f, RecoilMaxDeg = 12f, RecoilRecoverDeg = 28f,
-                BulletSpeed = 110, Range = 40, Auto = false, NoiseRadius = 45,
-            };
-            Add("weapon_ak", "Калаш", ItemCategory.Weapon).Weapon = new WeaponDef
-            {
-                Id = "weapon_ak", AmmoId = "ammo_rifle",
-                Damage = 30, FireInterval = 0.12f, Magazine = 30, ReloadTime = 2.5f,
-                BaseSpreadDeg = 1.2f, BloomPerShotDeg = 2.0f, MaxBloomDeg = 13f, BloomRecoverDeg = 11f,
-                RecoilDeg = 1.6f, RecoilGrowDeg = 0.22f, RecoilMaxDeg = 26f, RecoilRecoverDeg = 32f,
-                RecoilPattern = new[] { 1, 1, -1, 1, -1, -1, -1, 1, 1, 1, -1, -1, 1, -1, -1, 1 },
-                BulletSpeed = 150, Range = 65, Auto = true, NoiseRadius = 70,
-            };
+            // огнестрел, лук, арбалет, калибры, 16 компонентов, обвесы, токарный станок (D46)
+            Weaponry.Register(Add);
+            Weaponry.Finish();
 
             // устанавливаемое
             Add("deploy_workbench", "Верстак", ItemCategory.Deployable).Deploy = DeployKind.Workbench;
@@ -244,13 +252,7 @@ namespace Rastvordd.Sim
         public static List<(string id, int n)> RecycleYield(string id)
         {
             var list = new List<(string, int)>();
-            switch (id)
-            {
-                case "comp_gears": list.Add(("scrap", 10)); list.Add(("metal_fragments", 15)); return list;
-                case "comp_spring": list.Add(("scrap", 8)); list.Add(("metal_fragments", 10)); return list;
-                case "comp_pipe": list.Add(("scrap", 6)); list.Add(("metal_fragments", 20)); return list;
-                case "comp_tape": list.Add(("scrap", 3)); list.Add(("cloth", 5)); return list;
-            }
+            if (id != null && Weaponry.Info.TryGetValue(id, out var meta) && meta.Recycle != null) { list.AddRange(meta.Recycle); return list; }
             var r = Recipes.All.Find(x => x.Output == id);
             if (r == null || r.Count > 1) return list;           // сырьё, патроны и порох не перерабатываются
             foreach (var (cid, n) in r.Cost) if (n / 2 > 0) list.Add((cid, n / 2));
@@ -278,12 +280,21 @@ namespace Rastvordd.Sim
                 }
                 else
                 {
-                    list.Add(("Урон", $"{w.Damage:0}"));
-                    list.Add(("Скорострельность", $"{60f / w.FireInterval:0} выстр./мин" + (w.Auto ? ", автомат" : "")));
+                    list.Add(("Урон", w.Pellets > 1 ? $"{w.Pellets}×{w.Damage:0} (дробь)" : $"{w.Damage:0}"));
+                    string mode = w.Mode switch { FireMode.Auto => ", автомат", FireMode.Burst => $", очередь по {w.Burst}", FireMode.Pump => ", помпа", FireMode.Bolt => ", затвор", FireMode.Single => ", однозаряд", _ => "" };
+                    list.Add(("Скорострельность", $"{60f / w.FireInterval:0} выстр./мин" + mode));
                     list.Add(("Магазин", $"{w.Magazine}"));
                     list.Add(("Перезарядка", $"{w.ReloadTime:0.0} с"));
                     list.Add(("Дальность", $"{w.Range:0} м"));
                     if (w.AmmoId != null) list.Add(("Патроны", Name(w.AmmoId)));
+                    if (w.Tier > 0) list.Add(("Тир", w.Tier >= 4 ? "элита" : $"{w.Tier}"));
+                    if (w.MaxDurability > 0) list.Add(("Износ", $"{w.MaxDurability:0} выстрелов"));
+                    if (w.Slots != 0)
+                    {
+                        var sl = new List<string>();
+                        for (int k = 0; k < 5; k++) if (w.Accepts((AttSlot)k)) sl.Add(Weaponry.SlotNames[k]);
+                        list.Add(("Обвесы", string.Join(", ", sl)));
+                    }
                 }
             }
             if (def.Explosive is ExplosiveDef e)
@@ -299,12 +310,33 @@ namespace Rastvordd.Sim
                 }
                 list.Add(("Бросок", $"до {e.ThrowRange:0} м"));
             }
+            if (def.Attachment is AttachmentDef at)
+            {
+                list.Add(("Слот", Weaponry.SlotNames[(int)at.Slot]));
+                list.Add(("Качество", Weaponry.QualityNames[at.Quality]));
+                if (at.NoiseMul != 1) list.Add(("Шум", $"−{(1 - at.NoiseMul) * 100:0}%"));
+                if (at.RecoilMul != 1) list.Add(("Отдача", $"−{(1 - at.RecoilMul) * 100:0}%"));
+                if (at.HipSpreadMul != 1) list.Add(("Разброс от бедра", $"−{(1 - at.HipSpreadMul) * 100:0}%"));
+                if (at.MoveSpreadMul != 1) list.Add(("Разброс на ходу", $"−{(1 - at.MoveSpreadMul) * 100:0}%"));
+                if (at.AdsSpreadMul != 1) list.Add(("Разброс в прицеле", $"−{(1 - at.AdsSpreadMul) * 100:0}%"));
+                if (at.MagMul != 1) list.Add(("Магазин", $"+{(at.MagMul - 1) * 100:0}%"));
+                if (at.ReloadMul != 1) list.Add(("Перезарядка", $"−{(1 - at.ReloadMul) * 100:0}%"));
+                if (at.SightZoom > 0) list.Add(("Кратность", at.SightZoom <= 1 ? "1× (коллиматор)" : $"{at.SightZoom:0.#}"));
+                if (at.Flashlight) list.Add(("Фонарь", "да"));
+                if (at.MaxShots > 0) list.Add(("Ресурс", $"{at.MaxShots:0} выстрелов"));
+            }
+            if (Weaponry.LatheFor(id) is Weaponry.LatheRecipe lr)
+            {
+                var parts = new List<string>();
+                foreach (var (cid, n) in lr.In) parts.Add($"{Name(cid)} {n}");
+                list.Add(("Токарный станок", string.Join(", ", parts) + (lr.Bench3 ? " (верстак 3)" : "")));
+            }
             if (BenchLevel(id) > 0) list.Add(("Открывает", $"крафт уровня {BenchLevel(id)}"));
             return list;
         }
 
         /// <summary>Ценность одной штуки «в ломах» — для решений ботов: стеш, груз, что подобрать, ради чего рисковать.</summary>
-        public static float Value(string id) => id switch
+        public static float Value(string id) => id != null && Weaponry.Info.TryGetValue(id, out var m) ? m.Value : id switch
         {
             "wood" or "stone" => 0.05f,
             "metal_ore" or "sulfur_ore" => 0.15f,
@@ -313,20 +345,13 @@ namespace Rastvordd.Sim
             "cloth" => 0.3f,
             "scrap" => 1f,
             "gunpowder" => 1.5f,
-            "ammo_pistol" => 1f,
-            "ammo_rifle" => 2f,
             "arrow" => 0.3f,
-            "comp_tape" => 4f,
-            "comp_gears" or "comp_spring" or "comp_pipe" => 12f,
             "keycard" => 40f,
             "punchcard_1" => 30f,
             "punchcard_2" => 80f,
             "fuse" => 0f,
             "bandage" => 3f,
             "berries" or "canned" or "water_bottle" => 1f,
-            "weapon_pipe" => 60f,
-            "weapon_ak" => 250f,
-            "weapon_bow" => 25f,
             "weapon_spear" => 8f,
             "expl_satchel" => 50f,
             "expl_c4" => 300f,
@@ -338,7 +363,7 @@ namespace Rastvordd.Sim
         };
 
         /// <summary>Для чего предмет — одна строка в подсказке инвентаря.</summary>
-        public static string Desc(string id) => id switch
+        public static string Desc(string id) => id != null && Weaponry.Info.TryGetValue(id, out var m) ? m.Desc : id switch
         {
             "wood" => "Стройка, крафт, топливо для печи",
             "stone" => "Инструменты, печь, улучшение построек до камня",
@@ -350,8 +375,6 @@ namespace Rastvordd.Sim
             "cloth" => "Бинты, спальник, лук, факел",
             "gunpowder" => "Патроны и взрывчатка (верстак)",
             "scrap" => "Верстак, самопал, взрывчатка",
-            "ammo_pistol" => "Патроны для самопала",
-            "ammo_rifle" => "Патроны для калаша",
             "arrow" => "Стрелы для лука",
             "berries" => "Еда: F — съесть",
             "canned" => "Еда: F — съесть",
@@ -369,17 +392,13 @@ namespace Rastvordd.Sim
             "lock_key" => "ЛКМ по двери — замок, ключ остаётся у тебя",
             "expl_fire" => "Поджигает: жжёт дерево и людей",
             "weapon_torch" => "Светит ночью",
-            "weapon_bow" => "Тихое оружие, нужны стрелы",
-            "weapon_pipe" => "Простой огнестрел на пист. патронах",
-            "weapon_ak" => "Автомат на патронах 5.56",
-            "deploy_workbench" => "E — дерево изучения. Открывает крафт уровня 1: порох, патроны, самопал",
-            "deploy_workbench2" => "Изучение и крафт уровня 2: патроны 5.56, самодельная бомба",
-            "deploy_workbench3" => "Изучение и крафт уровня 3: калаш, взрывчатка",
+            "deploy_workbench" => "E — дерево изучения. Крафт уровня 1: порох, 9 мм, 12 к, Наган, Самоделка, арбалет. Alt+E со стволом в руках — починка маслом",
+            "deploy_workbench2" => "Изучение и крафт уровня 2: 7,62, Грач, ППС-43, СВТ-40, обвесы, токарный станок, самодельная бомба",
+            "deploy_workbench3" => "Изучение и крафт уровня 3: 5,45, АКМ, АН-94, ППШ, СВД, взрывчатка; детали тира 3 на станке рядом",
             "deploy_sleepbag" => "Место респауна (B)",
             "deploy_box" => "Хранилище на 30 ячеек",
             "deploy_claim" => "Центр базы: даёт строить рядом; клади ресурсы, иначе база гниёт",
             "deploy_furnace" => "Плавит руду в металл и серу",
-            "comp_gears" or "comp_spring" or "comp_pipe" or "comp_tape" => "Деталь: в переработчике на РТ — лом и металл",
             "keycard" => "Открывает сейф на РТ с охраной (одна карта — один сейф)",
             "punchcard_1" => "Открывает крейт РТ тира 1 (Подстанция). Тратится",
             "punchcard_2" => "Открывает крейт РТ тира 2. Тратится",
@@ -390,17 +409,15 @@ namespace Rastvordd.Sim
         };
 
         /// <summary>Редкость (цвет рамки и время обыска): 0 обычное, 1 необычное, 2 редкое, 3 эпическое, 4 легендарное.</summary>
-        public static int Rarity(string id) => id switch
+        public static int Rarity(string id) => id != null && Weaponry.Info.TryGetValue(id, out var m) ? m.Rarity : id switch
         {
             "keycard" => 3,
             "punchcard_1" => 2,
             "punchcard_2" => 3,
             "fuse" => 1,
-            "comp_gears" or "comp_spring" or "comp_pipe" => 2,
-            "comp_tape" => 1,
-            "weapon_ak" or "expl_c4" => 4,
-            "expl_satchel" or "ammo_rifle" or "lock_code" or "weapon_bow" => 3,
-            "weapon_pipe" or "gunpowder" or "ammo_pistol" or "metal_fragments" or "expl_fire" or "lock_key" or "weapon_spear" => 2,
+            "expl_c4" => 4,
+            "expl_satchel" or "lock_code" => 3,
+            "gunpowder" or "metal_fragments" or "expl_fire" or "lock_key" or "weapon_spear" => 2,
             "bandage" or "canned" or "water_bottle" or "charcoal" or "sulfur" or "scrap" or "arrow" or "tool_hatchet" or "tool_pickaxe" => 1,
             _ when id != null && id.StartsWith("key_") => 3,
             _ => 0,
@@ -415,6 +432,7 @@ namespace Rastvordd.Sim
             var d = Get(id);
             if (d == null) return 1;
             if (d.Holdable) return System.Math.Max(1, d.Stack);
+            if (Weaponry.Info.TryGetValue(id, out var m) && m.Stack > 0) return m.Stack;
             return d.Category switch
             {
                 ItemCategory.Ammo => id == "arrow" ? 64 : 128,
@@ -465,13 +483,11 @@ namespace Rastvordd.Sim
             new Recipe { Output = "deploy_furnace", Cost = new[] { ("stone", 100), ("wood", 50) }, Time = 8 },
             new Recipe { Output = "deploy_workbench", Cost = new[] { ("wood", 150), ("metal_fragments", 50), ("scrap", 25) }, Time = 10 },
             new Recipe { Output = "gunpowder", Count = 5, Cost = new[] { ("charcoal", 15), ("sulfur", 10) }, Time = 3, Bench = 1 },
-            new Recipe { Output = "ammo_pistol", Count = 5, Cost = new[] { ("metal_fragments", 10), ("gunpowder", 5) }, Time = 3, Bench = 1 },
-            new Recipe { Output = "ammo_rifle", Count = 5, Cost = new[] { ("metal_fragments", 10), ("gunpowder", 10) }, Time = 4, Bench = 2 },
-            new Recipe { Output = "weapon_pipe", Cost = new[] { ("metal_fragments", 100), ("wood", 50), ("scrap", 10) }, Time = 10, Bench = 1 },
-            new Recipe { Output = "weapon_ak", Cost = new[] { ("metal_fragments", 250), ("wood", 50), ("scrap", 60) }, Time = 20, Bench = 3 },
             new Recipe { Output = "deploy_workbench2", Cost = new[] { ("metal_fragments", 200), ("scrap", 75) }, Time = 15, Bench = 1 },
             new Recipe { Output = "deploy_workbench3", Cost = new[] { ("metal_fragments", 400), ("scrap", 200) }, Time = 25, Bench = 2 },
         };
+
+        static Recipes() => Weaponry.AddRecipes(All);   // стволы, патроны, обвесы, станок (D46)
     }
 
     /// <summary>Узел дерева изучения: изучается за металлолом у верстака нужного уровня после предков.</summary>
@@ -481,6 +497,8 @@ namespace Rastvordd.Sim
         public int Bench;                // уровень верстака
         public int Scrap;                // цена в металлоломе
         public string[] Requires = System.Array.Empty<string>();
+        public string[] RequiresAny = System.Array.Empty<string>();   // хотя бы один из (АКМ — через Грач или СВТ)
+        public int Col = -1, Row = -1;   // место в окне изучения (столбец = верстак − 1); −1 — по умолчанию клиента
     }
 
     /// <summary>Дерево изучения (D28). Всё, чего в дереве нет, известно с начала (примитив, станки).</summary>
@@ -488,16 +506,14 @@ namespace Rastvordd.Sim
     {
         public static readonly List<TechNode> All = new()
         {
-            new TechNode { Id = "gunpowder", Bench = 1, Scrap = 20 },
-            new TechNode { Id = "lock_code", Bench = 1, Scrap = 30 },
-            new TechNode { Id = "expl_fire", Bench = 1, Scrap = 30 },
-            new TechNode { Id = "ammo_pistol", Bench = 1, Scrap = 30, Requires = new[] { "gunpowder" } },
-            new TechNode { Id = "weapon_pipe", Bench = 1, Scrap = 60, Requires = new[] { "ammo_pistol" } },
-            new TechNode { Id = "ammo_rifle", Bench = 2, Scrap = 75, Requires = new[] { "ammo_pistol" } },
-            new TechNode { Id = "expl_satchel", Bench = 2, Scrap = 75, Requires = new[] { "gunpowder" } },
-            new TechNode { Id = "weapon_ak", Bench = 3, Scrap = 200, Requires = new[] { "weapon_pipe", "ammo_rifle" } },
-            new TechNode { Id = "expl_c4", Bench = 3, Scrap = 250, Requires = new[] { "expl_satchel" } },
+            new TechNode { Id = "gunpowder", Bench = 1, Scrap = 20, Col = 0, Row = 0 },
+            new TechNode { Id = "lock_code", Bench = 1, Scrap = 30, Col = 0, Row = 10 },
+            new TechNode { Id = "expl_fire", Bench = 1, Scrap = 30, Col = 0, Row = 11 },
+            new TechNode { Id = "expl_satchel", Bench = 2, Scrap = 75, Requires = new[] { "gunpowder" }, Col = 1, Row = 0 },
+            new TechNode { Id = "expl_c4", Bench = 3, Scrap = 250, Requires = new[] { "expl_satchel" }, Col = 2, Row = 0 },
         };
+
+        static Tech() => Weaponry.AddTech(All);   // ветка оружия и обвесов (D46)
 
         public static TechNode Get(string id) => All.Find(n => n.Id == id);
 

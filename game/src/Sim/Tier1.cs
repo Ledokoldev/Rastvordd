@@ -128,7 +128,7 @@ namespace Rastvordd.Sim
 
             rt.CratePos = Mark("crate") ?? rt.M.Center;
             rt.Crate = new LootBag { Id = NextId(), Pos = rt.CratePos, IsCrate = true, Tier = 1, Punch = true };
-            FillPunchCrate(rt.Crate);
+            FillPunchCrate(rt.Crate, rt.Key == "ats");
             Bags.Add(rt.Crate);
 
             switch (rt.Key)
@@ -317,7 +317,7 @@ namespace Rastvordd.Sim
                     if (rt.CapsuleLeft <= 0)
                     {
                         rt.Crate.Pos = rt.CapsuleTo >= 0 ? rt.Capsules[rt.CapsuleTo] + new Vector2(0, 0.9f) : rt.M.Center;
-                        FillPunchCrate(rt.Crate);
+                        FillPunchCrate(rt.Crate, rt.Key == "ats");
                         rt.Crate.Unlocked = true;
                         if (!Bags.Contains(rt.Crate)) Bags.Add(rt.Crate);
                         rt.Ready = true;
@@ -377,7 +377,7 @@ namespace Rastvordd.Sim
             rt.WagonT = 0;
             rt.WagonMoving = false;
             if (rt.Wagon != null) rt.Wagon.Pos = rt.WagonStart;
-            FillPunchCrate(rt.Crate);
+            FillPunchCrate(rt.Crate, rt.Key == "ats");
             rt.Crate.Pos = rt.Key == "depot" ? rt.WagonStart : rt.CratePos;
             if (rt.Key == "ats") Bags.Remove(rt.Crate);
             else if (!Bags.Contains(rt.Crate)) Bags.Add(rt.Crate);

@@ -172,7 +172,8 @@ namespace Rastvordd.Sim
             if (_strafeTimer <= 0) { _strafeSign = _rng.Next(2) == 0 ? -1 : 1; _strafeTimer = R(0.6f, 1.8f); }
             var side = new Vector2(-dir.Y, dir.X) * _strafeSign;
             Vector2 move = side * 0.7f;
-            if (dist > 18) move += dir;
+            float fireRange = MathF.Min(MaxFireRange, (_me.Weapon?.Def.Range ?? MaxFireRange) * 0.95f);   // самопал (12 к) бьёт на 14 м — подходит ближе
+            if (dist > MathF.Min(18, fireRange * 0.8f)) move += dir;
             else if (dist < 8) move -= dir * 0.8f;
             if (_me.Hp < 35 && dist < 20) move -= dir * 0.6f;
             cmd.Move = AvoidWalls(move);
@@ -186,7 +187,7 @@ namespace Rastvordd.Sim
             cmd.Aim = target.Pos + lead + _aimError;
 
             _reaction -= World.Dt;
-            if (_reaction > 0 || dist > MaxFireRange) return;
+            if (_reaction > 0 || dist > fireRange) return;
 
             // очереди с паузами
             if (_pauseTimer > 0) { _pauseTimer -= World.Dt; return; }

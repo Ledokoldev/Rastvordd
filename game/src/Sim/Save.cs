@@ -11,7 +11,7 @@ namespace Rastvordd.Sim
     /// </summary>
     public sealed class WorldSave
     {
-        public int Version = 3;   // 3: рюкзак ячейками   // 2: остров 1 км, малые РТ
+        public int Version = 4;   // 4: ветка оружия D46 (калибры, обвесы, износ; старые id переводятся при загрузке)   // 3: рюкзак ячейками   // 2: остров 1 км, малые РТ
         public int Seed;
         public float Time, TimeOffset;
         public int NextId;
@@ -25,7 +25,7 @@ namespace Rastvordd.Sim
         public List<PlayerS> Players = new();
 
         public sealed class NodeS { public int Id, Kind; public float X, Y, R, Amount, Max; }
-        public sealed class SlotS { public string Id; public int Count, Ammo = -1; }
+        public sealed class SlotS { public string Id; public int Count, Ammo = -1; public float Dur = -1; public List<string> Att; public List<float> AttDur; }
         public sealed class StructS { public int Id, Kind, I, J, Dir, Tier, OwnerId, ClaimId, Code; public float Hp, Ax, Ay, Bx, By, Cx, Cy; public bool Open, Locked, KeyLock; public List<int> LockAuth = new(); }
         public sealed class DeployS
         {
@@ -56,13 +56,34 @@ namespace Rastvordd.Sim
     {
         public int Seed;
 
-        static WorldSave.SlotS SaveSlot(ItemSlot s) => s == null ? null : new WorldSave.SlotS { Id = s.Id, Count = s.Count, Ammo = s.State?.Ammo ?? -1 };
+        static WorldSave.SlotS SaveSlot(ItemSlot s)
+        {
+            if (s == null) return null;
+            var ss = new WorldSave.SlotS { Id = s.Id, Count = s.Count, Ammo = s.State?.Ammo ?? -1, Dur = s.State?.Durability ?? -1 };
+            if (s.State != null && s.State.AttCount > 0) { ss.Att = new List<string>(s.State.Att); ss.AttDur = new List<float>(s.State.AttDur); }
+            return ss;
+        }
 
+        /// <summary>Загрузка ячейки: старые id (ammo_pistol, ammo_rifle, weapon_ak, weapon_pipe) переводятся в новые (D46).</summary>
         static ItemSlot LoadSlot(WorldSave.SlotS s)
         {
-            if (s == null || Items.Get(s.Id) == null) return null;
-            var slot = Items.NewSlot(s.Id, Math.Max(0, s.Ammo));
+            if (s == null) return null;
+            string id = Weaponry.Migrate(s.Id);
+            if (Items.Get(id) == null) return null;
+            var slot = Items.NewSlot(id, Math.Max(0, s.Ammo));
             slot.Count = s.Count;
+            if (slot.State is WeaponState w)
+            {
+                if (s.Dur >= 0 && w.Def.MaxDurability > 0) w.Durability = Math.Min(s.Dur, w.Def.MaxDurability);
+                if (s.Att != null)
+                    for (int k = 0; k < w.Att.Length && k < s.Att.Count; k++)
+                    {
+                        if (Weaponry.Att(s.Att[k]) == null) continue;
+                        w.Att[k] = s.Att[k];
+                        w.AttDur[k] = s.AttDur != null && k < s.AttDur.Count ? s.AttDur[k] : Weaponry.Att(s.Att[k]).MaxShots;
+                    }
+                w.Ammo = Math.Min(w.Ammo, w.MagSize);
+            }
             return slot;
         }
 
@@ -181,7 +202,7 @@ namespace Rastvordd.Sim
                 a.Current = ps.Current;
                 a.BuildPiece = (StructKind)ps.BuildPiece;
                 a.Known.Clear();
-                if (ps.Known != null) foreach (var k in ps.Known) a.Known.Add(k);
+                if (ps.Known != null) foreach (var k in ps.Known) if (Tech.Get(Weaponry.Migrate(k)) != null) a.Known.Add(Weaponry.Migrate(k));
                 Actors.Add(a);
             }
             _nextId = Math.Max(_nextId, w.NextId);

@@ -345,6 +345,7 @@ namespace Rastvordd.Sim
         /// <summary>Отладка: прокрутить мир на seconds без клиента, печатая занятия ботов.</summary>
         /// <summary>Отладка рейдов: в эту секунду мира первый бот получает бомбы и патроны (−1 — нет).</summary>
         public float RaidKitAt = -1;
+        public float GunKitAt = -1;   // --gunkit=сек (D54)
 
         public void FastForward(float seconds, System.Action<string> log, int focusId = -1)
         {
@@ -412,6 +413,20 @@ namespace Rastvordd.Sim
                         if (b.Me.Count("weapon_nagant") == 0 && !System.Array.Exists(b.Me.Belt, s => s?.Id == "weapon_nagant")) b.Me.AddSlot(Items.NewSlot("weapon_nagant", 7));
                         b.Me.Add("ammo_9mm", 60); b.Me.Add("bandage", 3); b.Me.Add("punchcard_1", 1);
                         log($"[{World.Time,6:0}s] отладка: {b.Me.Name} получил наган, 60 патронов, 3 бинта, перфокарту I");
+                    }
+                }
+                if (GunKitAt >= 0 && World.Time >= GunKitAt)
+                {
+                    // отладка D54 (--gunkit=сек): самому продвинутому боту — всё на верстак 3, оружейный стол и АКМ; проверка, что бот сам ставит стол и собирает ствол
+                    GunKitAt = -1;
+                    PlayerBot best = null; int bl = -1;
+                    foreach (var b in _bots.Values) { int l = World.BenchLevel(b.Me.Pos, 60); if (!b.Me.Dead && l > bl) { bl = l; best = b; } }
+                    if (best != null)
+                    {
+                        var m = best.Me;
+                        foreach (var (id, n) in new (string, int)[] { (Prog.Alloy, 120), ("comp_receiver_ak", 1), ("comp_bolt_carrier", 1), ("comp_gas_block", 1), ("comp_spring", 8), ("comp_gears", 9), ("comp_circuit", 3), ("metal_fragments", 4000), ("scrap", 2500), ("wood", 400) })
+                            m.Add(id, n);
+                        log($"[{World.Time,6:0}s] отладка: {m.Name} (верстак {bl}) получил набор на оружейный стол и АКМ");
                     }
                 }
                 if (RaidKitAt >= 0 && World.Time >= RaidKitAt)

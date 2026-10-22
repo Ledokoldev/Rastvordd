@@ -296,6 +296,8 @@ namespace Rastvordd.Client
                 var p = st.Substring(10).Split(',');
                 var rk = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--raidkit="));
                 if (rk != null) _server.RaidKitAt = float.Parse(rk.Substring(10), System.Globalization.CultureInfo.InvariantCulture);
+                var gk = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--gunkit="));   // D54: набор на оружейный стол боту
+                if (gk != null) _server.GunKitAt = float.Parse(gk.Substring(9), System.Globalization.CultureInfo.InvariantCulture);
                 _server.FastForward(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), s => GD.Print(s), _myId);
                 var me = _server.World.Find(_myId);
 int bi = p.Length > 1 ? int.Parse(p[1]) : 0;

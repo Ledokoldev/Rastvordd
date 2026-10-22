@@ -70,7 +70,7 @@ namespace Rastvordd.Sim
         /// <summary>Переписанные рецепты существующих вещей (весь рецепт целиком): выход → цена, верстак, станция.</summary>
         public static readonly (string output, int bench, DeployKind station, (string, int)[] cost)[] RecipeOverride =
         {
-            ("deploy_workbench3", 2, DeployKind.None, new[] { ("metal_fragments", 600), ("scrap", 400), ("comp_circuit", 3), ("comp_gears", 5), (Alloy, 25) }),
+            ("deploy_workbench3", 2, DeployKind.None, new[] { ("metal_fragments", 600), ("scrap", 400), ("comp_circuit", 3), ("comp_gears", 5), (Alloy, 10) }),   // D54: по плану 25 — снижено, чтобы боты держали темп (замер)
             // стволы тира 3 — только на оружейном столе, с легированной сталью
             ("weapon_akm", 3, DeployKind.GunTable, new[] { ("metal_fragments", 250), ("wood", 100), ("comp_receiver_ak", 1), ("comp_bolt_carrier", 1), ("comp_gas_block", 1), ("comp_spring", 4), (Alloy, 25) }),
             ("weapon_an94", 3, DeployKind.GunTable, new[] { ("metal_fragments", 300), ("comp_receiver_ak", 1), ("comp_barrel_chrome", 1), ("comp_bolt_carrier", 1), ("comp_gas_block", 1), ("comp_gears", 3), (Alloy, 30) }),
@@ -92,7 +92,7 @@ namespace Rastvordd.Sim
         public static readonly Dictionary<string, int> RecycleAlloy = new()
         {
             ["comp_trigger"] = 2, ["comp_bolt_carrier"] = 2, ["comp_barrel_rifled"] = 2, ["comp_frame_pistol"] = 2, ["comp_body_smg"] = 2, ["comp_body_rifle"] = 2,
-            ["val_motor"] = 1,
+            ["val_motor"] = 2, ["val_battery"] = 1,
             ["comp_receiver_ak"] = 4, ["comp_barrel_chrome"] = 3, ["comp_gas_block"] = 3,
             ["val_radio_tubes"] = 2, ["val_gold_contacts"] = 3, ["val_computer_block"] = 8,
             ["plate_steel"] = 4, ["plate_ceramic"] = 6,
@@ -224,7 +224,7 @@ namespace Rastvordd.Sim
                     Power = 3, NeedsPower = true, Machine = "efurnace", Light = 2,
                     Desc = "Плавит руду вдвое быстрее печи, без дерева — только на токе (3)" },
             new() { Item = "deploy_guntable", Kind = DeployKind.GunTable, Name = "Оружейный стол", Sprite = "guntable", Size = Footprint.Full, W = 1.85f, D = 1.85f,
-                    Bench = 3, Cost = new[] { ("metal_fragments", 300), (Alloy, 20), ("comp_gears", 4), ("comp_spring", 4) }, Time = 25, Scrap = 150,
+                    Bench = 3, Cost = new[] { ("metal_fragments", 300), (Alloy, 15), ("comp_gears", 4), ("comp_spring", 4) }, Time = 25, Scrap = 150,
                     Power = 1, PowerSpeed = 1.33f, Boost = new[] { "att_*", "weapon_*" }, BoostTime = 0.6f, Repair = "gun",
                     Desc = "Стволы тира 3 и армейские обвесы — только здесь; починка ствола маслом — до 100%. E — крафт" },
             new() { Item = "deploy_medtable", Kind = DeployKind.MedTable, Name = "Медстол", Sprite = "medtable", Size = Footprint.Half, W = 1.7f, D = 0.85f,

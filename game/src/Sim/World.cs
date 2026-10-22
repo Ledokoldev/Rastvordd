@@ -1425,15 +1425,16 @@ namespace Rastvordd.Sim
             float bestD = InteractRange;
             foreach (var b in Bags)
             {
-                if (b.Empty || !ClearLine(a.Pos, b.Pos, null, true)) continue;   // сквозь стены и двери не достать
+                if (b.Empty) continue;
                 float d = Vector2.Distance(a.Pos, b.Pos);
-                if (d < bestD) { bestD = d; best = (InteractKind.Bag, b); }
+                // сначала дальность (дёшево), потом стены (луч до каждой сумки на карте стоил дорого)
+                if (d < bestD && ClearLine(a.Pos, b.Pos, null, true)) { bestD = d; best = (InteractKind.Bag, b); }   // сквозь стены и двери не достать
             }
             foreach (var p in Pickups)
             {
-                if (!p.Available || !ClearLine(a.Pos, p.Pos, null, true)) continue;
+                if (!p.Available) continue;
                 float d = Vector2.Distance(a.Pos, p.Pos);
-                if (d < bestD) { bestD = d; best = (InteractKind.Pickup, p); }
+                if (d < bestD && ClearLine(a.Pos, p.Pos, null, true)) { bestD = d; best = (InteractKind.Pickup, p); }
             }
             foreach (var dp in DeploysNear(a.Pos, InteractRange))
             {

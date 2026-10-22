@@ -2,3 +2,4 @@
 game/addons/godot-steam-audio/bin/*.dll
 game/addons/godot-steam-audio/bin/*.lib
 dist/
+build/

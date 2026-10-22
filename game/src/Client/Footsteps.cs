@@ -62,13 +62,16 @@ namespace Rastvordd.Client
         /// <summary>Где слышно чужие шаги (м): обзор ~50 м — бег почти на весь обзор, шаг на 3/5, присед на четверть.</summary>
         public const float HearRun = 45f, HearWalk = 30f, HearCrouch = 12f;
 
-        public static void Play(Surface s, Vector2 posPx, float volumeDb, float hearM)
+        /// <returns>id сыгранного шага (null — поверхность без шагов).</returns>
+        public static string Play(Surface s, Vector2 posPx, float volumeDb, float hearM)
         {
-            if (!Sets.TryGetValue(s, out var set)) return;
+            if (!Sets.TryGetValue(s, out var set)) return null;
             int k = _rng.RandiRange(1, set.count);
             if (set.count > 1 && _last.GetValueOrDefault(s) == k) k = k % set.count + 1;
             _last[s] = k;
-            Sfx.Play($"steps/{set.prefix}_step_{k:00}", posPx, volumeDb, hearM, 0.06f, 1f, Sfx.Room.Quiet);
+            string id = $"steps/{set.prefix}_step_{k:00}";
+            Sfx.Play(id, posPx, volumeDb, hearM, 0.06f, 1f, Sfx.Room.Quiet);
+            return id;
         }
     }
 }

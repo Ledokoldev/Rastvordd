@@ -1843,6 +1843,12 @@ namespace Rastvordd.Sim
         public void Damage(Actor target, float dmg, int attackerId, Vector2 pos, string zone = null)
         {
             if (target.Spectator) return;
+            if (DamageHook != null && DamageHook(target, dmg, attackerId, zone))
+            {
+                // полигон: урон перехвачен (бессмертие, мишени) — попадание всё равно видно и слышно
+                Events.Add(new SimEvent { Kind = SimEventKind.HitActor, ActorId = target.Id, OtherId = attackerId, Pos = pos, Value = dmg, Text = zone });
+                return;
+            }
             target.Hp -= dmg;
             target.LastAttacker = attackerId;
             target.LastDamagedTime = Time;

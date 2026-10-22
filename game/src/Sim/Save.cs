@@ -11,7 +11,7 @@ namespace Rastvordd.Sim
     /// </summary>
     public sealed class WorldSave
     {
-        public int Version = 6;   // 6: сетка клеток D52 (у установленного — пол, слоты, поворот, хитбокс; старые сейвы пересаживаются в слоты)   // 5: одежда D47 (слоты, пластины с прочностью, доза, переохлаждение; старые сейвы — голыми)   // 4: ветка оружия D46 (калибры, обвесы, износ; старые id переводятся при загрузке)   // 3: рюкзак ячейками   // 2: остров 1 км, малые РТ
+        public int Version = 7;   // 7: прогрессия D54 (жидкость в ёмкостях, станции: вкл/выкл, отравление; старые сейвы читаются как есть)   // 6: сетка клеток D52 (у установленного — пол, слоты, поворот, хитбокс; старые сейвы пересаживаются в слоты)   // 5: одежда D47 (слоты, пластины с прочностью, доза, переохлаждение; старые сейвы — голыми)   // 4: ветка оружия D46 (калибры, обвесы, износ; старые id переводятся при загрузке)   // 3: рюкзак ячейками   // 2: остров 1 км, малые РТ
         public int Seed;
         public float Time, TimeOffset;
         public int NextId;
@@ -25,14 +25,16 @@ namespace Rastvordd.Sim
         public List<PlayerS> Players = new();
 
         public sealed class NodeS { public int Id, Kind; public float X, Y, R, Amount, Max; }
-        public sealed class SlotS { public string Id; public int Count, Ammo = -1; public float Dur = -1; public List<string> Att; public List<float> AttDur; }
-        public sealed class StructS { public int Id, Kind, I, J, Dir, Tier, OwnerId, ClaimId, Code; public float Hp, Ax, Ay, Bx, By, Cx, Cy; public bool Open, Locked, KeyLock; public List<int> LockAuth = new(); }
+        public sealed class SlotS { public string Id; public int Count, Ammo = -1; public float Dur = -1; public List<string> Att; public List<float> AttDur; public string Liquid; public float Liters; }   // v7: жидкость в ёмкости
+        public sealed class StructS { public int Id, Kind, I, J, Dir, Tier, OwnerId, ClaimId, Code; public float Hp, Ax, Ay, Bx, By, Cx, Cy; public bool Open, Locked, KeyLock, Shutters; public List<int> LockAuth = new(); }   // v7: Shutters — ставни на окне
         public sealed class DeployS
         {
             public int Id, Kind, OwnerId, Ore, SulfurOre, OutMetal, OutSulfur, OutCharcoal, Level;
             public int Rot, FloorId, Slots;   // v6
             public float Hx, Hy;              // v6: хитбокс (половины сторон)
             public float X, Y, Hp, Fuel, Grace, ReadyAt;
+            public bool Off;                  // v7: станция выключена (по умолчанию — включена, как в старых сейвах)
+            public float Work;                // v7: таймер работы станции
             public List<int> Auth = new();
             public Dictionary<string, float> Store = new();
             public List<SlotS> Storage;
@@ -50,6 +52,7 @@ namespace Rastvordd.Sim
             public List<SlotS> Worn;      // v5: одежда по слотам WearSlot
             public List<SlotS> Plates;    // v5: пластины перед/спина (Dur — прочность)
             public float RadDose, Cold;
+            public float Poison;          // v7: отравление сырой водой
         }
 
         static readonly JsonSerializerOptions Opts = new() { IncludeFields = true, WriteIndented = false };
@@ -66,6 +69,7 @@ namespace Rastvordd.Sim
             if (s == null) return null;
             var ss = new WorldSave.SlotS { Id = s.Id, Count = s.Count, Ammo = s.State?.Ammo ?? -1, Dur = s.State?.Durability ?? s.Dur };   // у пластины — её прочность
             if (s.State != null && s.State.AttCount > 0) { ss.Att = new List<string>(s.State.Att); ss.AttDur = new List<float>(s.State.AttDur); }
+            if (s.Liquid != null) { ss.Liquid = s.Liquid; ss.Liters = s.Liters; }
             return ss;
         }
 
@@ -90,6 +94,7 @@ namespace Rastvordd.Sim
                 w.Ammo = Math.Min(w.Ammo, w.MagSize);
             }
             else if (s.Dur >= 0 && Clothing.Plate(id) is PlateDef pd) slot.Dur = Math.Min(s.Dur, pd.Durability);
+            if (s.Liquid != null && Liquids.Fits(slot, s.Liquid)) { slot.Liquid = s.Liquid; slot.Liters = Math.Min(s.Liters, slot.Def.Capacity); }
             return slot;
         }
 
@@ -100,7 +105,7 @@ namespace Rastvordd.Sim
             foreach (var (k, left) in _nodeRespawns) w.NodeRespawns.Add(((int)k, left));
             foreach (var s in Structures)
             {
-                var ss = new WorldSave.StructS { Id = s.Id, Kind = (int)s.Kind, I = s.I, J = s.J, Dir = s.Dir, Tier = s.Tier, OwnerId = s.OwnerId, ClaimId = s.ClaimId, Hp = s.Hp, Open = s.Open, Locked = s.Locked, KeyLock = s.KeyLock, Code = s.Code, Ax = s.A.X, Ay = s.A.Y, Bx = s.B.X, By = s.B.Y, Cx = s.C.X, Cy = s.C.Y };
+                var ss = new WorldSave.StructS { Id = s.Id, Kind = (int)s.Kind, I = s.I, J = s.J, Dir = s.Dir, Tier = s.Tier, OwnerId = s.OwnerId, ClaimId = s.ClaimId, Hp = s.Hp, Open = s.Open, Locked = s.Locked, KeyLock = s.KeyLock, Shutters = s.Shutters, Code = s.Code, Ax = s.A.X, Ay = s.A.Y, Bx = s.B.X, By = s.B.Y, Cx = s.C.X, Cy = s.C.Y };
                 ss.LockAuth.AddRange(s.LockAuth);
                 w.Structures.Add(ss);
             }
@@ -111,6 +116,7 @@ namespace Rastvordd.Sim
                     Id = d.Id, Kind = (int)d.Kind, OwnerId = d.OwnerId, X = d.Pos.X, Y = d.Pos.Y, Hp = d.Hp, Level = d.Level,
                     Ore = d.Ore, SulfurOre = d.SulfurOre, Fuel = d.Fuel, OutMetal = d.OutMetal, OutSulfur = d.OutSulfur, OutCharcoal = d.OutCharcoal, Grace = d.Grace, ReadyAt = d.ReadyAt - Time,
                     Rot = d.Rot, FloorId = d.FloorId, Slots = d.Slots, Hx = d.Half.X, Hy = d.Half.Y,
+                    Off = !d.On && StationDefs.Get(d.Kind) != null, Work = d.Work,
                 };
                 ds.Auth.AddRange(d.Auth);
                 foreach (var kv in d.Store) ds.Store[kv.Key] = kv.Value;
@@ -133,7 +139,7 @@ namespace Rastvordd.Sim
                 ps.Known.AddRange(a.Known);
                 ps.Worn = new List<WorldSave.SlotS>(); foreach (var s in a.Worn) ps.Worn.Add(SaveSlot(s));
                 ps.Plates = new List<WorldSave.SlotS>(); foreach (var s in a.Plates) ps.Plates.Add(SaveSlot(s));
-                ps.RadDose = a.RadDose; ps.Cold = a.Cold;
+                ps.RadDose = a.RadDose; ps.Cold = a.Cold; ps.Poison = a.Poison;
                 w.Players.Add(ps);
             }
             return w;
@@ -167,7 +173,9 @@ namespace Rastvordd.Sim
                     Id = ds.Id, Kind = (DeployKind)ds.Kind, OwnerId = ds.OwnerId, Pos = new Vector2(ds.X, ds.Y), Hp = ds.Hp, Level = ds.Level,
                     Ore = ds.Ore, SulfurOre = ds.SulfurOre, Fuel = ds.Fuel, OutMetal = ds.OutMetal, OutSulfur = ds.OutSulfur, OutCharcoal = ds.OutCharcoal, Grace = ds.Grace, ReadyAt = Time + ds.ReadyAt,
                     Rot = ds.Rot & 3, FloorId = ds.FloorId, Slots = ds.Slots, Half = new Vector2(ds.Hx, ds.Hy),
+                    Work = ds.Work,
                 };
+                if (StationDefs.Get(d.Kind) != null) d.On = !ds.Off;
                 foreach (var id in ds.Auth) d.Auth.Add(id);
                 foreach (var kv in ds.Store) d.Store[kv.Key] = kv.Value;
                 if (ds.Storage != null)
@@ -183,7 +191,7 @@ namespace Rastvordd.Sim
                 var s = new Structure
                 {
                     Id = ss.Id, Kind = (StructKind)ss.Kind, I = ss.I, J = ss.J, Dir = ss.Dir, Tier = ss.Tier, OwnerId = ss.OwnerId, ClaimId = ss.ClaimId,
-                    Hp = ss.Hp, Open = ss.Open, Locked = ss.Locked, KeyLock = ss.KeyLock, Code = ss.Code,
+                    Hp = ss.Hp, Open = ss.Open, Locked = ss.Locked, KeyLock = ss.KeyLock, Code = ss.Code, Shutters = ss.Shutters,
                 };
                 foreach (var id in ss.LockAuth) s.LockAuth.Add(id);
                 (s.A, s.B, s.C) = (new Vector2(ss.Ax, ss.Ay), new Vector2(ss.Bx, ss.By), new Vector2(ss.Cx, ss.Cy));
@@ -225,7 +233,7 @@ namespace Rastvordd.Sim
                 if (ps.Plates != null)
                     for (int i = 0; i < Clothing.PlateSlots && i < ps.Plates.Count; i++)
                         if (LoadSlot(ps.Plates[i]) is ItemSlot pl && Clothing.Plate(pl.Id) != null) a.Plates[i] = pl;
-                a.RadDose = ps.RadDose; a.Cold = ps.Cold;
+                a.RadDose = ps.RadDose; a.Cold = ps.Cold; a.Poison = ps.Poison;
                 a.Known.Clear();
                 if (ps.Known != null) foreach (var k in ps.Known) if (Tech.Get(Weaponry.Migrate(k)) != null) a.Known.Add(Weaponry.Migrate(k));
                 Actors.Add(a);
@@ -266,7 +274,7 @@ namespace Rastvordd.Sim
                     foreach (var s in new List<Structure>(Structures))
                     {
                         if (s.ClaimId != claim.Id) continue;
-                        foreach (var (cid, _) in Building.Cost(s.Kind, s.Tier))
+                        foreach (var (cid, _) in Building.UpkeepCost(s.Kind, s.Tier))
                             if (cid == id)
                             {
                                 bool gone = s.Hp <= s.MaxHp * DecayPerMinute * rotMin;

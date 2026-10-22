@@ -63,7 +63,7 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Множитель урона взрывом по уровню: разметка рассыпается, камень — 2 шашки, металл — 4, сталь — 8.</summary>
-        public static readonly float[] BlastTierMult = { 3f, 1.2f, 0.55f, 0.5f, 0.5f };
+        public static readonly float[] BlastTierMult = { 3f, 1.2f, 0.55f, 0.5f, 0.5f, 0.45f };   // 5 — броня (D54)
 
         void Throw(Actor a, Vector2 aim)
         {
@@ -153,7 +153,7 @@ namespace Rastvordd.Sim
                 else dist = Building.PointInPoly(t.Pos, s.Poly) ? 0.6f : MinPolyDist(t.Pos, s.Poly) + 0.6f;
                 if (dist > r) continue;
                 float fall = 1f - 0.5f * dist / r;
-                DamageStructure(s, ex.Damage * fall * BlastTierMult[Math.Clamp(s.Tier, 0, 4)], t.OwnerId);
+                DamageStructure(s, ex.Damage * fall * BlastTierMult[Math.Clamp(s.Tier, 0, BlastTierMult.Length - 1)], t.OwnerId);
             }
             // установленное: ящик рассыпается лутом, столб падает
             foreach (var d in new List<Deployable>(Deployables))

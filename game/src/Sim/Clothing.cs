@@ -370,6 +370,7 @@ namespace Rastvordd.Sim
         {
             void Maybe(double ch, string id, int min = 1, int max = 1) { if (rng.NextDouble() < ch) bag.Items.Add(new ItemSlot(id, rng.Next(min, max + 1))); }
             void One(double ch, string[] from) { if (rng.NextDouble() < ch) bag.Items.Add(new ItemSlot(from[rng.Next(from.Length)], 1)); }
+            StationDefs.Loot(rng, bag, kind);   // легированная сталь, ёмкости с топливом, медицина (D54, Prog.Loot)
             switch (kind)
             {
                 case "barrel":

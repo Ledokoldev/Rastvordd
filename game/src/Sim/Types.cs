@@ -129,7 +129,8 @@ namespace Rastvordd.Sim
     }
 
     public enum ItemCategory { Resource, Component, Tool, Weapon, Ammo, Food, Medical, Deployable, Clothing }   // Clothing — одежда, пластины, часы (D47, Clothing.cs)
-    public enum DeployKind { None, Workbench, Furnace, Claim, Box, SleepBag, Recycler, Lathe }   // Recycler — переработчик на РТ (ничей, не ломается); Lathe — токарный станок (D46)
+    public enum DeployKind { None, Workbench, Furnace, Claim, Box, SleepBag, Recycler, Lathe,   // Recycler — переработчик на РТ (ничей, не ломается); Lathe — токарный станок (D46)
+        Still, Sewing, Chem, Generator, Lamp, Floodlight, EFurnace, GunTable, MedTable, Conveyor, Rectifier, Campfire, Barrel, BoxLarge, Drill }   // станции прогрессии (D54, Data/Progression.cs: таблица Prog.Stations); новые — только в конец (сейвы хранят число)
 
     public sealed class ItemDef
     {
@@ -146,9 +147,17 @@ namespace Rastvordd.Sim
         public AttachmentDef Attachment;  // обвес на ствол (att_*)
         public WearDef Wear;              // одежда (wear_*), Clothing.cs
         public PlateDef Plate;            // бронепластина (plate_*)
+        // D54 (Data/Progression.cs): ёмкость для жидкости, жидкость, топливо инструмента, лечение
+        public float Capacity;            // ёмкость, литров (фляга, канистра); 0 — не ёмкость
+        public bool WaterOnly;            // фляга: только вода
+        public bool IsLiquid;             // жидкость (нефть, топляк, дизель, вода): живёт только в ёмкостях, считается в литрах
+        public string FuelId;             // инструмент на топливе (бензопила — топляк, отбойник — дизель)
+        public float FuelPerHit;          // литров за удар
+        public bool CuresPoison;          // аптечка, шприц: снимают отравление
+        public bool Bars;                 // решётки/ставни: ЛКМ по окну
 
         /// <summary>Предметы, которые держат в руках, живут на поясе (по одному в слоте).</summary>
-        public bool Holdable => Weapon != null || Deploy != DeployKind.None || Build || Explosive != null || Lock;
+        public bool Holdable => Weapon != null || Deploy != DeployKind.None || Build || Explosive != null || Lock || Bars;
     }
 
     /// <summary>Предмет в слоте пояса или в контейнере. У оружия — своё состояние (патроны в магазине).</summary>
@@ -158,7 +167,10 @@ namespace Rastvordd.Sim
         public int Count;
         public WeaponState State;
         public float Dur = -1;          // прочность пластины (урона до разрушения); −1 — новая
+        public string Liquid;           // ёмкость (D54): что налито (null — пусто)
+        public float Liters;            // сколько литров
         public ItemSlot(string id, int count, WeaponState state = null) { Id = id; Count = count; State = state; }
+        public bool IsContainer => Def?.Capacity > 0;
         public ItemDef Def => Items.Get(Id);
     }
 
@@ -235,6 +247,9 @@ namespace Rastvordd.Sim
             // ценный лом — только на переработку (D49, Economy.cs)
             Economy.Register(Add);
 
+            // прогрессия D54: сталь, жидкости и ёмкости, медицина, инструменты, станции (Data/Progression.cs)
+            StationDefs.Register(Add);
+
             // устанавливаемое
             Add("deploy_workbench", "Верстак", ItemCategory.Deployable).Deploy = DeployKind.Workbench;
             Add("deploy_workbench2", "Верстак 2", ItemCategory.Deployable).Deploy = DeployKind.Workbench;
@@ -260,6 +275,13 @@ namespace Rastvordd.Sim
 
         /// <summary>Что даёт переработчик за одну штуку (D33): детали — лом и металл, крафтовые вещи — половину рецепта.</summary>
         public static List<(string id, int n)> RecycleYield(string id)
+        {
+            var list = RecycleBase(id);
+            if (id != null && Prog.RecycleAlloy.TryGetValue(id, out int alloy)) list.Add((Prog.Alloy, alloy));   // легированная сталь (D54)
+            return list;
+        }
+
+        static List<(string id, int n)> RecycleBase(string id)
         {
             var list = new List<(string, int)>();
             if (id != null && Weaponry.Info.TryGetValue(id, out var meta) && meta.Recycle != null) { list.AddRange(meta.Recycle); return list; }
@@ -499,6 +521,7 @@ namespace Rastvordd.Sim
         public (string id, int count)[] Cost;
         public float Time;
         public int Bench;        // какой уровень верстака нужен рядом: 0 — можно в руках, 1–3
+        public DeployKind Station;   // станция рядом обязательна (D54: оружейный стол, медстол, химстол…); None — не нужна
     }
 
     public static class Recipes
@@ -530,7 +553,7 @@ namespace Rastvordd.Sim
             new Recipe { Output = "deploy_workbench3", Cost = new[] { ("metal_fragments", 600), ("scrap", 400), ("comp_circuit", 3), ("comp_gears", 5) }, Time = 25, Bench = 2 },
         };
 
-        static Recipes() { Weaponry.AddRecipes(All); Clothing.AddRecipes(All); }   // стволы, патроны, обвесы, станок (D46); одежда (D47)
+        static Recipes() { Weaponry.AddRecipes(All); Clothing.AddRecipes(All); StationDefs.AddRecipes(All); }   // + D54: сталь, станции, ёмкости, инструменты   // стволы, патроны, обвесы, станок (D46); одежда (D47)
     }
 
     /// <summary>Узел дерева изучения: изучается за металлолом у верстака нужного уровня после предков.</summary>
@@ -557,7 +580,7 @@ namespace Rastvordd.Sim
             new TechNode { Id = "expl_c4", Bench = 3, Scrap = 160, Requires = new[] { "expl_satchel" }, Col = 2, Row = 0 },
         };
 
-        static Tech() { Weaponry.AddTech(All); Clothing.AddTech(All); }   // ветка оружия и обвесов (D46), комплекты одежды (D47)
+        static Tech() { Weaponry.AddTech(All); Clothing.AddTech(All); StationDefs.AddTech(All); }   // ветка оружия и обвесов (D46), комплекты одежды (D47)
 
         public static TechNode Get(string id) => All.Find(n => n.Id == id);
 
@@ -572,7 +595,7 @@ namespace Rastvordd.Sim
     public sealed class CraftJob
     {
         public Recipe Recipe;
-        public float Left;
+        public float Left, Total;
     }
 
     public enum Team { Player = 0, Npc = 1 }
@@ -602,6 +625,7 @@ namespace Rastvordd.Sim
         public bool Swimming;           // в воде: медленно, без оружия
         public bool IsBot;              // бот: E — быстрые действия, у живого игрока — окна
         public bool WantsCraftMenu;     // нажал E у верстака — клиент откроет дерево изучения
+        public bool WantsCraftList;     // …а у станции (D54) — сразу список крафта
         public readonly HashSet<string> Known = new();   // изученные узлы дерева (примитив известен всегда, см. Tech)
         public bool Spectator;          // наблюдатель: летает, видит всё, мир его не замечает
         public UiKind OpenUi;
@@ -625,6 +649,7 @@ namespace Rastvordd.Sim
         // одежда (D47): 10 слотов (WearSlot), пластины перед/спина; радиация и холод
         public readonly ItemSlot[] Worn = new ItemSlot[Clothing.Slots];
         public readonly ItemSlot[] Plates = new ItemSlot[Clothing.PlateSlots];
+        public float Poison;            // отравление сырой водой (D54): секунд осталось
         public float RadDose;           // накопленная доза
         public float Cold;              // переохлаждение 0..100
         public float WetLeft;           // мокрый ещё столько секунд (вода, дождь)
@@ -639,6 +664,7 @@ namespace Rastvordd.Sim
         public int Count(string id)
         {
             if (id == "fuse") return Fuses;
+            if (Liquids.Is(id)) return (int)(Liquids.Total(Pack, id) + Liquids.Total(Belt, id) + 1e-3f);   // литры в ёмкостях (D54)
             int n = 0;
             foreach (var s in Pack) if (s != null && s.Id == id) n += s.Count;
             foreach (var s in Belt) if (s != null && s.Id == id && s.State == null) n += s.Count;
@@ -650,6 +676,7 @@ namespace Rastvordd.Sim
         {
             if (count <= 0) return 0;
             if (id == "fuse") { Fuses += count; return count; }
+            if (Liquids.Is(id)) return Liquids.AddToActor(this, id, count);   // жидкость — в ёмкости (нет места — в новую канистру)
             var def = Items.Get(id);
             int max = Items.MaxStack(id), left = count;
             bool holdable = def != null && def.Holdable;
@@ -707,6 +734,7 @@ namespace Rastvordd.Sim
         public int Take(string id, int count)
         {
             if (id == "fuse") { int f = System.Math.Min(Fuses, System.Math.Max(0, count)); Fuses -= f; return f; }
+            if (Liquids.Is(id)) return Liquids.TakeFromActor(this, id, count);
             int taken = 0;
             for (int pass = 0; pass < 2 && taken < count; pass++)
             {
@@ -764,7 +792,7 @@ namespace Rastvordd.Sim
         };
     }
 
-    public enum PickupKind { Hemp, Berries, WaterBarrel, Fuse, PunchCard, LocalItem }
+    public enum PickupKind { Hemp, Berries, WaterBarrel, Fuse, PunchCard, LocalItem, OilBarrel, CanisterPile }   // OilBarrel / CanisterPile — бочка с мазутом / ржавые канистры: нефть в ёмкость (D54)
 
     /// <summary>То, что собирают руками по E: конопля, ягоды, бочка с водой.</summary>
     public sealed class Pickup
@@ -812,7 +840,10 @@ namespace Rastvordd.Sim
         // спальник: после возрождения в нём — перезарядка
         public float ReadyAt;
         public bool On = true;           // печь зажжена (игрок включает в окне)
-        public bool Burning => On && Fuel > 0 && (Ore > 0 || SulfurOre > 0);
+        public bool Powered;             // станция под током генератора (D54; считается каждую секунду, не сохраняется)
+        public float Work;               // станции D54: таймер текущей работы
+        public bool Active;              // станция D54 работает (горит, крутится) — для клиента и тепла
+        public bool Burning => Kind == DeployKind.Furnace ? On && Fuel > 0 && (Ore > 0 || SulfurOre > 0) : Active;
     }
 
     public sealed class Projectile

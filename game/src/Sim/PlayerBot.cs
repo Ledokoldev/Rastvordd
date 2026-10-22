@@ -534,7 +534,7 @@ namespace Rastvordd.Sim
             {
                 if (id == "metal_fragments") { _metalGoal = Math.Max(_metalGoal, count + 60); SmeltOrMine(ref cmd); return false; }
                 if (id == "scrap") { GetScrap(count, MyBox(), ref cmd); return false; }
-                if (id.StartsWith("comp_")) { _partsWant[id] = Math.Max(_partsWant.GetValueOrDefault(id), count - Stock(id)); _partsWantAt = _w.Time; }
+                if (IsOrdered(id)) { _partsWant[id] = Math.Max(_partsWant.GetValueOrDefault(id), count - Stock(id)); _partsWantAt = _w.Time; }
                 Doing = $"нет: {Items.Name(id)}";
                 return false;
             }
@@ -727,9 +727,9 @@ namespace Rastvordd.Sim
 
         int _metalGoal = 300;
         // ветка оружия D46: Наган → Самоделка (тир 1), 7,62 → Грач / СВТ (тир 2), АКМ / СВД (тир 3); дробовики и элиту не учат — их только находят
-        static readonly string[] ResearchOrder = { "lock_code", "gunpowder", "ammo_9mm", "weapon_nagant", "weapon_homesmg", "ammo_12g", "weapon_crossbow", "weapon_grach", "ammo_762", "weapon_svt40", "expl_satchel", "weapon_akm", "weapon_svd", "expl_c4" };
+        static readonly string[] ResearchOrder = { "lock_code", "gunpowder", "ammo_9mm", "weapon_nagant", "weapon_homesmg", "ammo_12g", "weapon_crossbow", "weapon_grach", "ammo_762", "weapon_svt40", "expl_satchel", "deploy_guntable", "weapon_akm", "weapon_svd", "expl_c4" };   // оружейный стол (D54) — до стволов тира 3
         // агрессивные (бродяги и задиристые фермеры) учат бомбы раньше патронов 7,62: рейды — на втором часу, а не «никогда»
-        static readonly string[] ResearchOrderRaider = { "lock_code", "gunpowder", "ammo_9mm", "weapon_nagant", "weapon_homesmg", "ammo_12g", "expl_satchel", "weapon_crossbow", "weapon_grach", "ammo_762", "weapon_svt40", "weapon_akm", "expl_c4", "weapon_svd" };
+        static readonly string[] ResearchOrderRaider = { "lock_code", "gunpowder", "ammo_9mm", "weapon_nagant", "weapon_homesmg", "ammo_12g", "expl_satchel", "weapon_crossbow", "weapon_grach", "ammo_762", "weapon_svt40", "deploy_guntable", "weapon_akm", "expl_c4", "weapon_svd" };
         string[] MyResearchOrder => Aggression > 0.45f ? ResearchOrderRaider : ResearchOrder;
         static readonly string[] BenchIds = { "deploy_workbench", "deploy_workbench2", "deploy_workbench3" };
 
@@ -818,7 +818,7 @@ namespace Rastvordd.Sim
                 if (id == "scrap") { WantScrap(n - _me.Count("scrap")); return GetScrap(n, box, ref cmd); }
                 if (id == "metal_fragments") { _metalGoal = Math.Max(_metalGoal, n + 60); Doing = $"копит металл на {Items.Name(bench)} ({metal}/{n})"; return metal >= n ? false : false; }
                 // детали (верстак 3: платы ×3, шестерни ×5) — с РТ и со станка: заказать и заняться другим (D49)
-                if (id.StartsWith("comp_")) { _partsWant[id] = Math.Max(_partsWant.GetValueOrDefault(id), n - Stock(id)); _partsWantAt = _w.Time; return false; }
+                if (IsOrdered(id)) { _partsWant[id] = Math.Max(_partsWant.GetValueOrDefault(id), n - Stock(id)); _partsWantAt = _w.Time; return false; }
                 return !Need(id, n, ref cmd) || true;
             }
             // всё есть — крафтим у текущего верстака
@@ -836,7 +836,7 @@ namespace Rastvordd.Sim
         readonly Dictionary<string, int> _partsWant = new();
         float _partsWantAt = -999;
 
-        static bool IsPart(string id) => id.StartsWith("comp_");
+        static bool IsPart(string id) => IsOrdered(id);   // детали и легированная сталь (D54) — «заказ» на РТ
 
         /// <summary>Лучший свой ствол (даже без патронов), не сломанный.</summary>
         string BestOwnedGun()
@@ -884,9 +884,14 @@ namespace Rastvordd.Sim
                 if (!_me.Known.Contains(g) || Recipe(g) < 0) continue;
                 var r = Recipes.All[Recipe(g)];
                 if (r.Bench > lvl) continue;
+                if (r.Station != DeployKind.None && MyStation(r.Station) == null && StationDefs.Get(r.Station) is StationDef sd && Tech.Get(sd.Item) != null && !_me.Known.Contains(sd.Item)) continue;   // станция не изучена
                 bool parts = true;
-                foreach (var (id, n) in r.Cost)
-                    if (IsPart(id) && Stock(id) < n) { parts = false; _partsWant[id] = Math.Max(_partsWant.GetValueOrDefault(id), n - Stock(id)); _partsWantAt = _w.Time; }
+                var need = new Dictionary<string, int>();
+                foreach (var (id, n) in r.Cost) if (IsPart(id)) need[id] = n;
+                if (r.Station != DeployKind.None && MyStation(r.Station) == null && !Has(StationDefs.Get(r.Station)?.Item ?? ""))   // станции ещё нет — её детали и сталь тоже (D54)
+                    foreach (var (id, n) in Recipes.All[Recipe(StationDefs.Get(r.Station).Item)].Cost) if (IsPart(id)) need[id] = need.GetValueOrDefault(id) + n;
+                foreach (var (id, n) in need)
+                    if (Stock(id) < n) { parts = false; _partsWant[id] = Math.Max(_partsWant.GetValueOrDefault(id), n - Stock(id)); _partsWantAt = _w.Time; }
                 if (!parts) continue;
                 Doing = $"собирает {Items.Name(g)}";
                 return CraftAtBench(g, box, ref cmd);
@@ -945,6 +950,13 @@ namespace Rastvordd.Sim
         bool CraftAtBench(string output, Deployable box, ref InputCmd cmd)
         {
             var r = Recipes.All[Recipe(output)];
+            Deployable station = null;
+            if (r.Station != DeployKind.None)
+            {
+                // рецепт станции (D54): сначала сама станция у дома
+                station = EnsureStation(r.Station, box, ref cmd, out bool busy);
+                if (station == null) return busy;
+            }
             foreach (var (id, n) in r.Cost)
             {
                 if (_me.Count(id) >= n) continue;
@@ -953,7 +965,8 @@ namespace Rastvordd.Sim
                 if (id == "metal_fragments") { _metalGoal = Math.Max(_metalGoal, n + 60); return false; }
                 return !Need(id, n, ref cmd) || true;
             }
-            if (r.Bench > 0 && !GoTo(BenchStand, 0.6f, ref cmd)) { Doing = $"идёт крафтить {Items.Name(output)}"; return true; }
+            if (station != null) { if (!Reach(station.Pos, ref cmd, 1.2f)) { Doing = $"идёт к станции: {Items.Name(output)}"; return true; } }
+            else if (r.Bench > 0 && !GoTo(BenchStand, 0.6f, ref cmd)) { Doing = $"идёт крафтить {Items.Name(output)}"; return true; }
             if (!Craft(output, ref cmd)) Doing = $"не может скрафтить {Items.Name(output)}";
             return true;
         }

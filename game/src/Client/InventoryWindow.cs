@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -95,8 +95,10 @@ namespace Rastvordd.Client
                     var dotAt = Number == null ? new Vector2(13.5f, 13.5f) : new Vector2(s - 13.5f, 13.5f);
                     UiTheme.DrawDot(this, dotAt, 3.5f, new Color(UiTheme.RarityColor(Cell.Rarity), a));
                 }
-                bool worn = Cell.Durability >= 0;
-                if (worn)   // износ ствола — тонкая полоска по низу ячейки
+                bool worn = Cell.Durability >= 0 || Cell.Capacity > 0;
+                if (Cell.Capacity > 0)   // ёмкость (D54): сколько налито — полоска цвета жидкости
+                    UiTheme.DrawBar(this, new Rect2(9, s - 7, s - 18, 3), Cell.Liters / Cell.Capacity, new Color(ItemCard.LiquidColor(Cell.Liquid), a), new Color(1, 1, 1, 0.1f * a));
+                else if (worn)   // износ ствола — тонкая полоска по низу ячейки
                     UiTheme.DrawBar(this, new Rect2(9, s - 7, s - 18, 3), Cell.Durability, new Color(UiTheme.DurabilityColor(Cell.Durability), a), new Color(1, 1, 1, 0.1f * a));
                 DrawAttPips(this, Cell, new Vector2(12, s - (worn ? 14 : 11)), a);
                 string n = Cell.Magazine > 0 ? $"{Cell.Ammo}/{Cell.Magazine}" : Cell.Count > 1 ? (Cell.Count >= 10000 ? $"{Cell.Count / 1000}k" : Cell.Count.ToString()) : "";
@@ -347,6 +349,19 @@ namespace Rastvordd.Client
         readonly Label _durText;
         readonly WearStatsView _wearStats = new();   // одежда и пластины: пули / радиация / тепло / скорость (D47)
         string _sig;
+        // ёмкость (D54): что налито, полоска, кнопки «Налить / Вылить / Выпить»
+        readonly VBoxContainer _liqBox;
+        readonly ThinBar _liqBar;
+        readonly Label _liqText;
+        readonly Button _drinkBtn;
+        public event Action<UiOp> ContainerOp;
+
+        public static Color LiquidColor(string liquid) => liquid switch
+        {
+            "water_raw" => new Color(0.55f, 0.6f, 0.4f), "water_boiled" => new Color(0.55f, 0.8f, 1f),
+            "crude" => new Color(0.6f, 0.45f, 0.3f), "fuel" => new Color(0.85f, 0.65f, 0.25f), "diesel" => new Color(0.9f, 0.3f, 0.25f),
+            _ => new Color(1, 1, 1, 0.3f),
+        };
 
         public ItemCard()
         {
@@ -372,6 +387,25 @@ namespace Rastvordd.Client
             _desc.CustomMinimumSize = new Vector2(W - 2 * UiTheme.PanelPad, 0);
             box.AddChild(_desc);
             box.AddChild(_wearStats);
+            _liqBox = UiTheme.VBox(6);
+            _liqBox.AddChild(Gap(8));
+            var lrow = UiTheme.HBox(10);
+            _liqText = UiTheme.Strong("", UiTheme.FontSmall);
+            _liqText.AutowrapMode = TextServer.AutowrapMode.Off;
+            lrow.AddChild(_liqText);
+            _liqBar = new ThinBar { CustomMinimumSize = new Vector2(0, 6), SizeFlagsHorizontal = SizeFlags.ExpandFill, SizeFlagsVertical = SizeFlags.ShrinkCenter };
+            lrow.AddChild(_liqBar);
+            _liqBox.AddChild(lrow);
+            var lbtn = UiTheme.HBox(6);
+            foreach (var (t, op) in new[] { ("Налить", UiOp.Fill), ("Вылить", UiOp.Empty), ("Выпить", UiOp.Drink) })
+            {
+                var b = UiTheme.Btn(t, op == UiOp.Fill, 96, 32);
+                b.Pressed += () => ContainerOp?.Invoke(op);
+                lbtn.AddChild(b);
+                if (op == UiOp.Drink) _drinkBtn = b;
+            }
+            _liqBox.AddChild(lbtn);
+            box.AddChild(_liqBox);
             _empty = UiTheme.Small("Наведи на предмет или кликни по нему — здесь появится, для чего он нужен.", UiTheme.Dim, UiTheme.FontBody);
             _empty.CustomMinimumSize = new Vector2(W - 2 * UiTheme.PanelPad, 0);
             box.AddChild(_empty);
@@ -447,7 +481,7 @@ namespace Rastvordd.Client
             var cv = cell ?? default;
             string id = cv.Id;
             int count = cv.Count;
-            string sig = id + "|" + count + "|" + cv.Durability.ToString("0.00") + "|" + (cv.Att != null ? string.Join(",", cv.Att) : "");
+            string sig = id + "|" + count + "|" + cv.Durability.ToString("0.00") + "|" + (cv.Att != null ? string.Join(",", cv.Att) : "") + "|" + cv.Liquid + cv.Liters.ToString("0.00");
             if (sig == _sig) return;
             _sig = sig;
             bool has = id != null;
@@ -462,6 +496,13 @@ namespace Rastvordd.Client
             _icon.Rarity = has ? Items.Rarity(id) : 0;
             _icon.QueueRedraw();
             _usesBox.Visible = _recBox.Visible = has;
+            _liqBox.Visible = has && cv.Capacity > 0;
+            if (_liqBox.Visible)
+            {
+                _liqText.Text = cv.Liquid == null || cv.Liters <= 0.001f ? $"Пусто · {cv.Capacity:0.#} л" : $"{Items.Name(cv.Liquid)} {cv.Liters:0.#} / {cv.Capacity:0.#} л";
+                _liqBar.Value = cv.Liters / cv.Capacity; _liqBar.Fill = LiquidColor(cv.Liquid); _liqBar.QueueRedraw();
+                _drinkBtn.Disabled = cv.Liquid is not ("water_raw" or "water_boiled");
+            }
             if (!has) { _wearStats.Visible = false; return; }
 
             int rar = Items.Rarity(id);
@@ -595,6 +636,7 @@ namespace Rastvordd.Client
             string desc = Items.Desc(c.Id);
             if (c.Magazine > 0) desc = $"В магазине {c.Ammo}/{c.Magazine}. " + desc;
             if (c.Durability >= 0) desc = $"Состояние {Mathf.RoundToInt(c.Durability * 100)}%. " + desc;
+            if (c.Capacity > 0) desc = (c.Liquid == null || c.Liters <= 0.001f ? $"Пусто ({c.Capacity:0.#} л). " : $"{Items.Name(c.Liquid)}: {c.Liters:0.#} из {c.Capacity:0.#} л. ") + desc;   // ёмкость (D54)
             if (WearStatsView.Line(c.Id) is string wl) desc = wl + ". " + desc;   // одежда (D47)
             if (c.Att != null)
             {
@@ -762,6 +804,7 @@ namespace Rastvordd.Client
 
             // ---- карточка предмета ----
             _card = new ItemCard();
+            _card.ContainerOp += op => { if (_sel.inv != null) Op?.Invoke(op, $"{_sel.inv}#{_sel.i}"); };   // кнопки ёмкости (D54)
             row.AddChild(_card);
 
             // ---- контейнер (вместо снаряжения и карточки) ----
@@ -904,7 +947,7 @@ namespace Rastvordd.Client
         void RefreshContainer(UiView ui)
         {
             _contTitle.Text = Cap(ui.Title);
-            string inv = ui.Kind switch { UiKind.Furnace => "fur", UiKind.Claim => "claim", _ => "cont" };
+            string inv = ui.Kind switch { UiKind.Furnace => "fur", UiKind.Claim => "claim", UiKind.Tank => "tank", _ => "cont" };
             string sig = inv + ui.Kind + ui.Machine + ui.Cells.Count;
             if (sig != _contSig)
             {
@@ -942,8 +985,12 @@ namespace Rastvordd.Client
                     if (_furnaceLine != null)
                         _furnaceLine.Text = $"Дерева хватит на {Clock(ui.FuelSeconds)} · руды на {Clock(ui.OreSeconds)}";
                     break;
-                case UiKind.Recycler when ui.Machine == "lathe":
-                    RefreshLathe(ui);
+                case UiKind.Recycler when ui.Machine != null && ui.Machine != "recycler":
+                    RefreshLathe(ui);   // токарный станок и станции D54 — одно окно «материалы → выход»
+                    break;
+                case UiKind.Tank:
+                    _badge.Set(ui.Cells.Count > 0 && ui.Cells[0].Id != null ? "Налито" : "Пусто", ui.Cells.Count > 0 && ui.Cells[0].Id != null ? UiTheme.Good : UiTheme.Faint);
+                    _contInfo.Text = ui.Info ?? "";
                     break;
                 case UiKind.Recycler:
                     if (ui.On) _badge.Set("Работает", UiTheme.Good); else _badge.Set("Остановлен", UiTheme.Faint);
@@ -979,6 +1026,8 @@ namespace Rastvordd.Client
                         Button(ui.On ? "Остановить" : "Запустить", UiOp.Toggle, true);
                         Button("Забрать всё", UiOp.TakeAll);
                         break;
+                    case UiKind.Tank:
+                        break;
                     default:
                         Button("Забрать всё", UiOp.TakeAll, true);
                         if (ui.Kind == UiKind.Box) Button("Сложить всё", UiOp.PutAll);
@@ -994,14 +1043,17 @@ namespace Rastvordd.Client
         /// <summary>Станок: состояние, текущая деталь с прогрессом, список рецептов «детали → деталь» с тем, чего не хватает.</summary>
         void RefreshLathe(UiView ui)
         {
-            if (ui.Making != null) _badge.Set("Точит", UiTheme.Good);
-            else if (ui.On) _badge.Set("Ждёт материалов", UiTheme.Dim);
+            bool lathe = ui.Machine == "lathe";
+            if (ui.Making != null) _badge.Set(lathe ? "Точит" : "Работает", UiTheme.Good);
+            else if (ui.Burning) _badge.Set("Работает", UiTheme.Good);
+            else if (ui.On) _badge.Set(lathe ? "Ждёт материалов" : "Ждёт", UiTheme.Dim);
             else _badge.Set("Остановлен", UiTheme.Faint);
-            _contInfo.Text = ui.On ? "" : "Положи материалы и нажми «Запустить». Точит самую сложную деталь, на которую хватает; шумно";
+            _contInfo.Text = lathe ? (ui.On ? "" : "Положи материалы и нажми «Запустить». Точит самую сложную деталь, на которую хватает; шумно") : ui.Info ?? "";
             if (_latheJob == null) return;
 
             var have = new Dictionary<string, int>();
-            foreach (var c in ui.Cells) if (c.Id != null && c.Durability < 0) have[c.Id] = have.GetValueOrDefault(c.Id) + c.Count;
+            foreach (var c in ui.Cells) if (c.Id != null && c.Durability < 0 && c.Capacity <= 0) have[c.Id] = have.GetValueOrDefault(c.Id) + c.Count;
+            foreach (var c in ui.Cells) if (c.Liquid != null) have[c.Liquid] = have.GetValueOrDefault(c.Liquid) + (int)(c.Liters + 0.001f);   // литры в ёмкостях (D54)
             string sig = ui.Making + "|" + (int)(ui.Progress * 100) + "|" + string.Join(";", have.Select(kv => kv.Key + kv.Value)) + "|" + string.Join(";", ui.Makes.Select(m => m.can ? "1" : "0"));
             if (sig == _latheSig) return;
             _latheSig = sig;
@@ -1015,7 +1067,7 @@ namespace Rastvordd.Client
                 col.SizeFlagsHorizontal = SizeFlags.ExpandFill;
                 col.SizeFlagsVertical = SizeFlags.ShrinkCenter;
                 var top = UiTheme.HBox(8);
-                var nm = UiTheme.Strong("Точит: " + Items.Name(ui.Making), UiTheme.FontBody);
+                var nm = UiTheme.Strong((lathe ? "Точит: " : "Делает: ") + Items.Name(ui.Making), UiTheme.FontBody);
                 nm.SizeFlagsHorizontal = SizeFlags.ExpandFill;
                 top.AddChild(nm);
                 top.AddChild(UiTheme.Strong($"{Mathf.RoundToInt(ui.Progress * 100)}%", UiTheme.FontSmall, UiTheme.Accent));
@@ -1025,16 +1077,18 @@ namespace Rastvordd.Client
             }
             else
             {
-                var e = UiTheme.Small(ui.On ? "Ничего не точит — не хватает материалов ни на одну деталь" : "Станок остановлен", UiTheme.Dim, UiTheme.FontSmall);
+                var e = UiTheme.Small(!lathe ? (ui.Burning ? "Работает" : ui.On ? "Ничего не делает — не хватает материалов, топлива или тока" : "Остановлена") : ui.On ? "Ничего не точит — не хватает материалов ни на одну деталь" : "Станок остановлен", UiTheme.Dim, UiTheme.FontSmall);
                 e.SizeFlagsVertical = SizeFlags.ShrinkCenter;
+                e.SizeFlagsHorizontal = SizeFlags.ExpandFill;   // иначе короткая строка («Работает») переносится по буквам
                 _latheJob.AddChild(e);
             }
 
             // рецепты
             foreach (var c in _latheList.GetChildren()) c.QueueFree();
-            for (int i = 0; i < Weaponry.Lathe.Count; i++)
+            var recipes = StationDefs.RecipesFor(ui.Machine);
+            for (int i = 0; i < recipes.Count; i++)
             {
-                var r = Weaponry.Lathe[i];
+                var r = recipes[i];
                 bool can = i < ui.Makes.Count ? ui.Makes[i].can : !r.Bench3;
                 bool enough = can && r.In.All(x => have.GetValueOrDefault(x.id) >= x.n);
                 bool now = r.Output == ui.Making;
@@ -1152,16 +1206,17 @@ namespace Rastvordd.Client
                     _contBody.AddChild(UiTheme.Small("Руда → металл · серная руда → сера · дерево → уголь", UiTheme.Faint, UiTheme.FontCaption));
                     break;
                 }
-                case UiKind.Recycler when ui.Machine == "lathe":
+                case UiKind.Recycler when ui.Machine != null && ui.Machine != "recycler":
                 {
-                    // токарный станок: материалы → деталь (как печь, но рецептов много)
-                    _contBody.AddChild(UiTheme.Caption("Материалы"));
+                    // токарный станок и станции D54: материалы → выход (как печь, но рецептов много)
+                    bool lathe = ui.Machine == "lathe";
+                    _contBody.AddChild(UiTheme.Caption(lathe ? "Материалы" : ui.Makes.Count > 0 ? "Материалы, топливо, ёмкости" : ui.Machine == "conveyor" ? "Фильтр: что носить" : "Топливо и выход"));
                     var grid = Grid(_contBody, 6);
                     for (int i = 0; i < ui.Cells.Count; i++) _cont.Add(AddCell(grid, inv, i, 64));
                     _latheJob = UiTheme.HBox(12);
                     _latheJob.CustomMinimumSize = new Vector2(0, 48);
                     _contBody.AddChild(_latheJob);
-                    _contBody.AddChild(UiTheme.Caption("Что точит станок · детали → деталь"));
+                    if (ui.Makes.Count > 0) _contBody.AddChild(UiTheme.Caption(lathe ? "Что точит станок · детали → деталь" : "Что делает · материалы → выход"));
                     _latheList = new GridContainer { Columns = 2 };
                     _latheList.AddThemeConstantOverride("h_separation", 8);
                     _latheList.AddThemeConstantOverride("v_separation", 6);
@@ -1183,6 +1238,19 @@ namespace Rastvordd.Client
                     note.CustomMinimumSize = new Vector2(220, 0);
                     res.AddChild(note);
                     _contBody.AddChild(res);
+                    break;
+                }
+                case UiKind.Tank:
+                {
+                    // бочка 200 л (D54): одна ячейка-бак; канистру сюда — долить, отсюда на ёмкость — налить
+                    _contBody.AddChild(UiTheme.Caption("Бак"));
+                    var row = UiTheme.HBox(12);
+                    _contBody.AddChild(row);
+                    _cont.Add(AddCell(row, inv, 0, 96));
+                    var note = UiTheme.Small("Перетащи канистру на бак — перельётся. Перетащи бак на пустую ёмкость в рюкзаке — нальётся. Генератор, буровая и станки в 3 м берут топливо отсюда.", UiTheme.Dim, UiTheme.FontSmall);
+                    note.CustomMinimumSize = new Vector2(380, 0);
+                    note.SizeFlagsVertical = SizeFlags.ShrinkCenter;
+                    row.AddChild(note);
                     break;
                 }
                 case UiKind.Claim:
@@ -1250,7 +1318,7 @@ namespace Rastvordd.Client
             _contButtons.AddChild(b);
         }
 
-        public static bool Same(CellView a, CellView b) => a.Id == b.Id && a.Count == b.Count && a.Hidden == b.Hidden && a.Ammo == b.Ammo && a.Label == b.Label
+        public static bool Same(CellView a, CellView b) => a.Id == b.Id && a.Count == b.Count && a.Hidden == b.Hidden && a.Ammo == b.Ammo && a.Label == b.Label && a.Liquid == b.Liquid && Mathf.IsEqualApprox(a.Liters, b.Liters)
             && Mathf.IsEqualApprox(a.Durability, b.Durability) && SameAtt(a.Att, b.Att);
 
         static bool SameAtt(string[] a, string[] b)

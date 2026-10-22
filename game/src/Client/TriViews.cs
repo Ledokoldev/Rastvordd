@@ -87,7 +87,7 @@ namespace Rastvordd.Client
             float h = _cut ? Mathf.Min(_h, Iso.H(0.45f)) : _h;
             var up = new Vector2(0, -h);
             var (frontTex, topTex) = WallView2D.BuiltTextures(_tier, _door);
-            var tint = _tier == 0 ? new Color(0.85f, 0.92f, 1.05f) : _tier >= 4 ? new Color(0.62f, 0.66f, 0.74f) : Colors.White;
+            var tint = _tier == 0 ? new Color(0.85f, 0.92f, 1.05f) : _tier >= 5 ? new Color(0.44f, 0.46f, 0.52f) : _tier >= 4 ? new Color(0.62f, 0.66f, 0.74f) : Colors.White;
             var fc = new Color(0.78f * tint.R, 0.78f * tint.G, 0.78f * tint.B, _alpha);
             var tc = new Color(1.05f * tint.R, 1.05f * tint.G, 1.05f * tint.B, _alpha);
             DrawColoredPolygon(new[] { _f0 + new Vector2(3, 0), _f1 + new Vector2(3, 0), _f1 + new Vector2(3, 4), _f0 + new Vector2(3, 4) }, new Color(0, 0, 0, 0.18f));

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -19,7 +19,8 @@ namespace Rastvordd.Sim
         public Vector2 A, B, C;        // ребро: A–B; треугольник: A–B — край, к которому приставлен, C — вершина
         public int Tier;               // 0 разметка, 1 дерево, 2 камень, 3 металл, 4 сталь
         public float Hp;
-        public bool Open;              // дверь открыта
+        public bool Open;              // дверь открыта; у окна — ставни закрыты (D54)
+        public bool Shutters;          // на окне решётка со ставнями (D54)
         public bool Locked;            // на двери замок
         public bool KeyLock;           // замок с ключом (иначе кодовый)
         public int Code;
@@ -47,11 +48,11 @@ namespace Rastvordd.Sim
         public const float WindowH = 1.0f;     // подоконник: укрытие, обзор и пули проходят
         public const float PostW = 0.5f;       // косяк дверного проёма
         public const float BuildRange = 6f;
-        public const int MaxTier = 4;
+        public const int MaxTier = 5;   // 5 — броня (D54): легированная сталь поверх стали
         public static readonly float TriHeight = Cell * MathF.Sqrt(3) / 2f;
 
-        public static readonly string[] TierNames = { "каркас", "дерево", "камень", "металл", "сталь" };
-        static readonly float[] TierHp = { 10, 250, 500, 1000, 2000 };
+        public static readonly string[] TierNames = { "каркас", "дерево", "камень", "металл", "сталь", Prog.ArmorTierName };
+        static readonly float[] TierHp = { 10, 250, 500, 1000, 2000, Prog.ArmorTierHp };
 
         public static bool IsFloor(StructKind k) => k is StructKind.Foundation or StructKind.TriFoundation;
 
@@ -87,7 +88,8 @@ namespace Rastvordd.Sim
             float m = k == StructKind.Foundation ? 1.5f : k == StructKind.TriFoundation ? 0.75f : k == StructKind.Window || k == StructKind.Doorway ? 0.7f : 1f;
             int N(float v) => Math.Max(5, (int)MathF.Round(v * m / 5f) * 5);
             if (k == StructKind.Door)
-                return tier <= 1 ? new[] { ("wood", 50) } : tier == 2 ? new[] { ("stone", 75) } : tier == 3 ? new[] { ("metal_fragments", 40) } : new[] { ("metal_fragments", 75), ("scrap", 10) };
+                return tier <= 1 ? new[] { ("wood", 50) } : tier == 2 ? new[] { ("stone", 75) } : tier == 3 ? new[] { ("metal_fragments", 40) } : tier == 4 ? new[] { ("metal_fragments", 75), ("scrap", 10) } : Prog.ArmorDoorCost;
+            if (tier >= 5) return Array.ConvertAll(Prog.ArmorWallCost, c => (c.Item1, Math.Max(1, (int)MathF.Round(c.Item2 * m))));   // бронеуровень (D54)
             // в 4–6 раз дешевле растовского: дерево даёт 120–200, камень 150 (2026-10-21) — дом 2×2 из дерева ≈ 4 дерева
             return tier switch
             {
@@ -99,10 +101,17 @@ namespace Rastvordd.Sim
             };
         }
 
+        /// <summary>Содержание считается от цены уровня; бронеуровень (сталь не кладут в шкаф) — металлом и ломом, как вдвое «стали» (D54).</summary>
+        public static (string id, int n)[] UpkeepCost(StructKind k, int tier)
+        {
+            if (tier < 5) return Cost(k, tier);
+            return Array.ConvertAll(Cost(k, 4), c => (c.id, c.n * 2));
+        }
+
         /// <summary>Во сколько раз урон по постройке меньше/больше: инструментом — только слабые уровни, пулями — двери и разметка (D22).</summary>
         public static float MeleeMult(StructKind k, int tier) => tier switch { 0 => 1f, 1 => k == StructKind.Door ? 0.35f : 0.25f, _ => 0f };
         public static float BulletMult(StructKind k, int tier) =>
-            tier == 0 ? 1f : k == StructKind.Door ? (tier == 1 ? 0.5f : tier == 2 ? 0.3f : tier == 3 ? 0.15f : 0.06f) : 0f;
+            tier == 0 ? 1f : k == StructKind.Door ? (tier == 1 ? 0.5f : tier == 2 ? 0.3f : tier == 3 ? 0.15f : tier == 4 ? 0.06f : Prog.ArmorDoorBulletMult) : 0f;
 
         public static (int i, int j) CellOf(Vector2 p) => ((int)MathF.Floor(p.X / Cell), (int)MathF.Floor(p.Y / Cell));
         public static Vector2 CellCenter(int i, int j) => new((i + 0.5f) * Cell, (j + 0.5f) * Cell);
@@ -189,7 +198,7 @@ namespace Rastvordd.Sim
             {
                 case StructKind.Wall: list.Add((0, 1, WallH, false)); break;
                 case StructKind.Doorway: list.Add((0, post, WallH, false)); list.Add((1 - post, 1, WallH, false)); break;
-                case StructKind.Window: list.Add((0, 0.3f, WallH, false)); list.Add((0.7f, 1, WallH, false)); list.Add((0.3f, 0.7f, WindowH, true)); break;
+                case StructKind.Window: list.Add((0, 0.3f, WallH, false)); list.Add((0.7f, 1, WallH, false)); list.Add(open ? (0.3f, 0.7f, WallH, false) : (0.3f, 0.7f, WindowH, true)); break;   // окно: Open — ставни закрыты (D54)
                 case StructKind.Door: if (!open) list.Add((post, 1 - post, WallH, false)); break;
             }
             return list;
@@ -715,7 +724,7 @@ namespace Rastvordd.Sim
             foreach (var s in Structures)
             {
                 if (s.ClaimId != claim.Id) continue;
-                foreach (var (id, n) in Building.Cost(s.Kind, s.Tier))
+                foreach (var (id, n) in Building.UpkeepCost(s.Kind, s.Tier))
                     need[id] = need.GetValueOrDefault(id) + n * UpkeepPerHour;
             }
             float b = ClaimLoad(claim).b;
@@ -787,7 +796,7 @@ namespace Rastvordd.Sim
                 foreach (var s in new List<Structure>(Structures))
                 {
                     if (s.ClaimId != claim.Id) continue;
-                    foreach (var (id, _) in Building.Cost(s.Kind, s.Tier))
+                    foreach (var (id, _) in Building.UpkeepCost(s.Kind, s.Tier))
                         if (lacking.Contains(id)) { DamageStructure(s, s.MaxHp * DecayPerMinute / 60f, -1); break; }
                 }
             }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -36,7 +36,9 @@ namespace Rastvordd.Sim
             // [DeployKind.Barrel200] = Full, [DeployKind.Column] = Full, малый ящик / лампа / канистра 20 л = Quarter
         };
 
-        public static Spec Of(DeployKind k) => Table.TryGetValue(k, out var s) ? s : new Spec(Footprint.Quarter, 0.85f, 0.85f);
+        public static Spec Of(DeployKind k) => Table.TryGetValue(k, out var s) ? s
+            : StationDefs.Get(k) is StationDef st ? new Spec(st.Size, st.W, st.D)   // станции D54 — из таблицы Prog.Stations
+            : new Spec(Footprint.Quarter, 0.85f, 0.85f);
         public static Footprint SizeOf(DeployKind k) => Of(k).Size;
 
         /// <summary>Половины сторон хитбокса (по осям мира) для поворота: 0/2 — длинная сторона вдоль X, 1/3 — вдоль Y.</summary>
@@ -234,6 +236,16 @@ namespace Rastvordd.Sim
             rot &= 3;
             var fit = new DeployFit { Rot = rot, Pos = at, Half = Footprints.HalfOf(kind, rot) };
             var floor = FloorAt(at);
+            if (StationDefs.Get(kind)?.OnNode == true)
+            {
+                // буровая (D54): на землю вплотную к рудному/серному/каменному узлу, вне сетки
+                if (floor != null) { fit.Why = "буровая ставится на землю у рудного узла, не на фундамент"; return fit; }
+                if (!Terrain.IsLand(at)) { fit.Why = "вода"; return fit; }
+                if (DrillNode(at, at - fit.Half, at + fit.Half) == null) { fit.Why = "поставь вплотную к рудному, серному или каменному узлу"; return fit; }
+                if (!AreaClear(a, at - fit.Half, at + fit.Half, null, out fit.Why)) return fit;
+                fit.Ok = true;
+                return fit;
+            }
             if (floor != null)
             {
                 fit.Snapped = true;

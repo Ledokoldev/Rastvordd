@@ -163,7 +163,7 @@ namespace Rastvordd.Sim
                 foreach (var off in new[] { new Vector2(-11, 6), new Vector2(11, 6), new Vector2(0, -12) })
                 {
                     var q = mp + off;
-                    if (rt.M.Contains(q, -1.5f)) Wire(mp, 19f, q, 0.4f, 0.3f);
+                    if (Decors.Exists(x => x.Sprite.EndsWith("concrete_barrier") && Vector2.Distance(x.Pos, q) < 1.5f)) Wire(mp, 19f, q, 0.4f, 0.3f);   // только к анкерам-блокам
                 }
             var dip = Decors.FindAll(x => x.Sprite == "props/radio_dipole" && rt.M.Contains(x.Pos));
             dip.Sort((a, b) => a.Pos.Y != b.Pos.Y ? a.Pos.Y.CompareTo(b.Pos.Y) : a.Pos.X.CompareTo(b.Pos.X));

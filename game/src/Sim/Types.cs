@@ -609,6 +609,7 @@ namespace Rastvordd.Sim
         public float PendingSwingAt = -1;   // удар инструментом засчитывается с задержкой — когда он опускается на цель
         public WeaponState PendingSwing;
         public StructKind BuildPiece = StructKind.Foundation;   // что ставит план постройки (R — сменить)
+        public int DeployRot;           // поворот установленного в руках (R), 0..3
         public Vector2 LastAim;
         public readonly ItemSlot[] Belt = new ItemSlot[BeltSize];
         public int Current;
@@ -781,7 +782,13 @@ namespace Rastvordd.Sim
         public int Id;
         public DeployKind Kind;
         public Vector2 Pos;
-        public float Radius = 0.6f;
+        public float Radius = 0.6f;     // дальность «рукой» и взрывы: половина длинной стороны хитбокса
+        public Vector2 Half;            // хитбокс — прямоугольник по осям (D52): половины сторон; 0 — по таблице Footprints
+        public int Rot;                 // поворот 0..3: половина — вдоль X (0/2) или Y (1/3), целая — куда «смотрит»
+        public int FloorId, Slots;      // пол (id постройки) и занятые слоты (биты); 0 — стоит вне сетки
+        public bool Solid => Kind != DeployKind.SleepBag;   // спальник плоский: по нему ходят, пули летят над ним
+        public Vector2 Min => Pos - Half;
+        public Vector2 Max => Pos + Half;
         public int OwnerId;
         public float Hp = 300;          // ломается взрывчаткой
         public int Level;               // верстак: 1–3

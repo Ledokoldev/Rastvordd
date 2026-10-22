@@ -25,7 +25,7 @@ namespace Rastvordd.Sim
     public struct BagSnap { public int Id; public Vector2 Pos; public bool IsCrate; public bool Empty; public bool Safe; public bool Punch; public bool Unlocked; public int Tier; public string Look; }
     public struct NodeSnap { public int Id; public NodeKind Kind; public Vector2 Pos; public float Radius; public float Fill; }
     public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; public string Item; }
-    public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; public int Level; public bool Seen; }
+    public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; public int Level; public bool Seen; public int Rot; public Vector2 Half; }
 
     /// <summary>Узел дерева изучения для окна верстака.</summary>
     public struct TechInfo
@@ -89,6 +89,10 @@ namespace Rastvordd.Sim
         public int Fuses;
         public string InteractHint;     // пусто — рядом ничего нет
         public bool HeldDeploy;
+        public bool DeployOk;           // установленное в руках: встанет ли под курсором (сетка клеток D52)
+        public Vector2 DeployPos, DeployHalf;   // призрак: центр и половины сторон хитбокса
+        public bool DeploySnapped;      // в слоты пола
+        public List<(Vector2[] poly, int state)> DeploySlots;   // подсветка слотов пола под курсором (World.SlotHighlight)
         public bool NearBench;
         public bool HoldingPlan;        // план постройки: призрак элемента под курсором
         public StructKind BuildPiece;    // выбранный элемент
@@ -437,6 +441,15 @@ namespace Rastvordd.Sim
             float tf = 0, th = 0, ta = 0;
             foreach (var b in _bots.Values) { tf += b.TotFlee; th += b.TotFight; ta += b.TotAll; }
             if (ta > 0) log($"ЗДОРОВЬЕ итог: в бегстве {tf / ta:P1}, в бою/охоте {th / ta:P1} времени живых ботов");
+            // итог баз: полы, установленное по видам (для сравнения прогонов, D52)
+            foreach (var b in _bots.Values)
+            {
+                int floors = World.Structures.FindAll(s => s.OwnerId == b.Me.Id && s.IsFloor).Count, edges = World.Structures.FindAll(s => s.OwnerId == b.Me.Id && s.IsEdge).Count;
+                var kinds = new SortedDictionary<string, int>();
+                foreach (var d in World.Deployables) if (d.OwnerId == b.Me.Id) kinds[d.Kind.ToString()] = kinds.GetValueOrDefault(d.Kind.ToString()) + 1;
+                log($"СЕТКА {b.Me.Name}: {b.PlanInfo} · полов {floors}, рёбер {edges} · {string.Join(", ", System.Linq.Enumerable.Select(kinds, kv => $"{kv.Key} {kv.Value}"))}");
+            }
+            if (World.FitRejects.Count > 0) log("СЕТКА отказы слотов: " + string.Join(", ", System.Linq.Enumerable.Select(System.Linq.Enumerable.OrderByDescending(World.FitRejects, kv => kv.Value), kv => $"{kv.Key} ×{kv.Value}")));
             foreach (var b in _bots.Values)
             {
                 var parts = new List<string>();
@@ -704,7 +717,7 @@ namespace Rastvordd.Sim
                 if (Vector2.DistanceSquared(d.Pos, me.Pos) >= r2) continue;
                 aliveD.Add(d.Id);
                 bool seen = me.Spectator || !me.Dead && (World.IsOwnBase(me, d) || Vector2.Distance(me.Pos, d.Pos) < 1.5f || World.SeesPoint(me, d.Pos, vr, vc));
-                if (seen) dmem[d.Id] = new DeploySnap { Id = d.Id, Kind = d.Kind, Pos = d.Pos, Burning = d.Burning, Level = d.Level, Seen = true };
+                if (seen) dmem[d.Id] = new DeploySnap { Id = d.Id, Kind = d.Kind, Pos = d.Pos, Burning = d.Burning, Level = d.Level, Seen = true, Rot = d.Rot, Half = d.Half };
                 else if (dmem.TryGetValue(d.Id, out var old)) { old.Seen = false; dmem[d.Id] = old; }
             }
             Forget(dmem, aliveD, id => dmem[id].Pos, me, vr, vc);
@@ -808,7 +821,7 @@ namespace Rastvordd.Sim
                 Bandages = me.Count("bandage"),
                 Fuses = me.Fuses,
                 Current = me.Current,
-                HeldDeploy = held?.Def?.Deploy is DeployKind.Workbench or DeployKind.Furnace,
+                HeldDeploy = held?.Def != null && held.Def.Deploy != DeployKind.None,
                 NearBench = World.NearBench(me.Pos),
                 BenchLevel = World.BenchLevel(me.Pos),
                 Scrap = me.Count("scrap"),
@@ -863,6 +876,17 @@ namespace Rastvordd.Sim
             s.Armor = World.ArmorReduction(me);
             FillWear(s, me);
             if (!me.Dead) s.InteractHint = Hint(World.NearestInteract(me), me);
+            if (!me.Dead && held?.Def != null && held.Def.Deploy != DeployKind.None)
+            {
+                var fit = World.FitDeploy(me, held.Def.Deploy, me.LastAim, me.DeployRot);
+                bool far = Vector2.Distance(me.Pos, me.LastAim) > World.PlaceRange;
+                s.DeployOk = fit.Ok && !far;
+                s.DeployPos = fit.Pos; s.DeployHalf = fit.Half; s.DeploySnapped = fit.Snapped;
+                s.DeploySlots = World.SlotHighlight(me, held.Def.Deploy, me.LastAim, me.DeployRot);
+                var size = Footprints.SizeOf(held.Def.Deploy);
+                if (string.IsNullOrEmpty(s.InteractHint))
+                    s.InteractHint = $"ЛКМ — {held.Def.Name} ({Footprints.SizeName(size)}){(Footprints.Of(held.Def.Deploy).W == Footprints.Of(held.Def.Deploy).D && size != Footprint.Full ? "" : " · R — повернуть")}{(far ? " · далеко" : fit.Ok ? "" : " · " + fit.Why)}";
+            }
             if (!me.Dead && held?.Def?.Build == true)
             {
                 s.HoldingPlan = true;

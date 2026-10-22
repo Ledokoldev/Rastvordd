@@ -443,7 +443,29 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         if (found) break;
                     }
                 }
-else if (arg == "--atcrate")
+                else if (arg.StartsWith("--gridshow"))
+                {
+                    string mode = arg.Contains('=') ? arg.Split('=')[1] : "half";
+                    // отладка сетки клеток D52: база со всеми размерами установленного и призрак верстака со слотами
+                    var w = _server.World;
+                    var me = w.Find(_myId);
+                    for (int r = 0; r < 200; r += 2)
+                    {
+                        bool found = false;
+                        for (int k = 0; k < 16 && !found; k++)
+                        {
+                            var c = new SVec(60, 60) + new SVec(Mathf.Cos(k * 0.39f), Mathf.Sin(k * 0.39f)) * r;
+                            var (ci, cj) = Building.CellOf(c);
+                            bool ok = w.CanPlaceClaim(Building.CellCenter(ci, cj), out _);
+                            for (int di = -2; di <= 4 && ok; di++) for (int dj = -2; dj <= 4 && ok; dj++) ok = w.FoundationGeoOk(ci + di, cj + dj, out _);
+                            if (ok) { _autoAim = w.DebugGridDemo(me, ci, cj, mode); found = true; }
+                        }
+                        if (found) break;
+                    }
+                    me.Belt[0] = Items.NewSlot(mode switch { "tri" or "door" => "deploy_box", "lathe" => "deploy_lathe", _ => "deploy_workbench" });
+                    me.Current = 0;
+                }
+                else if (arg == "--atcrate")
                 {
                     // отладка: встать у ближайшего к центру ящика РТ без охраны
                     var w = _server.World;
@@ -1463,7 +1485,8 @@ else if (arg == "--atcrate")
                 seen.Add(d.Id);
                 if (!_deployViews.TryGetValue(d.Id, out var v))
                 {
-                    v = new DeployView2D(d.Kind, d.Level) { Position = Iso.Px(d.Pos) };
+                    var half = d.Half == SVec.Zero ? Footprints.HalfOf(d.Kind, d.Rot) : d.Half;
+                    v = new DeployView2D(d.Kind, d.Level, d.Rot, half) { Position = Iso.Px(d.Pos + new SVec(0, half.Y)) };   // начало — передний край следа
                     _world.AddChild(v);
                     _deployViews[d.Id] = v;
                 }
@@ -1556,13 +1579,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             // призрак установки
             var self = _cur.Self;
             _ghost.Visible = self.HeldDeploy && !self.Dead && !_hud.CraftOpen;
-            if (_ghost.Visible)
-            {
-                var me = new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
-                _ghost.Position = Iso.Px(_aim);
-                bool ok = SVec.Distance(me, _aim) <= World.PlaceRange;
-                if (_ghost.Ok != ok) { _ghost.Ok = ok; _ghost.QueueRedraw(); }
-            }
+            if (_ghost.Visible) _ghost.Set(self.DeployOk, self.DeployPos, self.DeployHalf, self.DeploySnapped, self.DeploySlots);   // как посчитал сервер (сетка клеток D52)
         }
 
         static void RemoveMissing<T>(Dictionary<int, T> views, HashSet<int> seen) where T : Node

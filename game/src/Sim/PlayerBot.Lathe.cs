@@ -74,14 +74,11 @@ namespace Rastvordd.Sim
                 }
                 if (_latheTry < 0) _latheTry = _w.Time;
                 if (_w.Time - _latheTry > 150) { _latheBlock = _w.Time + 600; _latheTry = -1; Thought("станок поставить негде — позже"); return false; }
-                // места по очереди (25 с на каждое): у южной стены кибитки, у северной, западной, восточной, дальше на юг —
-                // раньше было одно место, и когда его занимала стройка мейна, станок не вставал никогда (D49)
-                var spot = AtPlan(LatheSpots[(int)((_w.Time - _latheTry) / 25f) % LatheSpots.Length]);
-                cmd.Aim = spot;
+                // станок — целая клетка (D52): свободная клетка своего пола, иначе фундамент-площадка у дома (ближе к южной стене кибитки)
                 Doing = "ставит токарный станок";
-                if (!Reach(spot, ref cmd, 1.1f)) return true;
-                if (Hold("deploy_lathe", ref cmd)) Click(ref cmd);
-                return true;
+                if (PlaceDeploy("deploy_lathe", AtPlan(LatheSpots[0]), ref cmd)) return true;
+                _latheBlock = _w.Time + 600; _latheTry = -1; Thought("станок поставить негде — позже");
+                return false;
             }
             _latheTry = -1;
             var rec = Weaponry.LatheFor(want);

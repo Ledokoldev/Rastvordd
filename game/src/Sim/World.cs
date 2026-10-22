@@ -84,9 +84,14 @@ namespace Rastvordd.Sim
 
         void AddDeployable(Deployable d)
         {
+            if (d.Half == Vector2.Zero) d.Half = Footprints.HalfOf(d.Kind, d.Rot);
+            d.Radius = MathF.Max(d.Half.X, d.Half.Y);
             Deployables.Add(d);
-            _deployGrid.Insert(d, d.Pos - new Vector2(d.Radius), d.Pos + new Vector2(d.Radius));
+            InsertDeployGrid(d);
+            OccupySlots(d, true);
         }
+
+        void InsertDeployGrid(Deployable d) => _deployGrid.Insert(d, d.Min, d.Max);
 
         int _nextId = 1;
 
@@ -270,7 +275,7 @@ namespace Rastvordd.Sim
             foreach (var w in WallsNear(p, r))
                 if (Vector2.Distance(Vector2.Clamp(p, w.Wall.Min, w.Wall.Max), p) < r) return false;
             foreach (var n in NodesNear(p, r)) if (Vector2.Distance(n.Pos, p) < n.Radius + r) return false;
-            foreach (var d in DeploysNear(p, r)) if (Vector2.Distance(d.Pos, p) < d.Radius + r) return false;
+            foreach (var d in DeploysNear(p, r)) if (Geo.CircleBox(p, r, d.Min, d.Max)) return false;
             foreach (var pk in Pickups) if (Vector2.Distance(pk.Pos, p) < r) return false;
             foreach (var a in Actors) if (!a.Dead && Vector2.Distance(a.Pos, p) < a.Radius + r) return false;
             return true;
@@ -874,7 +879,7 @@ namespace Rastvordd.Sim
                 foreach (var w in WallsNear(a.Pos, a.Radius + 0.5f))
                     a.Pos = Geo.PushOut(a.Pos, a.Radius, w.Wall.Min, w.Wall.Max);
                 foreach (var n in NodesNear(a.Pos, a.Radius)) a.Pos = PushOutCircle(a.Pos, a.Radius, n.Pos, n.Radius);
-                foreach (var d in DeploysNear(a.Pos, a.Radius)) a.Pos = PushOutCircle(a.Pos, a.Radius, d.Pos, d.Radius);
+                foreach (var d in DeploysNear(a.Pos, a.Radius)) if (d.Solid) a.Pos = Geo.PushOut(a.Pos, a.Radius, d.Min, d.Max);
             }
             a.Pos = Vector2.Clamp(a.Pos, new Vector2(-HalfSize + a.Radius), new Vector2(HalfSize - a.Radius));
         }
@@ -1058,6 +1063,8 @@ namespace Rastvordd.Sim
 
             if (def.Deploy != DeployKind.None)
             {
+                // R — повернуть (половина: вдоль/поперёк, целая: 4 стороны)
+                if (cmd.Reload) a.DeployRot = (a.DeployRot + 1) & 3;
                 trigger = cmd.Fire && !a.FireHeldLastTick;
                 a.FireHeldLastTick = cmd.Fire;
                 if (trigger) TryPlace(a, cmd.Aim, def);
@@ -1370,12 +1377,16 @@ namespace Rastvordd.Sim
         void TryPlace(Actor a, Vector2 at, ItemDef def)
         {
             if (Vector2.Distance(a.Pos, at) > PlaceRange) { Info(a, "Слишком далеко"); return; }
-            float rad = def.Deploy switch { DeployKind.Claim or DeployKind.SleepBag => 0.3f, DeployKind.Box => 0.45f, _ => 0.6f };
             if (def.Deploy == DeployKind.Claim && !CanPlaceClaim(at, out string why)) { Info(a, $"Шкаф: {why}"); return; }
-            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, Pos = at, OwnerId = a.Id, Radius = rad, Level = Items.BenchLevel(def.Id) };
+            // сетка клеток (D52): на полу — в слоты клетки под курсором, на земле — свободно (станки — только на фундамент)
+            var fit = FitDeploy(a, def.Deploy, at, a.DeployRot);
+            if (!fit.Ok) { Info(a, $"{def.Name}: {fit.Why}"); return; }
+            at = fit.Pos;
+            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, OwnerId = a.Id, Level = Items.BenchLevel(def.Id) };
+            ApplyFit(dep, fit);
             if (def.Deploy is DeployKind.Workbench or DeployKind.Claim or DeployKind.Furnace or DeployKind.Lathe) Milestone(a, $"поставил: {def.Name}");   // столб тонкий, спальник плоский, ящик компактный
             if (def.Deploy is DeployKind.Box or DeployKind.Lathe) dep.Storage = new LootBag { Id = NextId(), Pos = at };
-            if (def.Deploy == DeployKind.Lathe) { dep.On = false; dep.Radius = 0.7f; }
+            if (def.Deploy == DeployKind.Lathe) dep.On = false;
             dep.Auth.Add(a.Id);
             if (def.Deploy == DeployKind.Furnace && !a.IsBot) dep.On = false;   // игрок зажигает сам в окне печи
             AddDeployable(dep);
@@ -1426,7 +1437,7 @@ namespace Rastvordd.Sim
             foreach (var dp in DeploysNear(a.Pos, InteractRange))
             {
                 if (dp.Kind == DeployKind.SleepBag || !ClearLine(a.Pos, dp.Pos, null, true)) continue;   // спальник — не для E
-                float d = Vector2.Distance(a.Pos, dp.Pos) - dp.Radius + 0.3f;
+                float d = Vector2.Distance(a.Pos, Vector2.Clamp(a.Pos, dp.Min, dp.Max)) + 0.3f;   // до края хитбокса
                 if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, DeployKind.Recycler => InteractKind.Recycler, DeployKind.Lathe => InteractKind.Lathe, _ => InteractKind.Workbench }, dp); }
             }
             foreach (var st in AllStashes())
@@ -1764,7 +1775,7 @@ namespace Rastvordd.Sim
                 foreach (var n in NodesAlong(a, b))
                     if (Geo.SegmentCircle(a, b, n.Pos, n.Radius, out float t) && t < bestT) { bestT = t; hitWall = null; hitNode = n; }
                 foreach (var d in DeploysAlong(a, b))
-                    if (Geo.SegmentCircle(a, b, d.Pos, d.Radius, out float t) && t < bestT) { bestT = t; hitWall = null; hitNode = null; }
+                    if (d.Solid && Geo.SegmentAabb(a, b, d.Min, d.Max, out float t) && t < bestT) { bestT = t; hitWall = null; hitNode = null; }
                 foreach (var act in Actors)
                 {
                     if (act.Dead || act.Spectator || act.Id == p.OwnerId) continue;

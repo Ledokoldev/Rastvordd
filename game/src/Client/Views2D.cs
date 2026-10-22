@@ -969,11 +969,16 @@ namespace Rastvordd.Client
         readonly AudioStreamPlayer2D _crackle;
 
         readonly int _level;
+        readonly int _rot;
+        readonly Vector2 _foot;   // хитбокс в пикселях (полные стороны); начало узла — передний край следа (D52)
 
-        public DeployView2D(DeployKind kind, int level = 0)
+        public DeployView2D(DeployKind kind, int level = 0, int rot = 0, SVec half = default)
         {
             _kind = kind;
             _level = level;
+            _rot = rot & 3;
+            if (half == SVec.Zero) half = Footprints.HalfOf(kind, rot);
+            _foot = new Vector2(half.X * 2 * Iso.PPM, half.Y * 2 * Iso.PPM);
             Material = VisionFx.ObjectMat;
             TextureFilter = TextureFilterEnum.Nearest;
             if (kind == DeployKind.Furnace)
@@ -1008,10 +1013,16 @@ namespace Rastvordd.Client
                 DrawRect(new Rect2(2, -Iso.H(1.8f), 5, 3), new Color(0.6f, 0.15f, 0.12f));
                 return;
             }
+            // след на полу: прямоугольник хитбокса (сетка клеток D52) — база выглядит аккуратно, видно, что сколько занимает
+            if (_kind != DeployKind.Recycler) DrawRect(new Rect2(-_foot.X / 2, -_foot.Y, _foot.X, _foot.Y), new Color(0, 0, 0, 0.14f));
             if (tex != null)
             {
-                Shade.Sprite(this, tex);
-                DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 2));
+                // спрайт вписан в ширину следа (станок без своей картинки — переработчик, он крупнее клетки), поворот 2/3 — зеркало
+                float sc = Mathf.Min(1f, (_foot.X + 6) / tex.GetWidth());
+                Shade.Sprite(this, tex, sc, at: new Vector2(0, 2));
+                DrawSetTransform(new Vector2(0, 2), 0, new Vector2(_rot >= 2 ? -sc : sc, sc));
+                DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight()));
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
                 if (_kind == DeployKind.Furnace && Burning)
                 {
                     // огонь в топке: 4 кадра по кругу (~10 к/с) + мерцающее свечение
@@ -1177,18 +1188,62 @@ namespace Rastvordd.Client
         }
     }
 
-    /// <summary>Призрак установки под курсором: зелёный — можно поставить, красный — далеко.</summary>
+    /// <summary>
+    /// Призрак установки под курсором (сетка клеток D52): слоты пола под курсором (зелёный — свободен, красный — занят,
+    /// жёлтый — проход у двери) и прямоугольник предмета по размеру; зелёный — встанет, красный — нет.
+    /// </summary>
     public partial class GhostView2D : Node2D
     {
-        public bool Ok;
+        bool _ok, _snapped;
+        SVec _pos, _half;
+        System.Collections.Generic.List<(SVec[] poly, int state)> _slots;
+
+        public GhostView2D() { ZIndex = 6; }
+
+        public void Set(bool ok, SVec pos, SVec half, bool snapped, System.Collections.Generic.List<(SVec[] poly, int state)> slots)
+        {
+            bool same = ok == _ok && pos == _pos && half == _half && snapped == _snapped && SameSlots(slots);
+            if (same) return;
+            _ok = ok; _pos = pos; _half = half; _snapped = snapped; _slots = slots;
+            QueueRedraw();
+        }
+
+        bool SameSlots(System.Collections.Generic.List<(SVec[] poly, int state)> s)
+        {
+            if ((s == null) != (_slots == null)) return false;
+            if (s == null) return true;
+            if (s.Count != _slots.Count) return false;
+            for (int i = 0; i < s.Count; i++) if (s[i].state != _slots[i].state || s[i].poly[0] != _slots[i].poly[0]) return false;
+            return true;
+        }
 
         public override void _Draw()
         {
-            var c = Ok ? new Color(0.4f, 1f, 0.45f, 0.45f) : new Color(1f, 0.3f, 0.25f, 0.45f);
-            DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.55f));
-            DrawCircle(Vector2.Zero, 0.65f * Iso.PPM, c);
-            DrawArc(Vector2.Zero, 0.65f * Iso.PPM, 0, Mathf.Tau, 32, new Color(c, 0.9f), 1.5f, true);
-            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+            if (_slots != null)
+                foreach (var (poly, st) in _slots)
+                {
+                    var c = st switch
+                    {
+                        1 => new Color(1f, 0.3f, 0.25f, 0.30f),      // занят
+                        2 => new Color(1f, 0.8f, 0.25f, 0.22f),      // проход у двери
+                        3 => _ok ? new Color(0.4f, 1f, 0.45f, 0.40f) : new Color(1f, 0.3f, 0.25f, 0.40f),   // сюда встанет
+                        _ => new Color(0.4f, 1f, 0.45f, 0.16f),      // свободен
+                    };
+                    var pts = new Vector2[poly.Length];
+                    for (int i = 0; i < pts.Length; i++) pts[i] = Iso.Px(poly[i]);
+                    DrawColoredPolygon(pts, c);
+                    for (int i = 0; i < pts.Length; i++) DrawLine(pts[i], pts[(i + 1) % pts.Length], new Color(c, 0.8f), 1);
+                }
+            var fill = _ok ? new Color(0.4f, 1f, 0.45f, 0.35f) : new Color(1f, 0.3f, 0.25f, 0.35f);
+            var line = new Color(fill, 0.95f);
+            var min = Iso.Px(_pos - _half); var max = Iso.Px(_pos + _half);
+            float hh = Iso.H(0.5f);
+            var top = new Rect2(min.X, min.Y - hh, max.X - min.X, max.Y - min.Y);
+            var front = new Rect2(min.X, max.Y - hh, max.X - min.X, hh);
+            DrawRect(front, fill.Darkened(0.2f));
+            DrawRect(top, fill);
+            DrawRect(top, line, false, 1.5f);
+            DrawRect(new Rect2(min, max - min), new Color(line, 0.5f), false, 1);   // след на полу
         }
     }
 }

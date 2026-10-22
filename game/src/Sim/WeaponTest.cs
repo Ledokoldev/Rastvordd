@@ -148,8 +148,8 @@ namespace Rastvordd.Sim
             log($"ОРУЖИЕ-ТЕСТ путь до АКМ через Грач: {path} лома");
             Check(Recipes.All.Find(r => r.Output is "weapon_sawnoff" or "weapon_mp133" or "weapon_saiga12" or "weapon_pipeshotgun" or "weapon_mosin" or "weapon_aps") == null, "дробовики и элита не крафтятся");
 
-            Deployables.Remove(lathe); _deployGrid.Remove(lathe);
-            Deployables.Remove(bench); _deployGrid.Remove(bench);
+            RemoveDeployable(lathe);
+            RemoveDeployable(bench);
             Actors.Remove(a);
             log($"ОРУЖИЕ-ТЕСТ итог: {ok} OK, {bad} провалов");
         }

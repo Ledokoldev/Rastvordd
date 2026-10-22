@@ -735,7 +735,7 @@ namespace Rastvordd.Sim
 
         /// <summary>Где в доме стоят верстаки (мастерская мейна) и откуда с ними работать.</summary>
         Vector2 BenchSpot(int level) => AtPlan(_plan.Benches[Math.Clamp(level - 1, 0, 2)]);
-        Vector2 BenchStand => AtPlan(_plan.BenchStand);
+        Vector2 BenchStand => BenchStandFor();   // верстак на площадке (D52) — работать рядом с ним
 
         int MyBenchLevel() { ScanMine(); return _mBench; }
 
@@ -807,10 +807,8 @@ namespace Rastvordd.Sim
             if (Has(bench))
             {
                 Doing = $"ставит {Items.Name(bench)}";
-                var spot = BenchSpot(lvl + 1);
-                if (!Reach(spot, ref cmd, 1.3f)) return true;   // место — в мастерской внутри дома, подходим изнутри
-                if (Hold(bench, ref cmd)) Click(ref cmd);
-                return true;
+                if (PlaceDeploy(bench, BenchSpot(lvl + 1), ref cmd)) return true;   // в слот мастерской (D52), нет места — на площадку рядом
+                return false;
             }
             var r = Recipes.All[Recipe(bench)];
             foreach (var (id, n) in r.Cost)

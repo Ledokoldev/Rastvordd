@@ -298,10 +298,10 @@ namespace Rastvordd.Sim
         void AddPickup(PickupKind kind, Vector2 p) => Pickups.Add(new Pickup { Id = NextId(), Kind = kind, Pos = p });
 
         /// <summary>
-        /// Через сколько секунд пустой ящик РТ наполнится снова: тир 0 — 10–14 мин, тир 1 — 15–21, тир 2 — 20–30.
+        /// Через сколько секунд пустой ящик РТ наполнится снова: тир 0 — 5–7 мин, тир 1 — 15–21, тир 2 — 20–30.
         /// Было 90 с — пользователь: «ящики откатываются очень быстро», лутать РТ без риска можно было по кругу.
         /// </summary>
-        public float CrateRespawnTime(LootBag bag) => bag.Tier switch { 0 => Range(600, 840), 1 => Range(900, 1260), _ => Range(1200, 1800) };
+        public float CrateRespawnTime(LootBag bag) => bag.Tier switch { 0 => Range(300, 420), 1 => Range(900, 1260), _ => Range(1200, 1800) };
 
         void AddCrate(Vector2 pos, int tier = 2)
         {

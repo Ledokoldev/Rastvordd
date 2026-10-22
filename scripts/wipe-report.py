@@ -146,6 +146,20 @@ def svg_map(head, tracks, deaths, issues, size=900):
         if tr:
             x, y = P(tr[-1][1], tr[-1][2])
             out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="{col}"/><text x="{x + 4:.1f}" y="{y + 3:.1f}" fill="{col}" font-size="9">{html.escape(n)}</text>')
+    # тепло: где шли бои, охота, бегство и смерти (каждые 5 с — точка), клетки 25 м
+    heat = collections.Counter()
+    for n, tr in tracks.items():
+        for s in tr:
+            if not s[3] and s[4] in ('бой', 'охота', 'бегство', 'месть'):
+                heat[(int(s[1] // 25), int(s[2] // 25))] += 1
+    for d in deaths:
+        heat[(int(d['x'] // 25), int(d['y'] // 25))] += 8
+    if heat:
+        mx = max(heat.values())
+        for (cx, cy), v in heat.items():
+            x, y = P((cx + 0.5) * 25, (cy + 0.5) * 25)
+            r = 25 * sc * (0.6 + 1.2 * v / mx)
+            out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r:.1f}" fill="#ff3010" opacity="{0.15 + 0.5 * v / mx:.2f}"><title>жар {v}</title></circle>')
     for d in deaths:
         x, y = P(d['x'], d['y'])
         out.append(f'<text x="{x - 4:.1f}" y="{y + 4:.1f}" fill="#ff4040" font-size="12" font-weight="bold">✕</text>')
@@ -178,7 +192,7 @@ def main():
 <style>body{{background:#141816;color:#ddd;font:14px system-ui;margin:20px}} table{{border-collapse:collapse;margin:8px 0}} td,th{{border:1px solid #333;padding:3px 8px}} th{{background:#222}} h2{{margin-top:28px}}</style>
 <h1>Летопись вайпа · {html.escape(head.get('started', ''))} · длительность {mmss(dur)}</h1>
 <p>Игроков и ботов: {len(tracks)} · смертей: {len(deaths)} · вех: {len(milestones)} · проблем: {', '.join(f'{k} {v}' for k, v in iss.items()) or 'нет'}</p>
-<h2>Карта</h2><p>Линии — маршруты, ✕ — смерти, жёлтые круги — «тусовки», голубые — «стоит».</p>{svg_map(head, tracks, deaths, issues)}
+<h2>Карта</h2><p>Линии — маршруты, красные пятна — где шли бои/охота/бегство (ярче — жарче), ✕ — смерти, жёлтые круги — «тусовки», голубые — «стоит».</p>{svg_map(head, tracks, deaths, issues)}
 <h2>Кто как играл</h2><table><tr><th>Кто</th><th>Прошёл</th><th>Смертей/убийств</th><th>Лом при себе</th><th>Цели (доля времени)</th><th>Время на РТ</th></tr>{''.join(rows)}</table>
 <h2>Проблемы</h2><table><tr><th>Вид</th><th>Когда</th><th>Что</th><th>Где</th></tr>{ir}</table>
 <h2>Смерти</h2><table><tr><th>Когда</th><th>Кто</th><th>Кем</th><th>Чем</th><th>Где</th></tr>{dr}</table>

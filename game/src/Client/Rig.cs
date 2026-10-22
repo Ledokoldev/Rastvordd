@@ -137,8 +137,8 @@ namespace Rastvordd.Client
             DrawTexture(t, -pivot);
         }
 
-        /// <summary>Телосложение: корпус, таз и конечности шире нарисованных на ~20% (рост тот же).</summary>
-        const float Broad = 1.2f;
+        /// <summary>Телосложение: корпус, таз и конечности шире нарисованных на ~45% (рост тот же) — крепкие мужики, не дрищи.</summary>
+        const float Broad = 1.45f;
         /// <summary>Множитель толщины части: до целого числа пикселей, чтобы пиксели не «плясали».</summary>
         static float Thick(int px) => Mathf.Max(px + 1, Mathf.Round(px * Broad)) / px;
 
@@ -238,8 +238,8 @@ namespace Rastvordd.Client
             var waist = new Vector2(0, hipY - 2 + breath);
             float torsoH = (back ? _set.TorsoB : _set.TorsoF).GetHeight();
             var torsoTop = waist + new Vector2(Mathf.Sin(lean) * torsoH, -Mathf.Cos(lean) * torsoH);
-            var shNear = torsoTop + new Vector2(5, 3);   // плечи шире (телосложение крепче)
-            var shFar = torsoTop + new Vector2(-5, 3);
+            var shNear = torsoTop + new Vector2(6, 3);   // плечи шире (телосложение крепче)
+            var shFar = torsoTop + new Vector2(-6, 3);
             var neck = torsoTop + new Vector2(1, 1);
 
             // ---------- оружие и кисти ----------

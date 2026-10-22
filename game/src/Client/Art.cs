@@ -150,20 +150,42 @@ namespace Rastvordd.Client
             ["lock_key"] = "icons/icon_key_lock",
         };
 
-        /// <summary>Иконка предмета для интерфейса.</summary>
+        // D46: пока нет арта нового ствола/детали/обвеса — похожая старая картинка (новый файл icons/icon_<id> или weapons/<id> перекроет)
+        static readonly Dictionary<string, string> Fallback = new()
+        {
+            ["weapon_pipeshotgun"] = "weapons/weapon_waterpipe", ["weapon_sawnoff"] = "weapons/weapon_doublebarrel", ["weapon_mp133"] = "weapons/weapon_doublebarrel",
+            ["weapon_saiga12"] = "weapons/weapon_ak", ["weapon_nagant"] = "weapons/weapon_revolver", ["weapon_grach"] = "weapons/weapon_revolver",
+            ["weapon_aps"] = "weapons/weapon_revolver", ["weapon_homesmg"] = "weapons/weapon_smg", ["weapon_pps43"] = "weapons/weapon_smg",
+            ["weapon_ppsh"] = "weapons/weapon_smg", ["weapon_svt40"] = "weapons/weapon_bolt", ["weapon_svd"] = "weapons/weapon_bolt",
+            ["weapon_mosin"] = "weapons/weapon_bolt", ["weapon_akm"] = "weapons/weapon_ak", ["weapon_an94"] = "weapons/weapon_ak",
+            ["ammo_9mm"] = "icons/icon_ammo_pistol", ["ammo_545"] = "icons/icon_ammo_rifle", ["ammo_762"] = "icons/icon_ammo_rifle",
+            ["ammo_12g"] = "icons/icon_ammo_shotgun", ["ammo_bolt"] = "icons/icon_arrow", ["deploy_lathe"] = "icons/icon_workbench2",
+            ["att_compensator_army"] = "icons/icon_att_compensator", ["att_mag_ext_army"] = "icons/icon_att_mag_ext", ["att_mag_twin_crude"] = "icons/icon_att_mag_twin",
+        };
+
+        static string FallbackPath(string id) =>
+            Fallback.TryGetValue(id, out var f) ? f
+            : id.StartsWith("comp_") ? "icons/icon_gears"
+            : id.StartsWith("att_") ? "icons/icon_gears"
+            : null;
+
+        /// <summary>Иконка предмета для интерфейса: icons/icon_&lt;id&gt;, weapons/&lt;id&gt;, старое имя, похожая картинка.</summary>
         public static Texture2D Icon(string itemId)
         {
             if (itemId == null) return null;
-            if (IconMap.TryGetValue(itemId, out var p)) return Get(p);
-            return Get($"icons/icon_{itemId}") ?? Get($"weapons/{itemId}");
+            var t = Get($"icons/icon_{itemId}") ?? Get($"weapons/{itemId}");
+            if (t != null) return t;
+            if (IconMap.TryGetValue(itemId, out var p) && Get(p) is Texture2D m) return m;
+            return FallbackPath(itemId) is string fb ? Get(fb) : null;
         }
 
         /// <summary>Спрайт предмета в руках (вид сбоку, ствол вправо). Только для оружия и инструментов.</summary>
         public static Texture2D HeldSprite(string itemId)
         {
             if (itemId == null) return null;
+            if (Get($"weapons/{itemId}") is Texture2D t) return t;
             if (IconMap.TryGetValue(itemId, out var p) && p.StartsWith("weapons/")) return Get(p);
-            return Get($"weapons/{itemId}");
+            return Fallback.TryGetValue(itemId, out var f) && f.StartsWith("weapons/") ? Get(f) : null;
         }
     }
 }

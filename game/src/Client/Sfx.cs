@@ -28,6 +28,9 @@ namespace Rastvordd.Client
             return s;
         }
 
+        /// <summary>Звук по id, а если файла ещё нет — заглушка (D46: свои звуки кладутся потом по имени файла).</summary>
+        public static string Pick(string name, string fallback) => Get(name) != null ? name : fallback;
+
         /// <param name="hearM">Дальше этого расстояния (м) не слышно.</param>
         public static void Play(string name, Vector2 posPx, float volumeDb = 0, float hearM = 40, float pitchVar = 0.08f, float basePitch = 1f)
         {

@@ -26,7 +26,7 @@ namespace Rastvordd.Client
         public bool ShowTip;           // всплывающая мини-карточка (когда большой карточки нет)
         public bool Backing;           // тёмная подложка (пояс в HUD поверх мира)
         public event Action<string, int, string, int> Moved;   // (откуда, i, куда, j)
-        public event Action<string, int> Quick, Picked, Hovered;
+        public event Action<string, int> Quick, Picked, Hovered, Detach;   // Detach — колёсико по стволу: снять обвесы (D46)
         float _pop, _spin;
         bool _hover;
 
@@ -162,6 +162,7 @@ namespace Rastvordd.Client
                     AcceptEvent();
                 }
                 else if (mb.ButtonIndex == MouseButton.Left) Picked?.Invoke(Inv, Index);
+                else if (mb.ButtonIndex == MouseButton.Middle) { Detach?.Invoke(Inv, Index); AcceptEvent(); }
             }
         }
     }
@@ -713,6 +714,7 @@ namespace Rastvordd.Client
         {
             c.Moved += (s, si, d, di) => Op?.Invoke(UiOp.Move, $"{s}#{si}>{d}#{di}");
             c.Quick += (s, si) => Op?.Invoke(UiOp.Quick, $"{s}#{si}");
+            c.Detach += (s, si) => Op?.Invoke(UiOp.Detach, $"{s}#{si}");
             c.Picked += (s, si) => { _sel = (s, si); MarkSelected(); };
             c.Hovered += (s, si) => { if (si >= 0) _hov = (s, si); else if (_hov.inv == s) _hov = (null, -1); };
         }

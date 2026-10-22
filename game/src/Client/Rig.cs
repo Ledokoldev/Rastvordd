@@ -103,13 +103,13 @@ namespace Rastvordd.Client
 
         public RigCanvas(RigSet set) => _set = set;
 
-        static bool TwoHanded(string id) => id is "weapon_ak" or "weapon_pipe" or "weapon_bow" or "weapon_spear" or "tool_pickaxe" or "tool_hatchet";
+        static bool TwoHanded(string id) => id is "weapon_ak" or "weapon_pipe" or "weapon_bow" or "weapon_spear" or "tool_pickaxe" or "tool_hatchet" || Rastvordd.Sim.Weaponry.TwoHanded(id);
         static bool IsTool(string id) => id is "tool_rock" or "tool_hatchet" or "tool_pickaxe" or "tool_hammer" or "weapon_spear" or "weapon_torch";
 
         /// <summary>Конец предмета в руках (пиксели буфера) — для пламени и света факела.</summary>
         public Vector2 TipPx;
 
-        static float HeldLength(string id) => id switch
+        static float HeldLength(string id) => Rastvordd.Sim.Weaponry.HeldLength(id) is float wl && wl > 0 ? wl : id switch
         {
             "tool_rock" => 0.3f, "tool_hatchet" => 0.78f, "tool_pickaxe" => 0.85f, "weapon_spear" => 1.5f,
             "weapon_bow" => 0.85f, "weapon_pipe" => 0.5f, "weapon_ak" => 0.92f, "weapon_torch" => 0.55f, "tool_hammer" => 0.45f, "build_plan" => 0.35f, _ => 0.6f,

@@ -867,11 +867,18 @@ else if (arg == "--atcrate")
                         if (e.Text != "weapon_bow") SpawnCasing(e.Pos, e.Dir);
                         // настоящий сэмпл выстрела для всего огнестрела (самопал — чуть выше и тише); каждый доигрывает до конца
                         if (e.Text == "weapon_bow") Sfx.Play("shot_bow", Iso.Px(e.Pos), -4, 25, 0.06f);
-                        else Sfx.Play("shot_ak", Iso.Px(e.Pos), e.Text == "weapon_ak" ? 0 : -3, 120, 0.03f, e.Text == "weapon_ak" ? 1f : 1.12f);
+                        else
+                        {
+                            // D46: свой звук shot_<ствол> (shot_akm, shot_nagant…), пока файла нет — сэмпл калаша (громкие — как есть, тихие — выше и тише)
+                            string own = "shot_" + (e.Text ?? "").Replace("weapon_", "");
+                            bool loud = (Items.Get(e.Text)?.Weapon?.NoiseRadius ?? 0) >= 70;
+                            if (Sfx.Get(own) != null) Sfx.Play(own, Iso.Px(e.Pos), 0, 120, 0.03f);
+                            else Sfx.Play("shot_ak", Iso.Px(e.Pos), loud ? 0 : -3, 120, 0.03f, loud ? 1f : 1.12f);
+                        }
                         break;
                     case SimEventKind.Reload:
                         if (_actorViews.TryGetValue(e.ActorId, out var reloader)) reloader.StartReload(Items.Get(e.Text)?.Weapon?.ReloadTime ?? 2f);
-                        Sfx.Play("reload_ak", Iso.Px(e.Pos), -2, 25, 0.02f);
+                        Sfx.Play(Sfx.Pick("reload_" + (e.Text ?? "").Replace("weapon_", ""), "reload_ak"), Iso.Px(e.Pos), -2, 25, 0.02f);   // reload_akm… → заглушка reload_ak
                         break;
                     case SimEventKind.Swing:
                         if (_actorViews.TryGetValue(e.ActorId, out var swinger)) swinger.StartSwing();
@@ -912,6 +919,7 @@ else if (arg == "--atcrate")
                         break;
                     case SimEventKind.Machine:
                         // механизмы готовых РТ: пробка, питание, роллета, считыватель крейта
+                        if (e.Text != null && e.Text.StartsWith("станок:")) { Sfx.Play(Sfx.Pick("lathe_done", "craft_done"), Iso.Px(e.Pos), -2, 30, 0.05f); break; }   // деталь готова (D46)
                         switch (e.Text)
                         {
                             case "fuse": Sfx.Play("lock_click", Iso.Px(e.Pos), 0, 15, 0f); Flash(e.Pos, new Color(1f, 0.9f, 0.5f), 6, 0.15f, true); break;
@@ -997,6 +1005,7 @@ else if (arg == "--atcrate")
 
         string NodeHitSound(int nodeId)
         {
+            if (nodeId == -2) return Sfx.Pick("lathe_work", "hit_metal_ore");   // токарный станок (D46)
             foreach (var n in _cur.Nodes)
                 if (n.Id == nodeId)
                     return n.Kind == NodeKind.Tree ? "hit_wood" : n.Kind == NodeKind.Stone ? "hit_stone" : "hit_metal_ore";

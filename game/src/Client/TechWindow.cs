@@ -51,12 +51,21 @@ namespace Rastvordd.Client
 
         const float ColW = 200, RowH = 96, Top = 64;
         // раскладка: (столбец = верстак − 1, строка) — потомки на строке предка
-        static readonly Dictionary<string, (int col, int row)> Layout = new()
+        // раскладка — из данных дерева (TechNode.Col/Row, ветка оружия D46); узел без места — в конец своего столбца
+        static readonly Dictionary<string, (int col, int row)> Layout = BuildLayout();
+        static Dictionary<string, (int col, int row)> BuildLayout()
         {
-            ["gunpowder"] = (0, 0), ["ammo_pistol"] = (0, 1), ["weapon_pipe"] = (0, 2), ["lock_code"] = (0, 3), ["expl_fire"] = (0, 4),
-            ["expl_satchel"] = (1, 0), ["ammo_rifle"] = (1, 1),
-            ["expl_c4"] = (2, 0), ["weapon_ak"] = (2, 1),
-        };
+            var d = new Dictionary<string, (int, int)>();
+            var next = new int[3];
+            foreach (var n in Tech.All) if (n.Row >= 0) next[Math.Clamp(n.Col, 0, 2)] = Math.Max(next[Math.Clamp(n.Col, 0, 2)], n.Row + 1);
+            foreach (var n in Tech.All)
+            {
+                int col = n.Col >= 0 ? Math.Clamp(n.Col, 0, 2) : Math.Clamp(n.Bench - 1, 0, 2);
+                d[n.Id] = (col, n.Row >= 0 ? n.Row : next[col]++);
+            }
+            return d;
+        }
+        static int LayoutRows() { int m = 0; foreach (var (_, (_, r)) in Layout) m = Math.Max(m, r + 1); return m; }
         static readonly string[] Starter = { "tool_hatchet", "tool_pickaxe", "weapon_spear", "weapon_bow", "arrow", "weapon_torch", "bandage", "build_plan", "tool_hammer", "deploy_claim", "deploy_box", "deploy_sleepbag", "lock_key", "deploy_furnace", "deploy_workbench" };
 
         readonly Control _tree;
@@ -118,7 +127,7 @@ namespace Rastvordd.Client
             _bench = UiTheme.Small("", UiTheme.Dim, UiTheme.FontSmall);
             lbox.AddChild(_bench);
 
-            _tree = new Control { CustomMinimumSize = new Vector2(3 * ColW, Top + 5 * RowH), MouseFilter = MouseFilterEnum.Pass };
+            _tree = new Control { CustomMinimumSize = new Vector2(3 * ColW, Top + Math.Max(5, LayoutRows()) * RowH), MouseFilter = MouseFilterEnum.Pass };
             _tree.Draw += DrawTree;
             lbox.AddChild(_tree);
             foreach (var (id, (col, r)) in Layout)

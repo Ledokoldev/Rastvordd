@@ -375,7 +375,7 @@ namespace Rastvordd.Client
         public float SwingT = -1;
 
         /// <summary>Держат двумя руками (вторая кисть на цевье).</summary>
-        static bool TwoHanded(string id) => id is "weapon_ak" or "weapon_pipe" or "weapon_bow" or "weapon_spear" or "tool_pickaxe" or "tool_hatchet";
+        static bool TwoHanded(string id) => id is "weapon_ak" or "weapon_pipe" or "weapon_bow" or "weapon_spear" or "tool_pickaxe" or "tool_hatchet" || Weaponry.TwoHanded(id);
 
         static readonly Color Metal = new Color(0.14f, 0.14f, 0.15f);
         static readonly Color Steel = new Color(0.55f, 0.56f, 0.58f);
@@ -386,7 +386,7 @@ namespace Rastvordd.Client
         public Held2D() => TextureFilter = TextureFilterEnum.Nearest;
 
         /// <summary>Длина предмета в руках, метры (по ней масштабируется спрайт).</summary>
-        static float HeldLength(string id) => id switch
+        static float HeldLength(string id) => Weaponry.HeldLength(id) is float wl && wl > 0 ? wl : id switch
         {
             "tool_rock" => 0.3f,
             "tool_hatchet" or "tool_pickaxe" => 0.65f,
@@ -451,12 +451,14 @@ namespace Rastvordd.Client
                     DrawCircle(new Vector2(16.5f, 0), 2.6f, Skin);
                     break;
                 case "weapon_pipe":
+                case string sp when Weaponry.IsGun(sp) && Weaponry.HeldLength(sp) < 0.7f:
                     DrawRect(new Rect2(2, -2, 18, 4), Metal);
                     DrawRect(new Rect2(-3, -2, 6, 6), Wood);
                     DrawCircle(new Vector2(4, 1), 2.6f, Skin);
                     DrawCircle(new Vector2(12, 0), 2.4f, Skin);
                     break;
                 case "weapon_ak":
+                case string lg when Weaponry.IsGun(lg):
                     DrawRect(new Rect2(2, -2.5f, 24, 5), Metal);
                     DrawRect(new Rect2(26, -1.5f, 4, 3), Metal.Lightened(0.2f));
                     DrawRect(new Rect2(-3, -2, 7, 6), new Color(0.42f, 0.28f, 0.15f));
@@ -976,7 +978,7 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            var tex = Art.Get(_kind switch { DeployKind.Workbench => _level >= 2 ? $"props/workbench{_level}" : "props/workbench", DeployKind.Claim => "props/claim_post", DeployKind.Box => "props/crate_wood", DeployKind.SleepBag => "props/sleeping_bag", DeployKind.Recycler => "props/recycler", _ => "props/furnace" });
+            var tex = Art.Get(_kind switch { DeployKind.Workbench => _level >= 2 ? $"props/workbench{_level}" : "props/workbench", DeployKind.Claim => "props/claim_post", DeployKind.Box => "props/crate_wood", DeployKind.SleepBag => "props/sleeping_bag", DeployKind.Recycler => "props/recycler", DeployKind.Lathe => Art.Get("props/lathe") != null ? "props/lathe" : "props/recycler", _ => "props/furnace" });
             if (tex == null && _kind == DeployKind.Claim)
             {
                 // запасной вид столба: столб с жестяным ящиком и красной тряпкой

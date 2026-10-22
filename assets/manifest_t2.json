@@ -244,6 +244,208 @@
    "cat": "icons",
    "icon": 128,
    "desc": "an old Soviet computer punch card made of beige cardboard with rows of small rectangular punched holes and a red stripe along the top edge with a small red star stamp, slightly bent and dirty"
+  },
+  {
+   "id": "int_fire_extinguisher",
+   "cat": "furniture",
+   "view": "front",
+   "w": 0.4,
+   "desc": "a red Soviet fire extinguisher (cylinder with a black hose and nozzle) standing on the floor next to a small metal wall bracket; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    0.7
+   ]
+  },
+  {
+   "id": "int_tea_table",
+   "cat": "furniture",
+   "view": "angled",
+   "w": 1.1,
+   "desc": "a small wooden side table with an old aluminium electric kettle, three chipped enamel mugs, a sugar bowl and a crumpled newspaper; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.9,
+    0.6,
+    0.8
+   ]
+  },
+  {
+   "id": "int_notice_board",
+   "cat": "furniture",
+   "view": "front",
+   "w": 1.4,
+   "desc": "a free-standing notice board on two wooden legs: green felt board with pinned yellowed papers, schedules, a faded poster and a duty roster, some papers torn; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.3,
+    1.8
+   ]
+  },
+  {
+   "id": "int_portrait_easel",
+   "cat": "furniture",
+   "view": "front",
+   "w": 0.8,
+   "desc": "a large framed oil portrait of an anonymous stern Soviet officer in uniform standing on a wooden easel, gilded frame chipped, canvas dusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.6,
+    0.4,
+    1.6
+   ]
+  },
+  {
+   "id": "int_flag_stand",
+   "cat": "furniture",
+   "view": "front",
+   "w": 0.7,
+   "desc": "a faded red banner flag with golden fringe on a wooden pole in a heavy round stand, dusty and torn at the edge; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.4,
+    0.4,
+    2.0
+   ]
+  },
+  {
+   "id": "int_operator_desk",
+   "cat": "furniture",
+   "view": "front",
+   "w": 1.6,
+   "desc": "a radio operator workstation desk: metal desk with an old oscilloscope, a receiver set with dials, headphones, a microphone, a log book and a desk lamp, an office chair pushed in; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    0.8,
+    1.2
+   ]
+  },
+  {
+   "id": "int_tube_crates",
+   "cat": "furniture",
+   "view": "angled",
+   "w": 1.2,
+   "desc": "a stack of small wooden crates of spare radio vacuum tubes, one crate open showing tubes packed in cotton wool, straw spilling out; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.0,
+    0.7,
+    0.8
+   ]
+  },
+  {
+   "id": "int_drying_rack",
+   "cat": "furniture",
+   "view": "side",
+   "w": 1.6,
+   "desc": "an indoor folding clothes drying rack with army undershirts, foot wraps, socks and a towel hanging on it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    0.4,
+    1.5
+   ]
+  },
+  {
+   "id": "int_boots_pair",
+   "cat": "clutter",
+   "view": "angled",
+   "w": 0.5,
+   "desc": "a pair of worn black Soviet army kirza boots standing next to each other; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "int_dead_plant",
+   "cat": "furniture",
+   "view": "front",
+   "w": 0.6,
+   "desc": "a dried-out dead ficus plant in a big cracked clay pot, brown leaves fallen around it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.5,
+    0.5,
+    1.2
+   ]
+  },
+  {
+   "id": "int_cable_trays",
+   "cat": "furniture",
+   "view": "side",
+   "w": 3.0,
+   "desc": "a long low steel cable tray lying on the floor full of thick black and grey cables, some cables spilling over the edge; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    0.5,
+    0.35
+   ]
+  },
+  {
+   "id": "int_sofa_office",
+   "cat": "furniture",
+   "view": "front",
+   "w": 1.9,
+   "desc": "an old brown leatherette office sofa with buttoned back, cracked upholstery, a folded blanket on it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.9,
+    0.8,
+    0.9
+   ]
+  },
+  {
+   "id": "int_parts_crates",
+   "cat": "furniture",
+   "view": "front",
+   "w": 1.6,
+   "desc": "a stack of olive-green metal storage boxes for spare electronic parts with latches and handles, a few cardboard boxes of radio components on top; Soviet, weathered, dusty; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    0.8,
+    1.0
+   ]
+  },
+  {
+   "id": "fence_panels_fallen",
+   "cat": "props",
+   "view": "side",
+   "w": 6.0,
+   "desc": "two collapsed grey concrete fence panels lying broken on the ground with exposed rusty rebar, chunks of concrete and weeds growing through; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.6,
+    1.2,
+    0.8
+   ]
+  },
+  {
+   "id": "decal_papers_scatter",
+   "cat": "decals",
+   "w": 1.4,
+   "h": 1.0,
+   "desc": "scattered yellowed documents, forms and torn pages of a logbook lying flat on the floor seen from directly above, top-down orthographic; transparent background around the papers; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "decal_carpet_red",
+   "cat": "decals",
+   "w": 3.0,
+   "h": 2.0,
+   "desc": "a worn rectangular Soviet red wool carpet with an ornate oriental pattern lying flat on the floor seen from directly above, top-down orthographic, frayed edges, stains; nothing else; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "decal_garage_pit",
+   "cat": "decals",
+   "w": 1.6,
+   "h": 5.0,
+   "desc": "a rectangular garage inspection pit in a concrete floor seen from directly above, top-down orthographic, long and narrow (1.6 m wide, 5 m long, vertical in the image), dark inside, steel edging, oil stains, a ladder at one end; nothing else; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "floor_parquet",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "worn Soviet herringbone oak parquet floor, scuffed and dusty, a few missing planks"
+  },
+  {
+   "id": "floor_linoleum_green",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "worn green Soviet linoleum floor with a faint diamond pattern, scuffs, cracks and dust"
+  },
+  {
+   "id": "floor_tile_brown",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "old brown-and-beige square ceramic floor tiles of a Soviet institution, some cracked, dusty grout"
   }
  ]
 }

@@ -270,6 +270,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
 
             _hud = new Hud();
             AddChild(_hud);
+            if (_teleports != null) _hud.SetTeleports(_teleports);
             var monList = new List<(string, SVec, SVec)>();
             for (int i = 0; i < _map.Yards.Count; i++) monList.Add((_map.YardNames[i], _map.Yards[i].min, _map.Yards[i].max));
             _mapView = new MapView(_map, monList);
@@ -491,6 +492,8 @@ else if (arg == "--atcrate")
             ground.AddChild(new TerrainView(map, 1337));
         }
 
+        System.Collections.Generic.List<(string, System.Action)> _teleports;
+
         void BuildMap(MapInfo map)
         {
             _prefab = new PrefabLayer(map, _world, this);
@@ -501,7 +504,7 @@ else if (arg == "--atcrate")
                     var mon = m;
                     tps.Add((mon.Name, () => { var me = _server.World.Find(_myId); if (me != null && !me.Dead) me.Pos = new SVec(mon.Center.X, mon.Max.Y + 5); }));
                 }
-                _hud.SetTeleports(tps);
+                _teleports = tps;
             }
             _lighting = new LightingLayer(map, _world);
             _dirLayer = new DirectorLayer();

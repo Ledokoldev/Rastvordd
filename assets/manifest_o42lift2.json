@@ -1,0 +1,25 @@
+{
+ "assets": [
+  {
+   "id": "o42_lift_n2_open",
+   "cat": "concept",
+   "view": "front",
+   "w": 7,
+   "h": 6,
+   "desc": "a square concrete elevator pavilion with a flat roof and a winch machine box in the centre of the roof; on the roof corners four loudspeaker horns (siren megaphones) pointing outward, red and orange warning lamps on posts at every corner, a large painted red star emblem and white stencil hazard chevrons on the roof; the building has FOUR identical wide entrances, one in the middle of each of its four walls, each doorway WIDE OPEN with the sliding doors fully retracted into the walls, revealing a dark elevator cabin interior lit by dim red light and black-yellow hazard stripes; viewed from above at a steep three-quarter angle, perfectly symmetrical, centered, square footprint, cabin for four soldiers, heavy, Soviet secret military bunker 1980s, weathered; no text, no letters, no numbers, no logos",
+   "foot": [
+    7,
+    7,
+    6
+   ]
+  },
+  {
+   "id": "o42_door_panel",
+   "cat": "concept",
+   "view": "front",
+   "w": 1.6,
+   "h": 2.6,
+   "desc": "a single heavy sliding armored elevator door panel, riveted dark grey steel with black-yellow hazard stripes along one edge, front view, flat; Soviet secret military bunker 1980s, weathered; no text, no letters, no numbers, no logos"
+  }
+ ]
+}

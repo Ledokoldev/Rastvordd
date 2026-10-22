@@ -1,0 +1,43 @@
+{
+ "assets": [
+  {
+   "id": "o42_lift_n2",
+   "cat": "concept",
+   "view": "front",
+   "w": 7,
+   "h": 6,
+   "desc": "a square concrete elevator pavilion with a flat roof and a winch machine box in the centre of the roof; on the roof corners four loudspeaker horns (siren megaphones) pointing outward, red and orange warning lamps on posts at every corner, a large painted red star emblem and white stencil hazard chevrons on the roof; the building has FOUR identical wide entrances, one in the middle of each of its four walls, each with heavy sliding armored doors and black-yellow hazard stripes; viewed from above at a steep three-quarter angle, perfectly symmetrical, centered, square footprint, cabin for four soldiers, heavy, Soviet secret military bunker 1980s, weathered; no text, no letters, no numbers, no logos",
+   "foot": [
+    7,
+    7,
+    6
+   ]
+  },
+  {
+   "id": "o42_lift_n3",
+   "cat": "concept",
+   "view": "front",
+   "w": 7,
+   "h": 6,
+   "desc": "a square concrete elevator pavilion with a flat roof and a central winch machine box; clusters of loudspeaker horns on a short mast in the middle, rotating orange beacons above every doorway, painted yellow radiation-style warning circles and red stripes on the roof edges; the building has FOUR identical wide entrances, one in the middle of each of its four walls, each with heavy sliding armored doors and black-yellow hazard stripes; viewed from above at a steep three-quarter angle, perfectly symmetrical, centered, square footprint, cabin for four soldiers, heavy, Soviet secret military bunker 1980s, weathered; no text, no letters, no numbers, no logos",
+   "foot": [
+    7,
+    7,
+    6
+   ]
+  },
+  {
+   "id": "o42_lift_n4",
+   "cat": "concept",
+   "view": "front",
+   "w": 7,
+   "h": 6,
+   "desc": "a square concrete elevator pavilion with a flat roof and a central winch machine box; siren horns on all four sides of the machine box, red blinking lamps above each door, big painted white identification square with a black star symbol on the roof, cables and conduits running to the lamps; the building has FOUR identical wide entrances, one in the middle of each of its four walls, each with heavy sliding armored doors and black-yellow hazard stripes; viewed from above at a steep three-quarter angle, perfectly symmetrical, centered, square footprint, cabin for four soldiers, heavy, Soviet secret military bunker 1980s, weathered; no text, no letters, no numbers, no logos",
+   "foot": [
+    7,
+    7,
+    6
+   ]
+  }
+ ]
+}

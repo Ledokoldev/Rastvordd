@@ -1,0 +1,159 @@
+<title>Дерево прогрессии Раствордда</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Russo+One&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Раскладка: сверху переключатель видов; основная область — сетка (тиры × категории) или лестница верстак → станки;
+   справа панель выбранного предмета с цепочкой до сырья. Один тёмный вид, как интерфейс игры. */
+:root{
+  --bg:#111214; --surface:#1a1b1e; --surface2:#222428; --line:#2e3136; --fg:#ecebe6; --muted:#9b9a94; --faint:#6d6c67;
+  --accent:#f2b234; --up:#f2b234; --down:#6cb6ff; --loot:#b46cff; --good:#5cc96b;
+  --c0:#9aa0a6; --c1:#5cc96b; --c2:#4aa3ff; --c3:#b46cff; --c4:#f2b234;
+  --display:"Russo One","Golos Text",system-ui,sans-serif; --body:"Golos Text","Segoe UI",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);font-size:14px;line-height:1.45;padding-block:18px 36px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font-family:var(--display);font-weight:400;font-size:28px;letter-spacing:.5px}
+h2{font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,.node:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 24px;max-width:1700px;margin:0 auto 14px}
+.top p{margin:4px 0 0;color:var(--muted);max-width:80ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px}
+.chip.on{background:var(--fg);color:#141414;border-color:var(--fg)}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;max-width:1700px;margin:0 auto;align-items:start}
+@media (max-width:1100px){.wrap{grid-template-columns:minmax(0,1fr)}.side{position:static!important}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;min-width:0}
+.scroll{overflow-x:auto}
+/* сетка */
+.grid{display:grid;grid-template-columns:150px repeat(5,minmax(170px,1fr));gap:6px;min-width:1020px}
+.ch{font-size:12px;font-weight:600;padding:6px 8px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;gap:6px}
+.ch i{width:8px;height:8px;border-radius:50%}
+.rh{font-size:12px;color:var(--muted);padding:8px 4px;text-transform:uppercase;letter-spacing:.6px}
+.cell{background:#16171a;border-radius:10px;padding:5px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;min-height:44px}
+.node{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 3px;border-radius:9px;background:var(--surface2);border:1px solid transparent;font-size:12px;cursor:pointer;max-width:100%}
+.node:hover{border-color:var(--faint)}
+.node img,.node .ph{width:28px;height:28px;flex:none;border-radius:6px;object-fit:contain;background:#1c1d20}
+.node .ph{display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--faint)}
+.node .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.node.sel{border-color:var(--fg);background:#2b2d32}
+.node.up{border-color:var(--up)}
+.node.down{border-color:var(--down)}
+.node.dim{opacity:.28}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin:10px 2px 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend b{width:12px;height:12px;border-radius:4px;border:2px solid}
+/* станки */
+.ladder{display:flex;flex-direction:column;gap:14px}
+.lvl{border-radius:14px;background:#16171a;padding:12px}
+.lvl>h3{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;margin-bottom:4px}
+.lvl>.req{font-size:12px;color:var(--muted);margin-bottom:10px}
+.stations{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.st{background:var(--surface2);border-radius:12px;padding:10px}
+.st .sh{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.st .sh .node{background:#2b2d32}
+.st .snote{font-size:12px;color:var(--muted);margin-bottom:8px}
+.st .makes{display:flex;flex-wrap:wrap;gap:4px}
+/* боковая панель */
+.side{position:sticky;top:12px}
+.side .title{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.side .title img,.side .title .ph{width:56px;height:56px;border-radius:10px;background:#1c1d20;object-fit:contain;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:11px}
+.side h2{margin:14px 0 6px}
+.kv{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--surface2)}
+.pill.r{color:var(--accent)} .pill.l{color:var(--loot)}
+ul.how{margin:0;padding-left:18px;color:var(--fg);font-size:13px}
+.tree{font-size:13px;font-family:var(--body)}
+.tree .t{padding:2px 0;cursor:pointer}
+.tree .t:hover{color:var(--accent)}
+.tree .n{font-family:var(--mono);color:var(--muted)}
+.tree .src{color:var(--faint);font-size:12px}
+.empty{color:var(--faint);font-size:13px}
+</style>
+
+<header class="top">
+  <div>
+    <h1>Дерево прогрессии</h1>
+    <p>Клик по предмету: справа видно, где он добывается, на каком станке и за сколько лома изучается, и полная цепочка до сырья. Жёлтым подсвечено то, из чего он делается, синим — то, куда он идёт. Цифры черновые, по дизайн-документам 13–15.</p>
+  </div>
+  <div class="tabs"><button class="chip on" data-v="grid">Тиры × категории</button><button class="chip" data-v="ladder">Верстаки → станки</button></div>
+</header>
+<div class="wrap">
+  <section class="panel" aria-label="Дерево">
+    <div class="scroll" id="view"></div>
+    <div class="legend"><span><b style="border-color:var(--up)"></b>из чего делается</span><span><b style="border-color:var(--down)"></b>куда идёт</span><span><b style="border-color:var(--fg)"></b>выбрано</span></div>
+  </section>
+  <aside class="panel side" id="side" aria-live="polite"></aside>
+</div>
+
+<script>
+const N=/*NODES*/[];
+const IC=/*ICONS*/{};
+const BY={};N.forEach(x=>BY[x.id]=x);
+const COLS=['Старт (без верстака)','Верстак 1','Верстак 2','Верстак 3','Только лут / РТ'];
+const CC=['var(--c0)','var(--c1)','var(--c2)','var(--c3)','var(--c4)'];
+const CATS=[['res','Добыча'],['proc','Переработанное'],['tool','Инструменты'],['stn','Станки'],['comp','Компоненты'],['val','Ценный лом'],['gun','Оружие'],['ammo','Патроны'],['att','Обвесы'],['wear','Одежда'],['equip','Снаряжение'],['med','Хил, еда, карты'],['base','База'],['boom','Взрывчатка, замки']];
+const USED={};N.forEach(x=>x.rec.forEach(([id])=>{(USED[id]=USED[id]||[]).push(x.id)}));N.forEach(x=>{if(x.st)(USED[x.st]=USED[x.st]||[]).push(x.id)});
+let sel=null, view='grid';
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function icon(id,cls=''){return IC[id]?`<img src="${IC[id]}" alt="">`:`<span class="ph">${esc((BY[id]?.name||id).slice(0,3))}</span>`}
+function chip(id){const x=BY[id];if(!x)return '';return `<div class="node" tabindex="0" role="button" data-id="${id}">${icon(id)}<span class="nm">${esc(x.name)}</span></div>`}
+function upstream(id,acc=new Set()){const x=BY[id];if(!x)return acc;x.rec.forEach(([r])=>{if(!acc.has(r)){acc.add(r);upstream(r,acc)}});if(x.st&&!acc.has(x.st)){acc.add(x.st);upstream(x.st,acc)}return acc}
+function renderGrid(){
+  let h=`<div class="grid"><div></div>`+COLS.map((c,i)=>`<div class="ch"><i style="background:${CC[i]}"></i>${c}</div>`).join('');
+  CATS.forEach(([k,lab])=>{h+=`<div class="rh">${lab}</div>`;for(let c=0;c<5;c++)h+=`<div class="cell">${N.filter(x=>x.cat===k&&x.col===c).map(x=>chip(x.id)).join('')}</div>`});
+  document.getElementById('view').innerHTML=h+'</div>';
+}
+function renderLadder(){
+  const L=[['Без верстака','с первой минуты',[null,'furnace'],0],['Верстак 1','',['bench1','still','sewing'],1],['Верстак 2','',['bench2','lathe','chem','generator','lamp'],2],['Верстак 3','',['bench3','guntable','medtable','efurnace','conveyor'],3],['Только на РТ','',['recycler'],4]];
+  let h='<div class="ladder">';
+  L.forEach(([t,sub,sts,c])=>{
+    const b=sts.find(s=>s&&s.startsWith('bench'));const req=b?BY[b].rec.map(([r,n])=>`${BY[r]?.name||r} ${n}`).join(', '):sub;
+    h+=`<div class="lvl"><h3><i style="width:10px;height:10px;border-radius:50%;background:${CC[c]};display:inline-block"></i>${t}</h3><div class="req">${b?'Построить: ':''}${esc(req)}</div><div class="stations">`;
+    sts.forEach(s=>{
+      const makes=s===null?N.filter(x=>!x.st&&x.rec.length&&x.cat!=='stn'):N.filter(x=>x.st===s);
+      const head=s===null?'<span class="node" style="cursor:default">в руках</span>':chip(s);
+      const note=s===null?'крафт без станка':esc(BY[s].note||'');
+      h+=`<div class="st"><div class="sh">${head}</div><div class="snote">${note}</div><div class="makes">${makes.map(x=>chip(x.id)).join('')||'<span class="empty">—</span>'}</div></div>`;
+    });
+    h+='</div></div>';
+  });
+  document.getElementById('view').innerHTML=h+'</div>';
+}
+function treeHtml(id,depth,seen){
+  const x=BY[id];if(!x)return '';
+  const src=x.how.length?` <span class="src">— ${esc(x.how[0])}</span>`:'';
+  let h='';
+  x.rec.forEach(([r,n])=>{const y=BY[r];if(!y)return;const s=y.how.length&&!y.rec.length?` <span class="src">— ${esc(y.how[0])}</span>`:(y.st?` <span class="src">— ${esc(BY[y.st]?.name||'')}</span>`:'');
+    h+=`<div class="t" data-id="${r}" style="padding-left:${depth*16}px">${n?`<span class="n">${n}×</span> `:''}${esc(y.name)}${s}</div>`;
+    if(!seen.has(r)&&depth<6){seen.add(r);h+=treeHtml(r,depth+1,seen)}});
+  return h;
+}
+function renderSide(){
+  const s=document.getElementById('side');
+  if(!sel){s.innerHTML='<h2>Выбери предмет</h2><p class="empty">Нажми на любой предмет в дереве — здесь появится цепочка от сырья до него.</p>';return}
+  const x=BY[sel];const st=x.st?BY[x.st]:null;
+  const users=(USED[sel]||[]).filter((v,i,a)=>a.indexOf(v)===i);
+  s.innerHTML=`<div class="title">${icon(sel)}<div><div style="font-size:18px;font-weight:600">${esc(x.name)}</div><div class="empty">${COLS[x.col]}</div></div></div>
+   <div class="kv">${st?`<span class="pill">станок: ${esc(st.name)}</span>`:''}${x.res?`<span class="pill r">изучить: ${x.res} лома</span>`:''}${!x.rec.length&&x.how.length?'<span class="pill l">только добыть / найти</span>':''}</div>
+   ${x.note?`<p style="margin:8px 0 0;color:var(--muted);font-size:13px">${esc(x.note)}</p>`:''}
+   ${x.how.length?`<h2>Где взять</h2><ul class="how">${x.how.map(h=>`<li>${esc(h)}</li>`).join('')}</ul>`:''}
+   ${x.rec.length?`<h2>Рецепт</h2><div class="kv">${x.rec.map(([r,n])=>`<span class="pill">${n?n+'× ':''}${esc(BY[r]?.name||r)}</span>`).join('')}</div>`:''}
+   ${x.rec.length||st?`<h2>Цепочка до сырья</h2><div class="tree">${treeHtml(sel,0,new Set())}${st?`<div class="t" data-id="${x.st}">⚙ станок: ${esc(st.name)}</div>${treeHtml(x.st,1,new Set())}`:''}</div>`:''}
+   ${users.length?`<h2>Куда идёт</h2><div class="kv">${users.map(u=>`<span class="pill t" data-id="${u}" style="cursor:pointer">${esc(BY[u].name)}</span>`).join('')}</div>`:''}`;
+}
+function highlight(){
+  const up=sel?upstream(sel):new Set(), down=new Set(sel?(USED[sel]||[]):[]);
+  document.querySelectorAll('#view .node[data-id]').forEach(e=>{const id=e.dataset.id;e.classList.toggle('sel',id===sel);e.classList.toggle('up',up.has(id));e.classList.toggle('down',down.has(id)&&id!==sel);e.classList.toggle('dim',!!sel&&id!==sel&&!up.has(id)&&!down.has(id))});
+}
+function render(){view==='grid'?renderGrid():renderLadder();highlight();renderSide()}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-id]');if(t){sel=sel===t.dataset.id&&t.closest('#view')?null:t.dataset.id;highlight();renderSide()}
+  const v=e.target.closest('[data-v]');if(v){view=v.dataset.v;document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b===v));render()}});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.node[data-id]')){e.preventDefault();e.target.click()}});
+sel='weapon_akm';render();
+</script>

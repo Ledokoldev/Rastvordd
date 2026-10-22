@@ -91,7 +91,8 @@ namespace Rastvordd.Sim
         /// <summary>Сталь при переработке (сверх обычного выхода): детали тира 2–3, дорогой ценный лом, пластины, элита.</summary>
         public static readonly Dictionary<string, int> RecycleAlloy = new()
         {
-            ["comp_trigger"] = 1, ["comp_bolt_carrier"] = 1, ["comp_barrel_rifled"] = 1, ["comp_frame_pistol"] = 1, ["comp_body_smg"] = 1, ["comp_body_rifle"] = 1,
+            ["comp_trigger"] = 2, ["comp_bolt_carrier"] = 2, ["comp_barrel_rifled"] = 2, ["comp_frame_pistol"] = 2, ["comp_body_smg"] = 2, ["comp_body_rifle"] = 2,
+            ["val_motor"] = 1,
             ["comp_receiver_ak"] = 4, ["comp_barrel_chrome"] = 3, ["comp_gas_block"] = 3,
             ["val_radio_tubes"] = 2, ["val_gold_contacts"] = 3, ["val_computer_block"] = 8,
             ["plate_steel"] = 4, ["plate_ceramic"] = 6,
@@ -107,11 +108,11 @@ namespace Rastvordd.Sim
             ["barrel"] = new LootLine[] { new(0.03, "flask_05", 1, 1), new(0.03, "canister_5", 1, 3, "crude") },
             ["barrel_rt"] = new LootLine[] { new(0.04, "flask_1", 1, 1), new(0.06, "canister_5", 2, 4, "crude"), new(0.03, "medspirt", 1, 1) },
             ["crate0"] = new LootLine[] { new(0.08, "flask_05", 1, 1), new(0.04, "flask_1", 1, 1), new(0.06, "canister_5", 2, 5, "fuel"), new(0.08, "medspirt", 1, 2) },
-            ["crate1"] = new LootLine[] { new(0.15, Alloy, 1, 3), new(0.15, "canister_5", 3, 5, "fuel"), new(0.05, "canister_20", 6, 12, "fuel"), new(0.15, "medspirt", 1, 3), new(0.05, "syringe", 1, 1) },
-            ["crate2"] = new LootLine[] { new(0.35, Alloy, 3, 6), new(0.15, "canister_20", 10, 20, "fuel"), new(0.08, "canister_5", 3, 5, "diesel"), new(0.15, "syringe", 1, 2), new(0.08, "medkit", 1, 1), new(0.03, "tool_jackhammer", 1, 1) },
-            ["safe"] = new LootLine[] { new(0.3, Alloy, 2, 5), new(0.2, "syringe", 1, 2), new(0.1, "medkit", 1, 1), new(0.1, "canister_5", 3, 5, "diesel") },
-            ["punch"] = new LootLine[] { new(0.4, Alloy, 2, 5), new(0.2, "canister_5", 3, 5, "fuel"), new(0.1, "syringe", 1, 1) },
-            ["event"] = new LootLine[] { new(1.0, Alloy, 6, 12), new(0.3, "canister_20", 8, 15, "diesel"), new(0.3, "medkit", 1, 2), new(0.3, "syringe", 1, 2) },
+            ["crate1"] = new LootLine[] { new(0.3, Alloy, 2, 4), new(0.15, "canister_5", 3, 5, "fuel"), new(0.05, "canister_20", 6, 12, "fuel"), new(0.15, "medspirt", 1, 3), new(0.05, "syringe", 1, 1) },
+            ["crate2"] = new LootLine[] { new(0.5, Alloy, 4, 8), new(0.15, "canister_20", 10, 20, "fuel"), new(0.08, "canister_5", 3, 5, "diesel"), new(0.15, "syringe", 1, 2), new(0.08, "medkit", 1, 1), new(0.03, "tool_jackhammer", 1, 1) },
+            ["safe"] = new LootLine[] { new(0.5, Alloy, 3, 6), new(0.2, "syringe", 1, 2), new(0.1, "medkit", 1, 1), new(0.1, "canister_5", 3, 5, "diesel") },
+            ["punch"] = new LootLine[] { new(0.6, Alloy, 3, 6), new(0.2, "canister_5", 3, 5, "fuel"), new(0.1, "syringe", 1, 1) },
+            ["event"] = new LootLine[] { new(1.0, Alloy, 8, 15), new(0.3, "canister_20", 8, 15, "diesel"), new(0.3, "medkit", 1, 2), new(0.3, "syringe", 1, 2) },
         };
 
         // =====================================================================================================
@@ -134,6 +135,8 @@ namespace Rastvordd.Sim
             ("canister_5", "Канистра 5 л", 5f, false, 1, new[] { ("metal_fragments", 40), ("rubber", 2) }, 1, "Вода или топливо"),
             ("canister_20", "Канистра 20 л", 20f, false, 2, new[] { ("metal_fragments", 100), ("rubber", 4) }, 2, "Вода или топливо. Тяжёлая"),
         };
+
+        public const float HeavyContainerLiters = 20f, HeavyContainerSpeed = 0.93f;   // полная канистра 20 л (больше половины) — −7% скорости
 
         // =====================================================================================================
         // Вода и отравление

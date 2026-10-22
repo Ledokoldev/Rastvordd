@@ -731,7 +731,7 @@ namespace Rastvordd.Sim
                 s.Liters -= t;
                 if (s.Liters <= 0.001f) { s.Liters = 0; s.Liquid = null; }
                 Info(a, $"В бочку: {Items.Name(Liquids.Tank(tank).liquid)} {t:0.#} л");
-                Events.Add(new SimEvent { Kind = SimEventKind.Wear, ActorId = a.Id, Pos = a.Pos, Text = "pour" });
+                Events.Add(new SimEvent { Kind = SimEventKind.Wear, ActorId = a.Id, Pos = a.Pos, Text = "pour_liquid" });
                 return true;
             }
             if (src == "tank")

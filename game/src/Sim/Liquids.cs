@@ -143,6 +143,15 @@ namespace Rastvordd.Sim
             return t;
         }
 
+        /// <summary>Тяжёлая ёмкость (канистра 20 л, налито больше половины) в рюкзаке или на поясе — медленнее (Prog.HeavyContainer*).</summary>
+        public static float HeavyMul(Actor a)
+        {
+            foreach (var s in a.Pack) if (Heavy(s)) return Prog.HeavyContainerSpeed;
+            foreach (var s in a.Belt) if (Heavy(s)) return Prog.HeavyContainerSpeed;
+            return 1f;
+            static bool Heavy(ItemSlot s) => s != null && s.Liters > 0 && s.Def is ItemDef d && d.Capacity >= Prog.HeavyContainerLiters && s.Liters > d.Capacity * 0.5f;
+        }
+
         /// <summary>Подпись для ячейки: «Топляк 3,5/5 л».</summary>
         public static string Label(ItemSlot s)
         {

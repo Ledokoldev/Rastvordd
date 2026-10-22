@@ -1073,8 +1073,10 @@ namespace Rastvordd.Client
                     DeployKind.Generator => Sfx.Pick("generator_loop", Sfx.Pick("lathe_work", "furnace_loop")),
                     DeployKind.Campfire => "furnace_loop",
                     DeployKind.Still => Sfx.Pick("still_loop", "furnace_loop"),
-                    DeployKind.Drill => Sfx.Pick("drill_loop", Sfx.Pick("generator_loop", "lathe_work")),
-                    DeployKind.Rectifier or DeployKind.EFurnace => Sfx.Pick("machine_hum", Sfx.Pick("generator_loop", "furnace_loop")),
+                    DeployKind.Drill => Sfx.Pick("drill_rig_loop", Sfx.Pick("generator_loop", "lathe_work")),
+                    DeployKind.Rectifier => Sfx.Pick("rectifier_loop", Sfx.Pick("generator_loop", "furnace_loop")),
+                    DeployKind.EFurnace => Sfx.Pick("efurnace_loop", "furnace_loop"),
+                    DeployKind.Conveyor => Sfx.Pick("conveyor_loop", "lathe_work"),
                     _ => null,
                 };
                 if (loop != null) { _crackle = Sfx.Loop(loop, -9, 16); AddChild(_crackle); }

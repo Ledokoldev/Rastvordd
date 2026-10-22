@@ -139,6 +139,11 @@ namespace Rastvordd.Sim
             Check(Building.MaxTier == 5 && Array.Exists(Building.Cost(StructKind.Wall, 5), c => c.id == Prog.Alloy), "стена: 5-й уровень «броня» за сталь");
             Check(!Array.Exists(Building.UpkeepCost(StructKind.Wall, 5), c => c.id == Prog.Alloy), "содержание брони — без стали (металл, лом)");
 
+            // 11б. ставни: закрытое окно — стена во всю высоту, пули не проходят
+            var closed = Building.Spans(StructKind.Window, true).Find(x => x.t0 > 0.2f && x.t1 < 0.8f);
+            var openW = Building.Spans(StructKind.Window, false).Find(x => x.t0 > 0.2f && x.t1 < 0.8f);
+            Check(closed.h >= Building.WallH && !closed.pass && openW.pass, "ставни: закрытое окно — как стена, открытое — подоконник");
+
             // 12. сохранение жидкостей и станций
             still.On = false;
             var sv = Save();

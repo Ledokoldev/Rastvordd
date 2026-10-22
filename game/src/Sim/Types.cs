@@ -382,6 +382,15 @@ namespace Rastvordd.Sim
                 list.Add(("Прочность", $"{pd.Durability:0} урона"));
             }
             if (BenchLevel(id) > 0) list.Add(("Открывает", $"крафт уровня {BenchLevel(id)}"));
+            if (def.FuelId != null) list.Add(("Топливо", $"{Name(def.FuelId)}, {def.FuelPerHit:0.##} л за удар"));   // бензопила, отбойник (D54)
+            if (def.Capacity > 0) list.Add(("Объём", $"{def.Capacity:0.#} л{(def.WaterOnly ? ", только вода" : "")}"));
+            if (StationDefs.Get(def.Deploy) is StationDef sd && !sd.Registered)
+            {
+                list.Add(("Место", Footprints.SizeName(sd.Size)));
+                if (sd.Power > 0) list.Add(("Ток", sd.NeedsPower ? $"{sd.Power:0} (без тока не работает)" : $"{sd.Power:0} (под током ×{sd.PowerSpeed:0.##})"));
+                if (sd.PowerOut > 0) list.Add(("Даёт ток", $"{sd.PowerOut:0} на {sd.PowerRadius:0} м"));
+                if (sd.Burn != null) list.Add(("Жжёт", $"{Name(sd.Burn)} {sd.BurnPerMin:0.##}{(Liquids.Is(sd.Burn) ? " л" : " шт.")}/мин"));
+            }
             return list;
         }
 

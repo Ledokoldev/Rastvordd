@@ -1080,7 +1080,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         // механизмы готовых РТ: пробка, питание, роллета, считыватель крейта
                         if (e.Text != null && e.Text.StartsWith("станок:")) { Sfx.Play(Sfx.Pick("lathe_done", "craft_done"), Iso.Px(e.Pos), -2, 30, 0.05f); break; }   // деталь готова (D46)
                         if (e.Text != null && e.Text.StartsWith("станция:")) { Sfx.Play(Sfx.Pick("station_done", "craft_done"), Iso.Px(e.Pos), -8, 15, 0.05f); break; }   // станция D54 сделала порцию
-                        if (e.Text == "pump") { Sfx.Play(Sfx.Pick("fuel_pump", "hit_metal_ore"), Iso.Px(e.Pos), -4, 40, 0.15f); break; }   // насос Заправки (D54)
+                        if (e.Text == "pump") { Sfx.Play(Sfx.Pick("hand_pump", "hit_metal_ore"), Iso.Px(e.Pos), -4, 40, 0.15f); break; }   // насос Заправки (D54)
                         switch (e.Text)
                         {
                             case "fuse": Sfx.Play("lock_click", Iso.Px(e.Pos), 0, 15, 0f); Vfx.Electric(Iso.Px(e.Pos), Iso.H(1.3f), false); break;

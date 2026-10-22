@@ -79,7 +79,7 @@ namespace Rastvordd.Sim
             add("leather", "Кожа", ItemCategory.Resource);
             Meta["leather"] = new Weaponry.Meta { Desc = "Старые куртки и ремни на лоскуты. Кожаный сет, кирзачи, ремни брони. Бочки и ящики", Rarity = 1, Value = 1.5f, Stack = 200 };
             var anti = add("antirad", "Антирадин", ItemCategory.Medical);
-            Meta["antirad"] = new Weaponry.Meta { Desc = $"Выводит радиацию: −{AntiradDose:0} дозы. F — принять, когда облучён. Ящики РТ, медстол (верстак 2)", Rarity = 2, Value = 12f, Stack = 10 };
+            Meta["antirad"] = new Weaponry.Meta { Desc = $"Выводит радиацию: −{AntiradDose:0} дозы. F — принять, когда облучён. Ящики РТ; крафт — химстол (медспирт 2 + уголь 10)", Rarity = 2, Value = 12f, Stack = 10 };
 
             void W(string set, string key, string name, WearSlot slot, float b, float rad, float warm, float spd = 0, int plates = 0, string desc = null, bool metal = false, bool rubber = false)
             {

@@ -16,6 +16,8 @@ namespace Rastvordd.Client
     public partial class Main
     {
         string _sbMode;
+        O42LiftView _sbLift;
+        float _sbLiftIdle = 2;
         SandboxPanel _sbPanel;
         SandboxMarks _sbMarks;
         SVec _sbC, _sbSpawn;          // центр площадки, точка появления
@@ -83,6 +85,14 @@ namespace Rastvordd.Client
                     _sbSpawn = _sbLane;
                     break;
                 }
+                case "lift":
+                {
+                    _sbC = w.FindSandboxSpot(new SVec(-40, -40), new SVec(40, 40));
+                    w.SandboxClear(_sbC + new SVec(-40, -40), _sbC + new SVec(40, 40), true);
+                    _sbSpawn = _sbC + new SVec(-4, 0);
+                    if (!OS.GetCmdlineUserArgs().Any(a => a.StartsWith("--zoom="))) _zoom = 1.5f;
+                    break;
+                }
                 case "sound":
                 {
                     _sbC = w.FindSandboxSpot(new SVec(-40, -40), new SVec(40, 40));
@@ -101,7 +111,7 @@ namespace Rastvordd.Client
                     break;
                 }
                 default:
-                    GD.PrintErr($"sandbox: неизвестный режим {_sbMode} (aim, sound, build)");
+                    GD.PrintErr($"sandbox: неизвестный режим {_sbMode} (aim, sound, build, lift)");
                     _sbMode = null;
                     w.DamageHook = null;
                     return;
@@ -431,17 +441,25 @@ namespace Rastvordd.Client
         void SandboxReady()
         {
             if (_sbMode == null) return;
-            _sbPanel = new SandboxPanel(_sbMode switch { "aim" => "Полигон — стрельба", "sound" => "Полигон — звук", _ => "Полигон — стройка" }) { Position = new Vector2(16, 56) };
+            _sbPanel = new SandboxPanel(_sbMode switch { "aim" => "Полигон — стрельба", "sound" => "Полигон — звук", "lift" => "Полигон — лифт", _ => "Полигон — стройка" }) { Position = new Vector2(16, 56) };
             _sbPanel.Toggled += () => Input.MouseMode = _sbPanel.Expanded || UiShown || _hud.CraftOpen || _hud.AdminOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
             _hud.AddChild(_sbPanel);
             _sbMarks = new SandboxMarks { ZIndex = -8 };
             AddChild(_sbMarks);
+            if (_sbMode == "lift")
+            {
+                _sbLift = new O42LiftView { Position = Iso.Px(_sbC) };
+                _world.AddChild(_sbLift);
+                _sbLift.DoorSlammed += () => _shake = Mathf.Min(1.5f, _shake + 0.8f);
+                _sbLift.StateChanged += state => GD.Print($"O42-LIFT: {state}");
+            }
             SbFillPanel();
-            DisplayServer.WindowSetTitle($"Раствордд — {(_sbMode switch { "aim" => "полигон: стрельба", "sound" => "полигон: звук", _ => "полигон: стройка" })}");
+            DisplayServer.WindowSetTitle($"Раствордд — {(_sbMode switch { "aim" => "полигон: стрельба", "sound" => "полигон: звук", "lift" => "полигон: лифт", _ => "полигон: стройка" })}");
             _hud.Toast(_sbMode switch
             {
                 "aim" => "Полигон: стрельба. F2 — панель (мишени, боты, стойка оружия). Сохранение не трогается.",
                 "sound" => "Полигон: звук. F2 — панель. Наушники! Сохранение не трогается.",
+                "lift" => "Полигон: лифт. F3 — начать заново, F2 — панель. Посадка 15 с.",
                 _ => "Полигон: стройка. Свой шкаф, ресурсы бесконечные, крафт мгновенный. F2 — панель.",
             });
         }
@@ -455,6 +473,10 @@ namespace Rastvordd.Client
                 case "aim": SbFillAim(); break;
                 case "sound": SbFillSound(); break;
                 case "build": SbFillBuild(); break;
+                case "lift":
+                    _sbPanel.Note("Объект 42: предупреждение 10 с, открытие 1,5 с, посадка 15 с, закрытие и спуск 3 с. Цикл повторяется после паузы 2 с.");
+                    _sbPanel.Buttons(("Начать заново (F3)", () => _sbLift.Start(15)));
+                    break;
             }
         }
 
@@ -568,6 +590,22 @@ namespace Rastvordd.Client
                     _sbPanel.Info.Text = $"Построек {_server.World.Structures.Count} · установлено {_server.World.Deployables.Count(d => d.Kind != DeployKind.Claim && SVec.Distance(d.Pos, _sbC) < 50)} · дерево {me.Count("wood")} · камень {me.Count("stone")} · металл {me.Count("metal_fragments")}";
                     _sbMarks.Rect(Iso.Px(_sbC + new SVec(-36, -36)), Iso.Px(_sbC + new SVec(36, 36)));
                     break;
+                case "lift":
+                    if (_sbLift.State == O42LiftView.LiftState.Idle)
+                    {
+                        _sbLiftIdle -= dt;
+                        if (_sbLiftIdle <= 0) { _sbLiftIdle = 2; _sbLift.Start(15); }
+                    }
+                    string phase = _sbLift.State switch
+                    {
+                        O42LiftView.LiftState.Idle => "Ожидание",
+                        O42LiftView.LiftState.Warning => "Предупреждение",
+                        O42LiftView.LiftState.Opening => "Открытие дверей",
+                        O42LiftView.LiftState.Boarding => "Посадка",
+                        _ => "Закрытие и спуск"
+                    };
+                    _sbPanel.Info.Text = $"Объект 42 · {phase} · {_sbLift.Remaining:0.0} с\nF3 — начать цикл заново · посадка в демо 15 с";
+                    break;
                 case "sound":
                     SoundFrame(dt);
                     break;
@@ -579,6 +617,7 @@ namespace Rastvordd.Client
         bool SandboxKey(Key k)
         {
             if (_sbMode == null) return false;
+            if (_sbMode == "lift" && k == Key.F3) { _sbLift.Start(15); return true; }
             if (k == Key.F2) { _sbPanel.SetExpanded(!_sbPanel.Expanded); return true; }
             if (_sbMode == "sound") return SoundKey(k);
             return false;

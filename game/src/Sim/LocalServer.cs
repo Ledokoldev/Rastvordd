@@ -340,7 +340,7 @@ namespace Rastvordd.Sim
             }
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--weapontest") >= 0) World.WeaponSelfTest(log);   // самопроверка ветки оружия D46
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--weartest") >= 0) World.WearSelfTest(log);       // самопроверка одежды D47
-            int shown = World.Milestones.Count;
+            int shown = World.Milestones.Count; int envShown = 0;
             var thoughtsShown = new Dictionary<int, int>();
             bool basedump = System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--basedump") >= 0;
             var killAt = new List<float>();
@@ -360,6 +360,7 @@ namespace Rastvordd.Sim
                 if (focusId >= 0) _pending[focusId] = InputCmd.Empty;
                 Tick();
                 while (shown < World.Milestones.Count) log("ВЕХА " + World.Milestones[shown++]);
+                while (envShown < World.EnvDeaths.Count) log("СРЕДА " + World.EnvDeaths[envShown++]);   // смерти от холода и радиации (D47)
                 foreach (var b in _bots.Values)
                 {
                     // журнал мыслей: решения директора с причинами

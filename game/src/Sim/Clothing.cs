@@ -51,9 +51,9 @@ namespace Rastvordd.Sim
         public const float AntiradDose = 120;           // антирадин: −120 дозы сразу
         public const float Comfort = 15f;               // воздух + тепло ≥ +15 °C — комфортно
         public const float FireWarm = 15f, IndoorWarm = 8f, WetCold = -10f, NightCold = -10f, RainCold = -4f, WinterCold = -15f, UndergroundAir = 6f;
-        public const float ColdRise = 0.05f;            // переохлаждение/с = дефицит × 0,05 (до 100)
+        public const float ColdRise = 0.02f;            // переохлаждение/с = дефицит × 0,02 (до 100): голым ночью в поле (+4 °C) — ≈ 7,5 мин
         public const float ColdRecover = 2f;
-        public const float ColdDmgBase = 0.3f, ColdDmgPerDeg = 0.03f;   // урон/с на полном переохлаждении: 0,3 + дефицит × 0,03
+        public const float ColdDmgBase = 0.15f, ColdDmgPerDeg = 0.02f;  // урон/с на полном переохлаждении: 0,15 + дефицит × 0,02 (тундра ночью голым ≈ 0,8)
 
         static readonly Dictionary<string, WearDef> Defs = new();
         static readonly Dictionary<string, PlateDef> PlateDefs = new();

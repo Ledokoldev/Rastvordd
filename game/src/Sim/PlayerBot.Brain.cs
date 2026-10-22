@@ -250,6 +250,8 @@ namespace Rastvordd.Sim
             if (_me.Water < (hurt ? 50 : 30)) u = MathF.Max(u, _me.Water < 15 ? 1f : 0.8f);
             if (_me.Food < (hurt ? 45 : 30) && _me.Count("berries") == 0) u = MathF.Max(u, _me.Food < 15 ? 1f : 0.7f);
             if (_me.Hp < 70 && _me.Count("bandage") > 0) u = MathF.Max(u, 0.6f);
+            if (_warming || (_me.Cold >= 60 && _me.FeltTemp < Clothing.Comfort && _w.Time >= _warmNoTry)) u = MathF.Max(u, 0.75f);   // замёрз (D47)
+            if (NeedClothesCloth) u = MathF.Max(u, 0.5f);                                                                              // мёрзнет голым — конопля на рубаху
             return u;
         }
 

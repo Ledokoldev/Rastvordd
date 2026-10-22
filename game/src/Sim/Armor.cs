@@ -139,6 +139,9 @@ namespace Rastvordd.Sim
             a.FeltTemp = a.AirTemp + Clothing.Warmth(a) + (a.NearFire ? Clothing.FireWarm : 0) + (a.Indoors ? Clothing.IndoorWarm : 0) + (a.WetLeft > 0 ? Clothing.WetCold : 0);
         }
 
+        /// <summary>Журнал смертей от среды (для прогонов ботов).</summary>
+        public readonly System.Collections.Generic.List<string> EnvDeaths = new();
+
         /// <summary>Доза, переохлаждение и их урон. Игроки и боты; охране РТ не нужно.</summary>
         void StepEnvironment(Actor a)
         {
@@ -146,7 +149,11 @@ namespace Rastvordd.Sim
             if ((Tick + (uint)a.Id) % 10 == 0) SenseEnvironment(a);
             a.WetLeft = MathF.Max(0, a.WetLeft - Dt);
             EnvTick(a, Dt);
-            if (a.Hp <= 0 && !a.Dead) Kill(a, -1);
+            if (a.Hp <= 0 && !a.Dead)
+            {
+                EnvDeaths.Add($"[{Time,6:0}s] {a.Name} умер от {(a.RadDose >= Clothing.RadHurt1 ? $"радиации (доза {a.RadDose:0}, уровень {a.RadHere:0}, защита {Clothing.RadProt(a):0})" : $"холода ({a.FeltTemp:0} °C, воздух {a.AirTemp:0}, тепло одежды {Clothing.Warmth(a):0})")} @({a.Pos.X:0};{a.Pos.Y:0}) {Terrain.BiomeAt(a.Pos)}");
+                Kill(a, -1);
+            }
         }
 
         /// <summary>Шаг дозы и переохлаждения на dt (без смерти — её решает вызывающий). Открыт для самотеста.</summary>
@@ -219,6 +226,7 @@ namespace Rastvordd.Sim
                 if (cur != null && Clothing.BotScore(Clothing.Def(cur.Id)) >= Clothing.BotScore(d)) continue;
                 a.Worn[k] = s;
                 a.Pack[i] = cur;
+                Milestone(a, $"надел: {Items.Name(s.Id)}");   // для отчёта прогонов ботов
             }
             FixPlates(a);
             for (int side = 0; side < Clothing.PlateCap(a); side++)

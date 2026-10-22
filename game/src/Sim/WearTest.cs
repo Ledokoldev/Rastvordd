@@ -90,9 +90,9 @@ namespace Rastvordd.Sim
                 t.FeltTemp = 15; for (int i = 0; i < 300; i++) EnvTick(t, Dt);
                 Check(t.Cold == 0, "+15 °C — переохлаждения нет");
                 t.FeltTemp = 14; for (int i = 0; i < 300; i++) EnvTick(t, Dt);
-                Check(Near(t.Cold, 0.5f, 0.01f), $"+14 °C — копится: {t.Cold:0.00} за 10 с (ждём 0,5)");
+                Check(Near(t.Cold, 0.2f, 0.01f), $"+14 °C — копится: {t.Cold:0.00} за 10 с (ждём 0,2)");
                 t.Cold = 100; t.FeltTemp = 5; hp0 = t.Hp; EnvTick(t, 1f);
-                Check(Near(hp0 - t.Hp, 0.3f + 10 * 0.03f, 0.01f), $"полное переохлаждение при +5 °C: −{hp0 - t.Hp:0.00} hp/с (0,6)");
+                Check(Near(hp0 - t.Hp, 0.15f + 10 * 0.02f, 0.01f), $"полное переохлаждение при +5 °C: −{hp0 - t.Hp:0.00} hp/с (0,35)");
                 Dress(t, "wear_vatnik_ushanka", "wear_vatnik_scarf", "wear_vatnik_telogreika", "wear_vatnik_pants", "wear_vatnik_valenki", "wear_vatnik_mittens");
                 Check(Near(Clothing.Comfort - Clothing.Warmth(t), -30), $"ватник держит холод до {Clothing.Comfort - Clothing.Warmth(t):0} °C (−30)");
 

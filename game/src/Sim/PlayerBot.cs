@@ -122,10 +122,46 @@ namespace Rastvordd.Sim
                 if (r < 0 || !_w.CanCraft(_me, Recipes.All[r])) continue;
                 int cloth = 0;
                 foreach (var (cid, n) in Recipes.All[r].Cost) if (cid == "cloth") cloth = n;
-                if (_me.Count("cloth") - cloth < 8) continue;                                  // ткань на бинты — не трогать
+                int reserve = Freezing ? 0 : 8;                                               // мёрзнет — шьёт из последней ткани
+                if (_me.Count("cloth") - cloth < reserve) continue;                            // ткань на бинты — не трогать
                 cmd.Craft = r;
                 return;
             }
+        }
+
+        bool _warming;
+        float _warmNoTry, _warmAt = -1;
+
+        /// <summary>Мёрзнет без кофты и не из чего сшить рубаху — нужна конопля.</summary>
+        bool NeedClothesCloth => _me.Cold > 25 && _me.FeltTemp < Clothing.Comfort && _me.Worn[(int)WearSlot.Kofta] == null && _me.Count("cloth") < 16;
+
+        /// <summary>Мёрзнет: воздух + одежда ниже +15 °C и переохлаждение копится.</summary>
+        bool Freezing => _me.FeltTemp < Clothing.Comfort && _me.Cold > 20;
+
+        /// <summary>
+        /// Холод (D47): переохлаждение ≥ 60 — греться у своей горящей печи или в доме (верстак внутри), пока не отпустит.
+        /// Не помогает (ночь в тундре голым) — бросает на 2 мин; греться негде — ищет коноплю на одежду.
+        /// </summary>
+        bool WarmUp(ref InputCmd cmd)
+        {
+            bool cold = _me.Cold >= 60 && _me.FeltTemp < Clothing.Comfort;
+            if (_warming && _me.Cold <= 5) _warming = false;
+            if (NeedClothesCloth) { Doing = "мёрзнет — ищет коноплю на одежду"; if (UsePickup(PickupKind.Hemp, ref cmd)) return true; }
+            if ((!_warming && !cold) || _w.Time < _warmNoTry) return false;
+            Vector2? spot = MyFurnace() is Deployable f && f.Burning ? f.Pos + new Vector2(1.3f, 0.3f) : _plan != null ? BenchStand : null;
+            if (spot == null)
+            {
+                _warming = false;
+                if (_me.Worn[(int)WearSlot.Kofta] == null && _me.Count("cloth") < 15) { Doing = "мёрзнет — ищет коноплю на одежду"; if (UsePickup(PickupKind.Hemp, ref cmd)) return true; }
+                _warmNoTry = _w.Time + 60;
+                return false;
+            }
+            if (!_warming) { _warming = true; _warmAt = -1; Thought($"замёрз ({_me.FeltTemp:0} °C) — иду греться"); }
+            Doing = "греется";
+            if (!GoTo(spot.Value, 0.8f, ref cmd)) return true;
+            if (_warmAt < 0) _warmAt = _w.Time;
+            if (_w.Time - _warmAt > 6 && _me.FeltTemp < Clothing.Comfort) { _warming = false; _warmNoTry = _w.Time + 120; return false; }   // здесь не согреться
+            return true;
         }
 
         bool CanAfford(string output)
@@ -630,6 +666,7 @@ namespace Rastvordd.Sim
         /// <summary>Лечение, вода, еда. Раненый держит сытость повыше — тогда здоровье восстанавливается само.</summary>
         bool Needs(ref InputCmd cmd)
         {
+            if (WarmUp(ref cmd)) return true;   // замёрз — греться (D47)
             bool hurt = _me.Hp < _me.MaxHp - 5;
             // ранен и нечем лечиться — бинт из ткани (конопля)
             if (_me.Hp < 60 && _me.Count("bandage") == 0)

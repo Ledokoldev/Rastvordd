@@ -85,7 +85,7 @@ namespace Rastvordd.Sim
             return n;
         }
 
-        /// <summary>Токарный станок бота (D46): положить материалы рецепта и включить. TODO: мозг бота пока станок не ставит и не зовёт это.</summary>
+        /// <summary>Токарный станок бота (D46): положить материалы рецепта и включить (мозг — PlayerBot.Lathe.cs).</summary>
         public bool BotLathePut(Actor a, Deployable lathe, string output)
         {
             var r = Weaponry.LatheFor(output);

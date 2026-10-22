@@ -452,11 +452,52 @@ namespace Rastvordd.Sim
             return best;
         }
 
+        // точки на пляже по всему берегу (лениво, свой генератор — раскладка мира не сдвигается) и где каждый просыпался последний раз
+        List<Vector2> _beach;
+        readonly Dictionary<int, Vector2> _lastBeach = new();
+        Random _spawnRng;
+
+        /// <summary>
+        /// Пляж для голого старта (как в Расте): случайная точка вдоль всего берега, не ближе 60 м к живому игроку или боту
+        /// и не там же, где этот игрок просыпался в прошлый раз (раньше 16 точек на всех — боты просыпались в одной точке и сразу дрались).
+        /// </summary>
+        Vector2 BeachSpawn(Actor a)
+        {
+            if (_beach == null)
+            {
+                _beach = new List<Vector2>();
+                _spawnRng = new Random(Seed * 7919 + 17);
+                for (int tries = 0; tries < 60000 && _beach.Count < 400; tries++)
+                {
+                    var p = new Vector2((float)(_spawnRng.NextDouble() * 2 - 1) * HalfSize, (float)(_spawnRng.NextDouble() * 2 - 1) * HalfSize);
+                    if (Terrain.BiomeAt(p) == Biome.Beach && IsFree(p, 1.5f)) _beach.Add(p);
+                }
+                _beach.AddRange(PlayerSpawns);
+            }
+            Vector2 best = PlayerSpawns[_spawnRng.Next(PlayerSpawns.Count)];
+            float bestScore = float.MinValue;
+            bool hasLast = _lastBeach.TryGetValue(a.Id, out var last);
+            for (int k = 0; k < 40; k++)
+            {
+                var p = _beach[_spawnRng.Next(_beach.Count)];
+                if (!IsFree(p, 1.0f)) continue;
+                float near = float.MaxValue;
+                foreach (var o in Actors)
+                    if (o != a && !o.Dead && !o.Spectator && o.Team == Team.Player) near = MathF.Min(near, Vector2.Distance(o.Pos, p));
+                float fromLast = hasLast ? Vector2.Distance(last, p) : 999;
+                if (near >= 60 && fromLast >= 80) { best = p; break; }
+                float s = MathF.Min(near, 200) + MathF.Min(fromLast, 80);
+                if (s > bestScore) { bestScore = s; best = p; }
+            }
+            _lastBeach[a.Id] = best;
+            return best;
+        }
+
         public void RespawnPlayer(Actor a, bool inBag = false)
         {
             var bag = inBag ? ReadyBag(a) : null;
             if (bag != null && Time < bag.ReadyAt) bag = null;
-            a.Pos = bag != null ? bag.Pos + new Vector2(0.9f, 0) : PlayerSpawns[Rng.Next(PlayerSpawns.Count)];
+            a.Pos = bag != null ? bag.Pos + new Vector2(0.9f, 0) : BeachSpawn(a);
             if (bag != null) bag.ReadyAt = Time + BagCooldown;
             a.Vel = Vector2.Zero;
             a.Hp = a.MaxHp;

@@ -36,18 +36,44 @@ namespace Rastvordd.Sim
             public int Kills, LootedKills, Raids, ShotFirst, Revenged;
             public float OffendAt = -999, SettledAt = -999, LootedAt = -999, RaidAt = -999, HuntCooldown = -999;
             public string LastRt;      // РТ, где его видел последний раз
-            /// <summary>Злость: убил — 3, рейдил — 3, обобрал моё убийство — 2, напал первым — 1, урон — по 1 за 60.</summary>
+            /// <summary>Серьёзная обида (раздел 10): убил, когда я нёс ценное; рейдил; обобрал моё убийство. Только она даёт месть.</summary>
+            public float SeriousAt = -999;
+            public string SeriousWhy;
+            public int Hunts;          // сколько раз искал его за эту вендетту
+            /// <summary>Злость (для мыслей и сводки): убил — 3, рейдил — 3, обобрал моё убийство — 2, напал первым — 1, урон — по 1 за 60.</summary>
             public float Severity => 3 * Kills + 3 * Raids + 2 * LootedKills + MathF.Min(ShotFirst, 3) + MathF.Min(Damage / 60f, 3);
-            /// <summary>Отомщено и с тех пор нового не было — пока не мщу (повтор обиды снова открывает счёт).</summary>
-            public bool Settled(float now) => SettledAt > OffendAt && now - SettledAt < 900 + 300 * (3 - MathF.Min(3, Kills + Raids));
+            /// <summary>Отомщено (убил его хоть раз после серьёзной обиды) — счёт закрыт, пока он не обидит снова.</summary>
+            public bool Settled(float now) => SettledAt > SeriousAt;
+            /// <summary>Вендетта жива: серьёзная обида за последние 25 мин игры и ещё не отомщена (как в Расте: обиды короткие).</summary>
+            public bool Active(float now) => now - SeriousAt < VendettaWindow && !Settled(now);
         }
+
+        /// <summary>Окно мести: 25 мин игрового времени.</summary>
+        const float VendettaWindow = 1500f;
+        /// <summary>Одна вендетта за раз: id обидчика (0 — нет).</summary>
+        int _vendettaId;
+
+        /// <summary>Активная вендетта на этого человека.</summary>
+        bool Vendetta(int id, out Grudge g)
+        {
+            g = null;
+            if (_vendettaId == 0 || id != _vendettaId || !_grudge.TryGetValue(id, out g)) return false;
+            if (g.Active(_w.Time)) return true;
+            _vendettaId = 0;
+            Thought($"вендетта с {_w.Find(id)?.Name ?? "?"} закрыта: {(g.Settled(_w.Time) ? "счёт сведён" : "прошло 25 мин — забыл")}");
+            LStat(g.Settled(_w.Time) ? "вендетта: сведена" : "вендетта: забыта");
+            return false;
+        }
+
+        /// <summary>Голый и пустой: в руках камень (факел), груза не видел — мстить такому незачем (ничего не вернёшь).</summary>
+        bool EmptyTarget(Actor a) => KitPower(a) <= 0.1f && (CarrierOf(a)?.Est ?? 0) < 40;
 
         readonly Dictionary<int, Enc> _enc = new();
         readonly Dictionary<int, Grudge> _grudge = new();
         Actor _encFight, _encAvoid;
         float _encScanAt = -99;
 
-        float LoadLimit => 120 + 280 * Aggression;
+        float LoadLimit => CarryAvoid + 50 * Aggression;   // раздел 10: с ≈150 лома — домой (раньше до 400)
         bool IsPerson(Actor a) => a != null && a != _me && !a.Spectator && a.Team != Team.Npc;
 
         // ---------- восприятие людей ----------
@@ -65,12 +91,13 @@ namespace Rastvordd.Sim
                     g.Damage += e.Value; g.At = _w.Time; g.LastPos = src.Pos; g.LastSeen = _w.Time; g.Kit = KitPower(src);
                 }
                 if (e.Kind != SimEventKind.Death) continue;
-                if (e.OtherId == _me.Id && _grudge.TryGetValue(e.ActorId, out var gd) && gd.Severity >= 1 && _w.Find(e.ActorId) is Actor dead)
+                if (e.OtherId == _me.Id && _grudge.TryGetValue(e.ActorId, out var gd) && gd.Active(_w.Time) && _w.Find(e.ActorId) is Actor dead)
                 {
                     gd.Revenged++; gd.SettledAt = _w.Time;
-                    Thought($"отомстил {dead.Name} — {GrudgeLine(gd)}");
+                    Thought($"отомстил {dead.Name} — счёт сведён ({GrudgeLine(gd)})");
                     Stat("месть: отомстил"); LStat("месть: отомстил");
                     if (_hunt == gd) _hunt = null;
+                    if (_vendettaId == e.ActorId) _vendettaId = 0;
                 }
             }
             // обиды не забываются весь вайп (пользователь: «злопамятность прям жёстко»)
@@ -133,10 +160,10 @@ namespace Rastvordd.Sim
             foreach (var e in _w.Events)
                 if (e.Kind == SimEventKind.Death && e.ActorId == _me.Id && _w.Find(e.OtherId) is Actor killer && IsPerson(killer))
                 {
-                    Offend(killer, "Kill", $"убил меня ({Items.Name(killer.Held?.Id ?? "tool_rock")})");
-                    Thought($"{killer.Name} — найду и отомщу, когда буду готов");
-                    _carriers.Remove(killer.Id);
-                    NoteCarrier(killer, 60, "убил меня — мой лут у него или у его ног");
+                    // как в Расте: убили голого — не обида (ничего не потерял); убили с лутом или стволом — вендетта
+                    bool lost = _kitValue >= 60;
+                    Offend(killer, lost ? "Kill" : "KillNaked", $"убил меня ({Items.Name(killer.Held?.Id ?? "tool_rock")}){(lost ? $", при мне было ≈{_kitValue:0} лома" : ", а при мне ничего не было")}");
+                    if (lost) NoteCarrier(killer, MathF.Min(_kitValue, 200), "убил меня — мой лут у него или у его ног");
                 }
         }
 
@@ -169,38 +196,72 @@ namespace Rastvordd.Sim
             float edge = MyPower - KitPower(a) + (Archetype == BotArchetype.Roamer ? 0.1f : 0) + (_me.Hp - 100) / 250f;
             string lose = LosingReason(a);
             bool armedClose = a.Weapon != null && !a.Weapon.Def.Melee && d < 18 + 14 * _caution;
-            bool grudge = _grudge.TryGetValue(a.Id, out var g) && g.Severity >= 1 && !g.Settled(_w.Time);
-            bool loaded = _load > LoadLimit;
+            bool vend = Vendetta(a.Id, out var g);
+            bool loaded = _surplus >= CarryAvoid;   // лишнее (что надо в ящик), а не рабочий запас дерева и патронов
             bool home = MyClaim() is Deployable c && Vector2.Distance(c.Pos, a.Pos) < 30 && Vector2.Distance(c.Pos, _me.Pos) < 45;
             en.Rt = _rt != null && (_rtPhase == RtPhase.Loot || (_rtPhase == RtPhase.Travel && Vector2.Distance(_me.Pos, _rt.M.Center) < _rt.Radius + 45)) && _rt.M.Contains(a.Pos, 6);
             string kit = Items.Name(a.Held?.Id ?? "tool_rock");
+            bool empty = EmptyTarget(a);
+            bool hurt = a.Hp < 45;                 // видно по крови и хромоте
+            bool nakedMe = MyPower <= 0.15f;       // у меня только камень или инструмент
 
             if (lose != null) return hitMe || en.Rt || d < 25 || armedClose ? (Stance.Flee, lose) : (Stance.Watch, lose);
             if (hitMe) return (Stance.Fight, "он напал первым");
             if (CampJudge(a, edge) is (Stance, string) cj) return cj;   // из засады: с лутом или слабее — бью, сильного пропускаю
-            // жадность: видел, как он лутал, — у него рюкзак; «лут — самое главное: убить, залутать»
+            // жадность: видел, как он лутал, — у него рюкзак; «лут — самое главное: убить, залутать» (сам не несу — нечего терять)
             var car = CarrierOf(a);
-            if (car != null && car.Est >= 40 && _load < LoadLimit && edge >= -0.12f - 0.15f * Greed && d < 45)
+            if (car != null && car.Est >= 40 && !loaded && edge >= -0.05f - 0.12f * Greed && d < 45)
             { LStat("жадность: напал на несущего"); return (Stance.Fight, $"у него рюкзак (≈{car.Est:0} лома: {car.Why}) — забираю"); }
-            if (grudge && g.Severity >= 4) return (Stance.Fight, $"{(g.KilledMe ? "он меня убивал" : "старые счёты")} — мщу ({GrudgeLine(g)})");
-            if (loaded) return d < 20 || armedClose ? (Stance.Flee, $"несу ≈{_load:0} лома — не до драки (отвечу, если нападёт)") : (Stance.Watch, $"несу ≈{_load:0} лома — обхожу");
-            if (grudge) return (Stance.Fight, $"{(g.KilledMe ? "он меня убил" : g.LootedKills > 0 ? "он обобрал моё убийство" : g.Raids > 0 ? "он рейдил меня" : $"он меня бил ({g.Damage:0} урона)")} — мщу ({GrudgeLine(g)})");
-            if (home) return (Stance.Fight, "чужой у моего дома");
+            // раздел 10: несу ценное — домой, драки не беру (отвечу, если нападёт)
+            if (loaded) return d < 20 || armedClose ? (Stance.Flee, $"несу ≈{_surplus:0} лома — не до драки (отвечу, если нападёт)") : (Stance.Watch, $"несу ≈{_surplus:0} лома — обхожу");
+            if (vend)
+            {
+                if (!empty && edge >= -0.1f) { LStat("вендетта: бью при встрече"); return (Stance.Fight, $"вендетта: {g.SeriousWhy} — мщу"); }
+                if (empty) Say("вендетта-голый" + a.Id, $"{a.Name} — мой обидчик, но он голый и пустой: мстить нечего", 120);
+            }
+            // сосед (его база рядом с моей) ходит мимо постоянно — гоню, только если лезет к самой двери
+            if (home && Neighbour(a) && Vector2.Distance(MyClaim().Pos, a.Pos) > 12) home = false;
+            if (home && (!empty || d < 15)) return (Stance.Fight, "чужой у моего дома");
             if (en.Rt)
             {
                 bool first = _rtPhase == RtPhase.Loot && _rtLootAt < en.FirstSeen - 1;
-                if (first) return (Stance.Fight, $"РТ «{_rt.Short}» — я тут первый, выбиваю");
-                if (edge >= -0.05f || Aggression > 0.5f) return (Stance.Fight, $"РТ «{_rt.Short}» занята {a.Name}, у него {kit} — отбиваю");
+                if (first && edge >= -0.1f) return (Stance.Fight, $"РТ «{_rt.Short}» — я тут первый, выбиваю");
+                if (edge >= 0.05f || (Aggression > 0.6f && edge >= -0.05f)) return (Stance.Fight, $"РТ «{_rt.Short}» занята {a.Name}, у него {kit} — отбиваю");
                 return (Stance.Camp, $"РТ «{_rt.Short}» занята {a.Name} ({kit}) — жду его на выходе");
             }
             if (_preyIgnore.TryGetValue(a.Id, out float until) && _w.Time < until) return (Stance.Parted, "недавно бросил за ним погоню");
-            float need = 0.22f - 0.35f * Aggression - 0.12f * Greed;   // все жадные: слабее себя — грабить
-            if (edge >= need && d < 22 + 30 * Aggression) return (Stance.Fight, $"я не слабее ({Items.Name(Ranged() ?? (Has("weapon_spear") ? "weapon_spear" : "tool_rock"))} против {kit})");
-            if (armedClose) return edge >= -0.1f ? (Stance.Fight, $"он со стволом рядом ({kit}) — бью первым") : (Stance.Flee, $"он со стволом рядом ({kit})");
-            if (d < 6 && edge >= -0.05f) return (Stance.Fight, "подошёл вплотную");
+            // встречный (как в Расте): голым людей обхожу; бью, только если есть явное преимущество и есть что взять
+            if (nakedMe && !(hurt && edge >= 0))
+                return d < 12 && !empty ? (Stance.Flee, $"я голый — обхожу ({kit})") : (Stance.Watch, "я голый — обхожу людей");
+            bool worth = !empty || hurt;
+            float need = 0.14f - 0.16f * Aggression - 0.04f * Greed;
+            if (Ranged() == null) need += 0.1f;   // драка в упор — монетка: без ствола нужен запас
+            // у своего дома он сильнее (двери, ящик, спальник рядом) — не лезу, если он сам не нападёт
+            if (AtHisBase(a)) { worth = false; Say("у-его-базы" + a.Id, $"{a.Name} у своей базы — не лезу", 120); }
+            if (worth && edge >= need && d < 18 + 22 * Aggression)
+                return (Stance.Fight, $"я сильнее ({Items.Name(Ranged() ?? (Has("weapon_spear") ? "weapon_spear" : "tool_rock"))} против {kit}){(hurt ? ", он ранен" : "")}");
+            if (armedClose) return edge >= 0.05f ? (Stance.Fight, $"он со стволом рядом ({kit}) — бью первым") : (Stance.Flee, $"он со стволом рядом ({kit})");
+            if (d < 6 && edge >= 0.05f && worth) return (Stance.Fight, "подошёл вплотную");
             if (edge < -0.1f && d < 15) return (Stance.Flee, $"он сильнее ({kit})");
-            return (Stance.Watch, "держу на виду");
+            return (Stance.Watch, empty ? "голый — не стоит патронов" : "держу на виду");
         }
+
+        bool AtHisBase(Actor a)
+        {
+            foreach (var kb in _bases.Values) if (kb.OwnerId == a.Id && Vector2.Distance(kb.Pos, a.Pos) < 35) return true;
+            return false;
+        }
+
+        bool Neighbour(Actor a)
+        {
+            var c = MyClaim();
+            if (c == null) return false;
+            foreach (var kb in _bases.Values) if (kb.OwnerId == a.Id && Vector2.Distance(kb.Pos, c.Pos) < 90) return true;
+            return false;
+        }
+
+        /// <summary>Сколько несу — уже «с лутом»: домой, драки не беру (раздел 10: ≈150 лома).</summary>
+        const float CarryAvoid = 150f;
 
         /// <summary>Что делать с угрозой: 1 — драться, −1 — уходить, 0 — не трогать (разошлись, слежу). Охрана РТ — по-старому (CanFight).</summary>
         int ThreatMode(Actor t)
@@ -303,36 +364,34 @@ namespace Rastvordd.Sim
         {
             if (_hunt != null)
             {
-                if (_w.Time - _huntStart < 180 && !_hunt.Settled(_w.Time)) return _huntScore;
-                _hunt.HuntCooldown = _w.Time + 240;   // 3 мин искал — пауза, не по кругу
+                if (_w.Time - _huntStart < 180 && _hunt.Active(_w.Time)) return _huntScore;
+                _hunt.HuntCooldown = _w.Time + 360;   // 3 мин искал — пауза, не по кругу
                 _hunt = null;
             }
-            if (_load > LoadLimit || _me.Hp < 60 || _rtPhase != RtPhase.None || _raid != null || NeedsUrgency() > 0) return 0;
+            // раздел 10: одна вендетта, окно 25 мин, не больше двух поисков; с грузом, ранен, в походе — не до мести
+            if (_surplus > 80 || _me.Hp < 60 || _rtPhase != RtPhase.None || _raid != null || NeedsUrgency() > 0 || _rj != null) return 0;
             if ((_w.Tick + _me.Id) % 15 != 0) return 0;   // выбор цели мести — раз в 0,5 с
+            if (!Vendetta(_vendettaId, out var g) || g.Hunts >= 2 || g.HuntCooldown > _w.Time) return 0;
+            int id = _vendettaId;
             float best = 0; Vector2 where = default; string how = null;
             Grudge pick = null; int pickId = 0;
-            foreach (var (id, g) in _grudge)
             {
-                float sev = g.Severity;
-                // охота — только за настоящие обиды (убил, рейдил, обобрал моё убийство); «напал первым» — бью при встрече, но не ищу
-                if (sev < 3 || g.Kills + g.Raids + g.LootedKills == 0 || g.Settled(_w.Time) || g.HuntCooldown > _w.Time) continue;
-                if (g.Kit > MyPower + 0.05f + MathF.Min(0.3f, 0.05f * sev)) continue;               // не по силам — подожду, пока вооружусь
-                if (_enc.TryGetValue(id, out var en) && _w.Time - en.LastSeen < 3) continue;        // на виду — решает встреча
-                if (_w.Find(id) is not Actor who || who.Dead) continue;
+                if (g.Kit > MyPower + 0.1f) return 0;                                             // не по силам — подожду, пока вооружусь
+                if (g.Kit <= 0.1f && (CarrierOf(_w.Find(id))?.Est ?? 0) < 40) return 0;         // видел голым — мстить нечего
+                if (_enc.TryGetValue(id, out var en) && _w.Time - en.LastSeen < 3) return 0;      // на виду — решает встреча
+                if (_w.Find(id) is not Actor who || who.Dead) return 0;
                 Vector2 p; string h;
+                KnownBase kb = null;
+                foreach (var b in _bases.Values) if (b.OwnerId == id) { kb = b; break; }
                 if (_w.Time - g.LastSeen < 180) { p = g.LastPos; h = "где видел"; }
-                else
-                {
-                    KnownBase kb = null;
-                    foreach (var b in _bases.Values) if (b.OwnerId == id) { kb = b; break; }
-                    if (kb != null && sev >= 3) { p = kb.Pos + Vector2.Normalize(_me.Pos - kb.Pos + new Vector2(0.01f, 0)) * 28; h = "у его базы"; }
-                    else if (g.LastRt != null && sev >= 3 && _w.Monuments.Find(m => m.Name == g.LastRt) is Monument lm) { p = ExitToward(lm, _me.Pos); h = $"у «{Short(lm)}», где он бывает"; }
-                    else continue;
-                }
-                float s = MathF.Min(84, (34 + 7 * sev) * (0.6f + Aggression) * MathF.Max(0.35f, 1 - Vector2.Distance(p, _me.Pos) / 400f));
-                if (s > best) { best = s; pick = g; pickId = id; where = p; how = h; }
+                else if (kb != null) { p = kb.Pos + Vector2.Normalize(_me.Pos - kb.Pos + new Vector2(0.01f, 0)) * 28; h = Bombs > 0 ? "у его базы (бомбы при мне — может, и зарейжу)" : "у его базы — подкараулю у двери"; }
+                else return 0;   // где искать — не знаю: встречу — отвечу
+                if (Vector2.Distance(p, _me.Pos) > 320) return 0;
+                best = MathF.Min(70, 52 * (0.6f + Aggression) * MathF.Max(0.4f, 1 - Vector2.Distance(p, _me.Pos) / 400f));
+                pick = g; pickId = id; where = p; how = h;
             }
             if (pick == null || best < 30) return 0;
+            pick.Hunts++;
             _hunt = pick; _huntId = pickId;
             _huntStart = _w.Time; _huntPos = where; _huntScore = best;
             Thought($"месть: иду за {_w.Find(_huntId)?.Name} — {how} ({GrudgeLine(_hunt)})");

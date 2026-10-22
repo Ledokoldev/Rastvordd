@@ -647,7 +647,18 @@ namespace Rastvordd.Sim
                 if (_camp != null) EndCamp("погиб");
                 if (_icpt != null) EndIntercept("погиб");
                 _deadTime += World.Dt;
-                if (_deadTime > 6) { cmd.RespawnBag = _w.ReadyBag(_me) is Deployable b && _w.Time >= b.ReadyAt; cmd.Respawn = !cmd.RespawnBag; _deadTime = 0; _node = null; }
+                if (_deadTime > 6)
+                {
+                    // раздел 10: просыпаться дома — спальник перезаряжается до 75 с — подождать его, а не идти голым с пляжа
+                    var bag = _w.ReadyBag(_me);
+                    bool ready = bag != null && _w.Time >= bag.ReadyAt;
+                    bool wait = bag != null && !ready && bag.ReadyAt - _w.Time < 75 && _deadTime < 90;
+                    // у спальника гибну раз за разом (холод, кемпер у двери) — проснуться на пляже
+                    int near = 0;
+                    if (bag != null) foreach (var (pos, at) in _deathSpots) if (_w.Time - at < 600 && Vector2.Distance(pos, bag.Pos) < 25) near++;
+                    if (near >= 2 && ready) { ready = false; wait = false; Say("спальник-опасно", "у спальника гибну раз за разом — проснусь на пляже", 300); }
+                    if (!wait) { cmd.RespawnBag = ready; cmd.Respawn = !ready; _deadTime = 0; _node = null; }
+                }
                 return cmd;
             }
 
@@ -833,7 +844,7 @@ namespace Rastvordd.Sim
                 Doing = $"собирает {Items.Name(g)}";
                 return CraftAtBench(g, box, ref cmd);
             }
-            // TODO(D46): токарный станок ботами — ставить его у верстака 2 и точить трубы/УСМ/затворы из пружин и шестерней (API: World.BotLathePut/BotLatheTake).
+            if (LatheWork(box, ref cmd)) return true;   // токарный станок: недостающие детали из сырья (PlayerBot.Lathe.cs)
             if (own == null) return false;
             var st = OwnedState(own);
             // ремонт: износ ниже трети, есть масло — к верстаку

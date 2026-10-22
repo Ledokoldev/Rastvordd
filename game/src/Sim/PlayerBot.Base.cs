@@ -326,7 +326,7 @@ namespace Rastvordd.Sim
                 float ang = (float)(_rng.NextDouble() * Math.PI * 2);
                 float dist = nearFav ? _fav.Radius + 48 + (float)_rng.NextDouble() * 60 : 15 + (float)_rng.NextDouble() * 45;
                 var p = (nearFav ? _fav.M.Center : home) + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
-                if (!_w.Terrain.IsLand(p) || OtherBaseNear(p, 55)) continue;
+                if (!_w.Terrain.IsLand(p) || OtherBaseNear(p, tries < 100 ? 80 : 55)) continue;   // раздел 10: соседи вплотную резали друг друга часами
                 var (ci, cj) = Building.CellOf(p);
                 bool ok = true;
                 // весь план с соседями (треугольники выступают на клетку): мейн — строки −1..0, кибитка — 1, двор у входа — 2..3
@@ -382,6 +382,12 @@ namespace Rastvordd.Sim
                     {
                         int ord = Building.IsFloor(p.Kind) ? 0 : p.Kind == StructKind.Door ? 2 : 1;
                         if (ord != order || Existing(p) != null) continue;
+                        // 90 с не встаёт (мешает своё установленное, рельеф) — пропустить на 10 мин: раньше бот часами «строил фундамент»
+                        if (_pieceSkip.TryGetValue(p, out float skipTill) && skipTill > _w.Time) continue;
+                        bool fresh = _pieceTry != p || _w.Time - _pieceTick > 5;
+                        _pieceTick = _w.Time;
+                        if (fresh) { _pieceTry = p; _pieceSince = _w.Time; }
+                        else if (_w.Time - _pieceSince > 90) { _pieceSkip[p] = _w.Time + 600; _pieceTry = null; LStat("стройка: элемент не встаёт"); Thought($"{Building.KindName(p.Kind)} не встаёт на место — пока пропускаю"); continue; }
                         if (BuildPiece(p, box, ref cmd)) return true;
                     }
                 // 2. замки на все двери стадии (кибитка — сразу, раньше ящика: база не стоит открытой): кодовый, если изучен и есть металл, иначе с ключом
@@ -611,6 +617,10 @@ namespace Rastvordd.Sim
             Doing = "копит металл";
             Gather(NodeKind.Metal, ref cmd);
         }
+
+        readonly Dictionary<Piece, float> _pieceSkip = new();
+        Piece _pieceTry;
+        float _pieceSince, _pieceTick = -99;
 
         bool BuildPiece(Piece p, Deployable box, ref InputCmd cmd)
         {

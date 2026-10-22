@@ -168,7 +168,7 @@ namespace Rastvordd.Sim
         {
             if (_rtPhase != RtPhase.None) return (_rtPhase == RtPhase.Prep ? 58 : 66) * MathF.Max(W("поход на РТ"), 0.9f);
             if (_w.Time < _rtNextAt || _w.Time < _rebuildUntil || _w.Time - _alarmAt < 120 || _raid != null || _rj != null || !Has("tool_hatchet")) return 0;
-            if (_w.Time - _rtScoreAt < 3) return _rtScore;
+            if (Night && Aggression < 0.75f) return 0;   // раздел 10: ночью на РТ не ходят (кроме самых отчаянных) — крафт, сортировка, фарм у дома            if (_w.Time - _rtScoreAt < 3) return _rtScore;
             _rtScoreAt = _w.Time;
             _rtScore = 0;
             if (_me.Hp < 75 || _me.Food < 15 || _me.Water < 15) return 0;   // поесть и попить — на сборах
@@ -664,7 +664,7 @@ namespace Rastvordd.Sim
             if (died) { _rtDeaths[_rt.M.Name] = _rtDeaths.GetValueOrDefault(_rt.M.Name) + 1; LStat("смертей в походе"); }
             else LStat("вернулся с РТ");
             Thought(died ? $"погиб в походе на «{_rt.Short}» — запомню ({_rtDeaths[_rt.M.Name]})" : $"поход на «{_rt.Short}» окончен ({why}): {(parts.Count > 0 ? string.Join(", ", parts) : "пусто")}");
-            if (!died && parts.Count > 0) _w.Milestone(_me, $"принёс с РТ «{_rt.Short}»: {string.Join(", ", parts.GetRange(0, Math.Min(3, parts.Count)))}");
+            if (!died && parts.Count > 0) { _w.Milestone(_me, $"принёс с РТ «{_rt.Short}»: {string.Join(", ", parts.GetRange(0, Math.Min(3, parts.Count)))}"); DepositSoon(); }
             LastRunEnd = _w.Time;
             _rtNextAt = _w.Time + (Archetype == BotArchetype.Roamer ? 150 : 240 + 240 * _caution);
             _rtPhase = RtPhase.None;

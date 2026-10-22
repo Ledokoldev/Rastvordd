@@ -19,7 +19,7 @@ namespace Rastvordd.Sim
 
         sealed class Carrier
         {
-            public float Est, At, SeenAt = -999;
+            public float Est, At, SeenAt = -999, DecayAt;
             public Vector2 Pos, Vel;
             public string Why = "";
             public string Rt;          // где грабил
@@ -35,7 +35,7 @@ namespace Rastvordd.Sim
             if (!IsPerson(a) || value <= 0) return;
             if (!_carriers.TryGetValue(a.Id, out var c)) _carriers[a.Id] = c = new Carrier();
             bool first = c.Est < 60 && c.Est + value >= 60;
-            c.Est = MathF.Min(c.Est + value, 900); c.At = _w.Time; c.Pos = a.Pos; c.Vel = a.Vel; c.SeenAt = _w.Time; c.Why = why;
+            c.Est = MathF.Min(c.Est + value, 900); c.At = c.DecayAt = _w.Time; c.Pos = a.Pos; c.Vel = a.Vel; c.SeenAt = _w.Time; c.Why = why;
             if (rt != null) c.Rt = rt;
             if (first) { Thought($"у {a.Name} рюкзак с лутом (≈{c.Est:0} лома): {why}"); LStat("жадность: заметил груз"); }
         }
@@ -74,9 +74,16 @@ namespace Rastvordd.Sim
                 NoteCarrier(looter, v, m != null ? $"видел, как он лутал на «{m.Name}»" : "видел, как он обирал сумку", m?.Name);
             }
             // кого вижу — обновить, где он и куда идёт (для перехвата)
+            // раздел 10: оценка груза тает (≈7 мин), а дошёл до своей базы — значит, сложил: больше не «несущий»
             if (_carriers.Count > 0)
                 foreach (var (id, c) in _carriers)
-                    if (_enc.TryGetValue(id, out var en) && _w.Time - en.LastSeen < 0.5f) { c.Pos = en.SeenPos; c.Vel = en.A.Vel; c.SeenAt = _w.Time; }
+                {
+                    float dt = _w.Time - c.DecayAt;
+                    if (dt >= 1f) { c.Est *= MathF.Exp(-dt / 400f); c.DecayAt = _w.Time; }
+                    if (!_enc.TryGetValue(id, out var en) || _w.Time - en.LastSeen >= 0.5f) continue;
+                    c.Pos = en.SeenPos; c.Vel = en.A.Vel; c.SeenAt = _w.Time;
+                    foreach (var kb in _bases.Values) if (kb.OwnerId == id && Vector2.Distance(kb.Pos, c.Pos) < 20) { c.Est = 0; break; }
+                }
         }
 
         // ---------- цель «лут убитого» ----------
@@ -137,8 +144,8 @@ namespace Rastvordd.Sim
                 _kills.RemoveAll(k => k.at == at);
                 Thought($"залутал убитого {name}{(got > 0 ? $": ≈{got:0} лома" : "")}{(!bag.Empty ? " (всё не влезло)" : "")}");
                 LStat("лут убитого: залутал");
-                if (got > 0) _w.Milestone(_me, $"убил и залутал {name}");
-                if (_rng.NextDouble() < 0.5) TryCamp("corpse", pos, _w.MonumentAt(pos), $"труп {name}");   // к трупу придут обирать
+                if (got > 0) { _w.Milestone(_me, $"убил и залутал {name}"); DepositSoon(); }   // раздел 10: залутал — домой, сдать
+                else if (_rng.NextDouble() < 0.5) TryCamp("corpse", pos, _w.MonumentAt(pos), $"труп {name}");   // к трупу придут обирать
             }
             return true;
         }
@@ -156,21 +163,21 @@ namespace Rastvordd.Sim
         {
             if (_icpt != null && _w.Time - _icptStart < 150) return 74;
             _icpt = null;
-            if (!ArmedForGreed || _me.Hp < 60 || _load > LoadLimit || _raid != null || _rtPhase == RtPhase.Prep) return 0;
+            if (!ArmedForGreed || _me.Hp < 60 || _surplus > 80 || _raid != null || _rtPhase == RtPhase.Prep) return 0;   // раздел 10: сам с лутом — не перехватываю
             float best = 0;
             foreach (var (id, c) in _carriers)
             {
-                if (c.Est < 50 || _w.Time - c.SeenAt > 90 || _icptCooldown.GetValueOrDefault(id) > _w.Time) continue;
+                if (c.Est < 80 || _w.Time - c.SeenAt > 60 || _icptCooldown.GetValueOrDefault(id) > _w.Time) continue;
                 var a = _w.Find(id);
                 if (a == null || a.Dead || !IsPerson(a)) continue;
                 float kit = _enc.TryGetValue(id, out var en) ? KitPower(en.A) : 0.5f;
-                if (kit > MyPower + 0.15f + 0.15f * Greed) continue;   // не по силам — не лезу
+                if (kit > MyPower + 0.05f * Greed) continue;   // перехват — только с преимуществом (раздел 10)
                 if (_enc.TryGetValue(id, out var en2) && _w.Time - en2.LastSeen < 1f) continue;   // на виду — решает встреча
                 float s = (50 + MathF.Min(30, c.Est / 15)) * Greed * MathF.Max(0.4f, 1 - Vector2.Distance(c.Pos, _me.Pos) / 250f);
                 if (s > best) { best = s; _icptId = id; }
             }
             if (best < 36) return 0;
-            return best + 30;   // ≈66–90: выше похода на РТ и хозяйства
+            return MathF.Min(best + 26, 80);   // ≈62–80: выше похода на РТ и хозяйства, ниже сдачи лута
         }
 
         bool InterceptAct(ref InputCmd cmd)
@@ -442,13 +449,24 @@ namespace Rastvordd.Sim
             switch (kind)
             {
                 case "Kill": g.Kills++; g.KilledMe = true; break;
+                case "KillNaked": g.KilledMe = true; break;
                 case "LootedKill": g.LootedKills++; g.LootedAt = _w.Time; break;
                 case "Raid": g.Raids++; g.RaidAt = _w.Time; break;
                 case "ShotFirst": g.ShotFirst++; break;
             }
             g.At = g.OffendAt = _w.Time; g.LastPos = a.Pos; g.LastSeen = _w.Time; g.Kit = KitPower(a);
-            Thought($"обида на {a.Name}: {why} — {GrudgeLine(g)}");
-            LStat("обида: " + kind switch { "Kill" => "убил меня", "LootedKill" => "обобрал моё убийство", "Raid" => "рейдил", _ => "напал первым" });
+            LStat("обида: " + kind switch { "Kill" => "убил меня", "KillNaked" => "убил голого", "LootedKill" => "обобрал моё убийство", "Raid" => "рейдил", _ => "напал первым" });
+            // раздел 10: месть — только за серьёзное (убил с лутом, рейдил, обобрал моё убийство); одна вендетта за раз, окно 25 мин
+            if (kind is not ("Kill" or "LootedKill" or "Raid"))
+            {
+                if (kind == "KillNaked") Thought($"{a.Name} убил меня голого — ничего не потерял, не мщу");
+                return;
+            }
+            g.SeriousAt = _w.Time; g.SeriousWhy = why; g.Hunts = 0;
+            bool other = _vendettaId != 0 && _vendettaId != a.Id && _grudge.TryGetValue(_vendettaId, out var cur) && cur.Active(_w.Time);
+            if (!other) _vendettaId = a.Id;
+            Thought($"обида на {a.Name}: {why} — {(other ? $"запомнил, но у меня уже вендетта с {_w.Find(_vendettaId)?.Name}" : "вендетта на 25 мин")} ({GrudgeLine(g)})");
+            if (!other) LStat("вендетта: начата");
         }
 
         static string GrudgeLine(Grudge g)

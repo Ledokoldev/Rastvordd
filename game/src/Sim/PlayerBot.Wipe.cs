@@ -35,10 +35,13 @@ namespace Rastvordd.Sim
             return WipeStage.Final;
         }
 
+        bool _hadBag;
+
         void StepStage()
         {
             if (_w.Time - _stageCheckAt < 5) return;
             _stageCheckAt = _w.Time;
+            if (!_hadBag && _w.ReadyBag(_me) != null) { _hadBag = true; Thought("спальник постелен — теперь просыпаюсь дома"); LStat("спальник постелен"); _w.Milestone(_me, "постелил спальник"); }
             var s = CurrentStage();
             if (s == _stage5) return;
             Thought($"этап вайпа: {StageNames[(int)_stage5]} → {StageNames[(int)s]} (за {(_w.Time - _stageAt) / 60:0} мин)");
@@ -70,7 +73,7 @@ namespace Rastvordd.Sim
             int ammo = gun != null ? AmmoLeft(gun) : 0;
             why = null;
             if (_me.Hp < 70) { why = $"ранен ({_me.Hp:0} HP)"; return 0; }
-            if (_load > LoadLimit) { why = $"несу ≈{_load:0} лома — сначала домой"; return 0; }
+            if (_surplus > LoadLimit) { why = $"несу ≈{_surplus:0} лома — сначала домой"; return 0; }
             switch (r.Kind)
             {
                 case "airdrop":
@@ -166,7 +169,7 @@ namespace Rastvordd.Sim
             }
             var j = _rj;
             if (_w.Time - j.StartAt > 600) { EndRumorJob("затянулось (10 мин)"); return false; }
-            if (_load > LoadLimit + 150) { EndRumorJob($"набрал ≈{_load:0} лома — несу домой", 60); return false; }
+            if (_surplus > LoadLimit + 150) { EndRumorJob($"набрал ≈{_surplus:0} лома — несу домой", 60); return false; }
             if (_me.Hp < 40) { EndRumorJob($"ранен ({_me.Hp:0} HP)"); return false; }
             var gun = Ranged();
             if (gun != null) Hold(gun, ref cmd); else if (Has("weapon_spear")) Hold("weapon_spear", ref cmd);
@@ -176,7 +179,8 @@ namespace Rastvordd.Sim
             {
                 Doing = $"идёт посмотреть базу из слуха ({d:0} м)";
                 foreach (var kb in _bases.Values) if (Vector2.Distance(kb.Pos, j.R.Pos) < j.R.Radius + 25 && _w.Time - kb.SeenAt < 5) { EndRumorJob($"увидел базу ({_w.Find(kb.OwnerId)?.Name ?? "?"}) — запомнил для рейда", 300); LStat("баз из слухов"); return false; }
-                if (MoveTo(j.Guess, 6f, ref cmd)) { if (j.ArriveAt < 0) j.ArriveAt = _w.Time; j.Guess = j.R.Pos + Geo.Rotate(Vector2.UnitX, (float)(_rng.NextDouble() * MathF.Tau)) * j.R.Radius * 0.8f; }
+                if (MoveTo(j.Guess, 6f, ref cmd) || (d < 15 && NoReach(j.Guess))) { if (j.ArriveAt < 0) j.ArriveAt = _w.Time; j.Guess = j.R.Pos + Geo.Rotate(Vector2.UnitX, (float)(_rng.NextDouble() * MathF.Tau)) * j.R.Radius * 0.8f; }
+                else if (d < 15 && j.ArriveAt < 0 && _w.Time - j.StartAt > 180) j.ArriveAt = _w.Time;   // рядом, а точно не подойти (за стенами) — считать, что дошёл
                 if (j.ArriveAt > 0 && _w.Time - j.ArriveAt > 60) EndRumorJob("обошёл место — базы не нашёл", 300);
                 return true;
             }
@@ -241,6 +245,7 @@ namespace Rastvordd.Sim
                 LStat(j.Kind == "airdrop" ? "сбросов вскрыто" : "закрытых ящиков вскрыто");
                 _w.Milestone(_me, $"забрал {(j.Kind == "airdrop" ? "сброс груза" : "закрытый ящик")}");
                 EndRumorJob($"забрал (≈{CarriedValue() - before:0} лома) — несу домой", 240);
+                DepositSoon();
                 _stashBlock = 0;
             }
             return true;
@@ -256,7 +261,13 @@ namespace Rastvordd.Sim
         void StepDeath()
         {
             if (_me.Dead) { if (!_wasDead) { _deathSpots.Add((_me.Pos, _w.Time)); if (_deathSpots.Count > 12) _deathSpots.RemoveAt(0); if (_rj != null) { _rj = null; _rjCooldown = _w.Time + 300; } } _wasDead = true; return; }
-            if (_wasDead) { _wasDead = false; _respawnAt = _w.Time; }
+            if (_wasDead)
+            {
+                _wasDead = false; _respawnAt = _w.Time;
+                bool inBag = _w.ReadyBag(_me) is Deployable bg && Vector2.Distance(bg.Pos, _me.Pos) < 2f;
+                Thought(inBag ? "проснулся в своём спальнике" : "проснулся на пляже");
+                LStat(inBag ? "респаун: спальник" : "респаун: пляж");
+            }
         }
 
         /// <summary>Опасно ли здесь по памяти (умирал недалеко за последние 10 мин).</summary>
@@ -312,6 +323,8 @@ namespace Rastvordd.Sim
             int want = KitWant(id);
             if (_w.Time - _respawnAt < 1) Thought("после смерти: домой за набором (оружие, патроны, бинты)");
             Doing = $"после смерти — берёт из ящика {Items.Name(id)}";
+            // ствол в ящике лежит целиком (с износом и магазином) — BotTake его не берёт, забрать ячейку (раньше бот стоял у ящика 5 мин)
+            if (box.Storage.Items.Exists(s => s.Id == id && s.State != null)) { if (!TakeGunFromBox(box, id, ref cmd)) { _respawnAt = -999; return false; } return true; }
             if (!TakeFromBox(box, id, Math.Min(want, _me.Count(id) + InBox(box, id)), ref cmd)) { _respawnAt = -999; return false; }
             return true;
         }

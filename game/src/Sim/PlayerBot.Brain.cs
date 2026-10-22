@@ -28,7 +28,7 @@ namespace Rastvordd.Sim
         readonly List<Heard> _heard = new();
         float _valueAt = -99;
         Actor _threat;
-        float _load, _stash;
+        float _load, _stash, _kitValue;
         public float Load => _load;
         public float Stash => _stash;
         public float Aggression;   // 0..1: тяга к драке (по архетипу и характеру)
@@ -63,7 +63,11 @@ namespace Rastvordd.Sim
             _threat = Threat() ?? RememberedFoe();   // спрятался — не значит, что ушёл
             PerceiveFoe();
             // ценность груза и ящика — раз в 0,5 с (перебор рюкзака и ящика каждый тик у 20 ботов заметен)
-            if (_w.Time - _valueAt >= 0.5f) { _valueAt = _w.Time; _load = CarriedValue(); _stash = StashValue(); _surplus = SurplusValue(); }
+            if (_w.Time - _valueAt >= 0.5f)
+            {
+                _valueAt = _w.Time; _load = CarriedValue(); _stash = StashValue(); _surplus = SurplusValue();
+                _kitValue = _load + (BestOwnedGun() is string kg ? Items.Value(kg) : 0);   // что потеряю, если убьют (для обиды «убил с лутом»)
+            }
             Aggression = Archetype == BotArchetype.Roamer ? 0.6f + 0.4f * (1 - _caution) : 0.2f + 0.3f * (1 - _caution);
             // слух: выстрелы и взрывы прошлого тика
             foreach (var e in _w.Events)
@@ -142,8 +146,8 @@ namespace Rastvordd.Sim
             return goal switch
             {
                 "охота" => farmer ? (bench >= 2 ? 0.65f : 0.3f) : 1.2f,             // фермер дерётся, когда отстроился
-                "проверить бой" => farmer ? 1f : 1.2f,
-                "бродить" => farmer ? 0.2f : 1f,
+                "проверить бой" => (farmer ? 1f : 1.2f) * (Night ? 0.6f : 1f),
+                "бродить" => (farmer ? 0.2f : 1f) * (Night ? 0.3f : 1f),            // раздел 10: ночью меньше бродят
                 "снаряжение" => farmer ? 0.35f : 1f,
                 "антирейд" => farmer ? 1.2f : 0.8f,
                 "хозяйство" => farmer ? 1f : RoamerHousework(),
@@ -179,7 +183,7 @@ namespace Rastvordd.Sim
                 new() { Name = "месть", Score = RevengeScore, Act = RevengeAct },
                 new() { Name = "нужды", Score = () => NeedsUrgency() * 70, Act = Needs },
                 new() { Name = "проверить бой", Score = () => InvestigateScore() * W("проверить бой"), Act = Investigate },
-                new() { Name = "лут трупа", Score = () => CorpseNear() != null && _me.Hp > 35 ? (ArmedForGreed && _load < LoadLimit ? 74 : 60) * W("лут трупа") : 0, Act = LootCorpse },   // лут — главное: каждый труп обыскать
+                new() { Name = "лут трупа", Score = () => CorpseNear() != null && _me.Hp > 35 ? (ArmedForGreed && _surplus < LoadLimit ? 74 : 60) * W("лут трупа") : 0, Act = LootCorpse },   // лут — главное: каждый труп обыскать
                 new() { Name = "рейд", Score = RaidScore, Act = RaidAct },
                 new() { Name = "поход на РТ", Score = RtScore, Act = RtRun },
                 new() { Name = "сейч", Score = StashScore, Act = StashAct },

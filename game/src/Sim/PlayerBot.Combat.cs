@@ -31,7 +31,8 @@ namespace Rastvordd.Sim
         bool _hasCover, _hasPeek, _trig;
         float _coverCheck, _phaseTime, _phaseLen, _peekUnseen;
         int _peekShots;
-        float _lastShotAt = -100, _coverSince, _pushUntil = -100, _chaseStart;
+        float _lastShotAt = -100, _coverSince, _pushUntil = -100, _chaseStart, _chaseTick = -99;
+        Vector2 _chaseFrom;
         Vector2 _flankFrom;
         Actor _chaseFoe;
         readonly Dictionary<int, float> _preyIgnore = new();   // брошенная добыча: id → до какого времени не трогать
@@ -341,15 +342,20 @@ namespace Rastvordd.Sim
             // погоня без толку (не догнать, не попасть) — бросить добычу
             if (t == _prey)
             {
-                if (_chaseFoe != t) { _chaseFoe = t; _chaseStart = _w.Time; }
+                if (_chaseFoe != t || _w.Time - _chaseTick > 5f) { _chaseFoe = t; _chaseStart = _w.Time; _chaseFrom = _me.Pos; }
+                _chaseTick = _w.Time;
                 // уходит от меня, а я 12 с не попадаю (или 25 с вообще) — не гоняться: разошлись на 2 мин, если он сам не нападёт
                 var rel = t.Pos - _me.Pos;
                 bool leaving = t.Vel.LengthSquared() > 1f && Vector2.Dot(t.Vel, rel) > 0.4f * t.Vel.Length() * rel.Length();
                 bool hitMe = _me.LastAttacker == t.Id && _w.Time - _me.LastDamagedTime < 8f;
                 float noHit = _w.Time - MathF.Max(_foeHitAt, _chaseStart);
-                if (!hitMe && (noHit > 25f || (leaving && noHit > 12f && rel.Length() > 12f)))
+                // раздел 10: погоня не дольше ~35 с и 60 м от места, где начал, — если он не несёт много лута
+                bool rich = (CarrierOf(t)?.Est ?? 0) >= 150;
+                bool tooLong = !rich && (_w.Time - _chaseStart > 35f || Vector2.Distance(_me.Pos, _chaseFrom) > 60f) && _w.Time - _foeHitAt > 3f;
+                if (!hitMe && (noHit > 25f || tooLong || (leaving && noHit > 12f && rel.Length() > 12f)))
                 {
-                    Thought($"бросаю погоню за {t.Name}: {(noHit > 25f ? "25 с ни одного попадания" : "он уходит, не догнать")}");
+                    if (tooLong) LStat("погоня: предел 35 с / 60 м");
+                    Thought($"бросаю погоню за {t.Name}: {(tooLong ? "гоняюсь слишком долго — не стоит того" : noHit > 25f ? "25 с ни одного попадания" : "он уходит, не догнать")}");
                     Stat("брошена погоня");
                     PartWith(t, "бросил погоню");
                     _prey = null; _chaseFoe = null;

@@ -93,13 +93,85 @@ namespace Rastvordd.Sim
             if (_rtPhase is RtPhase.Travel or RtPhase.Loot) return 0;   // в походе мешок не бросают — несут после
             if (box.Storage.Items.Count >= World.BoxSlots && Surplus().TrueForAll(s => !box.Storage.Items.Exists(x => x.Id == s.id))) return 0;
             float v = _surplus;
-            if (v < 25) return 0;
+            bool guns = SpareGun() != null;
+            if (v < 25 && !guns) return 0;
             float home = Vector2.Distance(_me.Pos, box.Pos);
-            float s = 20 + 45 * Math.Clamp(v / 200f, 0, 1);
+            // раздел 10, правило сдачи: ≥ 150 лома при себе, рюкзак на 70 %, после похода на РТ или лута убитого, ночью — домой и сложить всё,
+            // кроме своего набора. Это выше охоты, перехвата и мести: несущий лут игрок в Расте идёт домой, а не воюет.
+            string why = DepositDue(v);
+            if (why != null)
+            {
+                if (_depositSaid != why) { _depositSaid = why; Thought($"пора домой сложить лут: {why}"); LStat("сдача: " + why.Split(' ')[0]); }
+                return 89;
+            }
+            _depositSaid = null;
+            float s = 20 + 45 * Math.Clamp(v / 150f, 0, 1) + (guns ? 15 : 0);
             if (DangerRecent) s += 12;          // стреляют — ценное лучше в ящик
             if (home < 30) s += 15;             // рядом — по пути
             if (_rtPhase == RtPhase.Leave) s += 10;
             return MathF.Min(s, 78) * W("сейч");
+        }
+
+        string _depositSaid;
+        /// <summary>Пора сдать лут (после похода на РТ, лута убитого, сброса): до какого времени действует.</summary>
+        float _depositAfter = -999;
+        void DepositSoon() => _depositAfter = _w.Time + 600;
+
+        /// <summary>Причина нести всё домой сейчас (null — не обязательно).</summary>
+        string DepositDue(float v)
+        {
+            if (v < 25 && SpareGun() == null) return null;
+            if (v >= 150) return $"несу ≈{v:0} лома";
+            int used = 0;
+            foreach (var s in _me.Pack) if (s != null) used++;
+            if (used >= Actor.PackSize * 0.7f && v >= 40) return $"рюкзак полон ({used}/{Actor.PackSize})";
+            if (_w.Time < _depositAfter && v >= 40) return "после добычи (РТ, убитый, груз) — сначала в ящик";
+            if (Night && v >= 40 && _rtPhase == RtPhase.None) return "ночь — сортирую дома";
+            return null;
+        }
+
+        /// <summary>Ночь (раздел 10: меньше бродить, крафт, сортировка, фарм у дома).</summary>
+        bool Night => World.NightFactorAt(_w.TimeOfDay) > 0.6f;
+
+        /// <summary>Лишний ствол при себе (кроме лучшего с патронами и лучшего вообще): в ящик — ценное дома, при себе набор.</summary>
+        ItemSlot SpareGun()
+        {
+            string keep1 = Ranged(), keep2 = BestOwnedGun();
+            for (int k = 0; k < Actor.BeltSize + Actor.PackSize; k++)
+            {
+                var s = k < Actor.BeltSize ? _me.Belt[k] : _me.Pack[k - Actor.BeltSize];
+                if (s?.State is not WeaponState st || st.Def.Melee) continue;
+                if (!st.Broken && (s.Id == keep1 || s.Id == keep2)) continue;
+                if (s.Id == "weapon_bow" && keep1 == "weapon_bow") continue;
+                return s;
+            }
+            return null;
+        }
+
+        /// <summary>Забрать ствол из ящика целиком (ячейку с износом и патронами). true — занят этим в этот тик.</summary>
+        bool TakeGunFromBox(Deployable box, string id, ref InputCmd cmd)
+        {
+            if (Has(id)) return false;
+            var slot = box.Storage.Items.Find(s => s.Id == id && s.State != null && !(s.State is WeaponState ws && ws.Broken));
+            if (slot == null) return false;
+            Doing = $"берёт из ящика: {Items.Name(id)}";
+            if (!Reach(box.Pos, ref cmd)) return true;
+            box.Storage.Items.Remove(slot);
+            if (!_me.AddSlot(slot)) { box.Storage.Items.Add(slot); return false; }
+            Reserve(id, 1);
+            LStat("набор: ствол из ящика");
+            return true;
+        }
+
+        /// <summary>Положить лишний ствол в ящик целиком (с патронами в магазине и износом). Бот уже у ящика.</summary>
+        bool PutSpareGun(Deployable box)
+        {
+            var s = SpareGun();
+            if (s == null || box.Storage.Items.Count >= World.BoxSlots || Vector2.Distance(_me.Pos, box.Pos) > World.InteractRange + box.Radius) return false;
+            for (int i = 0; i < Actor.BeltSize; i++) if (_me.Belt[i] == s) { if (_me.Current == i) _me.Current = 0; _me.Belt[i] = null; }
+            for (int i = 0; i < Actor.PackSize; i++) if (_me.Pack[i] == s) _me.Pack[i] = null;
+            box.Storage.Items.Add(s);
+            return true;
         }
 
         string _stashSaidFor;
@@ -110,7 +182,8 @@ namespace Rastvordd.Sim
             var box = MyBox();
             if (box == null) return false;
             var list = Surplus();
-            if (list.Count == 0) return false;
+            if (list.Count == 0 && SpareGun() == null) return false;
+            if (list.Count == 0) list.Add((SpareGun().Id, 0));
             float v = 0;
             foreach (var (id, n) in list) v += Items.Value(id) * n;
             Doing = $"несёт добычу домой (≈{v:0} лома)";
@@ -128,8 +201,16 @@ namespace Rastvordd.Sim
             _stashBest = float.MaxValue; _stashSince = _w.Time;
             var parts = new List<string>();
             int moved = 0;
+            for (int k = 0; k < 4; k++)
+            {
+                string gid = SpareGun()?.Id;
+                if (gid == null || !PutSpareGun(box)) break;
+                moved++; LStat("сдача: ствол в ящик");
+                if (parts.Count < 4) parts.Add(Items.Name(gid));
+            }
             foreach (var (id, n) in list)
             {
+                if (n <= 0) continue;
                 if (box.Storage.Items.Count >= World.BoxSlots && !box.Storage.Items.Exists(x => x.Id == id)) continue;
                 int put = _w.BotPut(_me, box, id, n);
                 if (put <= 0) continue;
@@ -144,6 +225,7 @@ namespace Rastvordd.Sim
                 Thought($"сложил в ящик: {string.Join(", ", parts)} (ящик ≈{StashValue():0} лома)");
             }
             _surplus = SurplusValue();
+            if (moved > 0) _depositAfter = -999;
             return moved > 0 || _surplus >= 25;
         }
 

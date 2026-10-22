@@ -473,20 +473,34 @@ namespace Rastvordd.Sim
             if (_mineTick == _w.Tick) return;
             _mineTick = _w.Tick;
             _mClaim = _mBox = _mFurnace = null; _mBench = 0;
+            _mBoxes.Clear();
             foreach (var d in _w.Deployables)
             {
                 if (d.OwnerId != _me.Id) continue;
                 switch (d.Kind)
                 {
                     case DeployKind.Claim: _mClaim ??= d; break;
-                    case DeployKind.Box: _mBox ??= d; break;
+                    case DeployKind.Box: if (d.Storage != null) _mBoxes.Add(d); break;
                     case DeployKind.Furnace: _mFurnace ??= d; break;
                     case DeployKind.Workbench: _mBench = Math.Max(_mBench, Math.Max(1, d.Level)); break;
                 }
             }
+            PickBox();
         }
 
         Deployable MyClaim() { ScanMine(); return _mClaim; }
+
+        /// <summary>
+        /// Все свои ящики (D49): в плане базы их два (кибитка и мейн), а бот пользовался только первым — ящик забивался до 30/30,
+        /// рюкзак не разгружался, ценный лом и детали не доезжали до переработчика. Теперь «мой ящик» — тот, где больше места,
+        /// а счёт и взятие — по всем своим ящикам.
+        /// </summary>
+        readonly List<Deployable> _mBoxes = new();
+        void PickBox()
+        {
+            _mBox = null;
+            foreach (var b in _mBoxes) if (_mBox == null || b.Storage.Items.Count < _mBox.Storage.Items.Count - 2) _mBox = b;
+        }
 
         static NodeKind NodeFor(string id) => id switch { "wood" => NodeKind.Tree, "metal_ore" => NodeKind.Metal, "sulfur_ore" => NodeKind.Sulfur, "rubber" => NodeKind.Tire, _ => NodeKind.Stone };
         /// <summary>Добывается ли ресурс из узла (остальное — печь, переработчик, лут; раньше всё неизвестное «добывалось» из камня).</summary>
@@ -728,14 +742,33 @@ namespace Rastvordd.Sim
         int InBox(Deployable box, string id)
         {
             int n = 0;
+            if (box.OwnerId == _me.Id && _mBoxes.Contains(box)) { foreach (var b in _mBoxes) n += InOne(b, id); return n; }   // свои — все ящики
+            return InOne(box, id);
+        }
+        static int InOne(Deployable box, string id)
+        {
+            int n = 0;
             foreach (var it in box.Storage.Items) if (it.Id == id) n += it.Count;
             return n;
+        }
+        /// <summary>Свой ящик, где лежит предмет (больше всего); null — нигде.</summary>
+        Deployable BoxWith(string id, bool gun = false)
+        {
+            ScanMine();
+            Deployable best = null; int bn = 0;
+            foreach (var b in _mBoxes)
+            {
+                int n = gun ? (b.Storage.Items.Exists(s => s.Id == id && s.State != null && !s.State.Broken) ? 1 : 0) : InOne(b, id);
+                if (n > bn) { bn = n; best = b; }
+            }
+            return best;
         }
 
         /// <summary>Нужно n штук в кармане: забрать из ящика (E — всё), иначе false.</summary>
         bool TakeFromBox(Deployable box, string id, int n, ref InputCmd cmd)
         {
             if (_me.Count(id) >= n || InBox(box, id) == 0) return false;
+            if (box.OwnerId == _me.Id && BoxWith(id) is Deployable src) box = src;   // из того своего ящика, где оно лежит
             Doing = $"берёт из ящика: {Items.Name(id)}";
             if (!Reach(box.Pos, ref cmd)) return true;
             cmd.Aim = box.Pos;

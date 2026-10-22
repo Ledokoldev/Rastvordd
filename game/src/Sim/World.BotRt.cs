@@ -106,6 +106,7 @@ namespace Rastvordd.Sim
         {
             var r = Weaponry.LatheFor(output);
             if (r == null || lathe?.Kind != DeployKind.Lathe || !BotReach(a, lathe.Pos, lathe.Radius)) return false;
+            if (r.Bench3 && BenchLevel(lathe.Pos, LatheBench3Range) < 3) return false;   // иначе станок выточит из этого сырья другое (затворы вместо газоотвода)
             foreach (var (id, n) in r.In) if (a.Count(id) < n) return false;
             foreach (var (id, n) in r.In)
             {
@@ -117,15 +118,17 @@ namespace Rastvordd.Sim
             return true;
         }
 
-        /// <summary>Токарный станок: забрать готовые детали (id из рецептов станка, кроме сырья).</summary>
+        /// <summary>
+        /// Токарный станок (станок стоит): забрать всё — готовые детали и остатки сырья. Раньше остатки (пружины, металл) лежали
+        /// в станке, и он сам точил из них «самое сложное, что выходит» — затворные группы десятками, а пружин на газоотвод не оставалось.
+        /// </summary>
         public int BotLatheTake(Actor a, Deployable lathe)
         {
-            if (lathe?.Kind != DeployKind.Lathe || !BotReach(a, lathe.Pos, lathe.Radius)) return 0;
+            if (lathe?.Kind != DeployKind.Lathe || lathe.On || !BotReach(a, lathe.Pos, lathe.Radius)) return 0;
             int got = 0;
             for (int i = lathe.Storage.Items.Count - 1; i >= 0; i--)
             {
                 var s = lathe.Storage.Items[i];
-                if (Weaponry.LatheFor(s.Id) == null) continue;
                 int put = a.AddUpTo(s.Id, s.Count);
                 got += put; s.Count -= put;
                 if (s.Count <= 0) lathe.Storage.Items.RemoveAt(i);

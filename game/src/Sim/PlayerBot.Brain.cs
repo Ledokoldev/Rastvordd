@@ -45,10 +45,9 @@ namespace Rastvordd.Sim
         /// <summary>Ценность ящика дома.</summary>
         float StashValue()
         {
-            var box = MyBox();
-            if (box?.Storage == null) return 0;
+            if (MyBox() == null) return 0;
             float v = 0;
-            foreach (var s in box.Storage.Items) v += Items.Value(s.Id) * s.Count;
+            foreach (var box in _mBoxes) foreach (var s in box.Storage.Items) v += Items.Value(s.Id) * s.Count;
             return v;
         }
 

@@ -115,7 +115,7 @@ namespace Rastvordd.Sim
         /// <summary>Сколько общих деталей бот держит под крафт стволов (D46): лишнее — в переработчик.</summary>
         public static int CompKeep(string id) => id switch
         {
-            "comp_spring" => 12, "comp_pipe" => 4, "comp_tape" => 4, "comp_gears" => 8,   // пружины не точатся — их держат больше
+            "comp_spring" => 20, "comp_pipe" => 4, "comp_tape" => 4, "comp_gears" => 8,   // пружины не точатся — их держат больше
             _ when Economy.IsValuable(id) => 0,                                  // ценный лом — только в переработчик (D49)
             _ when Array.IndexOf(Weaponry.Tier2Parts, id) >= 0 => 2,             // детали тира 2 — по две на стволы, лишнее в лом
             _ => int.MaxValue,

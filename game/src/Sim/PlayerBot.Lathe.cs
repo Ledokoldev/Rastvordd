@@ -31,7 +31,7 @@ namespace Rastvordd.Sim
             {
                 if (!_partsWant.ContainsKey(id)) continue;
                 var r = Weaponry.LatheFor(id);
-                if (r == null || (r.Bench3 && MyBenchLevel() < 3)) continue;   // хромированный ствол и газоотвод — у верстака 3
+                if (r == null || (r.Bench3 && (MyBenchLevel() < 3 || (MyLathe() is Deployable lt && _w.BenchLevel(lt.Pos, World.LatheBench3Range) < 3)))) continue;   // хромированный ствол и газоотвод — станок у верстака 3
                 if (CanLathe(r)) return id;
                 // не хватает промежуточной детали, которую тоже точит станок (газоотвод ← УСМ, затвор ← шестерни) — сначала её
                 foreach (var (inId, n) in r.In)
@@ -52,7 +52,7 @@ namespace Rastvordd.Sim
             if (_w.Time < _latheBlock || MyBenchLevel() < 2) return false;
             var lathe = MyLathe();
             // готовое — забрать
-            if (lathe != null && !lathe.On && lathe.Storage.Items.Exists(s => Weaponry.LatheFor(s.Id) != null))
+            if (lathe != null && !lathe.On && lathe.Storage.Items.Count > 0)
             {
                 Doing = "забирает детали со станка";
                 if (!Reach(lathe.Pos, ref cmd, 1.2f)) return true;

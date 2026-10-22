@@ -83,8 +83,8 @@ namespace Rastvordd.Sim
         public static readonly string[] Tier2Parts = { "comp_trigger", "comp_bolt_carrier", "comp_barrel_rifled", "comp_frame_pistol", "comp_body_smg", "comp_body_rifle" };
         public static readonly string[] Tier3Parts = { "comp_receiver_ak", "comp_barrel_chrome", "comp_gas_block" };
 
-        /// <summary>Общий компонент для бочек и ящиков (D49): пружина 35 % (не точится), труба 25, изолента 20, шестерни 20.</summary>
-        public static string CommonPart(Random rng) => rng.Next(100) switch { < 25 => "comp_pipe", < 60 => "comp_spring", < 80 => "comp_tape", _ => "comp_gears" };
+        /// <summary>Общий компонент для бочек и ящиков (D49): пружина 45 % (не точится, нужна везде), труба 20, изолента 17, шестерни 18.</summary>
+        public static string CommonPart(Random rng) => rng.Next(100) switch { < 20 => "comp_pipe", < 65 => "comp_spring", < 82 => "comp_tape", _ => "comp_gears" };
         /// <summary>Деталь тира 2: корпуса (только лут) вдвое чаще точимых на станке УСМ, затвора и нарезного ствола.</summary>
         public static string Tier2Part(Random rng) => rng.Next(9) switch
         {

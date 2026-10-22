@@ -310,7 +310,7 @@ namespace Rastvordd.Sim
         /// <summary>С какой секунды вайпа в лут попадают детали тира 3 (ствольная коробка АК, хромированный ствол, газоотвод).</summary>
         public const float Tier3From = 5f * 3600f;
         /// <summary>Сколько деталей тира 3 на весь мир за час (ящики, сейфы, ивенты).</summary>
-        public const int Tier3PerHour = 4;
+        public const int Tier3PerHour = 5;
         readonly Dictionary<int, int> _tier3ByHour = new();
 
         /// <summary>Можно ли сейчас выпустить деталь тира 3 (фаза режиссёра, время, лимит в час).</summary>
@@ -335,7 +335,7 @@ namespace Rastvordd.Sim
             if (Rng.NextDouble() >= chance || !Tier3Allowed()) return false;
             int h = (int)(Time / 3600);
             _tier3ByHour[h] = _tier3ByHour.GetValueOrDefault(h) + 1;
-            bag.Items.Add(new ItemSlot(Rng.Next(2) == 0 ? "comp_receiver_ak" : Pick(Weaponry.Tier3Parts), 1));   // ствольная коробка — только лут, она чаще
+            bag.Items.Add(new ItemSlot(Rng.Next(3) < 2 ? "comp_receiver_ak" : Pick(Weaponry.Tier3Parts), 1));   // ствольная коробка — только лут, её ≈ 3/4 (хром и газоотвод точатся)
             return true;
         }
 
@@ -388,7 +388,7 @@ namespace Rastvordd.Sim
             {
                 Maybe(0.35, "comp_tape", 1, 2);
                 Maybe(0.35, "comp_gears", 1, 2);
-                Maybe(0.3, "comp_spring", 1, 2);
+                Maybe(0.45, "comp_spring", 1, 2);
                 Maybe(0.3, "comp_pipe", 1, 2);
             }
             if (bag.Tier >= 1) Maybe(0.18, "keycard", 1, 1);
@@ -448,7 +448,7 @@ namespace Rastvordd.Sim
                     if (Rng.NextDouble() < 0.08) bag.Items.Add(new ItemSlot(Pick(Weaponry.FactoryAtts), 1));
                     if (Rng.NextDouble() < 0.03) bag.Items.Add(new ItemSlot(Pick(Weaponry.ArmyAtts), 1));
                     if (Rng.NextDouble() < 0.05) bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_sawnoff", "weapon_mp133", "weapon_grach" })));
-                    TryTier3(bag, 0.12);
+                    TryTier3(bag, 0.25);
                     if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot("expl_satchel"));
                     break;
             }
@@ -714,11 +714,16 @@ namespace Rastvordd.Sim
         public bool NearBench(Vector2 p) => BenchLevel(p) > 0;
 
         /// <summary>Самый высокий уровень верстака рядом (0 — нет).</summary>
-        public int BenchLevel(Vector2 p)
+        public int BenchLevel(Vector2 p) => BenchLevel(p, BenchRange);
+
+        /// <summary>Станок точит детали тира 3, если верстак 3 в мастерской рядом — 10 м (D49: у южной стены кибитки станок стоял в 6–7 м от верстака).</summary>
+        public const float LatheBench3Range = 10f;
+
+        public int BenchLevel(Vector2 p, float range)
         {
             int best = 0;
-            foreach (var d in DeploysNear(p, BenchRange))
-                if (d.Kind == DeployKind.Workbench && Vector2.Distance(d.Pos, p) < BenchRange) best = Math.Max(best, Math.Max(1, d.Level));
+            foreach (var d in DeploysNear(p, range))
+                if (d.Kind == DeployKind.Workbench && Vector2.Distance(d.Pos, p) < range) best = Math.Max(best, Math.Max(1, d.Level));
             return best;
         }
 

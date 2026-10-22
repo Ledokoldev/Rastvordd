@@ -291,7 +291,7 @@ namespace Rastvordd.Sim
             {
                 if (Weaponry.Power(g) <= have) break;
                 if (InBox(box, g) == 0 || Has(g)) continue;
-                if (box.Storage.Items.Exists(s => s.Id == g && s.State != null && !s.State.Broken)) return g;
+                if (BoxWith(g, true) != null) return g;
             }
             // патроны к стволам, что при мне или в ящике
             foreach (var g in Weaponry.GunsByPower)
@@ -324,7 +324,7 @@ namespace Rastvordd.Sim
             if (_w.Time - _respawnAt < 1) Thought("после смерти: домой за набором (оружие, патроны, бинты)");
             Doing = $"после смерти — берёт из ящика {Items.Name(id)}";
             // ствол в ящике лежит целиком (с износом и магазином) — BotTake его не берёт, забрать ячейку (раньше бот стоял у ящика 5 мин)
-            if (box.Storage.Items.Exists(s => s.Id == id && s.State != null)) { if (!TakeGunFromBox(box, id, ref cmd)) { _respawnAt = -999; return false; } return true; }
+            if (BoxWith(id, true) is Deployable gb) { if (!TakeGunFromBox(gb, id, ref cmd)) { _respawnAt = -999; return false; } return true; }
             if (!TakeFromBox(box, id, Math.Min(want, _me.Count(id) + InBox(box, id)), ref cmd)) { _respawnAt = -999; return false; }
             return true;
         }

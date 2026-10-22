@@ -85,7 +85,7 @@ namespace Rastvordd.Sim
         /// <summary>Что станок будет точить из того, что в нём лежит: самый сложный выполнимый рецепт (тир 3 — только у верстака 3).</summary>
         Weaponry.LatheRecipe LatheJob(Deployable d)
         {
-            bool b3 = BenchLevel(d.Pos) >= 3;
+            bool b3 = BenchLevel(d.Pos, LatheBench3Range) >= 3;
             var items = d.Storage.Items;
             for (int i = Weaponry.Lathe.Count - 1; i >= 0; i--)
             {
@@ -623,7 +623,7 @@ namespace Rastvordd.Sim
                     v.On = lt.On; v.Burning = job != null;
                     v.Making = job?.Output;
                     if (job != null) v.Progress = Math.Clamp(lt.SmeltTimer / job.Time, 0, 1);
-                    bool b3 = BenchLevel(lt.Pos) >= 3;
+                    bool b3 = BenchLevel(lt.Pos, LatheBench3Range) >= 3;
                     foreach (var r in Weaponry.Lathe)
                     {
                         var inp = new List<string>();

@@ -96,6 +96,7 @@ namespace Rastvordd.Sim
                 if (!rt.M.Contains(p)) continue;
                 lvl = MathF.Max(lvl, rt.Key switch { "ats" => 10, "depot" => 15, "quarry" => 25, _ => 0 });   // гаражи — 0
             }
+            foreach (var rt in Tier2) if (rt.M.Contains(p)) lvl = MathF.Max(lvl, Tier2Rt.Radiation);   // Радиоцентр: антенное поле «фонит» по всей территории
             if (RadWarehouse > 0 && MonumentAt(p)?.Name == "Склад «Центральный»") lvl = MathF.Max(lvl, RadWarehouse);
             foreach (var (c, r, l) in RadSpots) if (Vector2.Distance(p, c) < r) lvl = MathF.Max(lvl, l);
             return lvl;

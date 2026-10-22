@@ -17,6 +17,7 @@ namespace Rastvordd.Client
             public LightCone2D Cone;
             public float Base, Phase;
             public bool Broken, NeedsPower;
+            public bool Radio;      // питание от дизеля Радиоцентра (иначе — щиток Подстанции)
         }
 
         readonly List<Lamp> _lamps = new();
@@ -65,6 +66,15 @@ namespace Rastvordd.Client
                     case "props/phone_booth":
                         AddLamp(world, p + new Vector2(0, 6), 3f, new Color(0.85f, 0.95f, 1f), 0.8f, 0, false);
                         break;
+                    case "props/radio_watchtower":
+                        // прожектор на вышке Радиоцентра: светит вниз-вперёд, на подход к вышке (горит всегда ночью — у вышки свой аккумулятор)
+                        AddLamp(world, Iso.Px(d.Pos + new System.Numerics.Vector2(3f, 6f)), 13f, new Color(0.85f, 0.92f, 1f), 1.5f, Iso.H(7.5f), true);
+                        break;
+                    case "props/radio_console":
+                    case "props/radio_transmitter_big":
+                        // аппаратура «Маяка» светится лампами и шкалами, когда завели дизель
+                        AddLamp(world, p + new Vector2(0, -16), 5f, d.Sprite.EndsWith("console") ? new Color(0.5f, 1f, 0.6f) : new Color(1f, 0.75f, 0.35f), 0.9f, 0, false, needsPower: true, flicker: false, radio: true);
+                        break;
                     case "props/subst_transformer":
                         // гудит под нагрузкой: холодные сполохи, только при питании
                         AddLamp(world, p + new Vector2(0, -10), 7f, new Color(0.55f, 0.75f, 1f), 0.9f, 0, false, needsPower: true, flicker: true);
@@ -80,7 +90,7 @@ namespace Rastvordd.Client
             }
         }
 
-        void AddLamp(Node world, Vector2 at, float radiusM, Color c, float energy, float headH, bool cone, bool needsPower = false, bool flicker = false)
+        void AddLamp(Node world, Vector2 at, float radiusM, Color c, float energy, float headH, bool cone, bool needsPower = false, bool flicker = false, bool radio = false)
         {
             var l = new PointLight2D
             {
@@ -89,7 +99,7 @@ namespace Rastvordd.Client
                 ShadowFilterSmooth = 2.5f, ShadowColor = new Color(0, 0, 0, 0.92f), Enabled = false,
             };
             world.AddChild(l);
-            var lamp = new Lamp { Light = l, Base = energy, Phase = _rng.Randf() * 50, NeedsPower = needsPower, Broken = flicker || _rng.Randf() < 0.18f };
+            var lamp = new Lamp { Light = l, Base = energy, Phase = _rng.Randf() * 50, NeedsPower = needsPower, Radio = radio, Broken = flicker || (!radio && _rng.Randf() < 0.18f) };
             if (cone && headH > 0)
             {
                 lamp.Cone = new LightCone2D { Position = at, Head = new Vector2(0, -headH), RadiusPx = radiusM * Iso.PPM * 0.75f, Tint = c, ZIndex = 3 };
@@ -98,13 +108,14 @@ namespace Rastvordd.Client
             _lamps.Add(lamp);
         }
 
-        /// <summary>night — 0 днём, 1 ночью; powered — включён ли щиток Подстанции; view — видимая часть мира (дальние лампы спят).</summary>
-        public void Update(float night, bool powered, Rect2 view, float dt)
+        /// <summary>night — 0 днём, 1 ночью; powered — включён ли щиток Подстанции; radioPowered — молотит ли дизель Радиоцентра; view — видимая часть мира (дальние лампы спят).</summary>
+        public void Update(float night, bool substPowered, Rect2 view, float dt, bool radioPowered = false)
         {
             _t += dt;
             var near = view.Grow(400);
             foreach (var lamp in _lamps)
             {
+                bool powered = lamp.Radio ? radioPowered : substPowered;
                 bool on = night > 0.05f && (!lamp.NeedsPower || powered) && near.HasPoint(lamp.Light.Position);
                 if (lamp.NeedsPower && powered && near.HasPoint(lamp.Light.Position)) on = true;   // питание — лампы горят и днём (внутри темно)
                 lamp.Light.Enabled = on;

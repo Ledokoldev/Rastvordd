@@ -62,6 +62,7 @@ namespace Rastvordd.Client
         PrefabLayer _prefab;
         LightingLayer _lighting;
         DirectorLayer _dirLayer;
+        readonly System.Collections.Generic.List<(SVec pos, float t)> _flares = new();   // сигнальные ракеты «Маяка» (DirectorLayer)
         RadioFeed _radio;
         /// <summary>Отладка (--occl-off): прозрачность только над своим персонажем — как было до D39, для сравнения.</summary>
         bool _occlSelfOnly;
@@ -181,7 +182,7 @@ namespace Rastvordd.Client
                 else if (a == "code") _hud.ShowCode(0);
                 else if (a == "die") _server.World.DebugKill(_server.World.Find(_myId));
                 else if (a == "steps") GD.Print("steps: " + string.Join(", ", System.Linq.Enumerable.Select(System.Linq.Enumerable.Where(Sfx.Played, kv => kv.Key.StartsWith("steps/")), kv => kv.Key[6..] + "×" + kv.Value)));   // отладка: какие шаги звучали
-                else if (a == "info") GD.Print($"info: {_server.World.LastInfo.GetValueOrDefault(_myId)} | structs {_server.World.Structures.Count} | aim {_autoAim} | me {_server.World.Find(_myId).Pos}" + (_server.World.Substations.Count > 0 ? $" | тир1: {string.Join(", ", _server.World.Tier1.ConvertAll(r => $"{r.Key} готов={r.Ready} кабели={r.CablesIn} вагон={r.WagonT:0.00} кран={(r.Cabin != null ? r.Cabin.Progress : 0):0} крейт={(r.Crate.Unlocked ? "открыт" : "закрыт")}@{r.Crate.Pos.X:0};{r.Crate.Pos.Y:0}"))} | подстанция: питание {_server.World.Substations[0].Powered}, крейт открыт {_server.World.Substations[0].Crate.Unlocked}, таймер {_server.World.Substations[0].CrateTimer:0}" : ""));   // отладка: последнее сообщение
+                else if (a == "info") GD.Print($"info: {_server.World.LastInfo.GetValueOrDefault(_myId)} | structs {_server.World.Structures.Count} | aim {_autoAim} | me {_server.World.Find(_myId).Pos}" + string.Concat(_server.World.Tier2.ConvertAll(r => $" | тир2 {r.Key}: ток {r.PowerLeft:0} перезарядка {r.CooldownLeft:0} кодов {r.Codes.Count}")) + (_server.World.Substations.Count > 0 ? $" | тир1: {string.Join(", ", _server.World.Tier1.ConvertAll(r => $"{r.Key} готов={r.Ready} кабели={r.CablesIn} вагон={r.WagonT:0.00} кран={(r.Cabin != null ? r.Cabin.Progress : 0):0} крейт={(r.Crate.Unlocked ? "открыт" : "закрыт")}@{r.Crate.Pos.X:0};{r.Crate.Pos.Y:0}"))} | подстанция: питание {_server.World.Substations[0].Powered}, крейт открыт {_server.World.Substations[0].Crate.Unlocked}, таймер {_server.World.Substations[0].CrateTimer:0}" : ""));   // отладка: последнее сообщение
                 else if (a == "map") { _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); }
                 else if (a == "crouch") _forceCrouch = true;
                 else if (a == "sprint") _forceSprint = true;
@@ -194,6 +195,18 @@ namespace Rastvordd.Client
                 {
                     var p = a.Substring(2).Split(';');
                     _forceWalk = new SVec(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture));
+                }
+                else if (a.StartsWith("t2tp"))
+                {
+                    // отладка: перенестись на РТ тира 2: t2tp<номер>;x;y от её угла
+                    var p = a.Substring(4).Split(';');
+                    _server.World.Find(_myId).Pos = _server.World.Tier2[int.Parse(p[0])].At(float.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[2], System.Globalization.CultureInfo.InvariantCulture));
+                }
+                else if (a == "t2power") { foreach (var r in _server.World.Tier2) r.PowerLeft = Rastvordd.Sim.Tier2Rt.PowerTime; }   // отладка: ток на Радиоцентре без дизеля
+                else if (a == "t2call")
+                {
+                    // отладка: вызвать борт на Радиоцентр без шагов (проверка сброса на площадку)
+                    foreach (var r in _server.World.Tier2) _server.World.DebugCallRadio(r, _server.World.Find(_myId));
                 }
                 else if (a.StartsWith("t1tp"))
                 {
@@ -390,6 +403,13 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     var rt = _server.World.Tier1[int.Parse(p[0])];
                     _server.World.Find(_myId).Pos = rt.At(float.Parse(p[1], inv), float.Parse(p[2], inv));
                 }
+                else if (arg.StartsWith("--att2="))
+                {
+                    // отладка: встать на РТ тира 2 номер N в точке (x, y) от её угла: --att2=0,92,80 (Радиоцентр: площадка ~92,71)
+                    var p = arg.Substring(7).Split(',');
+                    var rt = _server.World.Tier2[int.Parse(p[0])];
+                    _server.World.Find(_myId).Pos = rt.At(float.Parse(p[1], inv), float.Parse(p[2], inv));
+                }
                 else if (arg.StartsWith("--att0="))
                 {
                     // отладка: встать на РТ тира 0 номер N в точке (x, y) от её угла: --att0=0,40,30
@@ -539,7 +559,7 @@ else if (arg == "--atcrate")
                 _teleports = tps;
             }
             _lighting = new LightingLayer(map, _world);
-            _dirLayer = new DirectorLayer();
+            _dirLayer = new DirectorLayer { Flares = _flares };
             AddChild(_dirLayer);
             foreach (var w in map.Walls)
             {
@@ -835,7 +855,7 @@ else if (arg == "--atcrate")
                 // свет РТ: фонари ночью, лампы корпуса Подстанции — при включённом щитке
                 bool powered = _cur.DecorSprites.Exists(d => d.sprite == "props/subst_main_panel_on");
                 var halfV = GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X;
-                _lighting.Update(_overview ? 0 : World.NightFactorAt(_forcedDay ?? _cur.DayTime), powered, new Rect2(_cam.Position - halfV, halfV * 2), dt);
+                _lighting.Update(_overview ? 0 : World.NightFactorAt(_forcedDay ?? _cur.DayTime), powered, new Rect2(_cam.Position - halfV, halfV * 2), dt, _cur.RadioPower);
             }
             UpdateHud(dt);
 
@@ -946,6 +966,15 @@ else if (arg == "--atcrate")
                             case "fuse": Sfx.Play("lock_click", Iso.Px(e.Pos), 0, 15, 0f); Flash(e.Pos, new Color(1f, 0.9f, 0.5f), 6, 0.15f, true); break;
                             case "power": Sfx.Play("fuse_hiss", Iso.Px(e.Pos), 2, 60, 0f); Flash(e.Pos, new Color(0.6f, 0.8f, 1f), 18, 0.4f, true); _shake = Mathf.Min(1f, _shake + 0.3f); break;
                             case "shutter": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), 0, 40, 0.1f); break;
+                            // Радиоцентр «Маяк» (тир 2): ракета, дизель, журнал. Ракету красиво нарисует VFX — пока вспышка и столб (DirectorLayer)
+                            case "flare":
+                                Sfx.Play(Sfx.Pick("flare_launch", "fire_whoosh"), Iso.Px(e.Pos), 6, 400, 0.05f);
+                                Flash(e.Pos, new Color(1f, 0.15f, 0.1f), 60, 2.5f, true);
+                                _flares.Add((e.Pos, _server.World.Time));
+                                break;
+                            case "diesel": Sfx.Play(Sfx.Pick("diesel_loop", "hit_metal_ore"), Iso.Px(e.Pos), -6, 60, 0.2f, 0.5f); break;
+                            case "power_off": Sfx.Play(Sfx.Pick("diesel_stop", "fuse_hiss"), Iso.Px(e.Pos), -2, 60, 0f); break;
+                            case "paper": Sfx.Play(Sfx.Pick("paper_flip", "rummage"), Iso.Px(e.Pos), -8, 8, 0.1f); break;
                             case "reader": Sfx.Play("c4_beep", Iso.Px(e.Pos), 0, 60, 0f); Flash(e.Pos, new Color(0.4f, 1f, 0.5f), 5, 0.2f, true); break;
                             case "crate": Sfx.Play("craft_done", Iso.Px(e.Pos), 2, 40, 0f); Flash(e.Pos, new Color(0.4f, 1f, 0.5f), 14, 0.5f, true); break;
                             case "pry": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), -2, 25, 0.15f); break;

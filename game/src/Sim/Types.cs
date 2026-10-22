@@ -188,6 +188,7 @@ namespace Rastvordd.Sim
             Add("keycard", "Карта доступа", ItemCategory.Component);
             Add("punchcard_1", "Перфокарта I", ItemCategory.Component);
             Add("punchcard_2", "Перфокарта II", ItemCategory.Component);
+            Add("punchcard_3", "Перфокарта III", ItemCategory.Component);
             Add("fuse", "Пробка", ItemCategory.Component);
             Add("rt_keyfob", "Брелок от ворот", ItemCategory.Component);
             Add("rt_cable", "Кабель-перемычка", ItemCategory.Component);
@@ -376,6 +377,7 @@ namespace Rastvordd.Sim
             "keycard" => 40f,
             "punchcard_1" => 30f,
             "punchcard_2" => 80f,
+            "punchcard_3" => 200f,
             "fuse" => 0f,
             "bandage" => 3f,
             "berries" or "canned" or "water_bottle" => 1f,
@@ -428,7 +430,8 @@ namespace Rastvordd.Sim
             "deploy_furnace" => "Плавит руду в металл и серу",
             "keycard" => "Открывает сейф на РТ с охраной (одна карта — один сейф)",
             "punchcard_1" => "Открывает крейт РТ тира 1 (Подстанция). Тратится",
-            "punchcard_2" => "Открывает крейт РТ тира 2. Тратится",
+            "punchcard_2" => "Открывает РТ тира 2 (пульт Радиоцентра «Маяк»). Тратится",
+            "punchcard_3" => "Для РТ тира 3 (ещё не построены). Редкость с вызова «Маяка»",
             "fuse" => "Пробка Подстанции: вставь в главный щиток. За забор не вынести",
             "rt_keyfob" => "Брелок от гаражных ворот: жми у гаражей — нужные ворота запищат. Из Гаражей не вынести",
             "rt_cable" => "Перемычка для кросса АТС. Из АТС не вынести",
@@ -451,6 +454,7 @@ namespace Rastvordd.Sim
             "keycard" => 3,
             "punchcard_1" => 2,
             "punchcard_2" => 3,
+            "punchcard_3" => 4,
             "fuse" => 1,
             "expl_c4" => 4,
             "expl_satchel" or "lock_code" => 3,

@@ -12,6 +12,8 @@ namespace Rastvordd.Client
     {
         List<DirectorMarker> _markers = new();
         float _time;
+        /// <summary>Сигнальные ракеты (Радиоцентр «Маяк»): где и когда пущены. Заглушка — красный огонь взлетает и висит ~25 с; красиво сделает VFX.</summary>
+        public List<(System.Numerics.Vector2 pos, float t)> Flares;
 
         public DirectorLayer()
         {
@@ -28,6 +30,20 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
+            if (Flares != null)
+                foreach (var (fp, ft) in Flares)
+                {
+                    float age = _time - ft;
+                    if (age < 0 || age > 25) continue;
+                    var at = Iso.Px(fp);
+                    // взлёт за 2,5 с на ~60 м, потом медленно опускается и гаснет
+                    float hM = age < 2.5f ? 60 * (age / 2.5f) : 60 - (age - 2.5f) * 1.6f;
+                    var top = at - new Vector2(Mathf.Sin(age * 0.7f) * 10 * Mathf.Min(1, age / 3), Iso.H(hM));
+                    float fade = age > 20 ? (25 - age) / 5 : 1;
+                    DrawLine(at, top, new Color(1, 0.75f, 0.6f, 0.25f * fade), 2);
+                    for (int i = 0; i < 4; i++) DrawCircle(top, 6 + i * 9, new Color(1f, 0.15f, 0.1f, 0.3f * fade / (i + 1)));
+                    DrawCircle(top, 4, new Color(1f, 0.9f, 0.8f, fade));
+                }
             foreach (var m in _markers)
             {
                 var at = Iso.Px(m.Pos);

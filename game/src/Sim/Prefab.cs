@@ -122,7 +122,7 @@ namespace Rastvordd.Sim
         {
             var d = Decor(sprite, p, flip);
             string id = sprite[(sprite.LastIndexOf('/') + 1)..];
-            if (!Foot.TryGetValue(id, out var f) && !Tier0Layouts.Foot.TryGetValue(id, out f) && !Tier1Layouts.Foot.TryGetValue(id, out f)) return d;
+            if (!Foot.TryGetValue(id, out var f) && !Tier0Layouts.Foot.TryGetValue(id, out f) && !Tier1Layouts.Foot.TryGetValue(id, out f) && !Tier2Layouts.Foot.TryGetValue(id, out f)) return d;
             if (f.legs)
             {
                 AddHiddenWall(p.X - f.w / 2, p.Y - f.d, p.X - f.w / 2 + f.d, p.Y, f.h);
@@ -228,6 +228,7 @@ namespace Rastvordd.Sim
                     || Vector2.Distance(b.Pos, t.ContStart) < 0.6f || Vector2.Distance(b.Pos, t.ContEnd) < 0.6f || t.Capsules.Exists(c => Vector2.Distance(b.Pos, c) < 1.5f)));
                 ResetTier1(t);
             }
+            foreach (var t in Tier2) ResetTier2(t);
         }
     }
 }

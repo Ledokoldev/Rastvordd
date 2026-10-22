@@ -92,6 +92,8 @@ namespace Rastvordd.Sim
             PerceiveDeaths();
             PerceiveRaid();
             PerceivePeople();
+            PerceiveGreed();
+            PerceiveCamp();
             StepStage();
         }
 
@@ -172,7 +174,10 @@ namespace Rastvordd.Sim
             {
                 new() { Name = "бегство", Score = FleeScore, Act = Retreat },
                 new() { Name = "бой", Score = () => _threat != null && ThreatMode(_threat) > 0 ? 95 * Math.Max(W("бой"), 0.5f) : 0, Act = (ref InputCmd c) => { Combat(_threat, ref c); return true; } },
+                new() { Name = "лут убитого", Score = KillLootScore, Act = KillLootAct },
                 new() { Name = "сторож", Score = WatchdogScore, Act = WatchdogAct },
+                new() { Name = "перехват", Score = InterceptScore, Act = InterceptAct },
+                new() { Name = "кемп", Score = LootCampScore, Act = CampGoalAct },
                 new() { Name = "засада у РТ", Score = CampScore, Act = CampAct },
                 new() { Name = "антирейд", Score = () => AntiRaidScore() * W("антирейд"), Act = AntiRaid },
                 new() { Name = "слух", Score = RumorScore, Act = RumorAct },
@@ -181,12 +186,12 @@ namespace Rastvordd.Sim
                 new() { Name = "месть", Score = RevengeScore, Act = RevengeAct },
                 new() { Name = "нужды", Score = () => NeedsUrgency() * 70, Act = Needs },
                 new() { Name = "проверить бой", Score = () => InvestigateScore() * W("проверить бой"), Act = Investigate },
-                new() { Name = "лут трупа", Score = () => CorpseNear() != null && _me.Hp > 35 ? 60 * W("лут трупа") : 0, Act = LootCorpse },
+                new() { Name = "лут трупа", Score = () => CorpseNear() != null && _me.Hp > 35 ? (ArmedForGreed && _load < LoadLimit ? 74 : 60) * W("лут трупа") : 0, Act = LootCorpse },   // лут — главное: каждый труп обыскать
                 new() { Name = "рейд", Score = RaidScore, Act = RaidAct },
                 new() { Name = "поход на РТ", Score = RtScore, Act = RtRun },
                 new() { Name = "сейч", Score = StashScore, Act = StashAct },
                 new() { Name = "разведка", Score = ScoutScore, Act = Scout },
-                new() { Name = "снаряжение", Score = () => GearMissing() ? 50 * W("снаряжение") : 0, Act = GearUp },
+                new() { Name = "снаряжение", Score = () => !GearMissing() ? 0 : !Has("weapon_spear") ? 55 : 50 * W("снаряжение"), Act = GearUp },
                 new() { Name = "хозяйство", Score = () => 40 * W("хозяйство"), Act = (ref InputCmd c) => { Plan(ref c); return true; } },
                 new() { Name = "бродить", Score = () => 20 * W("бродить"), Act = RoamMove },
             };
@@ -224,7 +229,7 @@ namespace Rastvordd.Sim
             {
                 bool fresh = _w.Time - _lastSwitchLog.GetValueOrDefault(best.Name, -999) > 30;   // повтор той же смены — не чаще раза в 30 с
                 if (fresh) _lastSwitchLog[best.Name] = _w.Time;
-                if (fresh && _goal != null && best.Name is "бегство" or "бой" or "антирейд" or "проверить бой" or "охота" or "рейд" or "поход на РТ" or "разведка" or "слух" or "месть")
+                if (fresh && _goal != null && best.Name is "бегство" or "бой" or "антирейд" or "проверить бой" or "охота" or "рейд" or "поход на РТ" or "разведка" or "слух" or "месть" or "перехват" or "кемп" or "лут убитого")
                     Thought($"{_goal.Name} → {best.Name}{(best.Name == "бой" || best.Name == "бегство" ? $": {_threat?.Name ?? "угроза"}, у него {Items.Name(_threat?.Held?.Id ?? "tool_rock")}" : "")}");
                 _goal = best;
             }
@@ -277,7 +282,7 @@ namespace Rastvordd.Sim
                 float near = Math.Clamp(1 - d / 220f, 0, 1);
                 float burden = Math.Clamp((_load + (Archetype == BotArchetype.Farmer ? _stash * 0.3f : 0)) / 600f, 0, 1);
                 float hp = _me.Hp / _me.MaxHp;
-                float score = mine < 0.35f ? 0 : 75 * Aggression * near * (1 - risk) * (1 - 0.7f * burden) * hp * (_w.Time - h.Time < 45 ? 1 : 0.5f);
+                float score = mine < 0.35f ? 0 : 75 * MathF.Min(1f, Aggression + 0.2f * Greed) * near * (1 - risk) * (1 - 0.7f * burden) * hp * (_w.Time - h.Time < 45 ? 1 : 0.5f);
                 if (!h.Judged)
                 {
                     h.Judged = true;
@@ -328,7 +333,7 @@ namespace Rastvordd.Sim
         LootBag CorpseNear()
         {
             LootBag bag = null;
-            float bd = 35;
+            float bd = ArmedForGreed ? 55 : 35;
             foreach (var b in _w.Bags)
             {
                 if (b.Empty || b.IsCrate || MyDrop(b) || (_badLoot.TryGetValue(b, out float until) && _w.Time < until)) continue;
@@ -346,12 +351,20 @@ namespace Rastvordd.Sim
             Doing = bag.Corpse ? "лутает труп" : "подбирает вещи";
             // не дойти за 30 с (за стеной, в чужом доме) — на 3 минуты забыть про эту сумку
             if (bag != _lootBag) { _lootBag = bag; _lootSince = _w.Time; }
-            else if (_w.Time - _lootSince > 30) { _badLoot[bag] = _w.Time + 180; _lootBag = null; return false; }
+            else if (_w.Time - _lootSince > 30 || NoReach(bag.Pos)) { _badLoot[bag] = _w.Time + 180; _lootBag = null; return false; }
             Use(bag, bag.Pos, ref cmd);
             return true;
         }
 
-        bool GearMissing() => Has("tool_hatchet") && (!Has("weapon_spear") || (!Has("weapon_bow") && (_me.Count("cloth") >= 50 || NearestPickup(PickupKind.Hemp) != null)) || (Has("weapon_bow") && _me.Count("arrow") < 12));
+        /// <summary>Без копья на РТ и к людям не ходят (пользователь: «хотя бы с копьём минимум, с луком шансов больше»).</summary>
+        bool GearMissing()
+        {
+            if (_w.Time - _gearAt < 1f) return _gearMiss;   // перебор конопли на карте — раз в секунду
+            _gearAt = _w.Time;
+            return _gearMiss = GearMissingNow();
+        }
+        float _gearAt = -99; bool _gearMiss;
+        bool GearMissingNow() => Has("tool_hatchet") && (!Has("weapon_spear") || (!Has("weapon_bow") && (_me.Count("cloth") >= 50 || NearestPickup(PickupKind.Hemp) != null)) || (Has("weapon_bow") && _me.Count("arrow") < 12));
 
         bool GearUp(ref InputCmd cmd)
         {

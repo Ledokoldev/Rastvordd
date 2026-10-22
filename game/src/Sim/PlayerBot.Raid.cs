@@ -522,7 +522,7 @@ namespace Rastvordd.Sim
                 foreach (var a in _w.Actors)
                 {
                     if (a == _me || a.Dead || a.Spectator || a.Team == Team.Npc || Vector2.Distance(a.Pos, claim.Pos) > 40) continue;
-                    if (_w.CanSeeActor(_me, a, _w.ViewRange(_me), 260f)) { if (!_raiders.ContainsKey(a.Id)) Thought($"у моей базы {a.Name} с {Items.Name(a.Held?.Id ?? "tool_rock")}"); _raiders[a.Id] = KitPower(a); _lastDanger = _w.Time; }
+                    if (_w.CanSeeActor(_me, a, _w.ViewRange(_me), 260f)) { if (!_raiders.ContainsKey(a.Id)) { Thought($"у моей базы {a.Name} с {Items.Name(a.Held?.Id ?? "tool_rock")}"); Offend(a, "Raid", $"рейдил мою базу ({_alarmWhat})"); } _raiders[a.Id] = KitPower(a); _lastDanger = _w.Time; }
                 }
         }
 

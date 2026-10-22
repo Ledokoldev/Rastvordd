@@ -116,6 +116,7 @@ namespace Rastvordd.Sim
             var d = p - _me.Pos;
             CloseDoorBehind();
             if (d.Length() <= tol) { _path = null; return true; }
+            if (DoorTransit(ref cmd)) return false;   // иду сквозь свою дверь — до точки за ней, не срезая о косяк
 
             // прогресс к цели: 1,5 с без приближения — застряли
             if (Vector2.Distance(_goalFor, p) > 0.5f) { _goalFor = p; _goalBest = float.MaxValue; _goalStuck = 0; }
@@ -123,7 +124,7 @@ namespace Rastvordd.Sim
             // долгое окно: за 8 с не приблизился и на 2 м (ёрзает вдоль забора — короткий счётчик сбрасывается) — считать застрявшим
             if (Vector2.Distance(_winGoal, p) > 3f || _w.Time - _winAt > 8f)
             {
-                if (Vector2.Distance(_winGoal, p) <= 3f && _winDist - d.Length() < 2f && d.Length() > 6f) { _goalStuck = MathF.Max(_goalStuck, 2f); _path = null; _pathCheck = 0; _exitTryAt = -99; SimPerf.Count("ёрзает — ищу путь"); }
+                if (Vector2.Distance(_winGoal, p) <= 3f && _winDist - d.Length() < 2f && d.Length() > 6f) { _goalStuck = MathF.Max(_goalStuck, 2f); _path = null; _pathCheck = 0; _exitTryAt = -99; _road = null; SimPerf.Count("ёрзает — ищу путь"); }
                 _winGoal = p; _winAt = _w.Time; _winDist = d.Length();
             }
 
@@ -135,7 +136,8 @@ namespace Rastvordd.Sim
                 if (_pathIdx < _path.Count - 1 || Vector2.Distance(_me.Pos, wp) > 0.4f)
                 {
                     if (OpenDoorAhead(wp, ref cmd)) return false;
-                    cmd.Move = Vector2.Normalize(wp - _me.Pos);
+                    var dir = Vector2.Normalize(wp - _me.Pos + new Vector2(1e-4f, 0));
+                    cmd.Move = Avoid(dir);   // упёрся на маршруте (сосед, свежая постройка) — скольжение вдоль
                     cmd.Aim = wp;
                     return false;
                 }
@@ -143,28 +145,48 @@ namespace Rastvordd.Sim
             }
             else _path = null;
 
-            // прямая закрыта (дом, дерево у угла, печь) или застряли — строим маршрут
-            // проверка прямой — не каждый тик (раньше при свободной прямой она шла каждый тик: до сотни проверок клеток на бота)
+            // прямая закрыта (дом, дерево у угла, печь, забор РТ) или застряли — строим маршрут.
+            // Прямая проверяется на 10 м вперёд и для дальних целей (раньше — только ближе 35 м: дальняя цель «за чужим домом»
+            // давала упор в стену до 1,5 с застревания на каждом шаге); дальняя цель — по «дорогам».
+            bool far = d.Length() >= 35;
             bool checkNow = (_pathCheck -= World.Dt) <= 0;
             if (checkNow) _pathCheck = 0.25f;
-            if (checkNow && (_goalStuck > 1.5f || (d.Length() < 35 && !_w.SegmentWalkable(_me.Pos, p, _me.Radius + 0.05f, tol + 0.4f))))
+            float look = MathF.Min(d.Length(), 10f);
+            if (checkNow && (_goalStuck > 1.2f || far || !_w.SegmentWalkable(_me.Pos, _me.Pos + Vector2.Normalize(d) * look, _me.Radius + 0.05f, d.Length() <= 10f ? tol + 0.4f : 0, OwnDoor)))
             {
                 _pathCheck = 0.6f;
-                var goal = d.Length() < 35 ? p : _me.Pos + Vector2.Normalize(d) * 25;
                 // внутри РТ, а цель снаружи — сначала выйти через проход (иначе промежуточная точка «за забором» водила по кругу внутри)
                 var path = ExitPath(p);
                 if (path != null) Thought("выбираюсь с РТ через проход");
-                else path = Pathfinder.Find(_w, _me.Pos, goal, _me.Radius, d.Length() < 35 ? tol : 1.5f, OwnDoor);
-                // дальняя цель, а промежуточная точка за стеной (выход с РТ через ворота сбоку) — пробуем повёрнутые направления
-                if (path == null && d.Length() >= 35)
-                    foreach (float turn in new[] { 0.5f, -0.5f, 1.0f, -1.0f, 1.6f, -1.6f, 2.4f, -2.4f })
+                else if (!far)
+                {
+                    path = Pathfinder.Find(_w, _me.Pos, p, _me.Radius, tol, OwnDoor);
+                    // окно вокруг отрезка «я — цель» мало (вход в здание РТ с другой стороны) — один раз шире
+                    if (path == null && _w.Time - _wideAt > 3f)
                     {
-                        var g2 = _me.Pos + Geo.Rotate(Vector2.Normalize(d), turn) * 25;
-                        if (!_w.Terrain.IsLand(g2)) continue;
-                        path = Pathfinder.Find(_w, _me.Pos, g2, _me.Radius, 1.5f, OwnDoor);
-                        if (path != null) break;
+                        _wideAt = _w.Time;
+                        path = Pathfinder.Find(_w, _me.Pos, p, _me.Radius, tol, OwnDoor, 45000, 26f);
+                        if (path == null) { MarkNoReach(p); _pathCheck = 2f; }
+                        else SimPerf.Count("A*: широкое окно помогло");
                     }
-                if (path == null) _pathCheck = 1.5f;   // пути нет — не искать заново каждые 0,6 с (поиск «впустую» — самый дорогой)
+                }
+                else
+                {
+                    // дальняя цель: прямая на 10 м свободна и дорога не нужна — не тратим поиск
+                    bool clear = _goalStuck <= 1.2f && _w.SegmentWalkable(_me.Pos, _me.Pos + Vector2.Normalize(d) * 10f, _me.Radius + 0.05f, 0, OwnDoor);
+                    path = clear && _roadPref < _w.Time ? null : RoadLeg(p);
+                    if (path == null && !clear)
+                        foreach (float turn in new[] { 0.5f, -0.5f, 1.0f, -1.0f, 1.6f, -1.6f, 2.4f, -2.4f })
+                        {
+                            var g2 = _me.Pos + Geo.Rotate(Vector2.Normalize(d), turn) * 25;
+                            if (!_w.Terrain.IsLand(g2)) continue;
+                            path = Pathfinder.Find(_w, _me.Pos, g2, _me.Radius, 1.5f, OwnDoor);
+                            if (path != null) break;
+                        }
+                    if (path == null && !clear) { _pathCheck = 1.5f; if (_goalStuck > 2f) MarkNoReach(p, 60); }   // пути нет ни по дорогам, ни в обход — цель за стенами
+                    if (path != null) _roadPref = _w.Time + 20f;      // пошёл по дороге — держусь её, а не «напрямик» через 0,6 с
+                    else _pathCheck = clear ? 0.5f : _pathCheck;
+                }
                 if (path != null && path.Count > 0)
                 {
                     _path = path; _pathIdx = 0; _pathGoal = p; _pathAge = 0; _goalStuck = 0;
@@ -180,17 +202,20 @@ namespace Rastvordd.Sim
                     return false;
                 }
             }
+            // цель недавно оказалась недостижимой (за стеной без прохода, в чужом доме) — не толкаться в стену: стоять, вызывающий сменит цель
+            if (_path == null && NoReach(p) && _goalStuck > 0.5f) { SimPerf.Count("стою: цель недостижима"); return false; }
             if (OpenDoorAhead(p, ref cmd)) return false;   // напрямую: закрытую свою дверь — открыть, открытую — запомнить, чтобы закрыть за собой
             var want = Vector2.Normalize(d);
-            // РТ с охраной обходим стороной, если цель не на самом РТ
-            foreach (var m in _w.Monuments)
-            {
-                if (m.Contains(p, 5) || d.Length() < 15 || m.Contains(_me.Pos, 4)) continue;   // с самой РТ выходим без отталкивания (прижимало к забору)   // ближние перемещения (по дому, к дереву) — без отталкивания
-                var off = _me.Pos - m.Center;
-                float r = (m.Max - m.Min).Length() * 0.5f + 45;
-                float dist = off.Length();
-                if (dist < r && dist > 0.1f) want += off / dist * (r - dist) / r * 2.5f;
-            }
+            // РТ с охраной обходим стороной, если цель не на самом РТ (дальние цели — по «дорогам», где РТ и так дорогие)
+            if (_path == null && !far)
+                foreach (var m in _w.Monuments)
+                {
+                    if (m.Contains(p, 5) || d.Length() < 15 || m.Contains(_me.Pos, 4)) continue;   // с самой РТ выходим без отталкивания (прижимало к забору)
+                    var off = _me.Pos - m.Center;
+                    float r = (m.Max - m.Min).Length() * 0.5f + 45;
+                    float dist = off.Length();
+                    if (dist < r && dist > 0.1f) want += off / dist * (r - dist) / r * 2.5f;
+                }
             if (want.LengthSquared() > 0.0001f) want = Vector2.Normalize(want);
             // вблизи цели — напрямую (иначе крутится), но если упёрлись в ящик/столб дольше секунды — обходим
             if (d.Length() < 1.2f)
@@ -203,6 +228,8 @@ namespace Rastvordd.Sim
             cmd.Aim = p;
             return false;
         }
+
+        float _wideAt = -99, _roadPref = -99;
 
         float _exitTryAt = -99, _winAt = -99, _winDist;
         Vector2 _winGoal;
@@ -282,13 +309,40 @@ namespace Rastvordd.Sim
             foreach (var s in DoorsNear())
             {
                 if (!MineDoor(s) || Vector2.DistanceSquared(s.Center, _me.Pos) > 9) continue;
-                bool crosses = false;
-                foreach (var (min, max, _, _) in Building.Boxes(StructKind.Door, s.A, s.B, false)) if (Geo.SegmentAabb(_me.Pos, wp, min, max, out _)) { crosses = true; break; }
+                bool crosses = false, touches = false;
+                var grow = new Vector2(_me.Radius + 0.08f);
+                foreach (var (min, max, _, _) in Building.Boxes(StructKind.Door, s.A, s.B, false))
+                {
+                    if (Geo.SegmentAabb(_me.Pos, wp, min, max, out _)) { crosses = true; break; }
+                    if (Geo.SegmentAabb(_me.Pos, wp, min - grow, max + grow, out _)) touches = true;
+                }
+                float dist = Vector2.Distance(_me.Pos, s.Center);
+                // маршрут идёт вдоль закрытой своей двери (A* считает её проходимой) — плечом в неё упирался: открыть по пути
+                if (!crosses && touches && !s.Open && dist <= World.InteractRange - 0.15f && _w.ClearLine(_me.Pos, s.Center, s, true))
+                {
+                    if (_w.BotToggleDoor(_me, s)) { NoteToClose(s); SimPerf.Count("дверь: открыл по пути"); }
+                    continue;
+                }
                 if (!crosses) continue;
-                if (s.Open) { if (Vector2.Distance(_me.Pos, s.Center) < 1.5f) NoteToClose(s); continue; }
+                float side = SideOf(s, _me.Pos);
+                if (side == 0) side = 1;
+                var front = s.Center + DoorNormal(s) * side * 0.85f;   // перед дверью с моей стороны — оттуда дверь видна и проём прямо
+                if (s.Open)
+                {
+                    // открыта: пройти насквозь перпендикулярно (раньше шёл к точке за дверью наискосок и цеплял косяк)
+                    if (dist < 1.6f) { NoteToClose(s); StartTransit(s); return DoorTransit(ref cmd); }
+                    continue;
+                }
                 cmd.Aim = s.Center;
-                if (Vector2.Distance(_me.Pos, s.Center) > 1.4f) { cmd.Move = Vector2.Normalize(s.Center - _me.Pos); return true; }
-                if (_w.BotToggleDoor(_me, s)) NoteToClose(s);
+                // открыть, когда дотягиваюсь и стены между нами нет; иначе — встать перед дверью (не толкаться в стену возле неё)
+                if (dist <= World.InteractRange - 0.15f && _w.ClearLine(_me.Pos, s.Center, s, true))
+                {
+                    if (_w.BotToggleDoor(_me, s)) { NoteToClose(s); StartTransit(s); SimPerf.Count("дверь: открыл"); }
+                    else if (Vector2.Distance(_me.Pos, front) > 0.3f) cmd.Move = Vector2.Normalize(front - _me.Pos + new Vector2(1e-4f, 0));
+                    return true;
+                }
+                var to = front - _me.Pos;
+                cmd.Move = to.LengthSquared() > 0.01f ? Vector2.Normalize(to) : Vector2.Normalize(s.Center - _me.Pos + new Vector2(1e-4f, 0));
                 return true;
             }
             return false;
@@ -305,11 +359,16 @@ namespace Rastvordd.Sim
                 var (d, side) = _toClose[i];
                 float dist = Vector2.Distance(_me.Pos, d.Center);
                 if (!d.Open || !_w.Structures.Contains(d) || dist > 6f) { _toClose.RemoveAt(i); continue; }   // ушёл далеко — закроет «обход дома»
+                if (d == _transitDoor) continue;   // прохожу сквозь неё — не закрывать перед носом
                 if ((SideOf(d, _me.Pos) != side && dist > 1.1f) || dist > 1.9f)
                     if (_w.BotToggleDoor(_me, d) || !d.Open) _toClose.RemoveAt(i);
             }
         }
 
+        /// <summary>
+        /// Обход препятствия на ходу: упёрся дольше 0,35 с — скольжение вдоль стены (ближайшее к нужному свободное направление,
+        /// в ту же сторону, что в прошлый раз) на 0,5–0,9 с. Раньше — случайный поворот: бот «тыкался» в угол по нескольку раз.
+        /// </summary>
         Vector2 Avoid(Vector2 move)
         {
             float moved = Vector2.Distance(_me.Pos, _lastPos);
@@ -317,9 +376,11 @@ namespace Rastvordd.Sim
             if (moved < 0.02f) _stuck += World.Dt; else _stuck = MathF.Max(0, _stuck - World.Dt);
             if (_stuck > 0.35f && _avoidTimer <= 0)
             {
-                _avoidAngle = (_rng.Next(2) == 0 ? -1 : 1) * (1.1f + (float)_rng.NextDouble() * 0.7f);
-                _avoidTimer = 0.5f + (float)_rng.NextDouble() * 0.6f;
+                var slide = SlideDir(move);
+                _avoidAngle = slide is Vector2 sd ? MathF.Atan2(move.X * sd.Y - move.Y * sd.X, Vector2.Dot(move, sd)) : (_rng.Next(2) == 0 ? -1 : 1) * (1.1f + (float)_rng.NextDouble() * 0.7f);
+                _avoidTimer = 0.5f + (float)_rng.NextDouble() * 0.4f;
                 _stuck = 0;
+                SimPerf.Count(slide != null ? "скольжение вдоль стены" : "обход наугад");
             }
             if (_avoidTimer > 0) { _avoidTimer -= World.Dt; return Geo.Rotate(move, _avoidAngle); }
             return move;
@@ -418,6 +479,7 @@ namespace Rastvordd.Sim
                 if (_node == null) { Wander(ref cmd); return; }
             }
             // не можем подойти к узлу — в чёрный список, ищем другой
+            if (NoReach(_node.Pos)) { _badNodes.Add(_node); _node = null; return; }
             float nd = Vector2.Distance(_me.Pos, _node.Pos);
             if (nd < _nodeBest - 0.3f) { _nodeBest = nd; _nodeNoProgress = 0; }
             else if ((_nodeNoProgress += World.Dt) > 5f && nd > _node.Radius + 1.0f)
@@ -507,12 +569,16 @@ namespace Rastvordd.Sim
         {
             var cmd = InputCmd.Empty;
             cmd.Aim = _me.Pos + _me.FacingDir * 3;
+            CountBump();
             StepDeath();
             if (_me.Dead)
             {
                 Doing = "мёртв";
+                PerceiveOwnDeath();
                 if (_rtPhase != RtPhase.None) EndRun("погиб", died: true);
                 if (_raid != null) { RaidEnd("погиб", false); _raid = null; _raidCooldown = _w.Time + 900; }
+                if (_camp != null) EndCamp("погиб");
+                if (_icpt != null) EndIntercept("погиб");
                 _deadTime += World.Dt;
                 if (_deadTime > 6) { cmd.RespawnBag = _w.ReadyBag(_me) is Deployable b && _w.Time >= b.ReadyAt; cmd.Respawn = !cmd.RespawnBag; _deadTime = 0; _node = null; }
                 return cmd;
@@ -525,6 +591,7 @@ namespace Rastvordd.Sim
             Decide(ref cmd);
             CloseDoorBehind();
             SimPerf.End("бот: решение+действие", t0);
+            NoteMove(cmd);
             return cmd;
         }
 
@@ -716,6 +783,7 @@ namespace Rastvordd.Sim
                 _nodeBest = float.MaxValue; _nodeNoProgress = 0;
                 if (_scrapNode == null) { Doing = "ищет лом"; Wander(ref cmd); return true; }
             }
+            if (NoReach(_scrapNode.Pos)) { _badScrap.Add(_scrapNode); _scrapNode = null; return true; }
             float dist = Vector2.Distance(_me.Pos, _scrapNode.Pos);
             if (dist < _nodeBest - 0.3f) { _nodeBest = dist; _nodeNoProgress = 0; }
             else if ((_nodeNoProgress += World.Dt) > 6f && dist > _scrapNode.Radius + 1.0f) { _badScrap.Add(_scrapNode); _scrapNode = null; return true; }

@@ -136,6 +136,18 @@ namespace Rastvordd.Sim
             why = null;
             var gun = Ranged();
             int deaths = _rtDeaths.GetValueOrDefault(r.M.Name);
+            // без оружия на РТ не ходят: копьё минимум, лук и самопал — лучше (пользователь: «так неинтересно»)
+            if (gun == null && !Has("weapon_spear")) { why = "без оружия на РТ не хожу — сначала копьё"; return false; }
+            // тир 0 — «сходить буквально один раз»: за перфокартой (если её нет) или первый раз за ломом; дальше — только кемпить там
+            if (r.Tier == 0 && r.Guards == 0)
+            {
+                int runs = _rtRuns.GetValueOrDefault(r.M.Name);
+                bool needCard = Stock("punchcard_1") == 0 && _w.Substations.Count > 0 && r.T0 != null;
+                int t0Runs = 0;
+                foreach (var (name, n) in _rtRuns) if (Rts().Exists(x => x.M.Name == name && x.Tier == 0 && x.Guards == 0)) t0Runs += n;
+                if (runs == 0 && (needCard || (t0Runs < 2 && _stage5 < WipeStage.Arms))) { }   // каждую тир 0 — один раз; за ломом — не больше двух всего
+                else { why = runs > 0 ? $"тир 0 уже обобрал ({runs} раз) — там нечего ловить" : "тир 0 мне уже не нужен"; return false; }
+            }
             if (r.Guards == 0) return deaths < 3 || (why = "там уже умирал") == null;
             if (gun == null) { why = "охрана, а у меня нет ствола"; return false; }
             if (AmmoLeft(gun) < 20) { why = "мало патронов"; return false; }
@@ -290,6 +302,8 @@ namespace Rastvordd.Sim
                 _rtValue0 = CarriedValue();
                 _rtHad.Clear();
                 _rtStashed.Clear();
+                _rtProg.Clear();
+                _rtMine = 0;
                 foreach (var id in RunItems) _rtHad[id] = _me.Count(id);
                 Thought($"на РТ «{_rt.Short}» — обхожу");
                 return true;
@@ -366,7 +380,7 @@ namespace Rastvordd.Sim
             float bestCost = float.MaxValue;
             void Consider(RtTk k, object o, Vector2 p, float bonus)
             {
-                if (Skipped(o)) return;
+                if (Skipped(o) || NoReach(p)) return;
                 float c = Vector2.Distance(p, _me.Pos) - bonus;
                 if (c < bestCost) { bestCost = c; best = (k, o, p); }
             }
@@ -383,6 +397,10 @@ namespace Rastvordd.Sim
             return best;
         }
         bool _punchedByMe;
+        readonly Dictionary<object, (float best, float since)> _rtProg = new();
+        int _rtMine;                                                   // ящиков РТ вскрыл я сам в этот поход
+        readonly Dictionary<string, int> _rtRuns = new();              // сколько раз ходил на РТ (тир 0 — «один раз»)
+        readonly Dictionary<string, float> _rtLast = new();
 
         /// <summary>
         /// Склад Подстанции (крейт) — только через роллету с улицы: снаружи сначала к роллете, потом внутрь
@@ -430,16 +448,21 @@ namespace Rastvordd.Sim
             if (_rtT == null || _w.Time - _rtTPick > 1.5f)
             {
                 var t = PickRtTarget();
-                if (t == null) { LeaveRt("на РТ больше нечего брать"); return true; }
+                if (t == null) { LeaveRt(_rtMine > 0 || _rtValue0 + 30 < CarriedValue() ? "на РТ больше нечего брать" : OnLootedRt()); return true; }
                 if (_rtT == null || t.Value.Item2 != _rtT.Value.obj) { _rtTSince = _w.Time; _rtTBest = float.MaxValue; }
                 _rtT = t;
                 _rtTPick = _w.Time;
             }
             var (kind, obj, pos) = _rtT.Value;
-            // не подойти 12 с — пропустить цель
+            // не подойти 12 с — пропустить цель. Прогресс — по каждой цели отдельно: раньше две бочки за стеной чередовались
+            // каждые 1,5 с, таймер сбрасывался, и бот упирался в стену заправки по 2 минуты
             float d = Vector2.Distance(_me.Pos, pos);
-            if (d < _rtTBest - 0.3f) { _rtTBest = d; _rtTSince = _w.Time; }
-            else if (_w.Time - _rtTSince > 12 && kind != RtTk.Guard && kind != RtTk.Recycler && !(obj is Stash hs && hs.ActorId == _me.Id)) { Skip(obj, 120); _rtT = null; return true; }
+            bool special = kind == RtTk.Guard || kind == RtTk.Recycler || (obj is Stash hs && hs.ActorId == _me.Id);
+            if (!special && NoReach(pos)) { Skip(obj, 180); _rtT = null; Say("рт-недост", "до цели на РТ не дойти (за стеной без прохода) — пропускаю", 20); return true; }
+            var pr = _rtProg.TryGetValue(obj, out var pv) ? pv : (best: float.MaxValue, since: _w.Time);
+            if (d < pr.best - 0.3f) pr = (d, _w.Time);
+            _rtProg[obj] = pr;
+            if (_w.Time - pr.since > 12 && !special) { Skip(obj, 120); _rtProg.Remove(obj); _rtT = null; LStat("цель РТ: не подошёл 12 с"); return true; }
             var gun = Ranged();
             switch (kind)
             {
@@ -463,7 +486,7 @@ namespace Rastvordd.Sim
                     if (_w.Time - _lastUse > 0.4f) { _lastUse = _w.Time; _w.BotUse(_me, bag); }
                     if (bag.Punch && bag.Empty) { _w.Milestone(_me, $"вскрыл крейт РТ «{_rt.Short}» перфокартой"); LStat("крейтов вскрыто"); }
                     if (!bag.Empty && bag.Items.Count == before) Skip(bag, 60);   // не влезло
-                    if (bag.IsCrate && !bag.Punch) LStat("ящиков РТ");
+                    if (bag.IsCrate && !bag.Punch) { LStat("ящиков РТ"); _rtMine++; }
                     _rtT = null;
                     return true;
                 }
@@ -472,7 +495,7 @@ namespace Rastvordd.Sim
                     var n = (ResourceNode)obj;
                     if (!_w.Nodes.Contains(n)) { _rtT = null; return true; }
                     Doing = n.Kind == NodeKind.Junk ? "ковыряет хлам на РТ" : "бьёт бочку на РТ";
-                    if (!MoveTo(n.Pos, n.Radius + 0.9f, ref cmd)) return true;
+                    if (!Reach(n.Pos, ref cmd, n.Radius + 0.55f)) return true;   // место рукой, без стены до бочки (раньше — «в радиусе», хоть из-за стены)
                     cmd.Aim = n.Pos;
                     string tool = n.Kind == NodeKind.Junk ? (Has("tool_pickaxe") ? "tool_pickaxe" : "tool_rock")
                                                          : (Has("weapon_spear") ? "weapon_spear" : Has("tool_hatchet") ? "tool_hatchet" : "tool_rock");
@@ -632,6 +655,7 @@ namespace Rastvordd.Sim
                     int delta = _me.Count(id) + _rtStashed.GetValueOrDefault(id) - _rtHad.GetValueOrDefault(id);
                     if (delta > 0) { parts.Add($"{Items.Name(id)} +{delta}"); LStat("принесено: " + Items.Name(id), delta); }
                 }
+            if (_rtPhase is RtPhase.Loot or RtPhase.Leave) { _rtRuns[_rt.M.Name] = _rtRuns.GetValueOrDefault(_rt.M.Name) + 1; _rtLast[_rt.M.Name] = _w.Time; if (_rt.Tier == 0) LStat("походов на тир 0"); }
             if (died) { _rtDeaths[_rt.M.Name] = _rtDeaths.GetValueOrDefault(_rt.M.Name) + 1; LStat("смертей в походе"); }
             else LStat("вернулся с РТ");
             Thought(died ? $"погиб в походе на «{_rt.Short}» — запомню ({_rtDeaths[_rt.M.Name]})" : $"поход на «{_rt.Short}» окончен ({why}): {(parts.Count > 0 ? string.Join(", ", parts) : "пусто")}");

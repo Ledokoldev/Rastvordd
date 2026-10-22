@@ -248,11 +248,12 @@ namespace Rastvordd.Sim
         bool GoStand(Vector2 stand, float tol, ref InputCmd cmd)
         {
             if (MoveTo(stand, tol, ref cmd)) return true;
-            if (_path == null && _goalStuck > 3f && Vector2.Distance(_goalFor, stand) < 0.5f)
+            if (NoReach(stand) || (_path == null && _goalStuck > 3f && Vector2.Distance(_goalFor, stand) < 0.5f))
             {
                 _badStands.RemoveAll(b => b.until <= _w.Time);
                 _badStands.Add((stand, _w.Time + 60));
                 _goalStuck = 0;
+                _standPick = null;
             }
             return false;
         }
@@ -270,8 +271,15 @@ namespace Rastvordd.Sim
         /// <summary>Подойти к цели так, чтобы достать рукой; true — на месте (прицел — на цель).</summary>
         bool Reach(Vector2 target, ref InputCmd cmd, float r = 0.95f)
         {
-            bool near = Vector2.Distance(_me.Pos, target) < r + 0.45f && _w.ClearLine(_me.Pos, target, null, true);
-            if (!near && !GoStand(StandNear(target, r), 0.25f, ref cmd)) return false;
+            bool near = Vector2.Distance(_me.Pos, target) < MathF.Min(World.InteractRange - 0.1f, r + 0.75f) && _w.ClearLine(_me.Pos, target, null, true);
+            if (!near)
+            {
+                // далеко — сначала дойти поближе (место «рукой» выбирается на подходе: издалека не видно, где свободно)
+                if (Vector2.Distance(_me.Pos, target) > 9f) { MoveTo(target, 4f, ref cmd); return false; }
+                // встать негде (цель в стене, в закрытой комнате) — не упираться, а отказаться: вызывающий пропустит цель
+                if (StandPoint(target, r) is not Vector2 stand) { if (!NoReach(target)) { MarkNoReach(target, 90); Say("встать-негде", "к цели не подойти — встать негде, беру другую", 20); } return false; }
+                if (!GoStand(stand, 0.25f, ref cmd)) return false;
+            }
             cmd.Aim = target;
             return true;
         }

@@ -41,10 +41,12 @@ namespace Rastvordd.Sim
         const int MaxCells = 120000;   // буферы общие (не на каждый поиск), поэтому окно можно держать больше — хватает на выход с крупной РТ
 
         /// <summary>passable — какие стены можно «пройти» (свои двери: бот их откроет по пути).</summary>
-        public static List<Vector2> Find(World w, Vector2 from, Vector2 to, float r, float tol, Func<MapWall, bool> passable = null, int budget = Budget)
+        public static List<Vector2> Find(World w, Vector2 from, Vector2 to, float r, float tol, Func<MapWall, bool> passable = null, int budget = Budget, float margin = 8f)
         {
             long t0 = SimPerf.Begin();
-            var res = FindInner(w, from, to, r, tol, passable, budget);
+            var span = Vector2.Abs(to - from);
+            while (margin > 8f && (span.X + 2 * margin) * (span.Y + 2 * margin) / (Step * Step) > MaxCells * 0.95f) margin -= 2f;   // окно не больше буферов
+            var res = FindInner(w, from, to, r, tol, passable, budget, null, null, Vector2.Min(from, to) - new Vector2(margin), Vector2.Max(from, to) + new Vector2(margin));
             SimPerf.End(res == null ? "A* (не найден)" : "A*", t0);
             return res;
         }

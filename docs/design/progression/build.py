@@ -1,180 +1,336 @@
-# Дерево прогрессии «Раствордд»: данные (по docs/design/13, 14, 15) + иконки → progression.html
+# Дерево прогрессии «Раствордд» → progression.html
+# Данные сверены с кодом game/src/Sim (Types.cs, Weaponry.cs, Clothing.cs, Economy.cs, World.cs, Prefab.cs, Substation.cs,
+# Tier0/1/2.cs, Building.cs) на 2026-10-22; план — docs/design/13, 14 (D53), 15 (D49, D51), 16, 11.
+# Статус узла: game — «в игре» (есть в коде, добывается/крафтится), part — «частично» (есть, но часть плана не сделана — см. miss),
+# plan — «только в плане». Строка «где взять», начинающаяся с «~», — источник только в плане.
 import base64, json, os
 ART = 'C:/Users/Xbaza/Desktop/Rastvordd/game/art/'
 OUT = os.path.dirname(os.path.abspath(__file__))
 
 N = []
-def n(id, name, cat, col, icon=None, how=(), rec=(), st=None, res=0, note=''):
-    N.append(dict(id=id, name=name, cat=cat, col=col, icon=icon, how=list(how), rec=[list(x) for x in rec], st=st, res=res, note=note))
+AREA = {'res': 'Добыча', 'proc': 'Переработка', 'stn': 'Станки', 'comp': 'Оружие', 'val': 'Ценный лом', 'gun': 'Оружие', 'ammo': 'Оружие',
+        'att': 'Оружие', 'wear': 'Одежда и броня', 'med': 'Медицина и еда', 'water': 'Вода', 'fuel': 'Топливо и ёмкости', 'rt': 'РТ',
+        'boom': 'Взрывчатка и замки', 'tool': 'Инструменты', 'base': 'Стройка', 'equip': 'Снаряжение'}
 
-# --- добыча и ресурсы (столбец 0 — с первой минуты) ---
-n('wood','Дерево','res',0,'icons/icon_wood',['деревья — топор или булыжник'])
-n('stone','Камень','res',0,'icons/icon_stone',['каменные узлы — кирка или булыжник'])
-n('metal_ore','Металлическая руда','res',0,'icons/icon_metal_ore',['рудные узлы — кирка'])
-n('sulfur_ore','Серная руда','res',0,'icons/icon_sulfur_ore',['серные узлы — кирка'])
-n('cloth','Ткань','res',0,'icons/icon_cloth',['конопля (собрать E)','разбор одежды'])
-n('berries','Ягоды','res',0,'icons/icon_berries',['кусты (собрать E)'])
-n('scrap','Металлолом','res',0,'icons/icon_scrap',['бочки (1–3)','крейты РТ (понемногу)','ГЛАВНОЕ: переработчик на РТ — компоненты и ценный лом'])
-n('crude','Сырая нефть','res',0,None,['бочки с мазутом и ржавые канистры в мире и на РТ (3–8)'])
-n('rubber','Резина','res',0,'icons/icon_rubber',['покрышки (2–4), штабеля и кучи шин (6–10) — бить инструментом'])
-n('leather','Кожа','res',0,'icons/icon_leather',['бочки и ящики'])
-# --- переработанное ---
-n('metal_fragments','Металл','proc',0,'icons/icon_metal_fragments',['переработчик (из компонентов)'],[('metal_ore',1)],'furnace',note='печь: руда → металл; электропечь вдвое быстрее')
-n('sulfur','Сера','proc',0,'icons/icon_sulfur',[],[('sulfur_ore',1)],'furnace')
-n('charcoal','Уголь','proc',0,'icons/icon_charcoal',[],[('wood',1)],'furnace',note='побочный продукт печи')
-n('fuel','Топляк','proc',1,None,['Заправка: насос подземной цистерны (20–40, шумно)','канистры в крейтах РТ 1–2, аирдроп, УАЗ'],[('crude',2)],'still',note='расходник: ток, патроны, хилки, молотов, ПВО')
-n('medspirt','Медспирт','proc',1,None,[],[('berries',10)],'still',note='или конопля; для аптечек и шприцев')
-n('gunpowder','Порох ×5','proc',1,'icons/icon_gunpowder',[],[('charcoal',15),('sulfur',10)],'bench1',20,'на химстоле быстрее и дешевле')
+def n(id, name, cat, col, icon=None, how=(), rec=(), st=None, res=0, note='', s='game', miss='', parts=None, area=None):
+    N.append(dict(id=id, name=name, cat=cat, col=col, icon=icon, how=list(how), rec=[list(x) for x in rec], st=st, res=res, note=note,
+                  s=s, miss=miss, parts=parts or [], area=area or AREA.get(cat, 'Прочее')))
 
-# --- металл высокого качества: легированная сталь ---
-n('alloy','Легированная сталь','proc',4,'icons/icon_hqm',['аирдропы и ивенты','переработчик: лут высоких тиров (детали тира 2–3, пластины, стволы, дорогой ценный лом)','крейты РТ тира 1–2'],[],None,0,'только найти или переработать; не плавится. Аналог МВК: бронедвери и стены, стволы тира 3, верстак 3, армейская экипировка')
+def total(items):
+    t = {}
+    for _, cost in items:
+        for k, v in cost: t[k] = t.get(k, 0) + v
+    return sorted(t.items(), key=lambda kv: -kv[1])
 
-# --- станки и верстаки ---
-n('furnace','Печь','stn',0,'icons/icon_furnace',[],[('stone',100),('wood',50)],None)
-n('bench1','Верстак 1','stn',1,'icons/icon_workbench',[],[('wood',150),('metal_fragments',50),('scrap',50)],None,note='изучить всё на нём ≈ 250 лома')
-n('still','Самогонный аппарат','stn',1,None,[],[('metal_fragments',50),('comp_pipe',2)],'bench1',30,note='нефть → топляк, ягоды → медспирт; дымит — видно базу')
-n('sewing','Швейный стол','stn',1,None,[],[('wood',100),('cloth',20)],'bench1',20,note='одежда тир 0–1 быстрее, ремонт одежды')
-n('bench2','Верстак 2','stn',2,'icons/icon_workbench2',[],[('metal_fragments',300),('scrap',150)],'bench1',note='изучить всё ≈ 650 лома')
-n('lathe','Токарный станок','stn',2,None,[],[('metal_fragments',150),('comp_gears',2)],'bench2',note='детали из деталей; под током быстрее')
-n('generator','Дизель-генератор','stn',2,None,[],[('metal_fragments',200),('comp_gears',3),('comp_pipe',2)],'bench2',60,note='топляк → ток: свет, электропечь, ускоренный крафт')
-n('chem','Химстол','stn',2,None,[],[('metal_fragments',150),('comp_pipe',1)],'bench2',60,note='порох, патроны, антирадин, сатчель')
-n('lamp','Лампы, прожектор','stn',2,None,[],[('metal_fragments',20),('val_copper_wire',1)],'bench2',20,note='свет от генератора')
-n('bench3','Верстак 3','stn',3,'icons/icon_workbench3',[],[('metal_fragments',600),('scrap',400),('alloy',25),('comp_circuit',3),('comp_gears',5)],'bench2',note='детали с РТ обязательны; изучить всё ≈ 1300 лома')
-n('efurnace','Электропечь','stn',3,None,[],[('metal_fragments',300),('val_motor',1),('val_copper_wire',2)],'bench3',100,note='плавит ×2, без дерева, на токе')
-n('guntable','Оружейный стол','stn',3,None,[],[('metal_fragments',300),('alloy',20),('comp_gears',4),('comp_spring',4)],'bench3',150,note='стволы тира 3 и армейские обвесы — только здесь; ремонт')
-n('medtable','Медстол','stn',3,None,[],[('metal_fragments',150),('cloth',50)],'bench3',80,note='аптечки, шприцы')
-n('conveyor','Конвейер, сортировщик','stn',3,None,[],[('metal_fragments',100),('val_motor',1),('comp_circuit',1)],'bench3',120,note='автоматизация между ящиками, печами, станками')
-n('recycler','Переработчик','stn',4,None,['только на РТ тира 0'],[],None,note='компоненты и ценный лом → лом и металл')
-# --- компоненты ---
-C=[('comp_spring','Пружина',0,['бочки','крейты РТ 0','переработка'],[],None,'только найти'),
-   ('comp_pipe','Труба',0,['бочки','РТ 0'],[('metal_fragments',40)],'lathe',''),
-   ('comp_tape','Изолента',0,['бочки','РТ 0'],[('cloth',15)],'lathe',''),
-   ('comp_gears','Шестерни',0,['РТ 0–1'],[('metal_fragments',60),('scrap',10)],'lathe',''),
-   ('comp_oil','Оружейное масло',0,['бочки'],[('charcoal',20)],'lathe','ремонт стволов'),
-   ('comp_circuit','Плата',2,['крейты РТ 1 (АТС, Подстанция чаще)'],[],None,'только найти'),
-   ('comp_lens','Линза',2,['крейты РТ 1','редко бочки'],[],None,'только найти'),
-   ('comp_trigger','УСМ',2,['крейты РТ 1'],[('comp_spring',2),('comp_gears',1),('metal_fragments',50)],'lathe',''),
-   ('comp_bolt_carrier','Затворная группа',2,['крейты РТ 1'],[('comp_spring',3),('comp_gears',2),('metal_fragments',80)],'lathe',''),
-   ('comp_barrel_rifled','Нарезной ствол',2,['крейты РТ 1'],[('comp_pipe',2),('comp_gears',1),('metal_fragments',100)],'lathe',''),
-   ('comp_frame_pistol','Корпус пистолета',2,['крейты РТ 1'],[],None,'только найти'),
-   ('comp_body_smg','Корпус ПП',2,['крейты РТ 1'],[],None,'только найти'),
-   ('comp_body_rifle','Корпус винтовки',2,['крейты РТ 1'],[],None,'только найти'),
-   ('comp_receiver_ak','Ствольная коробка АК',4,['РТ 2','аирдроп','вертолёт'],[],None,'только найти, с середины вайпа'),
-   ('comp_barrel_chrome','Хромированный ствол',3,['РТ 2','аирдроп'],[('comp_barrel_rifled',2),('comp_spring',2),('metal_fragments',200)],'lathe','станок рядом с верстаком 3'),
-   ('comp_gas_block','Газоотводный узел',3,['РТ 2','аирдроп'],[('comp_trigger',1),('comp_spring',3),('comp_gears',2),('metal_fragments',150)],'lathe','станок рядом с верстаком 3')]
-for id,nm,col,how,rec,st,note in C: n(id,nm,'comp',col,'icons/icon_'+{'comp_spring':'spring','comp_pipe':'metal_pipe','comp_gears':'gears'}.get(id,id),how,rec,st,0,note)
-# --- ценный лом ---
-for id,nm,where,y in [('val_copper_wire','Медный провод','бочки, РТ 0','4 лома, 5 металла'),('val_radio_parts','Радиодетали','РТ 0–1, АТС','8 лома'),('val_battery','Аккумулятор 6СТ','машины на РТ, РТ 1','12 лома, 10 металла'),('val_motor','Электромотор','Подстанция, Депо, РТ 1','20 лома, 30 металла'),('val_radio_tubes','Радиолампы','РТ 2, Радиоцентр, ПВО','40 лома'),('val_gold_contacts','Золотые контакты','РТ 2, «Объект 42»','60 лома'),('val_computer_block','Блок ЭВМ','«Объект 42», вертолёт','120 лома')]:
-    n(id,nm,'val',4 if 'РТ 2' in where or 'Объект' in where else 2 if 'РТ 1' in where else 0,'icons/icon_'+id,[where],[],'recycler',0,'переработка → '+y)
-# --- оружие ---
-W=[('weapon_spear','Копьё',0,[('wood',150)],None,0,'weapons/weapon_spear'),('weapon_bow','Лук',0,[('wood',100),('cloth',30)],None,0,'weapons/weapon_bow'),
-   ('weapon_crossbow','Арбалет',1,[('wood',150),('cloth',20),('comp_spring',1)],'bench1',30,None),
-   ('weapon_nagant','Наган',1,[('metal_fragments',100),('comp_spring',2),('comp_pipe',1)],'bench1',50,None),
-   ('weapon_homesmg','Самоделка (ПП)',1,[('metal_fragments',125),('comp_spring',2),('comp_pipe',2),('comp_tape',2)],'bench1',90,None),
-   ('weapon_grach','Грач',2,[('metal_fragments',150),('comp_frame_pistol',1),('comp_trigger',1),('comp_spring',2)],'bench2',120,None),
-   ('weapon_pps43','ППС-43',2,[('metal_fragments',175),('comp_body_smg',1),('comp_bolt_carrier',1),('comp_spring',3)],'bench2',150,None),
-   ('weapon_svt40','СВТ-40',2,[('metal_fragments',200),('wood',100),('comp_body_rifle',1),('comp_barrel_rifled',1),('comp_trigger',1)],'bench2',150,None),
-   ('weapon_akm','АКМ',3,[('metal_fragments',250),('alloy',25),('wood',100),('comp_receiver_ak',1),('comp_bolt_carrier',1),('comp_gas_block',1),('comp_spring',4)],'guntable',300,None),
-   ('weapon_an94','АН-94 «Абакан»',3,[('metal_fragments',250),('alloy',30),('comp_receiver_ak',1),('comp_barrel_chrome',1),('comp_bolt_carrier',1),('comp_gas_block',1),('comp_gears',3)],'guntable',300,None),
-   ('weapon_ppsh','ППШ',3,[('metal_fragments',200),('alloy',20),('wood',150),('comp_body_smg',1),('comp_barrel_chrome',1),('comp_bolt_carrier',1),('comp_spring',4)],'guntable',250,None),
-   ('weapon_svd','СВД',3,[('metal_fragments',250),('alloy',25),('wood',100),('comp_body_rifle',1),('comp_barrel_chrome',1),('comp_gas_block',1),('comp_trigger',1)],'guntable',300,None)]
-for id,nm,col,rec,st,res,ic in W: n(id,nm,'gun',col,ic or 'icons/icon_'+id,[],rec,st,res)
-for id,nm,where in [('weapon_pipeshotgun','Самопал','бочки, РТ 0'),('weapon_sawnoff','Обрез','крейты РТ 0–1'),('weapon_mp133','МР-133','крейты РТ 1, аирдроп'),('weapon_saiga12','Сайга-12','вертолёт, «Объект 42», редко аирдроп'),('weapon_mosin','Мосинка с ПУ','«Объект 42», редко аирдроп'),('weapon_aps','АПС','вертолёт, «Объект 42», редко аирдроп')]:
-    n(id,nm,'gun',4,'icons/icon_'+id,[where],[],None,0,'не крафтится')
-# --- патроны ---
-n('arrow','Стрелы ×2','ammo',0,'icons/icon_arrow',[],[('wood',25),('stone',10)])
-n('ammo_9mm','9 мм ×5','ammo',1,'icons/icon_ammo_9mm',[],[('metal_fragments',10),('gunpowder',5)],'bench1',30)
-n('ammo_12g','12 калибр ×5','ammo',1,'icons/icon_ammo_12g',[],[('metal_fragments',5),('gunpowder',5),('fuel',1)],'bench1',30)
-n('ammo_762','7,62 ×5','ammo',2,'icons/icon_ammo_762',[],[('metal_fragments',10),('gunpowder',10),('fuel',1)],'chem',100)
-n('ammo_545','5,45 ×5','ammo',3,'icons/icon_ammo_545',[],[('metal_fragments',8),('gunpowder',6),('fuel',1)],'chem',120)
-# --- обвесы ---
-A=[('att_suppressor_can','Глушитель «банка»',1,[('metal_fragments',50),('comp_tape',1)],'bench1',30,[]),
-   ('att_grip_wood','Рукоять кустарная',1,[('wood',30),('comp_tape',1)],'bench1',30,[]),
-   ('att_torch','Фонарь на изоленте',1,[('cloth',10),('comp_tape',1),('fuel',2)],'bench1',30,[]),
-   ('att_mag_twin','Спарка',1,[('comp_tape',2)],'bench1',40,[]),
-   ('att_reddot','Коллиматор',2,[('metal_fragments',75),('comp_lens',1),('comp_circuit',1)],'bench2',80,[]),
-   ('att_scope2x','Прицел 2×',2,[('metal_fragments',100),('comp_lens',2),('comp_gears',1)],'bench2',100,['лут']),
-   ('att_laser','ЛЦУ',2,[('comp_circuit',1),('comp_lens',1)],'bench2',80,[]),
-   ('att_suppressor','Глушитель заводской',2,[],None,0,['крейты РТ 1']),
-   ('att_compensator','Компенсатор',2,[],None,0,['крейты РТ 1']),
-   ('att_grip','Рукоять заводская',2,[],None,0,['крейты РТ 1']),
-   ('att_flashlight','Тактический фонарь',2,[],None,0,['крейты РТ 1']),
-   ('att_mag_ext','Увеличенный магазин',2,[],None,0,['крейты РТ 1']),
-   ('att_stock_tac','Тактический приклад',2,[],None,0,['крейты РТ 1']),
-   ('att_scope4x','ПСО 4×',4,[],None,0,['РТ 2','аирдроп']),
-   ('att_suppressor_pbs','ПБС',4,[],None,0,['РТ 2','аирдроп','вертолёт'])]
-for id,nm,col,rec,st,res,how in A: n(id,nm,'att',col,'icons/icon_'+id,how,rec,st,res)
-# --- одежда (сеты) ---
-S=[('set_rags','Тряпьё',0,'wear_rags_shirt',[('cloth',20)],None,0,[],'тир 0'),
-   ('set_vatnik','Ватник',1,'wear_vatnik_telogreika',[('cloth',40),('leather',3)],'sewing',0,[],'холод до −30°'),
-   ('set_leather','Кожа и дерево',1,'wear_leather_chestplate',[('leather',10),('wood',60)],'bench1',0,[],'от людей'),
-   ('set_spec','Спецовка',2,'wear_spec_robe',[('cloth',40),('rubber',15)],'bench2',40,[],'радиация до 40'),
-   ('set_scrap','Кустарная броня',2,'wear_scrap_signvest',[('metal_fragments',120),('comp_tape',3),('rubber',6)],'bench2',60,[],'от людей'),
-   ('plate_homemade','Пластина кустарная',2,'plate_homemade',[('metal_fragments',100),('comp_tape',1)],'bench2',0,[],'+20%, 150 урона'),
-   ('set_ozk','ОЗК',3,'wear_ozk_gp5',[('rubber',30),('cloth',30)],'bench3',100,['лут РТ 1–2'],'радиация до 67'),
-   ('set_army','Армейская',3,'wear_army_6b2',[('metal_fragments',150),('alloy',20),('cloth',60),('plate_steel',0)],'bench3',120,[],'пули, холод до −13°'),
-   ('plate_steel','Пластина армейская',4,'plate_steel',[],None,0,['крейты РТ 2','сейф'],'+30%, 400 урона'),
-   ('plate_ceramic','Пластина керамическая',4,'plate_ceramic',[],None,0,['вертолёт','«Объект 42»'],'+40%, 300 урона'),
-   ('set_likv','Ликвидатор',4,'wear_likvidator_pmk',[],None,0,['аирдроп','закрытый ящик','«Объект 42»'],'радиация до 96, холод до −33°'),
-   ('set_sobr','СОБР',4,'wear_sobr_kora',[],None,0,['вертолёт','аирдроп','«Объект 42»'],'корпус до 75%'),
-   ('wear_watch','Часы «Электроника»',0,'wear_watch',[],None,0,['бочки, РТ 0–1'],'время, t°, радиация')]
-for id,nm,col,ic,rec,st,res,how,note in S: n(id,nm,'wear',col,'icons/icon_'+ic,how,[r for r in rec if r[1]>0],st,res,note)
-# --- медицина и прочее ---
-n('bandage','Бинт','med',0,'icons/icon_bandage',[],[('cloth',4)])
-n('antirad','Антирадин','med',2,'icons/icon_antirad',['ящики'],[('medspirt',2),('charcoal',10)],'chem',40,'−120 дозы')
-n('medkit','Аптечка','med',3,'icons/icon_medkit',[],[('medspirt',4),('cloth',10),('fuel',2)],'medtable',80)
-n('syringe','Шприц','med',3,'icons/icon_syringe',['лут РТ 2'],[('medspirt',2),('fuel',1)],'medtable',80)
-n('punchcard_1','Перфокарта I','med',0,'icons/icon_punchcard_1',['РТ 0: бардачок, касса, магазин','аирдроп'],[],None,0,'открывает РТ тира 1')
-n('punchcard_2','Перфокарта II','med',2,'icons/icon_punchcard_2',['крейты РТ 1','аирдроп'],[],None,0,'открывает РТ тира 2')
-n('punchcard_3','Перфокарта III','med',4,None,['РТ 2 (Радиоцентр — вызов)','аирдроп редко'],[],None,0,'лифты «Объекта 42»')
-# --- взрывчатка и стройка ---
-n('lock_key','Ключевой замок','boom',0,'icons/icon_key_lock',[],[('wood',75)])
-n('lock_code','Кодовый замок','boom',1,'icons/icon_code_lock',[],[('metal_fragments',100)],'bench1',30)
-n('molotov','Молотов','boom',1,'icons/icon_molotov',[],[('cloth',10),('fuel',5)],'bench1',30)
-n('satchel','Сатчель','boom',2,'icons/icon_satchel',[],[('cloth',10),('gunpowder',30),('metal_fragments',20)],'chem',75)
-n('c4','C4','boom',3,'icons/icon_c4',[],[('gunpowder',200),('alloy',5),('metal_fragments',100),('scrap',20),('cloth',5)],'chem',250,'нужен верстак 3')
+# ===================== добыча =====================
+n('wood', 'Дерево', 'res', 0, 'icons/icon_wood', ['деревья: булыжник 6 за удар, каменный топор 16'])
+n('stone', 'Камень', 'res', 0, 'icons/icon_stone', ['каменные узлы: кирка 14 за удар, булыжник 6'])
+n('metal_ore', 'Металлическая руда', 'res', 0, 'icons/icon_metal_ore', ['рудные узлы: кирка 10 за удар', '~ буровая установка на рудном месте'])
+n('sulfur_ore', 'Серная руда', 'res', 0, 'icons/icon_sulfur_ore', ['серные узлы: кирка 9 за удар', '~ буровая установка'])
+n('cloth', 'Ткань', 'res', 0, 'icons/icon_cloth', ['конопля (E, +10)', 'бочки (25%), ящики РТ 0 (10–25)', 'переработка одежды'])
+n('berries', 'Ягоды', 'res', 0, 'icons/icon_berries', ['кусты (E)'], note='еда 12, вода 4')
+n('scrap', 'Металлолом', 'res', 0, 'icons/icon_scrap',
+  ['ГЛАВНОЕ: переработчик (Пост ГАИ, Заправка, Котельная) — компоненты, ценный лом, лутовая одежда', 'кучи хлама (ковырять)',
+   'бочки 1–2', 'ящики РТ 0: 3–8, РТ 1: 10–20, РТ 2: 20–40', 'сейф 15–30, крейт перфокарты 10–20, ивенты 20–40, «Маяк» 25–45', 'охрана РТ 2–8'],
+  note='изучение и верстаки (50 / 150 / 400)')
+n('rubber', 'Резина', 'res', 0, 'icons/icon_rubber', ['покрышки и штабеля шин (бить инструментом)', 'бочки (8%), бочки на РТ (25%)', 'ящики РТ 0–2, сейф'])
+n('leather', 'Кожа', 'res', 0, 'icons/icon_leather', ['бочки (6%), бочки на РТ (12%)', 'ящики РТ 0–1'], note='зверей нет — только лут')
+n('crude', 'Сырая нефть', 'res', 0, 'icons/icon_crude', ['~ бочки с мазутом и ржавые канистры в мире и на РТ (3–8)'], s='plan', area='Топливо и ёмкости')
 
+# ===================== переработка =====================
+n('metal_fragments', 'Металл', 'proc', 0, 'icons/icon_metal_fragments', ['бочки (10–25), ящики РТ', 'переработчик (из компонентов и ценного лома)', '~ электропечь — вдвое быстрее'],
+  [('metal_ore', 1)], 'furnace', note='печь: руда → металл на дровах')
+n('sulfur', 'Сера', 'proc', 0, 'icons/icon_sulfur', [], [('sulfur_ore', 1)], 'furnace')
+n('charcoal', 'Уголь', 'proc', 0, 'icons/icon_charcoal', ['побочный продукт печи (дерево)'], [('wood', 1)], 'furnace')
+n('gunpowder', 'Порох ×5', 'proc', 1, 'icons/icon_gunpowder', ['ящики РТ 1–2, сейф, ивенты (40–100)', '~ химстол — быстрее и дешевле'],
+  [('charcoal', 15), ('sulfur', 10)], 'bench1', 15, s='part', miss='нет химстола')
+n('fuel', 'Топляк', 'fuel', 1, 'icons/icon_fuel', ['~ Заправка: насос подземной цистерны (20–40, шумно)', '~ канистры в крейтах РТ 1–2, аирдроп, УАЗ'],
+  [('crude', 2)], 'still', note='по плану: расходник — генератор, лампы, патроны, хилки, молотов, бензопила', s='plan')
+n('diesel', 'Дизель', 'fuel', 3, 'icons/icon_diesel', ['~ дизельная колонка на Заправке (мало)', '~ цистерны в Депо и технике Карьера', '~ крейты РТ 2, аирдроп'],
+  [('fuel', 2)], 'rectifier', note='по плану: запуск РТ (дизель «Маяка», радар ПВО), отбойник, буровая, техника', s='plan')
+n('medspirt', 'Медспирт', 'proc', 1, 'icons/icon_medspirt', [], [('berries', 10)], 'still', note='по плану: для аптечек и шприцев; или из конопли', s='plan', area='Медицина и еда')
+n('alloy', 'Легированная сталь', 'proc', 4, 'icons/icon_alloy',
+  ['~ аирдропы и ивенты', '~ переработчик: детали тира 2–3, пластины, стволы, дорогой ценный лом', '~ крейты РТ 1–2'], [], None, 0,
+  'по плану: верстак 3 (25), оружейный стол (20), стволы тира 3, армейская (20), бронедверь (40), C4 (5). Сейчас её нигде нет', s='plan')
 
-# --- инструменты ---
-n('tool_rock','Булыжник','tool',0,'weapons/weapon_rock',['есть с начала, подобрать камень'])
-n('tool_hatchet','Каменный топор','tool',0,'weapons/weapon_hatchet',[],[('wood',100),('stone',50)])
-n('tool_pickaxe','Каменная кирка','tool',0,'weapons/weapon_pickaxe',[],[('wood',100),('stone',50)])
-n('tool_hammer','Киянка','tool',0,'icons/icon_hammer',[],[('wood',50)],None,0,'стройка, апгрейд и ремонт')
-n('tool_metal_hatchet','Металлический топор','tool',1,'weapons/weapon_metal_hatchet',[],[('metal_fragments',75),('wood',50)],'bench1',30,'дерево ×2')
-n('tool_metal_pickaxe','Металлическая кирка','tool',1,'weapons/weapon_metal_pickaxe',[],[('metal_fragments',100),('wood',50)],'bench1',30,'руда ×2')
-n('tool_chainsaw','Бензопила «Дружба»','tool',2,None,[],[('metal_fragments',150),('comp_gears',2),('comp_spring',1),('val_motor',1)],'bench2',100,'дерево ×4, жрёт топляк, громко')
-n('tool_jackhammer','Отбойный молоток','tool',3,None,['лут РТ 2'],[('metal_fragments',200),('comp_gears',3),('val_motor',1)],'bench3',150,'камень и руда ×4, жрёт топляк, громко')
-n('drill_rig','Буровая установка','tool',3,None,[],[('metal_fragments',400),('comp_gears',6),('val_motor',2),('comp_pipe',4)],'bench3',200,'ставится на рудное место, сама добывает руду/серу, пока есть топляк; видна и слышна издалека')
-# --- база ---
-n('build_plan','План стройки','base',0,'icons/icon_build_plan',[],[('wood',20)])
-n('deploy_claim','Шкаф','base',0,'icons/icon_tool_cupboard',[],[('wood',50)],None,0,'зона строительства, содержание')
-n('deploy_sleepbag','Спальник','base',0,'icons/icon_sleeping_bag',[],[('cloth',30)])
-n('deploy_box','Ящик','base',0,'icons/icon_wood_box',[],[('wood',75)])
-n('door_wood','Деревянная дверь','base',0,'icons/icon_wood_door',[],[('wood',150)])
-n('box_large','Большой ящик','base',1,None,[],[('wood',250),('metal_fragments',50)],'bench1',20)
-n('door_metal','Металлическая дверь','base',1,'icons/icon_metal_door',[],[('metal_fragments',150)],'bench1',40)
-n('bars','Решётки и ставни','base',1,None,[],[('metal_fragments',50)],'bench1',20)
-n('door_armored','Бронедверь','base',3,None,[],[('metal_fragments',200),('alloy',40),('comp_gears',4)],'bench3',150)
-n('walls_armored','Бронированные стены','base',3,None,['апгрейд киянкой поверх металла'],[('alloy',25)],'bench3',120,'на каждый сегмент; рейдить в разы дороже')
-n('walls','Стены: дерево → камень → металл','base',0,'icons/icon_build_wall',['киянкой: дерево, потом камень, потом металл'],[('wood',50)],None,0,'апгрейд материалом, без верстака')
-# --- снаряжение (идея из Arc Raiders, не утверждено) ---
-n('bag_sidor','Сидор (12 ячеек)','equip',0,'icons/icon_backpack',[],[('cloth',40)],None,0,'идея: рюкзак как снаряжение — не утверждено')
-n('bag_tourist','Туристический рюкзак (24)','equip',1,'icons/icon_backpack',[],[('cloth',80),('leather',6)],'sewing',30,'идея — не утверждено')
-n('bag_army','Армейский рюкзак (36)','equip',4,'icons/icon_backpack',['крейты РТ 2','аирдроп'],[],None,0,'идея — не утверждено')
-n('rig_vest','Разгрузка (+2 пояса)','equip',2,None,[],[('cloth',40),('leather',6),('comp_tape',2)],'sewing',60,'идея — не утверждено')
-# --- еда и вода ---
-n('water','Вода','med',0,'icons/icon_water_bottle',['колонки, бочки с водой, водоёмы'])
-n('canned','Консервы','med',0,'icons/icon_canned',['ящики еды, крейты РТ 0'])
-n('ammo_bolt','Болты ×2','ammo',0,'icons/icon_ammo_bolt',[],[('wood',30),('metal_fragments',5)],'bench1',0,'для арбалета')
+# ===================== станки =====================
+n('furnace', 'Печь', 'stn', 0, 'icons/icon_furnace', [], [('stone', 100), ('wood', 50)], None, note='руда → металл и сера, дерево → уголь')
+n('bench1', 'Верстак 1', 'stn', 1, 'icons/icon_workbench', [], [('wood', 150), ('metal_fragments', 50), ('scrap', 50)], None,
+  note='изучение и крафт уровня 1; изучить всё ≈ 250 лома; Alt+E — починка ствола маслом')
+n('bench2', 'Верстак 2', 'stn', 2, 'icons/icon_workbench2', [], [('metal_fragments', 300), ('scrap', 150)], 'bench1', note='изучить всё ≈ 650 лома')
+n('bench3', 'Верстак 3', 'stn', 3, 'icons/icon_workbench3', [], [('metal_fragments', 600), ('scrap', 400), ('comp_circuit', 3), ('comp_gears', 5)], 'bench2',
+  note='изучить всё ≈ 1300 лома', s='part', miss='по плану ещё 25 легированной стали')
+n('lathe', 'Токарный станок', 'stn', 2, 'icons/icon_lathe', ['~ под током — быстрее'], [('metal_fragments', 250), ('scrap', 50), ('comp_gears', 2)], 'bench2',
+  note='детали из деталей, как печь; шумит; детали тира 3 — только рядом с верстаком 3')
+n('recycler', 'Переработчик', 'stn', 4, 'icons/icon_recycler', ['стоит на РТ: Пост ГАИ, Заправка, Котельная (ничей, не ломается)'], [], None,
+  note='компоненты и ценный лом → лом и металл; крафтовое — половина рецепта')
+n('still', 'Самогонный аппарат', 'stn', 1, 'icons/icon_still', [], [('metal_fragments', 50), ('comp_pipe', 2)], 'bench1', 30,
+  'нефть → топляк, ягоды → медспирт; дымит — видно базу', s='plan')
+n('sewing', 'Швейный стол', 'stn', 1, 'icons/icon_sewing', [], [('wood', 100), ('cloth', 20)], 'bench1', 20, 'одежда тира 0–1 быстрее, ремонт одежды', s='plan')
+n('generator', 'Дизель-генератор', 'stn', 2, 'icons/icon_generator', [], [('metal_fragments', 200), ('comp_gears', 3), ('comp_pipe', 2)], 'bench2', 60,
+  'топляк → ток: свет, электропечь, ускоренный крафт', s='plan')
+n('chem', 'Химстол', 'stn', 2, 'icons/icon_chem', [], [('metal_fragments', 150), ('comp_pipe', 1)], 'bench2', 60, 'порох, патроны, антирадин, сатчель', s='plan')
+n('lamp', 'Лампы, прожектор', 'stn', 2, 'icons/icon_lamp', [], [('metal_fragments', 20), ('val_copper_wire', 1)], 'bench2', 20, 'свет от генератора', s='plan')
+n('efurnace', 'Электропечь', 'stn', 3, 'icons/icon_efurnace', [], [('metal_fragments', 300), ('val_motor', 1), ('val_copper_wire', 2)], 'bench3', 100,
+  'плавит ×2, без дерева, на токе', s='plan')
+n('guntable', 'Оружейный стол', 'stn', 3, 'icons/icon_guntable', [], [('metal_fragments', 300), ('alloy', 20), ('comp_gears', 4), ('comp_spring', 4)], 'bench3', 150,
+  'стволы тира 3 и армейские обвесы — только здесь; ремонт', s='plan')
+n('medtable', 'Медстол', 'stn', 3, 'icons/icon_medtable', [], [('metal_fragments', 150), ('cloth', 50)], 'bench3', 80, 'аптечки, шприцы', s='plan')
+n('conveyor', 'Конвейер, сортировщик', 'stn', 3, 'icons/icon_conveyor', [], [('metal_fragments', 100), ('val_motor', 1), ('comp_circuit', 1)], 'bench3', 120,
+  'автоматизация между ящиками, печами, станками', s='plan')
+n('rectifier', 'Ректификационная колонна', 'stn', 3, 'icons/icon_rectifier', [], [], 'bench3', 0, 'топляк 2 л → дизель 1 л; цена не задана', s='plan')
+n('campfire', 'Костёр', 'stn', 0, 'icons/icon_campfire', [], [], None, 0, 'кипятить воду (черновик «Ёмкости и вода»), греться', s='plan', area='Вода')
 
+# ===================== компоненты (16) =====================
+T2SRC = ['ящики РТ 0 (10%), РТ 1 (30%), РТ 2 (35%)', 'сейф, крейты перфокарт, ивенты, вызов «Маяка»']
+T3SRC = ['ящики РТ 2 (25%), сейф (30%), ивенты (85%), «Маяк» (60%) — режиссёр дозирует по часам', '~ сбитый вертолёт, «Объект 42»']
+COMMON = ['бочки (35% — одна из общих)', 'ящики РТ 0–2, сейф, крейты перфокарт, ивенты']
+C = [('comp_spring', 'Пружина', 0, COMMON + ['не точится — только найти'], [], None, 'переработка: 8 лома, 10 металла'),
+     ('comp_pipe', 'Труба', 0, COMMON, [('metal_fragments', 40)], 'lathe', 'переработка: 6 лома, 20 металла'),
+     ('comp_tape', 'Изолента', 0, COMMON, [('cloth', 15)], 'lathe', 'переработка: 5 лома, 5 ткани'),
+     ('comp_gears', 'Шестерни', 0, COMMON, [('metal_fragments', 60), ('scrap', 10)], 'lathe', 'переработка: 10 лома, 15 металла'),
+     ('comp_oil', 'Оружейное масло', 0, ['бочки (8%), ящики РТ 0–2, ивенты'], [('charcoal', 20)], 'lathe', 'чинит износ стволов и обвесов'),
+     ('comp_circuit', 'Плата', 2, ['ящики РТ 0 (5%), 1 (12%), 2 (15%), бочки редко', 'крейты перфокарт (АТС, Подстанция — 75%)', 'ивенты, «Маяк»'], [], None, 'только найти'),
+     ('comp_lens', 'Линза', 2, ['ящики РТ 0 (5%), 1 (12%), 2 (15%), бочки редко', 'крейты перфокарт, ивенты, «Маяк»'], [], None, 'только найти'),
+     ('comp_trigger', 'УСМ', 2, T2SRC, [('comp_spring', 2), ('comp_gears', 1), ('metal_fragments', 50)], 'lathe', ''),
+     ('comp_bolt_carrier', 'Затворная группа', 2, T2SRC, [('comp_spring', 3), ('comp_gears', 2), ('metal_fragments', 80)], 'lathe', ''),
+     ('comp_barrel_rifled', 'Нарезной ствол', 2, T2SRC, [('comp_pipe', 2), ('comp_gears', 1), ('metal_fragments', 100)], 'lathe', ''),
+     ('comp_frame_pistol', 'Корпус пистолета', 2, T2SRC, [], None, 'только найти; корпуса падают вдвое чаще точимых'),
+     ('comp_body_smg', 'Корпус ПП', 2, T2SRC, [], None, 'только найти'),
+     ('comp_body_rifle', 'Корпус винтовки', 2, T2SRC, [], None, 'только найти'),
+     ('comp_receiver_ak', 'Ствольная коробка АК', 4, T3SRC, [], None, 'только найти; ≈ 3/4 выпадений детали тира 3'),
+     ('comp_barrel_chrome', 'Хромированный ствол', 3, T3SRC, [('comp_barrel_rifled', 2), ('comp_spring', 2), ('metal_fragments', 200)], 'lathe', 'станок рядом с верстаком 3'),
+     ('comp_gas_block', 'Газоотводный узел', 3, T3SRC, [('comp_trigger', 1), ('comp_spring', 3), ('comp_gears', 2), ('metal_fragments', 150)], 'lathe', 'станок рядом с верстаком 3')]
+ICO = {'comp_spring': 'spring', 'comp_pipe': 'metal_pipe', 'comp_gears': 'gears'}
+for id, nm, col, how, rec, st, note in C:
+    n(id, nm, 'comp', col, 'icons/icon_' + ICO.get(id, id), how, rec, st, 0, note)
+
+# ===================== ценный лом =====================
+V = [('val_copper_wire', 'Медный провод', 0, ['бочки, ящики РТ 0 (тир 0: 60%)', 'ящики РТ 1–2'], '4 лома, 5 металла', 'game', ''),
+     ('val_radio_parts', 'Радиодетали', 0, ['бочки, ящики РТ 0–2', 'крейты АТС и Подстанции (1–3)', 'из часов при переработке'], '8 лома', 'game', ''),
+     ('val_battery', 'Аккумулятор', 2, ['ящики РТ 0 редко, РТ 1–2, сейф, крейты перфокарт', '~ плата за радар ПВО (2 шт.)'], '12 лома, 10 металла', 'game', ''),
+     ('val_motor', 'Электромотор', 2, ['ящики РТ 1–2, сейф, крейты (АТС/Подстанция 50%)', 'ивенты'], '20 лома, 30 металла', 'game', ''),
+     ('val_radio_tubes', 'Радиолампы', 4, ['вызов «Маяка» (1–3 гарантированно)', 'аирдроп и закрытый ящик (35% — высокий лом)', '~ ПВО «Заря»'], '40 лома', 'game', ''),
+     ('val_gold_contacts', 'Золотые контакты', 4, ['«Маяк» (45%)', 'аирдроп и закрытый ящик', '~ «Объект 42»'], '60 лома', 'game', ''),
+     ('val_computer_block', 'Блок ЭВМ', 4, ['аирдроп и закрытый ящик (редко)', '~ «Объект 42», ~ вертолёт'], '120 лома', 'part', 'основные источники («Объект 42», вертолёт) не сделаны')]
+for id, nm, col, how, y, s, miss in V:
+    n(id, nm, 'val', col, 'icons/icon_' + id, how, [], 'recycler', 0, 'только в переработчик → ' + y, s=s, miss=miss)
+
+# ===================== оружие =====================
+n('weapon_spear', 'Деревянное копьё', 'gun', 0, 'weapons/weapon_spear', ['охрана РТ 1 (сторож)'], [('wood', 150)], None, 0, 'ближний бой, 35 урона')
+n('weapon_bow', 'Лук', 'gun', 0, 'weapons/weapon_bow', ['охрана РТ 1 (лучник)'], [('wood', 100), ('cloth', 30)], None, 0, 'тихий, стрелы')
+GW = [('weapon_crossbow', 'Арбалет', 1, [('wood', 150), ('cloth', 20), ('comp_spring', 1)], 'bench1', 20, [], 'болты, тихий'),
+      ('weapon_nagant', 'Наган', 1, [('metal_fragments', 100), ('comp_spring', 2), ('comp_pipe', 1)], 'bench1', 35, ['охрана РТ 1'], '9 мм'),
+      ('weapon_homesmg', 'Самоделка (ПП)', 1, [('metal_fragments', 125), ('comp_spring', 2), ('comp_pipe', 2), ('comp_tape', 2)], 'bench1', 60, [], '9 мм, автомат'),
+      ('weapon_grach', 'Грач', 2, [('metal_fragments', 150), ('comp_frame_pistol', 1), ('comp_trigger', 1), ('comp_spring', 2)], 'bench2', 75,
+       ['сейф (15%), ящики РТ 2, ивенты, «Маяк»', 'охрана «Маяка»'], '9 мм'),
+      ('weapon_pps43', 'ППС-43', 2, [('metal_fragments', 175), ('comp_body_smg', 1), ('comp_bolt_carrier', 1), ('comp_spring', 3)], 'bench2', 90,
+       ['сейф, «Маяк»', 'охрана «Маяка»'], '9 мм, автомат'),
+      ('weapon_svt40', 'СВТ-40', 2, [('metal_fragments', 200), ('wood', 100), ('comp_body_rifle', 1), ('comp_barrel_rifled', 1), ('comp_trigger', 1)], 'bench2', 90,
+       ['сейф, ивенты, «Маяк»', 'охрана «Маяка» (снайпер)'], '7,62')]
+for id, nm, col, rec, st, res, how, note in GW: n(id, nm, 'gun', col, 'icons/icon_' + id, how, rec, st, res, note)
+G3 = [('weapon_akm', 'АКМ', [('metal_fragments', 300), ('wood', 100), ('comp_receiver_ak', 1), ('comp_bolt_carrier', 1), ('comp_gas_block', 1), ('comp_spring', 4)], 420,
+       ['«Маяк» (6%)', 'охрана склада РТ'], '7,62; по плану: 250 металла + 25 стали'),
+      ('weapon_an94', 'АН-94 «Абакан»', [('metal_fragments', 300), ('comp_receiver_ak', 1), ('comp_barrel_chrome', 1), ('comp_bolt_carrier', 1), ('comp_gas_block', 1), ('comp_gears', 3)], 200,
+       [], '5,45; по плану: + 30 стали'),
+      ('weapon_ppsh', 'ППШ', [('metal_fragments', 250), ('wood', 150), ('comp_body_smg', 1), ('comp_barrel_chrome', 1), ('comp_bolt_carrier', 1), ('comp_spring', 4)], 160,
+       ['«Маяк» (6%)'], '9 мм; по плану: 200 металла + 20 стали'),
+      ('weapon_svd', 'СВД', [('metal_fragments', 300), ('wood', 100), ('comp_body_rifle', 1), ('comp_barrel_chrome', 1), ('comp_gas_block', 1), ('comp_trigger', 1)], 160,
+       ['«Маяк» (6%)'], '7,62; по плану: 250 металла + 25 стали')]
+for id, nm, rec, res, how, pl in G3:
+    n(id, nm, 'gun', 3, 'icons/icon_' + id, how + ['~ сборка на оружейном столе'], rec, 'bench3', res, pl, s='part', miss='собирается на верстаке 3; нет оружейного стола и легированной стали')
+LG = [('weapon_pipeshotgun', 'Самопал', ['ящики РТ 0 (4%), РТ 1', 'бочки на РТ (1%)', 'охрана РТ 1'], 'game', '', 'не крафтится; 12 к'),
+      ('weapon_sawnoff', 'Обрез', ['ящики РТ 1–2, крейты перфокарт', 'ивенты'], 'game', '', 'только найти; 12 к'),
+      ('weapon_mp133', 'МР-133', ['ящики РТ 2, крейты перфокарт', 'ивенты, «Маяк»'], 'game', '', 'помпа, не крафтится'),
+      ('weapon_saiga12', 'Сайга-12', ['аирдроп / закрытый ящик: фаза ≥ 2, с 3 ч, раз в 3,5 ч на мир', '~ сбитый вертолёт, ~ «Объект 42»'], 'part', 'нет вертолёта и «Объекта 42»', 'элита'),
+      ('weapon_mosin', 'Мосинка с ПУ', ['аирдроп / закрытый ящик (элита)', '~ «Объект 42»'], 'part', 'нет «Объекта 42»', 'элита'),
+      ('weapon_aps', 'АПС', ['аирдроп / закрытый ящик (элита)', '~ сбитый вертолёт, ~ «Объект 42»'], 'part', 'нет вертолёта и «Объекта 42»', 'элита')]
+for id, nm, how, s, miss, note in LG: n(id, nm, 'gun', 4, 'icons/icon_' + id, how, [], None, 0, note, s=s, miss=miss)
+
+# ===================== патроны =====================
+n('arrow', 'Стрелы ×2', 'ammo', 0, 'icons/icon_arrow', ['охрана-лучник'], [('wood', 25), ('stone', 10)])
+n('ammo_bolt', 'Болты ×2', 'ammo', 0, 'icons/icon_ammo_bolt', [], [('wood', 25), ('metal_fragments', 5)], None, 0, 'для арбалета; в руках')
+n('ammo_9mm', '9 мм ×5', 'ammo', 1, 'icons/icon_ammo_9mm', ['бочки, ящики РТ 0–2, крейты, ивенты'], [('metal_fragments', 10), ('gunpowder', 5)], 'bench1', 20)
+n('ammo_12g', '12 калибр ×5', 'ammo', 1, 'icons/icon_ammo_12g', ['бочки, ящики РТ 0–2, крейты, ивенты'], [('metal_fragments', 15), ('gunpowder', 10)], 'bench1', 20,
+  'по плану: + 1 топляк', s='part', miss='нет топляка в рецепте')
+n('ammo_762', '7,62 ×5', 'ammo', 2, 'icons/icon_ammo_762', ['ящики РТ 1–2, сейф, ивенты, «Маяк»', '~ химстол'], [('metal_fragments', 15), ('gunpowder', 15)], 'bench2', 60,
+  'по плану: химстол, + 1 топляк', s='part', miss='нет химстола и топляка')
+n('ammo_545', '5,45 ×5', 'ammo', 3, 'icons/icon_ammo_545', ['~ химстол'], [('metal_fragments', 10), ('gunpowder', 10)], 'bench3', 60,
+  'по плану: химстол, + 1 топляк', s='part', miss='нет химстола и топляка; в луте не падает')
+n('ammo_special', 'Разрывные и зажигательные', 'ammo', 3, None, ['~ на потом'], [('diesel', 0)], None, 0, 'по плану: расходник дизеля', s='plan')
+
+# ===================== обвесы (качество: кустарный / заводской / армейский) =====================
+A0 = [('att_suppressor_can', 'Глушитель-банка', [('metal_fragments', 50), ('comp_tape', 1)], '−35% шума, 40 выстрелов'),
+      ('att_grip_wood', 'Рукоять на изоленте', [('wood', 50), ('comp_tape', 1), ('rubber', 2)], '−10% отдачи'),
+      ('att_torch', 'Факел на изоленте', [('wood', 30), ('cloth', 5), ('comp_tape', 1)], 'светит ночью'),
+      ('att_mag_twin_crude', 'Спарка на изоленте', [('comp_tape', 2)], '−20% перезарядки')]
+for id, nm, rec, note in A0:
+    n(id, nm + ' · кустарный', 'att', 1, 'icons/icon_' + ('att_mag_twin' if id == 'att_mag_twin_crude' else id), ['ящики РТ 0 (5%)'], rec, 'bench1', 12, note)
+A1 = [('att_reddot', 'Коллиматор', [('metal_fragments', 75), ('comp_lens', 1), ('comp_circuit', 1)], 25, '−20% разброса в прицеле'),
+      ('att_scope2x', 'Прицел 2×', [('metal_fragments', 100), ('comp_lens', 2), ('comp_gears', 1)], 35, 'кратность 2×; падает и в армейском луте'),
+      ('att_suppressor', 'Глушитель', [('metal_fragments', 150), ('comp_barrel_rifled', 1), ('comp_tape', 1)], 30, '−50% шума'),
+      ('att_compensator', 'Компенсатор', [('metal_fragments', 100), ('comp_gears', 2)], 25, '−20% увода'),
+      ('att_grip', 'Рукоять', [('metal_fragments', 75), ('rubber', 4), ('comp_gears', 1)], 20, '−20% отдачи'),
+      ('att_flashlight', 'Тактический фонарь', [('metal_fragments', 50), ('comp_circuit', 1)], 15, 'ярко и далеко'),
+      ('att_laser', 'ЛЦУ', [('metal_fragments', 50), ('comp_circuit', 1), ('comp_lens', 1)], 25, '−25% разброса от бедра'),
+      ('att_mag_ext', 'Увеличенный магазин', [('metal_fragments', 100), ('comp_spring', 2)], 30, '+50% патронов'),
+      ('att_mag_twin', 'Спарка', [('metal_fragments', 75), ('comp_spring', 1)], 20, '−35% перезарядки'),
+      ('att_stock_tac', 'Тактический приклад', [('metal_fragments', 100), ('wood', 50), ('comp_gears', 1)], 25, '−30% разброса на ходу')]
+for id, nm, rec, res, note in A1:
+    n(id, nm + ' · заводской', 'att', 2, 'icons/icon_' + id, ['ящики РТ 2 (8%), сейф (12%), крейты перфокарт (10%), ивенты'], rec, 'bench2', res, note)
+A2 = [('att_scope4x', 'ПСО 4×', 'att_scope4x', 'кратность 4×'), ('att_suppressor_pbs', 'ПБС', 'att_suppressor_pbs', '−65% шума, без вспышки'),
+      ('att_compensator_army', 'Компенсатор', 'att_compensator', '−30% увода'), ('att_mag_ext_army', 'Увеличенный магазин', 'att_mag_ext', '+75% патронов')]
+for id, nm, ic, note in A2:
+    n(id, nm + ' · армейский', 'att', 4, 'icons/icon_' + ic, ['ящики РТ 2 (3%), ивенты (35%), «Маяк» (30%)', '~ сбитый вертолёт'], [], None, 0, note + '; не крафтится')
+
+# ===================== одежда (D53: тиры 0–3, боевой / защищённый; Ликвидатор убран) =====================
+SETS = [
+    ('set_rags', 'Тряпьё', 0, 'wear_rags_shirt', None, 0, 'тир 0, базовый: рад 0, тепло 15 → РТ 0',
+     [('Бандана', [('cloth', 5)]), ('Рубаха из мешковины', [('cloth', 15)]), ('Штаны из мешковины', [('cloth', 15)]), ('Обмотки', [('cloth', 8)]), ('Рукавицы', [('cloth', 6)])],
+     ['ящики РТ 0 (12%), бочки на РТ (3%)'], 'game', ''),
+    ('set_vatnik', 'Ватник', 1, 'wear_vatnik_telogreika', 'bench1', 0, 'тир 1, защищённый: рад 20, тепло 34 → РТ 0–2',
+     [('Ушанка', [('cloth', 20), ('leather', 3)]), ('Шарф', [('cloth', 12)]), ('Телогрейка', [('cloth', 40)]), ('Ватные штаны', [('cloth', 30)]), ('Валенки', [('cloth', 25)]), ('Ватные рукавицы', [('cloth', 12)])],
+     ['ящики РТ 0 (5%), РТ 1 (12%)', 'охрана РТ 1 (с трупа)', '~ швейный стол — быстрее, ремонт'], 'part', 'нет швейного стола'),
+    ('set_leather', 'Кожа и дерево', 1, 'wear_leather_chestplate', 'bench1', 0, 'тир 1, боевой: рад 10 → РТ 0–1',
+     [('Кожаный шлем', [('leather', 8), ('cloth', 5)]), ('Деревянный нагрудник', [('wood', 200), ('leather', 4)]), ('Кожаные наручи', [('leather', 6)]), ('Кожаные штаны', [('leather', 12), ('cloth', 10)]), ('Деревянные поножи', [('wood', 120), ('leather', 3)])],
+     ['ящики РТ 0 (5%), РТ 1 (12%)', 'охрана РТ 1 (с трупа)'], 'game', ''),
+    ('set_spec', 'Спецовка', 2, 'wear_spec_robe', 'bench2', 25, 'тир 2, защищённый: рад 30, тепло 52 → РТ 0–3',
+     [('Прорезиненный капюшон', [('rubber', 6), ('cloth', 10)]), ('Респиратор Р-2', [('rubber', 4), ('charcoal', 20), ('comp_tape', 1)]), ('Роба-спецовка', [('cloth', 35), ('rubber', 6)]), ('Прорезиненные штаны', [('rubber', 10), ('cloth', 15)]), ('Резиновые сапоги', [('rubber', 12)]), ('Резиновые перчатки', [('rubber', 6)])],
+     ['ящики РТ 1 (5%), крейты перфокарт (15%)'], 'game', ''),
+    ('set_scrap', 'Кустарная броня', 2, 'wear_scrap_signvest', 'bench2', 35, 'тир 2, боевой: рад 20 → РТ 0–2; жилет — 1 пластина',
+     [('Каска-кастрюля', [('metal_fragments', 75), ('leather', 3)]), ('Балаклава', [('cloth', 15)]), ('Жилет из дорожных знаков', [('metal_fragments', 150), ('comp_tape', 2), ('leather', 4)]), ('Жестяные наручи', [('metal_fragments', 60), ('leather', 2)]), ('Наколенники из покрышек', [('rubber', 10), ('comp_tape', 1)]), ('Кирзачи', [('leather', 12), ('rubber', 4)])],
+     ['ящики РТ 1 (5%), крейты перфокарт (15%)'], 'game', ''),
+    ('set_ozk', 'ОЗК', 3, 'wear_ozk_cape', 'bench3', 60, 'тир 3, защищённый: рад 40, тепло 52 → РТ 0–4; узел после Спецовки',
+     [('Капюшон ОЗК', [('rubber', 15), ('cloth', 10)]), ('Противогаз ГП-5', [('rubber', 10), ('charcoal', 30), ('comp_lens', 1)]), ('Плащ ОЗК', [('rubber', 30), ('cloth', 20)]), ('Перчатки ОЗК', [('rubber', 10)]), ('Чулки ОЗК', [('rubber', 15)])],
+     ['ящики РТ 1 (4%), РТ 2 (12%), крейты перфокарт (8%), ивенты (10%)'], 'game', ''),
+    ('set_army', 'Армейская', 3, 'wear_army_6b2', 'bench3', 80, 'тир 3, боевой: рад 30, тепло 52 → РТ 0–3; 6Б2 — 2 пластины; узел после Кустарной',
+     [('Шлем СШ-68', [('metal_fragments', 200), ('leather', 5)]), ('Бушлат', [('cloth', 60), ('leather', 6)]), ('Бронежилет 6Б2', [('metal_fragments', 250), ('cloth', 30), ('comp_tape', 3)]), ('Налокотники', [('metal_fragments', 50), ('rubber', 6)]), ('Наколенники', [('metal_fragments', 50), ('rubber', 6)]), ('Армейские штаны', [('cloth', 40)]), ('Берцы', [('leather', 15), ('rubber', 6)]), ('Тактические перчатки', [('leather', 6), ('cloth', 5)])],
+     ['ящики РТ 2 (10%), сейф (20%), ивенты (25%)', 'охрана «Маяка» и склада (с трупа)'], 'part', 'по плану ещё 20 легированной стали'),
+    ('set_sobr', 'СОБР (элита)', 3, 'wear_sobr_kora', None, 0, 'тир 3, боевой элитный: рад 30 → РТ 0–3; «Кора» — 2 пластины; не крафтится',
+     [('Шлем «Сфера»', []), ('Балаклава Nomex', []), ('Бронежилет «Кора»', []), ('Тактический костюм', []), ('Налокотники', []), ('Наколенники', []), ('Тактические брюки', []), ('Штурмовые ботинки', []), ('Штурмовые перчатки', [])],
+     ['ящики РТ 2 и сейф (2%), ивенты (12%)', '~ экипаж сбитого вертолёта, ~ «Объект 42»'], 'part', 'нет вертолёта и «Объекта 42»'),
+]
+for id, nm, col, ic, st, res, note, items, how, s, miss in SETS:
+    n(id, nm, 'wear', col, 'icons/icon_' + ic, how, total(items), st, res, note + ('; рецепт — сумма за весь комплект' if st or col == 0 else ''), s=s, miss=miss,
+      parts=[[x, [list(r) for r in c]] for x, c in items])
+n('wear_watch', 'Часы «Электроника»', 'wear', 4, 'icons/icon_wear_watch', ['бочки (0,8%), бочки на РТ (2%)', 'ящики РТ 0–1, крейты перфокарт'], [], None, 0, 'время, температура, радиация в HUD')
+n('plate_homemade', 'Кустарная пластина', 'wear', 2, 'icons/icon_plate_homemade', ['ящики РТ 1 (5%), крейты перфокарт (8%)'], [('metal_fragments', 100), ('comp_tape', 1)], 'bench2', 0,
+  '+20% корпусу, 150 урона; открывается узлом Кустарной брони')
+n('plate_lead', 'Свинцовая пластина', 'wear', 2, 'icons/icon_plate_lead', ['ящики РТ 2 и сейф (5%), ивенты (15%)'], [('metal_fragments', 150), ('comp_tape', 1)], 'bench2', 0,
+  '+5 к радиации, +10% корпусу, 250 урона; две в 6Б2/«Коре» — на любую РТ')
+n('plate_steel', 'Армейская стальная пластина', 'wear', 4, 'icons/icon_plate_steel', ['ящики РТ 2 (12%), сейф (20%), крейты перфокарт (3%), ивенты (25%)'], [], None, 0, '+30%, 400 урона; не крафтится')
+n('plate_ceramic', 'Керамическая пластина', 'wear', 4, 'icons/icon_plate_ceramic', ['ящики РТ 2 и сейф (0,8%), ивенты (6%)', '~ вертолёт, ~ «Объект 42» (по плану — только оттуда)'], [], None, 0,
+  '+40%, 300 урона', s='part', miss='нет вертолёта и «Объекта 42»')
+
+# ===================== медицина, еда, вода =====================
+n('bandage', 'Бинт', 'med', 0, 'icons/icon_bandage', ['ящики РТ 0–2, бочки, ивенты'], [('cloth', 4)], None, 0, 'лечит 25')
+n('antirad', 'Антирадин', 'med', 2, 'icons/icon_antirad', ['ящики РТ 0 (6%), РТ 1 (20%), РТ 2 (30%), крейты перфокарт, ивенты', '~ химстол'],
+  [('charcoal', 20), ('cloth', 2)], 'bench2', 0, '−120 дозы; без изучения. По плану: химстол, медспирт 2 + уголь 10', s='part', miss='нет химстола и медспирта')
+n('medkit', 'Аптечка', 'med', 3, 'icons/icon_medkit', [], [('medspirt', 4), ('cloth', 10), ('fuel', 2)], 'medtable', 80, s='plan')
+n('syringe', 'Шприц', 'med', 3, 'icons/icon_syringe', ['~ лут РТ 2'], [('medspirt', 2), ('fuel', 1)], 'medtable', 80, s='plan')
+n('canned', 'Консервы', 'med', 0, 'icons/icon_canned', ['ящики РТ 0–1, охрана РТ'], [], None, 0, 'еда 35')
+n('water_bottle', 'Бутылка воды', 'water', 0, 'icons/icon_water_bottle', ['ящики РТ 0', 'бочка с водой — пить на месте (E, +40)'], [], None, 0, 'вода 35')
+n('water_raw', 'Сырая вода', 'water', 0, 'icons/icon_water_raw', ['~ водоёмы, реки, бочки с водой, дождь — налить в ёмкость'], [], None, 0, '~30% отравиться', s='plan')
+n('water_boiled', 'Кипячёная вода', 'water', 0, 'icons/icon_water_boiled', [], [('water_raw', 1)], 'furnace', 0, 'фляга/канистра в печи или на костре — безопасна', s='plan')
+
+# ===================== ёмкости =====================
+n('flask_05', 'Фляга 0,5 л', 'fuel', 0, 'icons/icon_flask_05', ['~ лут'], [('metal_fragments', 0)], None, 0, 'только вода; цена не задана', s='plan')
+n('flask_1', 'Фляга 1 л', 'fuel', 1, 'icons/icon_flask_1', ['~ лут'], [('metal_fragments', 0)], 'bench1', 0, 'только вода', s='plan')
+n('canister_5', 'Канистра 5 л', 'fuel', 1, 'icons/icon_canister_5', [], [('metal_fragments', 0), ('rubber', 0)], 'bench1', 0, 'вода или топливо', s='plan')
+n('canister_20', 'Канистра 20 л', 'fuel', 2, 'icons/icon_canister_20', ['~ лут РТ'], [('metal_fragments', 0)], 'bench2', 0, 'тяжёлая', s='plan')
+n('barrel_200', 'Бочка 200 л', 'fuel', 2, 'icons/icon_barrel_200', [], [('metal_fragments', 0)], 'bench2', 0, 'склад жидкости на базе; станки берут из бочки рядом', s='plan')
+
+# ===================== РТ: доступ =====================
+n('punchcard_1', 'Перфокарта I', 'rt', 0, 'icons/icon_punchcard_1', ['РТ 0: бардачок «копейки» (Пост ГАИ), касса (Заправка), полка (Сельмаг)', 'ивенты (50%)'], [], None, 0,
+  'открывает крейты РТ 1: Подстанция, Гаражи, Депо, Карьер; на АТС — в коммутатор')
+n('punchcard_2', 'Перфокарта II', 'rt', 2, 'icons/icon_punchcard_2', ['крейты РТ 1 (гарантированно)', 'ивенты с фазы 1 (40%)'], [], None, 0, 'пульт Радиоцентра «Маяк» — вызов борта')
+n('punchcard_3', 'Перфокарта III', 'rt', 4, 'icons/icon_punchcard_3', ['вызов «Маяка» (7%)'], [], None, 0, 'по плану — лифты «Объекта 42»', s='part', miss='применить негде: РТ тира 3 нет')
+n('keycard', 'Карта доступа', 'rt', 2, 'icons/icon_keycard', ['ящики РТ 1–2 (18%)', 'охрана РТ (12%)'], [], None, 0, 'открывает сейф на РТ с охраной')
+n('fuse', 'Пробка', 'rt', 2, 'icons/icon_fuse', ['Подстанция — только там'], [], None, 0, 'в главный щиток; за забор не вынести')
+n('rt_local', 'Брелок, кабель-перемычка', 'rt', 2, None, ['Гаражи (брелок), АТС (кабель)'], [], None, 0, 'местные предметы РТ — не выносятся')
+n('ammo_23mm', 'Ящик снарядов 23 мм', 'rt', 4, 'icons/icon_ammo_23mm', ['~ склад БП на ПВО «Заря», аирдроп'], [], None, 0, 'зарядить ЗУ-23-2 → сбить вертолёт', s='plan')
+
+# ===================== взрывчатка, замки =====================
+n('lock_key', 'Замок с ключом', 'boom', 0, 'icons/icon_key_lock', [], [('wood', 75)], None, 0, 'ключ — предмет, остаётся у тебя')
+n('lock_code', 'Кодовый замок', 'boom', 1, 'icons/icon_code_lock', ['ящики РТ 1 (12%)'], [('metal_fragments', 100)], None, 15, 'изучить у верстака 1, крафт в руках')
+n('molotov', 'Коктейль Молотова', 'boom', 1, 'icons/icon_molotov', [], [('cloth', 10), ('sulfur', 15), ('charcoal', 10)], None, 15,
+  'изучить у верстака 1, крафт в руках; по плану: ткань 10 + топляк 5', s='part', miss='по плану — на топляке')
+n('satchel', 'Самодельная бомба', 'boom', 2, 'icons/icon_satchel', ['сейф (20%), ящики РТ 2, ивенты с фазы 2'], [('cloth', 10), ('gunpowder', 30), ('metal_fragments', 20)], 'bench2', 45,
+  'по плану: химстол', s='part', miss='нет химстола')
+n('c4', 'Взрывчатка (C4)', 'boom', 3, 'icons/icon_c4', ['сейф (6%), ивенты с фазы 2 (25%)'], [('gunpowder', 200), ('metal_fragments', 100), ('scrap', 20), ('cloth', 5)], 'bench3', 160,
+  'по плану: химстол, + 5 стали', s='part', miss='нет химстола и легированной стали')
+
+# ===================== инструменты =====================
+n('tool_rock', 'Булыжник', 'tool', 0, 'weapons/weapon_rock', ['есть с начала'])
+n('tool_hatchet', 'Каменный топор', 'tool', 0, 'weapons/weapon_hatchet', [], [('wood', 100), ('stone', 50)], None, 0, 'дерево 16 за удар')
+n('tool_pickaxe', 'Каменная кирка', 'tool', 0, 'weapons/weapon_pickaxe', [], [('wood', 100), ('stone', 50)], None, 0, 'камень 14, руда 10, сера 9')
+n('tool_hammer', 'Киянка', 'tool', 0, 'icons/icon_hammer', [], [('wood', 50)], None, 0, 'улучшение и ремонт построек')
+n('weapon_torch', 'Факел', 'tool', 0, 'weapons/weapon_torch', [], [('wood', 30), ('cloth', 5)], None, 0, 'светит ночью')
+n('tool_metal_hatchet', 'Металлический топор', 'tool', 1, 'weapons/weapon_metal_hatchet', [], [('metal_fragments', 75), ('wood', 50)], 'bench1', 30, 'дерево ×2', s='plan')
+n('tool_metal_pickaxe', 'Металлическая кирка', 'tool', 1, 'weapons/weapon_metal_pickaxe', [], [('metal_fragments', 100), ('wood', 50)], 'bench1', 30, 'руда ×2', s='plan')
+n('tool_chainsaw', 'Бензопила «Дружба»', 'tool', 2, 'icons/icon_chainsaw', [], [('metal_fragments', 150), ('comp_gears', 2), ('comp_spring', 1), ('val_motor', 1)], 'bench2', 100,
+  'дерево ×4, жрёт топляк, громко', s='plan')
+n('tool_jackhammer', 'Отбойный молоток', 'tool', 3, 'icons/icon_jackhammer', ['~ лут РТ 2'], [('metal_fragments', 200), ('comp_gears', 3), ('val_motor', 1)], 'bench3', 150,
+  'камень и руда ×4, на дизеле', s='plan')
+n('drill_rig', 'Буровая установка', 'tool', 3, 'icons/icon_drill_rig', [], [('metal_fragments', 400), ('comp_gears', 6), ('val_motor', 2), ('comp_pipe', 4)], 'bench3', 200,
+  'ставится на рудное место, сама добывает руду/серу на топливе; видна и слышна издалека', s='plan')
+
+# ===================== база =====================
+n('build_plan', 'План стройки', 'base', 0, 'icons/icon_build_plan', [], [('wood', 20)], None, 0, 'фундамент, треугольник, стена, проём, окно, дверь')
+n('deploy_claim', 'Шкаф', 'base', 0, 'icons/icon_tool_cupboard', [], [('wood', 50)], None, 0, 'зона строительства, содержание')
+n('deploy_sleepbag', 'Спальник', 'base', 0, 'icons/icon_sleeping_bag', [], [('cloth', 30)], None, 0, 'респаун')
+n('deploy_box', 'Ящик', 'base', 0, 'icons/icon_wood_box', [], [('wood', 75)], None, 0, '30 ячеек')
+n('walls', 'Стены и полы: каркас → дерево → камень → металл → сталь', 'base', 0, 'icons/icon_build_wall',
+  ['каркас планом: дерево 10', 'киянкой: дерево 30 → камень 50 → металл 35 → сталь (металл 50 + лом 5)'], [('wood', 10)], None, 0,
+  'цены для стены; фундамент ×1,5, окно и проём ×0,7; верстак не нужен. Прочность 10 / 250 / 500 / 1000 / 2000')
+n('door', 'Дверь: дерево → камень → металл → сталь', 'base', 0, 'icons/icon_wood_door',
+  ['планом: дерево 50', 'киянкой: камень 75 → металл 40 → сталь (металл 75 + лом 10)'], [('wood', 50)], None, 0, 'замки — с ключом или кодовый')
+n('box_large', 'Большой ящик', 'base', 1, 'icons/icon_box_large', [], [('wood', 250), ('metal_fragments', 50)], 'bench1', 20, s='plan')
+n('bars', 'Решётки и ставни', 'base', 1, 'icons/icon_bars', [], [('metal_fragments', 50)], 'bench1', 20, s='plan')
+n('door_armored', 'Бронедверь', 'base', 3, 'icons/icon_door_armored', [], [('metal_fragments', 200), ('alloy', 40), ('comp_gears', 4)], 'bench3', 150,
+  'сейчас вместо неё — дверь уровня «сталь»', s='plan')
+n('walls_armored', 'Бронированные стены', 'base', 3, 'icons/icon_walls_armored', ['~ апгрейд киянкой поверх металла'], [('alloy', 25)], 'bench3', 120,
+  'сейчас вместо них — уровень «сталь» за металл и лом', s='plan')
+
+# ===================== снаряжение (идея, не утверждено) =====================
+n('bag_sidor', 'Сидор (12 ячеек)', 'equip', 0, 'icons/icon_bag_sidor', [], [('cloth', 40)], None, 0, 'идея: рюкзак как снаряжение — не утверждено. Сейчас рюкзак фиксированный, 24 ячейки', s='plan')
+n('bag_tourist', 'Туристический рюкзак (24)', 'equip', 1, 'icons/icon_bag_tourist', [], [('cloth', 80), ('leather', 6)], 'sewing', 30, 'идея — не утверждено', s='plan')
+n('bag_army', 'Армейский рюкзак (36)', 'equip', 4, 'icons/icon_bag_army', ['~ ящики РТ 2, аирдроп'], [], None, 0, 'идея — не утверждено', s='plan')
+n('rig_vest', 'Разгрузка (+2 пояса)', 'equip', 2, 'icons/icon_rig_vest', [], [('cloth', 40), ('leather', 6), ('comp_tape', 2)], 'sewing', 60, 'идея — не утверждено', s='plan')
+
+# ===================== не-предметы: запланировано, но не сделано =====================
+EXTRA = [
+    ('События', 'Сбитый вертолёт Ми-8: обломки, СОБР-экипаж, военные ящики (тир 3, элита, керамика)'),
+    ('События', 'Инкассаторский УАЗ: сейф 60 с, сигнализация'),
+    ('События', 'Эшелон у Депо, мародёры-конвой, схрон по радио, гуманитарка'),
+    ('События', 'Барыга на нейтральной РТ'),
+    ('РТ', 'ПВО «Заря» (тир 2): радар, ЗУ-23-2, вызов вертолёта'),
+    ('РТ', 'РТ тира 3 и «Объект 42» (лифты по перфокарте III)'),
+    ('РТ', 'Заправка: насос подземной цистерны (топляк)'),
+    ('РТ', 'Дизель «Маяка» и радара как плата за запуск'),
+    ('Станки', 'Электричество: ток от генератора, свет, ускорение крафта и токарного станка'),
+    ('Одежда и броня', 'Ремонт одежды (швейный стол)'),
+    ('Вода', 'Налить / перелить / вылить, отравление сырой водой'),
+]
+
+# ===================== сборка =====================
 icons = {}
 for x in N:
     if x['icon']:
         p = ART + x['icon'] + '.png'
         if os.path.exists(p):
             icons[x['id']] = 'data:image/png;base64,' + base64.b64encode(open(p, 'rb').read()).decode()
+        else:
+            print('нет иконки:', p)
     x.pop('icon')
+ids = {x['id'] for x in N}
+for x in N:
+    for r, _ in x['rec']:
+        if r not in ids: print('нет узла для ингредиента', r, 'в', x['id'])
+    if x['st'] and x['st'] not in ids: print('нет станка', x['st'], 'в', x['id'])
 tpl = open(os.path.join(OUT, 'page.html'), encoding='utf-8').read()
-html = tpl.replace('/*NODES*/[]', json.dumps(N, ensure_ascii=False)).replace('/*ICONS*/{}', json.dumps(icons))
+html = (tpl.replace('/*NODES*/[]', json.dumps(N, ensure_ascii=False)).replace('/*ICONS*/{}', json.dumps(icons))
+        .replace('/*EXTRA*/[]', json.dumps(EXTRA, ensure_ascii=False)))
 open(os.path.join(OUT, 'progression.html'), 'w', encoding='utf-8').write(html)
-print(len(N), 'nodes', len(icons), 'icons', len(html) // 1024, 'KB')
+cnt = {k: sum(1 for x in N if x['s'] == k) for k in ('game', 'part', 'plan')}
+print(len(N), 'nodes', cnt, len(icons), 'icons', len(html) // 1024, 'KB')

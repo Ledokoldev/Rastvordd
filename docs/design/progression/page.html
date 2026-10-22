@@ -4,89 +4,162 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Russo+One&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <style>
-/* Раскладка: сверху переключатель видов; основная область — сетка (тиры × категории) или лестница верстак → станки;
-   справа панель выбранного предмета с цепочкой до сырья. Один тёмный вид, как интерфейс игры. */
+/* Раскладка: сверху сводка «что в игре / что в плане», под ней переключатели вида и фильтр статуса;
+   основная область — сетка (категории × верстаки) или лестница верстак → станки; справа панель выбранного предмета. */
 :root{
-  --bg:#111214; --surface:#1a1b1e; --surface2:#222428; --line:#2e3136; --fg:#ecebe6; --muted:#9b9a94; --faint:#6d6c67;
-  --accent:#f2b234; --up:#f2b234; --down:#6cb6ff; --loot:#b46cff; --good:#5cc96b;
-  --c0:#9aa0a6; --c1:#5cc96b; --c2:#4aa3ff; --c3:#b46cff; --c4:#f2b234;
+  --bg:#f4f3ef; --surface:#ffffff; --surface2:#eeede8; --cell:#f7f6f2; --line:#dddbd3; --fg:#1c1c1a; --muted:#66655f; --faint:#8e8d86; --ph:#e6e4dd;
+  --accent:#b77800; --up:#c98a00; --down:#1f74d1; --loot:#7d3fc4;
+  --game:#1f8a3b; --game-bg:#e3f3e6; --part:#b06f00; --part-bg:#fbefd8; --plan:#7c7b75; --plan-bg:#ecebe6;
+  --c0:#7d838a; --c1:#1f8a3b; --c2:#1f74d1; --c3:#7d3fc4; --c4:#b77800;
   --display:"Russo One","Golos Text",system-ui,sans-serif; --body:"Golos Text","Segoe UI",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
-  color-scheme:dark;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111214; --surface:#1a1b1e; --surface2:#222428; --cell:#16171a; --line:#2e3136; --fg:#ecebe6; --muted:#9b9a94; --faint:#6d6c67; --ph:#1c1d20;
+  --accent:#f2b234; --up:#f2b234; --down:#6cb6ff; --loot:#b46cff;
+  --game:#5cc96b; --game-bg:#1c3322; --part:#f2b234; --part-bg:#3a2e14; --plan:#8d8c86; --plan-bg:#26272a;
+  --c0:#9aa0a6; --c1:#5cc96b; --c2:#4aa3ff; --c3:#b46cff; --c4:#f2b234; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#111214; --surface:#1a1b1e; --surface2:#222428; --cell:#16171a; --line:#2e3136; --fg:#ecebe6; --muted:#9b9a94; --faint:#6d6c67; --ph:#1c1d20;
+  --accent:#f2b234; --up:#f2b234; --down:#6cb6ff; --loot:#b46cff;
+  --game:#5cc96b; --game-bg:#1c3322; --part:#f2b234; --part-bg:#3a2e14; --plan:#8d8c86; --plan-bg:#26272a;
+  --c0:#9aa0a6; --c1:#5cc96b; --c2:#4aa3ff; --c3:#b46cff; --c4:#f2b234; color-scheme:dark;
 }
 *{box-sizing:border-box}
-html,body{background:var(--bg);color:var(--fg)}
+html,body{background:var(--bg);color:var(--fg);margin:0}
 body{font-family:var(--body);font-size:14px;line-height:1.45;padding-block:18px 36px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1,h2,h3{margin:0;text-wrap:balance}
 h1{font-family:var(--display);font-weight:400;font-size:28px;letter-spacing:.5px}
 h2{font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
 button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible,.node:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 24px;max-width:1700px;margin:0 auto 14px}
-.top p{margin:4px 0 0;color:var(--muted);max-width:80ch}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+button:focus-visible,.node:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top,.summary,.bar,.wrap{max-width:1700px;margin-left:auto;margin-right:auto}
+.top{margin-bottom:14px}
+.top p{margin:4px 0 0;color:var(--muted);max-width:90ch}
+/* статусы */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.b-game{color:var(--game);background:var(--game-bg)}
+.b-part{color:var(--part);background:var(--part-bg)}
+.b-plan{color:var(--plan);background:transparent;border:1px dashed var(--plan)}
+/* сводка */
+.summary{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:14px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{border-radius:12px;padding:10px 12px;background:var(--surface2);border-left:4px solid}
+.tile b{display:block;font-family:var(--display);font-weight:400;font-size:28px;line-height:1.1}
+.tile span{font-size:13px;color:var(--muted)}
+.t-game{border-color:var(--game)} .t-game b{color:var(--game)}
+.t-part{border-color:var(--part)} .t-part b{color:var(--part)}
+.t-plan{border-color:var(--plan);border-left-style:dashed} .t-plan b{color:var(--plan)}
+details.todo{margin-top:12px}
+details.todo>summary{cursor:pointer;font-weight:600;font-size:15px;padding:4px 0}
+.areas{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;margin-top:8px}
+.area{background:var(--cell);border-radius:12px;padding:10px 12px}
+.area h3{font-size:14px;margin-bottom:6px}
+.area ul{margin:0;padding-left:18px;font-size:13px}
+.area li{margin:2px 0}
+.area li .lk{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.area li .lk:hover{color:var(--accent)}
+.area li small{color:var(--muted)}
+/* панель управления */
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-bottom:12px}
+.group{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.group>span{font-size:12px;color:var(--muted);margin-right:2px}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px}
-.chip.on{background:var(--fg);color:#141414;border-color:var(--fg)}
-.wrap{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;max-width:1700px;margin:0 auto;align-items:start}
+.chip.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
 @media (max-width:1100px){.wrap{grid-template-columns:minmax(0,1fr)}.side{position:static!important}}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;min-width:0}
 .scroll{overflow-x:auto}
 /* сетка */
-.grid{display:grid;grid-template-columns:150px repeat(5,minmax(170px,1fr));gap:6px;min-width:1020px}
+.grid{display:grid;grid-template-columns:130px repeat(5,minmax(170px,1fr));gap:6px;min-width:1000px}
 .ch{font-size:12px;font-weight:600;padding:6px 8px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;gap:6px}
-.ch i{width:8px;height:8px;border-radius:50%}
+.ch i{width:8px;height:8px;border-radius:50%;flex:none}
 .rh{font-size:12px;color:var(--muted);padding:8px 4px;text-transform:uppercase;letter-spacing:.6px}
-.cell{background:#16171a;border-radius:10px;padding:5px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;min-height:44px}
-.node{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 3px;border-radius:9px;background:var(--surface2);border:1px solid transparent;font-size:12px;cursor:pointer;max-width:100%}
+.cell{background:var(--cell);border-radius:10px;padding:5px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;min-height:44px}
+.node{position:relative;display:flex;align-items:center;gap:6px;padding:3px 8px 3px 3px;border-radius:9px;background:var(--surface2);border:1px solid var(--line);border-left:4px solid var(--game);font-size:12px;cursor:pointer;max-width:100%}
+.node.s-part{border-left-color:var(--part)}
+.node.s-plan{border:1px dashed var(--plan);border-left:4px dashed var(--plan);background:transparent;color:var(--muted)}
+.node.s-plan img{opacity:.55;filter:grayscale(.6)}
 .node:hover{border-color:var(--faint)}
-.node img,.node .ph{width:28px;height:28px;flex:none;border-radius:6px;object-fit:contain;background:#1c1d20}
+.node img,.node .ph{width:28px;height:28px;flex:none;border-radius:6px;object-fit:contain;background:var(--ph);image-rendering:auto}
 .node .ph{display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--faint)}
 .node .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.node.sel{border-color:var(--fg);background:#2b2d32}
-.node.up{border-color:var(--up)}
-.node.down{border-color:var(--down)}
-.node.dim{opacity:.28}
-.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin:10px 2px 0}
+.node .tag{font-size:10px;font-weight:600;padding:0 5px;border-radius:6px;flex:none}
+.node.s-part .tag{color:var(--part);background:var(--part-bg)}
+.node.s-plan .tag{color:var(--plan);border:1px dashed var(--plan)}
+.node.sel{box-shadow:0 0 0 2px var(--fg)}
+.node.up{box-shadow:0 0 0 2px var(--up)}
+.node.down{box-shadow:0 0 0 2px var(--down)}
+.node.dim{opacity:.25}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12px;color:var(--muted);margin:10px 2px 0;align-items:center}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend b{width:12px;height:12px;border-radius:4px;border:2px solid}
 /* станки */
 .ladder{display:flex;flex-direction:column;gap:14px}
-.lvl{border-radius:14px;background:#16171a;padding:12px}
+.lvl{border-radius:14px;background:var(--cell);padding:12px}
 .lvl>h3{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;margin-bottom:4px}
 .lvl>.req{font-size:12px;color:var(--muted);margin-bottom:10px}
-.stations{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.stations{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
 .st{background:var(--surface2);border-radius:12px;padding:10px}
-.st .sh{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.st .sh .node{background:#2b2d32}
+.st.s-plan{background:transparent;border:1px dashed var(--plan)}
+.st .sh{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
 .st .snote{font-size:12px;color:var(--muted);margin-bottom:8px}
 .st .makes{display:flex;flex-wrap:wrap;gap:4px}
 /* боковая панель */
-.side{position:sticky;top:12px}
+.side{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
 .side .title{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.side .title img,.side .title .ph{width:56px;height:56px;border-radius:10px;background:#1c1d20;object-fit:contain;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:11px}
+.side .title img,.side .title .ph{width:56px;height:56px;border-radius:10px;background:var(--ph);object-fit:contain;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:11px;flex:none}
 .side h2{margin:14px 0 6px}
 .kv{display:flex;flex-wrap:wrap;gap:6px}
 .pill{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--surface2)}
 .pill.r{color:var(--accent)} .pill.l{color:var(--loot)}
+.pill.plan{background:transparent;border:1px dashed var(--plan);color:var(--muted)}
+.miss{margin:8px 0 0;padding:8px 10px;border-radius:10px;font-size:13px;background:var(--part-bg);color:var(--fg)}
+.miss.plan{background:var(--plan-bg)}
 ul.how{margin:0;padding-left:18px;color:var(--fg);font-size:13px}
-.tree{font-size:13px;font-family:var(--body)}
+ul.how li.p{color:var(--muted)}
+ul.how li .badge{margin-left:6px;font-size:10px;padding:0 6px}
+table.parts{width:100%;border-collapse:collapse;font-size:12px}
+table.parts td{padding:3px 4px;border-top:1px solid var(--line);vertical-align:top}
+table.parts td:last-child{color:var(--muted)}
+.tree{font-size:13px}
 .tree .t{padding:2px 0;cursor:pointer}
 .tree .t:hover{color:var(--accent)}
 .tree .n{font-family:var(--mono);color:var(--muted)}
 .tree .src{color:var(--faint);font-size:12px}
+.tree .t.p{color:var(--muted);font-style:italic}
 .empty{color:var(--faint);font-size:13px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.d-game{background:var(--game)} .d-part{background:var(--part)} .d-plan{border:1px dashed var(--plan)}
 </style>
 
 <header class="top">
-  <div>
-    <h1>Дерево прогрессии</h1>
-    <p>Клик по предмету: справа видно, где он добывается, на каком станке и за сколько лома изучается, и полная цепочка до сырья. Жёлтым подсвечено то, из чего он делается, синим — то, куда он идёт. Цифры черновые, по дизайн-документам 13–15.</p>
-  </div>
-  <div class="tabs"><button class="chip on" data-v="grid">Тиры × категории</button><button class="chip" data-v="ladder">Верстаки → станки</button></div>
+  <h1>Дерево прогрессии</h1>
+  <p>Что из чего получается и где: добыча → печь → верстаки и станки → детали → оружие, одежда, медицина, стройка. У каждого предмета статус: <span class="badge b-game">в игре</span> — есть в коде и добывается или крафтится; <span class="badge b-part">частично</span> — есть, но часть плана не сделана; <span class="badge b-plan">только в плане</span> — есть только в дизайн-документах. Цифры — из кода игры (22.10.2026), расхождения с планом подписаны «по плану».</p>
 </header>
+
+<section class="summary" aria-label="Сводка">
+  <div class="tiles" id="tiles"></div>
+  <details class="todo" open>
+    <summary>Не сделано в игре (запланировано) — по областям</summary>
+    <div class="areas" id="todo"></div>
+  </details>
+</section>
+
+<div class="bar">
+  <div class="group" role="group" aria-label="Вид"><span>Вид:</span><button class="chip on" data-v="grid">Категории × верстаки</button><button class="chip" data-v="ladder">Верстаки → станки</button></div>
+  <div class="group" role="group" aria-label="Фильтр по статусу"><span>Показать:</span><button class="chip on" data-f="all">всё</button><button class="chip" data-f="ingame">есть в игре</button><button class="chip" data-f="part">частично</button><button class="chip" data-f="plan">только план</button></div>
+</div>
+
 <div class="wrap">
   <section class="panel" aria-label="Дерево">
     <div class="scroll" id="view"></div>
-    <div class="legend"><span><b style="border-color:var(--up)"></b>из чего делается</span><span><b style="border-color:var(--down)"></b>куда идёт</span><span><b style="border-color:var(--fg)"></b>выбрано</span></div>
+    <div class="legend">
+      <span class="badge b-game">в игре</span><span class="badge b-part">частично</span><span class="badge b-plan">только в плане</span>
+      <span><b style="border-color:var(--up)"></b>из чего делается</span><span><b style="border-color:var(--down)"></b>куда идёт</span><span><b style="border-color:var(--fg)"></b>выбрано</span>
+    </div>
   </section>
   <aside class="panel side" id="side" aria-live="polite"></aside>
 </div>
@@ -94,66 +167,103 @@ ul.how{margin:0;padding-left:18px;color:var(--fg);font-size:13px}
 <script>
 const N=/*NODES*/[];
 const IC=/*ICONS*/{};
+const EXTRA=/*EXTRA*/[];
 const BY={};N.forEach(x=>BY[x.id]=x);
+const SN={game:'в игре',part:'частично',plan:'только в плане'};
 const COLS=['Старт (без верстака)','Верстак 1','Верстак 2','Верстак 3','Только лут / РТ'];
 const CC=['var(--c0)','var(--c1)','var(--c2)','var(--c3)','var(--c4)'];
-const CATS=[['res','Добыча'],['proc','Переработанное'],['tool','Инструменты'],['stn','Станки'],['comp','Компоненты'],['val','Ценный лом'],['gun','Оружие'],['ammo','Патроны'],['att','Обвесы'],['wear','Одежда'],['equip','Снаряжение'],['med','Хил, еда, карты'],['base','База'],['boom','Взрывчатка, замки']];
+const CATS=[['res','Добыча'],['proc','Переработанное'],['fuel','Топливо, ёмкости'],['stn','Станки'],['tool','Инструменты'],['comp','Компоненты'],['val','Ценный лом'],['gun','Оружие'],['ammo','Патроны'],['att','Обвесы'],['wear','Одежда, пластины'],['med','Медицина, еда'],['water','Вода'],['rt','Доступ на РТ'],['boom','Взрывчатка, замки'],['base','База'],['equip','Снаряжение (идея)']];
 const USED={};N.forEach(x=>x.rec.forEach(([id])=>{(USED[id]=USED[id]||[]).push(x.id)}));N.forEach(x=>{if(x.st)(USED[x.st]=USED[x.st]||[]).push(x.id)});
-let sel=null, view='grid';
-function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
-function icon(id,cls=''){return IC[id]?`<img src="${IC[id]}" alt="">`:`<span class="ph">${esc((BY[id]?.name||id).slice(0,3))}</span>`}
-function chip(id){const x=BY[id];if(!x)return '';return `<div class="node" tabindex="0" role="button" data-id="${id}">${icon(id)}<span class="nm">${esc(x.name)}</span></div>`}
+let sel=null, view='grid', filt='all';
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function isPlanHow(h){return h.startsWith('~')}
+function howText(h){return h.replace(/^~\s*/,'')}
+function icon(id){return IC[id]?`<img src="${IC[id]}" alt="">`:`<span class="ph">${esc((BY[id]?.name||id).slice(0,3))}</span>`}
+function badge(s){return `<span class="badge b-${s}">${SN[s]}</span>`}
+function pass(x){return filt==='all'||(filt==='ingame'&&x.s!=='plan')||x.s===filt}
+function chip(id,force){const x=BY[id];if(!x||(!force&&!pass(x)))return '';
+  const tag=x.s==='part'?'<span class="tag">частично</span>':x.s==='plan'?'<span class="tag">план</span>':'';
+  return `<div class="node s-${x.s}" tabindex="0" role="button" data-id="${id}" title="${esc(x.name)} — ${SN[x.s]}">${icon(id)}<span class="nm">${esc(x.name)}</span>${tag}</div>`}
 function upstream(id,acc=new Set()){const x=BY[id];if(!x)return acc;x.rec.forEach(([r])=>{if(!acc.has(r)){acc.add(r);upstream(r,acc)}});if(x.st&&!acc.has(x.st)){acc.add(x.st);upstream(x.st,acc)}return acc}
+
+function renderSummary(){
+  const c={game:0,part:0,plan:0};N.forEach(x=>c[x.s]++);
+  document.getElementById('tiles').innerHTML=
+    `<div class="tile t-game"><b>${c.game}</b><span>в игре полностью</span></div>`+
+    `<div class="tile t-part"><b>${c.part}</b><span>частично (есть, но план шире)</span></div>`+
+    `<div class="tile t-plan"><b>${c.plan}</b><span>только в плане</span></div>`+
+    `<div class="tile" style="border-color:var(--line)"><b>${N.length}</b><span>всего узлов дерева</span></div>`;
+  const A={};const add=(a,h)=>{(A[a]=A[a]||[]).push(h)};
+  N.filter(x=>x.s==='plan').forEach(x=>add(x.area,`<li><span class="lk" data-id="${x.id}">${esc(x.name)}</span> <small>— только в плане</small></li>`));
+  N.filter(x=>x.s==='part').forEach(x=>add(x.area,`<li><span class="lk" data-id="${x.id}">${esc(x.name)}</span> <small>— частично: ${esc(x.miss)}</small></li>`));
+  EXTRA.forEach(([a,t])=>add(a,`<li>${esc(t)}</li>`));
+  const order=['Станки','Топливо и ёмкости','Вода','Переработка','Одежда и броня','Оружие','Взрывчатка и замки','Медицина и еда','Инструменты','Стройка','РТ','События','Ценный лом','Снаряжение'];
+  const keys=Object.keys(A).sort((a,b)=>(order.indexOf(a)+99)%99-(order.indexOf(b)+99)%99);
+  document.getElementById('todo').innerHTML=keys.map(k=>`<div class="area"><h3>${esc(k)}</h3><ul>${A[k].join('')}</ul></div>`).join('');
+}
 function renderGrid(){
   let h=`<div class="grid"><div></div>`+COLS.map((c,i)=>`<div class="ch"><i style="background:${CC[i]}"></i>${c}</div>`).join('');
-  CATS.forEach(([k,lab])=>{h+=`<div class="rh">${lab}</div>`;for(let c=0;c<5;c++)h+=`<div class="cell">${N.filter(x=>x.cat===k&&x.col===c).map(x=>chip(x.id)).join('')}</div>`});
+  CATS.forEach(([k,lab])=>{const row=N.filter(x=>x.cat===k&&pass(x));if(!row.length)return;
+    h+=`<div class="rh">${lab}</div>`;for(let c=0;c<5;c++)h+=`<div class="cell">${row.filter(x=>x.col===c).map(x=>chip(x.id)).join('')}</div>`});
   document.getElementById('view').innerHTML=h+'</div>';
 }
 function renderLadder(){
-  const L=[['Без верстака','с первой минуты',[null,'furnace'],0],['Верстак 1','',['bench1','still','sewing'],1],['Верстак 2','',['bench2','lathe','chem','generator','lamp'],2],['Верстак 3','',['bench3','guntable','medtable','efurnace','conveyor'],3],['Только на РТ','',['recycler'],4]];
+  const L=[['Без верстака','крафт в руках и печь',0],['Верстак 1','',1],['Верстак 2','',2],['Верстак 3','',3],['Только на РТ','переработчик стоит на РТ, его не построить',4]];
   let h='<div class="ladder">';
-  L.forEach(([t,sub,sts,c])=>{
-    const b=sts.find(s=>s&&s.startsWith('bench'));const req=b?BY[b].rec.map(([r,n])=>`${BY[r]?.name||r} ${n}`).join(', '):sub;
-    h+=`<div class="lvl"><h3><i style="width:10px;height:10px;border-radius:50%;background:${CC[c]};display:inline-block"></i>${t}</h3><div class="req">${b?'Построить: ':''}${esc(req)}</div><div class="stations">`;
+  L.forEach(([t,sub,c])=>{
+    const b=c>=1&&c<=3?'bench'+c:null;
+    const sts=(c===0?[null]:[]).concat(N.filter(x=>x.cat==='stn'&&x.col===c&&x.id!=='campfire').map(x=>x.id));
+    const req=b?'Построить: '+BY[b].rec.map(([r,n])=>`${BY[r]?.name||r} ${n}`).join(', ')+(BY[b].miss?' · '+BY[b].miss:''):sub;
+    h+=`<div class="lvl"><h3><i style="width:10px;height:10px;border-radius:50%;background:${CC[c]};display:inline-block"></i>${t}</h3><div class="req">${esc(req)}</div><div class="stations">`;
     sts.forEach(s=>{
-      const makes=s===null?N.filter(x=>!x.st&&x.rec.length&&x.cat!=='stn'):N.filter(x=>x.st===s);
-      const head=s===null?'<span class="node" style="cursor:default">в руках</span>':chip(s);
-      const note=s===null?'крафт без станка':esc(BY[s].note||'');
-      h+=`<div class="st"><div class="sh">${head}</div><div class="snote">${note}</div><div class="makes">${makes.map(x=>chip(x.id)).join('')||'<span class="empty">—</span>'}</div></div>`;
+      const makes=s===null?N.filter(x=>!x.st&&x.rec.length&&x.cat!=='stn'&&pass(x)):N.filter(x=>x.st===s&&pass(x));
+      const sx=s&&BY[s];
+      if(sx&&!pass(sx)&&!makes.length)return;
+      const head=s===null?'<span class="node" style="cursor:default">в руках</span>':chip(s,true)+badge(sx.s);
+      const note=s===null?'крафт без станка (часть — после изучения у верстака)':esc(sx.note||'');
+      h+=`<div class="st ${sx?'s-'+sx.s:''}"><div class="sh">${head}</div><div class="snote">${note}</div><div class="makes">${makes.map(x=>chip(x.id)).join('')||'<span class="empty">—</span>'}</div></div>`;
     });
     h+='</div></div>';
   });
   document.getElementById('view').innerHTML=h+'</div>';
 }
+function srcOf(y){return y.how.length&&!y.rec.length?` <span class="src">— ${esc(howText(y.how[0]))}</span>`:(y.st?` <span class="src">— ${esc(BY[y.st]?.name||'')}</span>`:'')}
 function treeHtml(id,depth,seen){
   const x=BY[id];if(!x)return '';
-  const src=x.how.length?` <span class="src">— ${esc(x.how[0])}</span>`:'';
   let h='';
-  x.rec.forEach(([r,n])=>{const y=BY[r];if(!y)return;const s=y.how.length&&!y.rec.length?` <span class="src">— ${esc(y.how[0])}</span>`:(y.st?` <span class="src">— ${esc(BY[y.st]?.name||'')}</span>`:'');
-    h+=`<div class="t" data-id="${r}" style="padding-left:${depth*16}px">${n?`<span class="n">${n}×</span> `:''}${esc(y.name)}${s}</div>`;
+  x.rec.forEach(([r,n])=>{const y=BY[r];if(!y)return;
+    h+=`<div class="t ${y.s==='plan'?'p':''}" data-id="${r}" style="padding-left:${depth*16}px"><span class="dot d-${y.s}"></span>${n?`<span class="n">${n}×</span> `:''}${esc(y.name)}${srcOf(y)}</div>`;
     if(!seen.has(r)&&depth<6){seen.add(r);h+=treeHtml(r,depth+1,seen)}});
   return h;
 }
 function renderSide(){
   const s=document.getElementById('side');
-  if(!sel){s.innerHTML='<h2>Выбери предмет</h2><p class="empty">Нажми на любой предмет в дереве — здесь появится цепочка от сырья до него.</p>';return}
+  if(!sel){s.innerHTML='<h2>Выбери предмет</h2><p class="empty">Нажми на любой предмет — здесь появится статус, где его взять и цепочка от сырья.</p>';return}
   const x=BY[sel];const st=x.st?BY[x.st]:null;
   const users=(USED[sel]||[]).filter((v,i,a)=>a.indexOf(v)===i);
-  s.innerHTML=`<div class="title">${icon(sel)}<div><div style="font-size:18px;font-weight:600">${esc(x.name)}</div><div class="empty">${COLS[x.col]}</div></div></div>
-   <div class="kv">${st?`<span class="pill">станок: ${esc(st.name)}</span>`:''}${x.res?`<span class="pill r">изучить: ${x.res} лома</span>`:''}${!x.rec.length&&x.how.length?'<span class="pill l">только добыть / найти</span>':''}</div>
+  const parts=x.parts.length?`<h2>Состав комплекта</h2><table class="parts">${x.parts.map(([nm,c])=>`<tr><td>${esc(nm)}</td><td>${c.length?c.map(([r,n])=>`${esc(BY[r]?.name||r)} ${n}`).join(', '):'только лут'}</td></tr>`).join('')}</table>`:'';
+  s.innerHTML=`<div class="title">${icon(sel)}<div><div style="font-size:18px;font-weight:600">${esc(x.name)}</div><div style="margin-top:3px">${badge(x.s)} <span class="empty">${COLS[x.col]}</span></div></div></div>
+   ${x.miss?`<div class="miss">Не сделано: ${esc(x.miss)}</div>`:''}${x.s==='plan'?'<div class="miss plan">Этого предмета нет в коде игры — только в дизайн-документах.</div>':''}
+   <div class="kv" style="margin-top:8px">${st?`<span class="pill ${st.s==='plan'?'plan':''}">станок: ${esc(st.name)}${st.s==='plan'?' (план)':''}</span>`:(x.rec.length?'<span class="pill">в руках</span>':'')}${x.res?`<span class="pill r">изучить: ${x.res} лома</span>`:''}${!x.rec.length&&x.how.length?'<span class="pill l">только добыть / найти</span>':''}</div>
    ${x.note?`<p style="margin:8px 0 0;color:var(--muted);font-size:13px">${esc(x.note)}</p>`:''}
-   ${x.how.length?`<h2>Где взять</h2><ul class="how">${x.how.map(h=>`<li>${esc(h)}</li>`).join('')}</ul>`:''}
-   ${x.rec.length?`<h2>Рецепт</h2><div class="kv">${x.rec.map(([r,n])=>`<span class="pill">${n?n+'× ':''}${esc(BY[r]?.name||r)}</span>`).join('')}</div>`:''}
-   ${x.rec.length||st?`<h2>Цепочка до сырья</h2><div class="tree">${treeHtml(sel,0,new Set())}${st?`<div class="t" data-id="${x.st}">⚙ станок: ${esc(st.name)}</div>${treeHtml(x.st,1,new Set())}`:''}</div>`:''}
-   ${users.length?`<h2>Куда идёт</h2><div class="kv">${users.map(u=>`<span class="pill t" data-id="${u}" style="cursor:pointer">${esc(BY[u].name)}</span>`).join('')}</div>`:''}`;
+   ${x.how.length?`<h2>Где взять</h2><ul class="how">${x.how.map(h=>isPlanHow(h)?`<li class="p">${esc(howText(h))}<span class="badge b-plan">план</span></li>`:`<li>${esc(h)}</li>`).join('')}</ul>`:''}
+   ${x.rec.length?`<h2>Рецепт</h2><div class="kv">${x.rec.map(([r,n])=>`<span class="pill t ${BY[r]?.s==='plan'?'plan':''}" data-id="${r}" style="cursor:pointer"><span class="dot d-${BY[r]?.s||'plan'}"></span>${n?n+'× ':''}${esc(BY[r]?.name||r)}</span>`).join('')}</div>`:''}
+   ${parts}
+   ${x.rec.length||st?`<h2>Цепочка до сырья</h2><div class="tree">${treeHtml(sel,0,new Set())}${st?`<div class="t ${st.s==='plan'?'p':''}" data-id="${x.st}"><span class="dot d-${st.s}"></span>станок: ${esc(st.name)}</div>${treeHtml(x.st,1,new Set())}`:''}</div>`:''}
+   ${users.length?`<h2>Куда идёт</h2><div class="kv">${users.map(u=>`<span class="pill t ${BY[u].s==='plan'?'plan':''}" data-id="${u}" style="cursor:pointer"><span class="dot d-${BY[u].s}"></span>${esc(BY[u].name)}</span>`).join('')}</div>`:''}`;
 }
 function highlight(){
   const up=sel?upstream(sel):new Set(), down=new Set(sel?(USED[sel]||[]):[]);
-  document.querySelectorAll('#view .node[data-id]').forEach(e=>{const id=e.dataset.id;e.classList.toggle('sel',id===sel);e.classList.toggle('up',up.has(id));e.classList.toggle('down',down.has(id)&&id!==sel);e.classList.toggle('dim',!!sel&&id!==sel&&!up.has(id)&&!down.has(id))});
+  document.querySelectorAll('#view .node[data-id]').forEach(e=>{const id=e.dataset.id;e.classList.toggle('sel',id===sel);e.classList.toggle('up',up.has(id)&&id!==sel);e.classList.toggle('down',down.has(id)&&id!==sel&&!up.has(id));e.classList.toggle('dim',!!sel&&id!==sel&&!up.has(id)&&!down.has(id))});
 }
 function render(){view==='grid'?renderGrid():renderLadder();highlight();renderSide()}
-document.addEventListener('click',e=>{const t=e.target.closest('[data-id]');if(t){sel=sel===t.dataset.id&&t.closest('#view')?null:t.dataset.id;highlight();renderSide()}
-  const v=e.target.closest('[data-v]');if(v){view=v.dataset.v;document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b===v));render()}});
-document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.node[data-id]')){e.preventDefault();e.target.click()}});
-sel='weapon_akm';render();
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-id]');
+  if(t){const inView=!!t.closest('#view');sel=sel===t.dataset.id&&inView?null:t.dataset.id;highlight();renderSide();
+    if(t.closest('#todo')||!inView&&window.innerWidth<=1100)document.getElementById('side').scrollIntoView({behavior:'smooth',block:'start'})}
+  const v=e.target.closest('[data-v]');if(v){view=v.dataset.v;document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b===v));render()}
+  const f=e.target.closest('[data-f]');if(f){filt=f.dataset.f;document.querySelectorAll('[data-f]').forEach(b=>b.classList.toggle('on',b===f));render()}
+});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.node[data-id],.lk[data-id]')){e.preventDefault();e.target.click()}});
+renderSummary();sel='weapon_akm';render();
 </script>

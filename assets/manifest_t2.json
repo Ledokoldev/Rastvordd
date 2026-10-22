@@ -1,0 +1,249 @@
+{
+ "assets": [
+  {
+   "id": "radio_mast",
+   "cat": "props",
+   "view": "front",
+   "w": 3.4,
+   "desc": "a very tall and slender Soviet radio broadcasting lattice mast (triangular steel truss tower, red-and-white painted sections faded and rusty), standing on a small concrete foundation block at the bottom, a few taut guy wires going down diagonally from the upper part and ending just above the base on both sides, small aircraft warning lamp and antenna rods at the very top; the WHOLE mast from the concrete base to the tip must be visible, tall narrow composition; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    1.6,
+    30.0
+   ]
+  },
+  {
+   "id": "radio_mast_fallen",
+   "cat": "props",
+   "view": "side",
+   "w": 30.0,
+   "desc": "a long Soviet steel lattice radio mast (triangular truss, faded red-and-white paint, rust) that has FALLEN and lies horizontally on the ground across the whole image, slightly bent and broken in the middle, torn guy wires and cables trailing, the concrete foundation chunk still attached at the left end, the top with antenna rods at the right end; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     30.0,
+     1.6,
+     1.4
+    ]
+   }
+  },
+  {
+   "id": "radio_dipole",
+   "cat": "props",
+   "view": "front",
+   "w": 8.0,
+   "desc": "a shortwave dipole antenna on a single tall wooden pole: a horizontal crossbar at the top with two long thin wire elements and white porcelain insulators, a feeder cable hanging down the pole, a small concrete footing; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.5,
+    0.4,
+    4.5
+   ]
+  },
+  {
+   "id": "radio_dish",
+   "cat": "props",
+   "view": "angled",
+   "w": 8.0,
+   "desc": "a large Soviet parabolic satellite communication dish antenna (about 7 meters across, white-grey painted metal reflector with panel seams, rusty streaks, feed horn on struts in front) tilted up toward the sky, mounted on a heavy steel yoke on a massive square concrete base with a small metal service ladder; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    4.0,
+    3.5
+   ]
+  },
+  {
+   "id": "radio_rack",
+   "cat": "props",
+   "view": "front",
+   "w": 2.4,
+   "desc": "a row of three tall grey-green steel cabinets of an old Soviet tube radio transmitter: glass windows showing glowing-off vacuum tubes, round analog meters and big bakelite knobs, ventilation grilles, cable trays on top; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    0.7,
+    2.2
+   ]
+  },
+  {
+   "id": "radio_rack_side",
+   "cat": "props",
+   "view": "side",
+   "w": 2.4,
+   "desc": "a row of three tall grey-green steel cabinets of an old Soviet tube radio transmitter seen from the side: side panels with ventilation grilles and bolts, cable bundles on top; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    0.7,
+    2.2
+   ]
+  },
+  {
+   "id": "radio_rack_open",
+   "cat": "props",
+   "view": "front",
+   "w": 1.0,
+   "desc": "a single tall grey-green steel radio transmitter cabinet under maintenance: its front door swung open, two chassis drawers pulled out, some empty vacuum tube sockets, a few spare parts lying on the floor at its foot; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.0,
+    0.7,
+    2.2
+   ]
+  },
+  {
+   "id": "radio_transmitter_big",
+   "cat": "props",
+   "view": "front",
+   "w": 4.2,
+   "desc": "a huge old Soviet shortwave radio transmitter unit: a wide steel console-cabinet painted faded grey-blue with a row of big round analog meters, large tuning dials, red and green signal lamps, a heavy knife switch, warning stripes, cable ducts going into the floor; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.2,
+    1.2,
+    2.6
+   ]
+  },
+  {
+   "id": "radio_console",
+   "cat": "props",
+   "view": "front",
+   "w": 2.6,
+   "desc": "a Soviet military radio call console desk: a long metal desk with an old radio station set, microphone on a stand, headphones, telegraph key, a row of toggle switches, a big red push button under a flip cover, and a slot card reader for punch cards on the right; an office chair in front; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.6,
+    1.0,
+    1.3
+   ]
+  },
+  {
+   "id": "radio_duty_desk",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.8,
+   "desc": "a duty officer's desk in a Soviet radio station: wooden desk with a big open log book journal, a desk lamp with green shade, a black rotary telephone, a mug, an ashtray, a wooden chair; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    0.8,
+    1.0
+   ]
+  },
+  {
+   "id": "radio_diesel_big",
+   "cat": "props",
+   "view": "side",
+   "w": 5.2,
+   "desc": "a large Soviet diesel generator set on a steel skid: green-painted engine block with a big radiator grille at one end, an alternator at the other, a vertical exhaust pipe with a rain cap, a small control panel with gauges, oil stains; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.2,
+    1.8,
+    2.2
+   ]
+  },
+  {
+   "id": "radio_fuel_tank",
+   "cat": "props",
+   "view": "front",
+   "w": 3.0,
+   "desc": "a vertical cylindrical diesel fuel tank on four short steel legs, faded green paint and rust, a ladder on the side, a filler hatch on top, a pipe with a valve going down to the ground; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    2.2,
+    3.5
+   ]
+  },
+  {
+   "id": "radio_watchtower",
+   "cat": "props",
+   "view": "front",
+   "w": 4.0,
+   "desc": "a Soviet military guard watchtower: four tall steel legs with cross bracing, a small wooden guard cabin on top with windows on all sides and a pitched tin roof, a big round searchlight mounted on the cabin railing, a steel ladder going up between the legs; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     4.0,
+     0.6,
+     6.0
+    ]
+   }
+  },
+  {
+   "id": "radio_flare_launcher",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.8,
+   "desc": "a signal rocket post for calling a rescue plane: a sturdy olive-green metal stand holding a rack of eight short upright tubes for colored signal fireworks, tilted slightly upward, a small grey switch box with a cable, a wooden box beside it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    1.0,
+    1.4
+   ]
+  },
+  {
+   "id": "radio_relay_truck",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.2,
+   "desc": "a Soviet ZIL-131 military radio-relay truck pointing to the right: six-wheel olive-green army truck with a closed box body (kung) with small windows and a door at the back, a folded telescopic antenna mast lying on the roof, cable reels on the side, flat tires; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    2.6,
+    3.2
+   ]
+  },
+  {
+   "id": "radio_sandbag_post",
+   "cat": "props",
+   "view": "angled",
+   "w": 3.6,
+   "desc": "a horseshoe-shaped guard position made of stacked sandbags (about 1.2 m high) with an opening at the back, a wooden ammo crate and a field telephone inside; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.4,
+    2.4,
+    1.2
+   ]
+  },
+  {
+   "id": "radio_antenna_scrap",
+   "cat": "props",
+   "view": "front",
+   "w": 3.2,
+   "desc": "a heap of dismantled radio antenna parts: lattice mast sections, bent aluminum antenna rods, porcelain insulators, coils of coaxial cable and a broken small dish; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    1.4,
+    1.2
+   ]
+  },
+  {
+   "id": "radio_cable_rack",
+   "cat": "props",
+   "view": "side",
+   "w": 3.0,
+   "desc": "an outdoor steel rack holding four big wooden cable drums with thick black cable, rusty frame; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    0.8,
+    1.6
+   ]
+  },
+  {
+   "id": "radio_parts_shelf",
+   "cat": "props",
+   "view": "front",
+   "w": 1.8,
+   "desc": "a metal storeroom shelf full of spare radio parts: boxes of vacuum tubes in cotton, spare meters, coils of wire, radio chassis; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.8,
+    0.5,
+    2.0
+   ]
+  },
+  {
+   "id": "radio_landing_x",
+   "cat": "decals",
+   "w": 14.0,
+   "h": 14.0,
+   "desc": "a big painted landing marker seen from directly above (top-down orthographic): a large worn white letter X inside a faded yellow circle, the paint cracked and peeling on grey concrete, flat on the ground, nothing else; transparent background outside the circle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_punchcard_3",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an old Soviet computer punch card made of beige cardboard with rows of small rectangular punched holes and a red stripe along the top edge with a small red star stamp, slightly bent and dirty"
+  }
+ ]
+}

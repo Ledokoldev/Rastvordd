@@ -620,16 +620,30 @@ namespace Rastvordd.Sim
         public float ViewRange(Actor a) => (50f + 30f * a.Peek) * (1f - 0.4f * NightFactorAt(TimeOfDay) * (a.Held?.Id == "weapon_torch" || a.Weapon?.Flashlight == true ? 0.35f : 1f));   // факел (и фонарь на стволе) почти снимает ночной штраф
 
         // ---------- время суток ----------
-        public const float DayLength = 1200f;   // 20 минут на сутки
-        /// <summary>0..1: 0 — полночь, 0.25 — рассвет, 0.5 — полдень, 0.75 — закат. Вайп начинается утром.</summary>
-        public float TimeOfDay => ((Time + TimeOffset) / DayLength + 0.36f) % 1f;
+        public const float DayLength = 1500f;   // сутки 25 минут: день ~20, ночь ~5 (по просьбе пользователя)
+        const float NightShare = 0.2f;           // доля реального времени суток на ночь
+        const float DayFrom = 0.25f, DayTo = 0.80f;   // TimeOfDay середины рассвета и заката (ночной фактор 0,5)
+        /// <summary>Фаза суток по реальному времени 0..1 (равномерно). Вайп начинается утром.</summary>
+        public float DayPhase => ((Time + TimeOffset) / DayLength + 0.16f) % 1f;
+        /// <summary>0..1: 0 — полночь, 0.25 — рассвет, 0.5 — полдень, 0.75 — закат. Часы ночью идут быстрее: ночь короче дня.</summary>
+        public float TimeOfDay => PhaseToTod(DayPhase);
         public float TimeOffset;
+
+        static float PhaseToTod(float p) => p < 1f - NightShare
+            ? DayFrom + p / (1f - NightShare) * (DayTo - DayFrom)
+            : (DayTo + (p - (1f - NightShare)) / NightShare * (1f + DayFrom - DayTo)) % 1f;
+        static float TodToPhase(float t)
+        {
+            if (t >= DayFrom && t < DayTo) return (t - DayFrom) / (DayTo - DayFrom) * (1f - NightShare);
+            float n = (t - DayTo + 1f) % 1f;   // сколько ночи прошло после заката
+            return 1f - NightShare + n / (1f + DayFrom - DayTo) * NightShare;
+        }
 
         /// <summary>Отладка (клавиша N): день ↔ ночь — прыжок к полудню или полуночи.</summary>
         void ToggleDayNight()
         {
-            float target = NightFactorAt(TimeOfDay) > 0.5f ? 0.5f : 0.0f;
-            TimeOffset += ((target - TimeOfDay + 1f) % 1f) * DayLength;
+            float target = TodToPhase(NightFactorAt(TimeOfDay) > 0.5f ? 0.5f : 0.0f);
+            TimeOffset += ((target - DayPhase + 1f) % 1f) * DayLength;
         }
         /// <summary>0 днём, 1 глубокой ночью, плавно на рассвете и закате.</summary>
         public static float NightFactorAt(float t)

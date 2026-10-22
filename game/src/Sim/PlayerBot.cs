@@ -618,9 +618,10 @@ namespace Rastvordd.Sim
         // ---------- прогрессия: верстаки и изучение ----------
 
         int _metalGoal = 300;
-        static readonly string[] ResearchOrder = { "lock_code", "gunpowder", "ammo_pistol", "weapon_pipe", "ammo_rifle", "expl_satchel", "weapon_ak", "expl_c4" };
-        // агрессивные (бродяги и задиристые фермеры) учат бомбы раньше патронов 5.56: рейды — на втором часу, а не «никогда»
-        static readonly string[] ResearchOrderRaider = { "lock_code", "gunpowder", "ammo_pistol", "weapon_pipe", "expl_satchel", "ammo_rifle", "weapon_ak", "expl_c4" };
+        // ветка оружия D46: Наган → Самоделка (тир 1), 7,62 → Грач / СВТ (тир 2), АКМ / СВД (тир 3); дробовики и элиту не учат — их только находят
+        static readonly string[] ResearchOrder = { "lock_code", "gunpowder", "ammo_9mm", "weapon_nagant", "weapon_homesmg", "ammo_12g", "weapon_crossbow", "weapon_grach", "ammo_762", "weapon_svt40", "expl_satchel", "weapon_akm", "weapon_svd", "expl_c4" };
+        // агрессивные (бродяги и задиристые фермеры) учат бомбы раньше патронов 7,62: рейды — на втором часу, а не «никогда»
+        static readonly string[] ResearchOrderRaider = { "lock_code", "gunpowder", "ammo_9mm", "weapon_nagant", "weapon_homesmg", "ammo_12g", "expl_satchel", "weapon_crossbow", "weapon_grach", "ammo_762", "weapon_svt40", "weapon_akm", "expl_c4", "weapon_svd" };
         string[] MyResearchOrder => Aggression > 0.45f ? ResearchOrderRaider : ResearchOrder;
         static readonly string[] BenchIds = { "deploy_workbench", "deploy_workbench2", "deploy_workbench3" };
 
@@ -660,6 +661,10 @@ namespace Rastvordd.Sim
             {
                 var n = Tech.Get(id);
                 if (n == null || _me.Known.Contains(id) || n.Bench > lvl || !Array.TrueForAll(n.Requires, r => _me.Known.Contains(r))) continue;
+                if (n.RequiresAny.Length > 0 && !Array.Exists(n.RequiresAny, r => _me.Known.Contains(r))) continue;
+                // не тратить лом раньше времени: 12 к — когда есть дробовик, арбалет (ступень к СВТ) — с верстака 2
+                if (id == "ammo_12g" && BestOwnedGun() is not ("weapon_pipeshotgun" or "weapon_sawnoff" or "weapon_mp133" or "weapon_saiga12")) continue;
+                if (id == "weapon_crossbow" && lvl < 2) continue;
                 if (scrap < n.Scrap) { WantScrap(n.Scrap - scrap); return GetScrap(n.Scrap - InBox(box, "scrap"), box, ref cmd); }
                 if (TakeFromBox(box, "scrap", n.Scrap, ref cmd)) return true;
                 Doing = $"изучает: {Items.Name(id)}";
@@ -695,17 +700,92 @@ namespace Rastvordd.Sim
             return true;
         }
 
-        // ---------- вооружение: самопал и патроны ----------
+        // ---------- вооружение: ствол лучше нынешнего, если есть детали; патроны; ремонт (D46) ----------
 
-        /// <summary>Самопал и 20 патронов: сера → печь (сера и уголь) → порох → патроны. true — занят этим.</summary>
+        /// <summary>Что бот крафтит, сильное первым. Дробовики и элита не крафтятся — только лут.</summary>
+        static readonly string[] CraftGuns = { "weapon_akm", "weapon_svd", "weapon_an94", "weapon_ppsh", "weapon_svt40", "weapon_pps43", "weapon_grach", "weapon_homesmg", "weapon_nagant", "weapon_crossbow" };
+
+        /// <summary>Каких деталей не хватает на следующий ствол (для походов на РТ): id → сколько.</summary>
+        readonly Dictionary<string, int> _partsWant = new();
+        float _partsWantAt = -999;
+
+        static bool IsPart(string id) => id.StartsWith("comp_");
+
+        /// <summary>Лучший свой ствол (даже без патронов), не сломанный.</summary>
+        string BestOwnedGun()
+        {
+            string best = null; float bp = -1;
+            for (int k = 0; k < Actor.BeltSize + Actor.PackSize; k++)
+            {
+                var s = k < Actor.BeltSize ? _me.Belt[k] : _me.Pack[k - Actor.BeltSize];
+                if (s?.State is not WeaponState st || st.Def.Melee || st.Broken) continue;
+                float p = Weaponry.Power(s.Id);
+                if (p > bp) { bp = p; best = s.Id; }
+            }
+            return best;
+        }
+
+        WeaponState OwnedState(string id)
+        {
+            int s = SlotOf(id);
+            if (s >= 0) return _me.Belt[s].State;
+            int p = PackOf(id);
+            return p >= 0 ? _me.Pack[p].State : null;
+        }
+
+        /// <summary>Отладка темпа (D46): верстак, лучший ствол, детали (при себе + в ящике), чего не хватает на следующий ствол.</summary>
+        public string ArmsReport()
+        {
+            var parts = new List<string>();
+            foreach (var id in new[] { "comp_spring", "comp_pipe", "comp_tape", "comp_gears", "comp_trigger", "comp_bolt_carrier", "comp_barrel_rifled", "comp_frame_pistol", "comp_body_smg", "comp_body_rifle", "comp_receiver_ak", "comp_barrel_chrome", "comp_gas_block", "comp_oil" })
+                if (Stock(id) > 0) parts.Add($"{id.Substring(5)} {Stock(id)}");
+            string want = _partsWant.Count > 0 ? " · не хватает: " + string.Join(", ", new List<string>(_partsWant.Keys)) : "";
+            return $"верстак {MyBenchLevel()}, ствол {BestOwnedGun() ?? "-"}, металл {MetalTotal()}, лом {Stock("scrap")}, изучено {_me.Known.Count} · детали: {string.Join(", ", parts)}{want}";
+        }
+
+        /// <summary>Ствол лучше нынешнего (если изучен и есть все детали), патроны к нему, ремонт маслом. true — занят этим.</summary>
         bool Arm(Deployable box, Deployable furnace, ref InputCmd cmd)
         {
-            if (!_me.Known.Contains("weapon_pipe") || MyBenchLevel() < 1) return false;
-            if (!Has("weapon_pipe")) return CraftAtBench("weapon_pipe", box, ref cmd);
-            if (_me.Count("ammo_pistol") >= 20 || !_me.Known.Contains("ammo_pistol")) return false;
-            if (_me.Count("gunpowder") >= 5) return CraftAtBench("ammo_pistol", box, ref cmd);
-            if (TakeFromBox(box, "gunpowder", 5, ref cmd)) return true;
-            return MakeGunpowder(5, box, furnace, ref cmd);
+            int lvl = MyBenchLevel();
+            if (lvl < 1) return false;
+            string own = BestOwnedGun();
+            float have = own != null ? Weaponry.Power(own) : 0;
+            if (_w.Time - _partsWantAt > 60) _partsWant.Clear();
+            foreach (var g in CraftGuns)
+            {
+                if (Weaponry.Power(g) <= have + 0.01f) break;
+                if (!_me.Known.Contains(g) || Recipe(g) < 0) continue;
+                var r = Recipes.All[Recipe(g)];
+                if (r.Bench > lvl) continue;
+                bool parts = true;
+                foreach (var (id, n) in r.Cost)
+                    if (IsPart(id) && Stock(id) < n) { parts = false; _partsWant[id] = Math.Max(_partsWant.GetValueOrDefault(id), n - Stock(id)); _partsWantAt = _w.Time; }
+                if (!parts) continue;
+                Doing = $"собирает {Items.Name(g)}";
+                return CraftAtBench(g, box, ref cmd);
+            }
+            // TODO(D46): токарный станок ботами — ставить его у верстака 2 и точить трубы/УСМ/затворы из пружин и шестерней (API: World.BotLathePut/BotLatheTake).
+            if (own == null) return false;
+            var st = OwnedState(own);
+            // ремонт: износ ниже трети, есть масло — к верстаку
+            if (st != null && st.Def.MaxDurability > 0 && st.Durability < st.Def.MaxDurability * 0.35f && Stock("comp_oil") > 0)
+            {
+                if (TakeFromBox(box, "comp_oil", 1, ref cmd)) return true;
+                Doing = $"чинит {Items.Name(own)} маслом";
+                if (!GoTo(BenchStand, 0.6f, ref cmd)) return true;
+                _w.Repair(_me, st);
+                return true;
+            }
+            string ammo = st?.Def.AmmoId;
+            if (ammo == null || ammo == "arrow" || _me.Count(ammo) >= 20 || !_me.Known.Contains(ammo) && Tech.Get(ammo) != null) return false;
+            int ri = Recipe(ammo);
+            if (ri < 0 || Recipes.All[ri].Bench > lvl) return false;
+            if (TakeFromBox(box, ammo, 20, ref cmd)) return true;
+            int powder = 0;
+            foreach (var (id, n) in Recipes.All[ri].Cost) if (id == "gunpowder") powder = n;
+            if (powder == 0 || _me.Count("gunpowder") >= powder) return CraftAtBench(ammo, box, ref cmd);
+            if (TakeFromBox(box, "gunpowder", powder, ref cmd)) return true;
+            return MakeGunpowder(powder, box, furnace, ref cmd);
         }
 
         /// <summary>Порох до target: уголь 15 + сера 10 у верстака; сера и уголь — из печи (серная руда + дерево).</summary>
@@ -816,22 +896,25 @@ namespace Rastvordd.Sim
         static float KitPower(Actor a)
         {
             var id = a.Held?.Id;
-            if (a.Weapon != null && !a.Weapon.Def.Melee) return id == "weapon_bow" ? 0.6f : id == "weapon_pipe" ? 0.8f : 1f;
+            if (a.Weapon != null && !a.Weapon.Def.Melee) return Weaponry.Power(id);
             return id switch { "weapon_spear" => 0.4f, "tool_hatchet" or "tool_pickaxe" => 0.25f, _ => 0.1f };
         }
 
         float MyPower => Ranged() is string g ? GunPower(g) : Has("weapon_spear") ? 0.4f : 0.15f;
 
-        /// <summary>Лучшее дальнобойное с боезапасом: калаш, самопал, лук.</summary>
+        /// <summary>Лучшее дальнобойное с боезапасом и не сломанное (по силе: элита, тир 3 … лук).</summary>
         string Ranged()
         {
-            foreach (var (gun, ammo) in new[] { ("weapon_ak", "ammo_rifle"), ("weapon_pipe", "ammo_pistol"), ("weapon_bow", "arrow") })
+            string best = null; float bp = -1;
+            for (int k = 0; k < Actor.BeltSize + Actor.PackSize; k++)
             {
-                int s = SlotOf(gun), p = PackOf(gun);
-                var st = s >= 0 ? _me.Belt[s].State : p >= 0 ? _me.Pack[p].State : null;
-                if ((s >= 0 || p >= 0) && ((st?.Ammo ?? 0) > 0 || _me.Count(ammo) > 0)) return gun;
+                var s = k < Actor.BeltSize ? _me.Belt[k] : _me.Pack[k - Actor.BeltSize];
+                if (s?.State is not WeaponState st || st.Def.Melee || st.Broken) continue;
+                float p = Weaponry.Power(s.Id);
+                if (p <= bp || (st.Ammo <= 0 && _me.Count(st.Def.AmmoId) <= 0)) continue;
+                bp = p; best = s.Id;
             }
-            return null;
+            return best;
         }
 
         /// <summary>Охота и отбивание: дальний бой с укрытиями и пиками (PlayerBot.Combat.cs), без ствола — вплотную.</summary>

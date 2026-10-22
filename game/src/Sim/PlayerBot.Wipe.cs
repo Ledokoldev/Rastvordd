@@ -266,18 +266,34 @@ namespace Rastvordd.Sim
             return false;
         }
 
-        static readonly string[] KitIds = { "weapon_ak", "weapon_pipe", "weapon_bow", "weapon_spear", "ammo_rifle", "ammo_pistol", "arrow", "bandage", "tool_hatchet", "tool_pickaxe" };
+        static readonly string[] KitIds = { "weapon_spear", "bandage", "tool_hatchet", "tool_pickaxe" };
 
+        static int KitWant(string id) => id switch { "ammo_762" or "ammo_545" => 60, "arrow" or "ammo_bolt" => 20, "ammo_12g" => 24, "bandage" => 3, _ when id.StartsWith("ammo_") => 40, _ => 1 };
+
+        /// <summary>Что забрать из ящика после смерти: лучший ствол, патроны к своим стволам, копьё, бинты, инструменты.</summary>
         string KitWanted(Deployable box)
         {
             if (box?.Storage == null) return null;
+            string own = Ranged();
+            float have = own != null ? Weaponry.Power(own) : 0;
+            foreach (var g in Weaponry.GunsByPower)
+            {
+                if (Weaponry.Power(g) <= have) break;
+                if (InBox(box, g) == 0 || Has(g)) continue;
+                if (box.Storage.Items.Exists(s => s.Id == g && s.State != null && !s.State.Broken)) return g;
+            }
+            // патроны к стволам, что при мне или в ящике
+            foreach (var g in Weaponry.GunsByPower)
+            {
+                if (!Has(g) && InBox(box, g) == 0) continue;
+                string ammo = WeaponAmmo(g);
+                if (_me.Count(ammo) < KitWant(ammo) && InBox(box, ammo) > 0) return ammo;
+            }
             foreach (var id in KitIds)
             {
-                int want = id switch { "ammo_rifle" => 60, "ammo_pistol" => 40, "arrow" => 20, "bandage" => 3, _ => 1 };
-                if (id.StartsWith("ammo") || id == "arrow") { string g = id == "ammo_rifle" ? "weapon_ak" : id == "ammo_pistol" ? "weapon_pipe" : "weapon_bow"; if (!Has(g) && InBox(box, g) == 0) continue; }
-                if (id.StartsWith("weapon_") && Ranged() != null && id is not ("weapon_ak" or "weapon_pipe" or "weapon_bow")) continue;
+                if (id == "weapon_spear" && Ranged() != null) continue;
                 if (id.StartsWith("weapon_") && Has(id)) continue;
-                if (_me.Count(id) < want && InBox(box, id) > 0) return id;
+                if (_me.Count(id) < KitWant(id) && InBox(box, id) > 0) return id;
             }
             return null;
         }
@@ -293,7 +309,7 @@ namespace Rastvordd.Sim
             var box = MyBox();
             var id = KitWanted(box);
             if (id == null) { _respawnAt = -999; return false; }
-            int want = id switch { "ammo_rifle" => 60, "ammo_pistol" => 40, "arrow" => 20, "bandage" => 3, _ => 1 };
+            int want = KitWant(id);
             if (_w.Time - _respawnAt < 1) Thought("после смерти: домой за набором (оружие, патроны, бинты)");
             Doing = $"после смерти — берёт из ящика {Items.Name(id)}";
             if (!TakeFromBox(box, id, Math.Min(want, _me.Count(id) + InBox(box, id)), ref cmd)) { _respawnAt = -999; return false; }

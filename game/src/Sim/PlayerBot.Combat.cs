@@ -58,13 +58,13 @@ namespace Rastvordd.Sim
             Thought(text);
         }
 
-        static string WeaponAmmo(string gun) => gun switch { "weapon_ak" => "ammo_rifle", "weapon_pipe" => "ammo_pistol", _ => "arrow" };
+        static string WeaponAmmo(string gun) => Items.Get(gun)?.Weapon?.AmmoId ?? "arrow";
 
         /// <summary>Сила оружия на глаз (как и KitPower): калаш 1, самопал 0,8, лук 0,6, копьё 0,4.</summary>
-        static float GunPower(string id) => id switch { "weapon_ak" => 1f, "weapon_pipe" => 0.8f, "weapon_bow" => 0.6f, "weapon_spear" => 0.4f, "tool_hatchet" or "tool_pickaxe" => 0.25f, _ => 0.1f };
+        static float GunPower(string id) => Weaponry.IsGun(id) ? Weaponry.Power(id) : id switch { "weapon_spear" => 0.4f, "tool_hatchet" or "tool_pickaxe" => 0.25f, _ => 0.1f };
 
         /// <summary>Удобная дистанция боя: лук и самопал — средняя, калаш — дальняя.</summary>
-        static float PrefDist(string gun) => gun switch { "weapon_ak" => 24f, "weapon_pipe" => 13f, _ => 15f };
+        static float PrefDist(string gun) => Weaponry.PrefDist(gun);
 
         WeaponState GunState(string gun) { int s = SlotOf(gun); return s >= 0 ? _me.Belt[s].State : null; }
 
@@ -245,8 +245,8 @@ namespace Rastvordd.Sim
             {
                 Say("оторвался", "оторвался — укрылся, перевожу дух", 15);
                 if (_me.Hp < 75 && _me.Count("bandage") > 0 && _w.Time - _me.LastDamagedTime > 2f) { cmd.Heal = true; if (_me.HealCooldown <= 0) { Say("бинт-отход", $"бинтуюсь в укрытии ({_me.Hp:0} HP)", 10); Stat("бинт в укрытии"); } }
-                if (Ranged() is string g && GunState(g) is WeaponState st && st.Ammo < st.Def.Magazine && st.ReloadLeft <= 0 && _me.Count(WeaponAmmo(g)) > 0 && Hold(g, ref cmd))
-                { cmd.Reload = true; if (st.Def.Magazine > 1) { Stat("перезарядка в укрытии"); Say("перезарядка-отход", "перезаряжаюсь, пока он меня не видит", 10); } }
+                if (Ranged() is string g && GunState(g) is WeaponState st && st.Ammo < st.MagSize && st.ReloadLeft <= 0 && _me.Count(WeaponAmmo(g)) > 0 && Hold(g, ref cmd))
+                { cmd.Reload = true; if (st.MagSize > 1) { Stat("перезарядка в укрытии"); Say("перезарядка-отход", "перезаряжаюсь, пока он меня не видит", 10); } }
                 // и уходим домой, когда он потерян
                 if (t == null && MyClaim() is Deployable c && Vector2.Distance(c.Pos, _me.Pos) > 12) { cmd.Crouch = false; Doing = "отходит домой"; GoTo(c.Pos + new Vector2(0.6f, 0.6f), 3f, ref cmd); }
             }
@@ -367,7 +367,7 @@ namespace Rastvordd.Sim
             bool sees = SeesFoe(t);
             bool hitRecently = _w.Time - _me.LastDamagedTime < 1.5f;
             float pref = PrefDist(gun);
-            if (_foeKitId == "weapon_ak" && gun != "weapon_ak") pref = MathF.Min(pref, 12f);   // с самопалом и луком против калаша — ближе не страшнее, но дальше бесполезно
+            if (Weaponry.Power(_foeKitId) >= 1f && GunPower(gun) < 0.95f) pref = MathF.Min(pref, 12f);   // с самопалом и луком против калаша — ближе не страшнее, но дальше бесполезно
             Doing = $"{(Archetype == BotArchetype.Roamer ? "охотится на" : "дерётся с")} {t.Name}";
 
             // 1. он ближник, а у меня ствол — кайт: держать дистанцию и стрелять на отходе
@@ -465,7 +465,7 @@ namespace Rastvordd.Sim
                 cmd.Aim = known;
                 cmd.Move = Vector2.Distance(_me.Pos, _coverPos) > 0.25f ? Vector2.Normalize(_coverPos - _me.Pos) * 0.6f : Vector2.Zero;
                 _phaseTime += World.Dt;
-                int mag = st.Def.Magazine;
+                int mag = st.MagSize;
                 bool needReload = st.ReloadLeft <= 0 && _me.Count(WeaponAmmo(gun)) > 0 && (st.Ammo == 0 || (mag > 1 && st.Ammo < mag * 0.5f));
                 if (st.ReloadLeft > 0) { Doing = $"перезаряжается за {_coverName}"; return; }
                 if (needReload)
@@ -491,7 +491,7 @@ namespace Rastvordd.Sim
                 {
                     _fight = Fight.Peek;
                     _phaseTime = 0; _peekShots = 0; _peekUnseen = 0;
-                    _phaseLen = gun == "weapon_ak" ? 1.4f + (float)_rng.NextDouble() * 0.6f : gun == "weapon_pipe" ? 2.2f : 2.5f;   // держит угол: ждёт, когда он высунется
+                    _phaseLen = Items.Get(gun)?.Weapon?.Auto == true ? 1.4f + (float)_rng.NextDouble() * 0.6f : Weaponry.Tier(gun) >= 1 ? 2.2f : 2.5f;   // держит угол: ждёт, когда он высунется
                     Say("пик", $"пикаю из-за {CoverFrom(_coverName)}", 12);
                 }
                 return;
@@ -533,13 +533,13 @@ namespace Rastvordd.Sim
             var known = KnownPos(t);
             var dir = d > 0.01f ? (known - _me.Pos) / d : Vector2.UnitX;
             _aimDrift = _aimDrift * 0.95f + ((float)_rng.NextDouble() - 0.5f) * 0.25f;
-            float lead = gun == "weapon_bow" ? d / 55f : d / (gun == "weapon_ak" ? 150f : 110f);
+            float lead = d / MathF.Max(40f, Items.Get(gun)?.Weapon?.BulletSpeed ?? 110f);
             cmd.Aim = sees ? t.Pos + t.Vel * lead + new Vector2(-dir.Y, dir.X) * _aimDrift * d * 0.06f : known;
             cmd.Peek = 1;
             if (!sees || d > st.Def.Range * 0.95f) return;
             var muzzle = _me.Pos + dir * (_me.Radius + 0.35f);
             if (!_w.BulletClear(muzzle, t.Pos)) return;   // своё укрытие на линии — не стрелять в камень
-            if (st.Ammo <= 0) { if (st.ReloadLeft <= 0) { cmd.Reload = true; if (st.Def.Magazine > 1) { Stat(where == "из укрытия" ? "перезарядка в укрытии" : "перезарядка в открытую"); } } return; }
+            if (st.Ammo <= 0) { if (st.ReloadLeft <= 0) { cmd.Reload = true; if (st.MagSize > 1) { Stat(where == "из укрытия" ? "перезарядка в укрытии" : "перезарядка в открытую"); } } return; }
             bool fire = st.Def.Auto ? MathF.Sin(_w.Time * 3f + _me.Id) > -0.3f : (_trig = !_trig);
             if (fire && st.Cooldown <= 0 && st.ReloadLeft <= 0) _lastShotAt = _w.Time;
             if (fire && st.Cooldown <= 0 && st.ReloadLeft <= 0) Stat(where == "из укрытия" ? "выстрел из укрытия" : "выстрел в открытую");
@@ -559,7 +559,7 @@ namespace Rastvordd.Sim
             if (reloading)
             {
                 cmd.Aim = known;
-                if (st.ReloadLeft <= 0 && _me.Count(WeaponAmmo(gun)) > 0) { cmd.Reload = true; if (st.Def.Magazine > 1) { Stat("перезарядка в открытую"); Say("перезарядка-открыто", "перезаряжаюсь в открытую — укрыться негде", 10); } }
+                if (st.ReloadLeft <= 0 && _me.Count(WeaponAmmo(gun)) > 0) { cmd.Reload = true; if (st.MagSize > 1) { Stat("перезарядка в открытую"); Say("перезарядка-открыто", "перезаряжаюсь в открытую — укрыться негде", 10); } }
                 return;
             }
             Shoot(t, gun, st, d, sees, ref cmd, "в открытую");

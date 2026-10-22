@@ -731,7 +731,8 @@ namespace Rastvordd.Sim
                 }
                 if (metal < _metalGoal && !furnace.Burning && _me.Count("metal_ore") < 60 && !Need("metal_ore", 60, ref cmd)) return;
             }
-            // 7. прогрессия, вооружение, рейд
+            // 7. прогрессия, вооружение, рейд; без ствола (или с луком) — сначала ствол, если есть детали (D46)
+            if ((Ranged() is not string rg || Weaponry.Power(rg) < 0.7f) && Arm(box, furnace, ref cmd)) return;
             if (Progress(box, metal, ref cmd)) return;
             if (Arm(box, furnace, ref cmd)) return;
             if (RaidPrep(box, furnace, ref cmd)) return;

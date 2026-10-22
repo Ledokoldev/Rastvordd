@@ -110,7 +110,12 @@ namespace Rastvordd.Sim
         readonly Dictionary<string, int> _rtDeaths = new();
         float _scrapWant, _scrapWantAt = -999;   // прогрессия упёрлась в лом: сколько не хватает
 
-        static readonly string[] RunItems = { "scrap", "comp_gears", "comp_spring", "comp_pipe", "comp_tape", "keycard", "punchcard_1", "punchcard_2", "ammo_pistol", "ammo_rifle", "metal_fragments", "bandage", "gunpowder" };
+        static readonly string[] RunItems = { "scrap", "comp_gears", "comp_spring", "comp_pipe", "comp_tape", "comp_trigger", "comp_bolt_carrier", "comp_barrel_rifled", "comp_frame_pistol", "comp_body_smg", "comp_body_rifle", "comp_receiver_ak", "comp_circuit", "comp_lens", "keycard", "punchcard_1", "punchcard_2", "ammo_9mm", "ammo_12g", "ammo_762", "metal_fragments", "bandage", "gunpowder" };
+
+        /// <summary>Сколько общих деталей бот держит под крафт стволов (D46): лишнее — в переработчик.</summary>
+        public static int CompKeep(string id) => id switch { "comp_spring" => 8, "comp_pipe" => 4, "comp_tape" => 4, "comp_gears" => 6, _ => int.MaxValue };
+        int CompSurplus(string id) => CompKeep(id) == int.MaxValue ? 0 : Math.Max(0, Stock(id) - CompKeep(id));
+        int CompKeepPocket(string id) => Math.Max(0, CompKeep(id) - (MyBox() is Deployable b ? InBox(b, id) : 0));
 
         /// <summary>Что взять из ящика в этот поход (и не сейчить, пока он идёт).</summary>
         int TripNeeds(string id)
@@ -120,9 +125,8 @@ namespace Rastvordd.Sim
             {
                 "punchcard_1" => _rt.Sub != null ? 1 : 0,
                 "keycard" => _rt.Safes.Count > 0 ? 1 : 0,
-                "comp_gears" or "comp_spring" or "comp_pipe" or "comp_tape" => _rt.Recycler != null ? 1000 : 0,
-                "ammo_pistol" => Ranged() == "weapon_pipe" ? 60 : 0,
-                "ammo_rifle" => Ranged() == "weapon_ak" ? 120 : 0,
+                "comp_gears" or "comp_spring" or "comp_pipe" or "comp_tape" => _rt.Recycler != null ? CompSurplus(id) : 0,
+                _ when id.StartsWith("ammo_") => Ranged() is string g && WeaponAmmo(g) == id ? (id is "ammo_762" or "ammo_545" ? 120 : 60) : 0,
                 "bandage" => 3,
                 _ => 0,
             };
@@ -176,8 +180,9 @@ namespace Rastvordd.Sim
             if (card && _w.Substations.Count > 0) { need += 0.5f; why.Add("есть перфокарта I — Подстанция"); }
             bool wantCard = !card && _w.Substations.Count > 0 && _w.Tier0.Count > 0 && Ranged() != null;
             if (wantCard) { need += 0.2f; why.Add("нужна перфокарта I (на тире 0) — для крейта Подстанции"); }
-            int comps = Stock("comp_gears") + Stock("comp_spring") + Stock("comp_pipe") + Stock("comp_tape");
-            if (comps >= 3) { need += 0.2f; why.Add($"{comps} деталей — в переработчик"); }
+            int comps = CompSurplus("comp_gears") + CompSurplus("comp_spring") + CompSurplus("comp_pipe") + CompSurplus("comp_tape");
+            if (comps >= 3) { need += 0.2f; why.Add($"{comps} лишних деталей — в переработчик"); }
+            if (_partsWant.Count > 0 && _w.Time - _partsWantAt < 60) { need += 0.3f; why.Add($"на ствол не хватает: {string.Join(", ", new List<string>(_partsWant.Keys).ConvertAll(Items.Name))}"); }
             float since = _w.Time - LastRunEnd;
             if (since > 1200) { need += 0.35f; why.Add("давно не был на РТ"); }
             if (Archetype == BotArchetype.Roamer) { need += 0.3f; why.Add("лут РТ — мой хлеб"); }
@@ -248,7 +253,7 @@ namespace Rastvordd.Sim
             bool wantHome = false;
             if (box != null)
             {
-                foreach (var id in new[] { "punchcard_1", "keycard", "ammo_pistol", "ammo_rifle", "comp_gears", "comp_spring", "comp_pipe" })
+                foreach (var id in new[] { "punchcard_1", "keycard", "ammo_9mm", "ammo_12g", "ammo_762", "comp_gears", "comp_spring", "comp_pipe" })
                     if (TripNeeds(id) > _me.Count(id) && InBox(box, id) > 0) wantHome = true;
                 wantHome |= _surplus >= 40;
             }
@@ -264,7 +269,7 @@ namespace Rastvordd.Sim
                 // ценное — дома (кроме нужного в поход)
                 if (_surplus >= 10) { if (StashAct(ref cmd)) { Doing = "собирается на РТ: оставляет ценное дома"; return true; } }
                 // взять из ящика нужное в поход
-                foreach (var id in new[] { "punchcard_1", "keycard", "ammo_pistol", "ammo_rifle", "bandage", "comp_gears", "comp_spring", "comp_pipe", "comp_tape" })
+                foreach (var id in new[] { "punchcard_1", "keycard", "ammo_9mm", "ammo_12g", "ammo_762", "bandage", "comp_gears", "comp_spring", "comp_pipe", "comp_tape" })
                 {
                     int want = TripNeeds(id);
                     if (want <= 0 || _me.Count(id) >= Math.Min(want, _me.Count(id) + InBox(box, id)) || InBox(box, id) == 0) continue;
@@ -393,7 +398,7 @@ namespace Rastvordd.Sim
                 if (!b.IsCrate && !b.Empty && _rt.M.Contains(b.Pos, 4) && !MyDrop(b)) Consider(RtTk.Bag, b, b.Pos, 10);
             foreach (var n in _w.NodesInRadius(_rt.M.Center, _rt.Radius + 3, _nodeBuf))
                 if (n.Kind is NodeKind.Barrel or NodeKind.Junk && _rt.M.Contains(n.Pos, 3)) Consider(RtTk.Node, n, n.Pos, n.Kind == NodeKind.Junk ? 4 : 0);
-            if (_rt.Recycler != null && (_me.Count("comp_gears") + _me.Count("comp_spring") + _me.Count("comp_pipe") + _me.Count("comp_tape") > 0 || _recycleSince > 0)) Consider(RtTk.Recycler, _rt.Recycler, _rt.Recycler.Pos, 15);
+            if (_rt.Recycler != null && (World.BotRecyclable(_me, CompKeepPocket) > 0 || _recycleSince > 0)) Consider(RtTk.Recycler, _rt.Recycler, _rt.Recycler.Pos, 15);
             return best;
         }
         bool _punchedByMe;
@@ -592,7 +597,7 @@ namespace Rastvordd.Sim
                     if (!Reach(rc.Pos, ref cmd, 1.2f)) return true;
                     if (_recycleSince <= 0)
                     {
-                        int n = _w.BotRecyclerPut(_me, rc);
+                        int n = _w.BotRecyclerPut(_me, rc, CompKeepPocket);
                         if (n > 0) { _recycleSince = _w.Time; Thought($"детали ×{n} в переработчик — лязг слышно, жду с оружием"); LStat("деталей в переработчик", n); }
                         else { Skip(rc, 300); _rtT = null; }
                         return true;

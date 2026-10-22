@@ -58,14 +58,24 @@ namespace Rastvordd.Sim
             return true;
         }
 
-        /// <summary>Переработчик: выложить все детали из рюкзака и включить. Возвращает, сколько деталей положено.</summary>
-        public int BotRecyclerPut(Actor a, Deployable rc)
+        static readonly string[] BotRecycleIds = { "comp_gears", "comp_spring", "comp_pipe", "comp_tape" };
+
+        /// <summary>Сколько общих деталей у бота сверх запаса под стволы (keep — сколько держать каждой).</summary>
+        public static int BotRecyclable(Actor a, Func<string, int> keep)
+        {
+            int n = 0;
+            foreach (var id in BotRecycleIds) n += Math.Max(0, a.Count(id) - keep(id));
+            return n;
+        }
+
+        /// <summary>Переработчик: выложить лишние общие детали (сверх запаса под стволы, D46) и включить. Возвращает, сколько положено.</summary>
+        public int BotRecyclerPut(Actor a, Deployable rc, Func<string, int> keep = null)
         {
             if (rc == null || rc.Kind != DeployKind.Recycler || !BotReach(a, rc.Pos, rc.Radius)) return 0;
             int n = 0;
-            foreach (var id in new[] { "comp_gears", "comp_spring", "comp_pipe", "comp_tape" })
+            foreach (var id in BotRecycleIds)
             {
-                int c = a.Take(id, 1000);
+                int c = a.Take(id, Math.Max(0, a.Count(id) - (keep?.Invoke(id) ?? 0)));
                 if (c <= 0) continue;
                 var same = rc.Storage.Items.Find(s => s.Id == id);
                 if (same != null) same.Count += c; else rc.Storage.Items.Add(new ItemSlot(id, c));
@@ -73,6 +83,38 @@ namespace Rastvordd.Sim
             }
             if (rc.Storage.Items.Exists(s => Items.RecycleYield(s.Id).Count > 0)) rc.On = true;
             return n;
+        }
+
+        /// <summary>Токарный станок бота (D46): положить материалы рецепта и включить. TODO: мозг бота пока станок не ставит и не зовёт это.</summary>
+        public bool BotLathePut(Actor a, Deployable lathe, string output)
+        {
+            var r = Weaponry.LatheFor(output);
+            if (r == null || lathe?.Kind != DeployKind.Lathe || !BotReach(a, lathe.Pos, lathe.Radius)) return false;
+            foreach (var (id, n) in r.In) if (a.Count(id) < n) return false;
+            foreach (var (id, n) in r.In)
+            {
+                int c = a.Take(id, n);
+                var same = lathe.Storage.Items.Find(s => s.Id == id && s.State == null);
+                if (same != null) same.Count += c; else lathe.Storage.Items.Add(new ItemSlot(id, c));
+            }
+            lathe.On = LatheJob(lathe) != null;
+            return true;
+        }
+
+        /// <summary>Токарный станок: забрать готовые детали (id из рецептов станка, кроме сырья).</summary>
+        public int BotLatheTake(Actor a, Deployable lathe)
+        {
+            if (lathe?.Kind != DeployKind.Lathe || !BotReach(a, lathe.Pos, lathe.Radius)) return 0;
+            int got = 0;
+            for (int i = lathe.Storage.Items.Count - 1; i >= 0; i--)
+            {
+                var s = lathe.Storage.Items[i];
+                if (Weaponry.LatheFor(s.Id) == null) continue;
+                int put = a.AddUpTo(s.Id, s.Count);
+                got += put; s.Count -= put;
+                if (s.Count <= 0) lathe.Storage.Items.RemoveAt(i);
+            }
+            return got;
         }
 
         /// <summary>Переработчик: забрать готовое (лом, металл, ткань). Детали, что ещё не разобраны, остаются.</summary>

@@ -37,8 +37,10 @@ namespace Rastvordd.Sim
                 "metal_ore" or "sulfur_ore" => int.MaxValue / 2,          // руда — в печь, а не в ящик
                 "metal_fragments" => 150,
                 "cloth" => 80,
-                "ammo_pistol" => 60,
-                "ammo_rifle" => 120,
+                "ammo_762" or "ammo_545" => 120,
+                "ammo_9mm" or "ammo_12g" => 60,
+                "ammo_bolt" => 40,
+                "comp_oil" => 2,
                 "arrow" => 40,
                 "bandage" => 4,
                 "berries" or "canned" or "water_bottle" => 10,

@@ -53,17 +53,10 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Насколько опасно оружие на слух.</summary>
-        static float WeaponPower(string id) => id switch
-        {
-            "weapon_ak" => 1f,
-            "weapon_pipe" => 0.75f,
-            "weapon_bow" => 0.6f,
-            "expl_satchel" or "expl_c4" => 1.1f,
-            _ => 0.4f,
-        };
+        static float WeaponPower(string id) => id is "expl_satchel" or "expl_c4" ? 1.1f : Weaponry.IsGun(id) ? Weaponry.Power(id) : 0.4f;
 
         /// <summary>Слышимость: огнестрел — далеко, лук — близко, взрывы — на полкарты.</summary>
-        static float HearRange(string id, bool explosion) => explosion ? 260f : id switch { "weapon_ak" => 180f, "weapon_pipe" => 120f, "weapon_bow" => 35f, _ => 25f };
+        static float HearRange(string id, bool explosion) => explosion ? 260f : Weaponry.HearRange(id);
 
         void Perceive()
         {

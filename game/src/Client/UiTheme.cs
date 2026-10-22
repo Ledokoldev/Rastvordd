@@ -55,6 +55,12 @@ namespace Rastvordd.Client
             ["weapon_spear"] = (-40, 1.5f), ["weapon_bow"] = (-40, 1.5f), ["build_plan"] = (-40, 1.3f),
             ["weapon_torch"] = (-40, 1.45f), ["tool_hammer"] = (-40, 1.4f), ["tool_hatchet"] = (-40, 1.4f),
             ["tool_pickaxe"] = (-40, 1.4f), ["weapon_ak"] = (-35, 1.35f), ["weapon_pipe"] = (0, 1.2f),
+            // оружие D46: иконки уже нарисованы по диагонали во весь кадр — только увеличиваем, чтобы читались
+            ["weapon_akm"] = (0, 1.3f), ["weapon_an94"] = (0, 1.3f), ["weapon_ppsh"] = (0, 1.3f), ["weapon_svd"] = (0, 1.35f),
+            ["weapon_svt40"] = (0, 1.35f), ["weapon_mosin"] = (0, 1.35f), ["weapon_saiga12"] = (0, 1.3f), ["weapon_mp133"] = (0, 1.35f),
+            ["weapon_sawnoff"] = (0, 1.2f), ["weapon_pipeshotgun"] = (0, 1.3f), ["weapon_pps43"] = (0, 1.25f), ["weapon_homesmg"] = (0, 1.25f),
+            ["weapon_crossbow"] = (0, 1.25f),
+            ["comp_barrel_rifled"] = (0, 1.25f), ["comp_barrel_chrome"] = (0, 1.25f), ["comp_body_rifle"] = (0, 1.25f),
         };
 
         // ================= РЕДКОСТЬ И КАТЕГОРИИ =================
@@ -67,12 +73,29 @@ namespace Rastvordd.Client
             _ => Dim,
         };
 
+        /// <summary>Цвет полоски износа: целое — зелёное, половина — янтарь, почти сломано — красное.</summary>
+        public static Color DurabilityColor(float k) => k > 0.5f ? Good : k > 0.2f ? Accent : Bad;
+
+        /// <summary>Ветка дерева изучения (цвет линий и метки): 0 пистолеты и ПП, 1 винтовки, 2 патроны, 3 обвесы, 4 прочее.</summary>
+        public static int Branch(string id) => id switch
+        {
+            "weapon_nagant" or "weapon_homesmg" or "weapon_grach" or "weapon_pps43" or "weapon_ppsh" or "weapon_aps" => 0,
+            "weapon_crossbow" or "weapon_svt40" or "weapon_akm" or "weapon_an94" or "weapon_svd" or "weapon_mosin" => 1,
+            "gunpowder" => 2,
+            _ when id != null && id.StartsWith("ammo_") => 2,
+            _ when id != null && id.StartsWith("att_") => 3,
+            _ => 4,
+        };
+        public static readonly string[] BranchNames = { "Пистолеты и ПП", "Винтовки", "Порох и патроны", "Обвесы", "Взрывчатка и разное" };
+        public static Color BranchColor(int b) => b switch { 0 => Hex(0x6cb6ff), 1 => Hex(0xf0b357), 2 => Hex(0xbdbdbd), 3 => Hex(0xb46cff), _ => Hex(0xe5675f) };
+
         public static string RarityName(int r) => r switch { 1 => "Необычное", 2 => "Редкое", 3 => "Эпическое", 4 => "Легендарное", _ => "Обычное" };
 
         public static string CategoryName(string id) => Items.Get(id)?.Category switch
         {
             ItemCategory.Resource => "Ресурс",
-            ItemCategory.Component => id != null && (id.StartsWith("key") || id.StartsWith("punchcard") || id.StartsWith("rt_") || id == "fuse") ? "Ключ" : "Компонент",
+            ItemCategory.Component => id != null && (id.StartsWith("key") || id.StartsWith("punchcard") || id.StartsWith("rt_") || id == "fuse") ? "Ключ"
+                : id != null && id.StartsWith("att_") ? "Обвес" : "Компонент",
             ItemCategory.Tool => "Инструмент",
             ItemCategory.Weapon => "Оружие",
             ItemCategory.Ammo => "Патроны",

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Rastvordd.Sim;
 
@@ -8,7 +9,7 @@ namespace Rastvordd.Client
     /// <summary>Узел дерева: иконка; изучен — зелёная точка, доступен — янтарная рамка и замок, закрыт — тусклый с замком.</summary>
     public partial class TechCell : Control
     {
-        public const float Side = 68;
+        public const float Side = 58;
         public TechInfo T;
         public bool Selected;
         public event Action<TechCell> Clicked;
@@ -49,7 +50,11 @@ namespace Rastvordd.Client
         public event Action<string> Research;
         public event Action OpenCraft;
 
-        const float ColW = 200, RowH = 96, Top = 64;
+        const float ColW = 200, RowH = 82, Top = 34, BandGap = 34, TreeH = 430;
+        /// <summary>Полосы дерева по строкам: (с какой строки, подпись) — порох и патроны, оружие, обвесы и разное.</summary>
+        static readonly (int row, string title)[] Bands = { (0, "Порох, патроны, взрывчатка"), (2, "Оружие: пистолеты и ПП · винтовки"), (6, "Обвесы и разное") };
+        static int BandOf(int row) { int b = 0; for (int i = 0; i < Bands.Length; i++) if (row >= Bands[i].row) b = i; return b; }
+        static float RowY(int row) => Top + row * RowH + BandOf(row) * BandGap;
         // раскладка: (столбец = верстак − 1, строка) — потомки на строке предка
         // раскладка — из данных дерева (TechNode.Col/Row, ветка оружия D46); узел без места — в конец своего столбца
         static readonly Dictionary<string, (int col, int row)> Layout = BuildLayout();
@@ -68,7 +73,13 @@ namespace Rastvordd.Client
         static int LayoutRows() { int m = 0; foreach (var (_, (_, r)) in Layout) m = Math.Max(m, r + 1); return m; }
         static readonly string[] Starter = { "tool_hatchet", "tool_pickaxe", "weapon_spear", "weapon_bow", "arrow", "weapon_torch", "bandage", "build_plan", "tool_hammer", "deploy_claim", "deploy_box", "deploy_sleepbag", "lock_key", "deploy_furnace", "deploy_workbench" };
 
-        readonly Control _tree;
+        readonly Control _tree, _heads;
+
+        partial class ColorDot : Control
+        {
+            public Color C;
+            public override void _Draw() => UiTheme.DrawDot(this, Size / 2, 4.5f, C);
+        }
         readonly Dictionary<string, TechCell> _cells = new();
         readonly Label _scrap, _bench, _name, _desc, _cost, _why;
         readonly BigIcon _icon;
@@ -127,12 +138,31 @@ namespace Rastvordd.Client
             _bench = UiTheme.Small("", UiTheme.Dim, UiTheme.FontSmall);
             lbox.AddChild(_bench);
 
-            _tree = new Control { CustomMinimumSize = new Vector2(3 * ColW, Top + Math.Max(5, LayoutRows()) * RowH), MouseFilter = MouseFilterEnum.Pass };
+            // ветки — цветом линий и точек у подписей
+            var legend = UiTheme.HBox(14);
+            for (int b = 0; b < UiTheme.BranchNames.Length; b++)
+            {
+                var item = UiTheme.HBox(6);
+                var dot = new ColorDot { C = UiTheme.BranchColor(b), CustomMinimumSize = new Vector2(10, 10), SizeFlagsVertical = SizeFlags.ShrinkCenter };
+                item.AddChild(dot);
+                var l = UiTheme.Small(UiTheme.BranchNames[b], UiTheme.Body, UiTheme.FontCaption);
+                l.AutowrapMode = TextServer.AutowrapMode.Off;
+                item.AddChild(l);
+                legend.AddChild(item);
+            }
+            lbox.AddChild(legend);
+            // шапка столбцов (верстак 1–3) — не прокручивается
+            _heads = new Control { CustomMinimumSize = new Vector2(3 * ColW, 44), MouseFilter = MouseFilterEnum.Ignore };
+            _heads.Draw += DrawHeads;
+            lbox.AddChild(_heads);
+            var scroll = new ScrollContainer { CustomMinimumSize = new Vector2(3 * ColW + 14, TreeH), HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };
+            lbox.AddChild(scroll);
+            _tree = new Control { CustomMinimumSize = new Vector2(3 * ColW, RowY(Math.Max(5, LayoutRows())) + 6), MouseFilter = MouseFilterEnum.Pass };
             _tree.Draw += DrawTree;
-            lbox.AddChild(_tree);
+            scroll.AddChild(_tree);
             foreach (var (id, (col, r)) in Layout)
             {
-                var c = new TechCell { Position = new Vector2(col * ColW + 20, Top + r * RowH) };
+                var c = new TechCell { Position = new Vector2(col * ColW + 30, RowY(r)) };
                 c.Clicked += cell => { _selected = cell.T.Id; _cardSig = null; };
                 _tree.AddChild(c);
                 _cells[id] = c;
@@ -180,49 +210,95 @@ namespace Rastvordd.Client
             rbox.AddChild(_why);
         }
 
-        // линии от предков к потомкам и подписи столбцов
-        void DrawTree()
+        // шапка: три верстака
+        void DrawHeads()
         {
-            var font = UiTheme.Text;
             for (int col = 0; col < 3; col++)
             {
                 string title = $"Верстак {col + 1}";
                 bool here = _benchLevel >= col + 1;
-                UiTheme.DrawRound(_tree, new Rect2(col * ColW + 16, 2, 40, 40), new Color(1, 1, 1, here ? 0.1f : 0.05f), 10);
-                UiTheme.DrawIcon(_tree, col == 0 ? "deploy_workbench" : $"deploy_workbench{col + 1}", new Rect2(col * ColW + 20, 6, 32, 32), here ? Colors.White : new Color(1, 1, 1, 0.45f));
-                UiTheme.DrawText(_tree, new Vector2(col * ColW + 64, 20), title, 14, here ? UiTheme.Ink : UiTheme.Body, UiTheme.Semi);
-                UiTheme.DrawText(_tree, new Vector2(col * ColW + 64, 37), here ? "рядом ✓" : col == 0 ? "дерево, металл, лом" : $"крафт у верстака {col}", 12, here ? UiTheme.Good : UiTheme.Dim);
+                UiTheme.DrawRound(_heads, new Rect2(col * ColW + 16, 2, 40, 40), new Color(1, 1, 1, here ? 0.1f : 0.05f), 10);
+                UiTheme.DrawIcon(_heads, col == 0 ? "deploy_workbench" : $"deploy_workbench{col + 1}", new Rect2(col * ColW + 20, 6, 32, 32), here ? Colors.White : new Color(1, 1, 1, 0.45f));
+                UiTheme.DrawText(_heads, new Vector2(col * ColW + 64, 20), title, 14, here ? UiTheme.Ink : UiTheme.Body, UiTheme.Semi);
+                UiTheme.DrawText(_heads, new Vector2(col * ColW + 64, 37), here ? "рядом ✓" : col == 0 ? "дерево, металл, лом" : $"крафт у верстака {col}", 12, here ? UiTheme.Good : UiTheme.Dim);
+            }
+        }
+
+        void DashedLine(Vector2 a, Vector2 b, Color c)
+        {
+            float len = a.DistanceTo(b);
+            if (len < 0.5f) return;
+            var d = (b - a) / len;
+            for (float t = 0; t < len; t += 9) _tree.DrawLine(a + d * t, a + d * Mathf.Min(len, t + 5), c, 2, true);
+        }
+
+        /// <summary>Связь предок → потомок: в одном столбце соседние — прямо вниз, дальние — по левому краю; между столбцами — уголком у потомка.</summary>
+        void Connect(TechCell parent, TechCell child, Color col, bool dashed)
+        {
+            float sd = TechCell.Side;
+            Vector2[] pts;
+            if (Mathf.IsEqualApprox(parent.Position.X, child.Position.X))
+            {
+                var pl = Layout[parent.T.Id]; var cl = Layout[child.T.Id];
+                if (cl.row == pl.row + 1 && BandOf(cl.row) == BandOf(pl.row))
+                    pts = new[] { parent.Position + new Vector2(sd / 2, sd), child.Position + new Vector2(sd / 2, 0) };
+                else
+                {
+                    float gx = parent.Position.X - 12;
+                    var a = parent.Position + new Vector2(0, sd / 2);
+                    var b = child.Position + new Vector2(0, sd / 2);
+                    pts = new[] { a, new Vector2(gx, a.Y), new Vector2(gx, b.Y), b };
+                }
+            }
+            else
+            {
+                var a = parent.Position + new Vector2(sd, sd / 2);
+                var b = child.Position + new Vector2(0, sd / 2);
+                float mx = b.X - 16 - (Mathf.Abs(a.Y - b.Y) > 1 ? 0 : 0);
+                pts = new[] { a, new Vector2(mx, a.Y), new Vector2(mx, b.Y), b };
+            }
+            if (dashed) for (int i = 0; i + 1 < pts.Length; i++) DashedLine(pts[i], pts[i + 1], col);
+            else _tree.DrawPolyline(pts, col, 2, true);
+            // стрелка-точка на входе в потомка
+            UiTheme.DrawDot(_tree, pts[^1], 2.5f, col);
+        }
+
+        // полосы, линии от предков к потомкам и подписи узлов
+        void DrawTree()
+        {
+            var font = UiTheme.Text;
+            // подписи полос
+            foreach (var (row, title) in Bands)
+            {
+                float y = RowY(row) - 24;
+                UiTheme.DrawText(_tree, new Vector2(4, y + 12), title.ToUpper(), UiTheme.FontCaption, UiTheme.Faint);
+                float tw = UiTheme.TextWidth(title.ToUpper(), UiTheme.FontCaption);
+                _tree.DrawLine(new Vector2(tw + 14, y + 8), new Vector2(3 * ColW - 8, y + 8), UiTheme.Line, 1);
             }
             foreach (var t in _tech)
             {
                 if (!_cells.TryGetValue(t.Id, out var child)) continue;
+                var bc = UiTheme.BranchColor(UiTheme.Branch(t.Id));
                 foreach (var req in t.Requires)
                 {
                     if (!_cells.TryGetValue(req, out var parent)) continue;
-                    bool done = parent.T.Known;
-                    var col = done ? new Color(UiTheme.Good, 0.7f) : new Color(1, 1, 1, 0.16f);
-                    Vector2 a, b;
-                    if (Mathf.IsEqualApprox(parent.Position.X, child.Position.X))
-                    {
-                        a = parent.Position + new Vector2(TechCell.Side / 2, TechCell.Side);
-                        b = child.Position + new Vector2(TechCell.Side / 2, 0);
-                        _tree.DrawLine(a, b, col, 2, true);
-                    }
-                    else
-                    {
-                        a = parent.Position + new Vector2(TechCell.Side, TechCell.Side / 2);
-                        b = child.Position + new Vector2(0, TechCell.Side / 2);
-                        float mx = b.X - 18;   // поворот у самого потомка — линия не идёт через чужие узлы
-                        _tree.DrawPolyline(new[] { a, new Vector2(mx, a.Y), new Vector2(mx, b.Y), b }, col, 2, true);
-                    }
+                    Connect(parent, child, new Color(bc, parent.T.Known ? 0.85f : 0.3f), false);
+                }
+                // «одно из» (АКМ — через Грач или СВТ) — пунктиром
+                foreach (var req in Tech.Get(t.Id)?.RequiresAny ?? Array.Empty<string>())
+                {
+                    if (!_cells.TryGetValue(req, out var parent)) continue;
+                    Connect(parent, child, new Color(bc, parent.T.Known ? 0.8f : 0.25f), true);
                 }
             }
-            // подписи под узлами
+            // подписи под узлами с точкой ветки
             foreach (var c in _cells.Values)
             {
                 string n = c.T.Name ?? "";
-                var sz = font.GetStringSize(n, HorizontalAlignment.Left, -1, 12);
-                _tree.DrawString(font, c.Position + new Vector2(TechCell.Side / 2 - sz.X / 2, TechCell.Side + 16), n, HorizontalAlignment.Left, -1, 12, c.T.Known ? UiTheme.Ink : UiTheme.Dim);
+                float w = Mathf.Min(UiTheme.TextWidth(n, 12), ColW - 30);
+                var at = c.Position + new Vector2(TechCell.Side / 2 - w / 2 + 5, TechCell.Side + 15);
+                UiTheme.DrawDot(_tree, at + new Vector2(-8, -4), 3, UiTheme.BranchColor(UiTheme.Branch(c.T.Id ?? "")));
+                _tree.DrawString(font, at, n, HorizontalAlignment.Left, ColW - 30, 12, c.T.Known ? UiTheme.Ink : UiTheme.Dim);
             }
         }
 
@@ -236,6 +312,7 @@ namespace Rastvordd.Client
             foreach (var t in _tech)
                 if (_cells.TryGetValue(t.Id, out var c)) { c.T = t; c.Selected = t.Id == _selected; c.QueueRedraw(); }
             _tree.QueueRedraw();
+            _heads.QueueRedraw();
 
             var sel = _tech.Find(t => t.Id == _selected);
             if (sel.Id == null) return;
@@ -259,6 +336,12 @@ namespace Rastvordd.Client
                 {
                     bool k = _tech.Exists(t => t.Id == r && t.Known);
                     _reqs.AddChild(Line(Items.Name(r), k ? "изучено ✓" : "не изучено", k ? green : red));
+                }
+                var any = Tech.Get(sel.Id)?.RequiresAny ?? Array.Empty<string>();
+                if (any.Length > 0)
+                {
+                    bool k = any.Any(r => _tech.Exists(t => t.Id == r && t.Known));
+                    _reqs.AddChild(Line("Одно из: " + string.Join(" / ", any.Select(Items.Name)), k ? "есть ✓" : "нет", k ? green : red));
                 }
                 _reqs.AddChild(Line("Металлолом", $"{s.Scrap} / {sel.Scrap}", s.Scrap >= sel.Scrap ? green : red));
             }

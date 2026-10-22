@@ -62,18 +62,28 @@ namespace Rastvordd.Client
     {
         public event Action<int, int> Craft;    // (индекс рецепта, сколько раз)
         public event Action OpenTree;
-        static readonly string[] Tabs = { "Всё", "Инструменты", "Оружие", "Стройка", "Рейд", "Разное" };
+        static readonly string[] Tabs = { "Всё", "Инструменты", "Оружие", "Обвесы", "Компоненты", "Стройка", "Рейд", "Разное" };
 
         static int TabOf(string id) => id switch
         {
             _ when id.StartsWith("tool_") || id == "build_plan" => 1,
             _ when id.StartsWith("weapon_") || id.StartsWith("ammo_") || id == "arrow" => 2,
-            _ when id.StartsWith("deploy_") || id.StartsWith("lock_") => 3,
-            _ when id.StartsWith("expl_") => 4,
-            _ => 5,
+            _ when id.StartsWith("att_") => 3,
+            _ when id.StartsWith("comp_") => 4,
+            _ when id.StartsWith("deploy_") || id.StartsWith("lock_") => 5,
+            _ when id.StartsWith("expl_") => 6,
+            _ => 7,
         };
 
-        readonly HBoxContainer _tabs;
+        /// <summary>Только добыча (D46): дробовики и элита не крафтятся — даже если рецепт появится, в окне его нет.</summary>
+        static readonly HashSet<string> LootOnly = new() { "weapon_pipeshotgun", "weapon_sawnoff", "weapon_mp133", "weapon_saiga12", "weapon_mosin", "weapon_aps" };
+        static readonly Dictionary<int, string> EmptyTab = new()
+        {
+            [4] = "Детали в крафте не делаются: их точит токарный станок (Стройка → Токарный станок) из деталей попроще. Редкие — только с РТ.",
+        };
+
+        readonly HFlowContainer _tabs;
+        readonly Label _emptyNote;
         readonly GridContainer _grid;
         readonly List<RecipeCell> _cells = new();
         readonly BigIcon _bigIcon;
@@ -116,7 +126,9 @@ namespace Rastvordd.Client
             var tree = UiTheme.Btn("Дерево изучения", false, 0, 34);
             tree.Pressed += () => OpenTree?.Invoke();
             head.AddChild(tree);
-            _tabs = UiTheme.HBox(8);
+            _tabs = new HFlowContainer { CustomMinimumSize = new Vector2(7 * (RecipeCell.Size + UiTheme.CellGap), 0) };
+            _tabs.AddThemeConstantOverride("h_separation", 8);
+            _tabs.AddThemeConstantOverride("v_separation", 8);
             lbox.AddChild(_tabs);
             for (int i = 0; i < Tabs.Length; i++)
             {
@@ -131,6 +143,10 @@ namespace Rastvordd.Client
             _grid.AddThemeConstantOverride("h_separation", (int)UiTheme.CellGap);
             _grid.AddThemeConstantOverride("v_separation", (int)UiTheme.CellGap);
             scroll.AddChild(_grid);
+            _emptyNote = UiTheme.Small("", UiTheme.Dim, UiTheme.FontSmall);
+            _emptyNote.CustomMinimumSize = new Vector2(7 * (RecipeCell.Size + UiTheme.CellGap), 0);
+            _emptyNote.Visible = false;
+            lbox.AddChild(_emptyNote);
             var keys = UiTheme.HBox(6);
             foreach (var k in new[] { "Клик — выбрать", "Двойной клик — скрафтить", "В1–В3 — нужен верстак", "Q — закрыть" }) keys.AddChild(UiTheme.KeyChip(k));
             lbox.AddChild(keys);
@@ -228,6 +244,7 @@ namespace Rastvordd.Client
                 _cells.Clear();
                 for (int i = 0; i < _recipes.Count; i++)
                 {
+                    if (LootOnly.Contains(_recipes[i].Output)) continue;
                     if (_tab != 0 && TabOf(_recipes[i].Output) != _tab) continue;
                     int idx = i;
                     var c = new RecipeCell { R = _recipes[i] };
@@ -236,8 +253,10 @@ namespace Rastvordd.Client
                     _grid.AddChild(c);
                     _cells.Add(c);
                 }
-                if (_selected < 0 || (_tab != 0 && TabOf(_recipes[_selected].Output) != _tab))
+                if (_selected < 0 || LootOnly.Contains(_recipes[_selected].Output) || (_tab != 0 && TabOf(_recipes[_selected].Output) != _tab))
                     _selected = _cells.Count > 0 ? _recipes.FindIndex(r => r.Index == _cells[0].R.Index) : -1;
+                _emptyNote.Visible = _cells.Count == 0;
+                _emptyNote.Text = EmptyTab.GetValueOrDefault(_tab, "Здесь пока ничего нет");
             }
             foreach (var c in _cells)
             {

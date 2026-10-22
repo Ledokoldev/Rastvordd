@@ -163,6 +163,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("open:")) { _server.World.DebugOpenUi(_server.World.Find(_myId), a[5..]); _invOpen = true; }   // отладка: окна для скриншотов
                 else if (a.StartsWith("ui")) _uiReq = ((UiOp)int.Parse(a.Substring(2).Split('_')[0]), a.Contains('_') ? a.Substring(a.IndexOf('_') + 1).Replace('~', '#').Replace('^', '>') : null, 0);   // отладка: ui<op>_<арг> (# → ~, > → ^)
                 else if (a == "inv") _invOpen = !_invOpen;
+                else if (a.StartsWith("invsel")) _inv.DebugSelect(a.Substring(6));   // отладка: invsel<pack|belt>~<i> — карточка этой ячейки
                 else if (a == "admin") _hud.ToggleAdmin();
                 else if (a == "code") _hud.ShowCode(0);
                 else if (a == "die") _server.World.DebugKill(_server.World.Find(_myId));
@@ -1379,6 +1380,7 @@ else if (arg == "--atcrate")
 
             // меню плана и шпаргалка стройки
             _feed.Update(_cur.Self, dt);
+            _feed.Visible = !_hud.CraftOpen && !_mapView.Visible;   // лента у пояса; пояс спрятан под крафтом и картой
             _structTip.Set(_cur.Self.Dead || UiShown || _buildMenu.Visible || _mapView.Visible ? null : StructTip.Pick(_cur.Structures, _aim));
             _buildBar.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_buildMenu.Visible && !UiShown;
             if (_buildBar.Visible) _buildBar.Set((int)_cur.Self.BuildPiece, (int)_cur.Self.GhostPiece);

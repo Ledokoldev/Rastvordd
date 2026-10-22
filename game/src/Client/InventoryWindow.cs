@@ -95,12 +95,16 @@ namespace Rastvordd.Client
                     var dotAt = Number == null ? new Vector2(13.5f, 13.5f) : new Vector2(s - 13.5f, 13.5f);
                     UiTheme.DrawDot(this, dotAt, 3.5f, new Color(UiTheme.RarityColor(Cell.Rarity), a));
                 }
+                bool worn = Cell.Durability >= 0;
+                if (worn)   // износ ствола — тонкая полоска по низу ячейки
+                    UiTheme.DrawBar(this, new Rect2(9, s - 7, s - 18, 3), Cell.Durability, new Color(UiTheme.DurabilityColor(Cell.Durability), a), new Color(1, 1, 1, 0.1f * a));
+                DrawAttPips(this, Cell, new Vector2(12, s - (worn ? 14 : 11)), a);
                 string n = Cell.Magazine > 0 ? $"{Cell.Ammo}/{Cell.Magazine}" : Cell.Count > 1 ? (Cell.Count >= 10000 ? $"{Cell.Count / 1000}k" : Cell.Count.ToString()) : "";
                 if (n != "")
                 {
                     int fs = Cell.Magazine > 0 ? 12 : (s < 70 ? 12 : 14);
                     float w = UiTheme.TextWidth(n, fs, UiTheme.Semi);
-                    var at = new Vector2(s - 9 - w, s - 8);
+                    var at = new Vector2(s - 9 - w, s - (worn ? 12 : 8));
                     UiTheme.DrawText(this, at + new Vector2(0, 1), n, fs, new Color(0, 0, 0, 0.6f * a), UiTheme.Semi);
                     UiTheme.DrawText(this, at, n, fs, new Color(UiTheme.Ink, a), UiTheme.Semi);
                 }
@@ -120,6 +124,25 @@ namespace Rastvordd.Client
                 }
             }
             if (Number != null) UiTheme.DrawText(this, new Vector2(10, 18), Number, 12, Selected ? UiTheme.Ink : new Color(1, 1, 1, 0.55f));
+        }
+
+        /// <summary>
+        /// Обвесы на стволе — точки по слотам, которые ствол принимает (прицел, дуло, цевьё, магазин, приклад):
+        /// заполненная — стоит обвес (цвет его качества), пустое кольцо — слот свободен.
+        /// </summary>
+        public static void DrawAttPips(CanvasItem c, CellView cell, Vector2 at, float a = 1)
+        {
+            if (Items.Get(cell.Id)?.Weapon is not WeaponDef w || w.Slots == 0) return;
+            float x = at.X;
+            for (int k = 0; k < Weaponry.SlotCount; k++)
+            {
+                if (!w.Accepts((AttSlot)k)) continue;
+                string att = cell.Att != null && k < cell.Att.Length ? cell.Att[k] : null;
+                var p = new Vector2(x, at.Y);
+                if (att != null) UiTheme.DrawDot(c, p, 2.8f, new Color(UiTheme.RarityColor(Items.Rarity(att)), a));
+                else c.DrawArc(p, 2.4f, 0, Mathf.Tau, 12, new Color(1, 1, 1, 0.35f * a), 1f, true);
+                x += 7.5f;
+            }
         }
 
         public override string _GetTooltip(Vector2 atPosition)
@@ -318,8 +341,10 @@ namespace Rastvordd.Client
         public const float W = 340;
         readonly BigIcon _icon = new() { CustomMinimumSize = new Vector2(0, 150) };
         readonly Label _name, _count, _type, _desc, _empty, _where;
-        readonly VBoxContainer _uses, _usesBox, _recBox;
+        readonly VBoxContainer _uses, _usesBox, _recBox, _gunBox, _gunStats, _gunAtts, _keysItem, _keysGun;
         readonly HFlowContainer _rec;
+        readonly ThinBar _durBar;
+        readonly Label _durText;
         string _sig;
 
         public ItemCard()
@@ -349,6 +374,28 @@ namespace Rastvordd.Client
             _empty.CustomMinimumSize = new Vector2(W - 2 * UiTheme.PanelPad, 0);
             box.AddChild(_empty);
 
+            // оружие: износ, характеристики, обвесы по слотам
+            _gunBox = UiTheme.VBox(4);
+            _gunBox.AddChild(Gap(8));
+            var dur = UiTheme.HBox(10);
+            var dl = UiTheme.Small("Состояние", UiTheme.Dim, UiTheme.FontSmall);
+            dl.AutowrapMode = TextServer.AutowrapMode.Off;
+            dur.AddChild(dl);
+            _durBar = new ThinBar { CustomMinimumSize = new Vector2(0, 6), SizeFlagsHorizontal = SizeFlags.ExpandFill, SizeFlagsVertical = SizeFlags.ShrinkCenter };
+            dur.AddChild(_durBar);
+            _durText = UiTheme.Strong("", UiTheme.FontSmall);
+            dur.AddChild(_durText);
+            _gunBox.AddChild(dur);
+            _gunBox.AddChild(Gap(6));
+            _gunBox.AddChild(UiTheme.Caption("Характеристики"));
+            _gunStats = UiTheme.VBox(1);
+            _gunBox.AddChild(_gunStats);
+            _gunBox.AddChild(Gap(6));
+            _gunBox.AddChild(UiTheme.Caption("Обвесы"));
+            _gunAtts = UiTheme.VBox(3);
+            _gunBox.AddChild(_gunAtts);
+            box.AddChild(_gunBox);
+
             _usesBox = UiTheme.VBox(6);
             _usesBox.AddChild(Gap(10));
             _usesBox.AddChild(UiTheme.Caption("Нужно для крафта"));
@@ -368,15 +415,22 @@ namespace Rastvordd.Client
             box.AddChild(_recBox);
 
             box.AddChild(new Control { SizeFlagsVertical = SizeFlags.ExpandFill, CustomMinimumSize = new Vector2(0, 12) });
-            // клавиши — две строки «таблеток»
-            foreach (var line in new[] { new[] { "Тащи — переложить", "За окно — выбросить" }, new[] { "ПКМ / Shift+клик — на пояс" } })
+            // клавиши — две строки «таблеток»; у ствола — свои (снять обвесы, ремонт)
+            VBoxContainer Keys(string[][] lines)
             {
-                var keys = UiTheme.HBox(6);
-                foreach (var k in line) keys.AddChild(UiTheme.KeyChip(k));
-                box.AddChild(keys);
-                box.AddChild(Gap(6));
+                var kb = UiTheme.VBox(6);
+                foreach (var line in lines)
+                {
+                    var keys = UiTheme.HBox(6);
+                    foreach (var k in line) keys.AddChild(UiTheme.KeyChip(k));
+                    kb.AddChild(keys);
+                }
+                box.AddChild(kb);
+                return kb;
             }
-            Show(null, 0);
+            _keysItem = Keys(new[] { new[] { "Тащи — переложить", "За окно — выбросить" }, new[] { "ПКМ / Shift+клик — на пояс" } });
+            _keysGun = Keys(new[] { new[] { "Колёсико — снять обвесы", "Обвес — тащи на ствол" }, new[] { "Alt+E у верстака — ремонт маслом" } });
+            Show(null);
         }
 
         static Control Gap(float h) => new Control { CustomMinimumSize = new Vector2(0, h), MouseFilter = MouseFilterEnum.Ignore };
@@ -386,12 +440,20 @@ namespace Rastvordd.Client
             Recipes.All.Where(r => r.Cost.Any(c => c.id == id))
                 .OrderBy(r => r.Cost.Length).ThenBy(r => r.Bench).ThenBy(r => r.Time).Take(max).ToList();
 
-        public void Show(string id, int count)
+        public void Show(CellView? cell)
         {
-            string sig = id + "|" + count;
+            var cv = cell ?? default;
+            string id = cv.Id;
+            int count = cv.Count;
+            string sig = id + "|" + count + "|" + cv.Durability.ToString("0.00") + "|" + (cv.Att != null ? string.Join(",", cv.Att) : "");
             if (sig == _sig) return;
             _sig = sig;
             bool has = id != null;
+            bool gun = has && Items.Get(id)?.Weapon is WeaponDef gw && !gw.Melee;
+            _gunBox.Visible = gun;
+            _keysGun.Visible = gun;
+            _keysItem.Visible = !gun;
+            if (gun) FillGun(cv);
             _empty.Visible = !has;
             _name.Visible = _count.Visible = _type.Visible = _desc.Visible = has;
             _icon.Id = id;
@@ -412,12 +474,63 @@ namespace Rastvordd.Client
             var uses = UsesOf(id);
             foreach (var r in uses) _uses.AddChild(RecipeRow(r, id));
             if (uses.Count == 0) _uses.AddChild(UiTheme.Small("Ни в одном рецепте не тратится", UiTheme.Faint, UiTheme.FontSmall));
+            _usesBox.Visible = !gun || uses.Count > 0;   // у ствола — место под характеристики
 
             foreach (var c in _rec.GetChildren()) c.QueueFree();
             var yield = Items.RecycleYield(id);
             foreach (var (yid, n) in yield) _rec.AddChild(YieldChip(yid, n));
             _rec.Visible = yield.Count > 0;
+            _recBox.Visible = !gun;   // ствол на переработку не главное — экономим высоту под обвесы
+            _icon.CustomMinimumSize = new Vector2(0, gun ? 110 : 150);
+            if (gun && Items.Get(id).Weapon.Tier > 0) _type.Text += Items.Get(id).Weapon.Tier >= 4 ? " · элита" : $" · тир {Items.Get(id).Weapon.Tier}";
             _where.Text = yield.Count > 0 ? "Переработчик на РТ · за 1 шт." : "Не перерабатывается";
+        }
+
+        /// <summary>Ствол: износ, характеристики (урон, темп и режим, магазин, калибр, дальность, тир) и обвесы по слотам.</summary>
+        void FillGun(CellView cv)
+        {
+            var w = Items.Get(cv.Id).Weapon;
+            bool worn = cv.Durability >= 0;
+            _durBar.GetParent<Control>().Visible = worn;
+            if (worn)
+            {
+                _durBar.Value = cv.Durability; _durBar.Fill = UiTheme.DurabilityColor(cv.Durability); _durBar.QueueRedraw();
+                _durText.Text = $"{Mathf.RoundToInt(cv.Durability * 100)}%";
+                _durText.AddThemeColorOverride("font_color", UiTheme.DurabilityColor(cv.Durability));
+            }
+            foreach (var c in _gunStats.GetChildren()) c.QueueFree();
+            foreach (var (label, value) in Items.Stats(cv.Id))
+            {
+                if (label is "Обвесы" or "Износ" or "Перезарядка" or "Тир") continue;   // обвесы — ниже, износ — полоской, тир — в подзаголовке
+                string v = value;
+                if (label == "Магазин" && cv.Magazine > 0) v = $"{cv.Ammo} / {cv.Magazine}";   // с обвесом магазин больше
+                if (label == "Патроны") v = value.Replace("Патроны ", "");
+                _gunStats.AddChild(TechWindow.Line(label == "Патроны" ? "Калибр" : label, v, UiTheme.Ink));
+            }
+
+            foreach (var c in _gunAtts.GetChildren()) c.QueueFree();
+            int slots = 0;
+            var free = new List<string>();
+            for (int k = 0; k < Weaponry.SlotCount; k++)
+            {
+                if (!w.Accepts((AttSlot)k)) continue;
+                slots++;
+                string att = cv.Att != null && k < cv.Att.Length ? cv.Att[k] : null;
+                if (att == null) { free.Add(Weaponry.SlotNames[k]); continue; }
+                var row = UiTheme.HBox(8);
+                var sl = UiTheme.Small(Weaponry.SlotNames[k], UiTheme.Dim, UiTheme.FontSmall);
+                sl.AutowrapMode = TextServer.AutowrapMode.Off;
+                sl.CustomMinimumSize = new Vector2(70, 0);
+                sl.VerticalAlignment = VerticalAlignment.Center;
+                row.AddChild(sl);
+                row.AddChild(UiTheme.IconBox(att, 24, 0.06f, 6));
+                var an = UiTheme.Strong(Items.Name(att), UiTheme.FontSmall, UiTheme.RarityColor(Items.Rarity(att)));
+                an.VerticalAlignment = VerticalAlignment.Center;
+                row.AddChild(an);
+                _gunAtts.AddChild(row);
+            }
+            if (free.Count > 0) _gunAtts.AddChild(UiTheme.Small("Свободно: " + string.Join(", ", free), UiTheme.Faint, UiTheme.FontCaption));
+            if (slots == 0) _gunAtts.AddChild(UiTheme.Small("Обвесы не ставятся", UiTheme.Faint, UiTheme.FontSmall));
         }
 
         static Control RecipeRow(Recipe r, string id)
@@ -478,6 +591,12 @@ namespace Rastvordd.Client
             box.AddChild(head);
             string desc = Items.Desc(c.Id);
             if (c.Magazine > 0) desc = $"В магазине {c.Ammo}/{c.Magazine}. " + desc;
+            if (c.Durability >= 0) desc = $"Состояние {Mathf.RoundToInt(c.Durability * 100)}%. " + desc;
+            if (c.Att != null)
+            {
+                var atts = c.Att.Where(x => x != null).Select(Items.Name).ToList();
+                if (atts.Count > 0) desc = "Обвесы: " + string.Join(", ", atts) + ". " + desc;
+            }
             if (desc != "") { var d = UiTheme.Small(desc, UiTheme.Body, UiTheme.FontSmall); d.CustomMinimumSize = new Vector2(260, 0); box.AddChild(d); }
             var y = Items.RecycleYield(c.Id);
             if (y.Count > 0)
@@ -727,6 +846,13 @@ namespace Rastvordd.Client
             return c;
         }
 
+        /// <summary>Отладка (скриншоты): выбрать ячейку «pack~3» / «belt~1».</summary>
+        public void DebugSelect(string at)
+        {
+            var p = at.Split('~');
+            if (p.Length == 2 && int.TryParse(p[1], out int i)) { _sel = (p[0], i); _hov = (null, -1); MarkSelected(); }
+        }
+
         void MarkSelected()
         {
             foreach (var c in _pack) { bool s = _sel.inv == "pack" && _sel.i == c.Index; if (c.Selected != s) { c.Selected = s; c.QueueRedraw(); } }
@@ -776,7 +902,7 @@ namespace Rastvordd.Client
                     if (first >= 0) { _sel = ("pack", first); MarkSelected(); }
                 }
                 var show = CellAt(_hov) is CellView h && h.Id != null ? h : CellAt(_sel) is CellView s && s.Id != null ? s : (CellView?)null;
-                _card.Show(show?.Id, show?.Count ?? 0);
+                _card.Show(show);
                 return;
             }
             RefreshContainer(ui);
@@ -786,7 +912,7 @@ namespace Rastvordd.Client
         {
             _contTitle.Text = Cap(ui.Title);
             string inv = ui.Kind switch { UiKind.Furnace => "fur", UiKind.Claim => "claim", _ => "cont" };
-            string sig = inv + ui.Kind + ui.Cells.Count;
+            string sig = inv + ui.Kind + ui.Machine + ui.Cells.Count;
             if (sig != _contSig)
             {
                 _contSig = sig;
@@ -822,6 +948,9 @@ namespace Rastvordd.Client
                     _contInfo.Text = ui.Burning ? "Руда плавится, дерево прогорает в уголь" : ui.On ? "Положи руду и дерево — продолжит сама" : "Положи руду и дерево, нажми «Зажечь»";
                     if (_furnaceLine != null)
                         _furnaceLine.Text = $"Дерева хватит на {Clock(ui.FuelSeconds)} · руды на {Clock(ui.OreSeconds)}";
+                    break;
+                case UiKind.Recycler when ui.Machine == "lathe":
+                    RefreshLathe(ui);
                     break;
                 case UiKind.Recycler:
                     if (ui.On) _badge.Set("Работает", UiTheme.Good); else _badge.Set("Остановлен", UiTheme.Faint);
@@ -862,6 +991,97 @@ namespace Rastvordd.Client
                         if (ui.Kind == UiKind.Box) Button("Сложить всё", UiOp.PutAll);
                         break;
                 }
+            }
+        }
+
+        HBoxContainer _latheJob;
+        GridContainer _latheList;
+        string _latheSig;
+
+        /// <summary>Станок: состояние, текущая деталь с прогрессом, список рецептов «детали → деталь» с тем, чего не хватает.</summary>
+        void RefreshLathe(UiView ui)
+        {
+            if (ui.Making != null) _badge.Set("Точит", UiTheme.Good);
+            else if (ui.On) _badge.Set("Ждёт материалов", UiTheme.Dim);
+            else _badge.Set("Остановлен", UiTheme.Faint);
+            _contInfo.Text = ui.On ? "" : "Положи материалы и нажми «Запустить». Точит самую сложную деталь, на которую хватает; шумно";
+            if (_latheJob == null) return;
+
+            var have = new Dictionary<string, int>();
+            foreach (var c in ui.Cells) if (c.Id != null && c.Durability < 0) have[c.Id] = have.GetValueOrDefault(c.Id) + c.Count;
+            string sig = ui.Making + "|" + (int)(ui.Progress * 100) + "|" + string.Join(";", have.Select(kv => kv.Key + kv.Value)) + "|" + string.Join(";", ui.Makes.Select(m => m.can ? "1" : "0"));
+            if (sig == _latheSig) return;
+            _latheSig = sig;
+
+            // текущая работа
+            foreach (var c in _latheJob.GetChildren()) c.QueueFree();
+            if (ui.Making != null)
+            {
+                _latheJob.AddChild(UiTheme.IconBox(ui.Making, 48, 0.1f, 10));
+                var col = UiTheme.VBox(5);
+                col.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+                col.SizeFlagsVertical = SizeFlags.ShrinkCenter;
+                var top = UiTheme.HBox(8);
+                var nm = UiTheme.Strong("Точит: " + Items.Name(ui.Making), UiTheme.FontBody);
+                nm.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+                top.AddChild(nm);
+                top.AddChild(UiTheme.Strong($"{Mathf.RoundToInt(ui.Progress * 100)}%", UiTheme.FontSmall, UiTheme.Accent));
+                col.AddChild(top);
+                col.AddChild(new ThinBar { Value = ui.Progress, Fill = UiTheme.Accent, CustomMinimumSize = new Vector2(0, 6) });
+                _latheJob.AddChild(col);
+            }
+            else
+            {
+                var e = UiTheme.Small(ui.On ? "Ничего не точит — не хватает материалов ни на одну деталь" : "Станок остановлен", UiTheme.Dim, UiTheme.FontSmall);
+                e.SizeFlagsVertical = SizeFlags.ShrinkCenter;
+                _latheJob.AddChild(e);
+            }
+
+            // рецепты
+            foreach (var c in _latheList.GetChildren()) c.QueueFree();
+            for (int i = 0; i < Weaponry.Lathe.Count; i++)
+            {
+                var r = Weaponry.Lathe[i];
+                bool can = i < ui.Makes.Count ? ui.Makes[i].can : !r.Bench3;
+                bool enough = can && r.In.All(x => have.GetValueOrDefault(x.id) >= x.n);
+                bool now = r.Output == ui.Making;
+                var p = new PanelContainer { MouseFilter = MouseFilterEnum.Stop, TooltipText = Items.Desc(r.Output) };
+                p.AddThemeStyleboxOverride("panel", UiTheme.Box(now ? new Color(1, 1, 1, 0.12f) : UiTheme.RowBg, UiTheme.RowRadius, now ? new Color(1, 1, 1, 0.6f) : enough ? new Color(UiTheme.Good, 0.35f) : null, 1, 8, 6));
+                p.CustomMinimumSize = new Vector2(285, 0);
+                var row = UiTheme.HBox(8);
+                p.AddChild(row);
+                var ic = (IconView)UiTheme.IconBox(r.Output, 34);
+                if (!can) ic.Mod = new Color(1, 1, 1, 0.35f);
+                ic.SizeFlagsVertical = SizeFlags.ShrinkCenter;
+                row.AddChild(ic);
+                var col = UiTheme.VBox(2);
+                col.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+                var head = UiTheme.HBox(6);
+                var nm = UiTheme.Strong(Items.Name(r.Output), UiTheme.FontSmall, can ? UiTheme.Ink : UiTheme.Dim);
+                nm.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+                head.AddChild(nm);
+                var tm = UiTheme.Small(r.Bench3 && !can ? "нужен верстак 3" : $"{r.Time:0} с", r.Bench3 && !can ? UiTheme.Bad : UiTheme.Faint, UiTheme.FontCaption);
+                tm.AutowrapMode = TextServer.AutowrapMode.Off;
+                head.AddChild(tm);
+                col.AddChild(head);
+                var ins = UiTheme.HBox(8);
+                foreach (var (id, n) in r.In)
+                {
+                    int h = have.GetValueOrDefault(id);
+                    var chip = UiTheme.HBox(3);
+                    var ci = UiTheme.IconBox(id, 18, 0);
+                    ci.SizeFlagsVertical = SizeFlags.ShrinkCenter;
+                    chip.AddChild(ci);
+                    var t = UiTheme.Small(h >= n ? $"{n}" : $"{h}/{n}", h >= n ? UiTheme.Good : UiTheme.Bad, UiTheme.FontCaption);
+                    t.AutowrapMode = TextServer.AutowrapMode.Off;
+                    t.VerticalAlignment = VerticalAlignment.Center;
+                    chip.AddChild(t);
+                    chip.TooltipText = Items.Name(id);
+                    ins.AddChild(chip);
+                }
+                col.AddChild(ins);
+                row.AddChild(col);
+                _latheList.AddChild(p);
             }
         }
 
@@ -912,7 +1132,7 @@ namespace Rastvordd.Client
         {
             foreach (var c in _contBody.GetChildren()) c.QueueFree();
             _cont.Clear();
-            _furnaceLine = null; _claimHours = null; _extraSig = null;
+            _furnaceLine = null; _claimHours = null; _extraSig = null; _latheJob = null; _latheList = null; _latheSig = null;
             _badge.Visible = true;
 
             switch (ui.Kind)
@@ -937,6 +1157,22 @@ namespace Rastvordd.Client
                     _furnaceLine = UiTheme.Small("", UiTheme.Dim, UiTheme.FontSmall);
                     _contBody.AddChild(_furnaceLine);
                     _contBody.AddChild(UiTheme.Small("Руда → металл · серная руда → сера · дерево → уголь", UiTheme.Faint, UiTheme.FontCaption));
+                    break;
+                }
+                case UiKind.Recycler when ui.Machine == "lathe":
+                {
+                    // токарный станок: материалы → деталь (как печь, но рецептов много)
+                    _contBody.AddChild(UiTheme.Caption("Материалы"));
+                    var grid = Grid(_contBody, 6);
+                    for (int i = 0; i < ui.Cells.Count; i++) _cont.Add(AddCell(grid, inv, i, 64));
+                    _latheJob = UiTheme.HBox(12);
+                    _latheJob.CustomMinimumSize = new Vector2(0, 48);
+                    _contBody.AddChild(_latheJob);
+                    _contBody.AddChild(UiTheme.Caption("Что точит станок · детали → деталь"));
+                    _latheList = new GridContainer { Columns = 2 };
+                    _latheList.AddThemeConstantOverride("h_separation", 8);
+                    _latheList.AddThemeConstantOverride("v_separation", 6);
+                    _contBody.AddChild(_latheList);
                     break;
                 }
                 case UiKind.Recycler:
@@ -1021,6 +1257,15 @@ namespace Rastvordd.Client
             _contButtons.AddChild(b);
         }
 
-        public static bool Same(CellView a, CellView b) => a.Id == b.Id && a.Count == b.Count && a.Hidden == b.Hidden && a.Ammo == b.Ammo && a.Label == b.Label;
+        public static bool Same(CellView a, CellView b) => a.Id == b.Id && a.Count == b.Count && a.Hidden == b.Hidden && a.Ammo == b.Ammo && a.Label == b.Label
+            && Mathf.IsEqualApprox(a.Durability, b.Durability) && SameAtt(a.Att, b.Att);
+
+        static bool SameAtt(string[] a, string[] b)
+        {
+            if (a == null || b == null) return a == b;
+            if (a.Length != b.Length) return false;
+            for (int i = 0; i < a.Length; i++) if (a[i] != b[i]) return false;
+            return true;
+        }
     }
 }

@@ -82,6 +82,7 @@ namespace Rastvordd.Sim
         public float ReloadProgress;    // 0..1, 0 — не перезаряжается
         public float SpreadDeg;
         public int Bandages;
+        public int Fuses;
         public string InteractHint;     // пусто — рядом ничего нет
         public bool HeldDeploy;
         public bool NearBench;
@@ -156,6 +157,7 @@ namespace Rastvordd.Sim
         public List<MapPatch> Patches = new();
         public List<MapRoof> Roofs = new();
         public List<MapWire> Wires = new();
+        public List<MapEntrance> Entrances = new();
         // рельеф и биомы (сетка N×N, клетка Cell метров) — отправляются один раз при подключении
         public int N;
         public float Cell;
@@ -236,6 +238,7 @@ namespace Rastvordd.Sim
             m.Patches.AddRange(World.Patches);
             m.Roofs.AddRange(World.Roofs);
             m.Wires.AddRange(World.Wires);
+            m.Entrances.AddRange(World.Entrances);
             return m;
         }
 
@@ -732,6 +735,7 @@ namespace Rastvordd.Sim
                 ReloadProgress = gun && w.ReloadLeft > 0 ? 1f - w.ReloadLeft / w.Def.ReloadTime : 0,
                 SpreadDeg = World.CurrentSpreadDeg(me),
                 Bandages = me.Count("bandage"),
+                Fuses = me.Fuses,
                 Current = me.Current,
                 HeldDeploy = held?.Def?.Deploy is DeployKind.Workbench or DeployKind.Furnace,
                 NearBench = World.NearBench(me.Pos),

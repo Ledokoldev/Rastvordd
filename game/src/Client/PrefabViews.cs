@@ -119,6 +119,126 @@ namespace Rastvordd.Client
     }
 
     /// <summary>
+    /// Входы зданий РТ (Entrances.cs): бетонное крыльцо со ступенями у двери и пандус у ворот — по ширине проёма,
+    /// в сторону наружу. Рисуется под объектами: по нему ходят.
+    /// </summary>
+    public partial class EntranceLayer : Node2D
+    {
+        readonly List<MapEntrance> _list;
+        Texture2D _tex;
+
+        public EntranceLayer(List<MapEntrance> list)
+        {
+            _list = list;
+            TextureFilter = TextureFilterEnum.Nearest;
+            TextureRepeat = TextureRepeatEnum.Enabled;
+            Material = VisionFx.ObjectMat;
+        }
+
+        // прямоугольник по осям «вдоль проёма» u и «наружу» n → мировые min/max
+        static (SVec min, SVec max) Box(MapEntrance e, float u0, float u1, float n0, float n1)
+        {
+            float o = e.Side is 0 or 2 ? 1 : -1;
+            SVec P(float u, float n) => e.Side < 2 ? new SVec(e.A.X + u, e.A.Y + o * n) : new SVec(e.A.X + o * n, e.A.Y + u);
+            var a = P(u0, n0); var b = P(u1, n1);
+            return (SVec.Min(a, b), SVec.Max(a, b));
+        }
+
+        Vector2 Up(SVec p, float h) => Iso.Px(p) - new Vector2(0, Iso.H(h));
+
+        void Quad(Vector2[] q, float shade)
+        {
+            var c = new Color(shade, shade * 0.99f, shade * 0.96f);
+            if (_tex != null)
+            {
+                var uv = new Vector2[q.Length];
+                for (int i = 0; i < q.Length; i++) uv[i] = q[i] / _tex.GetSize();
+                DrawPolygon(q, new[] { c, c, c, c }[..q.Length], uv, _tex);
+            }
+            else DrawColoredPolygon(q, c * new Color(0.62f, 0.61f, 0.58f));
+        }
+
+        // бетонный блок высотой h: верх (светлый) и видимая южная грань (в тени)
+        void Block(SVec min, SVec max, float h, float topShade)
+        {
+            var top = new[] { Up(min, h), Up(new SVec(max.X, min.Y), h), Up(max, h), Up(new SVec(min.X, max.Y), h) };
+            var face = new[] { Up(new SVec(min.X, max.Y), h), Up(max, h), Iso.Px(max), Iso.Px(new SVec(min.X, max.Y)) };
+            Quad(face, 0.55f);
+            Quad(top, topShade);
+            DrawLine(top[0], top[1], new Color(1, 1, 1, 0.18f), 1);              // скол кромки на свету
+            DrawPolyline(new[] { top[0], top[1], top[2], face[2], face[3], top[3], top[0] }, new Color(0, 0, 0, 0.35f), 1);
+        }
+
+        public override void _Draw()
+        {
+            _tex ??= Art.Get("tiles/ground_concrete");
+            foreach (var e in _list)
+            {
+                float len = (e.B - e.A).Length(), d = e.Depth;
+                // контактная тень по земле — чуть шире и дальше
+                var (smin, smax) = Box(e, -0.15f, len + 0.15f, 0, d + 0.25f);
+                DrawRect(new Rect2(Iso.Px(smin), Iso.Px(smax) - Iso.Px(smin)), new Color(0, 0, 0, 0.16f));
+
+                if (e.Ramp) DrawRamp(e, len, d);
+                else DrawPorch(e, len, d);
+            }
+        }
+
+        void DrawPorch(MapEntrance e, float len, float d)
+        {
+            float split = d * 0.55f;
+            var (pmin, pmax) = Box(e, 0, len, 0, split);           // площадка у двери
+            var (smin, smax) = Box(e, 0, len, split, d);           // ступень
+            const float hp = 0.3f, hs = 0.15f;
+            // порядок: дальнее от камеры — раньше
+            if (e.Side == 1) { Block(smin, smax, hs, 0.9f); Block(pmin, pmax, hp, 1f); }
+            else { Block(pmin, pmax, hp, 1f); Block(smin, smax, hs, 0.9f); }
+            // перила из трубы по краям, если крыльцо не во всю стену
+            var rail = new Color(0.24f, 0.25f, 0.26f);
+            foreach (float u in new[] { 0.12f, len - 0.12f })
+            {
+                var (a, _) = Box(e, u, u, 0.1f, 0.1f);
+                var (b, _) = Box(e, u, u, d - 0.1f, d - 0.1f);
+                var pa = Up(a, hp); var pb = Up(b, hs);
+                var ta = pa - new Vector2(0, Iso.H(0.85f)); var tb = pb - new Vector2(0, Iso.H(0.85f));
+                DrawLine(pa, ta, rail, 2); DrawLine(pb, tb, rail, 2); DrawLine(ta, tb, rail, 2);
+                DrawLine(ta + new Vector2(0, -1), tb + new Vector2(0, -1), new Color(0.6f, 0.62f, 0.64f, 0.6f), 1);   // блик
+            }
+        }
+
+        void DrawRamp(MapEntrance e, float len, float d)
+        {
+            const float hr = 0.25f;
+            float o = e.Side is 0 or 2 ? 1 : -1;
+            // наклонная плоскость: у стены — hr, на краю — 0
+            SVec P(float u, float n) => e.Side < 2 ? new SVec(e.A.X + u, e.A.Y + o * n) : new SVec(e.A.X + o * n, e.A.Y + u);
+            float H(float n) => hr * (1 - n / d);
+            var q = new[] { Up(P(0, 0), H(0)), Up(P(len, 0), H(0)), Up(P(len, d), H(d)), Up(P(0, d), H(d)) };
+            // боковая грань-клин видна, когда пандус идёт вбок (восток/запад)
+            if (e.Side >= 2)
+            {
+                var (_, mx) = Box(e, 0, len, 0, d);
+                float yS = mx.Y;
+                var w0 = new SVec(P(0, 0).X, yS); var w1 = new SVec(P(0, d).X, yS);
+                Quad(new[] { Up(w0, hr), Iso.Px(w0), Iso.Px(w1) }, 0.5f);
+            }
+            Quad(q, 0.92f);
+            // рифление поперёк уклона
+            for (float n = 0.3f; n < d - 0.1f; n += 0.3f)
+                DrawLine(Up(P(0.15f, n), H(n)), Up(P(len - 0.15f, n), H(n)), new Color(0, 0, 0, 0.22f), 1);
+            // жёлто-чёрная кромка у края пандуса
+            int seg = Mathf.Max(2, (int)(len / 0.4f));
+            for (int i = 0; i < seg; i++)
+            {
+                float u0 = len * i / seg, u1 = len * (i + 1) / seg;
+                var col = i % 2 == 0 ? new Color(0.86f, 0.68f, 0.16f) : new Color(0.12f, 0.12f, 0.12f);
+                DrawColoredPolygon(new[] { Up(P(u0, d - 0.22f), H(d - 0.22f)), Up(P(u1, d - 0.22f), H(d - 0.22f)), Iso.Px(P(u1, d)), Iso.Px(P(u0, d)) }, new Color(col, 0.85f));
+            }
+            DrawPolyline(new[] { q[0], q[1], q[2], q[3], q[0] }, new Color(0, 0, 0, 0.35f), 1);
+        }
+    }
+
+    /// <summary>
     /// Крыша над комнатой (D40): снаружи прячет, что внутри; растворяется, когда свой персонаж внутри
     /// (или стоит в дверях). Рисуется поверх всего на высоте стен.
     /// </summary>
@@ -249,6 +369,7 @@ namespace Rastvordd.Client
                 _decors[d.Id] = v;
             }
             if (map.Patches.Count > 0) root.AddChild(new PatchLayer(map.Patches) { ZIndex = -10 });
+            if (map.Entrances.Count > 0) root.AddChild(new EntranceLayer(map.Entrances) { ZIndex = -8 });
             if (map.Wires.Count > 0) root.AddChild(new WireLayer(map.Wires));
             foreach (var r in map.Roofs)
             {

@@ -554,6 +554,8 @@ namespace Rastvordd.Sim
         /// <summary>Не влезло (рюкзак полон) — World выбросит рядом сумкой.</summary>
         public readonly List<ItemSlot> Overflow = new();
         public readonly List<CraftJob> CraftQueue = new();
+        /// <summary>Пробки Подстанции — отдельный счётчик, не занимают ячейку (за забор не выносятся, при смерти возвращаются на РТ).</summary>
+        public int Fuses;
 
         public ItemSlot Held => Belt[Current];
         public WeaponState Weapon => Held?.State;
@@ -562,6 +564,7 @@ namespace Rastvordd.Sim
         /// <summary>Сколько всего этого предмета в рюкзаке и на поясе.</summary>
         public int Count(string id)
         {
+            if (id == "fuse") return Fuses;
             int n = 0;
             foreach (var s in Pack) if (s != null && s.Id == id) n += s.Count;
             foreach (var s in Belt) if (s != null && s.Id == id && s.State == null) n += s.Count;
@@ -572,6 +575,7 @@ namespace Rastvordd.Sim
         public int AddUpTo(string id, int count)
         {
             if (count <= 0) return 0;
+            if (id == "fuse") { Fuses += count; return count; }
             var def = Items.Get(id);
             int max = Items.MaxStack(id), left = count;
             bool holdable = def != null && def.Holdable;
@@ -628,6 +632,7 @@ namespace Rastvordd.Sim
 
         public int Take(string id, int count)
         {
+            if (id == "fuse") { int f = System.Math.Min(Fuses, System.Math.Max(0, count)); Fuses -= f; return f; }
             int taken = 0;
             for (int pass = 0; pass < 2 && taken < count; pass++)
             {

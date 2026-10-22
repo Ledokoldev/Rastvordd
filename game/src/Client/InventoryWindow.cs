@@ -271,7 +271,7 @@ namespace Rastvordd.Client
                 if (self.Pack[i].Id != null) used++;
                 if (!Same(_pack[i].Cell, self.Pack[i])) { _pack[i].Cell = self.Pack[i]; _pack[i].QueueRedraw(); }
             }
-            _packTitle.Text = $"РЮКЗАК {used}/{Actor.PackSize}";
+            _packTitle.Text = $"РЮКЗАК {used}/{Actor.PackSize}" + (self.Fuses > 0 ? $"      ПРОБКИ: {self.Fuses}/2" : "");
             for (int i = 0; i < _belt.Count && i < self.BeltCells.Count; i++)
             {
                 bool sel = i == self.Current;

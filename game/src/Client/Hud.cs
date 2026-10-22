@@ -349,7 +349,7 @@ void fragment() {
         {
             SetBar(_hpFill, s.Hp, s.MaxHp);
             _hpFill.Color = s.Hp > 50 ? new Color(0.45f, 0.75f, 0.3f) : s.Hp > 25 ? new Color(0.85f, 0.65f, 0.2f) : new Color(0.85f, 0.2f, 0.15f);
-            _hpLabel.Text = $"HP {Mathf.CeilToInt(s.Hp)}   · бинты: {s.Bandages}";
+            _hpLabel.Text = $"HP {Mathf.CeilToInt(s.Hp)}   · бинты: {s.Bandages}" + (s.Fuses > 0 ? $"   · пробки: {s.Fuses}" : "");
             SetBar(_foodFill, s.Food, 100);
             _foodLabel.Text = $"Еда {Mathf.CeilToInt(s.Food)}";
             SetBar(_waterFill, s.Water, 100);

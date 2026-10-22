@@ -98,6 +98,7 @@ namespace Rastvordd.Sim
                 mw.Tex = "walls/" + wl[5].GetString();
                 if (wl[5].GetString() == "wallface_door_wood") doors.Add(mw);
             }
+            int roofFrom = Roofs.Count;
             foreach (var r in root.GetProperty("roofs").EnumerateArray())
                 Roof("tiles/" + r[5].GetString(), P(V(r, 0)), P(V(r, 2)), rng);
 
@@ -109,6 +110,7 @@ namespace Rastvordd.Sim
                 bool flip = pr[3].GetBoolean();
                 bool planned = pr[4].ValueKind == JsonValueKind.Array;
                 string id = sprite[(sprite.LastIndexOf('/') + 1)..];
+                if (id is "porch_front" or "porch_side" or "garage_ramp") continue;   // входы строятся по проёмам (Entrances.cs)
                 if (id == "recycler") { AddRecycler(p); continue; }
                 if (planned && id.StartsWith("crate_")) { AddCrate(p, 0); continue; }
                 if (planned && id == "junk_pile") { AddScrapSpot(NodeKind.Junk, p); continue; }
@@ -117,6 +119,7 @@ namespace Rastvordd.Sim
                 if (sprite.StartsWith("grass/") || sprite.StartsWith("plants/") || sprite.StartsWith("clutter/")) { Decor(sprite, p, flip); continue; }
                 Prop(sprite, p, flip);
             }
+            AddEntrances(roofFrom);
 
             // механика перфокарты — по метке на макете
             foreach (var mk in root.GetProperty("marks").EnumerateArray())

@@ -25,6 +25,11 @@ n('charcoal','Уголь','proc',0,'icons/icon_charcoal',[],[('wood',1)],'furnac
 n('fuel','Топляк','proc',1,None,['Заправка: насос подземной цистерны (20–40, шумно)','канистры в крейтах РТ 1–2, аирдроп, УАЗ'],[('crude',2)],'still',note='расходник: ток, патроны, хилки, молотов, ПВО')
 n('medspirt','Медспирт','proc',1,None,[],[('berries',10)],'still',note='или конопля; для аптечек и шприцев')
 n('gunpowder','Порох ×5','proc',1,'icons/icon_gunpowder',[],[('charcoal',15),('sulfur',10)],'bench1',20,'на химстоле быстрее и дешевле')
+
+# --- металл высокого качества: легированная сталь ---
+n('chrome_ore','Хромистая руда','res',0,None,['рудные узлы — изредка (≈10%)','Карьер «Ковш» — богатые жилы','буровая установка'])
+n('alloy','Легированная сталь','proc',1,'icons/icon_hqm',['переработчик: детали тира 2–3, пластины, стволы','крейты РТ 2, аирдроп'],[('chrome_ore',1)],'furnace',0,'печь плавит медленно; электропечь — ×2. Аналог МВК: бронедвери и стены, стволы тира 3, верстак 3, армейская экипировка')
+
 # --- станки и верстаки ---
 n('furnace','Печь','stn',0,'icons/icon_furnace',[],[('stone',100),('wood',50)],None)
 n('bench1','Верстак 1','stn',1,'icons/icon_workbench',[],[('wood',150),('metal_fragments',50),('scrap',50)],None,note='изучить всё на нём ≈ 250 лома')
@@ -35,9 +40,9 @@ n('lathe','Токарный станок','stn',2,None,[],[('metal_fragments',15
 n('generator','Дизель-генератор','stn',2,None,[],[('metal_fragments',200),('comp_gears',3),('comp_pipe',2)],'bench2',60,note='топляк → ток: свет, электропечь, ускоренный крафт')
 n('chem','Химстол','stn',2,None,[],[('metal_fragments',150),('comp_pipe',1)],'bench2',60,note='порох, патроны, антирадин, сатчель')
 n('lamp','Лампы, прожектор','stn',2,None,[],[('metal_fragments',20),('val_copper_wire',1)],'bench2',20,note='свет от генератора')
-n('bench3','Верстак 3','stn',3,'icons/icon_workbench3',[],[('metal_fragments',600),('scrap',400),('comp_circuit',3),('comp_gears',5)],'bench2',note='детали с РТ обязательны; изучить всё ≈ 1300 лома')
+n('bench3','Верстак 3','stn',3,'icons/icon_workbench3',[],[('metal_fragments',600),('scrap',400),('alloy',25),('comp_circuit',3),('comp_gears',5)],'bench2',note='детали с РТ обязательны; изучить всё ≈ 1300 лома')
 n('efurnace','Электропечь','stn',3,None,[],[('metal_fragments',300),('val_motor',1),('val_copper_wire',2)],'bench3',100,note='плавит ×2, без дерева, на токе')
-n('guntable','Оружейный стол','stn',3,None,[],[('metal_fragments',300),('comp_gears',4),('comp_spring',4)],'bench3',150,note='стволы тира 3 и армейские обвесы — только здесь; ремонт')
+n('guntable','Оружейный стол','stn',3,None,[],[('metal_fragments',300),('alloy',20),('comp_gears',4),('comp_spring',4)],'bench3',150,note='стволы тира 3 и армейские обвесы — только здесь; ремонт')
 n('medtable','Медстол','stn',3,None,[],[('metal_fragments',150),('cloth',50)],'bench3',80,note='аптечки, шприцы')
 n('conveyor','Конвейер, сортировщик','stn',3,None,[],[('metal_fragments',100),('val_motor',1),('comp_circuit',1)],'bench3',120,note='автоматизация между ящиками, печами, станками')
 n('recycler','Переработчик','stn',4,None,['только на РТ тира 0'],[],None,note='компоненты и ценный лом → лом и металл')
@@ -70,10 +75,10 @@ W=[('weapon_spear','Копьё',0,[('wood',150)],None,0,'weapons/weapon_spear'),
    ('weapon_grach','Грач',2,[('metal_fragments',150),('comp_frame_pistol',1),('comp_trigger',1),('comp_spring',2)],'bench2',120,None),
    ('weapon_pps43','ППС-43',2,[('metal_fragments',175),('comp_body_smg',1),('comp_bolt_carrier',1),('comp_spring',3)],'bench2',150,None),
    ('weapon_svt40','СВТ-40',2,[('metal_fragments',200),('wood',100),('comp_body_rifle',1),('comp_barrel_rifled',1),('comp_trigger',1)],'bench2',150,None),
-   ('weapon_akm','АКМ',3,[('metal_fragments',300),('wood',100),('comp_receiver_ak',1),('comp_bolt_carrier',1),('comp_gas_block',1),('comp_spring',4)],'guntable',300,None),
-   ('weapon_an94','АН-94 «Абакан»',3,[('metal_fragments',300),('comp_receiver_ak',1),('comp_barrel_chrome',1),('comp_bolt_carrier',1),('comp_gas_block',1),('comp_gears',3)],'guntable',300,None),
-   ('weapon_ppsh','ППШ',3,[('metal_fragments',250),('wood',150),('comp_body_smg',1),('comp_barrel_chrome',1),('comp_bolt_carrier',1),('comp_spring',4)],'guntable',250,None),
-   ('weapon_svd','СВД',3,[('metal_fragments',300),('wood',100),('comp_body_rifle',1),('comp_barrel_chrome',1),('comp_gas_block',1),('comp_trigger',1)],'guntable',300,None)]
+   ('weapon_akm','АКМ',3,[('metal_fragments',250),('alloy',25),('wood',100),('comp_receiver_ak',1),('comp_bolt_carrier',1),('comp_gas_block',1),('comp_spring',4)],'guntable',300,None),
+   ('weapon_an94','АН-94 «Абакан»',3,[('metal_fragments',250),('alloy',30),('comp_receiver_ak',1),('comp_barrel_chrome',1),('comp_bolt_carrier',1),('comp_gas_block',1),('comp_gears',3)],'guntable',300,None),
+   ('weapon_ppsh','ППШ',3,[('metal_fragments',200),('alloy',20),('wood',150),('comp_body_smg',1),('comp_barrel_chrome',1),('comp_bolt_carrier',1),('comp_spring',4)],'guntable',250,None),
+   ('weapon_svd','СВД',3,[('metal_fragments',250),('alloy',25),('wood',100),('comp_body_rifle',1),('comp_barrel_chrome',1),('comp_gas_block',1),('comp_trigger',1)],'guntable',300,None)]
 for id,nm,col,rec,st,res,ic in W: n(id,nm,'gun',col,ic or 'icons/icon_'+id,[],rec,st,res)
 for id,nm,where in [('weapon_pipeshotgun','Самопал','бочки, РТ 0'),('weapon_sawnoff','Обрез','крейты РТ 0–1'),('weapon_mp133','МР-133','крейты РТ 1, аирдроп'),('weapon_saiga12','Сайга-12','вертолёт, «Объект 42», редко аирдроп'),('weapon_mosin','Мосинка с ПУ','«Объект 42», редко аирдроп'),('weapon_aps','АПС','вертолёт, «Объект 42», редко аирдроп')]:
     n(id,nm,'gun',4,'icons/icon_'+id,[where],[],None,0,'не крафтится')
@@ -108,7 +113,7 @@ S=[('set_rags','Тряпьё',0,'wear_rags_shirt',[('cloth',20)],None,0,[],'ти
    ('set_scrap','Кустарная броня',2,'wear_scrap_signvest',[('metal_fragments',120),('comp_tape',3),('rubber',6)],'bench2',60,[],'от людей'),
    ('plate_homemade','Пластина кустарная',2,'plate_homemade',[('metal_fragments',100),('comp_tape',1)],'bench2',0,[],'+20%, 150 урона'),
    ('set_ozk','ОЗК',3,'wear_ozk_gp5',[('rubber',30),('cloth',30)],'bench3',100,['лут РТ 1–2'],'радиация до 67'),
-   ('set_army','Армейская',3,'wear_army_6b2',[('metal_fragments',250),('cloth',60),('plate_steel',0)],'bench3',120,[],'пули, холод до −13°'),
+   ('set_army','Армейская',3,'wear_army_6b2',[('metal_fragments',150),('alloy',20),('cloth',60),('plate_steel',0)],'bench3',120,[],'пули, холод до −13°'),
    ('plate_steel','Пластина армейская',4,'plate_steel',[],None,0,['крейты РТ 2','сейф'],'+30%, 400 урона'),
    ('plate_ceramic','Пластина керамическая',4,'plate_ceramic',[],None,0,['вертолёт','«Объект 42»'],'+40%, 300 урона'),
    ('set_likv','Ликвидатор',4,'wear_likvidator_pmk',[],None,0,['аирдроп','закрытый ящик','«Объект 42»'],'радиация до 96, холод до −33°'),
@@ -128,7 +133,7 @@ n('lock_key','Ключевой замок','boom',0,'icons/icon_key_lock',[],[('
 n('lock_code','Кодовый замок','boom',1,'icons/icon_code_lock',[],[('metal_fragments',100)],'bench1',30)
 n('molotov','Молотов','boom',1,'icons/icon_molotov',[],[('cloth',10),('fuel',5)],'bench1',30)
 n('satchel','Сатчель','boom',2,'icons/icon_satchel',[],[('cloth',10),('gunpowder',30),('metal_fragments',20)],'chem',75)
-n('c4','C4','boom',3,'icons/icon_c4',[],[('gunpowder',200),('metal_fragments',100),('scrap',20),('cloth',5)],'chem',250,'нужен верстак 3')
+n('c4','C4','boom',3,'icons/icon_c4',[],[('gunpowder',200),('alloy',5),('metal_fragments',100),('scrap',20),('cloth',5)],'chem',250,'нужен верстак 3')
 
 
 # --- инструменты ---
@@ -150,7 +155,8 @@ n('door_wood','Деревянная дверь','base',0,'icons/icon_wood_door',
 n('box_large','Большой ящик','base',1,None,[],[('wood',250),('metal_fragments',50)],'bench1',20)
 n('door_metal','Металлическая дверь','base',1,'icons/icon_metal_door',[],[('metal_fragments',150)],'bench1',40)
 n('bars','Решётки и ставни','base',1,None,[],[('metal_fragments',50)],'bench1',20)
-n('door_armored','Бронедверь','base',3,None,[],[('metal_fragments',400),('comp_gears',4),('plate_steel',1)],'bench3',150)
+n('door_armored','Бронедверь','base',3,None,[],[('metal_fragments',200),('alloy',40),('comp_gears',4)],'bench3',150)
+n('walls_armored','Бронированные стены','base',3,None,['апгрейд киянкой поверх металла'],[('alloy',25)],'bench3',120,'на каждый сегмент; рейдить в разы дороже')
 n('walls','Стены: дерево → камень → металл','base',0,'icons/icon_build_wall',['киянкой: дерево, потом камень, потом металл'],[('wood',50)],None,0,'апгрейд материалом, без верстака')
 # --- снаряжение (идея из Arc Raiders, не утверждено) ---
 n('bag_sidor','Сидор (12 ячеек)','equip',0,'icons/icon_backpack',[],[('cloth',40)],None,0,'идея: рюкзак как снаряжение — не утверждено')

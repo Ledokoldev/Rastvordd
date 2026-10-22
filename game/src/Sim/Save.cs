@@ -11,7 +11,7 @@ namespace Rastvordd.Sim
     /// </summary>
     public sealed class WorldSave
     {
-        public int Version = 5;   // 5: одежда D47 (слоты, пластины с прочностью, доза, переохлаждение; старые сейвы — голыми)   // 4: ветка оружия D46 (калибры, обвесы, износ; старые id переводятся при загрузке)   // 3: рюкзак ячейками   // 2: остров 1 км, малые РТ
+        public int Version = 6;   // 6: сетка клеток D52 (у установленного — пол, слоты, поворот, хитбокс; старые сейвы пересаживаются в слоты)   // 5: одежда D47 (слоты, пластины с прочностью, доза, переохлаждение; старые сейвы — голыми)   // 4: ветка оружия D46 (калибры, обвесы, износ; старые id переводятся при загрузке)   // 3: рюкзак ячейками   // 2: остров 1 км, малые РТ
         public int Seed;
         public float Time, TimeOffset;
         public int NextId;
@@ -30,6 +30,8 @@ namespace Rastvordd.Sim
         public sealed class DeployS
         {
             public int Id, Kind, OwnerId, Ore, SulfurOre, OutMetal, OutSulfur, OutCharcoal, Level;
+            public int Rot, FloorId, Slots;   // v6
+            public float Hx, Hy;              // v6: хитбокс (половины сторон)
             public float X, Y, Hp, Fuel, Grace, ReadyAt;
             public List<int> Auth = new();
             public Dictionary<string, float> Store = new();
@@ -108,6 +110,7 @@ namespace Rastvordd.Sim
                 {
                     Id = d.Id, Kind = (int)d.Kind, OwnerId = d.OwnerId, X = d.Pos.X, Y = d.Pos.Y, Hp = d.Hp, Level = d.Level,
                     Ore = d.Ore, SulfurOre = d.SulfurOre, Fuel = d.Fuel, OutMetal = d.OutMetal, OutSulfur = d.OutSulfur, OutCharcoal = d.OutCharcoal, Grace = d.Grace, ReadyAt = d.ReadyAt - Time,
+                    Rot = d.Rot, FloorId = d.FloorId, Slots = d.Slots, Hx = d.Half.X, Hy = d.Half.Y,
                 };
                 ds.Auth.AddRange(d.Auth);
                 foreach (var kv in d.Store) ds.Store[kv.Key] = kv.Value;
@@ -156,12 +159,14 @@ namespace Rastvordd.Sim
 
             foreach (var d in Deployables) _deployGrid.Remove(d);
             Deployables.Clear();
+            _slotUse.Clear();
             foreach (var ds in w.Deployables)
             {
                 var d = new Deployable
                 {
                     Id = ds.Id, Kind = (DeployKind)ds.Kind, OwnerId = ds.OwnerId, Pos = new Vector2(ds.X, ds.Y), Hp = ds.Hp, Level = ds.Level,
                     Ore = ds.Ore, SulfurOre = ds.SulfurOre, Fuel = ds.Fuel, OutMetal = ds.OutMetal, OutSulfur = ds.OutSulfur, OutCharcoal = ds.OutCharcoal, Grace = ds.Grace, ReadyAt = Time + ds.ReadyAt,
+                    Rot = ds.Rot & 3, FloorId = ds.FloorId, Slots = ds.Slots, Half = new Vector2(ds.Hx, ds.Hy),
                 };
                 foreach (var id in ds.Auth) d.Auth.Add(id);
                 foreach (var kv in ds.Store) d.Store[kv.Key] = kv.Value;
@@ -191,6 +196,10 @@ namespace Rastvordd.Sim
                 RebuildBoxes(s);
             }
             RebuildFloorEdges();
+            // сетка D52: пол, на котором стояло, мог не сохраниться — тогда предмет вне сетки; сейв до сетки — пересадить в слоты
+            foreach (var d in Deployables)
+                if (d.FloorId != 0 && FloorById(d.FloorId) == null) { OccupySlots(d, false); d.FloorId = 0; d.Slots = 0; }
+            if (w.Version < 6) ResnapLegacyDeploys();
             StructVersion++;
 
             Bags.Clear();

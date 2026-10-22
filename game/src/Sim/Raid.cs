@@ -162,8 +162,7 @@ namespace Rastvordd.Sim
                 if (dist > r + d.Radius || !HasLineOfSight(t.Pos, d.Pos)) continue;
                 d.Hp -= ex.Damage * (1f - 0.5f * dist / (r + d.Radius));
                 if (d.Hp > 0) continue;
-                Deployables.Remove(d);
-                _deployGrid.Remove(d);
+                RemoveDeployable(d);
                 if (d.Storage != null && !d.Storage.Empty)
                 {
                     var spill = new LootBag { Id = NextId(), Pos = d.Pos, Despawn = 600 };

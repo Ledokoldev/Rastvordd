@@ -14,7 +14,7 @@ namespace Rastvordd.Sim
             foreach (var n in NodesAlong(a, b))
                 if (Geo.SegmentCircle(a, b, n.Pos, n.Radius, out _)) return false;
             foreach (var d in DeploysAlong(a, b))
-                if (Geo.SegmentCircle(a, b, d.Pos, d.Radius, out _)) return false;
+                if (d.Solid && Geo.SegmentAabb(a, b, d.Min, d.Max, out _)) return false;
             return true;
         }
 

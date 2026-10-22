@@ -327,7 +327,7 @@ namespace Rastvordd.Sim
             foreach (var n in NodesNear(c, 1.5f))
                 if (Geo.CircleBox(n.Pos, n.Radius, min, max)) { why = "мешает дерево/камень"; return false; }
             foreach (var d in DeploysNear(c, 1.5f))
-                if (d.Kind != DeployKind.Claim && Geo.CircleBox(d.Pos, d.Radius, min, max)) { why = "мешает установленное"; return false; }
+                if (d.Kind != DeployKind.Claim && d.FloorId == 0 && Geo.BoxOverlap(min, max, d.Min + new Vector2(0.05f), d.Max - new Vector2(0.05f))) { why = "мешает установленное"; return false; }
             return true;
         }
 
@@ -352,7 +352,7 @@ namespace Rastvordd.Sim
             foreach (var n in NodesNear(centroid, 1.5f))
                 if (Building.PointInPoly(n.Pos, tri) || Building.SegDist(n.Pos, a, c) < n.Radius || Building.SegDist(n.Pos, b, c) < n.Radius) { why = "мешает дерево/камень"; return false; }
             foreach (var d in DeploysNear(centroid, 1.5f))
-                if (d.Kind != DeployKind.Claim && (Building.PointInPoly(d.Pos, tri) || Building.SegDist(d.Pos, a, c) < d.Radius || Building.SegDist(d.Pos, b, c) < d.Radius)) { why = "мешает установленное"; return false; }
+                if (d.Kind != DeployKind.Claim && d.FloorId == 0 && Building.PolysOverlap(tri, Footprints.RectPoly(d.Min, d.Max))) { why = "мешает установленное"; return false; }
             return true;
         }
 
@@ -403,6 +403,7 @@ namespace Rastvordd.Sim
                 if (_doors.ContainsKey(key)) { why = "дверь уже есть"; return false; }
             }
             else if (_edges.ContainsKey(key)) { why = "занято"; return false; }
+            if (kind == StructKind.Doorway && DoorwayBlocked(ea, eb)) { why = "перед проёмом стоит установленное"; return false; }
             foreach (var (min, max, _, _) in Building.Boxes(kind, ea, eb, false))
                 foreach (var o in Actors)
                     if (!o.Dead && !o.Spectator && Geo.CircleBox(o.Pos, o.Radius, min, max)) { why = "мешает человек"; return false; }
@@ -464,7 +465,7 @@ namespace Rastvordd.Sim
             s.Hp = s.MaxHp;
             s.ClaimId = ClaimAt(s.IsFloor ? Building.CellOf(s.Center) : EdgeOwnerCell(s.A, s.B))?.Id ?? 0;
             Structures.Add(s);
-            if (s.IsFloor) CountFloorEdges(s, +1);
+            if (s.IsFloor) { CountFloorEdges(s, +1); AdoptDeploysOnFloor(s); }
             RebuildBoxes(s);
             StructVersion++;
             Events.Add(new SimEvent { Kind = SimEventKind.Built, ActorId = a.Id, OtherId = s.Id, Pos = s.Center, Text = Building.KindName(kind) });
@@ -494,10 +495,12 @@ namespace Rastvordd.Sim
             switch (s.Kind)
             {
                 case StructKind.Foundation:
+                    DropSlotsOf(s);
                     _foundations.Remove((s.I, s.J));
                     CountFloorEdges(s, -1);   // рёбра, у которых не осталось пола ни с одной стороны, падают
                     break;
                 case StructKind.TriFoundation:
+                    DropSlotsOf(s);
                     _tris.Remove(s);
                     CountFloorEdges(s, -1);
                     break;

@@ -14,7 +14,7 @@ namespace Rastvordd.Sim
             foreach (var n in NodesNear(p, r + 1f))
                 if (Vector2.DistanceSquared(p, n.Pos) < (r + n.Radius) * (r + n.Radius)) return true;
             foreach (var d in DeploysNear(p, r + 1f))
-                if (Vector2.DistanceSquared(p, d.Pos) < (r + d.Radius) * (r + d.Radius)) return true;
+                if (d.Solid && Geo.CircleBox(p, r, d.Min, d.Max)) return true;
             return false;
         }
 

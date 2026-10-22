@@ -1,0 +1,550 @@
+{
+ "assets": [
+  {
+   "id": "icon_crude",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an old rusty steel bidon (milk-can shaped jug with a lid) smeared with black sticky crude oil, thick black mazut oozing down its sides and dripping from the lid; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_fuel",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a battered dented steel jerrycan stained with oil, a little cloudy yellow-brown dirty fuel spilling from the open spout, greasy rag tied to the handle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_diesel",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a clean bright red steel jerrycan in good condition, a thick white painted stripe band across its side, a tight screw cap, freshly painted; no text, no letters"
+  },
+  {
+   "id": "icon_medspirt",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a clear glass pharmacy bottle of medical spirit with a plain white paper label and a cork stopper, the liquid perfectly clear; Soviet pharmacy style, slightly dusty; no readable text, no letters, no numbers"
+  },
+  {
+   "id": "icon_water_raw",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an open dented aluminium army canteen flask lying tilted, murky muddy brown-green water pouring out of its neck into a small dirty puddle, bits of silt and a leaf in the water, the water clearly brown and dirty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_water_boiled",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a blackened aluminium soldier's mess tin pot (kotelok) with a wire handle, filled with perfectly clear clean water, thick white wisps of steam rising high above it, a canteen flask cap beside it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_flask_05",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small empty Soviet army aluminium canteen flask of 0.5 litre, flat oval body, screw cap on a little chain, worn olive canvas cover on half of it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_flask_1",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a larger Soviet army aluminium canteen flask of 1 litre with a khaki canvas cover and a strap, screw cap on a chain, scratched; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_canister_5",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a SMALL flat 5-litre steel can for petrol: narrow tall rectangular body, a single carry handle on top and a short angled spout with a cap on the corner, faded orange-red paint with scratches, clearly much smaller and slimmer than a jerrycan; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_canister_20",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a big 20-litre Soviet steel jerrycan painted dark army green with the classic three-handle top and an X stamped pattern on the side, dented; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_barrel_200",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a standing 200-litre steel oil drum barrel with two ribs, faded blue-grey paint, a bung cap on top, rust streaks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_alloy",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a neat stack of three machined alloy steel bars with a cold BLUE tint: blued tempered steel, gunmetal blue-grey with violet-blue heat tint at the edges, bright polished highlights, perfectly clean, no rust at all, sharp crisp edges, high-tech refined metal; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_chainsaw",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet Druzhba petrol chainsaw: an orange-red and grey motor body with a pull starter, a big two-handed frame handle, a long guide bar with a chain, oily and worn, seen at a slight angle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_jackhammer",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heavy petrol jackhammer standing vertically: a T-shaped grip handle on top, a fat grey-black cylinder body with a small engine block, a long steel chisel bit at the bottom, dusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_drill_rig",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a compact home-made ore drilling rig: a tall welded steel lattice tower with a drill pipe going down, a small diesel engine with an exhaust pipe at its base, on skids, oily and rusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_box_large",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a large long wooden storage chest made of planks with iron corner brackets, two side handles, a hinged lid and a padlock hasp; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_door_armored",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heavy armored steel door with riveted thick plates, reinforced frame, a big wheel-like handle and a narrow peephole slot, grey-green paint chipped; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_bars",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a welded window grille of rusty steel bars in a square frame, next to a pair of small closed steel window shutters; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_walls_armored",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a thick armored steel wall plate section, riveted heavy grey-blue steel sheet with welded seams and reinforcing ribs, slightly scratched; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_rig_vest",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet-style khaki canvas chest rig load-bearing vest (razgruzka) with several magazine pouches and grenade pockets, straps and buckles, worn; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_bag_sidor",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet soldier's sidor duffel sack: a simple khaki canvas bag cinched at the top with a rope that forms the shoulder strap loop, slumped and worn; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_bag_tourist",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a large Soviet tourist hiking backpack: a frame rucksack of faded green and orange canvas with leather straps, big side pockets and a rolled bedroll strapped on top; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_bag_army",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet army RD-54 style assault backpack: olive drab canvas with many pouches and straps, a rolled cape on top, sturdy and military; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_still",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a home-made moonshine still: a copper boiling pot with a dome lid, a copper coil condenser in a small water barrel, a thin pipe, set on a little iron stove; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_sewing",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a worn wooden sewing table with an old black cast-iron Soviet sewing machine on top, a treadle underneath, spools of thread; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_lathe",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small Soviet metal turning lathe machine: grey-green cast iron bed, a chuck with a handwheel, a tailstock, oil stains; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_generator",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a portable diesel generator set: a green steel frame with a diesel engine, a fuel tank on top, an exhaust pipe and a cylindrical alternator, oily; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_chem",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a chemistry workbench: a steel table with glass flasks, retorts, a small burner, jars of chemicals and a mortar, stained; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_lamp",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an industrial work floodlight lamp: a round metal reflector head with a glass lens on a tripod stand and a coiled black cable; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_efurnace",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an electric smelting furnace: a boxy steel kiln with a heavy door, thick power cables, a crucible and a small control box with dials; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_guntable",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heavy steel locksmith workbench with a big vise, a small drill press, a pegboard of hanging wrenches and files, steel tubes and small springs on the tabletop, olive green metal boxes underneath; Soviet, weathered, oily; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_medtable",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a medical workbench: a white-painted steel table with a medical kit, glass bottles, syringes, bandages and a small sterilizer box; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_conveyor",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a short industrial belt conveyor segment with a black rubber belt on rollers in a grey steel frame, a small electric motor on its side, and a little sorter box; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_rectifier",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a tall home-made distillation rectification column: a vertical copper-and-steel column pipe with pressure gauges and valves on a small boiler tank; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_recycler",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a big industrial recycling machine: a rusty green steel box with an input hopper on top, a crusher and an output tray; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "still",
+   "cat": "props",
+   "view": "front",
+   "w": 1.8,
+   "foot": [
+    1.8,
+    0.9,
+    1.6
+   ],
+   "desc": "a home-made moonshine still / crude oil distiller station: a big riveted copper boiling tank with a dome lid on a brick-and-iron fire box, a copper coil condenser inside a rusty water barrel next to it, a thin copper pipe between them, a short smoke chimney pipe rising from the fire box, a tap with a bucket under it, the long side faces the viewer, all parts in one row left to right; a survivor-built home-made machine assembled from salvaged Soviet industrial parts, welded steel, bolts, rust, chipped grey-green and blue-grey paint; Soviet / post-Soviet Russian, weathered, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "still_side",
+   "cat": "props",
+   "view": "front",
+   "w": 0.95,
+   "foot": [
+    0.9,
+    1.8,
+    1.6
+   ],
+   "desc": "the same moonshine still seen from its narrow end: copper boiling tank in front with the condenser barrel behind it, smoke chimney pipe rising from the fire box, compact and narrow; a survivor-built home-made machine assembled from salvaged Soviet industrial parts, welded steel, bolts, rust, chipped grey-green and blue-grey paint; Soviet / post-Soviet Russian, weathered, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "sewing",
+   "cat": "props",
+   "view": "front",
+   "w": 1.7,
+   "foot": [
+    1.8,
+    0.9,
+    1.1
+   ],
+   "desc": "a sewing workshop table: a long scratched wooden work table with an old black cast-iron treadle sewing machine on it, a cast-iron treadle frame underneath, scissors, spools of thread, folded cloth and leather pieces; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "sewing_side",
+   "cat": "props",
+   "view": "front",
+   "w": 0.95,
+   "foot": [
+    0.9,
+    1.8,
+    1.1
+   ],
+   "desc": "a long wooden sewing workshop table with an old black cast-iron treadle sewing machine on it, treadle frame underneath, spools of thread, folded cloth seen from its NARROW SHORT END: the short end faces the viewer squarely and the long table goes straight away from the viewer into the distance (we see its top surface strongly foreshortened going back), the object is about half as wide as it is long, compact narrow silhouette; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lathe",
+   "cat": "props",
+   "view": "side",
+   "w": 1.9,
+   "foot": [
+    1.9,
+    1.0,
+    1.4
+   ],
+   "desc": "a Soviet metal turning lathe machine tool: a long heavy grey-green cast-iron bed on two cabinet legs, a headstock with a chuck on the left, a carriage with a tool post and handwheels, a tailstock on the right, a chip tray, an electric motor box, oil stains, metal shavings; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lathe_side",
+   "cat": "props",
+   "view": "front",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    1.9,
+    1.4
+   ],
+   "desc": "a Soviet metal lathe machine seen from its headstock end: the narrow end of a grey-green cast-iron lathe, the chuck facing the viewer, handwheels, electric motor housing, the long bed going away from the viewer; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "generator",
+   "cat": "props",
+   "view": "side",
+   "w": 1.9,
+   "foot": [
+    1.9,
+    1.1,
+    1.5
+   ],
+   "desc": "a stationary diesel generator set (genset): a diesel engine with a radiator grille at one end and a big cylindrical alternator at the other, on a heavy steel skid frame, a fuel tank, a vertical exhaust pipe with a rain cap, a small control panel with dials, oily and rusty, olive-green paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "generator_side",
+   "cat": "props",
+   "view": "front",
+   "w": 1.1,
+   "foot": [
+    1.1,
+    1.9,
+    1.5
+   ],
+   "desc": "a stationary diesel generator set seen from its radiator end: a radiator grille with a fan guard facing the viewer, the vertical exhaust pipe and fuel tank above, olive-green steel skid frame, oily and rusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "chem",
+   "cat": "props",
+   "view": "front",
+   "w": 1.8,
+   "foot": [
+    1.8,
+    0.9,
+    1.4
+   ],
+   "desc": "a chemistry workbench: a long scratched steel table with a tiled top, glass flasks, retorts and tubes on a rack, a small gas burner under a round flask, jars and canisters of chemicals, a mortar and pestle, a small fume hood box with a pipe going up, acid stains; a survivor-built home-made machine assembled from salvaged Soviet industrial parts, welded steel, bolts, rust, chipped grey-green and blue-grey paint; Soviet / post-Soviet Russian, weathered, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "chem_side",
+   "cat": "props",
+   "view": "front",
+   "w": 0.8,
+   "foot": [
+    0.9,
+    1.8,
+    1.4
+   ],
+   "desc": "a long steel chemistry workbench with glass flasks, retorts, a gas burner, jars of chemicals and a small fume hood box with a pipe going up at the far end seen from its NARROW SHORT END: the short end faces the viewer squarely and the long table goes straight away from the viewer into the distance (we see its top surface strongly foreshortened going back), the object is about half as wide as it is long, compact narrow silhouette; a survivor-built home-made bench from salvaged steel; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lamp",
+   "cat": "props",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.6,
+    1.8
+   ],
+   "desc": "a standing industrial work floodlight: a round steel reflector lamp head with a glass lens and protective wire guard, mounted on a tall tripod stand of steel tubes, a black power cable coiled at its feet, switched off; a survivor-built home-made machine assembled from salvaged Soviet industrial parts, welded steel, bolts, rust, chipped grey-green and blue-grey paint; Soviet / post-Soviet Russian, weathered, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lamp_wall",
+   "cat": "props",
+   "view": "front",
+   "w": 0.5,
+   "foot": [
+    0.5,
+    0.3,
+    0.6
+   ],
+   "desc": "a Soviet wall-mounted industrial lamp: a round steel reflector lamp with a wire cage over the bulb on a short bent bracket arm with a mounting plate, a cable running from it, seen from the front, switched off; a survivor-built home-made machine assembled from salvaged Soviet industrial parts, welded steel, bolts, rust, chipped grey-green and blue-grey paint; Soviet / post-Soviet Russian, weathered, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "efurnace",
+   "cat": "props",
+   "view": "front",
+   "w": 1.9,
+   "foot": [
+    1.9,
+    1.6,
+    1.7
+   ],
+   "desc": "an industrial electric smelting furnace: a big boxy steel kiln with refractory bricks visible inside a heavy hinged front door with a small inspection window, thick power cables coming from a control cabinet with dials and a big knife switch, a crucible and tongs beside it, scorched and sooty; a survivor-built home-made machine assembled from salvaged Soviet industrial parts, welded steel, bolts, rust, chipped grey-green and blue-grey paint; Soviet / post-Soviet Russian, weathered, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "efurnace_side",
+   "cat": "props",
+   "view": "front",
+   "w": 1.6,
+   "foot": [
+    1.6,
+    1.9,
+    1.7
+   ],
+   "desc": "an industrial electric smelting furnace seen from its side: a big boxy riveted steel kiln with cooling fins and thick power cables going into a control cabinet behind, scorched and sooty; a survivor-built home-made machine assembled from salvaged Soviet industrial parts, welded steel, bolts, rust, chipped grey-green and blue-grey paint; Soviet / post-Soviet Russian, weathered, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "guntable",
+   "cat": "props",
+   "view": "front",
+   "w": 1.9,
+   "foot": [
+    1.9,
+    1.0,
+    1.6
+   ],
+   "desc": "a heavy precision mechanic's steel workbench: a thick steel table with a big vise clamping a long steel tube, a pegboard back wall with hanging files, wrenches and long steel tubes, a small drill press on one end, small springs and machined steel parts laid out on an oily rag, olive green metal crates underneath; a survivor-built home-made workshop furniture assembled from salvaged Soviet industrial parts, welded steel, bolts, rust, chipped grey-green paint; Soviet / post-Soviet Russian, weathered, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "guntable_side",
+   "cat": "props",
+   "view": "front",
+   "w": 1.05,
+   "foot": [
+    1.0,
+    1.9,
+    1.6
+   ],
+   "desc": "a long heavy precision mechanic's steel workbench with a big vise at the near end, a pegboard of hanging tools along one side, a small drill press at the far end, small springs and machined parts on an oily rag, olive green metal crates underneath seen from its NARROW SHORT END: the short end faces the viewer squarely and the long table goes straight away from the viewer into the distance (we see its top surface strongly foreshortened going back), the object is about half as wide as it is long, compact narrow silhouette; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "medtable",
+   "cat": "props",
+   "view": "front",
+   "w": 1.8,
+   "foot": [
+    1.8,
+    0.9,
+    1.3
+   ],
+   "desc": "a field medical workbench: a white-painted steel medical table with chipped enamel, a glass instrument cabinet on one end, a sterilizer box, glass bottles, syringes in a tray, rolled bandages, a small spirit lamp, a stand with a drip bottle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "medtable_side",
+   "cat": "props",
+   "view": "front",
+   "w": 0.85,
+   "foot": [
+    0.9,
+    1.8,
+    1.3
+   ],
+   "desc": "a long white-painted steel field medical table with chipped enamel, a glass instrument cabinet at the far end, bottles, syringes in a tray, bandages, a drip stand seen from its NARROW SHORT END: the short end faces the viewer squarely and the long table goes straight away from the viewer into the distance (we see its top surface strongly foreshortened going back), the object is about half as wide as it is long, compact narrow silhouette; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "conveyor",
+   "cat": "props",
+   "view": "side",
+   "w": 1.0,
+   "foot": [
+    1.0,
+    0.6,
+    0.7
+   ],
+   "desc": "one short straight segment of a belt conveyor: a black rubber belt over steel rollers in a grey-green steel frame on four short legs, open at both ends so segments can join, a small electric motor box on its side; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "conveyor_sorter",
+   "cat": "props",
+   "view": "front",
+   "w": 0.9,
+   "foot": [
+    0.9,
+    0.9,
+    1.0
+   ],
+   "desc": "a small conveyor sorter box: a square grey-green steel cabinet with an input slot and two output chutes, a flap gate, a small control panel with a toggle switch and indicator lamp, cables; a survivor-built home-made machine assembled from salvaged Soviet industrial parts, welded steel, bolts, rust, chipped grey-green and blue-grey paint; Soviet / post-Soviet Russian, weathered, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "rectifier",
+   "cat": "props",
+   "view": "front",
+   "w": 1.15,
+   "foot": [
+    1.8,
+    1.8,
+    3.0
+   ],
+   "desc": "a tall home-made rectification distillation column: a vertical riveted steel-and-copper column pipe about three times taller than wide, with ring flanges, pressure gauges and valves, a reflux condenser and a thin pipe at the top, standing on a squat boiler tank on a steel frame with a fire box, a collector tap with a small canister at the base, ladder rungs on the side; a survivor-built home-made machine assembled from salvaged Soviet industrial parts, welded steel, bolts, rust, chipped grey-green and blue-grey paint; Soviet / post-Soviet Russian, weathered, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "barrel_200",
+   "cat": "props",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.6,
+    0.9
+   ],
+   "desc": "a standing 200-litre steel oil drum barrel with two ribs, faded blue-grey paint, a bung cap and a hand pump on top, rust streaks, clean enough to be used as liquid storage; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "box_large",
+   "cat": "props",
+   "view": "front",
+   "w": 1.7,
+   "foot": [
+    1.7,
+    0.8,
+    0.8
+   ],
+   "desc": "a large long wooden storage chest made of thick planks with iron corner brackets and straps, two rope side handles, a closed hinged lid and a padlock hasp; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "box_large_side",
+   "cat": "props",
+   "view": "front",
+   "w": 0.85,
+   "foot": [
+    0.8,
+    1.7,
+    0.8
+   ],
+   "desc": "the same large long wooden storage chest seen from its narrow end, the chest going away from the viewer, iron corner brackets and rope handle, closed lid; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "drill_rig",
+   "cat": "props",
+   "view": "front",
+   "w": 2.0,
+   "foot": [
+    2.0,
+    2.0,
+    3.2
+   ],
+   "desc": "a home-made ore drilling rig standing on rocky ground: a tall welded steel lattice derrick tower with a pulley at the top, a drill pipe going down into a hole in a cracked rock, a small diesel engine with a belt drive and a vertical exhaust pipe on a steel skid base, a fuel jerrycan beside it, heaps of drilled rock chips around the base; a survivor-built home-made machine assembled from salvaged Soviet industrial parts, welded steel, bolts, rust, chipped grey-green and blue-grey paint; Soviet / post-Soviet Russian, weathered, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "barrel_mazut",
+   "cat": "props",
+   "view": "front",
+   "w": 0.6,
+   "foot": [
+    0.6,
+    0.6,
+    0.9
+   ],
+   "desc": "a very rusty old steel oil drum without its lid, filled to the top with thick black glossy mazut fuel oil, black oil smeared and dripping down its sides, a black puddle stain at its base; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "canister_pile_rusty",
+   "cat": "props",
+   "view": "front",
+   "w": 1.1,
+   "foot": [
+    1.1,
+    0.8,
+    0.6
+   ],
+   "desc": "a pile of five or six old rusty dented steel jerrycans and small canisters heaped on each other, some lying on their side, oil stains, one with an open spout leaking black oil; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "fuel_hand_pump",
+   "cat": "props",
+   "view": "front",
+   "w": 1.2,
+   "foot": [
+    1.2,
+    1.2,
+    1.3
+   ],
+   "desc": "a Soviet gas station underground fuel tank access: a square steel manhole hatch frame set in a cracked concrete slab, its heavy lid open, and a rusty hand-operated rotary fuel pump with a long crank lever on a short pipe standing on the hatch, a rubber hose with a nozzle hanging from it, oil stains on the concrete; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  }
+ ]
+}

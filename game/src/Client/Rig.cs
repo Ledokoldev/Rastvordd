@@ -384,19 +384,17 @@ namespace Rastvordd.Client
             {
                 var up = ArmPal(_set.UpperArm);
                 var fo = ArmPal(_set.ForeArm);
-                float wu = Mathf.Max(3, Mathf.Round(_set.UpperArm.GetHeight() * 1.35f));   // с обводкой выходит как ArmThick
-                float wf = Mathf.Max(3, Mathf.Round(_set.ForeArm.GetHeight() * 1.2f));
+                // звенья короткие (~9 px), поэтому рука тонкая: 3 px заливки + обводка — иначе выходит «трапеция»-обрубок
+                const float wu = 3, wf = 3;
                 var wrist = arm.joint + new Vector2(Mathf.Cos(arm.a2), Mathf.Sin(arm.a2)) * lFore;
                 Vector2 M(Vector2 q) { q += RigView.Feet; if (_mirror) q.X = RigView.VW - q.X; return q.Round(); }
                 Vector2 a = M(sh), j = M(arm.joint), h = M(wrist);
                 DrawSetTransform(Vector2.Zero, 0, Vector2.One);
                 Capsule(a, j, wu + 2, up.line);
-                Capsule(j, h, wf + 2, fo.line);
+                Capsule(j, h, wf + 2, up.line);
                 Capsule(a, j, wu, up.fill);
-                Capsule(j, h, wf, fo.fill);
-                // складка в локте и тень по нижнему краю — чтобы рука читалась объёмной, а не плоской палкой
-                DrawCircle(j, wf * 0.5f - 0.5f, up.shade);
-                float r = Mathf.Max(1.5f, wf * 0.42f);
+                Capsule(j, h, wf, up.fill);   // рукав одного цвета до запястья
+                const float r = 1.5f;
                 DrawCircle(h, r + 1, fo.line);
                 DrawCircle(h, r, fo.tip);
             }

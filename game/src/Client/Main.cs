@@ -33,6 +33,8 @@ namespace Rastvordd.Client
         // наблюдатель (песочница ботов)
         bool _spectate;
         int _followId, _timeScale = 1;
+        bool _autoCam;       // наблюдатель: камера сама переезжает к самой горячей точке (--autocam, C — вкл/выкл)
+        float _camTimer;
         float _effSpeed = 1;   // сколько секунд мира проходит за секунду на деле (песочница может не успевать)
         float _specRefresh;
         SpectatorPanel _specPanel;
@@ -274,6 +276,9 @@ namespace Rastvordd.Client
             }
             // песочница: --spectate — без своего персонажа, смотреть на ботов
             _spectate = System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--spectate") >= 0;
+            _autoCam = _spectate && System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--autocam") >= 0;
+            var spd = System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--speed="));
+            if (spd != null && int.TryParse(spd[8..], out int ts)) _timeScale = System.Math.Clamp(ts, 1, 20);   // скорость мира с самого старта
             _myId = _spectate ? _server.ConnectSpectator() : _server.Connect("Игрок");
             // летопись вайпа — всегда: обычная игра и песочница пишут в user://chronicle, отладка — куда скажут (--chronicle=путь)
             try
@@ -709,8 +714,10 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     if (bots.Count == 0) return true;
                     int i = bots.FindIndex(b => b.id == _followId);
                     _followId = bots[(i + 1) % bots.Count].id;
+                    _autoCam = false;
                     return true;
-                case Key.F: _followId = 0; return true;
+                case Key.F: _followId = 0; _autoCam = false; return true;
+                case Key.C: _autoCam = !_autoCam; _camTimer = 0; _hud.Toast(_autoCam ? "Автокамера: к перестрелкам" : "Автокамера выключена"); return true;
                 case Key.Key1: _timeScale = 1; return true;
                 case Key.Key2: _timeScale = 2; return true;
                 case Key.Key3: _timeScale = 4; return true;
@@ -721,6 +728,30 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             return false;
         }
 
+        /// <summary>
+        /// Автокамера: раз в 12 с (или когда наблюдаемый умер) — к живому боту у самой горячей точки (стрельба, рейд, сброс);
+        /// горячих нет — к тому, кто дольше всех не показывался.
+        /// </summary>
+        void AutoCam(float dt)
+        {
+            var cur = _server.World.Find(_followId);
+            if ((_camTimer -= dt) > 0 && cur != null && !cur.Dead) return;
+            _camTimer = 12f;
+            var bots = _server.BotLines();
+            if (bots.Count == 0) return;
+            int pick = -1; float bestD = 70f;
+            if (_cur.Hot.Count > 0)
+                foreach (var (id, _) in bots)
+                    if (_server.World.Find(id) is Sim.Actor a && !a.Dead && SVec.Distance(a.Pos, _cur.Hot[0].pos) < bestD) { bestD = SVec.Distance(a.Pos, _cur.Hot[0].pos); pick = id; }
+            if (pick < 0)
+            {
+                int i = bots.FindIndex(b => b.id == _followId);
+                for (int k = 1; k <= bots.Count && pick < 0; k++)
+                    if (_server.World.Find(bots[(i + k) % bots.Count].id) is Sim.Actor a && !a.Dead) pick = a.Id;
+            }
+            if (pick >= 0) _followId = pick;
+        }
+
         void UpdateSpectatorPanel(float dt)
         {
             if (_specPanel == null)
@@ -729,6 +760,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _specPanel = new SpectatorPanel { Position = new Vector2(16, 14) };
                 _hud.AddChild(_specPanel);
             }
+            if (_autoCam) AutoCam(dt);
             if ((_specRefresh -= dt) > 0) return;
             _specRefresh = 0.4f;
             string speed = $"×{_timeScale}{(_timeScale > 1 && _effSpeed < _timeScale * 0.85f ? $" (факт ×{_effSpeed:0.#})" : "")}";

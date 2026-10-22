@@ -143,6 +143,40 @@ namespace Rastvordd.Client
         static float Thick(int px) => Mathf.Max(px + 1, Mathf.Round(px * Broad)) / px;
         /// <summary>Руки толще остального тела (иначе на крепком торсе они выглядят тонкими и кривыми).</summary>
         static float ArmThick(int px) => Mathf.Max(px + 2, Mathf.Round(px * 1.8f)) / px;
+        /// <summary>Цвета руки из текстуры части (рукав уже окрашен одеждой — WearLook): заливка, тень, обводка, кисть.</summary>
+        static readonly System.Collections.Generic.Dictionary<ulong, (Color fill, Color shade, Color line, Color tip)> _armPal = new();
+        static (Color fill, Color shade, Color line, Color tip) ArmPal(Texture2D t)
+        {
+            ulong key = t.GetRid().Id;
+            if (_armPal.TryGetValue(key, out var pal)) return pal;
+            var img = t.GetImage();
+            if (img.IsCompressed()) img.Decompress();
+            var all = new System.Collections.Generic.Dictionary<Color, int>();
+            var end = new System.Collections.Generic.Dictionary<Color, int>();
+            int w = img.GetWidth(), h = img.GetHeight();
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                {
+                    var c = img.GetPixel(x, y);
+                    if (c.A < 0.5f) continue;
+                    c.A = 1;
+                    all[c] = (all.TryGetValue(c, out int na) ? na : 0) + 1;
+                    if (x >= w - 2) end[c] = (end.TryGetValue(c, out int ne) ? ne : 0) + 1;
+                }
+            Color line = Colors.Black, fill = Colors.Gray, tip = Colors.Gray;
+            float darkest = 9;
+            foreach (var (c, _) in all) if (c.Luminance < darkest) { darkest = c.Luminance; line = c; }
+            int best = -1;
+            foreach (var (c, n) in all) if (c.Luminance > darkest + 0.06f && n > best) { best = n; fill = c; }
+            best = -1;
+            foreach (var (c, n) in end) if (c.Luminance > darkest + 0.06f && n > best) { best = n; tip = c; }
+            if (best < 0) tip = fill;
+            line = line.Darkened(0.15f);
+            pal = (fill, fill.Darkened(0.2f), line, tip);
+            _armPal[key] = pal;
+            return pal;
+        }
+
         /// <summary>Голова чуть шире нарисованной — лицо и шлем читаются как человеческие.</summary>
         static float HeadWide(int px) => Mathf.Max(px + 2, Mathf.Round(px * 1.2f)) / px;
 
@@ -344,10 +378,34 @@ namespace Rastvordd.Client
                 Vfx.DrawFrame(this, "fire_torch", at + new Vector2(0, 2), s.Breath, 9f);
             }
 
+            // рука — цельная: плечо и предплечье капсулами в цвет рукава с тёмной обводкой, кисть — кружком (перчатка/кожа).
+            // Раньше это были крошечные текстуры, повёрнутые и растянутые ×1,8 — пиксели «рвались», в локте была щель.
             void DrawArm((float a1, float a2, Vector2 joint) arm, Vector2 sh)
             {
-                Part(_set.UpperArm, sh, arm.a1, new Vector2(1, _set.UpperArm.GetHeight() / 2f), ArmThick(_set.UpperArm.GetHeight()));
-                Part(_set.ForeArm, arm.joint, arm.a2, new Vector2(1, _set.ForeArm.GetHeight() / 2f), ArmThick(_set.ForeArm.GetHeight()));
+                var up = ArmPal(_set.UpperArm);
+                var fo = ArmPal(_set.ForeArm);
+                float wu = Mathf.Max(3, Mathf.Round(_set.UpperArm.GetHeight() * 1.35f));   // с обводкой выходит как ArmThick
+                float wf = Mathf.Max(3, Mathf.Round(_set.ForeArm.GetHeight() * 1.2f));
+                var wrist = arm.joint + new Vector2(Mathf.Cos(arm.a2), Mathf.Sin(arm.a2)) * lFore;
+                Vector2 M(Vector2 q) { q += RigView.Feet; if (_mirror) q.X = RigView.VW - q.X; return q.Round(); }
+                Vector2 a = M(sh), j = M(arm.joint), h = M(wrist);
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                Capsule(a, j, wu + 2, up.line);
+                Capsule(j, h, wf + 2, fo.line);
+                Capsule(a, j, wu, up.fill);
+                Capsule(j, h, wf, fo.fill);
+                // складка в локте и тень по нижнему краю — чтобы рука читалась объёмной, а не плоской палкой
+                DrawCircle(j, wf * 0.5f - 0.5f, up.shade);
+                float r = Mathf.Max(1.5f, wf * 0.42f);
+                DrawCircle(h, r + 1, fo.line);
+                DrawCircle(h, r, fo.tip);
+            }
+
+            void Capsule(Vector2 a, Vector2 b, float w, Color c)
+            {
+                DrawLine(a, b, c, w);
+                DrawCircle(a, w * 0.5f, c);
+                DrawCircle(b, w * 0.5f, c);
             }
 
             void DrawLeg(Vector2 hip, Vector2 foot)

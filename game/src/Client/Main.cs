@@ -161,8 +161,12 @@ namespace Rastvordd.Client
                 else if (a == "bdone") _buildMenu.Release();   // отладка: отпустить ПКМ
                 else if (a.StartsWith("bpick")) { GetViewport().WarpMouse(GetViewport().GetVisibleRect().Size / 2 + new Vector2(0, -1).Rotated(int.Parse(a.Substring(5)) * Mathf.Tau / 5) * 110); }   // отладка: навести на сектор колеса
                 else if (a.StartsWith("give")) { var g = a.Substring(4).Split('x'); _server.World.Find(_myId).Add(g[0], g.Length > 1 ? int.Parse(g[1]) : 1); }   // отладка: give<id>x<n>
+                else if (a.StartsWith("open:")) { _server.World.DebugOpenUi(_server.World.Find(_myId), a[5..]); _invOpen = true; }   // отладка: окна для скриншотов
                 else if (a.StartsWith("ui")) _uiReq = ((UiOp)int.Parse(a.Substring(2).Split('_')[0]), a.Contains('_') ? a.Substring(a.IndexOf('_') + 1).Replace('~', '#').Replace('^', '>') : null, 0);   // отладка: ui<op>_<арг> (# → ~, > → ^)
                 else if (a == "inv") _invOpen = !_invOpen;
+                else if (a == "admin") _hud.ToggleAdmin();
+                else if (a == "code") _hud.ShowCode(0);
+                else if (a == "die") _server.World.DebugKill(_server.World.Find(_myId));
                 else if (a == "steps") GD.Print("steps: " + string.Join(", ", System.Linq.Enumerable.Select(System.Linq.Enumerable.Where(Sfx.Played, kv => kv.Key.StartsWith("steps/")), kv => kv.Key[6..] + "×" + kv.Value)));   // отладка: какие шаги звучали
                 else if (a == "info") GD.Print($"info: {_server.World.LastInfo.GetValueOrDefault(_myId)} | structs {_server.World.Structures.Count} | aim {_autoAim} | me {_server.World.Find(_myId).Pos}" + (_server.World.Substations.Count > 0 ? $" | тир1: {string.Join(", ", _server.World.Tier1.ConvertAll(r => $"{r.Key} готов={r.Ready} кабели={r.CablesIn} вагон={r.WagonT:0.00} кран={(r.Cabin != null ? r.Cabin.Progress : 0):0} крейт={(r.Crate.Unlocked ? "открыт" : "закрыт")}@{r.Crate.Pos.X:0};{r.Crate.Pos.Y:0}"))} | подстанция: питание {_server.World.Substations[0].Powered}, крейт открыт {_server.World.Substations[0].Crate.Unlocked}, таймер {_server.World.Substations[0].CrateTimer:0}" : ""));   // отладка: последнее сообщение
                 else if (a == "map") { _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); }
@@ -424,7 +428,7 @@ else if (arg == "--atcrate")
                     // отладочный сценарий: --do=10:kit,20:slot5,30:fire,60:interact,70:craft3
                     foreach (var step in arg.Substring(5).Split(','))
                     {
-                        var kv = step.Split(':');
+                        var kv = step.Split(':', 2);
                         int frame = int.Parse(kv[0]);
                         if (!_script.TryGetValue(frame, out var list)) _script[frame] = list = new List<string>();
                         list.Add(kv[1]);

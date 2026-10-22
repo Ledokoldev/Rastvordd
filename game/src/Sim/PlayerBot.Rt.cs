@@ -172,10 +172,10 @@ namespace Rastvordd.Sim
                 else if (r.Recycler != null && RecycleScrapStock() >= 40) { }                     // переработчик — главный источник лома (D49): к нему ходят сколько надо
                 else { why = runs > 0 ? $"тир 0 уже обобрал ({runs} раз) — там нечего ловить" : "тир 0 мне уже не нужен"; return false; }
             }
-            // радиация (Радиоцентр — 30): без защиты не хожу — доза убьёт раньше охраны.
+            // радиация (фон по тиру РТ: 0/10/20): без защиты не хожу — доза убьёт раньше охраны.
             // TODO(тир 2, Радиоцентр «Маяк»): полный цикл вызова борта ботом — журнал (код) → дизель → пульт (код + перфокарта II,
             // World.EnterConsoleCode) → ждать на площадке, отбивать контейнер. Пока боты только обходят ящики, сейф и стойки (BotUseStash).
-            float rad = _w.Tier2.Exists(t => t.M == r.M) ? Tier2Rt.Radiation : 0;   // остальные РТ — как раньше (там фон ниже)
+            float rad = _w.RadLevelAt(r.M.Center);
             if (rad > 0 && Clothing.RadProt(_me) < rad - 5) { why = $"там радиация {rad:0} — нечем защититься"; return false; }
             if (r.Guards == 0) return deaths < 3 || (why = "там уже умирал") == null;
             if (gun == null) { why = "охрана, а у меня нет ствола"; return false; }

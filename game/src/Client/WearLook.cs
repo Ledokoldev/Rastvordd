@@ -77,11 +77,6 @@ namespace Rastvordd.Client
             "wear_army_ssh68" or "wear_army_6b2" or "wear_army_elbowpads" or "wear_army_kneepads" => ArmyGreen,
             "wear_army_bertsy" or "wear_sobr_boots" => Boots,
             "wear_army_gloves" => new Mat(0x33352a, 0x26281f, Pat.Noise),
-            "wear_liquidator_helmet" or "wear_liquidator_overboots" => White,
-            "wear_liquidator_pmk" => new Mat(0x7d827a, 0x2a2c28, Pat.Gloss),
-            "wear_liquidator_apron" => Lead,
-            "wear_liquidator_suit" or "wear_liquidator_pants" => L1,
-            "wear_liquidator_gloves" => new Mat(0xc0b8a0, 0xa39c86, Pat.Noise),
             "wear_sobr_sfera" => new Mat(0x3a3f35, 0x26291f, Pat.Gloss),
             "wear_sobr_kora" => new Mat(0x3a4032, 0x2b3025, Pat.Noise),   // тёмная олива поверх чёрного костюма — жилет читается
             "wear_sobr_elbowpads" or "wear_sobr_kneepads" or "wear_sobr_gloves" => Black,
@@ -242,7 +237,7 @@ namespace Rastvordd.Client
                     case "wear_scrap_balaclava" or "wear_sobr_nomex":
                         Fabric(fcm, (x, y) => !(front && y >= h * 0.45f && y <= h * 0.55f && x > 1 && x < w - 2), 5);   // прорезь для глаз
                         break;
-                    case "wear_ozk_gp5" or "wear_liquidator_pmk":
+                    case "wear_ozk_gp5":
                         if (front) Hard(face, fcm, (x, y) => Op(x, y) && y >= h * 0.4f, side);
                         else Fabric(fcm, (x, y) => y >= h * 0.35f && y <= h * 0.45f, 5);
                         if (front && face == "wear_ozk_gp5") { int cx = w / 2; for (int dy = 0; dy < 2; dy++) for (int dx = -1; dx <= 0; dx++) Put(img, cx + dx, h - 2 + dy - 1, new Color(0.18f, 0.2f, 0.16f)); }   // фильтр

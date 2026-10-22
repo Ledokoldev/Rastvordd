@@ -9,11 +9,11 @@ namespace Rastvordd.Sim
     /// РТ тира 2 по макетам (scripts/mock-tier2.py → Tier2Layouts): Радиоцентр «Маяк» (docs/design/11-monuments.md, D50).
     /// Вызов груза: журнал дежурного (личный код) → дизель (ток на 10 мин) → пульт: код + перфокарта II →
     /// красная ракета у площадки, слух по радио → через 90 с Ан-2 сбрасывает контейнер РОВНО на площадку (заперт 30 с, вскрыть 10 с).
-    /// Перезарядка РТ — 20 мин. Радиация 30 по всей территории.
+    /// Перезарядка РТ — 20 мин. Радиация 20 (тир 2) по всей территории.
     /// </summary>
     public sealed class Tier2Rt
     {
-        public const float RefreshTime = 1200f, PowerTime = 600f, CallDelay = 90f, DropLock = 30f, Radiation = 30f;
+        public const float RefreshTime = 1200f, PowerTime = 600f, CallDelay = 90f, DropLock = 30f, Radiation = 20f;   // = Clothing.RtRad[2]
         public string Key;
         public Monument M;
         public Vector2 O;

@@ -67,13 +67,13 @@ namespace Rastvordd.Sim
                 t.Hp = 100;
                 Check(Near(MeleeAfterArmor(t, new Actor { Pos = t.Pos + new Vector2(1, 0) }, 40), 40 * (1 - 0.15f)), "ближний бой: защита корпуса ×0,5");
 
-                // 5. радиация: Карьер 25, тряпьё (рад 5) — доза 2/с; ОЗК (рад 67) — не идёт и выводится
+                // 5. радиация: РТ тира 2 (фон 20), тряпьё (рад 0) — доза 2/с; ОЗК (рад 40) — не идёт и выводится
                 t.ClearAll(); t.Hp = 100;
                 Dress(t, "wear_rags_bandana", "wear_rags_shirt", "wear_rags_pants", "wear_rags_wraps", "wear_rags_mittens");
-                Check(Near(Clothing.RadProt(t), 5) && Near(Clothing.Warmth(t), 10), $"тряпьё: рад {Clothing.RadProt(t):0} (5), тепло {Clothing.Warmth(t):0} (10)");
-                t.RadHere = 25; t.FeltTemp = 30;
+                Check(Near(Clothing.RadProt(t), 0) && Near(Clothing.Warmth(t), 15), $"тряпьё: рад {Clothing.RadProt(t):0} (0), тепло {Clothing.Warmth(t):0} (15 — обычная ночь)");
+                t.RadHere = 20; t.FeltTemp = 30;
                 for (int i = 0; i < 300; i++) EnvTick(t, Dt);   // 10 с
-                Check(Near(t.RadDose, 20, 0.05f), $"тряпьё на Карьере: доза за 10 с = {t.RadDose:0.0} (ждём 20)");
+                Check(Near(t.RadDose, 20, 0.05f), $"тряпьё на РТ тира 2: доза за 10 с = {t.RadDose:0.0} (ждём 20)");
                 t.RadDose = 260; float hp0 = t.Hp; EnvTick(t, 1f);
                 Check(Near(hp0 - t.Hp, 1, 0.01f), "доза ≥ 250 → 1 hp/с");
                 t.RadDose = 520; hp0 = t.Hp; EnvTick(t, 1f);
@@ -81,9 +81,22 @@ namespace Rastvordd.Sim
                 Check(HealMul(t) < 1, "доза ≥ 100 → тошнота (лечение ×0,5)");
                 t.ClearAll(); t.Hp = 100;
                 Dress(t, "wear_ozk_hood", "wear_ozk_gp5", "wear_ozk_cape", "wear_ozk_gloves", "wear_ozk_stockings");
-                t.RadHere = 25; t.FeltTemp = 30; t.RadDose = 10;
+                t.RadHere = 20; t.FeltTemp = 30; t.RadDose = 10;
                 for (int i = 0; i < 300; i++) EnvTick(t, Dt);
-                Check(Near(Clothing.RadProt(t), 67) && t.RadDose < 10 && Near(t.RadDose, 5, 0.05f), $"ОЗК (рад {Clothing.RadProt(t):0}) на Карьере: доза не идёт, выводится 0,5/с → {t.RadDose:0.0}");
+                Check(Near(Clothing.RadProt(t), 40) && t.RadDose < 10 && Near(t.RadDose, 5, 0.05f), $"ОЗК (рад {Clothing.RadProt(t):0}) на РТ тира 2: доза не идёт, выводится 0,5/с → {t.RadDose:0.0}");
+
+                // 5б. сеты и куда пускают (D53): боевой тира N — РТ 0…N, защищённый — 0…N+1; 2 свинцовые пластины — +10
+                foreach (var set in Clothing.Sets)
+                {
+                    if (set.Key == "watch") continue;
+                    t.ClearAll(); Dress(t, set.Items.ToArray());
+                    float rp = Clothing.RadProt(t); int maxTier = -1;
+                    for (int k = 0; k < Clothing.RtRad.Length; k++) if (Clothing.RtRad[k] <= rp) maxTier = k;
+                    int want = set.Tier + (set.Kind == "env" ? 1 : 0);
+                    Check(maxTier == want, $"{set.Name} (тир {set.Tier}, {(set.Kind == "env" ? "защищённый" : set.Kind == "people" ? "боевой" : "базовый")}): рад {rp:0}, тепло {Clothing.Warmth(t):0} (держит до {Clothing.Comfort - Clothing.Warmth(t):0} °C) → РТ до тира {maxTier} (ждём {want})");
+                }
+                t.ClearAll(); Dress(t, Clothing.Sets.Find(x => x.Key == "army").Items.ToArray()); Dress(t, "plate_lead", "plate_lead");
+                Check(Near(Clothing.RadProt(t), Clothing.RtRad[4]), $"армейская + 2 свинцовые пластины: рад {Clothing.RadProt(t):0} (ждём {Clothing.RtRad[4]:0} — куда угодно)");
 
                 // 6. холод: воздух + тепло ≥ +15 — комфортно
                 t.ClearAll(); t.Hp = 100; t.RadHere = 0;
@@ -94,7 +107,7 @@ namespace Rastvordd.Sim
                 t.Cold = 100; t.FeltTemp = 5; hp0 = t.Hp; EnvTick(t, 1f);
                 Check(Near(hp0 - t.Hp, 0.15f + 10 * 0.02f, 0.01f), $"полное переохлаждение при +5 °C: −{hp0 - t.Hp:0.00} hp/с (0,35)");
                 Dress(t, "wear_vatnik_ushanka", "wear_vatnik_scarf", "wear_vatnik_telogreika", "wear_vatnik_pants", "wear_vatnik_valenki", "wear_vatnik_mittens");
-                Check(Near(Clothing.Comfort - Clothing.Warmth(t), -30), $"ватник держит холод до {Clothing.Comfort - Clothing.Warmth(t):0} °C (−30)");
+                Check(Near(Clothing.Comfort - Clothing.Warmth(t), -19), $"ватник держит холод до {Clothing.Comfort - Clothing.Warmth(t):0} °C (−19: зимняя ночь в лесу под дождём)");
 
                 // 7. надеть / снять через окно: ПКМ по жилету в рюкзаке, по пластине, снять жилет — пластины в рюкзак
                 t.ClearAll();

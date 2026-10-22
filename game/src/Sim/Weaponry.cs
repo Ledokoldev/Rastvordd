@@ -39,6 +39,10 @@ namespace Rastvordd.Sim
             ["ammo_rifle"] = "ammo_762",
             ["weapon_ak"] = "weapon_akm",
             ["weapon_pipe"] = "weapon_nagant",   // старый «самопал» стрелял пистолетными — ближе всего Наган
+            // Ликвидатор убран (D53): вещи из старых сейвов — в ближайшие из ОЗК и армейской
+            ["wear_liquidator_helmet"] = "wear_ozk_hood", ["wear_liquidator_pmk"] = "wear_ozk_gp5", ["wear_liquidator_apron"] = "wear_ozk_cape",
+            ["wear_liquidator_suit"] = "wear_army_bushlat", ["wear_liquidator_pants"] = "wear_army_pants", ["wear_liquidator_overboots"] = "wear_ozk_stockings",
+            ["wear_liquidator_gloves"] = "wear_ozk_gloves",
         };
         public static string Migrate(string id) => id != null && Legacy.TryGetValue(id, out var n) ? n : id;
 

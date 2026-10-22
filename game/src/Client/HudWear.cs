@@ -137,7 +137,7 @@ namespace Rastvordd.Client
                 if (_shiver <= 0) { if (Sfx.Get("cold_shiver") != null) Sfx.Play("cold_shiver", at, -10, 8); _shiver = 9 + GD.Randf() * 6; }
             }
             // противогаз: глухое дыхание (только когда появится файл)
-            if (s.Worn.Count > 1 && s.Worn[1].Id is "wear_ozk_gp5" or "wear_liquidator_pmk")
+            if (s.Worn.Count > 1 && s.Worn[1].Id is "wear_ozk_gp5")
             {
                 _breath -= dt;
                 if (_breath <= 0) { if (Sfx.Get("gasmask_breath_loop") != null) Sfx.Play("gasmask_breath_loop", at, -14, 6, 0.05f); _breath = 5f; }

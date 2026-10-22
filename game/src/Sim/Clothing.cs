@@ -21,7 +21,7 @@ namespace Rastvordd.Sim
     }
 
     /// <summary>Бронепластина: + к защите корпуса со своей стороны, прочность — урон до разрушения.</summary>
-    public sealed class PlateDef { public string Id; public float Bonus, Durability; }
+    public sealed class PlateDef { public string Id; public float Bonus, Durability, Rad; }
 
     /// <summary>
     /// Одежда, броня, пластины, часы, радиация и холод — данные (docs/design/14-armor-radiation-heli.md, версии 2–3).
@@ -49,6 +49,8 @@ namespace Rastvordd.Sim
         public const float RadDecay = 0.5f;             // доза/с выводится, когда не облучает
         public const float RadNausea = 100, RadHurt1 = 250, RadHurt3 = 500, RadMax = 1000;
         public const float AntiradDose = 120;           // антирадин: −120 дозы сразу
+        // фон РТ по тиру (D53): боевой сет тира N держит РТ тиров 0…N, защищённый — 0…N+1, две свинцовые пластины — любые
+        public static readonly float[] RtRad = { 0, 10, 20, 30, 40 };
         public const float Comfort = 15f;               // воздух + тепло ≥ +15 °C — комфортно
         public const float FireWarm = 15f, IndoorWarm = 8f, WetCold = -10f, NightCold = -10f, RainCold = -4f, WinterCold = -15f, UndergroundAir = 6f;
         public const float ColdRise = 0.02f;            // переохлаждение/с = дефицит × 0,02 (до 100): голым ночью в поле (+4 °C) — ≈ 7,5 мин
@@ -93,100 +95,93 @@ namespace Rastvordd.Sim
             void S(string key, string name, int tier, string kind, string source) => Sets.Add(new SetInfo { Key = key, Name = name, Tier = tier, Kind = kind, Source = source });
 
             S("rags", "Тряпьё", 0, "base", "в руках, ткань");
-            W("rags", "bandana", "Бандана", WearSlot.Face, 0, 1, 1, desc: "Тряпка на лицо. Почти ничего, но лучше, чем ничего");
-            W("rags", "shirt", "Рубаха из мешковины", WearSlot.Kofta, 3, 1, 3, desc: "Первая одежда: колется, но греет");
-            W("rags", "pants", "Штаны из мешковины", WearSlot.Legs, 3, 1, 3);
-            W("rags", "wraps", "Обмотки", WearSlot.Feet, 1, 1, 1, desc: "Тряпки на ноги вместо обуви");
-            W("rags", "mittens", "Рукавицы", WearSlot.Gloves, 1, 1, 2);
+            W("rags", "bandana", "Бандана", WearSlot.Face, 0, 0, 1, desc: "Тряпка на лицо. Почти ничего, но лучше, чем ничего");
+            W("rags", "shirt", "Рубаха из мешковины", WearSlot.Kofta, 3, 0, 5, desc: "Первая одежда: колется, но греет");
+            W("rags", "pants", "Штаны из мешковины", WearSlot.Legs, 3, 0, 5);
+            W("rags", "wraps", "Обмотки", WearSlot.Feet, 1, 0, 2, desc: "Тряпки на ноги вместо обуви");
+            W("rags", "mittens", "Рукавицы", WearSlot.Gloves, 1, 0, 2);
 
             S("vatnik", "Ватник", 1, "env", "верстак 1");
-            W("vatnik", "ushanka", "Ушанка", WearSlot.Head, 3, 2, 8, desc: "Тёплая шапка с ушами");
-            W("vatnik", "scarf", "Шарф", WearSlot.Face, 0, 3, 5);
-            W("vatnik", "telogreika", "Телогрейка", WearSlot.Kofta, 8, 3, 12, desc: "Стёганый ватник: держит холод ночью");
-            W("vatnik", "pants", "Ватные штаны", WearSlot.Legs, 6, 2, 9);
-            W("vatnik", "valenki", "Валенки", WearSlot.Feet, 2, 1, 7);
-            W("vatnik", "mittens", "Ватные рукавицы", WearSlot.Gloves, 1, 1, 4);
+            W("vatnik", "ushanka", "Ушанка", WearSlot.Head, 3, 3, 7, desc: "Тёплая шапка с ушами");
+            W("vatnik", "scarf", "Шарф", WearSlot.Face, 0, 4, 4);
+            W("vatnik", "telogreika", "Телогрейка", WearSlot.Kofta, 8, 5, 10, desc: "Стёганый ватник: держит холод ночью");
+            W("vatnik", "pants", "Ватные штаны", WearSlot.Legs, 6, 4, 7);
+            W("vatnik", "valenki", "Валенки", WearSlot.Feet, 2, 2, 4);
+            W("vatnik", "mittens", "Ватные рукавицы", WearSlot.Gloves, 1, 2, 2);
 
             S("leather", "Кожа и дерево", 1, "people", "верстак 1");
-            W("leather", "helmet", "Кожаный шлем", WearSlot.Head, 12, 0, 2);
-            W("leather", "chestplate", "Деревянный нагрудник", WearSlot.Armor, 18, 0, 0, -3, desc: "Доски на ремнях: держит нож и картечь на излёте");
-            W("leather", "bracers", "Кожаные наручи", WearSlot.Arms, 10, 0, 1);
-            W("leather", "pants", "Кожаные штаны", WearSlot.Legs, 8, 0, 4);
-            W("leather", "shinguards", "Деревянные поножи", WearSlot.Knees, 10, 0, 0, -2);
+            W("leather", "helmet", "Кожаный шлем", WearSlot.Head, 12, 2, 3);
+            W("leather", "chestplate", "Деревянный нагрудник", WearSlot.Armor, 18, 3, 2, -3, desc: "Доски на ремнях: держит нож и картечь на излёте");
+            W("leather", "bracers", "Кожаные наручи", WearSlot.Arms, 10, 1, 2);
+            W("leather", "pants", "Кожаные штаны", WearSlot.Legs, 8, 3, 6);
+            W("leather", "shinguards", "Деревянные поножи", WearSlot.Knees, 10, 1, 2, -2);
 
             S("spec", "Спецовка", 2, "env", "верстак 2");
-            W("spec", "hood", "Прорезиненный капюшон", WearSlot.Head, 2, 6, 3, rubber: true);
-            W("spec", "r2", "Респиратор Р-2", WearSlot.Face, 0, 12, 1, desc: "Фильтрует пыль и радиоактивную гарь", rubber: true);
-            W("spec", "robe", "Роба-спецовка", WearSlot.Kofta, 6, 8, 5, desc: "Плотная рабочая роба: от пыли и радиации");
-            W("spec", "pants", "Прорезиненные штаны", WearSlot.Legs, 4, 6, 3, rubber: true);
-            W("spec", "boots", "Резиновые сапоги", WearSlot.Feet, 2, 4, 3, rubber: true);
-            W("spec", "gloves", "Резиновые перчатки", WearSlot.Gloves, 1, 4, 1, rubber: true);
+            W("spec", "hood", "Прорезиненный капюшон", WearSlot.Head, 2, 5, 8, rubber: true);
+            W("spec", "r2", "Респиратор Р-2", WearSlot.Face, 0, 8, 2, desc: "Фильтрует пыль и радиоактивную гарь", rubber: true);
+            W("spec", "robe", "Роба-спецовка", WearSlot.Kofta, 6, 7, 16, desc: "Плотная рабочая роба: от пыли и радиации");
+            W("spec", "pants", "Прорезиненные штаны", WearSlot.Legs, 4, 5, 12, rubber: true);
+            W("spec", "boots", "Резиновые сапоги", WearSlot.Feet, 2, 3, 8, rubber: true);
+            W("spec", "gloves", "Резиновые перчатки", WearSlot.Gloves, 1, 2, 6, rubber: true);
 
             S("scrap", "Кустарная броня", 2, "people", "верстак 2");
-            W("scrap", "pot", "Каска-кастрюля", WearSlot.Head, 25, 0, 0, desc: "Кастрюля на ремне. Звенит от каждой пули", metal: true);
-            W("scrap", "balaclava", "Балаклава", WearSlot.Face, 3, 1, 4);
-            W("scrap", "signvest", "Жилет из дорожных знаков", WearSlot.Armor, 30, 0, 0, -4, 1, "Дорожные знаки на проволоке. Карман под 1 пластину (спереди). Гремит на бегу", metal: true);
-            W("scrap", "bracers", "Жестяные наручи", WearSlot.Arms, 15, 0, 0, metal: true);
-            W("scrap", "kneepads", "Наколенники из покрышек", WearSlot.Knees, 15, 0, 0, -2, rubber: true);
-            W("scrap", "kirza", "Кирзачи", WearSlot.Feet, 6, 0, 4);
+            W("scrap", "pot", "Каска-кастрюля", WearSlot.Head, 25, 3, 1, desc: "Кастрюля на ремне. Звенит от каждой пули", metal: true);
+            W("scrap", "balaclava", "Балаклава", WearSlot.Face, 3, 4, 5);
+            W("scrap", "signvest", "Жилет из дорожных знаков", WearSlot.Armor, 30, 5, 0, -4, 1, "Дорожные знаки на проволоке. Карман под 1 пластину (спереди). Гремит на бегу", metal: true);
+            W("scrap", "bracers", "Жестяные наручи", WearSlot.Arms, 15, 2, 1, metal: true);
+            W("scrap", "kneepads", "Наколенники из покрышек", WearSlot.Knees, 15, 2, 2, -2, rubber: true);
+            W("scrap", "kirza", "Кирзачи", WearSlot.Feet, 6, 4, 6);
 
-            S("ozk", "ОЗК", 3, "env", "верстак 3 или лут");
-            W("ozk", "hood", "Капюшон ОЗК", WearSlot.Head, 2, 10, 2, rubber: true);
-            W("ozk", "gp5", "Противогаз ГП-5", WearSlot.Face, 2, 25, 1, desc: "Резиновая маска с фильтром. Дышишь тяжело, но живёшь", rubber: true);
-            W("ozk", "cape", "Плащ ОЗК", WearSlot.Armor, 4, 20, 4, -3, desc: "Общевойсковой защитный комплект: от радиации, не от пуль. Виден издалека", rubber: true);
-            W("ozk", "gloves", "Перчатки ОЗК", WearSlot.Gloves, 1, 6, 1, rubber: true);
-            W("ozk", "stockings", "Чулки ОЗК", WearSlot.Feet, 1, 6, 2, rubber: true);
+            S("ozk", "ОЗК", 3, "env", "верстак 3 или лут");   // защищённый тир 3: на будущие РТ уровня 4 («Объект 42»)
+            W("ozk", "hood", "Капюшон ОЗК", WearSlot.Head, 2, 7, 8, rubber: true);
+            W("ozk", "gp5", "Противогаз ГП-5", WearSlot.Face, 2, 12, 3, desc: "Резиновая маска с фильтром. Дышишь тяжело, но живёшь", rubber: true);
+            W("ozk", "cape", "Плащ ОЗК", WearSlot.Armor, 4, 12, 22, -3, desc: "Общевойсковой защитный комплект: от радиации, не от пуль. Виден издалека", rubber: true);
+            W("ozk", "gloves", "Перчатки ОЗК", WearSlot.Gloves, 1, 4, 8, rubber: true);
+            W("ozk", "stockings", "Чулки ОЗК", WearSlot.Feet, 1, 5, 11, rubber: true);
 
             S("army", "Армейская", 3, "people", "верстак 3");
-            W("army", "ssh68", "Шлем СШ-68", WearSlot.Head, 35, 0, 0, desc: "Стальной армейский шлем", metal: true);
-            W("army", "bushlat", "Бушлат", WearSlot.Kofta, 10, 2, 14, desc: "Армейский ватный бушлат: тепло и немного от осколков");
-            W("army", "6b2", "Бронежилет 6Б2", WearSlot.Armor, 30, 0, 0, -5, 2, "Армейский бронежилет: 2 пластины — спереди и сзади", metal: true);
-            W("army", "elbowpads", "Армейские налокотники", WearSlot.Arms, 15, 0, 0);
-            W("army", "kneepads", "Армейские наколенники", WearSlot.Knees, 15, 0, 0);
-            W("army", "pants", "Армейские штаны", WearSlot.Legs, 8, 1, 6);
-            W("army", "bertsy", "Берцы", WearSlot.Feet, 6, 0, 5);
-            W("army", "gloves", "Тактические перчатки", WearSlot.Gloves, 4, 0, 3);
+            W("army", "ssh68", "Шлем СШ-68", WearSlot.Head, 35, 4, 4, desc: "Стальной армейский шлем", metal: true);
+            W("army", "bushlat", "Бушлат", WearSlot.Kofta, 10, 6, 18, desc: "Армейский ватный бушлат: тепло и немного от осколков");
+            W("army", "6b2", "Бронежилет 6Б2", WearSlot.Armor, 30, 4, 2, -5, 2, "Армейский бронежилет: 2 пластины — спереди и сзади", metal: true);
+            W("army", "elbowpads", "Армейские налокотники", WearSlot.Arms, 15, 2, 2);
+            W("army", "kneepads", "Армейские наколенники", WearSlot.Knees, 15, 2, 2);
+            W("army", "pants", "Армейские штаны", WearSlot.Legs, 8, 5, 10);
+            W("army", "bertsy", "Берцы", WearSlot.Feet, 6, 4, 8);
+            W("army", "gloves", "Тактические перчатки", WearSlot.Gloves, 4, 3, 6);
 
-            S("liquidator", "Ликвидатор", 4, "env", "только лут");
-            W("liquidator", "helmet", "Шлем с забралом", WearSlot.Head, 15, 12, 4, desc: "Каска с пластиковым забралом");
-            W("liquidator", "pmk", "Противогаз ПМК", WearSlot.Face, 3, 30, 3, rubber: true);
-            W("liquidator", "apron", "Освинцованный фартук", WearSlot.Armor, 15, 25, 0, -6, desc: "Тяжёлый свинцовый фартук ликвидатора");
-            W("liquidator", "suit", "Куртка Л-1 утеплённая", WearSlot.Kofta, 4, 12, 16);
-            W("liquidator", "pants", "Штаны Л-1", WearSlot.Legs, 4, 8, 12);
-            W("liquidator", "overboots", "Бахилы", WearSlot.Feet, 1, 5, 8, rubber: true);
-            W("liquidator", "gloves", "Перчатки Л-1", WearSlot.Gloves, 1, 4, 5, rubber: true);
 
-            S("sobr", "СОБР", 4, "people", "только лут");
-            W("sobr", "sfera", "Шлем «Сфера»", WearSlot.Head, 45, 2, 2, desc: "Титановый шлем спецназа", metal: true);
-            W("sobr", "nomex", "Балаклава Nomex", WearSlot.Face, 8, 2, 5);
-            W("sobr", "kora", "Бронежилет «Кора»", WearSlot.Armor, 40, 0, 0, -7, 2, "Штурмовой бронежилет: 2 пластины — спереди и сзади", metal: true);
-            W("sobr", "suit", "Тактический костюм", WearSlot.Kofta, 10, 3, 10);
-            W("sobr", "elbowpads", "Налокотники СОБР", WearSlot.Arms, 20, 0, 0);
-            W("sobr", "kneepads", "Наколенники СОБР", WearSlot.Knees, 20, 0, 0);
-            W("sobr", "pants", "Тактические брюки", WearSlot.Legs, 10, 2, 8);
-            W("sobr", "boots", "Штурмовые ботинки", WearSlot.Feet, 8, 1, 6);
-            W("sobr", "gloves", "Штурмовые перчатки", WearSlot.Gloves, 6, 0, 3);
+            S("sobr", "СОБР", 3, "people", "только лут");   // элита тира 3: тиров 0–3, четвёртого нет
+            W("sobr", "sfera", "Шлем «Сфера»", WearSlot.Head, 45, 4, 4, desc: "Титановый шлем спецназа", metal: true);
+            W("sobr", "nomex", "Балаклава Nomex", WearSlot.Face, 8, 4, 6);
+            W("sobr", "kora", "Бронежилет «Кора»", WearSlot.Armor, 40, 4, 2, -7, 2, "Штурмовой бронежилет: 2 пластины — спереди и сзади", metal: true);
+            W("sobr", "suit", "Тактический костюм", WearSlot.Kofta, 10, 6, 14);
+            W("sobr", "elbowpads", "Налокотники СОБР", WearSlot.Arms, 20, 2, 2);
+            W("sobr", "kneepads", "Наколенники СОБР", WearSlot.Knees, 20, 2, 2);
+            W("sobr", "pants", "Тактические брюки", WearSlot.Legs, 10, 4, 10);
+            W("sobr", "boots", "Штурмовые ботинки", WearSlot.Feet, 8, 2, 8);
+            W("sobr", "gloves", "Штурмовые перчатки", WearSlot.Gloves, 6, 2, 4);
 
             // часы — одни (упрощено по просьбе пользователя): время, температура, радиация в HUD
             S("watch", "Часы", 1, "base", "бочки и ящики РТ 0–1");
             W("watch", "", "Часы «Электроника»", WearSlot.Wrist, 0, 0, 0, desc: "Наденешь на запястье — в HUD время, температура воздуха и радиация там, где стоишь");
             Meta["wear_watch"].Rarity = 2; Meta["wear_watch"].Value = 25;
 
-            void P(string id, string name, float bonus, float dur, int rarity, float value, string desc)
+            void P(string id, string name, float bonus, float dur, int rarity, float value, string desc, float rad = 0)
             {
-                PlateDefs[id] = new PlateDef { Id = id, Bonus = bonus / 100f, Durability = dur };
+                PlateDefs[id] = new PlateDef { Id = id, Bonus = bonus / 100f, Durability = dur, Rad = rad };
                 add(id, name, ItemCategory.Clothing).Plate = PlateDefs[id];
                 Meta[id] = new Weaponry.Meta { Desc = desc, Rarity = rarity, Value = value, Stack = 1 };
             }
             P("plate_homemade", "Кустарная пластина", 20, 150, 2, 30, "Жесть и дорожный знак: +20% к корпусу со своей стороны, держит 150 урона. Вставляется в жилет из знаков, 6Б2, «Кору»");
             P("plate_steel", "Армейская стальная пластина", 30, 400, 3, 80, "+30% к корпусу со своей стороны, держит 400 урона. Только лут РТ тира 2");
             P("plate_ceramic", "Керамическая пластина", 40, 300, 4, 150, "+40% к корпусу со своей стороны, держит 300 урона. Только вертолёт и «Объект 42»");
+            P("plate_lead", "Свинцовая пластина", 10, 250, 2, 40, "Антирад: +5 к защите от радиации и +10% к корпусу, держит 250 урона. Две в бронике (6Б2, «Кора») — пустит куда угодно", rad: 5);
         }
 
         static float ValueOf(int tier, WearSlot slot, int plates) =>
             (tier switch { 0 => 3f, 1 => 8f, 2 => 20f, 3 => 45f, _ => 90f }) * (slot is WearSlot.Armor or WearSlot.Head ? 2f : 1f) + plates * 10;
 
-        /// <summary>Рецепты одежды (D47). Ликвидатор, СОБР, армейская/керамическая пластины, часы — только лут; ОЗК — верстак 3 и лут.</summary>
+        /// <summary>Рецепты одежды (D47). СОБР, армейская/керамическая пластины, часы — только лут; ОЗК — верстак 3 и лут.</summary>
         internal static void AddRecipes(List<Recipe> all)
         {
             Recipe R(string output, float time, int bench, params (string, int)[] cost) => new Recipe { Output = output, Time = time, Bench = bench, Count = 1, Cost = cost };
@@ -224,6 +219,7 @@ namespace Rastvordd.Sim
                 R("wear_scrap_kneepads", 5, 2, ("rubber", 10), ("comp_tape", 1)),
                 R("wear_scrap_kirza", 6, 2, ("leather", 12), ("rubber", 4)),
                 R("plate_homemade", 8, 2, ("metal_fragments", 100), ("comp_tape", 1)),
+                R("plate_lead", 10, 2, ("metal_fragments", 150), ("comp_tape", 1)),
                 R("antirad", 4, 2, ("charcoal", 20), ("cloth", 2)),
                 // тир 3 — верстак 3
                 R("wear_ozk_hood", 6, 3, ("rubber", 15), ("cloth", 10)),
@@ -279,7 +275,7 @@ namespace Rastvordd.Sim
         {
             null => null,
             "antirad" => null,
-            "plate_homemade" => "wear_scrap_signvest",
+            "plate_homemade" or "plate_lead" => "wear_scrap_signvest",
             _ when id.StartsWith("wear_spec_") => "wear_spec_robe",
             _ when id.StartsWith("wear_scrap_") => "wear_scrap_signvest",
             _ when id.StartsWith("wear_ozk_") => "wear_ozk_cape",
@@ -332,7 +328,13 @@ namespace Rastvordd.Sim
         public static float CapSpeed(float sum) => MathF.Max(SpeedCap, sum);
 
         /// <summary>Защита от радиации (ед.): сумма по всем надетым вещам.</summary>
-        public static float RadProt(Actor a) { float s = 0; foreach (var w in a.Worn) if (Def(w?.Id) is WearDef d) s += d.Rad; return s; }
+        public static float RadProt(Actor a)
+        {
+            float s = 0;
+            foreach (var w in a.Worn) if (Def(w?.Id) is WearDef d) s += d.Rad;
+            for (int i = 0; i < PlateSlots && i < PlateCap(a); i++) if (Plate(a.Plates[i]?.Id) is PlateDef p && PlateDur(a.Plates[i]) > 0) s += p.Rad;   // свинцовые пластины
+            return s;
+        }
         /// <summary>Тепло одежды (°C): сумма. Держит холод до 15 − тепло.</summary>
         public static float Warmth(Actor a) { float s = 0; foreach (var w in a.Worn) if (Def(w?.Id) is WearDef d) s += d.Warm; return s; }
         /// <summary>Штраф скорости: сумма, но не больше −15%.</summary>
@@ -341,7 +343,7 @@ namespace Rastvordd.Sim
         public static bool Noisy(Actor a) { foreach (var w in a.Worn) if (Def(w?.Id)?.Metal == true) return true; return false; }
 
         /// <summary>Есть ли на голове жёсткий шлем (для звука «дзынь»).</summary>
-        public static bool HardHelmet(Actor a) => a.Worn[(int)WearSlot.Head]?.Id is "wear_scrap_pot" or "wear_army_ssh68" or "wear_sobr_sfera" or "wear_liquidator_helmet" or "wear_leather_helmet";
+        public static bool HardHelmet(Actor a) => a.Worn[(int)WearSlot.Head]?.Id is "wear_scrap_pot" or "wear_army_ssh68" or "wear_sobr_sfera" or "wear_leather_helmet";
 
         /// <summary>Звук надевания: ткань / металл / резина (docs/sound-list.md).</summary>
         public static string EquipSound(string id) => Def(id) is WearDef d ? (d.Metal ? "wear_metal" : d.Rubber ? "wear_rubber" : "wear_cloth") : Plate(id) != null ? "wear_metal" : "wear_cloth";
@@ -351,13 +353,12 @@ namespace Rastvordd.Sim
 
         // ---------- лут ----------
         static readonly string[] T0Bits = { "wear_rags_bandana", "wear_rags_shirt", "wear_rags_pants", "wear_rags_wraps", "wear_rags_mittens" };
-        static string[] _t1, _t2, _ozk, _army, _liq, _sobr;
+        static string[] _t1, _t2, _ozk, _army, _sobr;
         static string[] SetItems(string key) => Sets.Find(s => s.Key == key).Items.ToArray();
         static string[] T1 => _t1 ??= Concat(SetItems("vatnik"), SetItems("leather"));
         static string[] T2 => _t2 ??= Concat(SetItems("spec"), SetItems("scrap"));
         static string[] Ozk => _ozk ??= SetItems("ozk");
         static string[] Army => _army ??= SetItems("army");
-        static string[] Liq => _liq ??= SetItems("liquidator");
         static string[] Sobr => _sobr ??= SetItems("sobr");
         static string[] Concat(string[] a, string[] b) { var r = new string[a.Length + b.Length]; a.CopyTo(r, 0); b.CopyTo(r, a.Length); return r; }
 
@@ -389,14 +390,14 @@ namespace Rastvordd.Sim
                 case "safe":
                     Maybe(0.3, "rubber", 4, 10); Maybe(0.3, "antirad", 1, 3);
                     One(0.12, Ozk); One(kind == "safe" ? 0.2 : 0.1, Army); Maybe(kind == "safe" ? 0.2 : 0.12, "plate_steel");
-                    One(0.03, Liq); One(0.02, Sobr); Maybe(0.008, "plate_ceramic");
+                    One(0.02, Sobr); Maybe(0.05, "plate_lead"); Maybe(0.008, "plate_ceramic");
                     break;
                 case "punch":   // крейт РТ тира 1 под перфокарту
                     Maybe(0.35, "antirad", 1, 2); One(0.15, T2); One(0.08, Ozk); Maybe(0.08, "plate_homemade"); Maybe(0.03, "plate_steel"); Maybe(0.03, "wear_watch");
                     break;
                 case "event":   // аирдроп и закрытый ящик: тир 4 — только отсюда (и будущие вертолёт / «Объект 42»)
                     Maybe(0.5, "antirad", 1, 3); One(0.25, Army); Maybe(0.25, "plate_steel");
-                    One(0.12, Sobr); One(0.1, Liq); Maybe(0.06, "plate_ceramic");
+                    One(0.12, Sobr); One(0.1, Ozk); Maybe(0.15, "plate_lead"); Maybe(0.06, "plate_ceramic");
                     break;
             }
         }

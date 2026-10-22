@@ -78,25 +78,15 @@ namespace Rastvordd.Sim
 
         // ---------- радиация и температура ----------
 
-        static readonly float[] TransformerX = { 52f, 66f, 80f };
 
         /// <summary>Уровень радиации в точке (ед.): по РТ (docs/design/14, «Уровни радиации») и хукам.</summary>
         public float RadLevelAt(Vector2 p)
         {
             float lvl = 0;
-            foreach (var s in Substations)
-            {
-                if (!s.M.Contains(p)) continue;
-                lvl = MathF.Max(lvl, 10);
-                foreach (var bx in TransformerX)
-                    if (Vector2.Distance(p, s.O + new Vector2(bx, 39)) < 7f) lvl = MathF.Max(lvl, 20);   // у трансформаторов
-            }
-            foreach (var rt in Tier1)
-            {
-                if (!rt.M.Contains(p)) continue;
-                lvl = MathF.Max(lvl, rt.Key switch { "ats" => 10, "depot" => 15, "quarry" => 25, _ => 0 });   // гаражи — 0
-            }
-            foreach (var rt in Tier2) if (rt.M.Contains(p)) lvl = MathF.Max(lvl, Tier2Rt.Radiation);   // Радиоцентр: антенное поле «фонит» по всей территории
+            // фон — по тиру РТ (D53), одинаковый по всей территории: правило «какой сет куда пускает» читается без исключений
+            foreach (var s in Substations) if (s.M.Contains(p)) lvl = MathF.Max(lvl, Clothing.RtRad[1]);
+            foreach (var rt in Tier1) if (rt.M.Contains(p)) lvl = MathF.Max(lvl, Clothing.RtRad[1]);
+            foreach (var rt in Tier2) if (rt.M.Contains(p)) lvl = MathF.Max(lvl, Clothing.RtRad[2]);
             if (RadWarehouse > 0 && MonumentAt(p)?.Name == "Склад «Центральный»") lvl = MathF.Max(lvl, RadWarehouse);
             foreach (var (c, r, l) in RadSpots) if (Vector2.Distance(p, c) < r) lvl = MathF.Max(lvl, l);
             return lvl;

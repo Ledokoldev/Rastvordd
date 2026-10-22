@@ -102,6 +102,7 @@ namespace Rastvordd.Client
             ItemCategory.Food => "Еда",
             ItemCategory.Medical => "Медицина",
             ItemCategory.Deployable => "Установка",
+            ItemCategory.Clothing => id != null && id.StartsWith("plate_") ? "Бронепластина" : id == "wear_watch" ? "Прибор" : "Одежда",
             _ => "",
         };
 

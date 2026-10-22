@@ -64,6 +64,7 @@ namespace Rastvordd.Client
             AddChild(_body);
             AddChild(_held);
             // управляемый персонаж из частей (если части сгенерированы): руки по IK к оружию, ноги шагают, позы
+            _isNpc = isNpc;
             var rigSet = RigSet.Load(isNpc ? "guard" : "naked");
             if (rigSet != null)
             {
@@ -79,6 +80,18 @@ namespace Rastvordd.Client
 
         readonly PointLight2D _torch;
         float _flicker;
+        readonly bool _isNpc;
+        string _wornKey = "";
+
+        /// <summary>Одежда (D47): риг собирается слоями на голом наборе (охрана без одежды — свой набор guard).</summary>
+        public void SetWorn(string[] worn)
+        {
+            if (_rig == null) return;
+            string key = worn == null ? "" : string.Join(",", worn);
+            if (key == _wornKey) return;
+            _wornKey = key;
+            _rig.SetSet(worn == null ? RigSet.Load(_isNpc ? "guard" : "naked") : WearLook.Dressed("naked", worn));
+        }
 
         public void StartSwing() => _swing = SwingTime;
 

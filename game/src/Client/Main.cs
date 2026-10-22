@@ -159,6 +159,18 @@ namespace Rastvordd.Client
                 else if (a == "bmenu") _buildMenu.Open();
                 else if (a == "bdone") _buildMenu.Release();   // отладка: отпустить ПКМ
                 else if (a.StartsWith("bpick")) { GetViewport().WarpMouse(GetViewport().GetVisibleRect().Size / 2 + new Vector2(0, -1).Rotated(int.Parse(a.Substring(5)) * Mathf.Tau / 5) * 110); }   // отладка: навести на сектор колеса
+                else if (a.StartsWith("dose")) _server.World.Find(_myId).RadDose = float.Parse(a.Substring(4));   // отладка (D47): dose<n> — доза радиации
+                else if (a.StartsWith("dress:"))
+                {
+                    // отладка (D47): dress:army+wear_ozk_gp5+plate_steel — надеть комплект(ы) и вещи по id; dress:none — раздеть
+                    var w = _server.World; var me = w.Find(_myId);
+                    foreach (var k in a.Substring(6).Split('+'))
+                    {
+                        if (k == "none") { System.Array.Clear(me.Worn); System.Array.Clear(me.Plates); continue; }
+                        var set = Clothing.Sets.Find(x => x.Key == k);
+                        w.Dress(me, set != null ? set.Items.ToArray() : new[] { k });
+                    }
+                }
                 else if (a.StartsWith("give")) { var g = a.Substring(4).Split('x'); _server.World.Find(_myId).Add(g[0], g.Length > 1 ? int.Parse(g[1]) : 1); }   // отладка: give<id>x<n>
                 else if (a.StartsWith("open:")) { _server.World.DebugOpenUi(_server.World.Find(_myId), a[5..]); _invOpen = true; }   // отладка: окна для скриншотов
                 else if (a.StartsWith("ui")) _uiReq = ((UiOp)int.Parse(a.Substring(2).Split('_')[0]), a.Contains('_') ? a.Substring(a.IndexOf('_') + 1).Replace('~', '#').Replace('^', '>') : null, 0);   // отладка: ui<op>_<арг> (# → ~, > → ^)
@@ -918,6 +930,11 @@ else if (arg == "--atcrate")
                         Sfx.Play($"reveal_{System.Math.Clamp((int)e.Value, 0, 4)}", _selfPx, -4, 10, 0.02f);
                         Sfx.Play("rummage", _selfPx, -10, 10, 0.1f);
                         break;
+                    case SimEventKind.Wear:
+                        // одежда (D47): надел — шорох/лязг/резина; пластина разбита — хруст (заглушки — rummage, hit_metal_ore, glass_break)
+                        if (e.Text == "plate_break") { Sfx.Play(Sfx.Pick("plate_break", "glass_break"), Iso.Px(e.Pos), -2, 30); if (e.ActorId == _myId) _hud.Toast("Пластина разбита"); }
+                        else if (e.ActorId == _myId) Sfx.Play(Sfx.Pick(e.Text, e.Text == "wear_metal" ? "hit_metal_ore" : "rummage"), _selfPx, -8, 8);
+                        break;
                     case SimEventKind.Machine:
                         // механизмы готовых РТ: пробка, питание, роллета, считыватель крейта
                         if (e.Text != null && e.Text.StartsWith("станок:")) { Sfx.Play(Sfx.Pick("lathe_done", "craft_done"), Iso.Px(e.Pos), -2, 30, 0.05f); break; }   // деталь готова (D46)
@@ -974,9 +991,17 @@ else if (arg == "--atcrate")
                         Sfx.Play("hit_wood", Iso.Px(e.Pos), -4, 20);
                         break;
                     case SimEventKind.HitActor:
-                        Flash(e.Pos, new Color(0.85f, 0.1f, 0.08f), 5, 0.15f);
-                        Sfx.Play("hit_flesh", Iso.Px(e.Pos), -2, 30, 0.12f);
-                        if (e.OtherId == _myId) _hud.Crosshair.HitFlash = 0.15f;
+                        Flash(e.Pos, e.Text is "helmet" or "plate" ? new Color(1f, 0.85f, 0.5f) : new Color(0.85f, 0.1f, 0.08f), 5, 0.15f);
+                        // зона попадания (D47): хедшот — щелчок, шлем — «дзынь», пластина — тупой удар, конечность — глуше
+                        Sfx.Play(e.Text switch
+                        {
+                            "head" => Sfx.Pick("hit_head", "hit_flesh"),
+                            "helmet" => Sfx.Pick("hit_helmet", "hit_metal_ore"),
+                            "plate" => Sfx.Pick("hit_plate", "hit_metal_ore"),
+                            "limb" => Sfx.Pick("hit_limb", "hit_flesh"),
+                            _ => "hit_flesh",
+                        }, Iso.Px(e.Pos), e.Text == "limb" ? -5 : -2, 30, 0.12f);
+                        if (e.OtherId == _myId) _hud.Crosshair.HitFlash = e.Text is "head" or "helmet" ? 0.3f : 0.15f;   // хедшот — маркер ярче и дольше
                         if (e.ActorId == _myId) _hud.FlashDamage();
                         if (_actorViews.TryGetValue(e.ActorId, out var victim))
                         {
@@ -1219,6 +1244,7 @@ else if (arg == "--atcrate")
                 view.AimDown = a.Id == _myId ? _peek : a.Peek;
                 view.SetLabel(a.Label);
                 view.Swimming = a.Swimming;
+                view.SetWorn(a.Worn);   // одежда слоями на риге (D47)
                 view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId, a.Crouching);
                 if (!a.Dead && !a.Swimming) Footstep(a.Id, pos, speed, view.StepContacts, a.Crouching);
             }
@@ -1493,13 +1519,16 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             _cam.Zoom = new Vector2(z, z);
         }
 
+        readonly WearSfx _wearSfx = new();
+
         void UpdateHud(float dt)
         {
             var s = _cur.Self;
             float day = _forcedDay ?? _cur.DayTime;
-            int mins = (int)(day * 24 * 60);
-            string clock = $"{mins / 60:00}:{mins % 60:00}" + (World.NightFactorAt(day) > 0.5f ? " · ночь" : "");
-            _hud.UpdateHud(s, dt, _peek > 0.05f ? $"{clock} · прицел" : clock);
+            // часы (D47): время, воздух и радиация — только с часами «Электроника» на запястье (ConditionView над шкалами)
+            _hud.DayTime = day;
+            _hud.UpdateHud(s, dt, _peek > 0.05f ? "прицел" : "");
+            _wearSfx.Update(s, dt, _selfPx);
 
             var canvas = GetViewport().GetCanvasTransform();
             float zoom = _cam.Zoom.X;

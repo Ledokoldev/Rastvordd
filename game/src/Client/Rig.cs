@@ -7,6 +7,13 @@ namespace Rastvordd.Client
     {
         public Texture2D HeadF, HeadB, TorsoF, TorsoB, Pelvis, UpperArm, ForeArm, Thigh, Shin;
 
+        /// <summary>Часть по имени файла (head_f, torso_b, …) — для сборки одежды (WearLook).</summary>
+        public Texture2D Part(string p) => p switch
+        {
+            "head_f" => HeadF, "head_b" => HeadB, "torso_f" => TorsoF, "torso_b" => TorsoB, "pelvis" => Pelvis,
+            "upperarm" => UpperArm, "forearm" => ForeArm, "thigh" => Thigh, _ => Shin,
+        };
+
         public static RigSet Load(string name)
         {
             Texture2D T(string p) => Art.Get($"rig/rig_{name}_{p}");
@@ -53,6 +60,8 @@ namespace Rastvordd.Client
         readonly RigCanvas _canvas;
         readonly Sprite2D _sprite;
         public RigState S => _canvas.S;
+        /// <summary>Сменить набор частей (одежда надета/снята — WearLook.Dressed).</summary>
+        public void SetSet(RigSet set) { if (set != null) { _canvas.Set = set; _canvas.QueueRedraw(); } }
 
         public RigView(RigSet set)
         {
@@ -99,7 +108,8 @@ namespace Rastvordd.Client
     public partial class RigCanvas : Node2D
     {
         public readonly RigState S = new();
-        readonly RigSet _set;
+        RigSet _set;
+        public RigSet Set { get => _set; set => _set = value; }
 
         public RigCanvas(RigSet set) => _set = set;
 

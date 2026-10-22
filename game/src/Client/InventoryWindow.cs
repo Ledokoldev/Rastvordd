@@ -345,6 +345,7 @@ namespace Rastvordd.Client
         readonly HFlowContainer _rec;
         readonly ThinBar _durBar;
         readonly Label _durText;
+        readonly WearStatsView _wearStats = new();   // одежда и пластины: пули / радиация / тепло / скорость (D47)
         string _sig;
 
         public ItemCard()
@@ -370,6 +371,7 @@ namespace Rastvordd.Client
             _desc = UiTheme.Small("", UiTheme.Body, UiTheme.FontBody);
             _desc.CustomMinimumSize = new Vector2(W - 2 * UiTheme.PanelPad, 0);
             box.AddChild(_desc);
+            box.AddChild(_wearStats);
             _empty = UiTheme.Small("Наведи на предмет или кликни по нему — здесь появится, для чего он нужен.", UiTheme.Dim, UiTheme.FontBody);
             _empty.CustomMinimumSize = new Vector2(W - 2 * UiTheme.PanelPad, 0);
             box.AddChild(_empty);
@@ -460,7 +462,7 @@ namespace Rastvordd.Client
             _icon.Rarity = has ? Items.Rarity(id) : 0;
             _icon.QueueRedraw();
             _usesBox.Visible = _recBox.Visible = has;
-            if (!has) return;
+            if (!has) { _wearStats.Visible = false; return; }
 
             int rar = Items.Rarity(id);
             _name.Text = Items.Name(id);
@@ -469,6 +471,7 @@ namespace Rastvordd.Client
             _type.AddThemeColorOverride("font_color", rar > 0 ? UiTheme.RarityColor(rar) : UiTheme.Dim);
             _desc.Text = Items.Desc(id);
             _desc.Visible = _desc.Text != "";
+            _wearStats.Set(id, cv.Durability);
 
             foreach (var c in _uses.GetChildren()) c.QueueFree();
             var uses = UsesOf(id);
@@ -592,6 +595,7 @@ namespace Rastvordd.Client
             string desc = Items.Desc(c.Id);
             if (c.Magazine > 0) desc = $"В магазине {c.Ammo}/{c.Magazine}. " + desc;
             if (c.Durability >= 0) desc = $"Состояние {Mathf.RoundToInt(c.Durability * 100)}%. " + desc;
+            if (WearStatsView.Line(c.Id) is string wl) desc = wl + ". " + desc;   // одежда (D47)
             if (c.Att != null)
             {
                 var atts = c.Att.Where(x => x != null).Select(Items.Name).ToList();
@@ -665,12 +669,13 @@ namespace Rastvordd.Client
             {
                 1 => cat == ItemCategory.Resource,
                 2 => cat == ItemCategory.Component,
-                3 => cat is ItemCategory.Tool or ItemCategory.Weapon or ItemCategory.Ammo or ItemCategory.Deployable,
+                3 => cat is ItemCategory.Tool or ItemCategory.Weapon or ItemCategory.Ammo or ItemCategory.Deployable or ItemCategory.Clothing,
                 _ => cat is ItemCategory.Food or ItemCategory.Medical,
             };
         }
 
         readonly PanelContainer _gearPanel, _packPanel, _contPanel;
+        readonly EquipmentPanel _equip;
         readonly ItemCard _card;
         readonly Label _usedLabel, _fuses, _contTitle, _contInfo;
         readonly ThinBar _usedBar;
@@ -709,32 +714,9 @@ namespace Rastvordd.Client
             var row = UiTheme.HBox(UiTheme.PanelGap);
             area.AddChild(row);
 
-            // ---- снаряжение ----
-            _gearPanel = UiTheme.GlassPanel();
-            _gearPanel.CustomMinimumSize = new Vector2(176, 0);
+            // ---- снаряжение (D47): риг в одежде, слоты по группам, пластины, итог защиты ----
+            _gearPanel = _equip = new EquipmentPanel(Wire);
             row.AddChild(_gearPanel);
-            var g = UiTheme.VBox(10);
-            _gearPanel.AddChild(g);
-            g.AddChild(UiTheme.Caption("Снаряжение"));
-            foreach (var (name, ghost) in new[] { ("Голова", "icons/icon_coffeecan_helmet"), ("Торс", "icons/icon_hoodie"), ("Руки", "icons/icon_gloves"), ("Ноги", "icons/icon_pants"), ("Обувь", "icons/icon_boots") })
-            {
-                var eq = UiTheme.HBox(12);
-                eq.AddChild(new GearSlot { Ghost = ghost, TooltipText = "Одежда — скоро", SizeFlagsVertical = SizeFlags.ShrinkCenter });
-                var l = UiTheme.Small(name, UiTheme.Dim, UiTheme.FontBody);
-                l.AutowrapMode = TextServer.AutowrapMode.Off;
-                l.VerticalAlignment = VerticalAlignment.Center;
-                l.SizeFlagsVertical = SizeFlags.ShrinkCenter;
-                eq.AddChild(l);
-                g.AddChild(eq);
-            }
-            g.AddChild(new Control { SizeFlagsVertical = SizeFlags.ExpandFill });
-            g.AddChild(UiTheme.Sep());
-            var armor = UiTheme.HBox();
-            var al = UiTheme.Small("Защита", UiTheme.Dim, UiTheme.FontSmall);
-            al.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-            armor.AddChild(al);
-            armor.AddChild(UiTheme.Strong("0%", UiTheme.FontSmall));
-            g.AddChild(armor);
 
             // ---- рюкзак ----
             _packPanel = UiTheme.GlassPanel();
@@ -816,7 +798,7 @@ namespace Rastvordd.Client
 
         // вещь из рюкзака или пояса утащили за окно — выбросить на землю
         public override bool _CanDropData(Vector2 atPosition, Variant data) =>
-            data.VariantType == Variant.Type.String && data.AsString() is var d && (d.StartsWith("pack#") || d.StartsWith("belt#"));
+            data.VariantType == Variant.Type.String && data.AsString() is var d && (d.StartsWith("pack#") || d.StartsWith("belt#") || d.StartsWith("wear#") || d.StartsWith("plate#"));
 
         public override void _DropData(Vector2 atPosition, Variant data) => Op?.Invoke(UiOp.Drop, data.AsString());
 
@@ -865,6 +847,9 @@ namespace Rastvordd.Client
             {
                 "pack" when at.i < _self.Pack.Count => _self.Pack[at.i],
                 "belt" when at.i < _self.BeltCells.Count => _self.BeltCells[at.i],
+                "wear" when at.i < _self.Worn.Count => _self.Worn[at.i],
+                "plate" when at.i < _self.PlateCells.Count => _self.PlateCells[at.i],
+                "wear" or "plate" => null,
                 _ when at.i < _cont.Count => _cont[at.i].Cell,
                 _ => null,
             };
@@ -894,6 +879,7 @@ namespace Rastvordd.Client
 
             if (!cont)
             {
+                _equip.Refresh(self);
                 _contSig = null; _lastRevealed = -1;
                 // ничего не выбрано — карточка первой вещи рюкзака
                 if (CellAt(_sel) is not CellView cur || cur.Id == null)

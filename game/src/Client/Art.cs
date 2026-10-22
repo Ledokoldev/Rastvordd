@@ -163,7 +163,31 @@ namespace Rastvordd.Client
             ["att_compensator_army"] = "icons/icon_att_compensator", ["att_mag_ext_army"] = "icons/icon_att_mag_ext", ["att_mag_twin_crude"] = "icons/icon_att_mag_twin",
         };
 
+        /// <summary>Одежда (D47): пока художник не положил icons/icon_wear_*, — похожая старая картинка по слоту.</summary>
+        static string WearFallback(string id)
+        {
+            if (id.StartsWith("plate_")) return "icons/icon_metal_chestplate";
+            if (id == "wear_watch") return "icons/icon_gears";
+            if (id is "rubber") return "icons/icon_tape";
+            if (id is "leather") return "icons/icon_cloth";
+            if (id is "antirad") return "icons/icon_syringe";
+            if (Clothing.Def(id) is not WearDef d) return null;
+            return d.Slot switch
+            {
+                WearSlot.Head => d.Metal ? "icons/icon_coffeecan_helmet" : "icons/icon_bandana",
+                WearSlot.Face => id.Contains("gp5") || id.Contains("pmk") || id.Contains("r2") ? "icons/icon_metal_facemask" : "icons/icon_bandana",
+                WearSlot.Kofta => id.StartsWith("wear_rags") ? "icons/icon_burlap_shirt" : "icons/icon_hoodie",
+                WearSlot.Armor => id.Contains("signvest") ? "icons/icon_roadsign_vest" : id.Contains("chestplate") ? "icons/icon_wood_armor" : id.Contains("ozk") ? "icons/icon_hide_vest" : "icons/icon_metal_chestplate",
+                WearSlot.Arms or WearSlot.Gloves => "icons/icon_gloves",
+                WearSlot.Legs => id.StartsWith("wear_rags") ? "icons/icon_burlap_trousers" : "icons/icon_pants",
+                WearSlot.Knees => "icons/icon_roadsign_kilt",
+                WearSlot.Feet => id.StartsWith("wear_rags") ? "icons/icon_burlap_shoes" : "icons/icon_boots",
+                _ => "icons/icon_gears",
+            };
+        }
+
         static string FallbackPath(string id) =>
+            WearFallback(id) is string wf ? wf :
             Fallback.TryGetValue(id, out var f) ? f
             : id.StartsWith("comp_") ? "icons/icon_gears"
             : id.StartsWith("att_") ? "icons/icon_gears"

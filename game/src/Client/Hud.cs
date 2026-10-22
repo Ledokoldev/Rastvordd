@@ -22,6 +22,9 @@ namespace Rastvordd.Client
         CraftWindow _craftWin;
         TechWindow _techWin;
         Hotbar _hotbar;
+        ConditionView _cond;
+        /// <summary>Время суток для часов (0..1) — ставит Main перед UpdateHud.</summary>
+        public float DayTime;
         ShaderMaterial _visionMat;
         float _toastTime, _damageFlash, _hintsTime = HintsShowTime;
 
@@ -211,6 +214,8 @@ void fragment() {
 
             _hotbar = new Hotbar(false) { Theme = UiTheme.Theme, TextureFilter = CanvasItem.TextureFilterEnum.Linear };
             AddChild(_hotbar);
+            _cond = new ConditionView { Theme = UiTheme.Theme };   // часы и значки состояния над шкалами (D47)
+            AddChild(_cond);
             BuildAdmin();
             BuildCraftPanel();
             BuildDeath();
@@ -290,7 +295,7 @@ void fragment() {
         public void SpectatorMode()
         {
             _spectator = true;
-            foreach (var c in new CanvasItem[] { _hotbar, _hintsPanel, _clockPanel, _promptPanel, _ammoPanel, _buildPanel, Crosshair, _vision })
+            foreach (var c in new CanvasItem[] { _hotbar, _cond, _hintsPanel, _clockPanel, _promptPanel, _ammoPanel, _buildPanel, Crosshair, _vision })
                 if (c != null) c.Visible = false;
         }
 
@@ -419,6 +424,10 @@ void fragment() {
             _hotbar.Visible = !_spectator && !bigWindow && !s.Dead;
             _hotbar.Refresh(s);
             Place(_hotbar, vs, 0.5f, 1, new Vector2(0, -28));
+            // часы и значки — над шкалами слева от пояса (D47)
+            _cond.Set(s, DayTime);
+            _cond.Visible = !_spectator && !bigWindow && !s.Dead && _cond.HasContent;
+            _cond.Position = _hotbar.Position + new Vector2(-VitalsView.W - Hotbar.Gap, UiTheme.CellSize - VitalsView.RowH * 4 - ConditionView.H - 8);
 
             // часы и подсказки клавиш
             _clockLabel.Text = modeText;
@@ -427,8 +436,8 @@ void fragment() {
             float ha = AdminOpen ? 1 : Mathf.Clamp(_hintsTime / 2f, 0, 1);
             _hintsPanel.Visible = !_spectator && ha > 0.01f && !bigWindow && !s.Dead;
             _hintsPanel.Modulate = new Color(1, 1, 1, ha);
-            Place(_hintsPanel, vs, 0, 0, new Vector2(16 + _clockPanel.Size.X + 8, 14));
-            _clockPanel.Visible = !_spectator && !bigWindow;
+            Place(_hintsPanel, vs, 0, 0, new Vector2(16 + (modeText != "" ? _clockPanel.Size.X + 8 : 0), 14));
+            _clockPanel.Visible = !_spectator && !bigWindow && modeText != "";   // время — только на часах (D47)
 
             // оружие
             _ammoPanel.Visible = !_spectator && !s.Dead && !bigWindow && !string.IsNullOrEmpty(s.WeaponName);

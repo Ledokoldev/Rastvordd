@@ -1,0 +1,2401 @@
+{
+ "assets": [
+  {
+   "id": "bwall_twig_front",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a single straight full-height wall segment 3 metres wide made of woven sticks, twigs and branches lashed with rope to rough poles, seen from the front; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_twig_side",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "the narrow end edge of a wall segment made of woven sticks, twigs and branches lashed with rope to rough poles, seen end-on: a tall thin vertical slab showing its thickness and top; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bdoorway_twig",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of woven sticks, twigs and branches lashed with rope to rough poles with an empty rectangular doorway opening in the middle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_twig",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of woven sticks, twigs and branches lashed with rope to rough poles with an empty square window opening in the middle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_twig_barred",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of woven sticks, twigs and branches lashed with rope to rough poles with a square window opening in the middle closed by welded rusty iron bars; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bhalfwall_twig",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.5,
+   "desc": "a half-height wall segment made of woven sticks, twigs and branches lashed with rope to rough poles; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    1.5
+   ]
+  },
+  {
+   "id": "blowwall_twig",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 0.9,
+   "desc": "a low waist-high wall segment made of woven sticks, twigs and branches lashed with rope to rough poles; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    0.9
+   ]
+  },
+  {
+   "id": "bwall_twig_dmg1",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a full-height wall segment made of woven sticks, twigs and branches lashed with rope to rough poles, lightly damaged: cracks, dents, scorch marks, a few holes; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_twig_dmg2",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a full-height wall segment made of woven sticks, twigs and branches lashed with rope to rough poles, heavily damaged: big broken holes, missing chunks, scorched, about to collapse; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bpillar_twig",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "a square corner pillar post made of woven sticks, twigs and branches lashed with rope to rough poles; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.4,
+    0.4,
+    3
+   ]
+  },
+  {
+   "id": "bfound_twig",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "top-down view of a square base foundation floor slab surface made of woven sticks, twigs and branches lashed, flat walkable top surface"
+  },
+  {
+   "id": "bfloor_twig",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "top-down view of a player-built floor surface of woven sticks, twigs and branches lashed, flat walkable"
+  },
+  {
+   "id": "bstairs_twig",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a straight staircase built of woven sticks, twigs and branches lashed with rope to rough poles going up away from the viewer, steps visible; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    3
+   ]
+  },
+  {
+   "id": "broof_twig",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.2,
+   "desc": "a flat roof slab section made of woven sticks, twigs and branches lashed with rope to rough poles seen from above at an angle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    0.4
+   ]
+  },
+  {
+   "id": "bwall_wood_front",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a single straight full-height wall segment 3 metres wide made of rough weathered horizontal wooden planks nailed to thick posts, seen from the front; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_wood_side",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "the narrow end edge of a wall segment made of rough weathered horizontal wooden planks nailed to thick posts, seen end-on: a tall thin vertical slab showing its thickness and top; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bdoorway_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of rough weathered horizontal wooden planks nailed to thick posts with an empty rectangular doorway opening in the middle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of rough weathered horizontal wooden planks nailed to thick posts with an empty square window opening in the middle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_wood_barred",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of rough weathered horizontal wooden planks nailed to thick posts with a square window opening in the middle closed by welded rusty iron bars; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bhalfwall_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.5,
+   "desc": "a half-height wall segment made of rough weathered horizontal wooden planks nailed to thick posts; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    1.5
+   ]
+  },
+  {
+   "id": "blowwall_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 0.9,
+   "desc": "a low waist-high wall segment made of rough weathered horizontal wooden planks nailed to thick posts; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    0.9
+   ]
+  },
+  {
+   "id": "bwall_wood_dmg1",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a full-height wall segment made of rough weathered horizontal wooden planks nailed to thick posts, lightly damaged: cracks, dents, scorch marks, a few holes; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_wood_dmg2",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a full-height wall segment made of rough weathered horizontal wooden planks nailed to thick posts, heavily damaged: big broken holes, missing chunks, scorched, about to collapse; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bpillar_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "a square corner pillar post made of rough weathered horizontal wooden planks nailed to thick posts; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.4,
+    0.4,
+    3
+   ]
+  },
+  {
+   "id": "bfound_wood",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "top-down view of a square base foundation floor slab surface made of rough weathered horizontal wooden planks nailed to thick posts, flat walkable top surface"
+  },
+  {
+   "id": "bfloor_wood",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "top-down view of a player-built floor surface of rough weathered horizontal wooden planks nailed to thick posts, flat walkable"
+  },
+  {
+   "id": "bstairs_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a straight staircase built of rough weathered horizontal wooden planks nailed to thick posts going up away from the viewer, steps visible; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    3
+   ]
+  },
+  {
+   "id": "broof_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.2,
+   "desc": "a flat roof slab section made of rough weathered horizontal wooden planks nailed to thick posts seen from above at an angle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    0.4
+   ]
+  },
+  {
+   "id": "bwall_stone_front",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a single straight full-height wall segment 3 metres wide made of stacked rough grey stone blocks with crumbling mortar, seen from the front; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_stone_side",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "the narrow end edge of a wall segment made of stacked rough grey stone blocks with crumbling mortar, seen end-on: a tall thin vertical slab showing its thickness and top; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bdoorway_stone",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of stacked rough grey stone blocks with crumbling mortar with an empty rectangular doorway opening in the middle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_stone",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of stacked rough grey stone blocks with crumbling mortar with an empty square window opening in the middle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_stone_barred",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of stacked rough grey stone blocks with crumbling mortar with a square window opening in the middle closed by welded rusty iron bars; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bhalfwall_stone",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.5,
+   "desc": "a half-height wall segment made of stacked rough grey stone blocks with crumbling mortar; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    1.5
+   ]
+  },
+  {
+   "id": "blowwall_stone",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 0.9,
+   "desc": "a low waist-high wall segment made of stacked rough grey stone blocks with crumbling mortar; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    0.9
+   ]
+  },
+  {
+   "id": "bwall_stone_dmg1",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a full-height wall segment made of stacked rough grey stone blocks with crumbling mortar, lightly damaged: cracks, dents, scorch marks, a few holes; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_stone_dmg2",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a full-height wall segment made of stacked rough grey stone blocks with crumbling mortar, heavily damaged: big broken holes, missing chunks, scorched, about to collapse; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bpillar_stone",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "a square corner pillar post made of stacked rough grey stone blocks with crumbling mortar; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.4,
+    0.4,
+    3
+   ]
+  },
+  {
+   "id": "bfound_stone",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "top-down view of a square base foundation floor slab surface made of stacked rough grey stone blocks, flat walkable top surface"
+  },
+  {
+   "id": "bfloor_stone",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "top-down view of a player-built floor surface of stacked rough grey stone blocks, flat walkable"
+  },
+  {
+   "id": "bstairs_stone",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a straight staircase built of stacked rough grey stone blocks with crumbling mortar going up away from the viewer, steps visible; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    3
+   ]
+  },
+  {
+   "id": "broof_stone",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.2,
+   "desc": "a flat roof slab section made of stacked rough grey stone blocks with crumbling mortar seen from above at an angle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    0.4
+   ]
+  },
+  {
+   "id": "bwall_metal_front",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a single straight full-height wall segment 3 metres wide made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches, seen from the front; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_metal_side",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "the narrow end edge of a wall segment made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches, seen end-on: a tall thin vertical slab showing its thickness and top; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bdoorway_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches with an empty rectangular doorway opening in the middle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches with an empty square window opening in the middle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_metal_barred",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches with a square window opening in the middle closed by welded rusty iron bars; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bhalfwall_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.5,
+   "desc": "a half-height wall segment made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    1.5
+   ]
+  },
+  {
+   "id": "blowwall_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 0.9,
+   "desc": "a low waist-high wall segment made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    0.9
+   ]
+  },
+  {
+   "id": "bwall_metal_dmg1",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a full-height wall segment made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches, lightly damaged: cracks, dents, scorch marks, a few holes; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_metal_dmg2",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a full-height wall segment made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches, heavily damaged: big broken holes, missing chunks, scorched, about to collapse; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bpillar_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "a square corner pillar post made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.4,
+    0.4,
+    3
+   ]
+  },
+  {
+   "id": "bfound_metal",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "top-down view of a square base foundation floor slab surface made of rusty corrugated and flat sheet metal panels riveted to a steel frame, flat walkable top surface"
+  },
+  {
+   "id": "bfloor_metal",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "top-down view of a player-built floor surface of rusty corrugated and flat sheet metal panels riveted to a steel frame, flat walkable"
+  },
+  {
+   "id": "bstairs_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a straight staircase built of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches going up away from the viewer, steps visible; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    3
+   ]
+  },
+  {
+   "id": "broof_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.2,
+   "desc": "a flat roof slab section made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches seen from above at an angle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    0.4
+   ]
+  },
+  {
+   "id": "wallface_steel",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: a wall of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint"
+  },
+  {
+   "id": "bwall_steel_front",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a single straight full-height wall segment 3 metres wide made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint, seen from the front; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_steel_side",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "the narrow end edge of a wall segment made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint, seen end-on: a tall thin vertical slab showing its thickness and top; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bdoorway_steel",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint with an empty rectangular doorway opening in the middle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_steel",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint with an empty square window opening in the middle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_steel_barred",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint with a square window opening in the middle closed by welded rusty iron bars; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bhalfwall_steel",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.5,
+   "desc": "a half-height wall segment made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    1.5
+   ]
+  },
+  {
+   "id": "blowwall_steel",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 0.9,
+   "desc": "a low waist-high wall segment made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    0.9
+   ]
+  },
+  {
+   "id": "bwall_steel_dmg1",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a full-height wall segment made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint, lightly damaged: cracks, dents, scorch marks, a few holes; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_steel_dmg2",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a full-height wall segment made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint, heavily damaged: big broken holes, missing chunks, scorched, about to collapse; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bpillar_steel",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "a square corner pillar post made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.4,
+    0.4,
+    3
+   ]
+  },
+  {
+   "id": "bfound_steel",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "top-down view of a square base foundation floor slab surface made of thick grey welded steel plates, flat walkable top surface"
+  },
+  {
+   "id": "bfloor_steel",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "top-down view of a player-built floor surface of thick grey welded steel plates, flat walkable"
+  },
+  {
+   "id": "bstairs_steel",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a straight staircase built of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint going up away from the viewer, steps visible; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    3
+   ]
+  },
+  {
+   "id": "broof_steel",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.2,
+   "desc": "a flat roof slab section made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint seen from above at an angle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    0.4
+   ]
+  },
+  {
+   "id": "wallface_armored",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: a wall of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military"
+  },
+  {
+   "id": "bwall_armored_front",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a single straight full-height wall segment 3 metres wide made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military, seen from the front; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_armored_side",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "the narrow end edge of a wall segment made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military, seen end-on: a tall thin vertical slab showing its thickness and top; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bdoorway_armored",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military with an empty rectangular doorway opening in the middle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_armored",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military with an empty square window opening in the middle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_armored_barred",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military with a square window opening in the middle closed by welded rusty iron bars; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bhalfwall_armored",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.5,
+   "desc": "a half-height wall segment made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    1.5
+   ]
+  },
+  {
+   "id": "blowwall_armored",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 0.9,
+   "desc": "a low waist-high wall segment made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    0.9
+   ]
+  },
+  {
+   "id": "bwall_armored_dmg1",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a full-height wall segment made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military, lightly damaged: cracks, dents, scorch marks, a few holes; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_armored_dmg2",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a full-height wall segment made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military, heavily damaged: big broken holes, missing chunks, scorched, about to collapse; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bpillar_armored",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "a square corner pillar post made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.4,
+    0.4,
+    3
+   ]
+  },
+  {
+   "id": "bfound_armored",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "top-down view of a square base foundation floor slab surface made of heavy dark armored alloy plates, flat walkable top surface"
+  },
+  {
+   "id": "bfloor_armored",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "top-down view of a player-built floor surface of heavy dark armored alloy plates, flat walkable"
+  },
+  {
+   "id": "bstairs_armored",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a straight staircase built of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military going up away from the viewer, steps visible; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    3
+   ]
+  },
+  {
+   "id": "broof_armored",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.2,
+   "desc": "a flat roof slab section made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military seen from above at an angle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    0.4
+   ]
+  },
+  {
+   "id": "bfound_tri_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1,
+   "desc": "a triangular wooden foundation platform (equilateral triangle) of planks on a low log frame, seen from above at an angle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    2.6,
+    0.6
+   ]
+  },
+  {
+   "id": "bfound_tri_stone",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1,
+   "desc": "a triangular stone foundation platform (equilateral triangle) of stacked stone, seen from above at an angle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    2.6,
+    0.6
+   ]
+  },
+  {
+   "id": "bfound_tri_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1,
+   "desc": "a triangular sheet-metal foundation platform (equilateral triangle) on a steel frame, seen from above at an angle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    2.6,
+    0.6
+   ]
+  },
+  {
+   "id": "bstairs_l_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "an L-shaped wooden staircase turning 90 degrees with a landing, rough planks; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    3
+   ]
+  },
+  {
+   "id": "bstairs_l_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "an L-shaped welded steel staircase turning 90 degrees with a landing and a rail; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    3
+   ]
+  },
+  {
+   "id": "bdoor_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 1.2,
+   "h": 2.4,
+   "desc": "a crude door of vertical wooden planks with Z braces and rusty hinges; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.15,
+    2.4
+   ]
+  },
+  {
+   "id": "bdoor_sheet",
+   "cat": "building",
+   "view": "front",
+   "w": 1.2,
+   "h": 2.4,
+   "desc": "a sheet-metal door of rusty welded steel sheet with a bolted handle plate; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.15,
+    2.4
+   ]
+  },
+  {
+   "id": "bdoor_armored",
+   "cat": "building",
+   "view": "front",
+   "w": 1.2,
+   "h": 2.4,
+   "desc": "a massive armored door of thick dark alloy plates with heavy bolts and a reinforced frame; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.15,
+    2.4
+   ]
+  },
+  {
+   "id": "bdoor_double_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 2.8,
+   "desc": "a double door of two wooden plank leaves with iron straps; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.15,
+    2.4
+   ]
+  },
+  {
+   "id": "bdoor_double_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 2.8,
+   "desc": "a double door of two rusty steel sheet leaves with welded ribs; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.15,
+    2.4
+   ]
+  },
+  {
+   "id": "bdoor_garage",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 2.8,
+   "desc": "a wide player-built garage door of corrugated rusty sheet metal panels in a steel frame, closed; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.15,
+    2.4
+   ]
+  },
+  {
+   "id": "bdoor_wood_open",
+   "cat": "building",
+   "view": "front",
+   "w": 1.2,
+   "h": 2.4,
+   "desc": "a crude wooden plank door standing half open on rusty hinges; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.15,
+    2.4
+   ]
+  },
+  {
+   "id": "bhatch_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 1.2,
+   "h": 0.4,
+   "desc": "a square floor hatch trapdoor of wooden planks with iron hinges and a ring handle, seen from above at an angle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    1.2,
+    0.1
+   ]
+  },
+  {
+   "id": "bhatch_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 1.2,
+   "h": 0.4,
+   "desc": "a square floor hatch trapdoor of welded steel plate with a ladder visible through a gap, seen from above at an angle; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    1.2,
+    0.1
+   ]
+  },
+  {
+   "id": "bwindow_bars",
+   "cat": "building",
+   "view": "front",
+   "w": 1.2,
+   "h": 1.2,
+   "desc": "a square grille of welded rusty iron window bars in a frame; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.1,
+    1.2
+   ]
+  },
+  {
+   "id": "bshutter_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 1.2,
+   "h": 1.2,
+   "desc": "a pair of closed wooden window shutters of planks in a frame; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.1,
+    1.2
+   ]
+  },
+  {
+   "id": "bshutter_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 1.2,
+   "h": 1.2,
+   "desc": "a closed steel plate window shutter with a narrow horizontal firing slit; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.1,
+    1.2
+   ]
+  },
+  {
+   "id": "bembrasure",
+   "cat": "building",
+   "view": "front",
+   "w": 1.2,
+   "h": 1.2,
+   "desc": "a thick armored steel embrasure plate with a narrow gun slit, bolted; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.1,
+    1.2
+   ]
+  },
+  {
+   "id": "bhighwall_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 4,
+   "desc": "a tall external palisade wall of sharpened vertical logs bound with wire; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.5,
+    4
+   ]
+  },
+  {
+   "id": "bhighgate_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 4,
+   "h": 4,
+   "desc": "a tall external palisade double gate of sharpened vertical logs bound with wire; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    0.5,
+    4
+   ]
+  },
+  {
+   "id": "bhighwall_stone",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 4,
+   "desc": "a tall external defensive wall of big stacked stone blocks and concrete; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.5,
+    4
+   ]
+  },
+  {
+   "id": "bhighgate_stone",
+   "cat": "building",
+   "view": "front",
+   "w": 4,
+   "h": 4,
+   "desc": "a tall external defensive double gate of big stacked stone blocks and concrete; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    0.5,
+    4
+   ]
+  },
+  {
+   "id": "bhighwall_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 4,
+   "desc": "a tall external defensive wall of rusty welded sheet metal panels with barbed wire on top; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.5,
+    4
+   ]
+  },
+  {
+   "id": "bhighgate_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 4,
+   "h": 4,
+   "desc": "a tall external defensive double gate of rusty welded sheet metal panels with barbed wire on top; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    0.5,
+    4
+   ]
+  },
+  {
+   "id": "bcodelock",
+   "cat": "building",
+   "view": "front",
+   "w": 0.3,
+   "h": 0.4,
+   "desc": "a small wall-mounted electronic keypad code lock box, grey metal, with a small led; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.2,
+    0.1,
+    0.3
+   ]
+  },
+  {
+   "id": "bkeylock",
+   "cat": "building",
+   "view": "front",
+   "w": 0.3,
+   "h": 0.4,
+   "desc": "a heavy rusty padlock and hasp key lock; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.2,
+    0.1,
+    0.3
+   ]
+  },
+  {
+   "id": "bcabinet_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 1,
+   "h": 1.8,
+   "desc": "a tool cupboard claim cabinet: a crude tall wooden cabinet nailed together from planks, a padlock, tools hanging on the side; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.5,
+    1.8
+   ]
+  },
+  {
+   "id": "bcabinet_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 1,
+   "h": 1.8,
+   "desc": "a tool cupboard claim cabinet: a dented grey steel cabinet with a hasp and padlock, rust streaks; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.5,
+    1.8
+   ]
+  },
+  {
+   "id": "bcabinet_armored",
+   "cat": "building",
+   "view": "front",
+   "w": 1,
+   "h": 1.8,
+   "desc": "a tool cupboard claim cabinet: a heavy armored steel cabinet with welded plates and a code lock; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.5,
+    1.8
+   ]
+  },
+  {
+   "id": "bdecay_rust",
+   "cat": "decals",
+   "tile": 3,
+   "desc": "rust streaks, flaking paint and corrosion stains pattern on a transparent-looking neutral grey background, overlay texture"
+  },
+  {
+   "id": "bdecay_moss",
+   "cat": "decals",
+   "tile": 3,
+   "desc": "moss, damp stains and grime pattern on a neutral grey background, overlay texture"
+  },
+  {
+   "id": "bsandbags",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1,
+   "desc": "a low curved barricade of stacked old sandbags; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.8,
+    0.9
+   ]
+  },
+  {
+   "id": "bspikes_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.2,
+   "desc": "a barricade of sharpened wooden stakes crossed in an X frame; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1,
+    1.2
+   ]
+  },
+  {
+   "id": "bspikes_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.2,
+   "desc": "a barricade of welded rusty rebar spikes and sharp metal sheets; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1,
+    1.2
+   ]
+  },
+  {
+   "id": "bczech_hedgehog",
+   "cat": "building",
+   "view": "front",
+   "w": 1.5,
+   "h": 1.2,
+   "desc": "a steel Czech hedgehog anti-tank barricade of three welded I-beams; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    1.4,
+    1.2
+   ]
+  },
+  {
+   "id": "bwall_twig_angled",
+   "cat": "building",
+   "view": "angled",
+   "w": 3.2,
+   "h": 3,
+   "desc": "a single straight full-height wall segment made of woven sticks, twigs and branches lashed with rope to rough poles; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bdoorframe_twig",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of woven sticks, twigs and branches lashed with rope to rough poles with a door frame holding a closed door in the middle matching the wall material; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_twig_shutter",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of woven sticks, twigs and branches lashed with rope to rough poles with a square window closed by shutters; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_twig_side_dmg",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "the narrow end edge of a damaged broken wall segment made of woven sticks, twigs and branches lashed with rope to rough poles, seen end-on, cracked and chipped; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "brubble_twig",
+   "cat": "building",
+   "view": "front",
+   "w": 2.4,
+   "h": 0.8,
+   "desc": "a pile of rubble and debris left from a destroyed wall made of woven sticks, twigs and branches lashed with rope to rough poles; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    1.2,
+    0.6
+   ]
+  },
+  {
+   "id": "broof_twig_slope",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.6,
+   "desc": "a sloped pitched roof section made of woven sticks, twigs and branches lashed; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    1
+   ]
+  },
+  {
+   "id": "bwall_twig_tri",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a triangular gable wall segment (triangle shape with flat bottom) made of woven sticks, twigs and branches lashed with rope to rough poles; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bstairs_twig_side",
+   "cat": "building",
+   "view": "side",
+   "w": 3,
+   "h": 3,
+   "desc": "a straight staircase built of woven sticks, twigs and branches lashed with rope to rough poles seen in exact side profile, going up from left to right; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1.2,
+    3
+   ]
+  },
+  {
+   "id": "bwall_wood_angled",
+   "cat": "building",
+   "view": "angled",
+   "w": 3.2,
+   "h": 3,
+   "desc": "a single straight full-height wall segment made of rough weathered horizontal wooden planks nailed to thick posts; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bdoorframe_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of rough weathered horizontal wooden planks nailed to thick posts with a door frame holding a closed door in the middle matching the wall material; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_wood_shutter",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of rough weathered horizontal wooden planks nailed to thick posts with a square window closed by shutters; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_wood_side_dmg",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "the narrow end edge of a damaged broken wall segment made of rough weathered horizontal wooden planks nailed to thick posts, seen end-on, cracked and chipped; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "brubble_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 2.4,
+   "h": 0.8,
+   "desc": "a pile of rubble and debris left from a destroyed wall made of rough weathered horizontal wooden planks nailed to thick posts; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    1.2,
+    0.6
+   ]
+  },
+  {
+   "id": "broof_wood_slope",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.6,
+   "desc": "a sloped pitched roof section made of rough weathered horizontal wooden planks nailed to thick posts; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    1
+   ]
+  },
+  {
+   "id": "bwall_wood_tri",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a triangular gable wall segment (triangle shape with flat bottom) made of rough weathered horizontal wooden planks nailed to thick posts; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bstairs_wood_side",
+   "cat": "building",
+   "view": "side",
+   "w": 3,
+   "h": 3,
+   "desc": "a straight staircase built of rough weathered horizontal wooden planks nailed to thick posts seen in exact side profile, going up from left to right; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1.2,
+    3
+   ]
+  },
+  {
+   "id": "bwall_stone_angled",
+   "cat": "building",
+   "view": "angled",
+   "w": 3.2,
+   "h": 3,
+   "desc": "a single straight full-height wall segment made of stacked rough grey stone blocks with crumbling mortar; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bdoorframe_stone",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of stacked rough grey stone blocks with crumbling mortar with a door frame holding a closed door in the middle matching the wall material; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_stone_shutter",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of stacked rough grey stone blocks with crumbling mortar with a square window closed by shutters; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_stone_side_dmg",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "the narrow end edge of a damaged broken wall segment made of stacked rough grey stone blocks with crumbling mortar, seen end-on, cracked and chipped; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "brubble_stone",
+   "cat": "building",
+   "view": "front",
+   "w": 2.4,
+   "h": 0.8,
+   "desc": "a pile of rubble and debris left from a destroyed wall made of stacked rough grey stone blocks with crumbling mortar; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    1.2,
+    0.6
+   ]
+  },
+  {
+   "id": "broof_stone_slope",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.6,
+   "desc": "a sloped pitched roof section made of stacked rough grey stone blocks; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    1
+   ]
+  },
+  {
+   "id": "bwall_stone_tri",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a triangular gable wall segment (triangle shape with flat bottom) made of stacked rough grey stone blocks with crumbling mortar; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bstairs_stone_side",
+   "cat": "building",
+   "view": "side",
+   "w": 3,
+   "h": 3,
+   "desc": "a straight staircase built of stacked rough grey stone blocks with crumbling mortar seen in exact side profile, going up from left to right; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1.2,
+    3
+   ]
+  },
+  {
+   "id": "bwall_metal_angled",
+   "cat": "building",
+   "view": "angled",
+   "w": 3.2,
+   "h": 3,
+   "desc": "a single straight full-height wall segment made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bdoorframe_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches with a door frame holding a closed door in the middle matching the wall material; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_metal_shutter",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches with a square window closed by shutters; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_metal_side_dmg",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "the narrow end edge of a damaged broken wall segment made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches, seen end-on, cracked and chipped; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "brubble_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 2.4,
+   "h": 0.8,
+   "desc": "a pile of rubble and debris left from a destroyed wall made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    1.2,
+    0.6
+   ]
+  },
+  {
+   "id": "broof_metal_slope",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.6,
+   "desc": "a sloped pitched roof section made of rusty corrugated and flat sheet metal panels riveted to a steel frame; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    1
+   ]
+  },
+  {
+   "id": "bwall_metal_tri",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a triangular gable wall segment (triangle shape with flat bottom) made of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bstairs_metal_side",
+   "cat": "building",
+   "view": "side",
+   "w": 3,
+   "h": 3,
+   "desc": "a straight staircase built of rusty corrugated and flat sheet metal panels riveted to a steel frame with welded patches seen in exact side profile, going up from left to right; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1.2,
+    3
+   ]
+  },
+  {
+   "id": "bwall_steel_angled",
+   "cat": "building",
+   "view": "angled",
+   "w": 3.2,
+   "h": 3,
+   "desc": "a single straight full-height wall segment made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bdoorframe_steel",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint with a door frame holding a closed door in the middle matching the wall material; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_steel_shutter",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint with a square window closed by shutters; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_steel_side_dmg",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "the narrow end edge of a damaged broken wall segment made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint, seen end-on, cracked and chipped; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "brubble_steel",
+   "cat": "building",
+   "view": "front",
+   "w": 2.4,
+   "h": 0.8,
+   "desc": "a pile of rubble and debris left from a destroyed wall made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    1.2,
+    0.6
+   ]
+  },
+  {
+   "id": "broof_steel_slope",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.6,
+   "desc": "a sloped pitched roof section made of thick grey welded steel plates; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    1
+   ]
+  },
+  {
+   "id": "bwall_steel_tri",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a triangular gable wall segment (triangle shape with flat bottom) made of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bstairs_steel_side",
+   "cat": "building",
+   "view": "side",
+   "w": 3,
+   "h": 3,
+   "desc": "a straight staircase built of thick grey welded steel plates with bolted seams, heavy rivets, chipped dark paint seen in exact side profile, going up from left to right; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1.2,
+    3
+   ]
+  },
+  {
+   "id": "bwall_armored_angled",
+   "cat": "building",
+   "view": "angled",
+   "w": 3.2,
+   "h": 3,
+   "desc": "a single straight full-height wall segment made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bdoorframe_armored",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military with a door frame holding a closed door in the middle matching the wall material; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwindow_armored_shutter",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a wall segment made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military with a square window closed by shutters; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bwall_armored_side_dmg",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 3,
+   "desc": "the narrow end edge of a damaged broken wall segment made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military, seen end-on, cracked and chipped; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    0.3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "brubble_armored",
+   "cat": "building",
+   "view": "front",
+   "w": 2.4,
+   "h": 0.8,
+   "desc": "a pile of rubble and debris left from a destroyed wall made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    1.2,
+    0.6
+   ]
+  },
+  {
+   "id": "broof_armored_slope",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.6,
+   "desc": "a sloped pitched roof section made of heavy dark armored alloy plates; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    1
+   ]
+  },
+  {
+   "id": "bwall_armored_tri",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a triangular gable wall segment (triangle shape with flat bottom) made of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.3,
+    3
+   ]
+  },
+  {
+   "id": "bstairs_armored_side",
+   "cat": "building",
+   "view": "side",
+   "w": 3,
+   "h": 3,
+   "desc": "a straight staircase built of heavy dark armored alloy plates with deep bolts, reinforced ribs and hazard-worn edges, massive and military seen in exact side profile, going up from left to right; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1.2,
+    3
+   ]
+  },
+  {
+   "id": "bwire_barbed",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1,
+   "desc": "a coil of barbed concertina razor wire barricade; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bbarrel_barricade",
+   "cat": "building",
+   "view": "front",
+   "w": 1.5,
+   "h": 1.5,
+   "desc": "a barricade of rusty oil drums filled with concrete chained together; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "btire_wall",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.4,
+   "desc": "a barricade wall of stacked old car tires; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bwood_barricade",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.6,
+   "desc": "a barricade of nailed planks and an old door propped by posts; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bmetal_barricade",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 1.4,
+   "desc": "a barricade of welded scrap sheet metal on legs; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bconcrete_block",
+   "cat": "building",
+   "view": "front",
+   "w": 2,
+   "h": 1,
+   "desc": "a precast concrete road block barrier; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bwatchtower",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 5,
+   "desc": "a crude player-built wooden watchtower with a ladder and a plank platform with sheet metal walls; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bshooting_floor",
+   "cat": "building",
+   "view": "front",
+   "w": 3,
+   "h": 2.5,
+   "desc": "a raised wooden shooting floor platform with a ladder; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bladder_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 2.5,
+   "desc": "a crude wooden ladder leaning upright; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bladder_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 0.6,
+   "h": 2.5,
+   "desc": "a welded steel ladder leaning upright; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bfurnace_base",
+   "cat": "building",
+   "view": "front",
+   "w": 1.5,
+   "h": 1.5,
+   "desc": "a crude stone and clay furnace with a chimney pipe; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bworkbench_base",
+   "cat": "building",
+   "view": "front",
+   "w": 1.5,
+   "h": 1.5,
+   "desc": "a heavy player-built workbench of planks and steel with a vise; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bstorage_box",
+   "cat": "building",
+   "view": "front",
+   "w": 1.5,
+   "h": 1.5,
+   "desc": "a large crude wooden storage box chest with iron corners; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bstorage_metal",
+   "cat": "building",
+   "view": "front",
+   "w": 1.5,
+   "h": 1.5,
+   "desc": "a large welded steel storage crate locker with a hasp; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bsleep_bag",
+   "cat": "building",
+   "view": "front",
+   "w": 2,
+   "h": 0.4,
+   "desc": "a dirty sleeping bag on a cardboard mat; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bbed_base",
+   "cat": "building",
+   "view": "front",
+   "w": 2,
+   "h": 0.7,
+   "desc": "a crude bed of pallets with an old mattress and blanket; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bcampfire",
+   "cat": "building",
+   "view": "front",
+   "w": 1.5,
+   "h": 1.5,
+   "desc": "a campfire ring of stones with burnt logs; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bgenerator",
+   "cat": "building",
+   "view": "front",
+   "w": 1.5,
+   "h": 1.5,
+   "desc": "a small rusty petrol generator on a frame; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bwater_barrel",
+   "cat": "building",
+   "view": "front",
+   "w": 1.5,
+   "h": 1.5,
+   "desc": "a blue plastic water barrel collecting rain with a tarp funnel; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bwindmill_small",
+   "cat": "building",
+   "view": "front",
+   "w": 1.5,
+   "h": 4,
+   "desc": "a small scrap windmill turbine on a pole; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bsign_wood",
+   "cat": "building",
+   "view": "front",
+   "w": 0.8,
+   "h": 1.4,
+   "desc": "a blank wooden plank signpost on a stake; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bcurtain_tarp",
+   "cat": "building",
+   "view": "front",
+   "w": 1.4,
+   "h": 2.4,
+   "desc": "a tarp curtain hung across a doorway frame; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bshelf_base",
+   "cat": "building",
+   "view": "front",
+   "w": 1.5,
+   "h": 1.5,
+   "desc": "a crude plank shelf rack with jars, tools and scrap; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "bsolar_panel",
+   "cat": "building",
+   "view": "front",
+   "w": 1.5,
+   "h": 1.5,
+   "desc": "a dusty solar panel on a scrap metal stand; player-built survival base piece, crude post-Soviet scavenger craftsmanship, weathered, dirt, no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    1,
+    1.5
+   ]
+  }
+ ]
+}

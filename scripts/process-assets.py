@@ -284,6 +284,9 @@ def main() -> None:
         extra = json.loads((ROOT / args["manifest"]).read_text(encoding="utf-8"))
         ids = {a["id"] for a in extra["assets"]}
         manifest["assets"] = [a for a in manifest["assets"] if a["id"] not in ids] + extra["assets"]
+        # обрабатываем только этот список (раньше заново перерабатывался весь проект и всё держалось в памяти — 6+ ГБ)
+        if only is None:
+            only = ids
     if PALETTE_FILE.exists() and "new-palette" not in args:
         _global_palette = Image.open(PALETTE_FILE)
         _global_palette.load()
@@ -297,6 +300,9 @@ def main() -> None:
         src = ROOT / "assets" / "gen" / a["cat"] / f"{a.get('src', a['id'])}.png"   # src — производный ассет из чужого исходника
         if not src.exists() or (only and a["id"] not in only):
             continue
+        out = ROOT / "game" / "art" / a["cat"] / f"{a['id']}.png"
+        if "force" not in args and not a.get("fx") and not a.get("sheet") and out.exists() and out.stat().st_mtime >= src.stat().st_mtime:
+            continue   # уже обработан и исходник не менялся
         if a.get("fx"):
             strip = process_fx(a, src)
             print(f"{a['id']:<24} fx -> {strip.width // strip.height} frames {strip.height}px")
@@ -320,13 +326,14 @@ def main() -> None:
             dst = base / a["cat"] / f"{a['id']}.png"
             dst.parent.mkdir(parents=True, exist_ok=True)
             im.save(dst)
-        pix.append((a["id"], px))
+        if len(pix) < 200:   # превью — не больше 200 картинок, иначе память
+            pix.append((a["id"], px))
         if a["cat"] in ("trees", "nodes", "props") and len(compare) < 12:
             compare.append((a["id"] + " HD", hd))
             compare.append((a["id"] + " px", px.resize((px.width * 2, px.height * 2), Image.NEAREST)))
         print(f"{a['id']:<24} {px.width}x{px.height}")
 
-    if pix and not only:
+    if pix and not args.get("manifest") and not args.get("only"):
         world = [(n, im) for n, im in pix if not n.startswith(("icon_", "weapon_"))]
         icons = [(n, im) for n, im in pix if n.startswith(("icon_", "weapon_"))]
         if world:

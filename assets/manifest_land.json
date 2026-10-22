@@ -1,0 +1,796 @@
+{
+ "assets": [
+  {
+   "id": "lm_runway",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "cracked grey concrete runway slabs with faded white painted stripe markings and weeds in seams, seen straight from above, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_taxiway",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "cracked concrete taxiway slabs with a faded yellow centre line and oil stains, seen straight from above, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_caponier",
+   "cat": "props",
+   "h": 6,
+   "desc": "a Soviet concrete hardened aircraft shelter, arched earth-covered bunker hangar with large steel blast doors half open, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 14,
+   "view": "front"
+  },
+  {
+   "id": "lm_hangar",
+   "cat": "props",
+   "h": 8,
+   "desc": "a large corrugated steel aircraft hangar with an arched roof and big sliding doors, holes in sheet metal, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 16,
+   "view": "front"
+  },
+  {
+   "id": "lm_mig21_wreck",
+   "cat": "decals",
+   "h": 14,
+   "w": 14,
+   "desc": "an abandoned wrecked delta-wing jet fighter, silver-grey paint peeling, missing canopy, broken wing, red stars faded, seen straight from directly above (top-down orthographic), abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_an12_wreck",
+   "cat": "decals",
+   "h": 30,
+   "w": 30,
+   "desc": "an abandoned wrecked four-engine turboprop cargo plane, grey-green, broken tail, missing propeller blades, seen straight from directly above (top-down orthographic), abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_control_tower",
+   "cat": "props",
+   "h": 12,
+   "desc": "a Soviet airfield control tower, square concrete building with a glazed observation room on top, broken windows, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 7,
+   "view": "front"
+  },
+  {
+   "id": "lm_control_tower_int",
+   "cat": "decals",
+   "h": 6,
+   "w": 6,
+   "desc": "interior of an airfield control tower room seen from above: radio consoles, dusty desks, chairs, broken glass on the floor, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_fuel_tank",
+   "cat": "props",
+   "h": 6,
+   "desc": "a large vertical cylindrical steel fuel storage tank with a ladder and pipes, peeling green paint, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 6
+  },
+  {
+   "id": "lm_fuel_truck",
+   "cat": "props",
+   "h": 3,
+   "desc": "a Soviet military airfield fuel tanker truck, olive drab cab, cylindrical tank, flat tyres, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 8,
+   "view": "side"
+  },
+  {
+   "id": "lm_windsock",
+   "cat": "props",
+   "h": 5,
+   "desc": "an airfield windsock on a metal pole, torn faded striped fabric cone, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 2
+  },
+  {
+   "id": "lm_landing_light",
+   "cat": "props",
+   "h": 1,
+   "desc": "a small airfield runway edge landing light on a short post, cracked lens, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 0.6
+  },
+  {
+   "id": "lm_radar_airfield",
+   "cat": "props",
+   "h": 6,
+   "desc": "a Soviet airfield rotating radar antenna, curved mesh dish on a trailer mount, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 6
+  },
+  {
+   "id": "lm_duga_wall",
+   "cat": "props",
+   "h": 14,
+   "desc": "a segment of a giant over-the-horizon radar antenna wall: tall lattice steel framework with rows of rusty cylindrical antenna elements, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 10,
+   "view": "front"
+  },
+  {
+   "id": "lm_duga_mast",
+   "cat": "props",
+   "h": 16,
+   "desc": "a tall rusty steel lattice mast with guy wires, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 3
+  },
+  {
+   "id": "lm_cable_spool",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a large wooden cable drum with thick black cable wound on it, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 2
+  },
+  {
+   "id": "lm_duga_control",
+   "cat": "props",
+   "h": 5,
+   "desc": "a grey concrete two-storey control building with small windows and antenna feeds on the roof, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 10,
+   "view": "front"
+  },
+  {
+   "id": "lm_generator_diesel",
+   "cat": "props",
+   "h": 2.5,
+   "desc": "a large diesel generator unit in a rusty green housing with exhaust pipe, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 4,
+   "view": "side"
+  },
+  {
+   "id": "lm_tank_hangar",
+   "cat": "props",
+   "h": 8,
+   "desc": "a long industrial repair hangar with brick walls and big steel gates, crane rail visible inside, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 16,
+   "view": "front"
+  },
+  {
+   "id": "lm_tank_repair",
+   "cat": "decals",
+   "h": 8,
+   "w": 8,
+   "desc": "a Soviet main battle tank under repair, engine deck open, tracks removed and lying beside, turret missing, seen straight from directly above (top-down orthographic), abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_turret_stand",
+   "cat": "props",
+   "h": 3,
+   "desc": "a tank turret resting on a steel repair stand, olive drab, rusty, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 4
+  },
+  {
+   "id": "lm_tracks_pile",
+   "cat": "props",
+   "h": 1,
+   "desc": "a pile of detached heavy tank track links, rusty, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 3
+  },
+  {
+   "id": "lm_trench",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "a dug earth trench with wooden plank revetment walls and muddy floor, seen from above, seen straight from above, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_range_target",
+   "cat": "props",
+   "h": 2.5,
+   "desc": "a plywood tank silhouette shooting range target on wooden posts, riddled with holes, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 4,
+   "view": "front"
+  },
+  {
+   "id": "lm_dugout",
+   "cat": "props",
+   "h": 2,
+   "desc": "an earth-covered log dugout bunker entrance with sandbags, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 5,
+   "view": "front"
+  },
+  {
+   "id": "lm_headframe",
+   "cat": "props",
+   "h": 18,
+   "desc": "a tall steel mine shaft headframe tower with two large winding wheels on top, rusty red lattice, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 8,
+   "view": "front"
+  },
+  {
+   "id": "lm_waste_heap",
+   "cat": "props",
+   "h": 10,
+   "desc": "a large conical black coal mine waste heap with sparse weeds, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 18
+  },
+  {
+   "id": "lm_lift_building",
+   "cat": "props",
+   "h": 7,
+   "desc": "a brick mine winding house building with tall windows and cable openings, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 12,
+   "view": "front"
+  },
+  {
+   "id": "lm_mine_cart",
+   "cat": "props",
+   "h": 1.3,
+   "desc": "a rusty mine tipping cart on rail wheels filled with coal, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 2,
+   "view": "side"
+  },
+  {
+   "id": "lm_mine_rails",
+   "cat": "tiles",
+   "tile": 2,
+   "desc": "narrow gauge mine rail track on wooden sleepers over coal-dusted gravel, rails running vertically, seen straight from above, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_conveyor_gallery",
+   "cat": "props",
+   "h": 6,
+   "desc": "an inclined enclosed corrugated conveyor gallery on steel trestles, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 14,
+   "view": "side"
+  },
+  {
+   "id": "lm_lamp_room_int",
+   "cat": "decals",
+   "h": 6,
+   "w": 6,
+   "desc": "interior of a mine lamp room seen from above: racks of miner helmet lamps charging, tiled floor, counter, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_miner_lockers",
+   "cat": "props",
+   "h": 2,
+   "desc": "a row of dented grey metal miner lockers, some doors open with hanging work clothes, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 3,
+   "view": "front"
+  },
+  {
+   "id": "lm_elevator",
+   "cat": "props",
+   "h": 20,
+   "desc": "a tall concrete grain elevator with silo cylinders and a head house tower, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 12,
+   "view": "front"
+  },
+  {
+   "id": "lm_silo_metal",
+   "cat": "props",
+   "h": 8,
+   "desc": "a corrugated steel grain silo bin with a conical roof, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 5
+  },
+  {
+   "id": "lm_grain_truck",
+   "cat": "props",
+   "h": 3,
+   "desc": "a Soviet tipper grain truck with wooden side boards, faded blue cab, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 7,
+   "view": "side"
+  },
+  {
+   "id": "lm_barn",
+   "cat": "props",
+   "h": 6,
+   "desc": "a long wooden kolkhoz barn with sagging slate roof and open doors, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 12,
+   "view": "front"
+  },
+  {
+   "id": "lm_cowshed",
+   "cat": "props",
+   "h": 5,
+   "desc": "a long white-plastered brick cowshed with small windows and slate roof, peeling plaster, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 14,
+   "view": "front"
+  },
+  {
+   "id": "lm_tractor_wheeled",
+   "cat": "props",
+   "h": 3,
+   "desc": "a small blue-red Soviet wheeled tractor, rusty, flat rear tyres, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 4,
+   "view": "side"
+  },
+  {
+   "id": "lm_tractor_crawler",
+   "cat": "props",
+   "h": 3,
+   "desc": "a Soviet crawler tractor with tracks, faded red cab, rusty, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 5,
+   "view": "side"
+  },
+  {
+   "id": "lm_combine",
+   "cat": "props",
+   "h": 4,
+   "desc": "an abandoned red Soviet combine harvester with a wide header, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 9,
+   "view": "side"
+  },
+  {
+   "id": "lm_hay_bales",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a stack of rotting rectangular hay bales, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 3
+  },
+  {
+   "id": "lm_mts_workshop",
+   "cat": "props",
+   "h": 6,
+   "desc": "a machine-tractor station workshop, brick building with large garage gate and oil stains, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 12,
+   "view": "front"
+  },
+  {
+   "id": "lm_sawmill_hall",
+   "cat": "props",
+   "h": 7,
+   "desc": "an open-sided wooden sawmill hall with a pitched roof and saw machinery inside, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 14,
+   "view": "front"
+  },
+  {
+   "id": "lm_log_stack",
+   "cat": "props",
+   "h": 2,
+   "desc": "a big stack of felled pine logs, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 6,
+   "view": "side"
+  },
+  {
+   "id": "lm_log_car",
+   "cat": "props",
+   "h": 2,
+   "desc": "a narrow-gauge railway flatcar loaded with pine logs, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 6,
+   "view": "side"
+  },
+  {
+   "id": "lm_debarker",
+   "cat": "props",
+   "h": 2.5,
+   "desc": "an industrial rusty log debarking drum machine, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 5,
+   "view": "side"
+  },
+  {
+   "id": "lm_sawdust_pile",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a large pile of pale wet sawdust, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 4
+  },
+  {
+   "id": "lm_cutting_table",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a rusty circular saw cutting table with a big blade, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 3,
+   "view": "side"
+  },
+  {
+   "id": "lm_cooling_tower",
+   "cat": "props",
+   "h": 30,
+   "desc": "a huge concrete hyperboloid cooling tower, stained grey, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 24,
+   "view": "front"
+  },
+  {
+   "id": "lm_chimney",
+   "cat": "props",
+   "h": 40,
+   "desc": "a very tall red-and-white striped industrial chimney, stained with soot, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 4
+  },
+  {
+   "id": "lm_turbine_hall_int",
+   "cat": "decals",
+   "h": 10,
+   "w": 10,
+   "desc": "interior of a power plant turbine hall seen from above: a huge green steam turbine set, catwalks, pipes, tiled floor, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_coal_yard",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "a coal yard ground covered with heaps of black coal and coal dust, seen straight from above, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_transformer",
+   "cat": "props",
+   "h": 3,
+   "desc": "a large power transformer with radiator fins and ceramic insulators, rusty, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 3
+  },
+  {
+   "id": "lm_ward_int",
+   "cat": "decals",
+   "h": 6,
+   "w": 6,
+   "desc": "interior of a hospital ward seen from above: rusty iron beds with stained mattresses, IV stands, bedside tables, peeling tiled floor, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_operating_int",
+   "cat": "decals",
+   "h": 6,
+   "w": 6,
+   "desc": "interior of a old operating room seen from above: operating table, surgical lamp, instrument trolleys, white tiled floor with stains, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_hospital_bed",
+   "cat": "props",
+   "h": 1,
+   "desc": "a rusty iron hospital bed with a stained mattress, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 2,
+   "view": "side"
+  },
+  {
+   "id": "lm_iv_stand",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a metal hospital IV drip stand, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 0.6
+  },
+  {
+   "id": "lm_khrush_roof",
+   "cat": "decals",
+   "h": 16,
+   "w": 16,
+   "desc": "the flat tar roof of a five-storey panel apartment block with ventilation shafts and antennas, seen straight from directly above (top-down orthographic), abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_khrush_entrance",
+   "cat": "props",
+   "h": 6,
+   "desc": "the entrance of a Soviet panel apartment block: door with canopy, steps, bench, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 6,
+   "view": "front"
+  },
+  {
+   "id": "lm_shop",
+   "cat": "props",
+   "h": 4,
+   "desc": "a small single-storey Soviet grocery store with large shop windows, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 10,
+   "view": "front"
+  },
+  {
+   "id": "lm_playground",
+   "cat": "props",
+   "h": 3,
+   "desc": "a rusty Soviet playground climbing frame dome and swing, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 5
+  },
+  {
+   "id": "lm_garages",
+   "cat": "props",
+   "h": 3,
+   "desc": "a row of rusty metal garages with painted doors, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 10,
+   "view": "front"
+  },
+  {
+   "id": "lm_kiosk",
+   "cat": "props",
+   "h": 3,
+   "desc": "a small metal street kiosk with a broken glass window, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 3,
+   "view": "front"
+  },
+  {
+   "id": "lm_bus",
+   "cat": "props",
+   "h": 3.5,
+   "desc": "a Soviet city bus with rounded body, faded yellow-red paint, flat tyres, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 11,
+   "view": "side"
+  },
+  {
+   "id": "lm_lamp_post",
+   "cat": "props",
+   "h": 6,
+   "desc": "a concrete street lamp post with a curved arm and broken lamp, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 2
+  },
+  {
+   "id": "lm_quarry_bench",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "terraced stone quarry ground: grey rock bench ledges with rubble and drill holes, seen straight from above, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_quarry_terrace",
+   "cat": "props",
+   "h": 6,
+   "desc": "a stepped grey granite quarry terrace wall with cut ledges and loose rubble, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 12,
+   "view": "front"
+  },
+  {
+   "id": "lm_cut_blocks",
+   "cat": "props",
+   "h": 2,
+   "desc": "a stack of large rough-cut granite stone blocks, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 4
+  },
+  {
+   "id": "lm_rock_crusher",
+   "cat": "props",
+   "h": 6,
+   "desc": "an industrial jaw rock crusher plant on steel frame with hopper and chute, rusty, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 8,
+   "view": "front"
+  },
+  {
+   "id": "lm_quarry_conveyor",
+   "cat": "props",
+   "h": 4,
+   "desc": "a long inclined open belt conveyor on steel legs carrying crushed stone, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 12,
+   "view": "side"
+  },
+  {
+   "id": "lm_dump_truck",
+   "cat": "props",
+   "h": 6,
+   "desc": "a huge Soviet mining dump truck, yellow cab paint faded, giant tyres, dented bed full of rock, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 11,
+   "view": "side"
+  },
+  {
+   "id": "lm_excavator",
+   "cat": "props",
+   "h": 6,
+   "desc": "a large rusty mining power shovel excavator with crawler tracks and bucket, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 10,
+   "view": "side"
+  },
+  {
+   "id": "lm_ore_pit",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "reddish-brown iron ore open pit ground with benches, rubble and puddles of rusty water, seen straight from above, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_ore_pile",
+   "cat": "props",
+   "h": 2.5,
+   "desc": "a pile of dark reddish iron ore lumps, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos",
+   "w": 5
+  },
+  {
+   "id": "lm_ore_car",
+   "cat": "props",
+   "h": 2.5,
+   "desc": "a rusty railway ore hopper car loaded with red-brown iron ore, colour scheme rich ochre and iron red, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 8,
+   "view": "side"
+  },
+  {
+   "id": "lm_pit_wall",
+   "cat": "props",
+   "h": 8,
+   "desc": "a terraced open pit mine wall of red-brown iron ore rock with haul road ledges, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 14,
+   "view": "front"
+  },
+  {
+   "id": "lm_sulfur_ground",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "ground covered with bright yellow sulfur crust deposits, white mineral stains and cracked grey rock, seen straight from above, colour scheme bright sulfur yellow and chalk white, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_sulfur_vent",
+   "cat": "props",
+   "h": 2,
+   "desc": "a steaming fumarole vent in a mound of yellow sulfur crystals with white steam, colour scheme bright sulfur yellow and chalk white, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 3
+  },
+  {
+   "id": "lm_sulfur_pile",
+   "cat": "props",
+   "h": 2,
+   "desc": "a pile of bright yellow sulfur lumps, colour scheme bright sulfur yellow and chalk white, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 4
+  },
+  {
+   "id": "lm_sulfur_plant",
+   "cat": "props",
+   "h": 8,
+   "desc": "a small sulfur processing plant: corroded tanks, pipes, yellow-stained sheds and a short chimney, colour scheme bright sulfur yellow and chalk white, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 12,
+   "view": "front"
+  },
+  {
+   "id": "lm_sawmill_yard_crane",
+   "cat": "props",
+   "h": 7,
+   "desc": "a rusty gantry log crane over a timber yard, colour scheme yellow, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 10,
+   "view": "front"
+  },
+  {
+   "id": "lm_hospital_small",
+   "cat": "props",
+   "h": 5,
+   "desc": "a small two-storey rural hospital building with white peeling plaster and a porch, colour scheme white and pale blue, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 12,
+   "view": "front"
+  },
+  {
+   "id": "lm_ambulance",
+   "cat": "props",
+   "h": 2.5,
+   "desc": "a Soviet van ambulance, white with faded red stripe, flat tyres, colour scheme white with red stripe, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 5,
+   "view": "side"
+  },
+  {
+   "id": "lm_panel_roof_9",
+   "cat": "decals",
+   "h": 20,
+   "w": 20,
+   "desc": "the flat roof of a nine-storey Soviet panel apartment block: tar membrane, elevator machine room, ventilation shafts, TV antennas, puddles, seen straight from directly above (top-down orthographic), colour scheme pale beige panels with pastel blue and pink balcony accents, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_panel_roof_5",
+   "cat": "decals",
+   "h": 16,
+   "w": 16,
+   "desc": "the flat roof of a five-storey Soviet panel apartment block section with ventilation shafts, stairwell exit hatch, TV antennas, seen straight from directly above (top-down orthographic), colour scheme pale beige panels with pastel blue and pink balcony accents, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_panel_block_facade",
+   "cat": "props",
+   "h": 14,
+   "desc": "a section of a Soviet nine-storey prefab concrete panel apartment block facade with rows of windows and glazed balconies, some broken, colour scheme pale beige panels with pastel blue and pink balcony accents, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 12,
+   "view": "front"
+  },
+  {
+   "id": "lm_balcony",
+   "cat": "props",
+   "h": 2,
+   "desc": "a Soviet apartment balcony with concrete slab, rusty railing and junk inside, colour scheme white with blue, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 3,
+   "view": "front"
+  },
+  {
+   "id": "lm_stairwell_int",
+   "cat": "decals",
+   "h": 6,
+   "w": 6,
+   "desc": "a Soviet apartment block stairwell landing seen from above: concrete stairs, metal railing, mailboxes, garbage chute, peeling green paint walls, colour scheme two-tone pale green and white walls, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_corridor_int",
+   "cat": "decals",
+   "h": 6,
+   "w": 6,
+   "desc": "a Soviet apartment block floor corridor seen from above: worn linoleum, apartment doors, electric meter cabinet, colour scheme beige linoleum and brown doors, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_kitchen_int",
+   "cat": "decals",
+   "h": 6,
+   "w": 6,
+   "desc": "a small Soviet apartment kitchen seen from above: gas stove, sink, cupboards, small table with stools, peeling wallpaper, linoleum, colour scheme pastel mint green and cream, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_room_int",
+   "cat": "decals",
+   "h": 6,
+   "w": 6,
+   "desc": "a Soviet apartment living room seen from above: wall unit cabinet, sofa, carpet, armchair, overturned table, debris, colour scheme warm brown and faded red, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_bedroom_int",
+   "cat": "decals",
+   "h": 6,
+   "w": 6,
+   "desc": "a Soviet apartment bedroom seen from above: double bed, wardrobe, rug, scattered clothes, colour scheme warm brown and faded red, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_bathroom_int",
+   "cat": "decals",
+   "h": 6,
+   "w": 6,
+   "desc": "a Soviet apartment bathroom seen from above: cast iron bathtub, sink, toilet, broken tiles, colour scheme warm brown and faded red, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_hallway_int",
+   "cat": "decals",
+   "h": 6,
+   "w": 6,
+   "desc": "a Soviet apartment entrance hallway seen from above: coat rack, shoe shelf, mirror, worn parquet, colour scheme warm brown parquet, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_univermag_int",
+   "cat": "decals",
+   "h": 6,
+   "w": 6,
+   "desc": "interior of a Soviet supermarket seen from above: empty shelves, checkout counters, toppled baskets, colour scheme white glass and blue, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_univermag",
+   "cat": "props",
+   "h": 6,
+   "desc": "a Soviet single-storey glass-fronted supermarket building with a wide flat canopy, colour scheme white glass and blue, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 16,
+   "view": "front"
+  },
+  {
+   "id": "lm_monument",
+   "cat": "props",
+   "h": 5,
+   "desc": "a Soviet concrete monument on a stepped pedestal, a heroic worker statue, stained, colour scheme light grey concrete, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 4
+  },
+  {
+   "id": "lm_fountain",
+   "cat": "props",
+   "h": 2,
+   "desc": "a round dry concrete city fountain basin with a central bowl, cracked, colour scheme pale grey and turquoise tiles, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 6
+  },
+  {
+   "id": "lm_square_paving",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "square city plaza paving of cracked concrete tiles with weeds, seen straight from above, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_bus_stop",
+   "cat": "props",
+   "h": 3,
+   "desc": "a Soviet concrete bus stop shelter with mosaic back wall and bench, colour scheme cream and red, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 5,
+   "view": "front"
+  },
+  {
+   "id": "lm_swing",
+   "cat": "props",
+   "h": 2.5,
+   "desc": "a rusty Soviet playground swing frame, colour scheme bright red and yellow paint, faded, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 3,
+   "view": "front"
+  },
+  {
+   "id": "lm_sandbox",
+   "cat": "props",
+   "h": 1,
+   "desc": "a wooden playground sandbox with a mushroom-shaped canopy, colour scheme faded green and red, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 3
+  },
+  {
+   "id": "lm_carousel",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a rusty playground merry-go-round, colour scheme bright blue and yellow, faded, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 3
+  },
+  {
+   "id": "lm_courtyard_asphalt",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "cracked courtyard asphalt with potholes, weeds and fallen leaves, seen straight from above, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "lm_trash_bins",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a row of rusty metal dumpsters with spilled garbage, colour scheme dark green, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 4,
+   "view": "front"
+  },
+  {
+   "id": "lm_laundry_rack",
+   "cat": "props",
+   "h": 2,
+   "desc": "a courtyard clothes drying rack with metal poles and sagging lines, colour scheme white sheets, post-Soviet, clear bold readable silhouette, only 2-3 main colours, light faded wear, not grungy, no text, no letters, no numbers, no logos",
+   "w": 4,
+   "view": "front"
+  }
+ ]
+}

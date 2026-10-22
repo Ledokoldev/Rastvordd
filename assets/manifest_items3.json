@@ -1,0 +1,2757 @@
+{
+ "fx_framing": "A sprite sheet of ONE short visual-effect animation for a 2D top-down pixel-art survival game: a grid of {cols} columns and {rows} rows of equally sized square cells holding {n} frames in reading order (left to right, then the next row). Fully transparent background. Each frame sits in the middle of its own cell with a wide empty margin; nothing touches or crosses the cell borders; the effect has the same scale and the same anchor point in every frame, and consecutive frames change smoothly so they play as a fluid animation. Bold, simple, readable shapes with clear stepped cel shading (3 to 5 tones) and crisp edges, so it still reads when shrunk to a tiny pixel sprite. No text, no numbers, no labels, no grid lines, no cell borders, no background colour, no ground, no cast shadow.",
+ "fx_style": "Classic 16-bit pixel-art game effect look (like Enter the Gungeon, Hyper Light Drifter, Project Zomboid effects); gritty Soviet post-apocalyptic mood, colours slightly desaturated except light-emitting parts (fire, sparks, flashes, flares) which stay bright and saturated.",
+ "assets": [
+  {
+   "id": "icon_tool_hatchet",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a crude homemade hatchet: rough sharpened steel scrap blade lashed with wire to a wooden handle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_pickaxe",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a crude homemade pickaxe: bent rebar and scrap steel head bound with wire to a wooden haft; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_rock",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a fist-sized grey flint rock with one chipped sharp edge used as a primitive tool; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_weapon_bow",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a primitive hunting bow made of a bent wooden stave and twisted cord string, rag-wrapped grip; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_weapon_pipe",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heavy steel water pipe club with duct tape wrapped grip; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_weapon_spear",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a wooden spear with a sharpened scrap metal tip tied with wire; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_weapon_torch",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a hand torch: a wooden stick wrapped in tar-soaked rags at the top, unlit; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_sobr_nomex",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a dark grey fire-resistant nomex tactical undershirt with long sleeves, folded; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_rt_cable",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a coil of thick black insulated electrical cable with copper ends; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_rt_keyfob",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small grey electronic key fob on a steel ring with a single rubber button; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_hatchet_metal",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a factory-made steel hatchet with a painted red head, wooden handle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_pickaxe_metal",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a factory steel pickaxe with a long wooden haft; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_crowbar",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a red painted steel crowbar (pry bar) with a curved claw end; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_knife",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet army bayonet knife with a brown bakelite handle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_shovel",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet army sapper shovel (MPL-50) with a wooden handle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_binoculars",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "Soviet military binoculars 8x30 in dark olive-green with leather strap; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_flashlight",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an old Soviet hand flashlight with a metal body and round glass lens; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_nvg",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet night-vision monocular device in dark green with a rubber eyecup and head strap; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_bread",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a loaf of dark rye bread, slightly stale, a heel cut off; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_potato",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small pile of three dirty potatoes; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_fish",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a whole raw river fish (pike) with grey-green scales; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_fish_dried",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a dried salted fish (vobla) tied with string; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_tushonka",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a tin can of Soviet beef stew (tushonka) with a plain grey label and a rusty rim; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_sprats",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a flat oval tin of sprats, open lid peeled back showing golden smoked fish in oil; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_condensed_milk",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a tin of condensed milk with plain blue-white label, two holes punched in the lid; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_pickles",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a three-litre glass jar of pickled cucumbers with dill and a metal lid; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_buckwheat",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a paper bag of buckwheat groats, tied, some grains spilled; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_chocolate",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a bar of chocolate in a torn paper wrapper and foil; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_meat_raw",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a chunk of raw red meat on a bone; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_fungus_mix",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a handful of wild forest mushrooms (boletus, chanterelles); Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_drink_tea",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an enamel mug of hot black tea with steam, chipped white enamel; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_drink_kvas",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a brown glass bottle of kvas with a metal cap; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_drink_vodka",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a clear glass half-litre bottle of vodka with a blank white label and a metal cap; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_drink_compote",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a glass jar of fruit compote with red cherries floating; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_med_pills",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small blister pack of white pills next to a little brown glass pill bottle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_med_splint",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a medical splint made of two wooden slats tied with bandage; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_med_ai2",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet orange plastic individual first aid kit box; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_med_tourniquet",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a red rubber Esmarch tourniquet coiled; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_med_iodine",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small brown glass bottle of iodine with a cotton swab; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_key_rusty",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an old rusty iron key on a wire ring; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_keycard_red",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a red plastic security access keycard with a magnetic stripe, worn; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_keycard_blue",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a blue plastic security access keycard with a magnetic stripe, worn; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_circuit_board",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a green printed circuit board with soldered Soviet transistors and capacitors; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_capacitors",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a handful of Soviet electrolytic and ceramic capacitors and resistors; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_transistors",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small heap of Soviet metal-can transistors with gold legs; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_bearing",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a large steel ball bearing, oily; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_relay",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet electromagnetic relay with a transparent cover; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_silver_contacts",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small pile of silver-plated electrical contacts from relays; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_doc_map",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a folded worn paper topographic map with creases and coffee stains, no readable text; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_doc_note",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a crumpled handwritten note on squared notebook paper, illegible scribbles; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_doc_folder",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a beige cardboard document folder with ties, papers sticking out, a red stamp mark; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_doc_photo",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an old faded black-and-white photograph with torn corner; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_ammo_box_545",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small green metal ammunition box with rifle cartridges visible; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_ammo_box_762",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an olive green wooden ammo crate with brass rifle cartridges; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_ammo_box_9mm",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small cardboard box of pistol cartridges, lid open; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_ammo_box_12g",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a cardboard box of red shotgun shells, lid open; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_expl_tnt",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a block of TNT explosive in brown waxed paper with a detonator cap inserted; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_expl_grenade_f1",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet F-1 fragmentation hand grenade, olive drab; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_expl_grenade_rgd5",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet RGD-5 hand grenade, smooth olive green; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_expl_dynamite",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "three sticks of dynamite bound with tape and a fuse; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_water_flask_army",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet army aluminium water flask in a green cloth cover; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_fuel_can_small",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small red metal fuel can with a spout; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_lighter",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a brass trench lighter; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_matches",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a box of Soviet safety matches, a few matches spilled; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_lockpick",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a set of improvised lock picks on a ring; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_radio_handheld",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet handheld walkie-talkie radio with a long antenna, olive green; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_gas_mask_filter",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a gas mask filter canister, olive green metal cylinder; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_geiger",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet handheld Geiger counter dosimeter with analog needle dial, yellow-grey plastic; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "tree_spruce_1",
+   "cat": "trees",
+   "h": 7,
+   "desc": "a tall dense dark-green spruce tree, conical shape, drooping branches"
+  },
+  {
+   "id": "tree_birch_2",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a slender birch tree with white-black bark and light green summer leaves"
+  },
+  {
+   "id": "tree_oak_1",
+   "cat": "trees",
+   "h": 6,
+   "desc": "a broad old oak tree with a thick gnarled trunk and full dark green crown"
+  },
+  {
+   "id": "tree_burnt_1",
+   "cat": "trees",
+   "h": 5,
+   "desc": "a burnt dead tree, charred black trunk and broken branches, ash-grey"
+  },
+  {
+   "id": "tree_burnt_2",
+   "cat": "trees",
+   "h": 3.5,
+   "desc": "a charred broken tree trunk snapped in half, black and ash-grey"
+  },
+  {
+   "id": "tree_pine_snow",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a tall pine tree covered with heavy snow on its branches"
+  },
+  {
+   "id": "tree_birch_snow",
+   "cat": "trees",
+   "h": 5,
+   "desc": "a leafless birch tree with snow on branches"
+  },
+  {
+   "id": "tree_aspen",
+   "cat": "trees",
+   "h": 5,
+   "desc": "an aspen tree with grey-green bark and yellow autumn leaves"
+  },
+  {
+   "id": "tree_young_pine",
+   "cat": "trees",
+   "h": 2.5,
+   "desc": "a young small pine sapling"
+  },
+  {
+   "id": "bush_2",
+   "cat": "plants",
+   "h": 1.1,
+   "desc": "a dense round green hazel bush"
+  },
+  {
+   "id": "bush_dry",
+   "cat": "plants",
+   "h": 1.0,
+   "desc": "a dry leafless thorny bush with grey twigs"
+  },
+  {
+   "id": "bush_snow",
+   "cat": "plants",
+   "h": 1.0,
+   "desc": "a low bush covered with snow"
+  },
+  {
+   "id": "grass_tall",
+   "cat": "plants",
+   "h": 1.0,
+   "desc": "a clump of tall wild dry yellow-green meadow grass"
+  },
+  {
+   "id": "reeds",
+   "cat": "plants",
+   "h": 1.6,
+   "desc": "a clump of tall marsh reeds and cattails"
+  },
+  {
+   "id": "nettle",
+   "cat": "plants",
+   "h": 0.8,
+   "desc": "a clump of stinging nettles"
+  },
+  {
+   "id": "fern",
+   "cat": "plants",
+   "h": 0.7,
+   "desc": "a lush green forest fern"
+  },
+  {
+   "id": "mushrooms_cluster",
+   "cat": "plants",
+   "h": 0.4,
+   "desc": "a small cluster of brown forest mushrooms growing on the ground"
+  },
+  {
+   "id": "flowers_wild",
+   "cat": "plants",
+   "h": 0.5,
+   "desc": "a patch of wild flowers: chamomile and blue cornflowers"
+  },
+  {
+   "id": "fly_agaric",
+   "cat": "plants",
+   "h": 0.35,
+   "desc": "two red fly agaric mushrooms with white spots"
+  },
+  {
+   "id": "node_stone_small",
+   "cat": "nodes",
+   "h": 0.6,
+   "desc": "a small grey granite rock with lichen"
+  },
+  {
+   "id": "node_metal_small",
+   "cat": "nodes",
+   "h": 0.6,
+   "desc": "a small rock with rusty orange-brown metal ore veins"
+  },
+  {
+   "id": "node_sulfur_small",
+   "cat": "nodes",
+   "h": 0.6,
+   "desc": "a small rock with bright yellow sulfur crystals"
+  },
+  {
+   "id": "node_stone_large",
+   "cat": "nodes",
+   "h": 2.0,
+   "desc": "a huge grey granite boulder with moss and cracks"
+  },
+  {
+   "id": "node_metal_large",
+   "cat": "nodes",
+   "h": 1.8,
+   "desc": "a large rock outcrop with thick rusty iron ore veins"
+  },
+  {
+   "id": "node_sulfur_large",
+   "cat": "nodes",
+   "h": 1.8,
+   "desc": "a large rock outcrop crusted with yellow sulfur crystals"
+  },
+  {
+   "id": "rock_flat",
+   "cat": "nodes",
+   "h": 0.5,
+   "desc": "a flat mossy rock slab"
+  },
+  {
+   "id": "stump_1",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a sawn tree stump with visible rings and moss"
+  },
+  {
+   "id": "stump_2",
+   "cat": "props",
+   "h": 0.7,
+   "desc": "an old rotten broken tree stump with mushrooms"
+  },
+  {
+   "id": "log_1",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a fallen tree log lying horizontally, mossy bark"
+  },
+  {
+   "id": "log_pile",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a stack of cut firewood logs"
+  },
+  {
+   "id": "snow_pile",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a pile of dirty grey snow"
+  },
+  {
+   "id": "decal_ice_patch",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "a flat patch of cracked grey-blue ice on the ground, seen from above"
+  },
+  {
+   "id": "decal_snow_patch",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "a flat patch of thin melting snow on the ground, seen from above"
+  },
+  {
+   "id": "decal_mud",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "a flat patch of wet brown mud with footprints, seen from above"
+  },
+  {
+   "id": "decal_moss_rocks",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "small mossy pebbles scattered on the ground, seen from above"
+  },
+  {
+   "id": "decal_needles",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "a flat scatter of fallen pine needles and cones on the ground, seen from above"
+  },
+  {
+   "id": "rain",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "falling rain streaks: thin slanted light blue-grey lines dropping diagonally, loopable"
+  },
+  {
+   "id": "rain_splash",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 16,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a raindrop splashing on the ground: tiny crown splash ring that expands and fades"
+  },
+  {
+   "id": "snow_fall",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "falling snowflakes: a few white soft flakes drifting down slowly, loopable"
+  },
+  {
+   "id": "fog_wisp",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a drifting wisp of pale grey fog slowly stretching and fading"
+  },
+  {
+   "id": "rotor_dust",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a ring of brown dust blown outward by helicopter rotor wash, expanding radially"
+  },
+  {
+   "id": "tracer",
+   "cat": "fx",
+   "fx": [
+    4,
+    1
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a bright yellow-orange bullet tracer streak, a long thin glowing line that flickers"
+  },
+  {
+   "id": "blood_spray",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a spray of dark red blood droplets bursting out to one side and falling"
+  },
+  {
+   "id": "blood_pool",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a dark red blood pool slowly spreading on the ground, seen from above"
+  },
+  {
+   "id": "gas_cloud",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a sickly yellow-green toxic gas cloud billowing slowly"
+  },
+  {
+   "id": "fire_fuel",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 48,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "spilled fuel burning: a wide low sheet of flickering orange-yellow flames with black smoke tips, loopable"
+  },
+  {
+   "id": "sparks_cutting",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a fountain of bright orange-white sparks from metal cutting spraying downward"
+  },
+  {
+   "id": "steam_jet",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a jet of white steam venting sideways from a pipe and dissipating"
+  },
+  {
+   "id": "water_drip",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 16,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a single water drop falling and splashing into a tiny ripple"
+  },
+  {
+   "id": "birds_flying",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a small flock of three dark birds flapping their wings, flying cycle"
+  },
+  {
+   "id": "leaves_blowing",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a few yellow-brown autumn leaves tumbling and blowing in the wind"
+  },
+  {
+   "id": "ash_falling",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "grey ash flakes slowly falling and drifting"
+  },
+  {
+   "id": "status_bleeding",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a red blood drop symbol, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_radiation",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a yellow-black radiation trefoil symbol, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_cold",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a blue snowflake symbol, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_hunger",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a cracked empty bowl with spoon symbol, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_thirst",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: an empty water drop outline with a crack, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_poisoned",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a green skull with dripping poison, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_wet",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: three blue water drops, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_comfort",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a warm orange campfire flame over a small house, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_broken_bone",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a white cracked bone, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_warm",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a red thermometer with heat, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_airdrop",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a parachute with a crate below, white symbol, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_locked_crate",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a crate with a padlock symbol, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_heli",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a helicopter silhouette symbol, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_rt",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a radio tower antenna silhouette symbol, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_base",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a small house with flag symbol, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_death",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a skull with crossbones symbol, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_weapons",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a rifle silhouette, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_ammo",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: three bullet cartridges, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_medical",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a red cross, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_food",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a fork and a tin can, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_tools",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a crossed hammer and wrench, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_clothing",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a jacket silhouette, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_resources",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a pile of logs and rocks, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_building",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a brick wall and trowel, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_components",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a gear and a spring, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_misc",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a burlap sack, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "icon_expl_tnt_v2",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a brown waxed paper wrapped rectangular block used for mining demolition, with a short cord; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_lockpick_v2",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a few thin bent steel wires and a small tension wrench on a key ring; Soviet-era Russian object; clear bold silhouette, 2-3 distinct main colours true to its real material (bright painted metal, coloured paper or plastic packaging, glass, enamel, fabric), clean readable shapes, only light wear, not covered in brown grunge or rust; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_onion",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "two yellow onions with dry skins; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_carrot",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a bunch of dirty orange carrots; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_cabbage",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a head of green cabbage, outer leaves wilted; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_apple",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "two small green-red wild apples; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_egg",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "three brown chicken eggs; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_salo",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a slab of salted pork fat (salo) with a pink meat streak on wax paper; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_kolbasa",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a stick of dry smoked sausage, one end cut; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_rusk",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a paper bag of dry bread rusks (sukhari); Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_honey",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a glass jar of golden honey with a lid; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_jam",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a glass jar of dark berry jam; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_noodles",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pack of instant noodles in a plain plastic wrapper; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_mre",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet army field ration (IRP) in a green cardboard box; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_soup",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an aluminium pot of hot borscht soup; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_food_meat_human_free",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a skewer of cooked meat chunks (shashlik); Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_drink_beer",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a brown glass beer bottle with a plain label; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_drink_samogon",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a cloudy glass bottle of moonshine stoppered with a rolled newspaper cork; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_drink_milk",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a glass milk bottle with a foil cap; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_drink_coffee",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a tin of instant coffee; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_drink_energy",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an aluminium soda can, plain silver with a red stripe; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_med_bandage_dirty",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a bloody used cloth bandage roll; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_med_painkiller",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small glass ampoule and a single-use syringe tube (promedol); Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_med_antibiotic",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small cardboard box of antibiotic tablets with a red stripe; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_med_herbs",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a bundle of dried medicinal herbs tied with string; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_med_salve",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small round tin of healing ointment, lid open; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_wrench",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heavy adjustable steel wrench; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_saw",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a hand saw with a wooden handle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_fishing_rod",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a simple bamboo fishing rod with line and float; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_compass",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet military officer compass, open lid; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_rope",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a coil of hemp rope; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_duct_tape",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a roll of grey duct tape; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_welder",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a portable welding torch with gas hoses; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_multimeter",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an old Soviet analog multimeter tester with needle dial; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_toolbox",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a red metal toolbox with tools sticking out; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_fire_extinguisher",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a red Soviet fire extinguisher; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_axe_fire",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a red fire axe; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_tool_sledgehammer",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heavy sledgehammer with a long wooden handle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_vacuum_tubes",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a few glowing glass radio vacuum tubes; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_watch_gold",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an old gold pocket watch with a chain; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_medal",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet bronze medal on a red ribbon, no text; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_samovar",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small brass samovar; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_icon",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small old Orthodox wooden painted icon with gold leaf; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_vinyl",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a vinyl record in a worn paper sleeve; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_cigarettes",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pack of cigarettes (papirosy), plain grey pack; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_salt",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a cloth bag of coarse salt; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_cassette",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a cassette tape; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_solar_cell",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small cracked solar panel cell; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_hdd",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heavy old computer hard drive unit; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_car_battery",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heavy car battery with corroded terminals; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_spark_plug",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "two spark plugs; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_val_hydraulic",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a hydraulic cylinder piston with oily rod; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_key_car",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a car key on a ring with a plastic tag; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_key_safe",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a long brass safe key with intricate teeth; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_keycard_green",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a green plastic security access keycard with a magnetic stripe, worn; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_keycard_yellow",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a yellow plastic security access keycard with a magnetic stripe, worn; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_doc_blueprint",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a rolled blue engineering blueprint sheet; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_doc_passport",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a worn red Soviet passport booklet, no text; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_doc_book",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a worn hardcover book with a plain cloth cover; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_doc_newspaper",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a folded old newspaper, illegible print; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_ammo_box_23mm",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heavy steel box of large 23mm cannon shells; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_ammo_arrows",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a bundle of wooden arrows with feather fletching; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_ammo_box_pistol",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small wooden crate of pistol cartridges; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_ammo_belt",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a linked belt of machine gun rifle cartridges coiled; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_expl_landmine",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a round olive anti-personnel landmine; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_expl_flare",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a red signal flare stick; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_expl_smoke_grenade",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a green cylindrical smoke grenade; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_expl_pipe_bomb",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a steel pipe sealed with caps, a fuse wire, wrapped in tape; Soviet-era Russian object; clear bold silhouette, 2-3 distinct main colours true to its real material (bright painted metal, coloured paper or plastic packaging, glass, enamel, fabric), clean readable shapes, only light wear, not covered in brown grunge or rust; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_water_jug_5l",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a 5-litre plastic water jug, scratched; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_water_bucket",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a galvanised steel bucket half filled with water; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_fuel_gas_bottle",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a red propane gas bottle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_fuel_kerosene",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a glass bottle of kerosene with a cork; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_battery_aa",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "two cylindrical batteries; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_repair_kit",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a canvas repair kit roll with tools; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_sewing_kit",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small tin with needles and thread spools; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_gas_mask",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet GP-5 rubber gas mask with round glass eyepieces; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_sleeping_pills",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small bottle of pills with a moon symbol; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_trap_bear",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a rusty steel bear trap, open jaws; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_fishing_net",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a bundled fishing net with floats; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_seeds",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a paper packet of vegetable seeds, some seeds spilled; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_fertilizer",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a sack of fertilizer; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_animal_fat",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a lump of white animal fat; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_bone",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pile of animal bones; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_hide_raw",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a raw animal hide, fur on one side; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_feather",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a few bird feathers; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_glass_bottle_empty",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an empty clear glass bottle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_nails",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a handful of rusty nails; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_bolts",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pile of steel bolts and nuts; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_sheet_metal",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a bent sheet of rusty metal; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_planks",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a stack of three wooden planks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_bricks",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small stack of red bricks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_concrete_bag",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a paper sack of cement; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_plastic_scrap",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heap of broken plastic pieces; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_electronics_scrap",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a tangle of broken electronics and wires; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_glue",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a tube of glue; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_paint_can",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a dented paint can with dripping green paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, used for years, rust, scuffs, dirt; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "tree_spruce_2",
+   "cat": "trees",
+   "h": 6,
+   "desc": "a medium spruce tree with a broken top, dark green"
+  },
+  {
+   "id": "tree_birch_dead",
+   "cat": "trees",
+   "h": 4.5,
+   "desc": "a dead birch with peeling white bark and no leaves"
+  },
+  {
+   "id": "tree_willow",
+   "cat": "trees",
+   "h": 5,
+   "desc": "a weeping willow with drooping green branches, in a vivid autumn palette of orange, red and gold"
+  },
+  {
+   "id": "tree_poplar",
+   "cat": "trees",
+   "h": 7,
+   "desc": "a tall narrow poplar tree, in a cold winter palette of white, pale blue and dark green"
+  },
+  {
+   "id": "tree_apple",
+   "cat": "trees",
+   "h": 3.5,
+   "desc": "an overgrown abandoned apple tree with small red apples, in a murky swamp palette of olive, teal and dark brown"
+  },
+  {
+   "id": "tree_dead_snow",
+   "cat": "trees",
+   "h": 4.5,
+   "desc": "a dead leafless tree with snow on branches"
+  },
+  {
+   "id": "tree_burnt_3",
+   "cat": "trees",
+   "h": 4.5,
+   "desc": "a charred pine with few blackened branches, in a dry steppe palette of ochre, straw yellow and sage"
+  },
+  {
+   "id": "tree_rowan",
+   "cat": "trees",
+   "h": 4,
+   "desc": "a rowan tree with clusters of red berries, in a fresh summer palette of saturated greens"
+  },
+  {
+   "id": "bush_juniper",
+   "cat": "plants",
+   "h": 1,
+   "desc": "a dark blue-green juniper bush, in a vivid autumn palette of orange, red and gold"
+  },
+  {
+   "id": "bush_lilac",
+   "cat": "plants",
+   "h": 1.8,
+   "desc": "an overgrown lilac bush with purple blossom, in a cold winter palette of white, pale blue and dark green"
+  },
+  {
+   "id": "bush_raspberry",
+   "cat": "plants",
+   "h": 1.1,
+   "desc": "a raspberry bush with red berries, in a murky swamp palette of olive, teal and dark brown"
+  },
+  {
+   "id": "sunflower",
+   "cat": "plants",
+   "h": 1.8,
+   "desc": "a tall wilted sunflower, in a dry steppe palette of ochre, straw yellow and sage"
+  },
+  {
+   "id": "burdock",
+   "cat": "plants",
+   "h": 0.9,
+   "desc": "a large burdock plant with big leaves, in a fresh summer palette of saturated greens"
+  },
+  {
+   "id": "grass_tall_green",
+   "cat": "plants",
+   "h": 1,
+   "desc": "a clump of tall lush green grass, in a vivid autumn palette of orange, red and gold"
+  },
+  {
+   "id": "grass_tall_snow",
+   "cat": "plants",
+   "h": 0.8,
+   "desc": "dry grass sticking out of snow"
+  },
+  {
+   "id": "cattails",
+   "cat": "plants",
+   "h": 1.5,
+   "desc": "a clump of cattails with brown heads, in a cold winter palette of white, pale blue and dark green"
+  },
+  {
+   "id": "mushrooms_boletus",
+   "cat": "plants",
+   "h": 0.3,
+   "desc": "a pair of brown boletus mushrooms, in a murky swamp palette of olive, teal and dark brown"
+  },
+  {
+   "id": "mushrooms_glowing",
+   "cat": "plants",
+   "h": 0.3,
+   "desc": "a cluster of pale mutated mushrooms with a faint green glow, in a dry steppe palette of ochre, straw yellow and sage"
+  },
+  {
+   "id": "flowers_dandelion",
+   "cat": "plants",
+   "h": 0.3,
+   "desc": "a few yellow dandelions, in a fresh summer palette of saturated greens"
+  },
+  {
+   "id": "vine_dead",
+   "cat": "plants",
+   "h": 1,
+   "desc": "a tangle of dead brown vines and brambles, in a vivid autumn palette of orange, red and gold"
+  },
+  {
+   "id": "node_stone_mid",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a grey rock with flat facets, in a cold winter palette of white, pale blue and dark green"
+  },
+  {
+   "id": "node_metal_mid",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a medium rock with rusty iron ore streaks, in a murky swamp palette of olive, teal and dark brown"
+  },
+  {
+   "id": "node_sulfur_mid",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a medium rock with yellow sulfur crust, in a dry steppe palette of ochre, straw yellow and sage"
+  },
+  {
+   "id": "node_stone_snow",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a grey boulder with snow on top"
+  },
+  {
+   "id": "node_metal_snow",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "an iron ore rock with snow on top"
+  },
+  {
+   "id": "node_sulfur_snow",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a sulfur rock with snow on top"
+  },
+  {
+   "id": "node_scrap_pile",
+   "cat": "nodes",
+   "h": 1,
+   "desc": "a pile of rusty scrap metal pieces harvestable, in a fresh summer palette of saturated greens"
+  },
+  {
+   "id": "rock_pile",
+   "cat": "nodes",
+   "h": 0.7,
+   "desc": "a pile of small grey rocks, in a vivid autumn palette of orange, red and gold"
+  },
+  {
+   "id": "stump_burnt",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a charred black tree stump, in a cold winter palette of white, pale blue and dark green"
+  },
+  {
+   "id": "stump_snow",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a tree stump covered with snow"
+  },
+  {
+   "id": "log_2",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a rotten fallen log with mushrooms, in a murky swamp palette of olive, teal and dark brown"
+  },
+  {
+   "id": "log_snow",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a fallen log covered with snow"
+  },
+  {
+   "id": "anthill",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a large forest anthill made of pine needles, in a dry steppe palette of ochre, straw yellow and sage"
+  },
+  {
+   "id": "hay_bale",
+   "cat": "props",
+   "h": 1,
+   "desc": "a round hay bale, in a fresh summer palette of saturated greens"
+  },
+  {
+   "id": "ice_block",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a chunk of cracked blue ice, in a vivid autumn palette of orange, red and gold"
+  },
+  {
+   "id": "decal_frost",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "a flat patch of white hoarfrost on the ground, seen from above"
+  },
+  {
+   "id": "decal_ash",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "a flat patch of grey ash and charcoal on the ground, seen from above"
+  },
+  {
+   "id": "decal_clover",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "a flat patch of green clover on the ground, seen from above"
+  },
+  {
+   "id": "decal_sand_ripples",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "a flat patch of rippled sand, seen from above"
+  },
+  {
+   "id": "decal_puddle_frozen",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "a frozen puddle with white cracked ice, seen from above"
+  },
+  {
+   "id": "decal_footprints_snow",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "a trail of footprints in snow, seen from above"
+  },
+  {
+   "id": "decal_animal_tracks",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "animal paw tracks in mud, seen from above"
+  },
+  {
+   "id": "decal_blood_trail",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "a trail of dark red blood drops on the ground, seen from above"
+  },
+  {
+   "id": "rain_heavy",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "heavy rain: dense slanted blue-grey streaks, loopable"
+  },
+  {
+   "id": "blizzard",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 48,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "blizzard: white snow streaks blown sideways, loopable"
+  },
+  {
+   "id": "dust_storm",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a drifting brown dust cloud blowing sideways"
+  },
+  {
+   "id": "fireflies",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a few tiny yellow-green glowing dots floating around"
+  },
+  {
+   "id": "radiation_shimmer",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a faint green shimmering glow with small particles rising"
+  },
+  {
+   "id": "electric_arc",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a blue-white electric arc crackling between two points"
+  },
+  {
+   "id": "fire_barrel",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "flames burning out of the top of a barrel, loopable flicker, flames only"
+  },
+  {
+   "id": "smoke_chimney",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a thin grey smoke plume rising and curling"
+  },
+  {
+   "id": "heal_sparkle",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "green plus-shaped sparkles rising and fading"
+  },
+  {
+   "id": "level_up_glow",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 48,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a golden ring of light expanding and fading"
+  },
+  {
+   "id": "ricochet",
+   "cat": "fx",
+   "fx": [
+    4,
+    1
+   ],
+   "px": 16,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a tiny bright spark flash ricochet"
+  },
+  {
+   "id": "bullet_hole_dust",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a small puff of dust and debris from a bullet impact on concrete"
+  },
+  {
+   "id": "footstep_snow",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 16,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a small puff of white snow kicked up"
+  },
+  {
+   "id": "footstep_water",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 16,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a small water splash ring from a footstep"
+  },
+  {
+   "id": "fish_jump",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a small fish jumping out of water and splashing back"
+  },
+  {
+   "id": "flies_buzzing",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a few black flies buzzing around in loops"
+  },
+  {
+   "id": "lantern_glow",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a warm yellow light glow pulsing softly"
+  },
+  {
+   "id": "rotor_blur",
+   "cat": "fx",
+   "fx": [
+    4,
+    1
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a circular blurred grey helicopter rotor disk spinning, seen from above"
+  },
+  {
+   "id": "fuse_burn",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 16,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a burning fuse spark sputtering"
+  },
+  {
+   "id": "status_tired",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a closed eye with Z letters shape (no text), sleepy symbol, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_drunk",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a tilted bottle with swirl, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_overweight",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a heavy kettlebell, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_hot",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a red sun with heat waves, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_infection",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a green virus germ, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_pain",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a red lightning bolt over a body, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_hydrated",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a full blue water drop, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_fed",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a full bowl with steam, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_stealth",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: an eye with a slash, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "status_encumbered",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a backpack with a down arrow, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_quest",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: an exclamation mark shape, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_trader",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a pair of hands exchanging a coin, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_water",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a blue water drop, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_radiation_zone",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a yellow radiation trefoil, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_bed",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a bed symbol, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_vehicle",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a car silhouette, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_player",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a white arrow pointer, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_enemy",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a red skull, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_loot",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: an open crate, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "marker_campfire",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a campfire, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_explosives",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a bomb with a fuse, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_valuables",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a gold coin stack, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_keys",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a key, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_documents",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a paper scroll, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_fuel",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a jerrycan, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "cat_attachments",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a rifle scope, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "btn_craft",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a hammer and anvil, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "btn_map",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a folded map, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "btn_inventory",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a backpack, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "btn_settings",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a gear, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "btn_close",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a cross X, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "btn_drop",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a hand dropping an item downward, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "btn_split",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a scissors, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "btn_repair",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: a wrench, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "btn_sort",
+   "cat": "ui",
+   "ui": [
+    32,
+    32
+   ],
+   "desc": "a small flat round-cornered HUD icon: three horizontal bars of decreasing length, bold simple shape on a dark grungy rusty metal badge background, high contrast, readable at tiny size"
+  },
+  {
+   "id": "lightning_bolt_1",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a jagged bright white-blue lightning bolt striking down from top to bottom with thin branches, flashing on then fading"
+  },
+  {
+   "id": "lightning_bolt_2",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a heavily branching forked lightning bolt, electric violet-white core, flickers and fades"
+  },
+  {
+   "id": "lightning_bolt_3",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a short zigzag lightning strike hitting the ground with a small bright impact flash at the bottom"
+  },
+  {
+   "id": "lightning_sheet",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "horizontal cloud-to-cloud lightning crawling sideways with many thin branches"
+  },
+  {
+   "id": "lightning_flash",
+   "cat": "fx",
+   "fx": [
+    4,
+    1
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a soft round white-blue light flash bloom that pops bright and fades to nothing"
+  },
+  {
+   "id": "thunder_rain",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 48,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "torrential storm rain: very dense long slanted blue-grey streaks, loopable"
+  },
+  {
+   "id": "rain_splash_puddle",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 16,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a raindrop hitting a puddle: a circular ripple ring with a tiny upward droplet, expanding and fading"
+  },
+  {
+   "id": "rain_splash_ground",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 16,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a raindrop hitting dirt: tiny brown-grey splash spray"
+  },
+  {
+   "id": "puddle_ripple",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "concentric water ripple rings spreading on a puddle surface, seen from above, loopable"
+  },
+  {
+   "id": "hail",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "falling white hailstones bouncing on the ground, loopable"
+  },
+  {
+   "id": "snowstorm",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "driving snowstorm: dense white snow flakes streaking diagonally from upper left to lower right, loopable"
+  },
+  {
+   "id": "wind_debris_leaves",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 48,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a gust of wind carrying green and brown leaves and twigs sideways"
+  },
+  {
+   "id": "wind_debris_paper",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 48,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "scraps of white paper and newspaper tumbling sideways in strong wind"
+  },
+  {
+   "id": "wind_debris_branches",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 48,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "small broken branches and twigs flying sideways in a storm"
+  },
+  {
+   "id": "dust_gust",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a sideways gust of tan dust streaks blowing across, loopable"
+  },
+  {
+   "id": "dust_devil",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 48,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a small spinning dust devil whirlwind funnel of tan dust, loopable"
+  },
+  {
+   "id": "tornado_small",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a small dark grey tornado funnel twisting with debris at the base, loopable"
+  },
+  {
+   "id": "fog_bank",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a wide low bank of soft white-grey fog drifting slowly, loopable"
+  },
+  {
+   "id": "mist_patch",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 48,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a thin pale blue-white mist patch hovering and slowly swirling"
+  },
+  {
+   "id": "sandstorm_haze",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "thick ochre-orange sandstorm haze rolling sideways with grains, loopable"
+  },
+  {
+   "id": "icicle_drip",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 16,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a hanging icicle with a water drop forming and falling"
+  },
+  {
+   "id": "decal_snow_drift_1",
+   "cat": "decals",
+   "h": 2,
+   "desc": "a flat snow drift with wind-sculpted ridges on the ground, seen from above, white and pale blue"
+  },
+  {
+   "id": "decal_snow_drift_2",
+   "cat": "decals",
+   "h": 2,
+   "desc": "a long curved snow drift streak blown against the ground, seen from above"
+  },
+  {
+   "id": "decal_frost_overlay",
+   "cat": "decals",
+   "h": 2,
+   "desc": "a lace pattern of white hoarfrost crystals on dark ground, seen from above"
+  },
+  {
+   "id": "decal_cloud_shadow_1",
+   "cat": "decals",
+   "h": 4,
+   "desc": "a big soft dark blurry blotch, a cloud shadow on the ground, seen from above, very soft edges, semi-transparent dark grey"
+  },
+  {
+   "id": "decal_cloud_shadow_2",
+   "cat": "decals",
+   "h": 4,
+   "desc": "a large elongated soft dark cloud shadow with irregular fuzzy edges, seen from above"
+  },
+  {
+   "id": "decal_wet_sheen",
+   "cat": "decals",
+   "h": 2,
+   "desc": "a patch of wet glossy ground with reflective blue-grey sheen highlights, seen from above"
+  },
+  {
+   "id": "decal_wet_asphalt",
+   "cat": "decals",
+   "h": 2,
+   "desc": "a wet dark asphalt patch with puddle reflections, seen from above"
+  },
+  {
+   "id": "decal_hail_scatter",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "small white hailstones scattered on the ground, seen from above"
+  },
+  {
+   "id": "decal_storm_debris",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "a scatter of broken branches, leaves and paper after a storm, seen from above"
+  },
+  {
+   "id": "decal_sand_drift",
+   "cat": "decals",
+   "h": 2,
+   "desc": "a fine ochre sand drift blown over the ground, seen from above"
+  },
+  {
+   "id": "icicles_1",
+   "cat": "props",
+   "h": 1,
+   "desc": "a row of hanging clear blue-white icicles of various lengths"
+  },
+  {
+   "id": "icicles_2",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a cluster of three thick icicles"
+  }
+ ]
+}

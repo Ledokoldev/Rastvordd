@@ -1,0 +1,2810 @@
+{
+ "assets": [
+  {
+   "id": "truck_gaz66_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 5.8,
+   "h": 2.5,
+   "desc": "an old Soviet GAZ-66 army truck, snub-nosed cab-over, faded olive paint, canvas-covered cargo bed, big off-road tyres; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.8,
+    2.3,
+    2.5
+   ]
+  },
+  {
+   "id": "truck_zil131_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.0,
+   "h": 2.9,
+   "desc": "an old Soviet ZIL-131 six-wheel army truck, long hood, faded olive paint, canvas-covered cargo bed; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    2.5,
+    2.9
+   ]
+  },
+  {
+   "id": "truck_fuel_tanker_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.0,
+   "h": 2.6,
+   "desc": "an old Soviet ZIL-130 fuel tanker truck, cylindrical rusty silver-grey tank on the back, faded blue cab, hoses; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    2.5,
+    2.6
+   ]
+  },
+  {
+   "id": "wreck_niva_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 3.7,
+   "h": 1.65,
+   "desc": "an abandoned rusty Lada Niva 4x4 wreck, faded white paint, broken glass, flat tyres, dented doors; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.7,
+    1.7,
+    1.65
+   ]
+  },
+  {
+   "id": "wreck_btr70_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.5,
+   "h": 2.3,
+   "desc": "a destroyed Soviet BTR-70 eight-wheeled armoured personnel carrier, boat-shaped hull, scorched olive paint, small turret, some wheels missing, burnt; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.5,
+    2.8,
+    2.3
+   ]
+  },
+  {
+   "id": "truck_gaz66_front",
+   "cat": "vehicles",
+   "view": "front",
+   "w": 2.3,
+   "h": 2.5,
+   "desc": "an old Soviet GAZ-66 army truck, snub-nosed cab-over, faded olive paint, canvas-covered cargo bed, big off-road tyres; seen straight from the front, symmetric; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.8,
+    2.3,
+    2.5
+   ]
+  },
+  {
+   "id": "truck_zil131_front",
+   "cat": "vehicles",
+   "view": "front",
+   "w": 2.5,
+   "h": 2.9,
+   "desc": "an old Soviet ZIL-131 six-wheel army truck, long hood, faded olive paint, canvas-covered cargo bed; seen straight from the front, symmetric; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    2.5,
+    2.9
+   ]
+  },
+  {
+   "id": "truck_fuel_tanker_front",
+   "cat": "vehicles",
+   "view": "front",
+   "w": 2.5,
+   "h": 2.6,
+   "desc": "an old Soviet ZIL-130 fuel tanker truck, cylindrical rusty silver-grey tank on the back, faded blue cab, hoses; seen straight from the front, symmetric; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    2.5,
+    2.6
+   ]
+  },
+  {
+   "id": "wreck_niva_front",
+   "cat": "vehicles",
+   "view": "front",
+   "w": 1.7,
+   "h": 1.65,
+   "desc": "an abandoned rusty Lada Niva 4x4 wreck, faded white paint, broken glass, flat tyres, dented doors; seen straight from the front, symmetric; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.7,
+    1.7,
+    1.65
+   ]
+  },
+  {
+   "id": "wreck_btr70_front",
+   "cat": "vehicles",
+   "view": "front",
+   "w": 2.8,
+   "h": 2.3,
+   "desc": "a destroyed Soviet BTR-70 eight-wheeled armoured personnel carrier, boat-shaped hull, scorched olive paint, small turret, some wheels missing, burnt; seen straight from the front, symmetric; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.5,
+    2.8,
+    2.3
+   ]
+  },
+  {
+   "id": "truck_gaz66_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 5.8,
+   "h": 2.5,
+   "desc": "an old Soviet GAZ-66 army truck, snub-nosed cab-over, faded olive paint, canvas-covered cargo bed, big off-road tyres; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.8,
+    2.3,
+    2.5
+   ]
+  },
+  {
+   "id": "truck_zil131_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.0,
+   "h": 2.9,
+   "desc": "an old Soviet ZIL-131 six-wheel army truck, long hood, faded olive paint, canvas-covered cargo bed; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    2.5,
+    2.9
+   ]
+  },
+  {
+   "id": "truck_fuel_tanker_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.0,
+   "h": 2.6,
+   "desc": "an old Soviet ZIL-130 fuel tanker truck, cylindrical rusty silver-grey tank on the back, faded blue cab, hoses; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    2.5,
+    2.6
+   ]
+  },
+  {
+   "id": "wreck_niva_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 3.7,
+   "h": 1.65,
+   "desc": "an abandoned rusty Lada Niva 4x4 wreck, faded white paint, broken glass, flat tyres, dented doors; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.7,
+    1.7,
+    1.65
+   ]
+  },
+  {
+   "id": "wreck_btr70_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.5,
+   "h": 2.3,
+   "desc": "a destroyed Soviet BTR-70 eight-wheeled armoured personnel carrier, boat-shaped hull, scorched olive paint, small turret, some wheels missing, burnt; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.5,
+    2.8,
+    2.3
+   ]
+  },
+  {
+   "id": "wreck_brdm2_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 5.75,
+   "h": 2.3,
+   "desc": "a rusted abandoned Soviet BRDM-2 four-wheeled armoured scout car, small cone turret, faded olive paint, flat tyres; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.75,
+    2.4,
+    2.3
+   ]
+  },
+  {
+   "id": "wreck_vaz2101_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 4.05,
+   "h": 1.45,
+   "desc": "a rusty abandoned Zhiguli VAZ-2101 kopeyka sedan wreck, faded light blue paint, no wheels, sitting on bricks, broken windows; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.05,
+    1.6,
+    1.45
+   ]
+  },
+  {
+   "id": "wreck_bukhanka_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 4.4,
+   "h": 2.1,
+   "desc": "a rusty abandoned UAZ-452 bukhanka loaf van, faded khaki paint, broken windows, flat tyres, doors hanging open; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.4,
+    2.0,
+    2.1
+   ]
+  },
+  {
+   "id": "truck_kamaz_tent_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.9,
+   "h": 3.2,
+   "desc": "an old Soviet KAMAZ-4310 army truck with canvas tent bed, faded olive paint, six big wheels; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.9,
+    2.5,
+    3.2
+   ]
+  },
+  {
+   "id": "bulldozer_t130_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 6.0,
+   "h": 3.0,
+   "desc": "an old rusty Soviet T-130 crawler bulldozer, faded yellow paint, big front blade, tracks; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    3.2,
+    3.0
+   ]
+  },
+  {
+   "id": "truck_crane_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 10.0,
+   "h": 3.5,
+   "desc": "an old Soviet truck crane on a MAZ chassis, faded yellow and orange, telescopic boom folded and laid over the cab, outrigger legs; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    10.0,
+    2.5,
+    3.5
+   ]
+  },
+  {
+   "id": "trailer_kung_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 6.0,
+   "h": 3.2,
+   "desc": "a Soviet military KUNG box body trailer, olive-green box with a small door and window, two axles; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    2.5,
+    3.2
+   ]
+  },
+  {
+   "id": "trailer_generator_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 3.5,
+   "h": 1.9,
+   "desc": "a Soviet military diesel generator on a small two-wheel trailer, olive-green housing with louvres, cables; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.5,
+    1.8,
+    1.9
+   ]
+  },
+  {
+   "id": "uaz_cash_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 4.4,
+   "h": 2.1,
+   "desc": "an armored Soviet UAZ-452 cash-in-transit van (inkassatsiya), loaf-shaped body painted grey with dark blue stripe, steel grilles on small windows, intact, dusty; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.4,
+    2.0,
+    2.1
+   ]
+  },
+  {
+   "id": "wreck_brdm2_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 5.75,
+   "h": 2.3,
+   "desc": "a rusted abandoned Soviet BRDM-2 four-wheeled armoured scout car, small cone turret, faded olive paint, flat tyres; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.75,
+    2.4,
+    2.3
+   ]
+  },
+  {
+   "id": "wreck_vaz2101_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.05,
+   "h": 1.45,
+   "desc": "a rusty abandoned Zhiguli VAZ-2101 kopeyka sedan wreck, faded light blue paint, no wheels, sitting on bricks, broken windows; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.05,
+    1.6,
+    1.45
+   ]
+  },
+  {
+   "id": "wreck_bukhanka_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.4,
+   "h": 2.1,
+   "desc": "a rusty abandoned UAZ-452 bukhanka loaf van, faded khaki paint, broken windows, flat tyres, doors hanging open; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.4,
+    2.0,
+    2.1
+   ]
+  },
+  {
+   "id": "truck_kamaz_tent_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.9,
+   "h": 3.2,
+   "desc": "an old Soviet KAMAZ-4310 army truck with canvas tent bed, faded olive paint, six big wheels; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.9,
+    2.5,
+    3.2
+   ]
+  },
+  {
+   "id": "bulldozer_t130_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6.0,
+   "h": 3.0,
+   "desc": "an old rusty Soviet T-130 crawler bulldozer, faded yellow paint, big front blade, tracks; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    3.2,
+    3.0
+   ]
+  },
+  {
+   "id": "truck_crane_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 10.0,
+   "h": 3.5,
+   "desc": "an old Soviet truck crane on a MAZ chassis, faded yellow and orange, telescopic boom folded and laid over the cab, outrigger legs; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    10.0,
+    2.5,
+    3.5
+   ]
+  },
+  {
+   "id": "trailer_kung_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6.0,
+   "h": 3.2,
+   "desc": "a Soviet military KUNG box body trailer, olive-green box with a small door and window, two axles; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    2.5,
+    3.2
+   ]
+  },
+  {
+   "id": "trailer_generator_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 3.5,
+   "h": 1.9,
+   "desc": "a Soviet military diesel generator on a small two-wheel trailer, olive-green housing with louvres, cables; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.5,
+    1.8,
+    1.9
+   ]
+  },
+  {
+   "id": "uaz_cash_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.4,
+   "h": 2.1,
+   "desc": "an armored Soviet UAZ-452 cash-in-transit van (inkassatsiya), loaf-shaped body painted grey with dark blue stripe, steel grilles on small windows, intact, dusty; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.4,
+    2.0,
+    2.1
+   ]
+  },
+  {
+   "id": "uaz_cash_open_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.4,
+   "h": 2.1,
+   "desc": "an armored Soviet UAZ-452 cash-in-transit van (inkassatsiya), grey with dark blue stripe, rear doors torn open showing an opened empty steel safe inside, scattered papers, flat tyres; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.4,
+    2.0,
+    2.1
+   ]
+  },
+  {
+   "id": "wreck_uaz469_burnt_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.0,
+   "h": 1.8,
+   "desc": "a burnt-out UAZ-469 jeep wreck, blackened and rusted, no canvas top, on rims, ash; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.0,
+    1.8,
+    1.8
+   ]
+  },
+  {
+   "id": "wreck_gaz66_burnt_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 5.8,
+   "h": 2.4,
+   "desc": "a burnt-out GAZ-66 army truck wreck, blackened rusty cab, bare cargo bed frame, on rims; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.8,
+    2.3,
+    2.4
+   ]
+  },
+  {
+   "id": "rail_tem2_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 16.0,
+   "h": 4.6,
+   "desc": "an old Soviet TEM2 shunting diesel locomotive, faded green with yellow stripe, cab at one end, long hood, handrails, rust; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    16.0,
+    3.0,
+    4.6
+   ]
+  },
+  {
+   "id": "wagon_tanker_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 12.0,
+   "h": 4.4,
+   "desc": "a Soviet four-axle railway tank wagon, black rusty cylindrical tank with top dome and ladder, two bogies; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.0,
+    3.0,
+    4.4
+   ]
+  },
+  {
+   "id": "wagon_flatcar_containers_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 13.5,
+   "h": 4.0,
+   "desc": "a Soviet four-axle railway flatcar carrying two rusty steel shipping containers, faded blue and red; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    13.5,
+    3.0,
+    4.0
+   ]
+  },
+  {
+   "id": "wagon_passenger_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 24.0,
+   "h": 4.3,
+   "desc": "a Soviet green passenger railway car, long body with a row of windows, some broken, two bogies, rust streaks; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    24.0,
+    3.0,
+    4.3
+   ]
+  },
+  {
+   "id": "wagon_gondola_coal_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 14.0,
+   "h": 3.5,
+   "desc": "a Soviet four-axle open gondola railway wagon full of coal, rusty brown steel sides with ribs; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    14.0,
+    3.0,
+    3.5
+   ]
+  },
+  {
+   "id": "boat_wooden_side",
+   "cat": "props",
+   "view": "side",
+   "w": 4.5,
+   "h": 0.9,
+   "desc": "an old wooden rowing boat lodka, weathered grey planks, flaking green paint, two oars inside; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.5,
+    1.4,
+    0.9
+   ]
+  },
+  {
+   "id": "boat_kazanka_side",
+   "cat": "props",
+   "view": "side",
+   "w": 4.6,
+   "h": 1.3,
+   "desc": "an old Soviet aluminium Kazanka motor boat with an outboard motor, dented silver-grey hull, faded red stripe; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.6,
+    1.7,
+    1.3
+   ]
+  },
+  {
+   "id": "boat_kazanka_top",
+   "cat": "props",
+   "view": "top",
+   "w": 4.6,
+   "h": 1.7,
+   "desc": "an old Soviet aluminium Kazanka motor boat with outboard motor, dented silver-grey hull; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "boat_lodka_top",
+   "cat": "props",
+   "view": "top",
+   "w": 4.5,
+   "h": 1.4,
+   "desc": "an old wooden rowing boat with two oars, weathered planks, flaking green paint; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "barge_rusted_side",
+   "cat": "props",
+   "view": "side",
+   "w": 20.0,
+   "h": 4.0,
+   "desc": "a rusted half-sunk river barge, flat steel hull, small wheelhouse at the back, heavy rust; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    20.0,
+    6.0,
+    4.0
+   ]
+  },
+  {
+   "id": "heli_mi8_wreck_burning_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 18.0,
+   "h": 6.0,
+   "desc": "the wreck of a crashed Soviet Mi-8 helicopter, fuselage scorched olive-green, tail boom snapped off, bent rotor blades, flames and black smoke rising from the engine section; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    18.0,
+    3.0,
+    4.5
+   ]
+  },
+  {
+   "id": "heli_mi8_tailboom",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 8.0,
+   "h": 2.2,
+   "desc": "the snapped-off tail boom of a Mi-8 helicopter lying on the ground, olive-green, torn end, small tail rotor still attached; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    8.0,
+    1.2,
+    2.2
+   ]
+  },
+  {
+   "id": "heli_mi8_tailrotor_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 3.9,
+   "h": 3.9,
+   "desc": "a small three-blade helicopter tail rotor seen face-on, grey blades with hub, to be spun in game; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "heli_mi8_debris_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 6.0,
+   "h": 6.0,
+   "desc": "scattered helicopter crash debris pieces: torn olive-green metal panels, a broken rotor blade, a wheel, cables; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "heli_mi8_shadow_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 18.3,
+   "h": 8.0,
+   "desc": "a solid flat dark grey silhouette shadow of a Mi-8 helicopter with rotor disc, soft edges; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "plane_an2_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 12.7,
+   "h": 4.0,
+   "desc": "an old Soviet An-2 biplane on the ground, faded olive-green paint, big radial engine, tailwheel; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.7,
+    6.0,
+    4.0
+   ]
+  },
+  {
+   "id": "plane_an2_wreck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 12.7,
+   "h": 4.0,
+   "desc": "a crashed Soviet An-2 biplane wreck, upper wing broken, propeller bent, faded green paint, tilted on its nose; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.7,
+    8.0,
+    4.0
+   ]
+  },
+  {
+   "id": "zu23_twin_side",
+   "cat": "props",
+   "view": "side",
+   "w": 4.6,
+   "h": 1.9,
+   "desc": "a Soviet twin anti-aircraft cannon mount on a two-wheel carriage, museum piece, faded olive paint, gunner seats; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.6,
+    2.9,
+    1.9
+   ]
+  },
+  {
+   "id": "s75_launcher_side",
+   "cat": "props",
+   "view": "side",
+   "w": 10.6,
+   "h": 4.0,
+   "desc": "a Soviet S-75 Dvina surface-to-air launcher, museum piece: a long white-grey rocket on an inclined rail of a rotating olive-green launch platform; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    10.6,
+    6.0,
+    4.0
+   ]
+  },
+  {
+   "id": "zu23_twin_angled",
+   "cat": "props",
+   "view": "angled",
+   "w": 4.6,
+   "h": 1.9,
+   "desc": "a Soviet twin anti-aircraft cannon mount on a two-wheel carriage, museum piece, faded olive paint, gunner seats; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.6,
+    2.9,
+    1.9
+   ]
+  },
+  {
+   "id": "s75_launcher_angled",
+   "cat": "props",
+   "view": "angled",
+   "w": 10.6,
+   "h": 4.0,
+   "desc": "a Soviet S-75 Dvina surface-to-air launcher, museum piece: a long white-grey rocket on an inclined rail of a rotating olive-green launch platform; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    10.6,
+    6.0,
+    4.0
+   ]
+  },
+  {
+   "id": "zu23_destroyed_angled",
+   "cat": "props",
+   "view": "angled",
+   "w": 4.6,
+   "h": 1.6,
+   "desc": "a destroyed Soviet twin anti-aircraft cannon mount, museum piece, burnt and rusted, barrels bent, carriage tipped; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.6,
+    2.9,
+    1.6
+   ]
+  },
+  {
+   "id": "missile_transporter_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 17.0,
+   "h": 3.2,
+   "desc": "a Soviet ZIL-131 tractor truck towing a long semitrailer carrying a white-grey S-75 rocket, museum display; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    17.0,
+    2.5,
+    3.2
+   ]
+  },
+  {
+   "id": "radar_dish_mast",
+   "cat": "props",
+   "view": "side",
+   "w": 4.0,
+   "h": 9.0,
+   "desc": "a Soviet radar dish antenna on a tall steel lattice mast with a small equipment box at the base, olive-green and grey; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    3.0,
+    9.0
+   ]
+  },
+  {
+   "id": "radar_p18_antenna_side",
+   "cat": "props",
+   "view": "side",
+   "w": 8.0,
+   "h": 7.0,
+   "desc": "a Soviet P-18 radar antenna array: wide frame of many yagi rods on a tall mast, standing on the ground; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    3.0,
+    7.0
+   ]
+  },
+  {
+   "id": "camo_net_top",
+   "cat": "props",
+   "view": "top",
+   "w": 8.0,
+   "h": 6.0,
+   "desc": "a military camouflage net stretched over poles, green and brown leaf-shaped scraps, sagging; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "sandbag_ring_top",
+   "cat": "props",
+   "view": "top",
+   "w": 5.0,
+   "h": 5.0,
+   "desc": "a circular sandbag gun position with an entrance gap, old faded burlap sandbags; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "rail_track_straight_top",
+   "cat": "props",
+   "view": "top",
+   "w": 8.0,
+   "h": 3.0,
+   "desc": "a straight piece of old railway track: two rusty steel rails on dark wooden sleepers over gravel ballast; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "tractor_t150_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6.0,
+   "h": 3.2,
+   "desc": "an old Soviet T-150K wheeled tractor, faded red-orange paint, big wheels, rusty; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    2.4,
+    3.2
+   ]
+  },
+  {
+   "id": "wreck_brdm2_front",
+   "cat": "vehicles",
+   "view": "front",
+   "w": 2.4,
+   "h": 2.3,
+   "desc": "a rusted abandoned Soviet BRDM-2 armoured scout car, small cone turret, faded olive paint, flat tyres; seen straight from the front, symmetric; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.75,
+    2.4,
+    2.3
+   ]
+  },
+  {
+   "id": "wreck_bukhanka_front",
+   "cat": "vehicles",
+   "view": "front",
+   "w": 2.0,
+   "h": 2.1,
+   "desc": "a rusty abandoned UAZ-452 bukhanka loaf van, faded khaki paint, broken windshield, flat tyres; seen straight from the front, symmetric; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.4,
+    2.0,
+    2.1
+   ]
+  },
+  {
+   "id": "truck_kamaz_tent_front",
+   "cat": "vehicles",
+   "view": "front",
+   "w": 2.5,
+   "h": 3.2,
+   "desc": "an old Soviet KAMAZ-4310 army truck with canvas tent bed, faded olive paint; seen straight from the front, symmetric; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.9,
+    2.5,
+    3.2
+   ]
+  },
+  {
+   "id": "uaz_cash_front",
+   "cat": "vehicles",
+   "view": "front",
+   "w": 2.0,
+   "h": 2.1,
+   "desc": "an armored Soviet UAZ-452 cash-in-transit van, grey with dark blue stripe, steel grille on windshield; seen straight from the front, symmetric; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.4,
+    2.0,
+    2.1
+   ]
+  },
+  {
+   "id": "bulldozer_t130_front",
+   "cat": "vehicles",
+   "view": "front",
+   "w": 3.2,
+   "h": 3.0,
+   "desc": "an old rusty Soviet T-130 crawler bulldozer, faded yellow paint, big front blade, tracks; seen straight from the front, symmetric; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    3.2,
+    3.0
+   ]
+  },
+  {
+   "id": "wreck_vaz2101_front",
+   "cat": "vehicles",
+   "view": "front",
+   "w": 1.6,
+   "h": 1.45,
+   "desc": "a rusty abandoned Zhiguli VAZ-2101 sedan wreck, faded light blue paint, on bricks, broken windshield; seen straight from the front, symmetric; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.05,
+    1.6,
+    1.45
+   ]
+  },
+  {
+   "id": "wreck_niva_burnt_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 3.7,
+   "h": 1.65,
+   "desc": "a burnt-out Lada Niva wreck, blackened and orange-rusted bare metal, no glass, on rims, ash; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.7,
+    1.7,
+    1.65
+   ]
+  },
+  {
+   "id": "wreck_kamaz_burnt_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.9,
+   "h": 3.0,
+   "desc": "a burnt-out KAMAZ army truck wreck, blackened rusty cab, burnt canvas frame, on rims; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.9,
+    2.5,
+    3.0
+   ]
+  },
+  {
+   "id": "wreck_zil131_overturned_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.0,
+   "h": 2.6,
+   "desc": "an overturned Soviet ZIL-131 army truck lying on its side, rusty olive underside and axles visible, torn canvas; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    2.9,
+    2.6
+   ]
+  },
+  {
+   "id": "wreck_btr70_turret",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.8,
+   "h": 0.9,
+   "desc": "the blown-off small turret of an armoured personnel carrier lying on the ground, scorched olive steel; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.8,
+    1.8,
+    0.9
+   ]
+  },
+  {
+   "id": "bmp1_wreck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6.7,
+   "h": 2.1,
+   "desc": "a destroyed rusted Soviet BMP-1 tracked infantry fighting vehicle, low wedge hull, small turret, broken track lying off; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.7,
+    2.9,
+    2.1
+   ]
+  },
+  {
+   "id": "tank_t55_wreck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 9.0,
+   "h": 2.4,
+   "desc": "a rusted abandoned Soviet T-55 tank hulk, museum piece, round turret, long barrel, broken tracks, overgrown with weeds; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    9.0,
+    3.3,
+    2.4
+   ]
+  },
+  {
+   "id": "tank_t55_wreck_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 9.0,
+   "h": 2.4,
+   "desc": "a rusted abandoned Soviet T-55 tank hulk, museum piece, round turret, long barrel, broken tracks; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    9.0,
+    3.3,
+    2.4
+   ]
+  },
+  {
+   "id": "tractor_dt75_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.5,
+   "h": 2.6,
+   "desc": "an old Soviet DT-75 crawler tractor, faded blue-red paint, small cab, rusty tracks; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.5,
+    1.9,
+    2.6
+   ]
+  },
+  {
+   "id": "combine_niva_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.5,
+   "h": 3.8,
+   "desc": "an old rusty Soviet Niva SK-5 combine harvester, faded red paint, front header reel, abandoned; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.5,
+    3.0,
+    3.8
+   ]
+  },
+  {
+   "id": "excavator_eo2621_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.0,
+   "h": 3.6,
+   "desc": "an old Soviet EO-2621 backhoe on a tractor base, faded yellow paint, bucket arm folded, rusty; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    2.4,
+    3.6
+   ]
+  },
+  {
+   "id": "bus_liaz677_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 10.5,
+   "h": 3.0,
+   "desc": "an old Soviet LiAZ-677 city bus, rounded body, faded yellow and white paint, broken windows, flat tyres; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    10.5,
+    2.5,
+    3.0
+   ]
+  },
+  {
+   "id": "car_volga_police_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.7,
+   "h": 1.5,
+   "desc": "an old Soviet GAZ-24 Volga militsiya car, faded yellow with blue stripe, roof beacon, dusty; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.7,
+    1.8,
+    1.5
+   ]
+  },
+  {
+   "id": "car_ambulance_rafik_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.9,
+   "h": 2.0,
+   "desc": "an old Soviet RAF-2203 ambulance minibus, faded white with red stripe, flat tyres, broken glass; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.9,
+    2.0,
+    2.0
+   ]
+  },
+  {
+   "id": "car_zaporozhets_wreck_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 3.3,
+   "h": 1.45,
+   "desc": "a rusty abandoned ZAZ-965 humpbacked Zaporozhets small car wreck, faded green, no wheels; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.3,
+    1.4,
+    1.45
+   ]
+  },
+  {
+   "id": "moto_izh_wreck_side",
+   "cat": "props",
+   "view": "side",
+   "w": 2.1,
+   "h": 0.8,
+   "desc": "a rusty abandoned IZh Planeta motorcycle lying on its side, faded red tank; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.1,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "id": "wagon_boxcar_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 14.0,
+   "h": 4.3,
+   "desc": "a Soviet four-axle covered railway boxcar, rusty brown-red steel body, closed sliding door, two bogies; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    14.0,
+    3.0,
+    4.3
+   ]
+  },
+  {
+   "id": "wagon_tanker_derailed_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 12.0,
+   "h": 4.0,
+   "desc": "a derailed Soviet railway tank wagon lying tilted off the rails, black rusty tank, leaking dark stain; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.0,
+    3.0,
+    4.0
+   ]
+  },
+  {
+   "id": "rail_draisine_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 5.0,
+   "h": 2.6,
+   "desc": "an old Soviet motor rail draisine trolley, small yellow cab on a flat rail car, rusty; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.0,
+    2.5,
+    2.6
+   ]
+  },
+  {
+   "id": "rail_track_curve_top",
+   "cat": "props",
+   "view": "top",
+   "w": 8.0,
+   "h": 6.0,
+   "desc": "a curved piece of old railway track, 30-degree bend: two rusty steel rails on dark wooden sleepers over gravel ballast; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "rail_track_broken_top",
+   "cat": "props",
+   "view": "top",
+   "w": 8.0,
+   "h": 3.0,
+   "desc": "a broken piece of old railway track, one rail torn and bent up, missing sleepers, gravel ballast; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "boat_kazanka_wreck_side",
+   "cat": "props",
+   "view": "side",
+   "w": 4.6,
+   "h": 1.1,
+   "desc": "a holed and dented abandoned aluminium motor boat lying on the shore, no motor, rust stains; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.6,
+    1.7,
+    1.1
+   ]
+  },
+  {
+   "id": "boat_tug_side",
+   "cat": "props",
+   "view": "side",
+   "w": 14.0,
+   "h": 6.0,
+   "desc": "an old rusty Soviet river tugboat, dark hull, white-and-rust wheelhouse, tires as fenders; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    14.0,
+    4.0,
+    6.0
+   ]
+  },
+  {
+   "id": "heli_mi24_wreck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 17.5,
+   "h": 4.5,
+   "desc": "the burnt wreck of a crashed Soviet Mi-24 attack helicopter, tandem cockpit smashed, stub wings, tail broken, scorched olive camouflage; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    17.5,
+    4.0,
+    4.5
+   ]
+  },
+  {
+   "id": "heli_mi8_cockpit_wreck",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.5,
+   "h": 2.8,
+   "desc": "the torn-off nose and cockpit section of a crashed Mi-8 helicopter, smashed glass, scorched olive-green, lying on the ground; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.5,
+    2.5,
+    2.8
+   ]
+  },
+  {
+   "id": "heli_mi2_wreck_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 12.0,
+   "h": 3.5,
+   "desc": "the wreck of a small Soviet Mi-2 helicopter, faded orange and white paint, bent rotor blades, skids broken; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.0,
+    3.0,
+    3.5
+   ]
+  },
+  {
+   "id": "plane_an2_shadow_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 12.7,
+   "h": 18.0,
+   "desc": "a solid flat dark grey silhouette shadow of an An-2 biplane, soft edges; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "mig21_wreck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 14.5,
+   "h": 4.1,
+   "desc": "an abandoned Soviet MiG-21 jet fighter, museum piece, silver-grey rusty skin, delta wings, flat tyres, missing canopy; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    14.5,
+    7.2,
+    4.1
+   ]
+  },
+  {
+   "id": "missile_s75_ground",
+   "cat": "props",
+   "view": "side",
+   "w": 10.6,
+   "h": 1.2,
+   "desc": "a long white-grey S-75 rocket lying on the ground on wooden blocks, museum piece, peeling paint, fins; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    10.6,
+    1.2,
+    1.2
+   ]
+  },
+  {
+   "id": "radar_snr75_cabin_angled",
+   "cat": "props",
+   "view": "angled",
+   "w": 9.0,
+   "h": 6.0,
+   "desc": "a Soviet radar control cabin trailer with a large rotating antenna assembly on top, olive-green, museum piece; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    9.0,
+    3.0,
+    6.0
+   ]
+  },
+  {
+   "id": "searchlight_trailer",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 2.2,
+   "desc": "a big old military searchlight on a two-wheel trailer, olive paint, cracked lens; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.5,
+    1.8,
+    2.2
+   ]
+  },
+  {
+   "id": "kung_trailer_wreck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6.0,
+   "h": 3.2,
+   "desc": "a looted abandoned Soviet KUNG box trailer, door torn open, rusty olive box, flat tyres; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    2.5,
+    3.2
+   ]
+  },
+  {
+   "id": "sandbag_zu23_pos_top",
+   "cat": "props",
+   "view": "top",
+   "w": 7.0,
+   "h": 7.0,
+   "desc": "a horseshoe-shaped sandbag revetment for an anti-aircraft gun position, empty, faded burlap; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "camo_net_vehicle_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 8.0,
+   "h": 3.5,
+   "desc": "an army truck fully covered with a sagging green-brown camouflage net on poles; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    8.0,
+    3.0,
+    3.5
+   ]
+  },
+  {
+   "id": "tire_pile",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 1.3,
+   "desc": "a pile of old worn truck tyres, some cracked; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.5,
+    2.5,
+    1.3
+   ]
+  },
+  {
+   "id": "engine_block_wreck",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 1.0,
+   "desc": "a rusty truck diesel engine block lying on the ground with loose hoses; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "id": "wreck_btr70_front_v2",
+   "cat": "vehicles",
+   "view": "front",
+   "w": 2.8,
+   "h": 2.3,
+   "desc": "a destroyed Soviet BTR-70 armoured personnel carrier, seen from the front at ground level: wedge-shaped bow, two small headlights, wheels on both sides, scorched olive paint; seen straight from the front, symmetric; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.5,
+    2.8,
+    2.3
+   ]
+  },
+  {
+   "id": "wreck_btr70_burning_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.5,
+   "h": 4.0,
+   "desc": "a destroyed Soviet BTR-70 armoured personnel carrier on fire, flames and black smoke from open hatches, scorched hull; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.5,
+    2.8,
+    2.3
+   ]
+  },
+  {
+   "id": "wreck_uaz469_burning_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.0,
+   "h": 3.0,
+   "desc": "a crashed UAZ-469 jeep wreck on fire, flames from the engine bay, black smoke, blackened body; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.0,
+    1.8,
+    1.8
+   ]
+  },
+  {
+   "id": "uaz_cash_burning_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.4,
+   "h": 3.2,
+   "desc": "an armored grey UAZ-452 cash-in-transit van wreck on fire, flames from the cab, black smoke, rear doors open; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.4,
+    2.0,
+    2.1
+   ]
+  },
+  {
+   "id": "jeep_uaz469_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 4.0,
+   "h": 1.8,
+   "desc": "an old Soviet UAZ-469 jeep with faded green canvas top, spare wheel on back; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "truck_gaz66_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 5.8,
+   "h": 2.3,
+   "desc": "an old Soviet GAZ-66 army truck, olive cab and canvas-covered cargo bed; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "truck_zil131_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 7.0,
+   "h": 2.5,
+   "desc": "an old Soviet ZIL-131 six-wheel army truck, olive cab with long hood, canvas-covered bed; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "van_bukhanka_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 4.4,
+   "h": 2.0,
+   "desc": "an old Soviet UAZ-452 bukhanka van, faded khaki roof; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "uaz_cash_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 4.4,
+   "h": 2.0,
+   "desc": "an armored Soviet UAZ-452 cash-in-transit van, grey roof with dark blue stripe; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "car_vaz2101_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 4.05,
+   "h": 1.6,
+   "desc": "an old Zhiguli VAZ-2101 sedan, faded light blue paint; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "car_niva_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 3.7,
+   "h": 1.7,
+   "desc": "an old Lada Niva 4x4, faded white paint, roof rack; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "btr70_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 7.5,
+   "h": 2.8,
+   "desc": "a Soviet BTR-70 eight-wheeled armoured personnel carrier, olive hull, small turret, hatches; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "bulldozer_t130_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 6.0,
+   "h": 3.2,
+   "desc": "an old Soviet T-130 crawler bulldozer, faded yellow, blade at the front, tracks; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "truck_fuel_tanker_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 7.0,
+   "h": 2.5,
+   "desc": "an old Soviet fuel tanker truck, blue cab, cylindrical rusty tank; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "wreck_sedan_burnt_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 4.0,
+   "h": 1.6,
+   "desc": "a burnt-out Soviet sedan wreck, blackened rusty roof, no glass; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "wagon_boxcar_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 14.0,
+   "h": 3.0,
+   "desc": "a Soviet railway boxcar roof, rusty brown-red, long rectangle; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "rail_tem2_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 16.0,
+   "h": 3.0,
+   "desc": "a Soviet TEM2 shunting diesel locomotive, faded green with yellow stripe, long hood, cab at one end; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "wagon_tanker_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 12.0,
+   "h": 3.0,
+   "desc": "a Soviet railway tank wagon, black rusty cylindrical tank with top dome and walkway; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "wagon_gondola_coal_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 14.0,
+   "h": 3.0,
+   "desc": "a Soviet open gondola railway wagon full of black coal, rusty brown sides; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "wagon_flatcar_containers_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 13.5,
+   "h": 3.0,
+   "desc": "a Soviet railway flatcar carrying two rusty steel shipping containers, faded blue and red roofs; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "heli_mi8_wreck_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 20.0,
+   "h": 14.0,
+   "desc": "the burnt wreck of a crashed Mi-8 helicopter lying on the ground, scorched olive fuselage, broken tail boom lying apart, bent rotor blades scattered; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "heli_mi8_landed_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 18.3,
+   "h": 5.5,
+   "desc": "a Soviet Mi-8 transport helicopter standing on the ground, faded olive camouflage, five drooping main rotor blades, tail rotor, round windows; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    18.3,
+    3.0,
+    5.5
+   ]
+  },
+  {
+   "id": "zu23_twin_top",
+   "cat": "props",
+   "view": "top",
+   "w": 4.6,
+   "h": 2.9,
+   "desc": "a Soviet twin anti-aircraft cannon mount on a two-wheel carriage, museum piece, faded olive paint; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "s75_launcher_top",
+   "cat": "props",
+   "view": "top",
+   "w": 10.6,
+   "h": 6.0,
+   "desc": "a Soviet S-75 launcher with a long white-grey rocket on its rail, olive cross-shaped base, museum piece; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "trailer_kung_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 6.0,
+   "h": 2.5,
+   "desc": "a Soviet military KUNG box trailer roof, olive-green, vent hatches; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "boat_barge_top",
+   "cat": "props",
+   "view": "top",
+   "w": 20.0,
+   "h": 6.0,
+   "desc": "a rusted river barge with an empty cargo hold and small wheelhouse at the back; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "wreck_pile_cars",
+   "cat": "props",
+   "view": "angled",
+   "w": 5.0,
+   "h": 3.0,
+   "desc": "a junkyard pile of three crushed rusty Soviet cars stacked on each other; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.0,
+    2.5,
+    3.0
+   ]
+  },
+  {
+   "id": "car_door_wreck",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.2,
+   "h": 0.3,
+   "desc": "a single rusty detached car door lying on the ground, broken window; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    1.0,
+    0.3
+   ]
+  },
+  {
+   "id": "car_wheel_rusty",
+   "cat": "props",
+   "view": "angled",
+   "w": 0.7,
+   "h": 0.3,
+   "desc": "a single rusty car wheel rim with a cracked flat tyre lying on the ground; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.7,
+    0.7,
+    0.3
+   ]
+  },
+  {
+   "id": "truck_cab_wreck",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 2.2,
+   "desc": "a detached rusty Soviet truck cab lying on the ground without chassis, broken windows; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.5,
+    2.3,
+    2.2
+   ]
+  },
+  {
+   "id": "tank_t55_turret_wreck",
+   "cat": "props",
+   "view": "angled",
+   "w": 4.5,
+   "h": 1.2,
+   "desc": "a rusty detached tank turret lying on the ground, long barrel pointing sideways, museum piece; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    2.5,
+    1.2
+   ]
+  },
+  {
+   "id": "camo_net_ruined_top",
+   "cat": "props",
+   "view": "top",
+   "w": 7.0,
+   "h": 5.0,
+   "desc": "a torn military camouflage net lying collapsed on the ground over broken poles, green and brown scraps; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "sandbag_trench_straight_top",
+   "cat": "props",
+   "view": "top",
+   "w": 8.0,
+   "h": 3.0,
+   "desc": "a straight trench section lined with old faded sandbags on both sides, dirt floor; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "rail_track_end_top",
+   "cat": "props",
+   "view": "top",
+   "w": 8.0,
+   "h": 3.0,
+   "desc": "the end of an old railway track with a rusty buffer stop at the end, wooden sleepers, gravel; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "rail_crossing_top",
+   "cat": "props",
+   "view": "top",
+   "w": 8.0,
+   "h": 8.0,
+   "desc": "an old level crossing: two rusty rails crossing an asphalt road with concrete slabs between rails; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "rail_track_switch_top",
+   "cat": "props",
+   "view": "top",
+   "w": 12.0,
+   "h": 4.0,
+   "desc": "an old railway switch where one track splits into two, rusty rails on wooden sleepers over gravel; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "rubber_tank_top",
+   "cat": "props",
+   "view": "top",
+   "w": 6.0,
+   "h": 3.0,
+   "desc": "a large sagging black rubber water pillow tank lying on the ground with a hose; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "wreck_gaz53_burnt_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6.4,
+   "h": 2.2,
+   "desc": "a burnt-out GAZ-53 truck wreck, blackened rusty cab and bare frame, on rims; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.4,
+    2.3,
+    2.2
+   ]
+  },
+  {
+   "id": "wreck_zil130_rusty_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6.7,
+   "h": 2.4,
+   "desc": "an abandoned rusty ZIL-130 truck, faded blue cab, broken windows, flat tyres, wooden bed half rotten; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.7,
+    2.5,
+    2.4
+   ]
+  },
+  {
+   "id": "wreck_kamaz_dump_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.6,
+   "h": 3.0,
+   "desc": "an abandoned rusty KAMAZ dump truck, faded orange cab, tipped dump body, flat tyres; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.6,
+    2.5,
+    3.0
+   ]
+  },
+  {
+   "id": "wreck_paz_bus_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.2,
+   "h": 2.95,
+   "desc": "an abandoned rusty PAZ-672 small bus, faded yellow and cream paint, broken windows, on rims; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.2,
+    2.5,
+    2.95
+   ]
+  },
+  {
+   "id": "wreck_moskvich_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 4.2,
+   "h": 1.5,
+   "desc": "an abandoned rusty Moskvich-412 sedan, faded orange paint, no wheels, sitting on bricks; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.2,
+    1.6,
+    1.5
+   ]
+  },
+  {
+   "id": "wreck_volga_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.7,
+   "h": 1.5,
+   "desc": "an abandoned rusty GAZ-24 Volga sedan, faded black paint, broken glass, flat tyres, trunk open; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.7,
+    1.8,
+    1.5
+   ]
+  },
+  {
+   "id": "wreck_rafik_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 4.9,
+   "h": 2.0,
+   "desc": "an abandoned rusty RAF minibus, faded white and red paint, broken windows, flat tyres; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.9,
+    2.0,
+    2.0
+   ]
+  },
+  {
+   "id": "wreck_ural_sidecar_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 2.6,
+   "h": 1.1,
+   "desc": "an abandoned rusty Ural motorcycle with sidecar, faded olive paint, flat tyres; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.6,
+    1.7,
+    1.1
+   ]
+  },
+  {
+   "id": "truck_ural4320_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.4,
+   "h": 2.9,
+   "desc": "an old Soviet Ural-4320 army truck, long hood, faded olive paint, canvas-covered bed, six big wheels; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.4,
+    2.5,
+    2.9
+   ]
+  },
+  {
+   "id": "truck_ural4320_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.4,
+   "h": 2.9,
+   "desc": "an old Soviet Ural-4320 army truck, long hood, faded olive paint, canvas-covered bed, six big wheels; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.4,
+    2.5,
+    2.9
+   ]
+  },
+  {
+   "id": "truck_maz_tanker_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.1,
+   "h": 2.7,
+   "desc": "an old Soviet MAZ-500 truck with a cylindrical water tank, faded green cab, rusty; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.1,
+    2.5,
+    2.7
+   ]
+  },
+  {
+   "id": "truck_gaz66_kung_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 5.8,
+   "h": 3.0,
+   "desc": "an old Soviet GAZ-66 army truck with an olive KUNG box body on the back, small antenna; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.8,
+    2.3,
+    3.0
+   ]
+  },
+  {
+   "id": "truck_zil131_kung_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.0,
+   "h": 3.4,
+   "desc": "an old Soviet ZIL-131 army truck with an olive KUNG box body, ladder, antenna mast folded; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    2.5,
+    3.4
+   ]
+  },
+  {
+   "id": "btr80_wreck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.7,
+   "h": 2.4,
+   "desc": "a rusted abandoned Soviet BTR-80 eight-wheeled armoured personnel carrier, faded olive paint, flat tyres, open hatches; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.7,
+    2.9,
+    2.4
+   ]
+  },
+  {
+   "id": "mtlb_wreck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6.5,
+   "h": 1.9,
+   "desc": "a rusted abandoned Soviet MT-LB tracked armoured tractor, low flat hull, small turret, broken track; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.5,
+    2.9,
+    1.9
+   ]
+  },
+  {
+   "id": "tractor_belarus_wreck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 3.9,
+   "h": 2.7,
+   "desc": "an abandoned rusty Belarus MTZ-80 tractor, faded blue-red paint, rear wheels gone, on blocks; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.9,
+    2.0,
+    2.7
+   ]
+  },
+  {
+   "id": "road_roller_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.5,
+   "h": 2.9,
+   "desc": "an old Soviet road roller, faded yellow paint, big steel front drum, rusty; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.5,
+    2.0,
+    2.9
+   ]
+  },
+  {
+   "id": "forklift_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 3.0,
+   "h": 2.3,
+   "desc": "an old Soviet forklift, faded yellow-orange paint, rusty forks, no cab door; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    1.3,
+    2.3
+   ]
+  },
+  {
+   "id": "trolleybus_wreck_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 11.8,
+   "h": 3.4,
+   "desc": "an abandoned Soviet ZiU-9 trolleybus, faded red and white paint, poles hanging down, broken windows; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    11.8,
+    2.5,
+    3.4
+   ]
+  },
+  {
+   "id": "tram_wreck_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 15.0,
+   "h": 3.2,
+   "desc": "an abandoned Soviet KTM tram car, faded red and cream paint, broken windows, rusty; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    15.0,
+    2.6,
+    3.2
+   ]
+  },
+  {
+   "id": "wagon_hopper_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 14.7,
+   "h": 4.5,
+   "desc": "a Soviet four-axle covered hopper railway wagon for grain, rusty grey sloped body; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    14.7,
+    3.0,
+    4.5
+   ]
+  },
+  {
+   "id": "wagon_flatcar_empty_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 13.5,
+   "h": 1.6,
+   "desc": "a Soviet four-axle empty railway flatcar, rusty steel deck with stakes; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    13.5,
+    3.0,
+    1.6
+   ]
+  },
+  {
+   "id": "wagon_flatcar_tank_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 13.5,
+   "h": 4.0,
+   "desc": "a Soviet railway flatcar carrying an old rusty tank under a torn tarp, museum piece; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    13.5,
+    3.0,
+    4.0
+   ]
+  },
+  {
+   "id": "wagon_caboose_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 10.0,
+   "h": 4.0,
+   "desc": "a small Soviet railway service car with a stove pipe, wooden body painted faded red, small windows; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    10.0,
+    3.0,
+    4.0
+   ]
+  },
+  {
+   "id": "loco_te3_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 17.0,
+   "h": 4.8,
+   "desc": "an old Soviet TE3 mainline diesel locomotive, faded green with yellow stripes, long body, rusty; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    17.0,
+    3.0,
+    4.8
+   ]
+  },
+  {
+   "id": "loco_steam_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 22.0,
+   "h": 4.8,
+   "desc": "an old Soviet steam locomotive monument, black with red wheels, rusty, tender behind; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    22.0,
+    3.0,
+    4.8
+   ]
+  },
+  {
+   "id": "boat_cutter_side",
+   "cat": "props",
+   "view": "side",
+   "w": 12.0,
+   "h": 3.5,
+   "desc": "an old rusty Soviet river patrol cutter, grey hull, small cabin, half sunk; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.0,
+    3.5,
+    3.5
+   ]
+  },
+  {
+   "id": "boat_pontoon_top",
+   "cat": "props",
+   "view": "top",
+   "w": 8.0,
+   "h": 4.0,
+   "desc": "a rusty steel pontoon float platform with planks and bollards; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "boat_catamaran_side",
+   "cat": "props",
+   "view": "side",
+   "w": 3.0,
+   "h": 1.2,
+   "desc": "an old pedal catamaran boat from a Soviet park, faded blue floats and seat, rusty; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    1.6,
+    1.2
+   ]
+  },
+  {
+   "id": "heli_mi8_door_panel",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.0,
+   "h": 0.4,
+   "desc": "a torn-off olive-green helicopter fuselage panel with a round window, lying on the ground; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.0,
+    1.4,
+    0.4
+   ]
+  },
+  {
+   "id": "heli_rotor_blade_broken",
+   "cat": "props",
+   "view": "side",
+   "w": 8.0,
+   "h": 0.5,
+   "desc": "a single long broken helicopter rotor blade lying bent on the ground, grey-green; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    8.0,
+    0.6,
+    0.5
+   ]
+  },
+  {
+   "id": "plane_yak52_wreck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.7,
+   "h": 2.7,
+   "desc": "a crashed small Soviet Yak-52 trainer plane, faded white and red paint, bent propeller, one wing torn; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.7,
+    6.0,
+    2.7
+   ]
+  },
+  {
+   "id": "plane_l39_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 12.1,
+   "h": 4.5,
+   "desc": "an abandoned Czech-built L-39 jet trainer, museum piece, faded grey-green paint, flat tyres; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.1,
+    9.0,
+    4.5
+   ]
+  },
+  {
+   "id": "zu23_on_truck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.4,
+   "h": 3.3,
+   "desc": "a twin anti-aircraft cannon mount bolted on the bed of an old Ural truck, museum piece, faded olive paint; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.4,
+    2.5,
+    3.3
+   ]
+  },
+  {
+   "id": "zsu_shilka_wreck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6.5,
+   "h": 3.8,
+   "desc": "a rusted abandoned Soviet ZSU-23-4 Shilka tracked self-propelled anti-aircraft vehicle, museum piece, square turret with radar dish; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.5,
+    3.1,
+    3.8
+   ]
+  },
+  {
+   "id": "s75_missile_crate",
+   "cat": "props",
+   "view": "angled",
+   "w": 11.0,
+   "h": 1.5,
+   "desc": "a long wooden and steel transport cradle with a white-grey rocket lying on it, museum piece; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    11.0,
+    1.5,
+    1.5
+   ]
+  },
+  {
+   "id": "radar_p18_truck_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 9.0,
+   "h": 8.0,
+   "desc": "a Soviet P-18 radar station: ZIL-131 truck with KUNG body and a tall yagi antenna mast raised behind; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    2.5,
+    8.0
+   ]
+  },
+  {
+   "id": "radar_dish_wreck",
+   "cat": "props",
+   "view": "angled",
+   "w": 5.0,
+   "h": 2.0,
+   "desc": "a fallen broken radar dish antenna lying on the ground, bent lattice, rusty; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.0,
+    4.0,
+    2.0
+   ]
+  },
+  {
+   "id": "sandbag_mg_nest_top",
+   "cat": "props",
+   "view": "top",
+   "w": 3.5,
+   "h": 3.5,
+   "desc": "a small round sandbag nest with a firing slit, faded burlap, empty; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "checkpoint_barrier_angled",
+   "cat": "props",
+   "view": "angled",
+   "w": 5.0,
+   "h": 2.5,
+   "desc": "a military checkpoint: red-white striped boom barrier, sandbags and a small booth; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.0,
+    2.5,
+    2.5
+   ]
+  },
+  {
+   "id": "hedgehog_antitank",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.8,
+   "h": 1.4,
+   "desc": "a Czech hedgehog anti-tank obstacle of three crossed rusty steel I-beams; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.8,
+    1.8,
+    1.4
+   ]
+  },
+  {
+   "id": "concrete_blocks_road",
+   "cat": "props",
+   "view": "angled",
+   "w": 4.0,
+   "h": 1.0,
+   "desc": "a row of grey concrete road blocks, cracked, with faded red-white stripes; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "id": "fuel_drums_pallet",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 1.2,
+   "desc": "a wooden pallet with four rusty blue and red oil drums; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    1.4,
+    1.2
+   ]
+  },
+  {
+   "id": "jerrycans_pile",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.2,
+   "h": 0.6,
+   "desc": "a small pile of old green steel jerrycans; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.8,
+    0.6
+   ]
+  },
+  {
+   "id": "car_vaz2106_skyblue_fresh_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.17,
+   "h": 1.44,
+   "desc": "a well-kept Zhiguli VAZ-2106 sedan in glossy sky-blue paint, chrome bumpers, clean, only light dust on tyres; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.17,
+    1.6,
+    1.44
+   ]
+  },
+  {
+   "id": "car_moskvich_cream_chipped_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 4.25,
+   "h": 1.48,
+   "desc": "a Moskvich-2140 sedan in cream paint with a few chipped spots, black tyres, chrome trim; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.25,
+    1.6,
+    1.48
+   ]
+  },
+  {
+   "id": "car_zaz_red_fresh_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 3.33,
+   "h": 1.45,
+   "desc": "a small humpbacked Zaporozhets ZAZ-965 car in bright cherry-red paint, white roof, neat; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.33,
+    1.4,
+    1.45
+   ]
+  },
+  {
+   "id": "car_niva_orange_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 3.7,
+   "h": 1.65,
+   "desc": "a Lada Niva 4x4 in safety-orange paint with black bumpers, a few scratches, roof rack with a canister; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.7,
+    1.7,
+    1.65
+   ]
+  },
+  {
+   "id": "car_volga_white_taxi_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.7,
+   "h": 1.5,
+   "desc": "a GAZ-24 Volga taxi in cream-white paint with a strip of plain black-and-white squares on the doors, green roof light; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.7,
+    1.8,
+    1.5
+   ]
+  },
+  {
+   "id": "car_vaz2101_moss_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 4.05,
+   "h": 1.45,
+   "desc": "an abandoned Zhiguli VAZ-2101 sedan in faded sky-blue, roof and hood covered with green moss, grass growing through the wheel arches; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.05,
+    1.6,
+    1.45
+   ]
+  },
+  {
+   "id": "van_uaz452_skyblue_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.4,
+   "h": 2.1,
+   "desc": "a UAZ-452 bukhanka van in pale sky-blue and white two-tone paint, clean, slightly chipped; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.4,
+    2.0,
+    2.1
+   ]
+  },
+  {
+   "id": "van_rafik_yellow_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 4.9,
+   "h": 2.0,
+   "desc": "a RAF-2203 minibus in ochre yellow with a white stripe, intact windows, neat; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.9,
+    2.0,
+    2.0
+   ]
+  },
+  {
+   "id": "truck_gaz53_bluewhite_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6.4,
+   "h": 2.2,
+   "desc": "a GAZ-53 truck with a pale blue cab and white wooden-plank cargo bed, fresh paint; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.4,
+    2.3,
+    2.2
+   ]
+  },
+  {
+   "id": "truck_zil130_orange_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 6.7,
+   "h": 2.4,
+   "desc": "a ZIL-130 municipal truck in safety-orange with a white stripe, dump bed, clean; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.7,
+    2.5,
+    2.4
+   ]
+  },
+  {
+   "id": "truck_kamaz_blue_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.4,
+   "h": 2.8,
+   "desc": "a KAMAZ-5320 flatbed truck with a light blue cab and red-brown primer bed, chipped edges; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.4,
+    2.5,
+    2.8
+   ]
+  },
+  {
+   "id": "truck_maz_red_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.1,
+   "h": 2.6,
+   "desc": "a MAZ-500 dump truck with a dark red cab and grey dump body, light dust; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.1,
+    2.5,
+    2.6
+   ]
+  },
+  {
+   "id": "truck_gaz66_green_fresh_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 5.8,
+   "h": 2.5,
+   "desc": "a GAZ-66 army truck in fresh glossy dark army green, new canvas top in sand colour, black tyres; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.8,
+    2.3,
+    2.5
+   ]
+  },
+  {
+   "id": "truck_zil131_white_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.0,
+   "h": 2.9,
+   "desc": "a ZIL-131 truck in winter white camouflage paint over green, with a closed khaki canvas; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.0,
+    2.5,
+    2.9
+   ]
+  },
+  {
+   "id": "truck_ural_mossy_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.4,
+   "h": 3.2,
+   "desc": "an Ural-4320 army truck abandoned in a forest for decades, faded green body with patches of bright moss, a birch sapling growing from the cargo bed; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.4,
+    2.5,
+    2.9
+   ]
+  },
+  {
+   "id": "bus_paz_blue_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.2,
+   "h": 2.95,
+   "desc": "a PAZ-672 bus in two-tone light blue and white paint, clean, intact windows; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.2,
+    2.5,
+    2.95
+   ]
+  },
+  {
+   "id": "bus_ikarus_yellow_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 11.0,
+   "h": 3.0,
+   "desc": "a Hungarian Ikarus-260 city bus in ochre yellow with a white roof, clean, intact windows; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    11.0,
+    2.5,
+    3.0
+   ]
+  },
+  {
+   "id": "tractor_mtz_red_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 3.9,
+   "h": 2.7,
+   "desc": "a Belarus MTZ-80 tractor in bright red bodywork with white cab and black tyres, freshly painted; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.9,
+    2.0,
+    2.7
+   ]
+  },
+  {
+   "id": "tractor_t150_green_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 6.0,
+   "h": 3.2,
+   "desc": "a T-150K wheeled tractor in green paint with a white cab roof, clean; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    2.4,
+    3.2
+   ]
+  },
+  {
+   "id": "combine_niva_red_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.5,
+   "h": 3.8,
+   "desc": "a Niva combine harvester in red paint with a yellow header reel, clean; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.5,
+    3.0,
+    3.8
+   ]
+  },
+  {
+   "id": "excavator_yellow_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 8.0,
+   "h": 3.5,
+   "desc": "a Soviet EO-3322 wheeled excavator in ochre yellow with a black boom, clean; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    8.0,
+    2.5,
+    3.5
+   ]
+  },
+  {
+   "id": "crane_truck_orange_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 10.0,
+   "h": 3.5,
+   "desc": "a truck crane in bright safety orange with a white cab, telescopic boom folded; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    10.0,
+    2.5,
+    3.5
+   ]
+  },
+  {
+   "id": "btr70_fresh_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7.5,
+   "h": 2.3,
+   "desc": "a BTR-70 eight-wheeled armoured personnel carrier, museum piece, fresh glossy olive-green paint, black tyres, clean; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    7.5,
+    2.8,
+    2.3
+   ]
+  },
+  {
+   "id": "brdm2_sand_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 5.75,
+   "h": 2.3,
+   "desc": "a BRDM-2 armoured scout car, museum piece, sand-yellow desert paint with brown spots, clean; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    5.75,
+    2.4,
+    2.3
+   ]
+  },
+  {
+   "id": "bmp1_camo_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6.7,
+   "h": 2.1,
+   "desc": "a BMP-1 tracked vehicle, museum piece, three-tone camouflage green, black and sand, clean; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.7,
+    2.9,
+    2.1
+   ]
+  },
+  {
+   "id": "tank_t55_monument_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 9.0,
+   "h": 3.6,
+   "desc": "a T-55 tank on a concrete monument plinth, freshly painted bright green, white plinth; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    9.0,
+    3.3,
+    3.6
+   ]
+  },
+  {
+   "id": "zu23_twin_green_fresh_angled",
+   "cat": "props",
+   "view": "angled",
+   "w": 4.6,
+   "h": 1.9,
+   "desc": "a twin anti-aircraft cannon mount, museum piece, fresh dark green paint, black rubber tyres, clean; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.6,
+    2.9,
+    1.9
+   ]
+  },
+  {
+   "id": "s75_launcher_blue_angled",
+   "cat": "props",
+   "view": "angled",
+   "w": 10.6,
+   "h": 4.0,
+   "desc": "a S-75 launcher, museum piece, light blue-grey platform and white rocket with red nose, freshly repainted; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    10.6,
+    6.0,
+    4.0
+   ]
+  },
+  {
+   "id": "radar_dish_white_mast",
+   "cat": "props",
+   "view": "side",
+   "w": 4.0,
+   "h": 9.0,
+   "desc": "a white radar dish on a red-and-white striped steel lattice mast, clean; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.0,
+    3.0,
+    9.0
+   ]
+  },
+  {
+   "id": "heli_mi8_orange_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 18.3,
+   "h": 5.5,
+   "desc": "a civilian Mi-8 helicopter on the ground, orange and white livery with a blue stripe, drooping rotor blades; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    18.3,
+    3.0,
+    5.5
+   ]
+  },
+  {
+   "id": "heli_mi8_blue_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 18.3,
+   "h": 5.0,
+   "desc": "a civilian Mi-8 helicopter in light blue and white livery, WITHOUT main rotor blades; seen strictly from directly above (orthographic top-down), nose to the right, on transparent background; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "heli_mi2_yellow_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 12.0,
+   "h": 3.5,
+   "desc": "a small Mi-2 helicopter in ochre yellow and white agricultural livery, rotor blades drooping, on skids; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.0,
+    3.0,
+    3.5
+   ]
+  },
+  {
+   "id": "plane_an2_silver_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 12.7,
+   "h": 4.0,
+   "desc": "an An-2 biplane in silver-grey paint with red trim on the wing tips and tail, clean; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.7,
+    6.0,
+    4.0
+   ]
+  },
+  {
+   "id": "plane_an2_moss_wreck_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 12.7,
+   "h": 4.0,
+   "desc": "an An-2 biplane abandoned in a field, faded olive-green, wings sagging, covered with moss and climbing weeds; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.7,
+    6.0,
+    4.0
+   ]
+  },
+  {
+   "id": "boat_kazanka_blue_side",
+   "cat": "props",
+   "view": "side",
+   "w": 4.6,
+   "h": 1.3,
+   "desc": "a Kazanka aluminium motor boat with a sky-blue painted hull and white top, outboard motor, neat; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.6,
+    1.7,
+    1.3
+   ]
+  },
+  {
+   "id": "boat_lodka_red_side",
+   "cat": "props",
+   "view": "side",
+   "w": 4.5,
+   "h": 0.9,
+   "desc": "a wooden rowing boat painted red-brown with a white stripe, two oars; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    4.5,
+    1.4,
+    0.9
+   ]
+  },
+  {
+   "id": "boat_tug_red_side",
+   "cat": "props",
+   "view": "side",
+   "w": 14.0,
+   "h": 6.0,
+   "desc": "a river tugboat with a dark red hull and white wheelhouse, black funnel with a red band, clean; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    14.0,
+    4.0,
+    6.0
+   ]
+  },
+  {
+   "id": "loco_tem2_blue_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 16.0,
+   "h": 4.6,
+   "desc": "a TEM2 shunting diesel locomotive in sky-blue with a white stripe, clean, freshly painted; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    16.0,
+    3.0,
+    4.6
+   ]
+  },
+  {
+   "id": "wagon_boxcar_green_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 14.0,
+   "h": 4.3,
+   "desc": "a four-axle covered railway boxcar in dark green with white doors, clean; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    14.0,
+    3.0,
+    4.3
+   ]
+  },
+  {
+   "id": "wagon_tanker_white_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 12.0,
+   "h": 4.4,
+   "desc": "a four-axle railway tank wagon with a light grey-white tank and black frame, clean; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.0,
+    3.0,
+    4.4
+   ]
+  },
+  {
+   "id": "wagon_passenger_blue_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 24.0,
+   "h": 4.3,
+   "desc": "a passenger railway car in dark blue with a yellow stripe, clean windows; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    24.0,
+    3.0,
+    4.3
+   ]
+  },
+  {
+   "id": "wagon_gondola_redbrown_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 14.0,
+   "h": 3.5,
+   "desc": "an open gondola railway wagon in red-brown primer paint, half full of grey scrap metal; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    14.0,
+    3.0,
+    3.5
+   ]
+  },
+  {
+   "id": "trailer_kung_sand_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6.0,
+   "h": 3.2,
+   "desc": "a KUNG box trailer in sand-yellow paint with green camouflage blots, clean; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.0,
+    2.5,
+    3.2
+   ]
+  },
+  {
+   "id": "trailer_tank_milk_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 3.8,
+   "h": 2.0,
+   "desc": "a small two-wheel milk tank trailer with a polished silver-grey tank and blue frame; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.8,
+    1.8,
+    2.0
+   ]
+  },
+  {
+   "id": "trailer_generator_orange_angled",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 3.5,
+   "h": 1.9,
+   "desc": "a diesel generator on a two-wheel trailer with a safety-orange housing, clean; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s; clean readable silhouette, 2-3 main flat colours, clear large shapes and readable details, NO noisy all-over grunge, wear only where stated; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.5,
+    1.8,
+    1.9
+   ]
+  }
+ ]
+}

@@ -1,0 +1,1618 @@
+{
+ "fx_framing": "A sprite sheet of ONE short visual-effect animation for a 2D top-down pixel-art survival game: a grid of {cols} columns and {rows} rows of equally sized square cells holding {n} frames in reading order (left to right, then the next row). Fully transparent background. Each frame sits in the middle of its own cell with a wide empty margin; nothing touches or crosses the cell borders; the effect has the same scale and the same anchor point in every frame, and consecutive frames change smoothly so they play as a fluid animation. Bold, simple, readable shapes with clear stepped cel shading (3 to 5 tones) and crisp edges, so it still reads when shrunk to a tiny pixel sprite. No text, no numbers, no labels, no grid lines, no cell borders, no background colour, no ground, no cast shadow.",
+ "fx_style": "Classic 16-bit pixel-art game effect look (like Enter the Gungeon, Hyper Light Drifter, Project Zomboid effects); gritty Soviet post-apocalyptic mood, colours slightly desaturated except light-emitting parts (fire, sparks, flashes, flares) which stay bright and saturated.",
+ "assets": [
+  {
+   "id": "sea_deck_grating",
+   "cat": "tiles",
+   "tile": 2,
+   "desc": "floor viewed straight down from above: rusty galvanised steel bar grating of an offshore oil platform deck, dark sea water visible faintly through the gaps"
+  },
+  {
+   "id": "sea_deck_plate",
+   "cat": "tiles",
+   "tile": 2,
+   "desc": "floor viewed straight down from above: weathered diamond-tread steel deck plates of an offshore oil platform, bolted seams, rust patches, oil stains, faded yellow-grey paint"
+  },
+  {
+   "id": "sea_deck_helipad",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "floor viewed straight down from above: dark green-grey painted steel helideck surface with anti-slip texture, worn paint, rust spots"
+  },
+  {
+   "id": "sea_helipad",
+   "cat": "props",
+   "view": "top",
+   "w": 14,
+   "h": 14,
+   "desc": "an octagonal offshore platform helipad with a big faded white H marking inside a worn yellow circle, safety net rim around the edge, dark green-grey deck; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers"
+  },
+  {
+   "id": "sea_railing_front",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 1.2,
+   "desc": "a 3-metre straight section of offshore platform safety railing, yellow-painted steel tubes with two rails and toe board, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    3,
+    0.2,
+    1.2
+   ]
+  },
+  {
+   "id": "sea_railing_side",
+   "cat": "props",
+   "view": "front",
+   "w": 0.3,
+   "h": 1.2,
+   "desc": "the end of an offshore platform yellow steel safety railing seen end-on, a single post with rails; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    0.2,
+    3,
+    1.2
+   ]
+  },
+  {
+   "id": "sea_stairs_deck",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 4,
+   "desc": "a steep steel stairway between two decks of an offshore oil platform, grated treads, yellow handrails, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    1.5,
+    4,
+    4
+   ]
+  },
+  {
+   "id": "sea_derrick",
+   "cat": "props",
+   "view": "front",
+   "w": 8,
+   "h": 22,
+   "desc": "a tall offshore drilling derrick: tapering lattice steel tower painted bright safety orange and white, crown block on top, cables; fresh-looking paint with a few chipped spots; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    8,
+    8,
+    22
+   ]
+  },
+  {
+   "id": "sea_drill_floor",
+   "cat": "props",
+   "view": "angled",
+   "w": 8,
+   "h": 3,
+   "desc": "an oil rig drill floor: a steel platform with a rotary table, drill pipe stands racked at the side, drawworks winch, tongs, mud and oil everywhere; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    8,
+    8,
+    3
+   ]
+  },
+  {
+   "id": "sea_flare_stack",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 16,
+   "desc": "a tall slender gas flare boom/stack of an offshore platform, lattice steel tower with a pipe and a burner tip on top with a bright orange gas flame and black smoke; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    3,
+    3,
+    16
+   ]
+  },
+  {
+   "id": "sea_crane_pedestal",
+   "cat": "props",
+   "view": "angled",
+   "w": 14,
+   "h": 8,
+   "desc": "an offshore pedestal crane painted bright safety yellow with a black-and-yellow striped boom tip and a white operator cabin, long lattice boom with hook; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    4,
+    8
+   ]
+  },
+  {
+   "id": "sea_quarters_ext",
+   "cat": "building",
+   "view": "front",
+   "w": 12,
+   "h": 8,
+   "desc": "a clean white offshore living quarters module with blue window frames, orange lifebuoys on the railings, yellow external stairs; salt-stained streaks under windows only; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    12,
+    8,
+    8
+   ]
+  },
+  {
+   "id": "sea_cabin_bunk",
+   "cat": "furniture",
+   "view": "front",
+   "w": 2,
+   "h": 1.6,
+   "desc": "a cramped offshore platform crew cabin bunk bed, two-tier metal bunk with thin stained mattresses and a grey blanket; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    2,
+    0.9,
+    1.6
+   ]
+  },
+  {
+   "id": "sea_mess_table",
+   "cat": "furniture",
+   "view": "angled",
+   "w": 2.4,
+   "h": 1,
+   "desc": "a bolted-down steel mess hall table with two fixed benches, metal trays and mugs left on it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    2.4,
+    1.6,
+    1
+   ]
+  },
+  {
+   "id": "sea_control_console",
+   "cat": "furniture",
+   "view": "front",
+   "w": 3,
+   "h": 1.6,
+   "desc": "a Soviet-era offshore platform control room console desk: rows of dials, gauges, switches, small CRT screens, dusty, some panels broken; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    3,
+    1,
+    1.6
+   ]
+  },
+  {
+   "id": "sea_control_panel_tall",
+   "cat": "furniture",
+   "view": "front",
+   "w": 1.4,
+   "h": 2.2,
+   "desc": "a tall grey metal control cabinet with gauges, indicator lamps and a mimic diagram of pipes, door ajar with wires hanging; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    1.4,
+    0.6,
+    2.2
+   ]
+  },
+  {
+   "id": "sea_pipes_run",
+   "cat": "props",
+   "view": "front",
+   "w": 4,
+   "h": 1.2,
+   "desc": "a bundle of several thick parallel industrial pipes on steel supports with flanges, yellow and grey paint, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    4,
+    1,
+    1.2
+   ]
+  },
+  {
+   "id": "sea_valve_manifold",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 1.6,
+   "desc": "an oil platform valve manifold: pipes with big red hand-wheel valves, pressure gauges and flanges on a skid; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    2.5,
+    1.5,
+    1.6
+   ]
+  },
+  {
+   "id": "sea_tank_vertical",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 4,
+   "desc": "a vertical process tank painted white with a red band, yellow ladder and valves; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "sea_tank_horizontal",
+   "cat": "props",
+   "view": "angled",
+   "w": 5,
+   "h": 2.5,
+   "desc": "a horizontal cylindrical pressure vessel separator on saddles, pipes and gauges, grey-green paint, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    5,
+    2,
+    2.5
+   ]
+  },
+  {
+   "id": "sea_lifeboat_davit",
+   "cat": "props",
+   "view": "angled",
+   "w": 8,
+   "h": 4,
+   "desc": "a bright orange enclosed lifeboat with white roof hanging from a yellow steel davit frame; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    8,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "sea_lifeboat_top",
+   "cat": "props",
+   "view": "top",
+   "w": 7.5,
+   "h": 2.8,
+   "desc": "a faded orange enclosed Soviet-style lifeboat with a covered canopy, hatches, nose to the right; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers"
+  },
+  {
+   "id": "sea_platform_leg",
+   "cat": "props",
+   "view": "top",
+   "w": 5,
+   "h": 5,
+   "desc": "a huge steel-and-concrete offshore platform leg column rising out of the sea, its round top cut, surrounded by white wave foam and churning water ring, rusted barnacled steel; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers"
+  },
+  {
+   "id": "sea_mooring_bitt",
+   "cat": "props",
+   "view": "front",
+   "w": 1,
+   "h": 0.8,
+   "desc": "a double steel mooring bitt bollard on a deck with a rusty frayed rope looped around it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    1,
+    0.5,
+    0.8
+   ]
+  },
+  {
+   "id": "sea_generator",
+   "cat": "props",
+   "view": "angled",
+   "w": 4,
+   "h": 2.2,
+   "desc": "a diesel generator in a dark green steel enclosure with yellow lifting eyes and a black exhaust, clean; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    2,
+    2.2
+   ]
+  },
+  {
+   "id": "sea_barrels_pallet",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.8,
+   "h": 1.2,
+   "desc": "four rusty blue and red oil drums standing together on a wooden pallet, tied with a rusty strap; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    1.4,
+    1.4,
+    1.2
+   ]
+  },
+  {
+   "id": "oil_pumpjack",
+   "cat": "props",
+   "view": "side",
+   "w": 7,
+   "h": 4,
+   "desc": "an oil well pump jack (nodding donkey) painted blue with a yellow horsehead and grey counterweights on a concrete base; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    7,
+    2.5,
+    4
+   ]
+  },
+  {
+   "id": "oil_sea_derrick_small",
+   "cat": "props",
+   "view": "front",
+   "w": 6,
+   "h": 9,
+   "desc": "a small old oil derrick standing on a rusty steel pile platform over shallow sea water, lattice tower, wooden walkway and a ladder going down to the water; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    6,
+    6,
+    9
+   ]
+  },
+  {
+   "id": "oil_sea_platform_small",
+   "cat": "props",
+   "view": "front",
+   "w": 6,
+   "h": 4,
+   "desc": "a small square rusty steel platform on four piles in the sea with a railing, a wellhead with valves and a ladder going down to the water; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    6,
+    6,
+    4
+   ]
+  },
+  {
+   "id": "oil_wellhead",
+   "cat": "props",
+   "view": "front",
+   "w": 1.2,
+   "h": 1.6,
+   "desc": "an oil wellhead christmas tree: stacked valves with red hand-wheels and a pressure gauge, oil-soaked; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    1,
+    1,
+    1.6
+   ]
+  },
+  {
+   "id": "oil_storage_tank",
+   "cat": "props",
+   "view": "front",
+   "w": 10,
+   "h": 7,
+   "desc": "a large round steel oil storage tank with a spiral staircase on the side, faded silver paint with dark rust streaks and oil drips; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    10,
+    10,
+    7
+   ]
+  },
+  {
+   "id": "oil_storage_tank_small",
+   "cat": "props",
+   "view": "front",
+   "w": 4,
+   "h": 3.5,
+   "desc": "a small vertical cylindrical oil tank with a ladder, black oil stains, rusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    4,
+    4,
+    3.5
+   ]
+  },
+  {
+   "id": "port_gantry_crane",
+   "cat": "props",
+   "view": "front",
+   "w": 20,
+   "h": 24,
+   "desc": "a huge ship-to-shore container gantry crane painted bright red and white, steel portal legs and a long boom, white operator cabin; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    20,
+    14,
+    24
+   ]
+  },
+  {
+   "id": "port_harbour_crane",
+   "cat": "props",
+   "view": "angled",
+   "w": 10,
+   "h": 14,
+   "desc": "a portal harbour crane painted light blue with a yellow cabin housing and a long lattice jib with hook, chipped paint; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    8,
+    8,
+    14
+   ]
+  },
+  {
+   "id": "port_container_red",
+   "cat": "containers",
+   "view": "front",
+   "w": 6.1,
+   "h": 2.6,
+   "desc": "a 20-foot shipping container painted bright oxide red, corrugated walls, mostly fresh paint with a few chipped edges; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.1,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_blue",
+   "cat": "containers",
+   "view": "front",
+   "w": 6.1,
+   "h": 2.6,
+   "desc": "a 20-foot shipping container painted deep cobalt blue, corrugated walls, fresh paint, a few scratches; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.1,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_green",
+   "cat": "containers",
+   "view": "front",
+   "w": 6.1,
+   "h": 2.6,
+   "desc": "a 20-foot shipping container painted bottle green, corrugated walls, salt-stained streaks; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.1,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_grey",
+   "cat": "containers",
+   "view": "front",
+   "w": 6.1,
+   "h": 2.6,
+   "desc": "a 20-foot shipping container painted light grey-white, corrugated walls, clean; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.1,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_orange",
+   "cat": "containers",
+   "view": "front",
+   "w": 6.1,
+   "h": 2.6,
+   "desc": "a 20-foot shipping container painted vivid orange, corrugated walls, chipped paint at corners; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.1,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_open",
+   "cat": "containers",
+   "view": "angled",
+   "w": 6.1,
+   "h": 2.6,
+   "desc": "a rusty 20-foot shipping container with both end doors swung open showing a dark empty inside with debris; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    6.1,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_rusted",
+   "cat": "containers",
+   "view": "angled",
+   "w": 6.1,
+   "h": 2.6,
+   "desc": "a heavily rusted, holed and dented brown 20-foot shipping container, paint almost gone; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    6.1,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_stack",
+   "cat": "containers",
+   "view": "front",
+   "w": 6.1,
+   "h": 5.2,
+   "desc": "two stacked 20-foot shipping containers, lower one cobalt blue, upper one bright yellow, clean paint; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.1,
+    2.4,
+    5.2
+   ]
+  },
+  {
+   "id": "port_container_top_red",
+   "cat": "containers",
+   "view": "top",
+   "w": 6.1,
+   "h": 2.4,
+   "desc": "the corrugated roof of a faded red 20-foot shipping container with corner castings, rust patches; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers"
+  },
+  {
+   "id": "port_warehouse",
+   "cat": "building",
+   "view": "front",
+   "w": 18,
+   "h": 8,
+   "desc": "a long Soviet port warehouse: grey concrete panels and corrugated metal, big sliding doors, broken high windows, rust streaks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    18,
+    12,
+    8
+   ]
+  },
+  {
+   "id": "port_pier_wood",
+   "cat": "tiles",
+   "tile": 2,
+   "desc": "floor viewed straight down from above: weathered grey wooden pier planks with gaps, rusty nails, salt stains, seagull droppings"
+  },
+  {
+   "id": "port_quay_concrete",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "floor viewed straight down from above: cracked weathered concrete quay slabs with rusty iron edge rails, oil stains, puddles"
+  },
+  {
+   "id": "port_pier_wood_end",
+   "cat": "props",
+   "view": "top",
+   "w": 4,
+   "h": 4,
+   "desc": "the end of a narrow wooden pier on wooden piles over sea water, planks with gaps, a few posts, ripples around the piles; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers"
+  },
+  {
+   "id": "port_bollard",
+   "cat": "props",
+   "view": "front",
+   "w": 0.7,
+   "h": 0.8,
+   "desc": "a squat cast-iron mushroom-shaped harbour mooring bollard, black paint worn off to rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    0.6,
+    0.6,
+    0.8
+   ]
+  },
+  {
+   "id": "port_fender_tyre",
+   "cat": "props",
+   "view": "front",
+   "w": 1.2,
+   "h": 1.2,
+   "desc": "a huge old black rubber tyre hung as a boat fender on a chain against a quay wall; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    1.2,
+    0.5,
+    1.2
+   ]
+  },
+  {
+   "id": "port_customs_booth",
+   "cat": "building",
+   "view": "angled",
+   "w": 3,
+   "h": 3,
+   "desc": "a small Soviet port customs/guard booth: a box kiosk with windows on all sides, a barrier arm in front, peeling paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    2.5,
+    2.5,
+    3
+   ]
+  },
+  {
+   "id": "port_fuel_tank",
+   "cat": "props",
+   "view": "angled",
+   "w": 6,
+   "h": 3,
+   "desc": "a horizontal cylindrical fuel tank on concrete supports with a fuel hose stand, rusty, oil stains; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    6,
+    2.5,
+    3
+   ]
+  },
+  {
+   "id": "port_forklift",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 3.5,
+   "h": 2.6,
+   "desc": "an old Soviet Balkancar forklift truck, faded yellow-orange, flat tyres, rusty forks lowered; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    3,
+    1.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_rail_quay",
+   "cat": "tiles",
+   "tile": 3,
+   "desc": "floor viewed straight down from above: a single railway track embedded flush in a concrete port quay, steel rails running top to bottom, cracked concrete, oil stains"
+  },
+  {
+   "id": "ship_cargo_bow",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 14,
+   "h": 12,
+   "desc": "the bow section of a big beached cargo ship: dark red-primer hull, light green deck, white anchor winches, pointed bow facing up, torn jagged steel at the bottom cut edge; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "ship_cargo_mid",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 14,
+   "h": 20,
+   "desc": "the middle section of a beached cargo ship: red-primer hull, two big dark green closed hold hatch covers, torn jagged steel at both cut ends; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "ship_cargo_stern",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 14,
+   "h": 14,
+   "desc": "the stern section of a beached cargo ship: red-primer hull, white superstructure roof, black-and-blue funnel, rounded stern pointing down, torn jagged steel at the top edge; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "ship_wheelhouse",
+   "cat": "building",
+   "view": "front",
+   "w": 8,
+   "h": 6,
+   "desc": "a ship bridge superstructure painted clean white with a row of dark front windows and bridge wings, a red stripe, radar mast on top; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    8,
+    5,
+    6
+   ]
+  },
+  {
+   "id": "ship_hold_hatch",
+   "cat": "props",
+   "view": "top",
+   "w": 6,
+   "h": 6,
+   "desc": "an open cargo ship hold hatch: a square dark hole in rusty deck with folded hatch cover panels and debris inside; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers"
+  },
+  {
+   "id": "ship_trawler_wreck",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 16,
+   "h": 7,
+   "desc": "a Soviet fishing trawler wreck run aground and tilted, rusted hull, wheelhouse with broken windows, gallows and torn nets; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    16,
+    6,
+    7
+   ]
+  },
+  {
+   "id": "ship_tug_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 12,
+   "h": 5,
+   "desc": "a harbour tugboat with a navy-black hull, red deck, white wheelhouse, black tyre fenders around the sides, nose to the right; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "ship_rowboat_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 4,
+   "h": 1.6,
+   "desc": "an old wooden rowing boat with two oars resting inside, flaking white and green paint, a puddle at the bottom, nose to the right; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers"
+  },
+  {
+   "id": "ship_motorboat_progress",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 4.6,
+   "h": 1.8,
+   "desc": "an old Soviet Progress aluminium motor boat with a windshield and outboard motor, dented grey-blue hull, nose to the right; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers"
+  },
+  {
+   "id": "ship_barge_side",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 20,
+   "h": 4,
+   "desc": "a rusty flat steel river/sea cargo barge with low sides, partly filled with gravel, exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    20,
+    8,
+    4
+   ]
+  },
+  {
+   "id": "sea_buoy_red",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "h": 2.4,
+   "desc": "a red-painted steel navigation buoy floating, conical top with a cage light, rust and green algae at the waterline; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    1.4,
+    1.4,
+    2.4
+   ]
+  },
+  {
+   "id": "sea_buoy_green",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "h": 2.4,
+   "desc": "a green-painted cylindrical steel navigation buoy floating, rust and algae at the waterline; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    1.4,
+    1.4,
+    2.4
+   ]
+  },
+  {
+   "id": "sea_anchor",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1,
+   "desc": "a large rusted stockless ship anchor lying on the ground with a few links of heavy chain; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    2,
+    1.2,
+    1
+   ]
+  },
+  {
+   "id": "sea_chain_pile",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 0.6,
+   "desc": "a heap of very heavy rusted anchor chain links lying in a pile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    2,
+    1.5,
+    0.6
+   ]
+  },
+  {
+   "id": "sub_pen_entrance",
+   "cat": "building",
+   "view": "front",
+   "w": 24,
+   "h": 12,
+   "desc": "the massive concrete entrance of a Soviet submarine pen cut into a rocky sea cliff: a huge arched tunnel opening with dark water going in, weathered concrete with rust stains and moss; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    24,
+    6,
+    12
+   ]
+  },
+  {
+   "id": "sub_submarine_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 70,
+   "h": 9,
+   "desc": "a long matte black submarine with a dark red waterline, conning tower sail in the middle, clean silhouette, nose to the right; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "sub_lock_gate",
+   "cat": "props",
+   "view": "front",
+   "w": 12,
+   "h": 6,
+   "desc": "a massive rusted steel lock gate of a dry dock, riveted panels, walkway on top with railing; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    12,
+    2,
+    6
+   ]
+  },
+  {
+   "id": "sub_torpedo_rack",
+   "cat": "furniture",
+   "view": "angled",
+   "w": 5,
+   "h": 2,
+   "desc": "a steel rack holding three long dark grey-green torpedoes, chains and cradles, no markings; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    5,
+    1.5,
+    2
+   ]
+  },
+  {
+   "id": "sub_dock_crane",
+   "cat": "props",
+   "view": "angled",
+   "w": 6,
+   "h": 8,
+   "desc": "a small rail-mounted wall crane inside a submarine pen, yellow steel gantry with hoist, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    5,
+    3,
+    8
+   ]
+  },
+  {
+   "id": "coast_lighthouse",
+   "cat": "building",
+   "view": "front",
+   "w": 7,
+   "h": 18,
+   "desc": "a white lighthouse tower with two bright red bands on dark grey coastal rocks, black lantern room with glass on top; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    6,
+    6,
+    18
+   ]
+  },
+  {
+   "id": "fish_conveyor",
+   "cat": "furniture",
+   "view": "angled",
+   "w": 5,
+   "h": 1.3,
+   "desc": "a fish processing conveyor belt line: steel frame with a worn rubber belt, scattered dead fish, ice and slime; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    5,
+    1,
+    1.3
+   ]
+  },
+  {
+   "id": "fish_freezer_boxes",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 1.2,
+   "desc": "a stack of wet plastic fish crates and frosted metal freezer boxes, a few fish tails sticking out; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    1.4,
+    1,
+    1.2
+   ]
+  },
+  {
+   "id": "fish_net_pile",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.2,
+   "h": 0.7,
+   "desc": "a big heap of tangled green fishing net with orange floats and ropes; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    2,
+    1.6,
+    0.7
+   ]
+  },
+  {
+   "id": "fish_net_drying",
+   "cat": "props",
+   "view": "front",
+   "w": 4,
+   "h": 2.2,
+   "desc": "a fishing net hung to dry on two wooden poles, with floats and holes; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    4,
+    0.4,
+    2.2
+   ]
+  },
+  {
+   "id": "coast_boat_station",
+   "cat": "building",
+   "view": "front",
+   "w": 10,
+   "h": 5,
+   "desc": "a small Soviet boat station shed on the shore: a wooden boathouse with a big double door facing the water, a slipway ramp going into the sea, peeling blue paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    10,
+    8,
+    5
+   ]
+  },
+  {
+   "id": "coast_rock_waves_1",
+   "cat": "nodes",
+   "view": "top",
+   "w": 4,
+   "h": 4,
+   "desc": "a dark wet coastal rock boulder sticking out of the sea with white wave foam swirling around it, barnacles and seaweed; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers"
+  },
+  {
+   "id": "coast_rock_waves_2",
+   "cat": "nodes",
+   "view": "top",
+   "w": 6,
+   "h": 3,
+   "desc": "a cluster of jagged dark wet sea rocks in shallow water with white surf foam around them; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_sea_foam_1",
+   "cat": "decals",
+   "view": "top",
+   "w": 3,
+   "h": 3,
+   "desc": "a patch of white sea foam and bubbles floating on water, lace-like wispy pattern, mostly transparent; seen strictly from directly above (orthographic top-down), on transparent background; no text"
+  },
+  {
+   "id": "decal_sea_foam_line",
+   "cat": "decals",
+   "view": "top",
+   "w": 4,
+   "h": 4,
+   "desc": "a long thin irregular line of white wave foam as on a beach wash line, horizontal, mostly transparent; seen strictly from directly above (orthographic top-down), on transparent background; no text"
+  },
+  {
+   "id": "decal_seaweed_pile",
+   "cat": "decals",
+   "view": "top",
+   "w": 1.5,
+   "h": 1.5,
+   "desc": "a heap of washed-up dark brown-green seaweed and kelp on the sand; seen strictly from directly above (orthographic top-down), on transparent background; no text"
+  },
+  {
+   "id": "decal_beach_debris",
+   "cat": "decals",
+   "view": "top",
+   "w": 2,
+   "h": 2,
+   "desc": "washed-up beach debris: driftwood pieces, a plastic bottle, a frayed rope, a broken float and small shells scattered; seen strictly from directly above (orthographic top-down), on transparent background; no text"
+  },
+  {
+   "id": "decal_oil_slick",
+   "cat": "decals",
+   "view": "top",
+   "w": 4,
+   "h": 4,
+   "desc": "a dark iridescent oil slick spreading on sea water with rainbow sheen edges, semi-transparent; seen strictly from directly above (orthographic top-down), on transparent background; no text"
+  },
+  {
+   "id": "beach_driftwood",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 0.5,
+   "desc": "a large bleached grey driftwood log with broken branches; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers",
+   "foot": [
+    2.4,
+    0.6,
+    0.5
+   ]
+  },
+  {
+   "id": "sea_water_deep",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "water surface viewed straight down from above: deep dark cold northern sea, dark blue-grey-green with subtle small waves"
+  },
+  {
+   "id": "sea_water_shallow",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "water surface viewed straight down from above: shallow cold sea water over sand and pebbles visible through it, grey-green-turquoise, small ripples"
+  },
+  {
+   "id": "sea_beach_sand",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "ground viewed straight down from above: wet grey-brown beach sand with small pebbles and shell fragments"
+  },
+  {
+   "id": "sea_beach_pebbles",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "ground viewed straight down from above: rounded grey sea pebbles and shingle, some wet"
+  },
+  {
+   "id": "sea_shoreline_straight",
+   "cat": "decals",
+   "view": "top",
+   "w": 4,
+   "h": 4,
+   "desc": "a straight shoreline transition strip: wet sand at the top fading into a band of white surf foam and then shallow sea water at the bottom, edges left and right continue seamlessly; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers"
+  },
+  {
+   "id": "sea_shoreline_corner",
+   "cat": "decals",
+   "view": "top",
+   "w": 4,
+   "h": 4,
+   "desc": "a shoreline outer corner: wet sand in the top-left quarter curving into surf foam and shallow sea water around it; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers"
+  },
+  {
+   "id": "fx_wave_foam",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "an animated loop of white wave foam washing onto a shore: a curved band of white surf foam rolls forward, spreads into lacy bubbles and retreats, semi-transparent white and pale cyan"
+  },
+  {
+   "id": "fx_gas_flare",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "an animated loop of a big gas flare flame burning on top of a pipe: roaring orange-yellow fire tongue swaying in the wind with dark smoke wisps at the tip"
+  },
+  {
+   "id": "fx_water_ripple",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 48,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "an animated loop of concentric ripple rings spreading on water around a floating object, pale white-cyan semi-transparent rings"
+  },
+  {
+   "id": "cship_bow",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 24,
+   "h": 22,
+   "desc": "the bow section of a large rusty container ship, pointed bow facing up, forecastle with anchor winches, the first rows of stacked shipping containers in various faded colours (red, blue, green, grey, orange), torn jagged steel at the bottom cut edge; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "cship_mid_stacked",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 24,
+   "h": 30,
+   "desc": "a middle hull section of a loaded container ship: navy-grey hull, deck tightly packed with 40-foot containers in clearly distinct colours (bright red, cobalt blue, bottle green, yellow, white, orange) in a varied pattern, jagged cut ends; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "cship_mid_chaos",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 24,
+   "h": 30,
+   "desc": "a middle hull section of a wrecked container ship: containers toppled and fallen askew, some open with spilled cargo, some burnt black, gaps showing dark hold below, jagged cut ends; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "cship_stern",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 24,
+   "h": 26,
+   "desc": "the stern section of a large container ship with the tall superstructure roof, funnel and radar mast, rounded stern facing down, a few container rows in front, torn jagged steel at the top cut edge; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "cship_hold_open",
+   "cat": "props",
+   "view": "top",
+   "w": 12,
+   "h": 14,
+   "desc": "an open cargo hold of a container ship: deep dark rectangular hold with cell guide rails and a few containers inside, hatch cover lifted aside, rust; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "cship_superstructure",
+   "cat": "building",
+   "view": "front",
+   "w": 16,
+   "h": 18,
+   "desc": "the tall accommodation superstructure of a container ship painted clean white with dark window rows, orange lifeboat on the side, a blue funnel behind; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    16,
+    10,
+    18
+   ]
+  },
+  {
+   "id": "cship_bridge_console",
+   "cat": "furniture",
+   "view": "front",
+   "w": 4,
+   "h": 1.6,
+   "desc": "a container ship bridge console: navigation radar screen, engine telegraph, dials, throttle levers, dusty, cracked screens; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    1,
+    1.6
+   ]
+  },
+  {
+   "id": "cship_ship_wheel",
+   "cat": "furniture",
+   "view": "front",
+   "w": 1,
+   "h": 1.4,
+   "desc": "a ship steering stand with a small wheel and compass binnacle on a bridge; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.8,
+    0.8,
+    1.4
+   ]
+  },
+  {
+   "id": "cship_deck_crane",
+   "cat": "props",
+   "view": "angled",
+   "w": 10,
+   "h": 10,
+   "desc": "a ship deck crane on a container ship: a round pedestal with an operator cabin and a long boom with hook, faded yellow paint, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    4,
+    10
+   ]
+  },
+  {
+   "id": "cship_lifeboat",
+   "cat": "props",
+   "view": "angled",
+   "w": 8,
+   "h": 4,
+   "desc": "a faded orange enclosed free-fall lifeboat on a steel launching ramp at the stern of a cargo ship, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    8,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "cship_gangway",
+   "cat": "props",
+   "view": "angled",
+   "w": 10,
+   "h": 4,
+   "desc": "a steel accommodation ladder gangway hanging down the side of a ship hull to a quay, with handrails and grated steps; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    10,
+    1.5,
+    4
+   ]
+  },
+  {
+   "id": "port_container_burnt",
+   "cat": "containers",
+   "view": "angled",
+   "w": 6.1,
+   "h": 2.6,
+   "desc": "a 20-foot shipping container burnt blackened scorched rusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.1,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_fallen",
+   "cat": "containers",
+   "view": "angled",
+   "w": 6.1,
+   "h": 2.6,
+   "desc": "a 20-foot shipping container toppled on its side, dented and rusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.1,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_open_spill",
+   "cat": "containers",
+   "view": "angled",
+   "w": 6.1,
+   "h": 2.6,
+   "desc": "a 20-foot shipping container doors open with cardboard boxes and sacks spilling out, rusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.1,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_top_blue",
+   "cat": "containers",
+   "view": "top",
+   "w": 6.1,
+   "h": 2.4,
+   "desc": "the corrugated roof of a faded blue 20-foot shipping container with corner castings, rust patches; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "port_container_top_burnt",
+   "cat": "containers",
+   "view": "top",
+   "w": 6.1,
+   "h": 2.4,
+   "desc": "the scorched blackened corrugated roof of a burnt 20-foot shipping container, holes and soot; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "cship_engine_room",
+   "cat": "furniture",
+   "view": "angled",
+   "w": 6,
+   "h": 3,
+   "desc": "a huge ship diesel engine block in an engine room: row of cylinder heads, catwalk with railing, pipes, oil everywhere; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6,
+    3,
+    3
+   ]
+  },
+  {
+   "id": "cship_cabin_bed",
+   "cat": "furniture",
+   "view": "front",
+   "w": 2,
+   "h": 1.2,
+   "desc": "a ship officer cabin single bed built into a wooden frame with drawers underneath, crumpled blanket; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    0.9,
+    1.2
+   ]
+  },
+  {
+   "id": "cship_mess_galley",
+   "cat": "furniture",
+   "view": "front",
+   "w": 3,
+   "h": 1.6,
+   "desc": "a ship galley stove range: large steel electric cooker with rails around the top, pots, grease; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.9,
+    1.6
+   ]
+  },
+  {
+   "id": "cship_chart_table",
+   "cat": "furniture",
+   "view": "angled",
+   "w": 1.8,
+   "h": 1.2,
+   "desc": "a ship chart table with a faded blank sea chart, dividers, an old radio set on top; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.8,
+    1,
+    1.2
+   ]
+  },
+  {
+   "id": "cship_lashing_bars",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 0.4,
+   "desc": "a pile of long steel container lashing bars and twist-locks on deck; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1,
+    0.4
+   ]
+  },
+  {
+   "id": "cship_hatch_cover_top",
+   "cat": "props",
+   "view": "top",
+   "w": 12,
+   "h": 13,
+   "desc": "a closed container ship hatch cover pontoon: large flat steel panel with reinforcing ribs, rust patches, faded grey-green paint; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "cship_container_rows_top",
+   "cat": "containers",
+   "view": "top",
+   "w": 13,
+   "h": 12,
+   "desc": "a block of shipping containers stacked tightly in rows, roofs seen from above, many faded colours red blue green orange grey, some dented, one burnt black; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "cship_funnel",
+   "cat": "props",
+   "view": "front",
+   "w": 5,
+   "h": 7,
+   "desc": "a ship funnel smokestack: wide oval steel funnel with a coloured band, soot-blackened top, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5,
+    4,
+    7
+   ]
+  },
+  {
+   "id": "cship_mast_radar",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 8,
+   "desc": "a ship radar mast: steel mast with radar scanner bars, antennas, navigation lights, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    2,
+    8
+   ]
+  },
+  {
+   "id": "cship_liferaft_canister",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.5,
+   "h": 0.9,
+   "desc": "two white fibreglass life raft canisters on a steel cradle rack, dirty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.5,
+    0.8,
+    0.9
+   ]
+  },
+  {
+   "id": "sea_seagull_flock",
+   "cat": "decals",
+   "view": "top",
+   "w": 3,
+   "h": 3,
+   "desc": "a few grey-white seagulls standing on the ground, scattered feathers; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "sea_tide_pool",
+   "cat": "decals",
+   "view": "top",
+   "w": 3,
+   "h": 3,
+   "desc": "a small rocky tide pool with clear water, seaweed, starfish and mussels on rocks; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "port_rail_wagon_tank",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 12,
+   "h": 4,
+   "desc": "a Soviet black railway tank wagon for oil, rusted and oily, exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    12,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "port_container_reach_stacker",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 11,
+   "h": 5,
+   "desc": "a container reach stacker vehicle with a long telescopic boom and spreader, faded yellow, rusty, flat tyres; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    9,
+    4,
+    5
+   ]
+  },
+  {
+   "id": "port_quay_ladder",
+   "cat": "props",
+   "view": "front",
+   "w": 1,
+   "h": 2.5,
+   "desc": "a rusty steel ladder going down a concrete quay wall into the water, covered with green algae at the bottom; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.8,
+    0.3,
+    2.5
+   ]
+  },
+  {
+   "id": "coast_wave_breaker",
+   "cat": "props",
+   "view": "angled",
+   "w": 5,
+   "h": 1.5,
+   "desc": "a pile of concrete tetrapod wave breakers on the shore, weathered, algae and barnacles; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5,
+    3,
+    1.5
+   ]
+  },
+  {
+   "id": "sea_lifebuoy_stand",
+   "cat": "props",
+   "view": "front",
+   "w": 0.8,
+   "h": 1.4,
+   "desc": "a white-and-red striped lifebuoy ring hanging on a white post; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.6,
+    0.3,
+    1.4
+   ]
+  },
+  {
+   "id": "sea_fire_hose_box",
+   "cat": "props",
+   "view": "front",
+   "w": 1,
+   "h": 1.4,
+   "desc": "a bright red fire hose cabinet with a coiled canvas hose and a brass nozzle; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.4,
+    1.4
+   ]
+  },
+  {
+   "id": "sea_foam_tank_red",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "h": 2,
+   "desc": "a red fire-fighting foam tank on legs with a white hose reel; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    1,
+    2
+   ]
+  },
+  {
+   "id": "sea_gas_cylinders",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 1.6,
+   "desc": "a rack of tall gas cylinders, some blue, some yellow, some green, chained in a steel frame; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    0.8,
+    1.6
+   ]
+  },
+  {
+   "id": "sea_drill_pipe_rack",
+   "cat": "props",
+   "view": "angled",
+   "w": 8,
+   "h": 1.2,
+   "desc": "a horizontal rack of long drill pipes painted dark blue with white ends, on yellow steel supports; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    8,
+    2.5,
+    1.2
+   ]
+  },
+  {
+   "id": "sea_mud_pump",
+   "cat": "props",
+   "view": "angled",
+   "w": 4,
+   "h": 2,
+   "desc": "a large triplex mud pump painted dark green with a red motor and yellow guards; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    2,
+    2
+   ]
+  },
+  {
+   "id": "sea_platform_leg_side",
+   "cat": "props",
+   "view": "front",
+   "w": 4,
+   "h": 10,
+   "desc": "a giant yellow offshore jack-up platform leg: a triangular lattice steel column, bright yellow with black rack teeth, going down into water; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    4,
+    10
+   ]
+  },
+  {
+   "id": "port_container_yellow",
+   "cat": "containers",
+   "view": "front",
+   "w": 6.1,
+   "h": 2.6,
+   "desc": "a 20-foot shipping container painted bright mustard yellow, corrugated walls, fresh paint; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.1,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_white_reefer",
+   "cat": "containers",
+   "view": "front",
+   "w": 6.1,
+   "h": 2.6,
+   "desc": "a white refrigerated reefer shipping container with a grey cooling unit panel at one end, clean; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    6.1,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_40_blue",
+   "cat": "containers",
+   "view": "front",
+   "w": 12.2,
+   "h": 2.6,
+   "desc": "a 40-foot long shipping container painted navy blue, corrugated walls, chipped edges; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    12.2,
+    2.4,
+    2.6
+   ]
+  },
+  {
+   "id": "port_container_top_green",
+   "cat": "containers",
+   "view": "top",
+   "w": 6.1,
+   "h": 2.4,
+   "desc": "the corrugated roof of a bottle-green 20-foot shipping container with corner castings; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "port_container_top_yellow",
+   "cat": "containers",
+   "view": "top",
+   "w": 6.1,
+   "h": 2.4,
+   "desc": "the corrugated roof of a mustard-yellow 20-foot shipping container with corner castings; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "port_container_top_white",
+   "cat": "containers",
+   "view": "top",
+   "w": 6.1,
+   "h": 2.4,
+   "desc": "the corrugated roof of a white 20-foot shipping container with corner castings, salt stains; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "port_signal_light",
+   "cat": "props",
+   "view": "front",
+   "w": 0.8,
+   "h": 4,
+   "desc": "a harbour entrance navigation light tower: a short red-and-white striped steel pole with a lantern on top; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.8,
+    0.8,
+    4
+   ]
+  },
+  {
+   "id": "port_pier_concrete_end",
+   "cat": "props",
+   "view": "top",
+   "w": 6,
+   "h": 6,
+   "desc": "the end of a concrete pier with a black bollard, a yellow edge stripe and dark sea water around it; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "ship_rowboat_blue",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 4,
+   "h": 1.6,
+   "desc": "a wooden rowing boat painted pale blue outside and white inside, two oars, nose to the right; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "ship_kater_white",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 9,
+   "h": 3,
+   "desc": "a small white patrol motor launch with a grey cabin and a dark blue stripe along the hull, nose to the right; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "ship_pontoon_dock",
+   "cat": "props",
+   "view": "top",
+   "w": 8,
+   "h": 3,
+   "desc": "a floating steel pontoon dock painted dark grey with yellow edges and black tyre fenders; seen strictly from directly above (orthographic top-down), on transparent background; clear readable silhouette, 2-3 main colours, light wear only on edges, no all-over grunge; no text, no letters, no numbers, no logos"
+  }
+ ]
+}

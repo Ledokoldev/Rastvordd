@@ -1,0 +1,3715 @@
+{
+ "assets": [
+  {
+   "id": "obj_s_elevator_kiosk",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 3.2,
+   "desc": "a small concrete surface elevator head building with steel sliding doors and a card reader box with a red lamp, inside a fenced bunker compound; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    3.2
+   ]
+  },
+  {
+   "id": "obj_s_vent_tower",
+   "cat": "props",
+   "view": "front",
+   "w": 2.5,
+   "h": 5,
+   "desc": "a tall square concrete ventilation tower of an underground bunker with louvered grilles on top, stained; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.5,
+    2.5,
+    5
+   ]
+  },
+  {
+   "id": "obj_s_vent_mushroom",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 1.4,
+   "desc": "a squat concrete mushroom-shaped ventilation head of an underground bunker sticking out of the ground with a steel grille; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    1.6,
+    1.4
+   ]
+  },
+  {
+   "id": "obj_s_hangar_portal",
+   "cat": "props",
+   "view": "angled",
+   "w": 9,
+   "h": 4,
+   "desc": "a camouflaged bunker hangar entrance cut into a grassy hill: a big concrete portal with massive steel sliding doors, torn camouflage net draped over; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    9,
+    6,
+    4
+   ]
+  },
+  {
+   "id": "obj_s_helipad",
+   "cat": "props",
+   "view": "angled",
+   "w": 8,
+   "h": 0.3,
+   "desc": "a round concrete military helipad with faded painted circle marking, cracked, weeds; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    8,
+    8,
+    0.2
+   ]
+  },
+  {
+   "id": "obj_s_guard_bunker",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 2,
+   "desc": "a small concrete pillbox guard bunker with a narrow horizontal slit and a steel door; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    2
+   ]
+  },
+  {
+   "id": "obj_s_fence_double",
+   "cat": "props",
+   "view": "front",
+   "w": 4,
+   "h": 3,
+   "desc": "a double perimeter fence: tall concrete posts with mesh and barbed wire coils on top and a gravel strip; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     4,
+     0.3,
+     3
+    ]
+   }
+  },
+  {
+   "id": "obj_s_gate_sliding",
+   "cat": "props",
+   "view": "front",
+   "w": 6,
+   "h": 3,
+   "desc": "a heavy steel sliding gate of a secret military compound with a red star, on rails, rust; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     6,
+     0.3,
+     3
+    ]
+   }
+  },
+  {
+   "id": "obj_s_antenna_array",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 8,
+   "desc": "a tall steel lattice antenna mast with dish and whip antennas next to a small equipment hut; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    2,
+    8
+   ]
+  },
+  {
+   "id": "obj_s_stair_entrance",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 2.4,
+   "desc": "a concrete stairway entrance going down into the ground with a small roof and a steel door at the bottom, railings; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    4,
+    2.4
+   ]
+  },
+  {
+   "id": "obj_s_searchlight_tower",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 6,
+   "desc": "a steel guard tower with a big searchlight on top and a ladder; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    2,
+    6
+   ]
+  },
+  {
+   "id": "obj_l1_guard_desk",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.4,
+   "h": 1.4,
+   "desc": "a bunker guard room desk with a CRT monitor bank, phones and a logbook, behind a steel counter; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    1,
+    1.4
+   ]
+  },
+  {
+   "id": "obj_l1_armory_cage",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 2.4,
+   "desc": "a steel mesh storage cage with a locked mesh door and empty steel racks inside; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.2,
+     2.4
+    ]
+   }
+  },
+  {
+   "id": "obj_l1_dorm_bunks",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.2,
+   "h": 2,
+   "desc": "two steel bunk beds with green blankets and footlockers between them in a bunker dormitory; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.2,
+    1.4,
+    2
+   ]
+  },
+  {
+   "id": "obj_l1_mess_tables",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 1,
+   "desc": "long steel mess hall tables with benches and aluminium trays, bunker canteen; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1.6,
+    1
+   ]
+  },
+  {
+   "id": "obj_l1_serving_line",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 1.3,
+   "desc": "a bunker canteen serving counter with steel food pans and a sneeze guard; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.8,
+    1.3
+   ]
+  },
+  {
+   "id": "obj_l1_shower_row",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 2.3,
+   "desc": "a tiled bunker shower room wall with a row of rusty shower heads and pipes, drain on floor; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.4,
+     2.3
+    ]
+   }
+  },
+  {
+   "id": "obj_l1_footlocker",
+   "cat": "props",
+   "view": "angled",
+   "w": 0.9,
+   "h": 0.5,
+   "desc": "a green wooden army footlocker trunk with a padlock; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.9,
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "id": "obj_l1_gasmask_rack",
+   "cat": "props",
+   "view": "front",
+   "w": 1.6,
+   "h": 1.4,
+   "desc": "a wall rack with many gas masks and helmets on hooks; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.6,
+     0.3,
+     1.4
+    ]
+   }
+  },
+  {
+   "id": "obj_l2_wall_display",
+   "cat": "props",
+   "view": "front",
+   "w": 4,
+   "h": 2.4,
+   "desc": "a big wall situation display board: a glowing map of a region with lines and dots, steel frame, lamps around; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     4,
+     0.3,
+     2.4
+    ]
+   }
+  },
+  {
+   "id": "obj_l2_radio_racks",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 2.2,
+   "desc": "a row of Soviet military radio equipment racks with dials, knobs, headphones hanging; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.6,
+    2.2
+   ]
+  },
+  {
+   "id": "obj_l2_radio_operator",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 1.4,
+   "desc": "a radio operator desk with a transceiver, a telegraph key, headphones and a chair; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    0.8,
+    1.4
+   ]
+  },
+  {
+   "id": "obj_l2_officer_bed",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1.2,
+   "desc": "a single officer bed with a neat blanket and a small desk with a lamp; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1.6,
+    1.2
+   ]
+  },
+  {
+   "id": "obj_l2_archive_cabinets",
+   "cat": "props",
+   "view": "front",
+   "w": 2.4,
+   "h": 2,
+   "desc": "a row of grey steel archive file cabinets with drawers, some open with papers; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    0.6,
+    2
+   ]
+  },
+  {
+   "id": "obj_l2_archive_shelves",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.6,
+   "h": 2.2,
+   "desc": "tall steel archive shelves packed with cardboard folders and boxes; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.6,
+    0.8,
+    2.2
+   ]
+  },
+  {
+   "id": "obj_l2_phone_bank",
+   "cat": "props",
+   "view": "front",
+   "w": 1.6,
+   "h": 1.2,
+   "desc": "a wall panel with several old military telephones of different colours; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.6,
+     0.3,
+     1.2
+    ]
+   }
+  },
+  {
+   "id": "obj_l3_glass_partition",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 2.4,
+   "desc": "a laboratory glass partition wall with steel frames, one pane cracked; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.2,
+     2.4
+    ]
+   }
+  },
+  {
+   "id": "obj_l3_hazmat_hooks",
+   "cat": "props",
+   "view": "front",
+   "w": 1.6,
+   "h": 1.9,
+   "desc": "orange protective hazmat suits and gas masks hanging on wall hooks; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.6,
+     0.3,
+     1.9
+    ]
+   }
+  },
+  {
+   "id": "obj_l3_airlock",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 2.6,
+   "desc": "a laboratory decontamination airlock: a steel chamber with two round hatch doors and hazard stripes; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    2,
+    2.6
+   ]
+  },
+  {
+   "id": "obj_l3_cold_storage",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 2.4,
+   "desc": "a walk-in cold storage room front with a thick insulated steel door, frost on it; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.5,
+     2.4
+    ]
+   }
+  },
+  {
+   "id": "obj_l3_freezer_chests",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1,
+   "desc": "two white laboratory chest freezers, one open with frost; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    0.8,
+    1
+   ]
+  },
+  {
+   "id": "obj_l3_microscope_bench",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1.3,
+   "desc": "a laboratory bench with microscopes, test tube racks and a lamp; Soviet secret military bunker complex, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    0.8,
+    1.3
+   ]
+  },
+  {
+   "id": "obj_l3_crate_shelving",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 3,
+   "desc": "tall warehouse steel shelving with wooden and metal crates, bunker storage; main colours: dark bottle green plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1.2,
+    3
+   ]
+  },
+  {
+   "id": "obj_l4_turbine_fan",
+   "cat": "props",
+   "view": "front",
+   "w": 4,
+   "h": 4,
+   "desc": "a huge industrial ventilation fan inside a round concrete duct opening, massive steel blades, grille; main colours: sky blue and grey plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     4,
+     1,
+     4
+    ]
+   }
+  },
+  {
+   "id": "obj_l4_transformer",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 2.4,
+   "desc": "a large industrial power transformer with cooling fins and ceramic insulators in a bunker; main colours: brick red plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.5,
+    1.6,
+    2.4
+   ]
+  },
+  {
+   "id": "obj_l4_reactor_core",
+   "cat": "props",
+   "view": "front",
+   "w": 4,
+   "h": 4,
+   "desc": "a compact underground power plant reactor vessel: a thick steel cylinder with pipes, gauges and a hazard ring, dim glow; main colours: mustard yellow and black plus one accent colour, 2-3 main colours only; wear: faded by sun; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    4,
+    4
+   ]
+  },
+  {
+   "id": "obj_l4_pump_row",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 1.4,
+   "desc": "a row of large water pumps with motors and big pipes in a bunker pump room; main colours: olive green plus one accent colour, 2-3 main colours only; wear: almost fresh paint with only light dust; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1.2,
+    1.4
+   ]
+  },
+  {
+   "id": "obj_l4_switchgear",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 2.2,
+   "desc": "a row of grey electrical switchgear cabinets with big levers and dial meters; main colours: light blue plus one accent colour, 2-3 main colours only; wear: chipped paint at edges; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    0.8,
+    2.2
+   ]
+  },
+  {
+   "id": "obj_l4_cable_tunnel",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 2.4,
+   "desc": "a cable tunnel wall section with many shelves of thick cables on steel brackets; main colours: ochre yellow plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.5,
+     2.4
+    ]
+   }
+  },
+  {
+   "id": "obj_l4_fuel_day_tank",
+   "cat": "props",
+   "view": "side",
+   "w": 3,
+   "h": 1.8,
+   "desc": "a horizontal diesel day tank on steel stands with a gauge glass and pipes; main colours: safety orange plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     1,
+     1.8
+    ]
+   }
+  },
+  {
+   "id": "obj_m_hatch_floor",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 0.4,
+   "desc": "a round steel hermetic floor hatch with a wheel lock; main colours: red-brown primer plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    1.2,
+    0.3
+   ]
+  },
+  {
+   "id": "obj_m_stairwell",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 3,
+   "desc": "a steel staircase going down in a concrete bunker stairwell with railings; main colours: white-grey plus one accent colour, 2-3 main colours only; wear: faded by sun; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "obj_m_elevator_cabin",
+   "cat": "props",
+   "view": "front",
+   "w": 2.4,
+   "h": 2.6,
+   "desc": "the inside of a big industrial freight elevator cabin with steel walls, a button panel and a caged lamp; main colours: cream plus one accent colour, 2-3 main colours only; wear: almost fresh paint with only light dust; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    2,
+    2.6
+   ]
+  },
+  {
+   "id": "obj_m_pipes_wall",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 2,
+   "desc": "a wall section with many horizontal pipes of different colours, valves and gauges; main colours: institutional green and white plus one accent colour, 2-3 main colours only; wear: chipped paint at edges; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.4,
+     2
+    ]
+   }
+  },
+  {
+   "id": "obj_m_cable_tray",
+   "cat": "props",
+   "view": "side",
+   "w": 3,
+   "h": 0.5,
+   "desc": "a steel ceiling cable tray full of black cables with hangers; main colours: dark bottle green plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.4,
+     0.5
+    ]
+   }
+  },
+  {
+   "id": "obj_m_sign_blank",
+   "cat": "props",
+   "view": "front",
+   "w": 0.8,
+   "h": 0.6,
+   "desc": "a small enamel safety sign plate with a pictogram of an arrow and a running man, no text; main colours: sky blue and grey plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     0.8,
+     0.1,
+     0.6
+    ]
+   }
+  },
+  {
+   "id": "obj_m_debris_pile",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 0.8,
+   "desc": "a pile of concrete debris, broken tiles and twisted pipes on a bunker floor; main colours: brick red plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1.6,
+    0.8
+   ]
+  },
+  {
+   "id": "obj_m_red_lamp_ceiling",
+   "cat": "props",
+   "view": "front",
+   "w": 0.6,
+   "h": 0.4,
+   "desc": "a rotating red warning beacon lamp, glowing; main colours: mustard yellow and black plus one accent colour, 2-3 main colours only; wear: faded by sun; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     0.4,
+     0.3,
+     0.4
+    ]
+   }
+  },
+  {
+   "id": "decal_flood_water",
+   "cat": "decals",
+   "w": 3,
+   "h": 2,
+   "desc": "a large shallow flood water puddle with floating debris and oily sheen, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_flood_edge",
+   "cat": "decals",
+   "w": 2,
+   "h": 1,
+   "desc": "the wet edge of standing water with mud line, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_flashlight_beam",
+   "cat": "decals",
+   "w": 3,
+   "h": 1.5,
+   "desc": "a soft cone of pale yellow flashlight light fading into darkness, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_dark_corner",
+   "cat": "decals",
+   "w": 2.5,
+   "h": 2.5,
+   "desc": "a soft black shadow vignette blob, dense in the middle fading out, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_bunker_papers",
+   "cat": "decals",
+   "w": 1.4,
+   "h": 1,
+   "desc": "scattered official papers and folders on a floor, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_red_arrow_floor",
+   "cat": "decals",
+   "w": 1.2,
+   "h": 0.6,
+   "desc": "a worn painted red arrow on concrete floor, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "obj_floor_painted_green",
+   "cat": "tiles",
+   "tile": 1.5,
+   "desc": "floor viewed straight down from above: worn green painted bunker concrete floor with scuffs"
+  },
+  {
+   "id": "obj_floor_wet",
+   "cat": "tiles",
+   "tile": 1.5,
+   "desc": "floor viewed straight down from above: wet dark concrete bunker floor with puddles and reflections"
+  },
+  {
+   "id": "obj_floor_hazard_edge",
+   "cat": "tiles",
+   "tile": 1.5,
+   "desc": "floor viewed straight down from above: concrete floor with a yellow-black painted hazard stripe band across the middle"
+  },
+  {
+   "id": "obj_wall_concrete_raw",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: raw formwork concrete bunker wall with tie holes and water stains"
+  },
+  {
+   "id": "obj_wall_stripe_red",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: bunker wall painted grey with a red horizontal stripe at waist height, peeling"
+  },
+  {
+   "id": "obj_wall_tile_lower",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: bunker wall with pale blue tiles on lower half and whitewashed concrete above, dirty"
+  },
+  {
+   "id": "pvo_launcher_s75",
+   "cat": "props",
+   "view": "angled",
+   "w": 7,
+   "h": 3.5,
+   "desc": "an abandoned Soviet S-75 surface-to-air missile launcher on its round turntable, a long slender white-grey missile with small fins resting on the inclined rail, khaki-green paint, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6,
+    3,
+    3
+   ]
+  },
+  {
+   "id": "pvo_launcher_empty",
+   "cat": "props",
+   "view": "angled",
+   "w": 6,
+   "h": 2.5,
+   "desc": "an empty abandoned Soviet SAM launcher turntable with an inclined steel launch rail and no missile, khaki-green, rust, cables hanging; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5,
+    3,
+    2.5
+   ]
+  },
+  {
+   "id": "pvo_revetment",
+   "cat": "props",
+   "view": "angled",
+   "w": 8,
+   "h": 2,
+   "desc": "a horseshoe-shaped earth revetment embankment (grassy soil berm) with a concrete slab entrance, used to shelter a missile launch pad; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    8,
+    6,
+    2
+   ]
+  },
+  {
+   "id": "pvo_missile_trailer",
+   "cat": "props",
+   "view": "side",
+   "w": 9,
+   "h": 2.6,
+   "desc": "a Soviet missile transport semi-trailer carrying a long white-grey missile with fins, khaki trailer, flat tyres; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "pvo_missile_crate",
+   "cat": "props",
+   "view": "side",
+   "w": 6,
+   "h": 1.2,
+   "desc": "a long wooden and steel transport container for a missile, olive green, blank stencil bands, lying on the ground; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6,
+    1.2,
+    1.2
+   ]
+  },
+  {
+   "id": "pvo_radar_snr",
+   "cat": "props",
+   "view": "angled",
+   "w": 4,
+   "h": 4,
+   "desc": "a Soviet SNR-75 fire control radar cabin trailer with several large rectangular and trough-shaped antennas on top, khaki-green, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "pvo_hangar_arch",
+   "cat": "props",
+   "view": "angled",
+   "w": 10,
+   "h": 5,
+   "desc": "a Soviet semicircular corrugated steel arch hangar with large closed sliding doors, green paint flaking, rust streaks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    10,
+    8,
+    5
+   ]
+  },
+  {
+   "id": "pvo_command_bunker",
+   "cat": "props",
+   "view": "angled",
+   "w": 6,
+   "h": 2.6,
+   "desc": "a Soviet command bunker entrance: a mound covered with earth and grass with a concrete portal, a heavy steel door and a ventilation pipe on top; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6,
+    5,
+    2.6
+   ]
+  },
+  {
+   "id": "pvo_kpp_gate",
+   "cat": "props",
+   "view": "front",
+   "w": 6,
+   "h": 3,
+   "desc": "a Soviet military checkpoint gate: two green steel gate leaves with red stars on them, concrete pillars, a striped barrier pole; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     6,
+     0.3,
+     3
+    ]
+   }
+  },
+  {
+   "id": "pvo_watchtower",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 6,
+   "desc": "a Soviet military camp wooden-and-steel guard watchtower with a small roofed cabin and a ladder, a searchlight; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.5,
+    2.5,
+    6
+   ]
+  },
+  {
+   "id": "pvo_barracks_bunks",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1.8,
+   "desc": "a pair of Soviet army iron bunk beds with thin striped mattresses and grey wool blankets; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1,
+    1.8
+   ]
+  },
+  {
+   "id": "pvo_plotting_board",
+   "cat": "props",
+   "view": "front",
+   "w": 2.5,
+   "h": 2,
+   "desc": "a Soviet air defence glass plotting board on a steel frame with grease pencil tracks and a grid, no readable marks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     2.5,
+     0.3,
+     2
+    ]
+   }
+  },
+  {
+   "id": "ars_ammo_bunker",
+   "cat": "props",
+   "view": "angled",
+   "w": 9,
+   "h": 3.5,
+   "desc": "a Soviet storage bunker with an earth-covered vaulted roof overgrown with grass, a concrete front facade and steel double doors; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    9,
+    8,
+    3.5
+   ]
+  },
+  {
+   "id": "ars_crate_stack_green",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1.6,
+   "desc": "a stack of olive-green Soviet wooden military crates with rope handles and metal latches, blank stencil bands; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.8,
+    1.2,
+    1.6
+   ]
+  },
+  {
+   "id": "ars_crate_pallet",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 1.2,
+   "desc": "a wooden pallet loaded with small olive-green metal tins strapped together; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    1.2,
+    1.2
+   ]
+  },
+  {
+   "id": "ars_rack_empty",
+   "cat": "props",
+   "view": "front",
+   "w": 2.2,
+   "h": 1.8,
+   "desc": "an empty Soviet armory wooden rack with vertical slots and a padlocked chain, nothing in it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     2.2,
+     0.4,
+     1.8
+    ]
+   }
+  },
+  {
+   "id": "ars_cage",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 2.4,
+   "desc": "a Soviet storage cage: steel mesh partition with a mesh door and a padlock, empty shelves behind; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.2,
+     2.4
+    ]
+   }
+  },
+  {
+   "id": "ars_loading_ramp",
+   "cat": "props",
+   "view": "angled",
+   "w": 5,
+   "h": 1.4,
+   "desc": "a concrete loading dock ramp with a steel edge and rubber bumpers for trucks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5,
+    3,
+    1.4
+   ]
+  },
+  {
+   "id": "ars_truck_ural",
+   "cat": "props",
+   "view": "side",
+   "w": 8,
+   "h": 3,
+   "desc": "a Soviet Ural-4320 army truck with a canvas-covered cargo bed, khaki, abandoned, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "ars_hand_cart",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 1,
+   "desc": "a two-wheeled steel hand cart for moving crates, green paint, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.7,
+    1
+   ]
+  },
+  {
+   "id": "ars_shell_rack",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 1.6,
+   "desc": "a steel rack holding large empty brass casings standing upright, tarnished; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     2,
+     0.6,
+     1.6
+    ]
+   }
+  },
+  {
+   "id": "chem_tank_vertical",
+   "cat": "props",
+   "view": "front",
+   "w": 4,
+   "h": 6,
+   "desc": "a tall vertical cylindrical chemical storage tank on steel legs with a ladder and walkway, yellow-white paint stained by drips, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    4,
+    6
+   ]
+  },
+  {
+   "id": "chem_tank_horizontal",
+   "cat": "props",
+   "view": "side",
+   "w": 7,
+   "h": 3,
+   "desc": "a big horizontal chemical storage tank on concrete saddles, white and faded orange stripes, rust stains and drips; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "chem_column",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 9,
+   "desc": "a tall chemical distillation column tower with platforms, ladders and pipes around it, grey steel, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    9
+   ]
+  },
+  {
+   "id": "chem_reactor",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 3.5,
+   "desc": "a squat chemical reactor vessel with a stirring motor on top, flanges, pipes and gauges, green-grey paint, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    3.5
+   ]
+  },
+  {
+   "id": "chem_pipe_rack",
+   "cat": "props",
+   "view": "side",
+   "w": 8,
+   "h": 4,
+   "desc": "an industrial pipe rack: a steel trestle carrying many parallel pipes of different diameters with flanges, rust, insulation peeling; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     8,
+     1.5,
+     4
+    ]
+   }
+  },
+  {
+   "id": "chem_valve_manifold",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1.5,
+   "desc": "a cluster of large industrial pipe valves with red handwheels and flanges coming out of the ground; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1.2,
+    1.5
+   ]
+  },
+  {
+   "id": "chem_cooling_tower",
+   "cat": "props",
+   "view": "front",
+   "w": 12,
+   "h": 12,
+   "desc": "a large hyperbolic concrete cooling tower of a Soviet chemical plant, stained grey concrete, dark streaks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    12,
+    12,
+    12
+   ]
+  },
+  {
+   "id": "chem_control_console",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 1.5,
+   "desc": "a Soviet chemical plant control room console desk with rows of toggle switches, dial gauges and indicator lamps, beige-grey; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.5,
+    1,
+    1.5
+   ]
+  },
+  {
+   "id": "chem_mimic_panel",
+   "cat": "props",
+   "view": "front",
+   "w": 3.5,
+   "h": 2.2,
+   "desc": "a Soviet control room mimic diagram wall panel with coloured process pipe lines, lamps and dial gauges; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3.5,
+     0.3,
+     2.2
+    ]
+   }
+  },
+  {
+   "id": "chem_lab_bench",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.2,
+   "h": 1.4,
+   "desc": "a Soviet chemistry lab bench with a tiled top, glass flasks, retorts, a burner and a small fume hood; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.2,
+    0.9,
+    1.4
+   ]
+  },
+  {
+   "id": "chem_fume_hood",
+   "cat": "props",
+   "view": "front",
+   "w": 1.6,
+   "h": 2.2,
+   "desc": "a Soviet laboratory fume hood cabinet with a glass sash, white enamel, stained; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    0.9,
+    2.2
+   ]
+  },
+  {
+   "id": "chem_gasmask_hooks",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "h": 1.2,
+   "desc": "a row of old Soviet GP-5 gas masks with grey rubber hoods hanging on wall hooks with their canvas bags; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.4,
+     0.2,
+     1.2
+    ]
+   }
+  },
+  {
+   "id": "chem_drums_hazard",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1.2,
+   "desc": "a group of corroded steel chemical drums with yellow-black hazard stripes, one tipped over leaking green liquid; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1.6,
+    1.2
+   ]
+  },
+  {
+   "id": "chem_carboys",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 0.8,
+   "desc": "several large glass acid carboys in wicker and wooden crates, some broken; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    1,
+    0.8
+   ]
+  },
+  {
+   "id": "chem_hazard_sign",
+   "cat": "props",
+   "view": "front",
+   "w": 0.8,
+   "h": 1.6,
+   "desc": "a metal post with a triangular yellow hazard warning sign showing a skull symbol, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     0.3,
+     0.3,
+     1.6
+    ]
+   }
+  },
+  {
+   "id": "decal_acid_puddle",
+   "cat": "decals",
+   "w": 1.6,
+   "h": 1.2,
+   "desc": "a puddle of glowing toxic yellow-green acid liquid with corroded edges and bubbles, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_chem_stain",
+   "cat": "decals",
+   "w": 1.4,
+   "h": 1.0,
+   "desc": "a dried chemical spill stain, crusty white and orange residue, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "obj_elevator_booth",
+   "cat": "props",
+   "view": "front",
+   "w": 2.4,
+   "h": 2.8,
+   "desc": "an underground bunker elevator booth with heavy steel sliding doors, a small card reader box with a red lamp beside it, grey-green paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     2.4,
+     0.4,
+     2.8
+    ]
+   }
+  },
+  {
+   "id": "obj_elevator_shaft",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 4,
+   "desc": "an open elevator shaft in a concrete wall: a dark vertical shaft with cables, guide rails and a broken steel cage door; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.3,
+     4
+    ]
+   }
+  },
+  {
+   "id": "obj_blast_door",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 3,
+   "desc": "a massive round Soviet bunker blast door made of thick steel with a big locking wheel and hinges, grey-green paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.6,
+     3
+    ]
+   }
+  },
+  {
+   "id": "obj_blast_door_open",
+   "cat": "props",
+   "view": "front",
+   "w": 3.5,
+   "h": 3,
+   "desc": "a massive Soviet bunker hermetic door standing half open, thick steel rim with locking bolts, dark corridor behind; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3.5,
+     0.6,
+     3
+    ]
+   }
+  },
+  {
+   "id": "obj_vent_fan",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 2,
+   "desc": "a large industrial ventilation fan in a square steel frame with a protective grille, grey, dusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     2,
+     0.5,
+     2
+    ]
+   }
+  },
+  {
+   "id": "obj_vent_shaft_floor",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 1,
+   "desc": "a square ventilation shaft opening in a bunker floor covered with a steel grate, deep dark inside; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    1.4,
+    0.3
+   ]
+  },
+  {
+   "id": "obj_filter_unit",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1.8,
+   "desc": "a Soviet bunker air filtration unit: green steel cylinders and a hand-cranked blower with ducts; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1,
+    1.8
+   ]
+  },
+  {
+   "id": "obj_server_rack",
+   "cat": "props",
+   "view": "front",
+   "w": 1,
+   "h": 2.1,
+   "desc": "a tall Soviet mainframe computer cabinet with tape reels, rows of indicator lamps and switches, grey-beige; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.8,
+    2.1
+   ]
+  },
+  {
+   "id": "obj_server_row",
+   "cat": "props",
+   "view": "angled",
+   "w": 4,
+   "h": 2.1,
+   "desc": "a row of Soviet mainframe computer cabinets with magnetic tape drives and blinking lamps, beige-grey; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    1,
+    2.1
+   ]
+  },
+  {
+   "id": "obj_decon_shower",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 2.4,
+   "desc": "a decontamination shower booth in a bunker: tiled cubicle with overhead shower heads, a drain grate, yellow-black hazard stripes; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1.5,
+    2.4
+   ]
+  },
+  {
+   "id": "obj_map_table",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 1.1,
+   "desc": "a large command room map table with an illuminated glass top showing a topographic map, steel frame; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    2,
+    1.1
+   ]
+  },
+  {
+   "id": "obj_command_console",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 1.6,
+   "desc": "a Soviet command bunker console with CRT screens, rows of buttons, telephones and a microphone; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1,
+    1.6
+   ]
+  },
+  {
+   "id": "obj_emergency_lamp",
+   "cat": "props",
+   "view": "front",
+   "w": 0.5,
+   "h": 0.5,
+   "desc": "a red emergency bunker wall lamp in a steel cage, glowing red; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     0.4,
+     0.2,
+     0.5
+    ]
+   }
+  },
+  {
+   "id": "obj_lamp_cage",
+   "cat": "props",
+   "view": "front",
+   "w": 0.4,
+   "h": 0.4,
+   "desc": "an industrial caged bulkhead wall lamp with a dim yellow bulb; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     0.3,
+     0.2,
+     0.4
+    ]
+   }
+  },
+  {
+   "id": "obj_lab_capsule",
+   "cat": "props",
+   "view": "front",
+   "w": 1.5,
+   "h": 2.4,
+   "desc": "a Soviet secret laboratory upright glass capsule chamber with steel caps, cables and pipes, empty with murky liquid at the bottom; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    1.4,
+    2.4
+   ]
+  },
+  {
+   "id": "obj_cable_wall",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 1.6,
+   "desc": "a bunker corridor wall section with many thick black cables running along steel brackets and a junction box; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.3,
+     1.6
+    ]
+   }
+  },
+  {
+   "id": "obj_bunk_triple",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.2,
+   "h": 2.4,
+   "desc": "a triple-tier steel bunk bed in a bunker shelter with thin mattresses and grey blankets; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    0.9,
+    2.4
+   ]
+  },
+  {
+   "id": "obj_generator_big",
+   "cat": "props",
+   "view": "angled",
+   "w": 3.5,
+   "h": 2,
+   "desc": "a large Soviet bunker diesel generator set with a radiator, exhaust pipe and control box, green paint, oil stains; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3.5,
+    1.5,
+    2
+   ]
+  },
+  {
+   "id": "obj_floor_bunker",
+   "cat": "tiles",
+   "tile": 1.5,
+   "desc": "floor viewed straight down from above: grey concrete bunker floor, oil stains, cracks, dust"
+  },
+  {
+   "id": "obj_floor_grating",
+   "cat": "tiles",
+   "tile": 1.5,
+   "desc": "floor viewed straight down from above: rusty steel floor grating panels over dark pipes below"
+  },
+  {
+   "id": "obj_floor_tile_white",
+   "cat": "tiles",
+   "tile": 1.5,
+   "desc": "floor viewed straight down from above: dirty white square ceramic tiles of a laboratory floor, cracked, stained"
+  },
+  {
+   "id": "obj_wall_bunker",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: a Soviet bunker corridor wall, green-painted lower half and whitewashed upper half, concrete, pipes and cables along it, peeling paint"
+  },
+  {
+   "id": "obj_wall_tiled_lab",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: a laboratory wall with dirty white square tiles, some missing, rust drip stains"
+  },
+  {
+   "id": "decal_dark_vignette",
+   "cat": "decals",
+   "w": 3,
+   "h": 3,
+   "desc": "a soft round pool of dark shadow with fading black edges, like darkness at the edge of a flashlight beam, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_red_glow",
+   "cat": "decals",
+   "w": 2,
+   "h": 2,
+   "desc": "a soft red glowing light spot on the floor from an emergency lamp, fading edges, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_hazard_stripes",
+   "cat": "decals",
+   "w": 2,
+   "h": 0.5,
+   "desc": "a painted yellow and black diagonal hazard stripe band on a concrete floor, worn and chipped, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "kit_buffet_old",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.2,
+   "h": 1.9,
+   "desc": "a Soviet kitchen buffet cabinet with glass doors, dishes inside, wooden veneer; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.5,
+    1.9
+   ]
+  },
+  {
+   "id": "kit_counter_sink",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 1,
+   "desc": "a Soviet kitchen counter with an enamel sink and cupboards below, light blue paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    0.6,
+    1
+   ]
+  },
+  {
+   "id": "kit_cauldron_canteen",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 1.2,
+   "desc": "a big aluminium canteen cooking kettle on a stove in a Soviet army canteen kitchen; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    1.2,
+    1.2
+   ]
+  },
+  {
+   "id": "kit_canteen_table",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 0.9,
+   "desc": "a long canteen table with aluminium bowls and mugs and two benches; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.5,
+    1.4,
+    0.9
+   ]
+  },
+  {
+   "id": "off_safe_cabinet",
+   "cat": "props",
+   "view": "angled",
+   "w": 0.9,
+   "h": 1.6,
+   "desc": "a Soviet office tall grey steel document safe cabinet; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.9,
+    0.6,
+    1.6
+   ]
+  },
+  {
+   "id": "off_desk_typewriter",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 1.1,
+   "desc": "a Soviet office wooden desk with a typewriter, a lamp, a phone and paper stacks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    0.8,
+    1.1
+   ]
+  },
+  {
+   "id": "off_paper_stacks",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.2,
+   "h": 0.8,
+   "desc": "stacks of old document folders and tied paper bundles on the floor; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "id": "ws_drill_press",
+   "cat": "props",
+   "view": "angled",
+   "w": 0.8,
+   "h": 1.7,
+   "desc": "a Soviet workshop drill press machine on a stand, green paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.8,
+    0.6,
+    1.7
+   ]
+  },
+  {
+   "id": "ws_grinder_bench",
+   "cat": "props",
+   "view": "angled",
+   "w": 0.6,
+   "h": 1.3,
+   "desc": "a bench grinder machine with two stones on a steel pedestal; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.6,
+    0.5,
+    1.3
+   ]
+  },
+  {
+   "id": "ws_welding_set",
+   "cat": "props",
+   "view": "angled",
+   "w": 1,
+   "h": 1,
+   "desc": "a Soviet welding transformer box on wheels with coiled cables and a welding mask; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.7,
+    1
+   ]
+  },
+  {
+   "id": "med_gurney",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1,
+   "desc": "a hospital stretcher gurney on wheels with a stained sheet; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    0.7,
+    1
+   ]
+  },
+  {
+   "id": "med_iv_stand",
+   "cat": "props",
+   "view": "angled",
+   "w": 0.5,
+   "h": 1.8,
+   "desc": "a medical IV drip stand with an empty glass bottle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.4,
+    0.4,
+    1.8
+   ]
+  },
+  {
+   "id": "med_dental_chair",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 1.6,
+   "desc": "an old Soviet dentist chair with a lamp arm; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    0.8,
+    1.6
+   ]
+  },
+  {
+   "id": "med_screen",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 1.7,
+   "desc": "a folding white hospital privacy screen with torn cloth; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.6,
+     0.3,
+     1.7
+    ]
+   }
+  },
+  {
+   "id": "wh_pallet_rack",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.7,
+   "h": 3,
+   "desc": "a tall warehouse steel pallet rack with sacks and boxes on shelves; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.7,
+    1.1,
+    3
+   ]
+  },
+  {
+   "id": "wh_forklift",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.4,
+   "h": 2.1,
+   "desc": "a small Soviet electric forklift, yellow-orange, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.2,
+    1.1,
+    2.1
+   ]
+  },
+  {
+   "id": "wh_scale_platform",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.2,
+   "h": 1.4,
+   "desc": "an old Soviet floor platform weighing scale with dial; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.8,
+    1.4
+   ]
+  },
+  {
+   "id": "toi_urinal_row",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1.2,
+   "desc": "a row of three cracked porcelain wall urinals with rusty pipes; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     2,
+     0.4,
+     1.2
+    ]
+   }
+  },
+  {
+   "id": "toi_stall",
+   "cat": "props",
+   "view": "angled",
+   "w": 1,
+   "h": 2,
+   "desc": "a wooden toilet stall partition with a half open door; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    1.4,
+    2
+   ]
+  },
+  {
+   "id": "toi_sink_row",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.8,
+   "h": 1.6,
+   "desc": "a row of two old porcelain washbasins with a cracked mirror strip above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.8,
+     0.5,
+     1.6
+    ]
+   }
+  },
+  {
+   "id": "bar_stool_row",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 0.8,
+   "desc": "a row of grey army stools next to a small bedside cabinet; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    0.4,
+    0.8
+   ]
+  },
+  {
+   "id": "bar_overcoats_rack",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 1.8,
+   "desc": "a wall rack of Soviet army greatcoats and caps hanging on hooks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.6,
+     0.4,
+     1.8
+    ]
+   }
+  },
+  {
+   "id": "wall_decal_stains",
+   "cat": "decals",
+   "w": 1.2,
+   "h": 1,
+   "desc": "rusty water stain streaks running down a wall, front view, isolated on transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "wall_decal_cracks",
+   "cat": "decals",
+   "w": 1.2,
+   "h": 1,
+   "desc": "a branching crack in plaster with chipped pieces, front view, isolated on transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "wall_decal_soot",
+   "cat": "decals",
+   "w": 1.4,
+   "h": 1,
+   "desc": "black soot burn mark on a wall, front view, isolated on transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "floor_concrete_painted",
+   "cat": "tiles",
+   "tile": 1.5,
+   "desc": "floor viewed straight down from above: worn red-brown painted concrete floor with scuffs and chipped paint"
+  },
+  {
+   "id": "floor_metal_plate",
+   "cat": "tiles",
+   "tile": 1.5,
+   "desc": "floor viewed straight down from above: diamond pattern steel checker plate floor, rusty, worn"
+  },
+  {
+   "id": "out_heatpipe_straight",
+   "cat": "props",
+   "view": "side",
+   "w": 6,
+   "h": 1.4,
+   "desc": "a straight above-ground Soviet heating main: two thick pipes wrapped in torn insulation and rusty sheet metal on concrete supports; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     6,
+     1,
+     1.4
+    ]
+   }
+  },
+  {
+   "id": "out_heatpipe_arch",
+   "cat": "props",
+   "view": "front",
+   "w": 5,
+   "h": 3.5,
+   "desc": "a Soviet heating pipe going up in a U-shaped arch over a road, insulation peeling, rusty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     5,
+     1,
+     3.5
+    ]
+   }
+  },
+  {
+   "id": "out_gate_metal_bars",
+   "cat": "props",
+   "view": "front",
+   "w": 5,
+   "h": 2.2,
+   "desc": "a Soviet industrial plant gate: two steel bar gate leaves, rusty, one open slightly; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     5,
+     0.3,
+     2.2
+    ]
+   }
+  },
+  {
+   "id": "out_fence_barbed",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 2.2,
+   "desc": "a 3-metre section of concrete-post fence with many rows of barbed wire, transparent background visible between wires; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.2,
+     2.2
+    ]
+   }
+  },
+  {
+   "id": "out_light_pole_flood",
+   "cat": "props",
+   "view": "front",
+   "w": 1.5,
+   "h": 9,
+   "desc": "a tall concrete pole with industrial floodlights on top, cables; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.5,
+    0.5,
+    9
+   ]
+  },
+  {
+   "id": "out_sign_blank",
+   "cat": "props",
+   "view": "front",
+   "w": 1.2,
+   "h": 2,
+   "desc": "a rusty metal sign board on two posts with peeling blank paint; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.2,
+     0.2,
+     2
+    ]
+   }
+  },
+  {
+   "id": "out_trash_bags_pile",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 0.8,
+   "desc": "a pile of torn black trash bags and garbage; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    1.2,
+    0.8
+   ]
+  },
+  {
+   "id": "out_bus_shelter_wreck",
+   "cat": "props",
+   "view": "angled",
+   "w": 4,
+   "h": 2.6,
+   "desc": "a wrecked Soviet mosaic concrete bus shelter, broken; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    1.6,
+    2.6
+   ]
+  },
+  {
+   "id": "out_transformer_booth",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 3,
+   "desc": "a small Soviet brick electrical transformer booth with a steel door and a lightning bolt symbol; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.5,
+    2.5,
+    3
+   ]
+  },
+  {
+   "id": "decal_puddle_rain2",
+   "cat": "decals",
+   "w": 2,
+   "h": 1.4,
+   "desc": "a large shallow rain puddle with ripples reflecting a grey sky, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_trash_spill",
+   "cat": "decals",
+   "w": 1.6,
+   "h": 1.2,
+   "desc": "spilled garbage: cans, wrappers, broken bottles, paper, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_rust_flakes",
+   "cat": "decals",
+   "w": 1.2,
+   "h": 1.0,
+   "desc": "scattered rust flakes and metal shavings, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "pvo_diesel_station",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 2,
+   "desc": "a Soviet mobile diesel power station trailer with an open hood, khaki-green; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1.6,
+    2
+   ]
+  },
+  {
+   "id": "pvo_cable_drums",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1.4,
+   "desc": "two large wooden cable drums with thick black cable; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1.4,
+    1.4
+   ]
+  },
+  {
+   "id": "pvo_camo_net",
+   "cat": "props",
+   "view": "angled",
+   "w": 5,
+   "h": 2.5,
+   "desc": "a torn camouflage net draped over steel poles, green-brown; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    5,
+    4,
+    2.5
+   ]
+  },
+  {
+   "id": "pvo_fuel_bowser",
+   "cat": "props",
+   "view": "side",
+   "w": 6,
+   "h": 2.6,
+   "desc": "a Soviet military fuel tanker truck ZIL-131, khaki, flat tyres; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     6,
+     2.4,
+     2.6
+    ]
+   }
+  },
+  {
+   "id": "pvo_radar_p12",
+   "cat": "props",
+   "view": "front",
+   "w": 5,
+   "h": 6,
+   "desc": "a Soviet P-12 early warning radar: a big rectangular yagi antenna array on a mast above a cabin; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    3,
+    6
+   ]
+  },
+  {
+   "id": "pvo_concrete_shelter",
+   "cat": "props",
+   "view": "angled",
+   "w": 6,
+   "h": 3,
+   "desc": "a Soviet reinforced concrete arched shelter for vehicles, covered with soil and grass, open dark entrance; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6,
+    6,
+    3
+   ]
+  },
+  {
+   "id": "pvo_sandbag_mg_nest",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 1.2,
+   "desc": "a circular sandbag emplacement nest, empty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.5,
+    2.5,
+    1.2
+   ]
+  },
+  {
+   "id": "ars_crates_open",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.8,
+   "h": 0.8,
+   "desc": "several opened olive-green wooden military crates with straw packing, empty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.8,
+    1.2,
+    0.8
+   ]
+  },
+  {
+   "id": "ars_helmets_pile",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.2,
+   "h": 0.6,
+   "desc": "a pile of old green Soviet steel helmets; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    1,
+    0.6
+   ]
+  },
+  {
+   "id": "ars_gas_mask_bags",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.2,
+   "h": 0.6,
+   "desc": "a pile of canvas gas mask bags and army belts; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    1,
+    0.6
+   ]
+  },
+  {
+   "id": "ars_steel_shelving",
+   "cat": "props",
+   "view": "front",
+   "w": 2.4,
+   "h": 2.2,
+   "desc": "a tall green steel shelving unit with stacked olive metal tins and boxes; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     2.4,
+     0.6,
+     2.2
+    ]
+   }
+  },
+  {
+   "id": "ars_guard_booth",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 2.4,
+   "desc": "a Soviet sentry booth with striped black-and-white paint and a small roof; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    1.2,
+    2.4
+   ]
+  },
+  {
+   "id": "ars_btr_wreck",
+   "cat": "props",
+   "view": "angled",
+   "w": 7,
+   "h": 2.6,
+   "desc": "an abandoned rusty Soviet BTR-70 eight-wheeled armoured personnel carrier, flat tyres, hatches open; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    7,
+    3,
+    2.6
+   ]
+  },
+  {
+   "id": "chem_pipe_elbow",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 2,
+   "desc": "a big rusty industrial pipe elbow with flanges coming out of the ground and going sideways; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1.2,
+    2
+   ]
+  },
+  {
+   "id": "chem_pump_unit",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.8,
+   "h": 1.2,
+   "desc": "an industrial centrifugal pump with an electric motor on a concrete base, pipes; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.8,
+    0.8,
+    1.2
+   ]
+  },
+  {
+   "id": "chem_gas_holder",
+   "cat": "props",
+   "view": "front",
+   "w": 6,
+   "h": 5,
+   "desc": "a Soviet spherical gas storage tank on steel legs, faded white paint, rust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    6,
+    6,
+    5
+   ]
+  },
+  {
+   "id": "chem_flare_stack",
+   "cat": "props",
+   "view": "front",
+   "w": 1.5,
+   "h": 10,
+   "desc": "a tall thin industrial flare stack chimney with guy wires and a small platform at top; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    1,
+    10
+   ]
+  },
+  {
+   "id": "chem_lab_shelves",
+   "cat": "props",
+   "view": "front",
+   "w": 1.6,
+   "h": 2,
+   "desc": "laboratory shelves with brown glass reagent bottles and flasks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.6,
+     0.4,
+     2
+    ]
+   }
+  },
+  {
+   "id": "chem_hazmat_suits",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "h": 1.8,
+   "desc": "rubberised green OZK protective suits and gas masks hanging on a wall rack; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.4,
+     0.3,
+     1.8
+    ]
+   }
+  },
+  {
+   "id": "chem_safety_shower",
+   "cat": "props",
+   "view": "front",
+   "w": 1,
+   "h": 2.4,
+   "desc": "an industrial emergency safety shower on a pipe stand with a pull handle and a yellow basin; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    1,
+    2.4
+   ]
+  },
+  {
+   "id": "obj_corridor_door",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "h": 2.3,
+   "desc": "a heavy steel bunker corridor door with a small porthole window and lever handles, green; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.4,
+     0.3,
+     2.3
+    ]
+   }
+  },
+  {
+   "id": "obj_ladder_hatch",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 2.6,
+   "desc": "a steel ladder going up to a round hatch in a concrete ceiling, bunker; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    1,
+    2.6
+   ]
+  },
+  {
+   "id": "obj_ceiling_duct",
+   "cat": "props",
+   "view": "side",
+   "w": 4,
+   "h": 0.8,
+   "desc": "a long rectangular galvanised ventilation duct with joints and hangers; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     4,
+     0.8,
+     0.8
+    ]
+   }
+  },
+  {
+   "id": "obj_oscilloscope_bench",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1.6,
+   "desc": "a Soviet electronics lab bench with oscilloscopes, meters, tube radios and wires; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    0.9,
+    1.6
+   ]
+  },
+  {
+   "id": "obj_operating_table",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1.2,
+   "desc": "a steel laboratory operating table with leather straps and a big surgical lamp above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1,
+    1.2
+   ]
+  },
+  {
+   "id": "obj_specimen_jars",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "h": 1.8,
+   "desc": "a glass cabinet with laboratory specimen jars of murky liquid; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    0.5,
+    1.8
+   ]
+  },
+  {
+   "id": "obj_rad_detector",
+   "cat": "props",
+   "view": "front",
+   "w": 0.8,
+   "h": 1.4,
+   "desc": "a Soviet radiation monitoring station box on a stand with a dial meter and a red lamp; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.6,
+    0.5,
+    1.4
+   ]
+  },
+  {
+   "id": "obj_lockers_bunker",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 2,
+   "desc": "a row of green steel bunker lockers with gas mask bags on top; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    0.5,
+    2
+   ]
+  },
+  {
+   "id": "obj_water_tanks",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 2,
+   "desc": "two large steel water storage tanks with valves in a bunker; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.5,
+    1.4,
+    2
+   ]
+  },
+  {
+   "id": "obj_collapsed_ceiling",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 1.4,
+   "desc": "a pile of collapsed concrete ceiling slabs with rebar sticking out, dust; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    2.5,
+    1.4
+   ]
+  },
+  {
+   "id": "obj_battery_room",
+   "cat": "props",
+   "view": "front",
+   "w": 2.5,
+   "h": 1.4,
+   "desc": "a rack of big old lead-acid batteries with cables in a bunker; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     2.5,
+     0.6,
+     1.4
+    ]
+   }
+  },
+  {
+   "id": "kit_fridge_canteen",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "h": 2,
+   "desc": "a large steel canteen refrigerator cabinet with two doors; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    0.8,
+    2
+   ]
+  },
+  {
+   "id": "kit_pots_shelf",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "h": 1.6,
+   "desc": "a wall shelf with big aluminium pots, ladles and pans; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.4,
+     0.4,
+     1.6
+    ]
+   }
+  },
+  {
+   "id": "kit_samovar_table",
+   "cat": "props",
+   "view": "angled",
+   "w": 1,
+   "h": 1.1,
+   "desc": "a small table with an electric samovar and glass tea holders; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.8,
+    0.6,
+    1.1
+   ]
+  },
+  {
+   "id": "off_globe_stand",
+   "cat": "props",
+   "view": "front",
+   "w": 0.6,
+   "h": 1.1,
+   "desc": "an old globe on a wooden stand; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.5,
+    0.5,
+    1.1
+   ]
+  },
+  {
+   "id": "off_card_catalog",
+   "cat": "props",
+   "view": "front",
+   "w": 1.2,
+   "h": 1.3,
+   "desc": "a wooden library card catalogue cabinet with many small drawers; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.5,
+    1.3
+   ]
+  },
+  {
+   "id": "off_bust_pedestal",
+   "cat": "props",
+   "view": "front",
+   "w": 0.6,
+   "h": 1.6,
+   "desc": "a white plaster bust of a bald man on a red cloth covered pedestal; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.6,
+    0.6,
+    1.6
+   ]
+  },
+  {
+   "id": "ws_metal_saw",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 1.2,
+   "desc": "a Soviet mechanical hacksaw machine for cutting metal bars; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    0.6,
+    1.2
+   ]
+  },
+  {
+   "id": "ws_oxygen_cart",
+   "cat": "props",
+   "view": "angled",
+   "w": 1,
+   "h": 1.5,
+   "desc": "a hand trolley with blue oxygen and red acetylene gas cylinders and welding hoses; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.8,
+    0.6,
+    1.5
+   ]
+  },
+  {
+   "id": "ws_anvil_stand",
+   "cat": "props",
+   "view": "angled",
+   "w": 0.8,
+   "h": 0.9,
+   "desc": "an old blacksmith anvil on a wooden stump with hammers; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.7,
+    0.5,
+    0.9
+   ]
+  },
+  {
+   "id": "med_xray",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 2,
+   "desc": "an old Soviet X-ray machine with a table and an arm tube; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1,
+    2
+   ]
+  },
+  {
+   "id": "med_cabinet_glass",
+   "cat": "props",
+   "view": "front",
+   "w": 1,
+   "h": 1.8,
+   "desc": "a white enamel medical cabinet with glass doors and bottles; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.4,
+    1.8
+   ]
+  },
+  {
+   "id": "med_wheelchair",
+   "cat": "props",
+   "view": "angled",
+   "w": 0.8,
+   "h": 1,
+   "desc": "an old rusty hospital wheelchair; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.7,
+    0.8,
+    1
+   ]
+  },
+  {
+   "id": "wh_sacks_pallet",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 1.1,
+   "desc": "a pallet stacked with grey burlap sacks of flour; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    1.2,
+    1.1
+   ]
+  },
+  {
+   "id": "wh_barrels_rack",
+   "cat": "props",
+   "view": "side",
+   "w": 3,
+   "h": 1.8,
+   "desc": "a steel rack holding lying oil barrels in two rows; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     1,
+     1.8
+    ]
+   }
+  },
+  {
+   "id": "wh_roller_door",
+   "cat": "props",
+   "view": "front",
+   "w": 4,
+   "h": 3.5,
+   "desc": "a corrugated steel roller shutter warehouse door half opened; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     4,
+     0.3,
+     3.5
+    ]
+   }
+  },
+  {
+   "id": "toi_squat_row",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 1.4,
+   "desc": "a row of squat toilet cubicles with low tiled partitions, dirty; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1.2,
+    1.4
+   ]
+  },
+  {
+   "id": "toi_shower_room",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 2.2,
+   "desc": "a row of rusty shower heads on a tiled wall with pipes; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     2,
+     0.3,
+     2.2
+    ]
+   }
+  },
+  {
+   "id": "bar_tumbochka",
+   "cat": "props",
+   "view": "front",
+   "w": 0.5,
+   "h": 0.8,
+   "desc": "a small Soviet army bedside cabinet nightstand, wooden, painted; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.5,
+    0.4,
+    0.8
+   ]
+  },
+  {
+   "id": "bar_weapon_room_door",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "h": 2.2,
+   "desc": "a steel grille door with a padlock leading into a dark room; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.4,
+     0.2,
+     2.2
+    ]
+   }
+  },
+  {
+   "id": "bar_duty_desk",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 1.2,
+   "desc": "a Soviet barracks duty officer desk with a phone, a lamp and a log book; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    0.8,
+    1.2
+   ]
+  },
+  {
+   "id": "out_heatpipe_corner",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 1.4,
+   "desc": "a corner piece of an above-ground Soviet heating main, two thick insulated pipes turning 90 degrees on concrete supports; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    3,
+    1.4
+   ]
+  },
+  {
+   "id": "out_gate_kpp_barrier",
+   "cat": "props",
+   "view": "front",
+   "w": 5,
+   "h": 1.4,
+   "desc": "a red-and-white striped boom barrier on a steel post with a counterweight; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     5,
+     0.3,
+     1.4
+    ]
+   }
+  },
+  {
+   "id": "out_fence_slab_broken",
+   "cat": "props",
+   "view": "front",
+   "w": 4,
+   "h": 2.5,
+   "desc": "a broken Soviet concrete slab fence section with a hole and rebar showing; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     4,
+     0.3,
+     2.5
+    ]
+   }
+  },
+  {
+   "id": "out_light_pole_lamp",
+   "cat": "props",
+   "view": "front",
+   "w": 1.5,
+   "h": 7,
+   "desc": "a curved Soviet street light on a concrete pole with a single lamp; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.4,
+    0.4,
+    7
+   ]
+  },
+  {
+   "id": "out_billboard_frame",
+   "cat": "props",
+   "view": "front",
+   "w": 4,
+   "h": 4,
+   "desc": "a rusty empty billboard frame on two steel legs with torn blank paper; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     4,
+     0.3,
+     4
+    ]
+   }
+  },
+  {
+   "id": "out_well_hatch",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.2,
+   "h": 0.4,
+   "desc": "a concrete utility well ring with a heavy steel hatch, steam rising; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    1.2,
+    0.4
+   ]
+  },
+  {
+   "id": "out_garbage_cage",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1.8,
+   "desc": "a mesh garbage cage enclosure with overflowing trash containers; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1.4,
+    1.8
+   ]
+  },
+  {
+   "id": "out_wood_pallets_stack",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 1.2,
+   "desc": "a stack of old wooden pallets; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    1,
+    1.2
+   ]
+  },
+  {
+   "id": "out_rusty_cistern_tank",
+   "cat": "props",
+   "view": "side",
+   "w": 5,
+   "h": 2.5,
+   "desc": "a rusty horizontal fuel cistern tank on concrete blocks; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     5,
+     2,
+     2.5
+    ]
+   }
+  },
+  {
+   "id": "decal_blood_drag",
+   "cat": "decals",
+   "w": 1.6,
+   "h": 0.6,
+   "desc": "an old dried brown drag smear on concrete, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_footprints_mud",
+   "cat": "decals",
+   "w": 1.4,
+   "h": 0.8,
+   "desc": "a trail of muddy boot prints, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_cable_floor",
+   "cat": "decals",
+   "w": 2,
+   "h": 0.6,
+   "desc": "thick black cables lying across a floor, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_water_leak",
+   "cat": "decals",
+   "w": 1.4,
+   "h": 1.2,
+   "desc": "a dirty water leak puddle with rust colour, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_paint_spill",
+   "cat": "decals",
+   "w": 1.2,
+   "h": 1,
+   "desc": "spilled green paint from a knocked over can, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_ash_pile",
+   "cat": "decals",
+   "w": 1.2,
+   "h": 1,
+   "desc": "a pile of grey ash and charred paper, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "pvo_launcher_tilted",
+   "cat": "props",
+   "view": "angled",
+   "w": 6,
+   "h": 3,
+   "desc": "a damaged Soviet SAM launcher turntable with its rail tilted and a missile lying broken on the ground beside it; main colours: light blue plus one accent colour, 2-3 main colours only; wear: chipped paint at edges; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    6,
+    4,
+    3
+   ]
+  },
+  {
+   "id": "pvo_launch_pad_concrete",
+   "cat": "props",
+   "view": "angled",
+   "w": 6,
+   "h": 0.6,
+   "desc": "a round concrete launch pad slab with steel mounting bolts and cable channels, cracked, weeds; main colours: ochre yellow plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    6,
+    6,
+    0.4
+   ]
+  },
+  {
+   "id": "pvo_missile_loader",
+   "cat": "props",
+   "view": "side",
+   "w": 8,
+   "h": 2.8,
+   "desc": "a Soviet missile transport-loader vehicle ZIL-157 with an empty long cradle frame on the back, khaki; main colours: safety orange plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     8,
+     2.4,
+     2.8
+    ]
+   }
+  },
+  {
+   "id": "pvo_cabin_ka",
+   "cat": "props",
+   "view": "side",
+   "w": 5,
+   "h": 2.8,
+   "desc": "a Soviet military van body cabin on a trailer with small windows and antennas, khaki-green; main colours: red-brown primer plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     5,
+     2.4,
+     2.8
+    ]
+   }
+  },
+  {
+   "id": "pvo_antenna_post",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 5,
+   "desc": "a Soviet military field antenna mast with whip antennas and a small equipment box; main colours: white-grey plus one accent colour, 2-3 main colours only; wear: faded by sun; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    1,
+    5
+   ]
+  },
+  {
+   "id": "pvo_trench_section",
+   "cat": "props",
+   "view": "angled",
+   "w": 4,
+   "h": 1,
+   "desc": "a section of a dug earth trench lined with wooden planks and sandbags; main colours: cream plus one accent colour, 2-3 main colours only; wear: almost fresh paint with only light dust; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    1.4,
+    1
+   ]
+  },
+  {
+   "id": "pvo_fuel_tanks_site",
+   "cat": "props",
+   "view": "side",
+   "w": 5,
+   "h": 2.4,
+   "desc": "two horizontal fuel tanks on concrete saddles with yellow-red bands, rust; main colours: institutional green and white plus one accent colour, 2-3 main colours only; wear: chipped paint at edges; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     5,
+     2,
+     2.4
+    ]
+   }
+  },
+  {
+   "id": "pvo_barracks_stove",
+   "cat": "props",
+   "view": "angled",
+   "w": 1,
+   "h": 1.6,
+   "desc": "a Soviet barracks brick stove with an iron door and a chimney pipe; main colours: dark bottle green plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.8,
+    1.6
+   ]
+  },
+  {
+   "id": "pvo_parade_stand",
+   "cat": "props",
+   "view": "angled",
+   "w": 4,
+   "h": 2,
+   "desc": "a small Soviet military parade ground tribune with a red star emblem and stairs; main colours: sky blue and grey plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    4,
+    2,
+    2
+   ]
+  },
+  {
+   "id": "pvo_star_monument",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 3,
+   "desc": "a Soviet military unit monument: a concrete pedestal with a big rusty red star on top; main colours: brick red plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    1.6,
+    3
+   ]
+  },
+  {
+   "id": "ars_crate_long_stack",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.4,
+   "h": 1.4,
+   "desc": "a stack of long narrow olive-green wooden military crates with metal latches; main colours: mustard yellow and black plus one accent colour, 2-3 main colours only; wear: faded by sun; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    1,
+    1.4
+   ]
+  },
+  {
+   "id": "ars_tins_stack",
+   "cat": "props",
+   "view": "angled",
+   "w": 1,
+   "h": 0.8,
+   "desc": "a stack of small sealed olive metal zinc boxes; main colours: olive green plus one accent colour, 2-3 main colours only; wear: almost fresh paint with only light dust; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.9,
+    0.6,
+    0.8
+   ]
+  },
+  {
+   "id": "ars_crate_broken",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 0.6,
+   "desc": "a smashed olive-green wooden crate with scattered planks and straw; main colours: light blue plus one accent colour, 2-3 main colours only; wear: chipped paint at edges; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    1,
+    0.6
+   ]
+  },
+  {
+   "id": "ars_gantry_crane",
+   "cat": "props",
+   "view": "front",
+   "w": 8,
+   "h": 5,
+   "desc": "an overhead steel gantry crane with a hook spanning a loading area, yellow paint, rust; main colours: ochre yellow plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     8,
+     0.5,
+     5
+    ]
+   }
+  },
+  {
+   "id": "ars_rail_dock",
+   "cat": "props",
+   "view": "side",
+   "w": 8,
+   "h": 1.4,
+   "desc": "a concrete railway loading platform with steel edge and stairs; main colours: safety orange plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     8,
+     2,
+     1.4
+    ]
+   }
+  },
+  {
+   "id": "ars_bunker_vent",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.2,
+   "h": 1.6,
+   "desc": "a mushroom-shaped concrete ventilation outlet sticking out of an earth mound; main colours: red-brown primer plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    1,
+    1.6
+   ]
+  },
+  {
+   "id": "ars_lightning_rod",
+   "cat": "props",
+   "view": "front",
+   "w": 1,
+   "h": 8,
+   "desc": "a tall steel lattice lightning rod tower; main colours: white-grey plus one accent colour, 2-3 main colours only; wear: faded by sun; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    1,
+    8
+   ]
+  },
+  {
+   "id": "ars_fire_board",
+   "cat": "props",
+   "view": "front",
+   "w": 1.6,
+   "h": 1.6,
+   "desc": "a red fire safety board with buckets, a shovel, an axe and a hook, red paint; main colours: cream plus one accent colour, 2-3 main colours only; wear: almost fresh paint with only light dust; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.6,
+     0.3,
+     1.6
+    ]
+   }
+  },
+  {
+   "id": "ars_sand_box_fire",
+   "cat": "props",
+   "view": "angled",
+   "w": 1,
+   "h": 0.8,
+   "desc": "a red-painted wooden box of sand for fire extinguishing with a shovel; main colours: institutional green and white plus one accent colour, 2-3 main colours only; wear: chipped paint at edges; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.6,
+    0.8
+   ]
+  },
+  {
+   "id": "ars_gaz66",
+   "cat": "props",
+   "view": "side",
+   "w": 6,
+   "h": 2.6,
+   "desc": "a Soviet GAZ-66 army truck with a canvas covered body, khaki, abandoned; main colours: dark bottle green plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     6,
+     2.4,
+     2.6
+    ]
+   }
+  },
+  {
+   "id": "chem_tank_small_row",
+   "cat": "props",
+   "view": "side",
+   "w": 5,
+   "h": 2.4,
+   "desc": "a row of three small vertical chemical tanks with pipes between, white paint, rust; main colours: sky blue and grey plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     5,
+     1.6,
+     2.4
+    ]
+   }
+  },
+  {
+   "id": "chem_pipe_bridge",
+   "cat": "props",
+   "view": "front",
+   "w": 8,
+   "h": 5,
+   "desc": "an industrial pipe bridge crossing over a road, steel truss carrying pipes; main colours: brick red plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     8,
+     1,
+     5
+    ]
+   }
+  },
+  {
+   "id": "chem_tank_containment",
+   "cat": "props",
+   "view": "angled",
+   "w": 6,
+   "h": 1,
+   "desc": "a concrete containment bund wall enclosure around tank foundations, stained, puddles; main colours: mustard yellow and black plus one accent colour, 2-3 main colours only; wear: faded by sun; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    6,
+    6,
+    1
+   ]
+  },
+  {
+   "id": "chem_heat_exchanger",
+   "cat": "props",
+   "view": "side",
+   "w": 4,
+   "h": 1.6,
+   "desc": "a horizontal shell-and-tube heat exchanger on supports with flanges, rust; main colours: olive green plus one accent colour, 2-3 main colours only; wear: almost fresh paint with only light dust; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     4,
+     1.2,
+     1.6
+    ]
+   }
+  },
+  {
+   "id": "chem_compressor",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 1.8,
+   "desc": "an industrial gas compressor unit with big flywheel and pipes, green paint; main colours: light blue plus one accent colour, 2-3 main colours only; wear: chipped paint at edges; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.5,
+    1.4,
+    1.8
+   ]
+  },
+  {
+   "id": "chem_tank_wagon",
+   "cat": "props",
+   "view": "side",
+   "w": 10,
+   "h": 3.5,
+   "desc": "a Soviet railway chemical tank wagon, white with orange stripe, rust streaks; main colours: ochre yellow plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     10,
+     3,
+     3.5
+    ]
+   }
+  },
+  {
+   "id": "chem_sampling_station",
+   "cat": "props",
+   "view": "front",
+   "w": 1,
+   "h": 1.6,
+   "desc": "a small industrial sampling station cabinet with valves and glass jars; main colours: safety orange plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.6,
+    1.6
+   ]
+  },
+  {
+   "id": "chem_reagent_sacks",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 1,
+   "desc": "a pallet of torn white chemical reagent sacks spilling white powder; main colours: red-brown primer plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.3,
+    1.2,
+    1
+   ]
+  },
+  {
+   "id": "chem_lab_centrifuge",
+   "cat": "props",
+   "view": "angled",
+   "w": 0.8,
+   "h": 1,
+   "desc": "an old Soviet laboratory centrifuge and a scale on a small table; main colours: white-grey plus one accent colour, 2-3 main colours only; wear: faded by sun; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.8,
+    0.6,
+    1
+   ]
+  },
+  {
+   "id": "chem_control_cabinet",
+   "cat": "props",
+   "view": "front",
+   "w": 1.2,
+   "h": 2,
+   "desc": "a grey electrical control cabinet with gauges, switches and lamps; main colours: cream plus one accent colour, 2-3 main colours only; wear: almost fresh paint with only light dust; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.5,
+    2
+   ]
+  },
+  {
+   "id": "chem_eye_wash",
+   "cat": "props",
+   "view": "front",
+   "w": 0.6,
+   "h": 1.2,
+   "desc": "an eye wash station basin on a pipe pedestal; main colours: institutional green and white plus one accent colour, 2-3 main colours only; wear: chipped paint at edges; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.5,
+    0.5,
+    1.2
+   ]
+  },
+  {
+   "id": "chem_cooling_tower_small",
+   "cat": "props",
+   "view": "angled",
+   "w": 5,
+   "h": 4,
+   "desc": "a small square wooden-slat industrial cooling tower with a fan on top, rotting; main colours: dark bottle green plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    5,
+    5,
+    4
+   ]
+  },
+  {
+   "id": "chem_dead_tree",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 4,
+   "desc": "a dead leafless tree bleached white by chemicals; main colours: sky blue and grey plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.6,
+    0.6,
+    4
+   ]
+  },
+  {
+   "id": "kit_stove_canteen",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 1,
+   "desc": "a big Soviet canteen electric stove range with ovens; main colours: brick red plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1,
+    1
+   ]
+  },
+  {
+   "id": "kit_dish_rack",
+   "cat": "props",
+   "view": "front",
+   "w": 1.2,
+   "h": 1.4,
+   "desc": "a steel dish drying rack with aluminium plates; main colours: mustard yellow and black plus one accent colour, 2-3 main colours only; wear: faded by sun; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.2,
+     0.4,
+     1.4
+    ]
+   }
+  },
+  {
+   "id": "kit_bread_trays",
+   "cat": "props",
+   "view": "angled",
+   "w": 1,
+   "h": 1.2,
+   "desc": "a stack of plastic bread trays with stale loaves; main colours: olive green plus one accent colour, 2-3 main colours only; wear: almost fresh paint with only light dust; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.8,
+    0.6,
+    1.2
+   ]
+  },
+  {
+   "id": "off_meeting_table",
+   "cat": "props",
+   "view": "angled",
+   "w": 3,
+   "h": 1,
+   "desc": "a long Soviet meeting table with green cloth, chairs and a water decanter; main colours: light blue plus one accent colour, 2-3 main colours only; wear: chipped paint at edges; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    3,
+    1.6,
+    1
+   ]
+  },
+  {
+   "id": "off_wall_shelf_folders",
+   "cat": "props",
+   "view": "front",
+   "w": 1.6,
+   "h": 1.8,
+   "desc": "an open wooden shelf full of document folders and binders; main colours: ochre yellow plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    0.4,
+    1.8
+   ]
+  },
+  {
+   "id": "off_tv_stand_red",
+   "cat": "props",
+   "view": "angled",
+   "w": 0.8,
+   "h": 1.3,
+   "desc": "a Soviet red corner stand with a small TV and pennants; main colours: safety orange plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.8,
+    0.6,
+    1.3
+   ]
+  },
+  {
+   "id": "ws_parts_bins",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "h": 1.6,
+   "desc": "a steel rack of small parts bins with bolts and nuts; main colours: red-brown primer plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     1.4,
+     0.4,
+     1.6
+    ]
+   }
+  },
+  {
+   "id": "ws_engine_hoist",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.6,
+   "h": 2,
+   "desc": "a mobile engine hoist crane with a chain; main colours: white-grey plus one accent colour, 2-3 main colours only; wear: faded by sun; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.6,
+    1,
+    2
+   ]
+  },
+  {
+   "id": "ws_paint_cans",
+   "cat": "props",
+   "view": "angled",
+   "w": 1,
+   "h": 0.6,
+   "desc": "a group of old dented paint cans with dried drips; main colours: cream plus one accent colour, 2-3 main colours only; wear: almost fresh paint with only light dust; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.8,
+    0.6
+   ]
+  },
+  {
+   "id": "med_crib",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.2,
+   "h": 1,
+   "desc": "an old white metal hospital crib; main colours: institutional green and white plus one accent colour, 2-3 main colours only; wear: chipped paint at edges; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    0.7,
+    1
+   ]
+  },
+  {
+   "id": "med_oxygen_tanks",
+   "cat": "props",
+   "view": "front",
+   "w": 1,
+   "h": 1.6,
+   "desc": "a rack of blue medical oxygen tanks; main colours: dark bottle green plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.4,
+    1.6
+   ]
+  },
+  {
+   "id": "med_bed_curtain",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 2,
+   "desc": "a hospital bed with a torn curtain on a rail; main colours: sky blue and grey plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    1,
+    2
+   ]
+  },
+  {
+   "id": "wh_cardboard_wall",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.4,
+   "h": 1.8,
+   "desc": "a big pile of stacked cardboard boxes with some collapsed; main colours: brick red plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    2.4,
+    1.4,
+    1.8
+   ]
+  },
+  {
+   "id": "wh_plastic_crates",
+   "cat": "props",
+   "view": "angled",
+   "w": 1,
+   "h": 0.8,
+   "desc": "a stack of grey plastic crates with bottles; main colours: mustard yellow and black plus one accent colour, 2-3 main colours only; wear: faded by sun; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.8,
+    0.6,
+    0.8
+   ]
+  },
+  {
+   "id": "toi_boiler",
+   "cat": "props",
+   "view": "front",
+   "w": 0.7,
+   "h": 1.2,
+   "desc": "an old wall mounted gas water heater boiler with pipes; main colours: olive green plus one accent colour, 2-3 main colours only; wear: almost fresh paint with only light dust; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     0.6,
+     0.4,
+     1.2
+    ]
+   }
+  },
+  {
+   "id": "toi_bucket_mops",
+   "cat": "props",
+   "view": "angled",
+   "w": 1,
+   "h": 0.8,
+   "desc": "buckets, mops and a broom in a corner; main colours: light blue plus one accent colour, 2-3 main colours only; wear: chipped paint at edges; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.8,
+    0.6,
+    0.8
+   ]
+  },
+  {
+   "id": "bar_steel_cabinet_closed",
+   "cat": "props",
+   "view": "front",
+   "w": 1,
+   "h": 1.8,
+   "desc": "a tall closed grey steel cabinet with a padlock; main colours: ochre yellow plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1,
+    0.5,
+    1.8
+   ]
+  },
+  {
+   "id": "bar_ironing_board",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 1,
+   "desc": "an old ironing board with an iron and a folded uniform; main colours: safety orange plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.4,
+    0.4,
+    1
+   ]
+  },
+  {
+   "id": "out_heatpipe_broken",
+   "cat": "props",
+   "view": "side",
+   "w": 5,
+   "h": 1.4,
+   "desc": "a broken above-ground heating pipe with fallen insulation and a steaming gap; main colours: red-brown primer plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     5,
+     1,
+     1.4
+    ]
+   }
+  },
+  {
+   "id": "out_fence_mesh_concrete",
+   "cat": "props",
+   "view": "front",
+   "w": 3,
+   "h": 2.5,
+   "desc": "a concrete post fence with welded steel mesh panels and barbed wire on top; main colours: white-grey plus one accent colour, 2-3 main colours only; wear: faded by sun; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     3,
+     0.2,
+     2.5
+    ]
+   }
+  },
+  {
+   "id": "out_dog_kennel",
+   "cat": "props",
+   "view": "angled",
+   "w": 1.4,
+   "h": 1,
+   "desc": "a wooden dog kennel with a chain and an empty bowl; main colours: cream plus one accent colour, 2-3 main colours only; wear: almost fresh paint with only light dust; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    1.2,
+    1,
+    1
+   ]
+  },
+  {
+   "id": "out_water_pump_hand",
+   "cat": "props",
+   "view": "front",
+   "w": 0.6,
+   "h": 1.4,
+   "desc": "a Soviet cast iron street water pump column; main colours: institutional green and white plus one accent colour, 2-3 main colours only; wear: chipped paint at edges; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.4,
+    0.4,
+    1.4
+   ]
+  },
+  {
+   "id": "out_flagpole",
+   "cat": "props",
+   "view": "front",
+   "w": 1,
+   "h": 7,
+   "desc": "a tall empty steel flagpole on a concrete base; main colours: dark bottle green plus one accent colour, 2-3 main colours only; wear: moderately rusted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    0.5,
+    0.5,
+    7
+   ]
+  },
+  {
+   "id": "out_info_stand",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 1.8,
+   "desc": "a rusty Soviet information board stand with peeling blank posters; main colours: sky blue and grey plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": {
+    "legs": [
+     2,
+     0.2,
+     1.8
+    ]
+   }
+  },
+  {
+   "id": "out_bench_concrete",
+   "cat": "props",
+   "view": "angled",
+   "w": 2,
+   "h": 0.6,
+   "desc": "a concrete and wooden plank bench, broken planks; main colours: brick red plus one accent colour, 2-3 main colours only; wear: damp with water stains; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos",
+   "foot": [
+    2,
+    0.6,
+    0.6
+   ]
+  },
+  {
+   "id": "decal_barrel_rings",
+   "cat": "decals",
+   "w": 1.4,
+   "h": 1,
+   "desc": "rusty ring marks left by barrels on concrete, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_white_powder",
+   "cat": "decals",
+   "w": 1.2,
+   "h": 1,
+   "desc": "spilled white chemical powder, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_green_sludge",
+   "cat": "decals",
+   "w": 1.8,
+   "h": 1.2,
+   "desc": "a puddle of thick green toxic sludge, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_rust_streak",
+   "cat": "decals",
+   "w": 2,
+   "h": 0.8,
+   "desc": "a long rust stain streak on concrete, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_gravel_patch",
+   "cat": "decals",
+   "w": 1.6,
+   "h": 1.2,
+   "desc": "a patch of loose gravel and small stones, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "decal_straw_scatter",
+   "cat": "decals",
+   "w": 1.2,
+   "h": 1,
+   "desc": "scattered straw packing material, viewed straight down from above, lying flat, no floor around it, transparent background, no text, no letters, no numbers"
+  },
+  {
+   "id": "floor_asphalt_military",
+   "cat": "tiles",
+   "tile": 2,
+   "desc": "floor viewed straight down from above: cracked old military asphalt with faded paint fragments and weeds"
+  },
+  {
+   "id": "floor_concrete_slabs_road",
+   "cat": "tiles",
+   "tile": 2,
+   "desc": "floor viewed straight down from above: hexagonal Soviet concrete road slabs with grass in the joints"
+  },
+  {
+   "id": "floor_lab_lino_grey",
+   "cat": "tiles",
+   "tile": 1.5,
+   "desc": "floor viewed straight down from above: grey industrial linoleum floor, stained and torn"
+  },
+  {
+   "id": "wall_chem_tile_green",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: an industrial wall with green glazed tiles lower half and stained plaster upper half"
+  },
+  {
+   "id": "wall_hangar_corrugated",
+   "cat": "walls",
+   "tile": 3,
+   "desc": "front elevation viewed straight-on: green corrugated steel hangar wall, rusty, dents"
+  }
+ ]
+}

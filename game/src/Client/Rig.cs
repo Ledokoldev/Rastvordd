@@ -14,12 +14,49 @@ namespace Rastvordd.Client
             "upperarm" => UpperArm, "forearm" => ForeArm, "thigh" => Thigh, _ => Shin,
         };
 
+        static readonly System.Collections.Generic.Dictionary<Texture2D, Texture2D> _shaped = new();
+
+        /// <summary>
+        /// Силуэт корпуса по-человечески: покатые плечи от шеи, грудь во всю ширину, к поясу чуть уже. Сгенерированный
+        /// корпус был «трапецией» с торчащими углами-плечами (а растянутый вширь — ещё и коробкой). Цвета берутся из исходника.
+        /// </summary>
+        static Texture2D ShapeTorso(Texture2D t)
+        {
+            if (t == null) return null;
+            if (_shaped.TryGetValue(t, out var done)) return done;
+            var src = t.GetImage();
+            if (src.IsCompressed()) src.Decompress();
+            int w = src.GetWidth(), h = src.GetHeight();
+            var img = Image.CreateEmpty(w, h, false, Image.Format.Rgba8);
+            float cx = (w - 1) / 2f, half = w / 2f;
+            for (int y = 0; y < h; y++)
+            {
+                float k = y switch { 0 => 0.38f, 1 => 0.62f, 2 => 0.82f, 3 => 0.94f, _ => Mathf.Lerp(1f, 0.8f, Mathf.Clamp((y - 5f) / (h - 6f), 0, 1)) };
+                for (int x = 0; x < w; x++)
+                {
+                    if (Mathf.Abs(x - cx) > half * k) continue;
+                    // цвет — из исходника; если там пусто (срезанный угол плеча стал телом) — ближайший непрозрачный в строке
+                    var c = src.GetPixel(x, y);
+                    for (int d = 1; c.A < 0.5f && d < w; d++)
+                    {
+                        int xl = x - d, xr = x + d;
+                        if (xl >= 0 && src.GetPixel(xl, y).A >= 0.5f) c = src.GetPixel(xl, y);
+                        else if (xr < w && src.GetPixel(xr, y).A >= 0.5f) c = src.GetPixel(xr, y);
+                    }
+                    if (c.A >= 0.5f) img.SetPixel(x, y, new Color(c, 1));
+                }
+            }
+            var tex = ImageTexture.CreateFromImage(img);
+            _shaped[t] = tex;
+            return tex;
+        }
+
         public static RigSet Load(string name)
         {
             Texture2D T(string p) => Art.Get($"rig/rig_{name}_{p}");
             var s = new RigSet
             {
-                HeadF = T("head_f"), HeadB = T("head_b"), TorsoF = T("torso_f"), TorsoB = T("torso_b"), Pelvis = T("pelvis"),
+                HeadF = T("head_f"), HeadB = T("head_b"), TorsoF = ShapeTorso(T("torso_f")), TorsoB = ShapeTorso(T("torso_b")), Pelvis = T("pelvis"),
                 UpperArm = T("upperarm"), ForeArm = T("forearm"), Thigh = T("thigh"), Shin = T("shin"),
             };
             return s.HeadF != null && s.HeadB != null && s.TorsoF != null && s.TorsoB != null && s.Pelvis != null
@@ -141,6 +178,8 @@ namespace Rastvordd.Client
         const float Broad = 1.45f;
         /// <summary>Множитель толщины части: до целого числа пикселей, чтобы пиксели не «плясали».</summary>
         static float Thick(int px) => Mathf.Max(px + 1, Mathf.Round(px * Broad)) / px;
+        /// <summary>Корпус шире нарисованного меньше, чем ноги и таз: плечи ≈ 0,9 высоты корпуса, как у человека.</summary>
+        static float TorsoThick(int px) => Mathf.Max(px + 1, Mathf.Round(px * 1.15f)) / px;
         /// <summary>Руки толще остального тела (иначе на крепком торсе они выглядят тонкими и кривыми).</summary>
         static float ArmThick(int px) => Mathf.Max(px + 2, Mathf.Round(px * 1.8f)) / px;
         /// <summary>Цвета руки из текстуры части (рукав уже окрашен одеждой — WearLook): заливка, тень, обводка, кисть.</summary>
@@ -171,7 +210,7 @@ namespace Rastvordd.Client
             best = -1;
             foreach (var (c, n) in end) if (c.Luminance > darkest + 0.06f && n > best) { best = n; tip = c; }
             if (best < 0) tip = fill;
-            line = line.Darkened(0.15f);
+            line = fill.Darkened(0.42f);   // мягкая обводка в тон рукава (чёрная по краю выглядела слишком резкой)
             pal = (fill, fill.Darkened(0.2f), line, tip);
             _armPal[key] = pal;
             return pal;
@@ -442,7 +481,7 @@ namespace Rastvordd.Client
                 }
                 Part(_set.Pelvis, new Vector2(0.5f, hipY - 1), lean * 0.5f, new Vector2(_set.Pelvis.GetWidth() / 2f, _set.Pelvis.GetHeight() * 0.7f), 1, Thick(_set.Pelvis.GetWidth()));
                 var torso = back ? _set.TorsoB : _set.TorsoF;
-                Part(torso, waist, lean, new Vector2(torso.GetWidth() / 2f, torso.GetHeight()), 1, Thick(torso.GetWidth()));
+                Part(torso, waist, lean, new Vector2(torso.GetWidth() / 2f, torso.GetHeight()), 1, TorsoThick(torso.GetWidth()));
                 var head = back ? _set.HeadB : _set.HeadF;
                 float headTilt = s.AimDown * 0.15f + lean * 0.5f - s.Flinch * 0.25f;   // в прицеле голова к прикладу; от удара голова дёргается
                 Part(head, neck, headTilt, new Vector2(head.GetWidth() / 2f, head.GetHeight()), 1, HeadWide(head.GetWidth()));

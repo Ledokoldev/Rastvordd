@@ -47,11 +47,13 @@ namespace Rastvordd.Sim
             bag.Search.Clear();
             bag.Unlocked = false;
             // D46: детали тира 2–3, армейские обвесы, редко элита (Сайга-12, АПС, Мосинка — только отсюда)
-            bag.Items.Add(new ItemSlot("scrap", Rng.Next(60, 121)));
+            bag.Items.Add(new ItemSlot("scrap", Rng.Next(20, 41)));
+            bag.Items.Add(new ItemSlot(Economy.Tier2(Rng), Rng.Next(1, 3)));
+            if (Rng.NextDouble() < 0.35) bag.Items.Add(new ItemSlot(Economy.High(Rng), 1));   // высокий лом — пока только ивенты (D49)
             bag.Items.Add(new ItemSlot("comp_gears", Rng.Next(1, 4)));
             bag.Items.Add(new ItemSlot("comp_spring", Rng.Next(1, 4)));
-            bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier2Parts), 1));
-            if (Rng.NextDouble() < 0.5) bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier2Parts), 1));
+            bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));
+            if (Rng.NextDouble() < 0.5) bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));
             bag.Items.Add(new ItemSlot(phase >= 1 ? "ammo_762" : "ammo_9mm", Rng.Next(20, 50)));
             if (Rng.NextDouble() < 0.4) bag.Items.Add(new ItemSlot("ammo_12g", Rng.Next(8, 20)));
             bag.Items.Add(new ItemSlot("bandage", Rng.Next(2, 5)));
@@ -62,8 +64,8 @@ namespace Rastvordd.Sim
             if (Rng.NextDouble() < 0.35) bag.Items.Add(new ItemSlot(Pick(Weaponry.ArmyAtts), 1));
             else if (Rng.NextDouble() < 0.3) bag.Items.Add(new ItemSlot(Pick(Weaponry.FactoryAtts), 1));
             if (Rng.NextDouble() < 0.3) bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_sawnoff", "weapon_mp133", "weapon_grach", "weapon_svt40" })));
-            TryTier3(bag, 0.6);
-            if (phase >= 1 && Rng.NextDouble() < 0.05) bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_saiga12", "weapon_aps", "weapon_mosin" })));
+            TryTier3(bag, 0.85);
+            TryElite(bag, phase, 0.15);   // элита: фаза ≥ 2, с 3 ч, не чаще раза в 3,5 ч на мир (D49)
             if (phase >= 1) bag.Items.Add(new ItemSlot("gunpowder", Rng.Next(40, 100)));
             if (phase >= 2 && Rng.NextDouble() < 0.6) bag.Items.Add(Items.NewSlot("expl_satchel"));
             if (phase >= 2 && Rng.NextDouble() < 0.25) bag.Items.Add(Items.NewSlot("expl_c4"));

@@ -488,7 +488,9 @@ namespace Rastvordd.Sim
 
         Deployable MyClaim() { ScanMine(); return _mClaim; }
 
-        static NodeKind NodeFor(string id) => id switch { "wood" => NodeKind.Tree, "metal_ore" => NodeKind.Metal, "sulfur_ore" => NodeKind.Sulfur, _ => NodeKind.Stone };
+        static NodeKind NodeFor(string id) => id switch { "wood" => NodeKind.Tree, "metal_ore" => NodeKind.Metal, "sulfur_ore" => NodeKind.Sulfur, "rubber" => NodeKind.Tire, _ => NodeKind.Stone };
+        /// <summary>Добывается ли ресурс из узла (остальное — печь, переработчик, лут; раньше всё неизвестное «добывалось» из камня).</summary>
+        static bool Gatherable(string id) => id is "wood" or "stone" or "metal_ore" or "sulfur_ore" or "rubber";
 
         Deployable MyFurnace() { ScanMine(); return _mFurnace; }
 
@@ -512,6 +514,16 @@ namespace Rastvordd.Sim
                 TakeFromBox(box, id, count, ref cmd);
                 return false;
             }
+            // не из узла (D49): металл — печь/руда, лом — бочки и хлам, детали — РТ. Раньше Need("metal_fragments"/"scrap") для содержания
+            // шкафа вёл бота бить камень без конца (≈ 30 % времени «бьёт камень»)
+            if (!Gatherable(id))
+            {
+                if (id == "metal_fragments") { _metalGoal = Math.Max(_metalGoal, count + 60); SmeltOrMine(ref cmd); return false; }
+                if (id == "scrap") { GetScrap(count, MyBox(), ref cmd); return false; }
+                if (id.StartsWith("comp_")) { _partsWant[id] = Math.Max(_partsWant.GetValueOrDefault(id), count - Stock(id)); _partsWantAt = _w.Time; }
+                Doing = $"нет: {Items.Name(id)}";
+                return false;
+            }
             _stockId = id;
             _stockTarget = Math.Max(count, id == "wood" ? 350 : 250);
             Gather(NodeFor(id), ref cmd);
@@ -521,7 +533,8 @@ namespace Rastvordd.Sim
         /// <summary>Добыча: ближайший узел нужного вида, подальше от охраны. Инструмент — лучший из имеющихся.</summary>
         void Gather(NodeKind kind, ref InputCmd cmd)
         {
-            string tool = kind == NodeKind.Tree ? (Has("tool_hatchet") ? "tool_hatchet" : "tool_rock")
+            bool tire = kind is NodeKind.Tire or NodeKind.TireStack;
+            string tool = kind == NodeKind.Tree || tire ? (Has("tool_hatchet") ? "tool_hatchet" : "tool_rock")
                                                 : (Has("tool_pickaxe") ? "tool_pickaxe" : "tool_rock");
             if (!Has(tool) && !Has("tool_rock"))
             {
@@ -529,15 +542,15 @@ namespace Rastvordd.Sim
                 Doing = "без инструмента";
                 return;
             }
-            Doing = kind == NodeKind.Tree ? "рубит дерево" : "бьёт камень";
+            Doing = kind switch { NodeKind.Tree => "рубит дерево", NodeKind.Metal => "бьёт металлическую руду", NodeKind.Sulfur => "бьёт серную руду", NodeKind.Stone => "бьёт камень", _ => "режет покрышку на резину" };
             if (_node == null || !_w.Nodes.Contains(_node) || _node.Kind != kind || (_nodeTimer -= World.Dt) < 0)
             {
                 _node = null;
                 float best = float.MaxValue;
-                foreach (var n in _w.NodesInRadius(_me.Pos, 70, _nodeBuf))
+                foreach (var n in _w.NodesInRadius(_me.Pos, tire ? 250 : 70, _nodeBuf))
                 {
-                    if (n.Kind != kind || _badNodes.Contains(n)) continue;
-                    if (_w.NearMonument(n.Pos, 22)) continue;
+                    if ((tire ? n.Kind is not (NodeKind.Tire or NodeKind.TireStack) : n.Kind != kind) || _badNodes.Contains(n)) continue;
+                    if (tire ? Guarded(n.Pos) : _w.NearMonument(n.Pos, 22)) continue;   // покрышки — и на РТ без охраны
                     float d = Vector2.Distance(n.Pos, _me.Pos);
                     if (d < best) { best = d; _node = n; }
                 }
@@ -669,6 +682,7 @@ namespace Rastvordd.Sim
             Decide(ref cmd);
             CloseDoorBehind();
             Clothe(ref cmd);
+            if ((_w.Tick + (uint)_me.Id) % 300 == 7) TidyPack();   // раз в 10 с: старые ключи и лишнее тряпьё из рюкзака (D49)
             SimPerf.End("бот: решение+действие", t0);
             NoteMove(cmd);
             return cmd;
@@ -772,6 +786,8 @@ namespace Rastvordd.Sim
                 if (TakeFromBox(box, id, n, ref cmd)) return true;
                 if (id == "scrap") { WantScrap(n - _me.Count("scrap")); return GetScrap(n, box, ref cmd); }
                 if (id == "metal_fragments") { _metalGoal = Math.Max(_metalGoal, n + 60); Doing = $"копит металл на {Items.Name(bench)} ({metal}/{n})"; return metal >= n ? false : false; }
+                // детали (верстак 3: платы ×3, шестерни ×5) — с РТ и со станка: заказать и заняться другим (D49)
+                if (id.StartsWith("comp_")) { _partsWant[id] = Math.Max(_partsWant.GetValueOrDefault(id), n - Stock(id)); _partsWantAt = _w.Time; return false; }
                 return !Need(id, n, ref cmd) || true;
             }
             // всё есть — крафтим у текущего верстака

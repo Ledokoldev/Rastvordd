@@ -64,10 +64,13 @@ namespace Rastvordd.Sim
             bag.Search.Clear();
             bag.Unlocked = false;
             bag.Items.Add(new ItemSlot("punchcard_2", 1));
-            bag.Items.Add(new ItemSlot("scrap", Rng.Next(30, 61)));
+            bag.Items.Add(new ItemSlot("scrap", Rng.Next(10, 21)));
+            // ценный лом (D49): электроника (АТС, Подстанция) — радиодетали и моторы, остальное — аккумуляторы и моторы
+            if (electronics) { bag.Items.Add(new ItemSlot("val_radio_parts", Rng.Next(1, 4))); if (Rng.NextDouble() < 0.5) bag.Items.Add(new ItemSlot("val_motor", 1)); }
+            else { bag.Items.Add(new ItemSlot(Economy.Tier2(Rng), 1)); if (Rng.NextDouble() < 0.5) bag.Items.Add(new ItemSlot(Economy.Tier1(Rng), 1)); }
             bag.Items.Add(new ItemSlot(Rng.Next(2) == 0 ? "comp_gears" : "comp_spring", Rng.Next(1, 3)));
-            bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier2Parts), 1));
-            if (Rng.NextDouble() < 0.45) bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier2Parts), 1));
+            bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));
+            if (Rng.NextDouble() < 0.45) bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));
             if (Rng.NextDouble() < (electronics ? 0.75 : 0.25)) bag.Items.Add(new ItemSlot("comp_circuit", 1));
             if (Rng.NextDouble() < (electronics ? 0.35 : 0.3)) bag.Items.Add(new ItemSlot("comp_lens", 1));
             if (Rng.NextDouble() < 0.5) bag.Items.Add(new ItemSlot("comp_pipe", 1));

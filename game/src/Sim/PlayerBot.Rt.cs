@@ -113,7 +113,15 @@ namespace Rastvordd.Sim
         static readonly string[] RunItems = { "scrap", "comp_gears", "comp_spring", "comp_pipe", "comp_tape", "comp_trigger", "comp_bolt_carrier", "comp_barrel_rifled", "comp_frame_pistol", "comp_body_smg", "comp_body_rifle", "comp_receiver_ak", "comp_circuit", "comp_lens", "keycard", "punchcard_1", "punchcard_2", "ammo_9mm", "ammo_12g", "ammo_762", "metal_fragments", "bandage", "gunpowder" };
 
         /// <summary>Сколько общих деталей бот держит под крафт стволов (D46): лишнее — в переработчик.</summary>
-        public static int CompKeep(string id) => id switch { "comp_spring" => 8, "comp_pipe" => 4, "comp_tape" => 4, "comp_gears" => 6, _ => int.MaxValue };
+        public static int CompKeep(string id) => id switch
+        {
+            "comp_spring" => 12, "comp_pipe" => 4, "comp_tape" => 4, "comp_gears" => 8,   // пружины не точатся — их держат больше
+            _ when Economy.IsValuable(id) => 0,                                  // ценный лом — только в переработчик (D49)
+            _ when Array.IndexOf(Weaponry.Tier2Parts, id) >= 0 => 2,             // детали тира 2 — по две на стволы, лишнее в лом
+            _ => int.MaxValue,
+        };
+        /// <summary>Сколько лома дадут лишние детали и ценный лом (при себе и дома) — повод сходить к переработчику.</summary>
+        int RecycleScrapStock() => World.BotRecycleScrap(Stock, CompKeep);
         int CompSurplus(string id) => CompKeep(id) == int.MaxValue ? 0 : Math.Max(0, Stock(id) - CompKeep(id));
         int CompKeepPocket(string id) => Math.Max(0, CompKeep(id) - (MyBox() is Deployable b ? InBox(b, id) : 0));
 
@@ -126,6 +134,7 @@ namespace Rastvordd.Sim
                 "punchcard_1" => _rt.Sub != null ? 1 : 0,
                 "keycard" => _rt.Safes.Count > 0 ? 1 : 0,
                 "comp_gears" or "comp_spring" or "comp_pipe" or "comp_tape" => _rt.Recycler != null ? CompSurplus(id) : 0,
+                _ when Array.IndexOf(World.BotRecycleIds, id) >= 0 => _rt.Recycler != null ? CompSurplus(id) : 0,   // ценный лом и лишние детали тира 2
                 _ when id.StartsWith("ammo_") => Ranged() is string g && WeaponAmmo(g) == id ? (id is "ammo_762" or "ammo_545" ? 120 : 60) : 0,
                 "bandage" => 3,
                 _ => 0,
@@ -133,6 +142,15 @@ namespace Rastvordd.Sim
         }
 
         int Stock(string id) => _me.Count(id) + (MyBox() is Deployable b ? InBox(b, id) : 0);
+
+        /// <summary>Что брать из ящика в поход: карты, патроны, бинты и всё, что пойдёт в переработчик.</summary>
+        static readonly string[] TripIds = BuildTripIds();
+        static string[] BuildTripIds()
+        {
+            var l = new List<string> { "punchcard_1", "keycard", "ammo_9mm", "ammo_12g", "ammo_762", "bandage" };
+            foreach (var id in World.BotRecycleIds) if (!l.Contains(id)) l.Add(id);
+            return l.ToArray();
+        }
 
         /// <summary>Могу ли я идти на эту РТ: охрана против моего ствола, патроны, смерти там.</summary>
         bool RtFeasible(RtInfo r, out string why)
@@ -150,6 +168,7 @@ namespace Rastvordd.Sim
                 int t0Runs = 0;
                 foreach (var (name, n) in _rtRuns) if (Rts().Exists(x => x.M.Name == name && x.Tier == 0 && x.Guards == 0)) t0Runs += n;
                 if (runs == 0 && (needCard || (t0Runs < 2 && _stage5 < WipeStage.Arms))) { }   // каждую тир 0 — один раз; за ломом — не больше двух всего
+                else if (r.Recycler != null && RecycleScrapStock() >= 40) { }                     // переработчик — главный источник лома (D49): к нему ходят сколько надо
                 else { why = runs > 0 ? $"тир 0 уже обобрал ({runs} раз) — там нечего ловить" : "тир 0 мне уже не нужен"; return false; }
             }
             if (r.Guards == 0) return deaths < 3 || (why = "там уже умирал") == null;
@@ -180,8 +199,9 @@ namespace Rastvordd.Sim
             if (card && _w.Substations.Count > 0) { need += 0.5f; why.Add("есть перфокарта I — Подстанция"); }
             bool wantCard = !card && _w.Substations.Count > 0 && _w.Tier0.Count > 0 && Ranged() != null;
             if (wantCard) { need += 0.2f; why.Add("нужна перфокарта I (на тире 0) — для крейта Подстанции"); }
-            int comps = CompSurplus("comp_gears") + CompSurplus("comp_spring") + CompSurplus("comp_pipe") + CompSurplus("comp_tape");
-            if (comps >= 3) { need += 0.2f; why.Add($"{comps} лишних деталей — в переработчик"); }
+            int recScrap = RecycleScrapStock();
+            int comps = recScrap >= 25 ? recScrap : 0;
+            if (recScrap >= 25) { need += Math.Clamp(recScrap / 150f, 0.2f, 0.6f); why.Add($"ценный лом и лишние детали ≈{recScrap} лома — в переработчик"); }
             if (_partsWant.Count > 0 && _w.Time - _partsWantAt < 60) { need += 0.3f; why.Add($"на ствол не хватает: {string.Join(", ", new List<string>(_partsWant.Keys).ConvertAll(Items.Name))}"); }
             float since = _w.Time - LastRunEnd;
             if (since > 1200) { need += 0.35f; why.Add("давно не был на РТ"); }
@@ -200,7 +220,7 @@ namespace Rastvordd.Sim
                     if (card && r.Sub != null) Say("подстанция-нет", $"с перфокартой на «{r.Short}» не иду: {w}", 300);
                     continue;
                 }
-                float value = r.Reward * (r == _fav ? 1.3f : 1f) + (card && r.Sub != null ? 150 : 0) + (comps > 0 && r.Recycler != null ? 40 : 0)
+                float value = r.Reward * (r == _fav ? 1.3f : 1f) + (card && r.Sub != null ? 150 : 0) + (comps > 0 && r.Recycler != null ? 40 + comps : 0)
                               + (Stock("keycard") > 0 ? r.Safes.Count * 60 : 0) + (wantCard && r.T0 != null && !Skipped(r.T0) ? 90 : 0);
                 float risk = r.Risk * (1 - Appetite) * 25 + Vector2.Distance(Home, r.M.Center) / 8f + (DangerSpot(r.M.Center, r.Radius + 20) ? 60 * (1 - Appetite) : 0);   // недавно там умирал
                 // слух по радио «на РТ ещё есть перфокарта» — туда, если перфокарта нужна
@@ -253,7 +273,7 @@ namespace Rastvordd.Sim
             bool wantHome = false;
             if (box != null)
             {
-                foreach (var id in new[] { "punchcard_1", "keycard", "ammo_9mm", "ammo_12g", "ammo_762", "comp_gears", "comp_spring", "comp_pipe" })
+                foreach (var id in TripIds)
                     if (TripNeeds(id) > _me.Count(id) && InBox(box, id) > 0) wantHome = true;
                 wantHome |= _surplus >= 40;
             }
@@ -269,7 +289,7 @@ namespace Rastvordd.Sim
                 // ценное — дома (кроме нужного в поход)
                 if (_surplus >= 10) { if (StashAct(ref cmd)) { Doing = "собирается на РТ: оставляет ценное дома"; return true; } }
                 // взять из ящика нужное в поход
-                foreach (var id in new[] { "punchcard_1", "keycard", "ammo_9mm", "ammo_12g", "ammo_762", "bandage", "comp_gears", "comp_spring", "comp_pipe", "comp_tape" })
+                foreach (var id in TripIds)
                 {
                     int want = TripNeeds(id);
                     if (want <= 0 || _me.Count(id) >= Math.Min(want, _me.Count(id) + InBox(box, id)) || InBox(box, id) == 0) continue;

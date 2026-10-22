@@ -10,8 +10,10 @@ namespace Rastvordd.Sim
     /// </summary>
     public sealed partial class PlayerBot
     {
-        static readonly string[] LatheParts = { "comp_pipe", "comp_tape", "comp_gears", "comp_trigger", "comp_bolt_carrier", "comp_barrel_rifled" };
+        // дорогие детали первыми: иначе станок съедал пружины на лишние УСМ, а на затвор и газоотвод к АКМ их не оставалось
+        static readonly string[] LatheParts = { "comp_gas_block", "comp_barrel_chrome", "comp_bolt_carrier", "comp_barrel_rifled", "comp_trigger", "comp_gears", "comp_pipe", "comp_tape" };
         float _latheBlock = -999, _latheTry = -1;
+        static readonly Vector2[] LatheSpots = { new(3.0f, 5.6f), new(3.0f, -1.8f), new(-1.8f, 2.0f), new(7.8f, 2.0f), new(3.0f, 9.0f), new(-2.5f, 7.0f) };
 
         Deployable MyLathe()
         {
@@ -29,12 +31,19 @@ namespace Rastvordd.Sim
             {
                 if (!_partsWant.ContainsKey(id)) continue;
                 var r = Weaponry.LatheFor(id);
-                if (r == null || r.Bench3) continue;
-                bool ok = true;
-                foreach (var (inId, n) in r.In) if (Stock(inId) < n + (inId == "metal_fragments" ? 50 : 0)) { ok = false; break; }
-                if (ok) return id;
+                if (r == null || (r.Bench3 && MyBenchLevel() < 3)) continue;   // хромированный ствол и газоотвод — у верстака 3
+                if (CanLathe(r)) return id;
+                // не хватает промежуточной детали, которую тоже точит станок (газоотвод ← УСМ, затвор ← шестерни) — сначала её
+                foreach (var (inId, n) in r.In)
+                    if (Stock(inId) < n && Weaponry.LatheFor(inId) is Weaponry.LatheRecipe sub && !sub.Bench3 && CanLathe(sub)) return inId;
             }
             return null;
+        }
+
+        bool CanLathe(Weaponry.LatheRecipe r)
+        {
+            foreach (var (inId, n) in r.In) if (Stock(inId) < n + (inId == "metal_fragments" ? 50 : 0)) return false;
+            return true;
         }
 
         /// <summary>true — занят станком в этот тик.</summary>
@@ -64,8 +73,11 @@ namespace Rastvordd.Sim
                     return CraftAtBench("deploy_lathe", box, ref cmd);
                 }
                 if (_latheTry < 0) _latheTry = _w.Time;
-                if (_w.Time - _latheTry > 90) { _latheBlock = _w.Time + 600; _latheTry = -1; Thought("станок поставить негде — позже"); return false; }
-                var spot = AtPlan(new Vector2(3.0f, 5.6f));   // снаружи у южной стены кибитки, в зоне шкафа
+                if (_w.Time - _latheTry > 150) { _latheBlock = _w.Time + 600; _latheTry = -1; Thought("станок поставить негде — позже"); return false; }
+                // места по очереди (25 с на каждое): у южной стены кибитки, у северной, западной, восточной, дальше на юг —
+                // раньше было одно место, и когда его занимала стройка мейна, станок не вставал никогда (D49)
+                var spot = AtPlan(LatheSpots[(int)((_w.Time - _latheTry) / 25f) % LatheSpots.Length]);
+                cmd.Aim = spot;
                 Doing = "ставит токарный станок";
                 if (!Reach(spot, ref cmd, 1.1f)) return true;
                 if (Hold("deploy_lathe", ref cmd)) Click(ref cmd);

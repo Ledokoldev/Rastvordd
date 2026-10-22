@@ -91,7 +91,7 @@ namespace Rastvordd.Sim
         {
             if (MyBox() is not Deployable box || _site == null || _raid != null || _w.Time < _stashBlock) return 0;
             if (_rtPhase is RtPhase.Travel or RtPhase.Loot) return 0;   // в походе мешок не бросают — несут после
-            if (box.Storage.Items.Count >= World.BoxSlots && Surplus().TrueForAll(s => !box.Storage.Items.Exists(x => x.Id == s.id))) return 0;
+            if (box.Storage.Items.Count >= World.BoxSlots && !TidyBox(box, true) && Surplus().TrueForAll(s => !box.Storage.Items.Exists(x => x.Id == s.id))) return 0;
             float v = _surplus;
             bool guns = SpareGun() != null;
             if (v < 25 && !guns) return 0;
@@ -174,6 +174,60 @@ namespace Rastvordd.Sim
             return true;
         }
 
+        /// <summary>
+        /// Ящик почти полон (D49): выкинуть мелочь по одной ячейке — одежду не лучше надетой, кустарные обвесы, сломанные стволы,
+        /// дешёвое (ценность ячейки &lt; 12 лома). Раньше ящик забивался одеждой до 30/30, рюкзак не разгружался, походы на РТ
+        /// кончались «рюкзак полон» на входе, а ценный лом не доходил до переработчика.
+        /// </summary>
+        bool TidyBox(Deployable box, bool dry = false)
+        {
+            var items = box.Storage.Items;
+            if (items.Count < World.BoxSlots - 3) return false;
+            var tossed = new List<string>();
+            for (int k = 0; k < 6 && items.Count >= World.BoxSlots - 5; k++)
+            {
+                int pick = -1; float low = 12;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    var s = items[i];
+                    if (s.Id == "scrap" || s.Id.StartsWith("key_") || s.Id.StartsWith("comp_") || Economy.IsValuable(s.Id) || s.Id.StartsWith("deploy_")) continue;
+                    float v = s.State is WeaponState ws ? (ws.Broken ? 1 : Items.Value(s.Id)) : Items.Value(s.Id) * s.Count;
+                    if (Clothing.Def(s.Id) is WearDef wd && Clothing.Def(_me.Worn[(int)wd.Slot]?.Id) is WearDef cur && Clothing.BotScore(cur) >= Clothing.BotScore(wd)) v = MathF.Min(v, 2);
+                    if (v < low) { low = v; pick = i; }
+                }
+                if (pick < 0) break;
+                if (dry) return true;
+                tossed.Add(Items.Name(items[pick].Id));
+                items.RemoveAt(pick);
+            }
+            if (tossed.Count > 0) { Thought($"ящик забит — выкинул хлам: {string.Join(", ", tossed)}"); LStat("ящик: выкинул хлам", tossed.Count); }
+            return tossed.Count > 0;
+        }
+
+        /// <summary>
+        /// Рюкзак (D49): ключи от дверей, которых больше нет, и запасная одежда не лучше надетой (дешевле 12 лома) — выкинуть.
+        /// Раньше рюкзак забивался ключами и тряпьём, походы на РТ кончались «рюкзак полон» на входе.
+        /// </summary>
+        void TidyPack()
+        {
+            int used = 0;
+            foreach (var s in _me.Pack) if (s != null) used++;
+            if (used < Actor.PackSize * 0.6f) return;
+            var tossed = new List<string>();
+            for (int i = 0; i < Actor.PackSize; i++)
+            {
+                var s = _me.Pack[i];
+                if (s == null) continue;
+                bool junk = false;
+                if (s.Id.StartsWith("key_") && int.TryParse(s.Id.Substring(4), out int door)) junk = !_w.Structures.Exists(x => x.Id == door);
+                else if (Clothing.Def(s.Id) is WearDef wd && Items.Value(s.Id) < 12 && Clothing.Def(_me.Worn[(int)wd.Slot]?.Id) is WearDef cur && Clothing.BotScore(cur) >= Clothing.BotScore(wd)) junk = true;
+                if (!junk) continue;
+                tossed.Add(Items.Name(s.Id));
+                _me.Pack[i] = null;
+            }
+            if (tossed.Count > 0) { Thought($"рюкзак: выкинул лишнее — {string.Join(", ", tossed)}"); LStat("рюкзак: выкинул", tossed.Count); }
+        }
+
         string _stashSaidFor;
         float _stashBest = float.MaxValue, _stashSince, _stashBlock;
 
@@ -201,6 +255,7 @@ namespace Rastvordd.Sim
             _stashBest = float.MaxValue; _stashSince = _w.Time;
             var parts = new List<string>();
             int moved = 0;
+            TidyBox(box);
             for (int k = 0; k < 4; k++)
             {
                 string gid = SpareGun()?.Id;

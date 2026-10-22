@@ -150,6 +150,7 @@ namespace Rastvordd.Sim
                 Nodes.Add(node);
                 _nodeGrid.Insert(node, node.Pos - new Vector2(node.Radius), node.Pos + new Vector2(node.Radius));
             }
+            EnsureTires();   // сохранение до покрышек — вернуть их на места
             _nodeRespawns.Clear();
             foreach (var (k, left) in w.NodeRespawns) _nodeRespawns.Add(((NodeKind)k, left));
 

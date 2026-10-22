@@ -105,6 +105,8 @@ namespace Rastvordd.Client
         {
             if (kind == NodeKind.Barrel) return Get("props/barrel_oil");
             if (kind == NodeKind.Junk) return Styled("props/junk_pile", biome);
+            if (kind == NodeKind.Tire) return Get("clutter/clutter_tire");
+            if (kind == NodeKind.TireStack) return Get("props/gar_tire_stack");
             string k = kind switch { NodeKind.Metal => "metal", NodeKind.Sulfur => "sulfur", _ => "stone" };
             string suffix = biome switch { Biome.Tundra => "tundra", Biome.Arid => "arid", Biome.Beach => "arid", Biome.Swamp => "swamp", _ => null };
             return (suffix != null ? Get($"nodes/node_{k}_{suffix}") : null) ?? Node(kind, seed);
@@ -140,7 +142,6 @@ namespace Rastvordd.Client
             ["comp_gears"] = "icons/icon_gears",
             ["comp_spring"] = "icons/icon_spring",
             ["comp_pipe"] = "icons/icon_metal_pipe",
-            ["comp_tape"] = "icons/icon_tape",
             ["deploy_box"] = "icons/icon_wood_box",
             ["deploy_claim"] = "icons/icon_tool_cupboard",
             ["expl_satchel"] = "icons/icon_satchel",
@@ -190,6 +191,9 @@ namespace Rastvordd.Client
             WearFallback(id) is string wf ? wf :
             Fallback.TryGetValue(id, out var f) ? f
             : id.StartsWith("comp_") ? "icons/icon_gears"
+            : id == "val_copper_wire" ? "icons/icon_comp_tape"
+            : id == "val_motor" || id == "val_battery" ? "icons/icon_gears"
+            : id.StartsWith("val_") ? "icons/icon_comp_circuit"
             : id.StartsWith("att_") ? "icons/icon_gears"
             : null;
 

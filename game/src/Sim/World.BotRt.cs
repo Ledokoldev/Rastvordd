@@ -58,7 +58,23 @@ namespace Rastvordd.Sim
             return true;
         }
 
-        static readonly string[] BotRecycleIds = { "comp_gears", "comp_spring", "comp_pipe", "comp_tape" };
+        /// <summary>Что бот несёт в переработчик (D49): ценный лом — весь, общие детали и детали тира 2 — сверх запаса под стволы.</summary>
+        public static readonly string[] BotRecycleIds = BuildRecycleIds();
+        static string[] BuildRecycleIds()
+        {
+            var l = new System.Collections.Generic.List<string> { "comp_gears", "comp_spring", "comp_pipe", "comp_tape" };
+            foreach (var v in Economy.Valuables) l.Add(v.id);
+            l.AddRange(Weaponry.Tier2Parts);
+            return l.ToArray();
+        }
+
+        /// <summary>Сколько лома выйдет из того, что бот отнёс бы в переработчик.</summary>
+        public static int BotRecycleScrap(Func<string, int> stock, Func<string, int> keep)
+        {
+            int n = 0;
+            foreach (var id in BotRecycleIds) n += Math.Max(0, stock(id) - keep(id)) * Economy.ScrapYield(id);
+            return n;
+        }
 
         /// <summary>Сколько общих деталей у бота сверх запаса под стволы (keep — сколько держать каждой).</summary>
         public static int BotRecyclable(Actor a, Func<string, int> keep)

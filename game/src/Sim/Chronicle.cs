@@ -16,7 +16,7 @@ namespace Rastvordd.Sim
     {
         public const float SampleEvery = 5f;
         readonly StreamWriter _w;
-        float _nextSample;
+        float _nextSample, _nextEcon;
         int _milestones;
         readonly Dictionary<int, string> _lastThought = new();
         static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
@@ -80,6 +80,15 @@ namespace Rastvordd.Sim
 
             if (t < _nextSample) return;
             _nextSample = t + SampleEvery;
+            // доход лома по источникам (D49, Economy.Ledger) — накопительно, раз в 10 мин мира
+            if (t >= _nextEcon)
+            {
+                _nextEcon = t + 600;
+                var eb = new StringBuilder("\"ledger\":{");
+                bool efirst = true;
+                foreach (var (k, v) in Economy.Snapshot()) { if (!efirst) eb.Append(','); efirst = false; eb.Append(S(k)).Append(':').Append(F((float)v)); }
+                Line(t, "econ", eb.Append('}').ToString());
+            }
             var sb = new StringBuilder("\"actors\":[");
             bool first = true;
             foreach (var a in w.Actors)

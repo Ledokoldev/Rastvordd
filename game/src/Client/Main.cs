@@ -233,7 +233,9 @@ namespace Rastvordd.Client
         public override void _Ready()
         {
             DisplayServer.WindowSetTitle("Раствордд — прототип 0 (2D 3/4)");
-            _server = new LocalServer(1337);
+            // отладка: --seed=N — другой мир для прогонов ботов (обычная игра — 1337; сохранение держит свой)
+            var seedArg = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--seed="));
+            _server = new LocalServer(seedArg != null && int.TryParse(seedArg.Substring(7), out int seedN) ? seedN : 1337);
             // сохранение мира игрока — только при обычном запуске: любой отладочный флаг (прогоны ботов, скриншоты,
             // наблюдатель) работает со свежим миром и НЕ трогает сохранение (иначе тест перезапишет мир игрока)
             _saveEnabled = OS.GetCmdlineUserArgs().Length == 0;

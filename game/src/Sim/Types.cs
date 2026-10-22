@@ -34,7 +34,7 @@ namespace Rastvordd.Sim
         public static InputCmd Empty => new InputCmd { SelectSlot = -1, Craft = -1, Code = -1, SetPiece = -1 };
     }
 
-    public enum NodeKind { Tree, Stone, Metal, Sulfur, Barrel, Junk }   // Barrel — бочка с хламом (ломается), Junk — куча хлама (ковыряется, даёт лом)
+    public enum NodeKind { Tree, Stone, Metal, Sulfur, Barrel, Junk, Tire, TireStack }   // Barrel — бочка с хламом (ломается), Junk — куча хлама (ковыряется, даёт лом); Tire / TireStack — покрышка / стопка покрышек (режется на резину)
 
     public sealed class WeaponDef
     {
@@ -231,6 +231,9 @@ namespace Rastvordd.Sim
             // одежда, пластины, часы, резина, кожа, антирадин (D47)
             Clothing.Register(Add);
 
+            // ценный лом — только на переработку (D49, Economy.cs)
+            Economy.Register(Add);
+
             // устанавливаемое
             Add("deploy_workbench", "Верстак", ItemCategory.Deployable).Deploy = DeployKind.Workbench;
             Add("deploy_workbench2", "Верстак 2", ItemCategory.Deployable).Deploy = DeployKind.Workbench;
@@ -259,6 +262,7 @@ namespace Rastvordd.Sim
         {
             var list = new List<(string, int)>();
             if (id != null && Weaponry.Info.TryGetValue(id, out var meta) && meta.Recycle != null) { list.AddRange(meta.Recycle); return list; }
+            if (Clothing.LootRecycle(id) is (string, int)[] cr) { list.AddRange(cr); return list; }   // лутовая одежда и пластины (D49)
             var r = Recipes.All.Find(x => x.Output == id);
             if (r == null || r.Count > 1) return list;           // сырьё, патроны и порох не перерабатываются
             foreach (var (cid, n) in r.Cost) if (n / 2 > 0) list.Add((cid, n / 2));
@@ -397,7 +401,7 @@ namespace Rastvordd.Sim
             "charcoal" => "Остаётся в печи от дерева; с серой — порох",
             "cloth" => "Бинты, спальник, лук, факел",
             "gunpowder" => "Патроны и взрывчатка (верстак)",
-            "scrap" => "Верстак, самопал, взрывчатка",
+            "scrap" => "Изучение и верстаки. Больше всего — из переработчика на РТ: компоненты и ценный лом",
             "arrow" => "Стрелы для лука",
             "berries" => "Еда: F — съесть",
             "canned" => "Еда: F — съесть",
@@ -515,10 +519,11 @@ namespace Rastvordd.Sim
             new Recipe { Output = "arrow", Count = 2, Cost = new[] { ("wood", 25), ("stone", 10) }, Time = 2 },
             new Recipe { Output = "bandage", Cost = new[] { ("cloth", 4) }, Time = 2 },
             new Recipe { Output = "deploy_furnace", Cost = new[] { ("stone", 100), ("wood", 50) }, Time = 8 },
-            new Recipe { Output = "deploy_workbench", Cost = new[] { ("wood", 150), ("metal_fragments", 50), ("scrap", 25) }, Time = 10 },
+            new Recipe { Output = "deploy_workbench", Cost = new[] { ("wood", 150), ("metal_fragments", 50), ("scrap", 50) }, Time = 10 },
             new Recipe { Output = "gunpowder", Count = 5, Cost = new[] { ("charcoal", 15), ("sulfur", 10) }, Time = 3, Bench = 1 },
-            new Recipe { Output = "deploy_workbench2", Cost = new[] { ("metal_fragments", 200), ("scrap", 75) }, Time = 15, Bench = 1 },
-            new Recipe { Output = "deploy_workbench3", Cost = new[] { ("metal_fragments", 400), ("scrap", 200) }, Time = 25, Bench = 2 },
+            // верстаки (D49): лом 50 / 150 / 400, третий — ещё платы ×3 и шестерни ×5
+            new Recipe { Output = "deploy_workbench2", Cost = new[] { ("metal_fragments", 300), ("scrap", 150) }, Time = 15, Bench = 1 },
+            new Recipe { Output = "deploy_workbench3", Cost = new[] { ("metal_fragments", 600), ("scrap", 400), ("comp_circuit", 3), ("comp_gears", 5) }, Time = 25, Bench = 2 },
         };
 
         static Recipes() { Weaponry.AddRecipes(All); Clothing.AddRecipes(All); }   // стволы, патроны, обвесы, станок (D46); одежда (D47)
@@ -540,11 +545,12 @@ namespace Rastvordd.Sim
     {
         public static readonly List<TechNode> All = new()
         {
-            new TechNode { Id = "gunpowder", Bench = 1, Scrap = 20, Col = 0, Row = 0 },
-            new TechNode { Id = "lock_code", Bench = 1, Scrap = 30, Col = 0, Row = 10 },
-            new TechNode { Id = "expl_fire", Bench = 1, Scrap = 30, Col = 0, Row = 11 },
-            new TechNode { Id = "expl_satchel", Bench = 2, Scrap = 75, Requires = new[] { "gunpowder" }, Col = 1, Row = 0 },
-            new TechNode { Id = "expl_c4", Bench = 3, Scrap = 250, Requires = new[] { "expl_satchel" }, Col = 2, Row = 0 },
+            // цены D49: «изучить всё» ≈ 250 / 650 / 1300 лома по верстакам (вместе с ветками оружия и одежды)
+            new TechNode { Id = "gunpowder", Bench = 1, Scrap = 15, Col = 0, Row = 0 },
+            new TechNode { Id = "lock_code", Bench = 1, Scrap = 15, Col = 0, Row = 10 },
+            new TechNode { Id = "expl_fire", Bench = 1, Scrap = 15, Col = 0, Row = 11 },
+            new TechNode { Id = "expl_satchel", Bench = 2, Scrap = 45, Requires = new[] { "gunpowder" }, Col = 1, Row = 0 },
+            new TechNode { Id = "expl_c4", Bench = 3, Scrap = 160, Requires = new[] { "expl_satchel" }, Col = 2, Row = 0 },
         };
 
         static Tech() { Weaponry.AddTech(All); Clothing.AddTech(All); }   // ветка оружия и обвесов (D46), комплекты одежды (D47)
@@ -748,6 +754,7 @@ namespace Rastvordd.Sim
             NodeKind.Stone => "stone",
             NodeKind.Metal => "metal_ore",
             NodeKind.Barrel or NodeKind.Junk => "scrap",
+            NodeKind.Tire or NodeKind.TireStack => "rubber",
             _ => "sulfur_ore",
         };
     }
@@ -825,6 +832,8 @@ namespace Rastvordd.Sim
         public readonly Dictionary<int, (int n, float t)> Search = new();
         public float Despawn;           // для сумок
         public float RespawnLeft;       // для ящиков
+        public string Src;              // откуда лут (учёт дохода лома, Economy.Ledger): null — по флагам (см. Source)
+        public string Source => Src ?? (Safe ? "сейф" : Look != null ? "ивент" : Punch ? "крейт перфокарты" : IsCrate ? $"ящик РТ {Tier}" : Corpse ? "труп" : null);
         public readonly List<ItemSlot> Items = new();
         public bool Empty => Items.Count == 0;
     }

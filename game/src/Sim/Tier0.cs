@@ -115,6 +115,8 @@ namespace Rastvordd.Sim
                 if (planned && id.StartsWith("crate_")) { AddCrate(p, 0); continue; }
                 if (planned && id == "junk_pile") { AddScrapSpot(NodeKind.Junk, p); continue; }
                 if (planned && id is "barrel_oil" or "barrel_water") { AddScrapSpot(NodeKind.Barrel, p); continue; }
+                if (id == "clutter_tire") { AddTireSpot(NodeKind.Tire, p); continue; }                          // покрышки режутся на резину
+                if (id is "gar_tire_stack" or "tires_pile") { AddTireSpot(NodeKind.TireStack, p); continue; }
                 if (id == "car_police_2101") carPos = p;
                 if (sprite.StartsWith("grass/") || sprite.StartsWith("plants/") || sprite.StartsWith("clutter/")) { Decor(sprite, p, flip); continue; }
                 Prop(sprite, p, flip);

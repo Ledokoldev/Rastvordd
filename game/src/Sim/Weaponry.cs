@@ -82,6 +82,14 @@ namespace Rastvordd.Sim
         public static readonly string[] CommonParts = { "comp_spring", "comp_pipe", "comp_tape", "comp_gears" };
         public static readonly string[] Tier2Parts = { "comp_trigger", "comp_bolt_carrier", "comp_barrel_rifled", "comp_frame_pistol", "comp_body_smg", "comp_body_rifle" };
         public static readonly string[] Tier3Parts = { "comp_receiver_ak", "comp_barrel_chrome", "comp_gas_block" };
+
+        /// <summary>Общий компонент для бочек и ящиков (D49): пружина 35 % (не точится), труба 25, изолента 20, шестерни 20.</summary>
+        public static string CommonPart(Random rng) => rng.Next(100) switch { < 25 => "comp_pipe", < 60 => "comp_spring", < 80 => "comp_tape", _ => "comp_gears" };
+        /// <summary>Деталь тира 2: корпуса (только лут) вдвое чаще точимых на станке УСМ, затвора и нарезного ствола.</summary>
+        public static string Tier2Part(Random rng) => rng.Next(9) switch
+        {
+            0 or 1 => "comp_frame_pistol", 2 or 3 => "comp_body_smg", 4 or 5 => "comp_body_rifle", 6 => "comp_trigger", 7 => "comp_bolt_carrier", _ => "comp_barrel_rifled",
+        };
         public static readonly string[] ArmyAtts = { "att_scope4x", "att_suppressor_pbs", "att_compensator_army", "att_mag_ext_army", "att_scope2x" };
         public static readonly string[] FactoryAtts = { "att_reddot", "att_suppressor", "att_compensator", "att_grip", "att_flashlight", "att_laser", "att_mag_ext", "att_mag_twin", "att_stock_tac" };
 
@@ -162,20 +170,20 @@ namespace Rastvordd.Sim
             }
             C("comp_spring", "Пружина", "Витая стальная пружина. Сама не сделаешь — только найти", 2, 12, 50, ("scrap", 8), ("metal_fragments", 10));
             C("comp_pipe", "Труба", "Обрезок водопроводной трубы. Ствол для самоделки", 2, 10, 50, ("scrap", 6), ("metal_fragments", 20));
-            C("comp_tape", "Изолента", "Синяя изолента. Держит всё, что не должно развалиться", 1, 4, 50, ("scrap", 3), ("cloth", 5));
+            C("comp_tape", "Изолента", "Синяя изолента. Держит всё, что не должно развалиться", 1, 5, 50, ("scrap", 5), ("cloth", 5));
             C("comp_gears", "Шестерни", "Шестерни от механизмов. Для замков, станков и затворов", 2, 12, 50, ("scrap", 10), ("metal_fragments", 15));
-            C("comp_circuit", "Плата", "Плата с радиодеталями. Для ЛЦУ, коллиматора и сложных механизмов", 2, 25, 20, ("scrap", 15));
-            C("comp_lens", "Линза", "Просветлённая линза. Без неё прицел не собрать", 2, 25, 20, ("scrap", 12));
-            C("comp_trigger", "УСМ", "Ударно-спусковой механизм: спуск, курок, шептало", 3, 40, 10, ("comp_spring", 1), ("scrap", 15));
-            C("comp_bolt_carrier", "Затворная группа", "Затвор с рамой. Сердце любого автомата", 3, 55, 10, ("comp_spring", 1), ("comp_gears", 1), ("scrap", 20));
-            C("comp_barrel_rifled", "Нарезной ствол", "Ствол с нарезами: точнее и дальше", 3, 50, 10, ("comp_pipe", 1), ("scrap", 25));
-            C("comp_frame_pistol", "Корпус пистолета", "Рамка пистолета с рукоятью", 3, 45, 5, ("scrap", 30), ("metal_fragments", 40));
-            C("comp_body_smg", "Корпус ПП", "Ствольная коробка пистолета-пулемёта", 3, 55, 5, ("scrap", 35), ("metal_fragments", 50));
-            C("comp_body_rifle", "Корпус винтовки", "Ложа с коробкой для винтовки", 3, 60, 5, ("scrap", 35), ("wood", 50));
-            C("comp_receiver_ak", "Ствольная коробка АК", "Фрезерованная коробка автомата. Таких не делают в гараже", 4, 200, 3, ("scrap", 80));
-            C("comp_barrel_chrome", "Хромированный ствол", "Хромированный канал ствола: живёт долго, бьёт кучно", 4, 150, 5, ("comp_barrel_rifled", 1), ("scrap", 30));
-            C("comp_gas_block", "Газоотводный узел", "Газовая камера с поршнем — для самозарядных и автоматов", 4, 140, 5, ("comp_trigger", 1), ("scrap", 30));
-            C("comp_oil", "Оружейное масло", "Смазка. Чинит износ оружия и обвесов (Alt+E у верстака со стволом в руках)", 1, 6, 20);
+            C("comp_circuit", "Плата", "Плата с радиодеталями. Для ЛЦУ, коллиматора и сложных механизмов", 2, 25, 20, ("scrap", 12));
+            C("comp_lens", "Линза", "Просветлённая линза. Без неё прицел не собрать", 2, 25, 20, ("scrap", 10));
+            C("comp_trigger", "УСМ", "Ударно-спусковой механизм: спуск, курок, шептало", 3, 40, 10, ("scrap", 18), ("comp_spring", 1));
+            C("comp_bolt_carrier", "Затворная группа", "Затвор с рамой. Сердце любого автомата", 3, 55, 10, ("scrap", 22), ("comp_spring", 1), ("comp_gears", 1));
+            C("comp_barrel_rifled", "Нарезной ствол", "Ствол с нарезами: точнее и дальше", 3, 50, 10, ("scrap", 20), ("comp_pipe", 1));
+            C("comp_frame_pistol", "Корпус пистолета", "Рамка пистолета с рукоятью", 3, 45, 5, ("scrap", 25), ("metal_fragments", 40));
+            C("comp_body_smg", "Корпус ПП", "Ствольная коробка пистолета-пулемёта", 3, 55, 5, ("scrap", 28), ("metal_fragments", 50));
+            C("comp_body_rifle", "Корпус винтовки", "Ложа с коробкой для винтовки", 3, 60, 5, ("scrap", 30), ("wood", 50));
+            C("comp_receiver_ak", "Ствольная коробка АК", "Фрезерованная коробка автомата. Таких не делают в гараже", 4, 200, 3, ("scrap", 60), ("metal_fragments", 50));
+            C("comp_barrel_chrome", "Хромированный ствол", "Хромированный канал ствола: живёт долго, бьёт кучно", 4, 150, 5, ("scrap", 50), ("metal_fragments", 40));
+            C("comp_gas_block", "Газоотводный узел", "Газовая камера с поршнем — для самозарядных и автоматов", 4, 140, 5, ("scrap", 45), ("metal_fragments", 40));
+            C("comp_oil", "Оружейное масло", "Смазка. Чинит износ оружия и обвесов (Alt+E у верстака со стволом в руках)", 1, 6, 20, ("scrap", 2));
 
             // стволы: id, патрон, тир, режим, урон, интервал, магазин, перезарядка, дальность, вид, износ (выстрелов), слоты обвесов
             void G(string id, string name, WeaponDef w, int rarity, float value, string desc)
@@ -286,14 +294,14 @@ namespace Rastvordd.Sim
                 R("deploy_lathe", 20, 2, 1, ("metal_fragments", 250), ("scrap", 50), ("comp_gears", 2)),
                 // обвесы: кустарные (верстак 1) и заводские (верстак 2)
                 R("att_suppressor_can", 5, 1, 1, ("metal_fragments", 50), ("comp_tape", 1)),
-                R("att_grip_wood", 4, 1, 1, ("wood", 50), ("comp_tape", 1)),
+                R("att_grip_wood", 4, 1, 1, ("wood", 50), ("comp_tape", 1), ("rubber", 2)),   // обмотка из резины
                 R("att_torch", 4, 1, 1, ("wood", 30), ("cloth", 5), ("comp_tape", 1)),
                 R("att_mag_twin_crude", 4, 1, 1, ("comp_tape", 2)),
                 R("att_reddot", 10, 2, 1, ("metal_fragments", 75), ("comp_lens", 1), ("comp_circuit", 1)),
                 R("att_scope2x", 12, 2, 1, ("metal_fragments", 100), ("comp_lens", 2), ("comp_gears", 1)),
                 R("att_suppressor", 10, 2, 1, ("metal_fragments", 150), ("comp_barrel_rifled", 1), ("comp_tape", 1)),
                 R("att_compensator", 8, 2, 1, ("metal_fragments", 100), ("comp_gears", 2)),
-                R("att_grip", 6, 2, 1, ("metal_fragments", 75), ("wood", 50), ("comp_gears", 1)),
+                R("att_grip", 6, 2, 1, ("metal_fragments", 75), ("rubber", 4), ("comp_gears", 1)),   // прорезиненная рукоять
                 R("att_flashlight", 6, 2, 1, ("metal_fragments", 50), ("comp_circuit", 1)),
                 R("att_laser", 8, 2, 1, ("metal_fragments", 50), ("comp_circuit", 1), ("comp_lens", 1)),
                 R("att_mag_ext", 8, 2, 1, ("metal_fragments", 100), ("comp_spring", 2)),
@@ -303,8 +311,9 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>
-        /// Дерево изучения ветки оружия (лом). Путь до АКМ: Наган 50 + Самоделка 90 + Грач 120 (или Арбалет 30 + СВТ 150) + 7,62 100 + АКМ 300
-        /// ≈ 660–690 лома (+ порох и 9 мм). Дробовики и элита — без узлов (не крафтятся).
+        /// Дерево изучения ветки оружия (лом, D49). Путь до АКМ: порох 15 + 9 мм 20 + Наган 35 + Самоделка 60 + Грач 75 + 7,62 60 + АКМ 420
+        /// ≈ 685 лома (через Арбалет 20 + СВТ 90 — ≈ 630). «Изучить всё» с одеждой и взрывчаткой: верстак 1 ≈ 250, 2 ≈ 670, 3 ≈ 1300.
+        /// Дробовики и элита — без узлов (не крафтятся).
         /// </summary>
         internal static void AddTech(List<TechNode> all)
         {
@@ -313,37 +322,37 @@ namespace Rastvordd.Sim
             all.AddRange(new[]
             {
                 // патроны
-                N("ammo_9mm", 1, 30, 0, 1, new[] { "gunpowder" }),
-                N("ammo_12g", 1, 40, 0, 2, new[] { "gunpowder" }),
-                N("ammo_762", 2, 100, 1, 1, new[] { "ammo_9mm" }),
-                N("ammo_545", 3, 100, 2, 1, new[] { "ammo_762" }),
+                N("ammo_9mm", 1, 20, 0, 1, new[] { "gunpowder" }),
+                N("ammo_12g", 1, 20, 0, 2, new[] { "gunpowder" }),
+                N("ammo_762", 2, 60, 1, 1, new[] { "ammo_9mm" }),
+                N("ammo_545", 3, 60, 2, 1, new[] { "ammo_762" }),
                 // ветка «Пистолеты и ПП»
-                N("weapon_nagant", 1, 50, 0, 3, new[] { "ammo_9mm" }),
-                N("weapon_homesmg", 1, 90, 0, 4, new[] { "weapon_nagant" }),
-                N("weapon_grach", 2, 120, 1, 2, new[] { "weapon_homesmg" }),
-                N("weapon_pps43", 2, 150, 1, 3, new[] { "weapon_grach" }),
-                N("weapon_ppsh", 3, 250, 2, 3, new[] { "weapon_pps43" }),
+                N("weapon_nagant", 1, 35, 0, 3, new[] { "ammo_9mm" }),
+                N("weapon_homesmg", 1, 60, 0, 4, new[] { "weapon_nagant" }),
+                N("weapon_grach", 2, 75, 1, 2, new[] { "weapon_homesmg" }),
+                N("weapon_pps43", 2, 90, 1, 3, new[] { "weapon_grach" }),
+                N("weapon_ppsh", 3, 160, 2, 3, new[] { "weapon_pps43" }),
                 // ветка «Винтовки»
-                N("weapon_crossbow", 1, 30, 0, 5),
-                N("weapon_svt40", 2, 150, 1, 4, new[] { "weapon_crossbow" }),
-                N("weapon_akm", 3, 300, 2, 2, new[] { "ammo_762" }, new[] { "weapon_grach", "weapon_svt40" }),
-                N("weapon_an94", 3, 300, 2, 4, new[] { "ammo_545" }, new[] { "weapon_grach", "weapon_svt40" }),
-                N("weapon_svd", 3, 300, 2, 5, new[] { "weapon_svt40", "ammo_762" }),
+                N("weapon_crossbow", 1, 20, 0, 5),
+                N("weapon_svt40", 2, 90, 1, 4, new[] { "weapon_crossbow" }),
+                N("weapon_akm", 3, 420, 2, 2, new[] { "ammo_762" }, new[] { "weapon_grach", "weapon_svt40" }),
+                N("weapon_an94", 3, 200, 2, 4, new[] { "ammo_545" }, new[] { "weapon_grach", "weapon_svt40" }),
+                N("weapon_svd", 3, 160, 2, 5, new[] { "weapon_svt40", "ammo_762" }),
                 // обвесы
-                N("att_suppressor_can", 1, 30, 0, 6),
-                N("att_grip_wood", 1, 30, 0, 7),
-                N("att_torch", 1, 30, 0, 8),
-                N("att_mag_twin_crude", 1, 30, 0, 9),
-                N("att_reddot", 2, 75, 1, 5),
-                N("att_scope2x", 2, 120, 1, 6, new[] { "att_reddot" }),
-                N("att_suppressor", 2, 90, 1, 7, new[] { "att_suppressor_can" }),
-                N("att_compensator", 2, 75, 1, 8),
-                N("att_grip", 2, 60, 1, 9, new[] { "att_grip_wood" }),
-                N("att_flashlight", 2, 45, 1, 10, new[] { "att_torch" }),
-                N("att_laser", 2, 90, 1, 11, new[] { "att_flashlight" }),
-                N("att_mag_ext", 2, 90, 1, 12),
-                N("att_mag_twin", 2, 60, 1, 13, new[] { "att_mag_twin_crude" }),
-                N("att_stock_tac", 2, 75, 1, 14),
+                N("att_suppressor_can", 1, 12, 0, 6),
+                N("att_grip_wood", 1, 12, 0, 7),
+                N("att_torch", 1, 12, 0, 8),
+                N("att_mag_twin_crude", 1, 12, 0, 9),
+                N("att_reddot", 2, 25, 1, 5),
+                N("att_scope2x", 2, 35, 1, 6, new[] { "att_reddot" }),
+                N("att_suppressor", 2, 30, 1, 7, new[] { "att_suppressor_can" }),
+                N("att_compensator", 2, 25, 1, 8),
+                N("att_grip", 2, 20, 1, 9, new[] { "att_grip_wood" }),
+                N("att_flashlight", 2, 15, 1, 10, new[] { "att_torch" }),
+                N("att_laser", 2, 25, 1, 11, new[] { "att_flashlight" }),
+                N("att_mag_ext", 2, 30, 1, 12),
+                N("att_mag_twin", 2, 20, 1, 13, new[] { "att_mag_twin_crude" }),
+                N("att_stock_tac", 2, 25, 1, 14),
             });
         }
     }

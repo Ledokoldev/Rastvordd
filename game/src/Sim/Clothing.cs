@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Rastvordd.Sim
@@ -72,8 +72,8 @@ namespace Rastvordd.Sim
         internal static void Register(Func<string, string, ItemCategory, ItemDef> add)
         {
             // материалы, которых раньше не было (D47): резина — покрышки и бочки на РТ, кожа — бочки и ящики (зверей в игре нет)
-            add("rubber", "Резина", ItemCategory.Resource);
-            Meta["rubber"] = new Weaponry.Meta { Desc = "Куски покрышек и камер. Спецовка, ОЗК, сапоги. Бочки и ящики на РТ", Rarity = 1, Value = 1.5f, Stack = 200 };
+            add("rubber", "Резина", ItemCategory.Component);   // компонент: режется из покрышек (узлы Tire / TireStack)
+            Meta["rubber"] = new Weaponry.Meta { Desc = "Резина: режешь из покрышек (топор или нож быстрее). Спецовка, ОЗК, сапоги, рукояти, уплотнители", Rarity = 1, Value = 1.5f, Stack = 200 };
             add("leather", "Кожа", ItemCategory.Resource);
             Meta["leather"] = new Weaponry.Meta { Desc = "Старые куртки и ремни на лоскуты. Кожаный сет, кирзачи, ремни брони. Бочки и ящики", Rarity = 1, Value = 1.5f, Stack = 200 };
             var anti = add("antirad", "Антирадин", ItemCategory.Medical);
@@ -244,14 +244,34 @@ namespace Rastvordd.Sim
 
         /// <summary>
         /// Изучение одежды: тиры 0–1 известны с начала, тиры 2–3 — один дешёвый узел на комплект (лом).
-        /// Узел открывает весь комплект (id узла — главная вещь комплекта, см. TechKey). Итого 4 узла, 320 лома.
+        /// Узел открывает весь комплект (id узла — главная вещь комплекта, см. TechKey). Итого 4 узла, 200 лома (D49).
         /// </summary>
         internal static void AddTech(List<TechNode> all)
         {
-            all.Add(new TechNode { Id = "wear_spec_robe", Bench = 2, Scrap = 40, Col = 1, Row = 15 });
-            all.Add(new TechNode { Id = "wear_scrap_signvest", Bench = 2, Scrap = 60, Col = 1, Row = 16 });
-            all.Add(new TechNode { Id = "wear_ozk_cape", Bench = 3, Scrap = 100, Col = 2, Row = 6, Requires = new[] { "wear_spec_robe" } });
-            all.Add(new TechNode { Id = "wear_army_6b2", Bench = 3, Scrap = 120, Col = 2, Row = 7, Requires = new[] { "wear_scrap_signvest" } });
+            all.Add(new TechNode { Id = "wear_spec_robe", Bench = 2, Scrap = 25, Col = 1, Row = 15 });
+            all.Add(new TechNode { Id = "wear_scrap_signvest", Bench = 2, Scrap = 35, Col = 1, Row = 16 });
+            all.Add(new TechNode { Id = "wear_ozk_cape", Bench = 3, Scrap = 60, Col = 2, Row = 6, Requires = new[] { "wear_spec_robe" } });
+            all.Add(new TechNode { Id = "wear_army_6b2", Bench = 3, Scrap = 80, Col = 2, Row = 7, Requires = new[] { "wear_scrap_signvest" } });
+        }
+
+        /// <summary>
+        /// Переработка лутовой одежды и пластин (D49): у крафтовых — половина рецепта (Items.RecycleYield), у лутовых — лом по тиру
+        /// (тир 2 — 6, тир 3 — 12, тир 4 — 25; голова и броня ×1,5) и немного ткани или металла; пластины — лом и металл.
+        /// </summary>
+        public static (string, int)[] LootRecycle(string id)
+        {
+            if (id == null) return null;
+            switch (id)
+            {
+                case "plate_steel": return new[] { ("scrap", 20), ("metal_fragments", 60) };
+                case "plate_ceramic": return new[] { ("scrap", 35) };
+                case "wear_watch": return new[] { ("scrap", 10), ("val_radio_parts", 1) };
+                case "rubber": return new[] { ("scrap", 1) };   // резина — почти ничего: её режут на крафт, а не на лом
+            }
+            if (Def(id) is not WearDef d || Recipes.All.Exists(r => r.Output == id)) return null;
+            int scrap = d.Tier switch { <= 1 => 2, 2 => 6, 3 => 12, _ => 25 };
+            if (d.Slot is WearSlot.Armor or WearSlot.Head) scrap = scrap * 3 / 2;
+            return d.Metal ? new[] { ("scrap", scrap), ("metal_fragments", 10 * d.Tier) } : new[] { ("scrap", scrap), ("cloth", 5 * Math.Max(1, d.Tier)) };
         }
 
         /// <summary>Узел дерева, который открывает рецепт вещи (комплект целиком); null — своего узла нет.</summary>

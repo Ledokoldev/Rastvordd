@@ -170,6 +170,7 @@ namespace Rastvordd.Sim
             PlaceSubstation();
             PlaceTier0();
             PlaceTier1();
+            PlaceWorldTires();   // покрышки — резина (после РТ, своим генератором)
         }
 
         // площадь на один объект (м²) и веса: дерево, камень, металл, сера, конопля, ягоды, бочка воды, ящик-укрытие, руины
@@ -282,13 +283,15 @@ namespace Rastvordd.Sim
                 NodeKind.Stone => 150,
                 NodeKind.Metal => 90,
                 NodeKind.Barrel => 30,               // прочность бочки
-                NodeKind.Junk => Range(10, 16),      // лома в куче
+                NodeKind.Junk => Rng.Next(1, 3),     // лома в куче (D49: голого лома мало — 1–2)
+                NodeKind.Tire => Rng.Next(2, 5),     // резины в покрышке
+                NodeKind.TireStack => Rng.Next(6, 11),
                 _ => 60,
             };
             var node = new ResourceNode
             {
                 Id = NextId(), Kind = kind, Pos = p,
-                Radius = kind switch { NodeKind.Tree => Range(0.35f, 0.5f), NodeKind.Barrel => 0.35f, NodeKind.Junk => 0.6f, _ => 0.7f },
+                Radius = kind switch { NodeKind.Tree => Range(0.35f, 0.5f), NodeKind.Barrel => 0.35f, NodeKind.Junk => 0.6f, NodeKind.Tire => 0.4f, NodeKind.TireStack => 0.55f, _ => 0.7f },
                 Amount = amount, MaxAmount = amount,
             };
             Nodes.Add(node);
@@ -305,13 +308,26 @@ namespace Rastvordd.Sim
 
         // ---------- детали тира 3: режиссёр выпускает с середины вайпа и дозирует в час (D46 «темп вайпа») ----------
         /// <summary>С какой секунды вайпа в лут попадают детали тира 3 (ствольная коробка АК, хромированный ствол, газоотвод).</summary>
-        public const float Tier3From = 4.5f * 3600f;
+        public const float Tier3From = 5f * 3600f;
         /// <summary>Сколько деталей тира 3 на весь мир за час (ящики, сейфы, ивенты).</summary>
-        public const int Tier3PerHour = 3;
+        public const int Tier3PerHour = 4;
         readonly Dictionary<int, int> _tier3ByHour = new();
 
         /// <summary>Можно ли сейчас выпустить деталь тира 3 (фаза режиссёра, время, лимит в час).</summary>
         public bool Tier3Allowed() => Time >= Tier3From && (Director?.Phase ?? 0) >= 1 && _tier3ByHour.GetValueOrDefault((int)(Time / 3600)) < Tier3PerHour;
+
+        /// <summary>Элита (Сайга-12, АПС, Мосинка) — только ивенты режиссёра, с 3 ч вайпа, поздняя фаза и не чаще раза в 3,5 ч на мир (D49).</summary>
+        public const float EliteFrom = 3f * 3600f, EliteEvery = 3.5f * 3600f;
+        float _eliteAt = -1e9f;
+
+        /// <summary>С шансом положить элитный ствол в ящик ивента (режиссёр: фаза ≥ 2, лимит на мир).</summary>
+        public bool TryElite(LootBag bag, int phase, double chance)
+        {
+            if (phase < 2 || Time < EliteFrom || Time - _eliteAt < EliteEvery || Rng.NextDouble() >= chance) return false;
+            _eliteAt = Time;
+            bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_saiga12", "weapon_aps", "weapon_mosin" })));
+            return true;
+        }
 
         /// <summary>С шансом положить деталь тира 3 (если режиссёр разрешает).</summary>
         public bool TryTier3(LootBag bag, double chance)
@@ -319,11 +335,11 @@ namespace Rastvordd.Sim
             if (Rng.NextDouble() >= chance || !Tier3Allowed()) return false;
             int h = (int)(Time / 3600);
             _tier3ByHour[h] = _tier3ByHour.GetValueOrDefault(h) + 1;
-            bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier3Parts), 1));
+            bag.Items.Add(new ItemSlot(Rng.Next(2) == 0 ? "comp_receiver_ak" : Pick(Weaponry.Tier3Parts), 1));   // ствольная коробка — только лут, она чаще
             return true;
         }
 
-        public float CrateRespawnTime(LootBag bag) => bag.Tier switch { 0 => Range(300, 420), 1 => Range(900, 1260), _ => Range(1200, 1800) };
+        public float CrateRespawnTime(LootBag bag) => bag.Tier switch { 0 => Range(420, 600), 1 => Range(900, 1260), _ => Range(1200, 1800) };   // тир 0 — 7–10 мин (D49: петля «своя РТ + переработчик» не должна кормить ломом без конца)
 
         void AddCrate(Vector2 pos, int tier = 2)
         {
@@ -345,8 +361,10 @@ namespace Rastvordd.Sim
             if (bag.Safe)
             {
                 // сейф: гарантированно лом и детали, шанс на ствол тира 2, деталь тира 3 (по режиссёру) и взрывчатку
-                bag.Items.Add(new ItemSlot("scrap", Rng.Next(25, 46)));
+                bag.Items.Add(new ItemSlot("scrap", Rng.Next(15, 31)));
                 bag.Items.Add(new ItemSlot(Pick(Weaponry.CommonParts), Rng.Next(1, 3)));
+                bag.Items.Add(new ItemSlot(Economy.Tier2(Rng), Rng.Next(1, 3)));   // ценный лом (D49)
+                Maybe(0.5, Economy.Tier1(Rng), 1, 2);
                 bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier2Parts), 1));
                 Maybe(0.5, "metal_fragments", 50, 120);
                 Maybe(0.4, "gunpowder", 30, 60);
@@ -360,15 +378,27 @@ namespace Rastvordd.Sim
                 return;
             }
             // общие детали — во всех ящиках; карта доступа — в охраняемых
-            Maybe(0.35, "comp_tape", 1, 2);
-            Maybe(bag.Tier == 0 ? 0.2 : 0.35, "comp_gears", 1, 2);
-            Maybe(bag.Tier == 0 ? 0.35 : 0.3, "comp_spring", 1, 2);
-            Maybe(bag.Tier == 0 ? 0.25 : 0.3, "comp_pipe", 1, 2);
+            // D49: в ящиках мало голого лома — компоненты и ценный лом (в переработчик или на крафт)
+            if (bag.Tier == 0)
+            {
+                Maybe(0.75, Weaponry.CommonPart(Rng), 1, 1);
+                Maybe(0.3, Weaponry.CommonPart(Rng), 1, 1);
+            }
+            else
+            {
+                Maybe(0.35, "comp_tape", 1, 2);
+                Maybe(0.35, "comp_gears", 1, 2);
+                Maybe(0.3, "comp_spring", 1, 2);
+                Maybe(0.3, "comp_pipe", 1, 2);
+            }
             if (bag.Tier >= 1) Maybe(0.18, "keycard", 1, 1);
             switch (bag.Tier)
             {
                 case 0:
-                    Maybe(0.8, "scrap", 5, 15);
+                    Maybe(0.85, "scrap", 3, 8);
+                    Maybe(0.5, Economy.Tier0(Rng), 1, 2);
+                    Maybe(0.2, Economy.Tier1(Rng), 1, 1);
+                    if (Rng.NextDouble() < 0.1) bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));   // редкая деталь тира 2 (корпуса чаще)
                     Maybe(0.5, "cloth", 10, 25);
                     Maybe(0.5, "canned", 1, 2);
                     Maybe(0.5, "water_bottle", 1, 2);
@@ -383,7 +413,9 @@ namespace Rastvordd.Sim
                     if (Rng.NextDouble() < 0.05) bag.Items.Add(new ItemSlot(Pick(new[] { "att_grip_wood", "att_suppressor_can", "att_mag_twin_crude", "att_torch" }), 1));
                     break;
                 case 1:
-                    Maybe(0.85, "scrap", 10, 25);
+                    Maybe(0.85, "scrap", 10, 20);
+                    Maybe(0.7, Economy.Tier1(Rng), 1, 2);
+                    Maybe(0.3, Economy.Tier2(Rng), 1, 1);
                     Maybe(0.6, "metal_fragments", 25, 70);
                     Maybe(0.45, "gunpowder", 15, 35);
                     Maybe(0.45, "ammo_9mm", 10, 30);
@@ -394,7 +426,7 @@ namespace Rastvordd.Sim
                     Maybe(0.2, "comp_oil", 1, 2);
                     Maybe(0.12, "comp_lens", 1, 1);
                     Maybe(0.12, "comp_circuit", 1, 1);
-                    if (Rng.NextDouble() < 0.12) bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier2Parts), 1));
+                    if (Rng.NextDouble() < 0.3) bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));
                     if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot(Rng.Next(2) == 0 ? "weapon_pipeshotgun" : "weapon_sawnoff"));
                     if (Rng.NextDouble() < 0.12) bag.Items.Add(Items.NewSlot("lock_code"));
                     break;
@@ -404,13 +436,15 @@ namespace Rastvordd.Sim
                     Maybe(0.5, "ammo_9mm", 10, 30);
                     Maybe(0.25, "ammo_12g", 6, 14);
                     Maybe(0.85, "scrap", 20, 40);
+                    Maybe(0.8, Economy.Tier2(Rng), 1, 2);
+                    Maybe(0.4, Economy.Tier1(Rng), 1, 2);
                     Maybe(0.5, "bandage", 2, 4);
                     Maybe(0.55, "metal_fragments", 40, 90);
                     Maybe(0.45, "gunpowder", 25, 50);
                     Maybe(0.3, "comp_oil", 1, 2);
                     Maybe(0.15, "comp_lens", 1, 1);
                     Maybe(0.15, "comp_circuit", 1, 1);
-                    if (Rng.NextDouble() < 0.35) bag.Items.Add(new ItemSlot(Pick(Weaponry.Tier2Parts), 1));
+                    if (Rng.NextDouble() < 0.35) bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));
                     if (Rng.NextDouble() < 0.08) bag.Items.Add(new ItemSlot(Pick(Weaponry.FactoryAtts), 1));
                     if (Rng.NextDouble() < 0.03) bag.Items.Add(new ItemSlot(Pick(Weaponry.ArmyAtts), 1));
                     if (Rng.NextDouble() < 0.05) bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_sawnoff", "weapon_mp133", "weapon_grach" })));
@@ -553,7 +587,8 @@ namespace Rastvordd.Sim
             }
             // одежда по тиру РТ (D47): тир 1 (дубина, лук, самопал) — ватник или кожа, склад с калашами — армейская
             Dress(a, Clothing.GuardKit(WearRng, kit is "club" or "bow" or "pipe" ? 1 : 2));
-            a.Add("scrap", Rng.Next(5, 20));
+            a.Add("scrap", Rng.Next(2, 9));
+            if (Rng.NextDouble() < 0.3) a.Add(Economy.Tier1(Rng), 1);
             if (Rng.NextDouble() < 0.12) a.Add("keycard", 1);
             if (Rng.NextDouble() < 0.4) a.Add("bandage", 1);
             if (Rng.NextDouble() < 0.3) a.Add("canned", 1);
@@ -1207,7 +1242,9 @@ namespace Rastvordd.Sim
                 HitBarrel(node, wd.Damage, a.Id);
                 return;
             }
-            float yield = node.Kind == NodeKind.Junk
+            float yield = node.Kind is NodeKind.Tire or NodeKind.TireStack
+                ? MathF.Min(node.Amount, wd.Id == "tool_hatchet" || wd.Id == "weapon_spear" ? 2 : 1)   // покрышку режут: топором быстрее
+                : node.Kind == NodeKind.Junk
                 ? MathF.Min(node.Amount, wd.Id == "tool_pickaxe" || wd.Id == "tool_hatchet" ? 2 : 1)   // хлам ковыряют: инструментом быстрее
                 : MathF.Min(node.Amount, wd.Gather(node.Kind));
             int got = (int)MathF.Round(yield);
@@ -1219,6 +1256,7 @@ namespace Rastvordd.Sim
                 // при добыче металла и серы попадается немного камня
                 if (node.Kind is NodeKind.Metal or NodeKind.Sulfur) a.Add("stone", Math.Max(1, got / 3));
                 if (node.Kind == NodeKind.Junk && Rng.NextDouble() < 0.18) a.Add("metal_fragments", Rng.Next(3, 8));
+                if (node.Kind == NodeKind.Junk && a.Team == Team.Player) Economy.Book("сырой: куча хлама", got);
                 Events.Add(new SimEvent { Kind = SimEventKind.Gather, ActorId = a.Id, OtherId = node.Id, Pos = node.Pos, Value = got, Text = Items.Name(node.ResourceId) });
             }
             if (node.Amount <= 0.5f) RemoveNode(node);
@@ -1230,6 +1268,37 @@ namespace Rastvordd.Sim
 
         /// <summary>Бочка или куча хлама на постоянном месте: после разграбления появляется там же.</summary>
         void AddScrapSpot(NodeKind kind, Vector2 p) => AddNode(kind, p);
+
+        /// <summary>Места покрышек (РТ и мир) — чтобы вернуть их в мир из старого сохранения, где их ещё не было.</summary>
+        readonly List<(NodeKind kind, Vector2 pos)> _tireSpots = new();
+
+        void AddTireSpot(NodeKind kind, Vector2 p) { _tireSpots.Add((kind, p)); AddNode(kind, p); }
+
+        /// <summary>
+        /// Покрышки по миру (резина — отдельный компонент): у дорог и на пляже, в пустоши, на окраинах поля. Свой генератор —
+        /// раскладка остального мира не сдвигается.
+        /// </summary>
+        void PlaceWorldTires()
+        {
+            var rng = new Random(Seed * 613 + 29);
+            int placed = 0;
+            for (int tries = 0; tries < 4000 && placed < 90; tries++)
+            {
+                var p = new Vector2((float)(rng.NextDouble() * 2 - 1) * HalfSize * 0.95f, (float)(rng.NextDouble() * 2 - 1) * HalfSize * 0.95f);
+                if (!Terrain.IsLand(p) || NearMonument(p, 25) || !IsFree(p, 1.2f)) continue;
+                var b = Terrain.BiomeAt(p);
+                if (b is not (Biome.Beach or Biome.Arid or Biome.Grassland)) continue;
+                AddTireSpot(rng.NextDouble() < 0.15 ? NodeKind.TireStack : NodeKind.Tire, p);
+                placed++;
+            }
+        }
+
+        /// <summary>Старое сохранение без покрышек: вернуть их на места.</summary>
+        void EnsureTires()
+        {
+            foreach (var n in Nodes) if (n.Kind is NodeKind.Tire or NodeKind.TireStack) return;
+            foreach (var (k, p) in _tireSpots) if (IsFree(p, 0.5f)) AddNode(k, p);
+        }
 
         /// <summary>Переработчик на РТ: ничей, не ломается, открыт всем.</summary>
         void AddRecycler(Vector2 p)
@@ -1253,6 +1322,7 @@ namespace Rastvordd.Sim
             Nodes.Remove(node);
             _nodeGrid.Remove(node);
             if (node.Kind is NodeKind.Barrel or NodeKind.Junk) _spotRespawns.Add((node.Kind, node.Pos, Range(180, 300)));
+            else if (node.Kind is NodeKind.Tire or NodeKind.TireStack) _spotRespawns.Add((node.Kind, node.Pos, NearMonument(node.Pos, 2) ? Range(900, 1260) : Range(1200, 1800)));   // покрышки: на РТ — с обновлением РТ, в мире — 20–30 мин
             else _nodeRespawns.Add((node.Kind, Range(90, 180)));
         }
 
@@ -1261,10 +1331,12 @@ namespace Rastvordd.Sim
         {
             node.Amount -= dmg;
             if (node.Amount > 0) return;
-            var bag = new LootBag { Id = NextId(), Pos = node.Pos, Despawn = 120f };
+            var bag = new LootBag { Id = NextId(), Pos = node.Pos, Despawn = 120f, Src = "бочка" };
             void Put(string id, int n) { if (n > 0) bag.Items.Add(new ItemSlot(id, n)); }
             bool rich = NearMonument(node.Pos, 2);
-            Put("scrap", Rng.Next(2, 6) + (rich ? 2 : 0));
+            Put("scrap", Rng.Next(1, 3));   // D49: голого лома мало — 1–2
+            if (Rng.NextDouble() < 0.35) Put(Weaponry.CommonPart(Rng), 1);                       // общий компонент
+            if (Rng.NextDouble() < (rich ? 0.25 : 0.2)) Put(Economy.Tier0(Rng), 1);                // ценный лом тира 0
             if (Rng.NextDouble() < 0.35) Put("metal_fragments", Rng.Next(10, 26));
             if (Rng.NextDouble() < 0.25) Put("cloth", Rng.Next(4, 9));
             if (Rng.NextDouble() < (rich ? 0.2 : 0.1)) Put("ammo_9mm", Rng.Next(4, 9));
@@ -1274,8 +1346,6 @@ namespace Rastvordd.Sim
             if (rich && Rng.NextDouble() < 0.01) bag.Items.Add(Items.NewSlot("weapon_pipeshotgun"));
             if (Rng.NextDouble() < 0.08) Put("gunpowder", Rng.Next(5, 11));
             if (Rng.NextDouble() < 0.05) Put("bandage", 1);
-            if (Rng.NextDouble() < 0.2) Put("comp_tape", 1);
-            if (Rng.NextDouble() < 0.2) Put(Rng.Next(10) switch { < 4 => "comp_spring", < 7 => "comp_pipe", _ => "comp_gears" }, 1);   // пружины и трубы — на Наган (D46)
             Clothing.Loot(WearRng, bag, rich ? "barrel_rt" : "barrel");   // резина (покрышки), кожа, редко часы (D47)
             Bags.Add(bag);
             Events.Add(new SimEvent { Kind = SimEventKind.Destroyed, ActorId = byId, Pos = node.Pos, Text = "Бочка" });
@@ -1499,6 +1569,7 @@ namespace Rastvordd.Sim
                     // сколько влезет; остальное остаётся в сумке (иначе бот бесконечно перекладывал бы сумки)
                     int put = a.AddUpTo(s.Id, s.Count);
                     if (put <= 0) continue;
+                    if (a.Team == Team.Player) Economy.BookTake(bag.Source, s.Id, put);
                     parts.Add($"{Items.Name(s.Id)} ×{put}");
                     s.Count -= put;
                     if (s.Count > 0) continue;

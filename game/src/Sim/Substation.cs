@@ -98,6 +98,7 @@ namespace Rastvordd.Sim
             _prefabMode = true;
             BuildSubstation(s, rng);
             _prefabMode = false;
+            RegisterDress(s.M, "subst", s.O, null, (12, 27, "office"), (26, 24, "electrical"), (26, 31, "storage"), (12, 40, "barracks"), (65, 58, "workshop"));
             Substations.Add(s);
         }
 

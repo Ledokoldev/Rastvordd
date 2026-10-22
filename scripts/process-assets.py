@@ -307,6 +307,15 @@ def main() -> None:
             print(f"{a['id']:<24} sheet -> {a['sheet'][0] * a['sheet'][1]} frames")
             continue
         hd, px = process(a, src)
+        if a.get("tone"):
+            # слишком светлое на тёмном полу (бумага, штукатурка) — приглушить, чтобы не «горело»
+            rgb = px.convert("RGB").point(lambda v, k=a["tone"]: int(v * k))
+            alpha = px.getchannel("A")
+            px = rgb.convert("RGBA")
+            px.putalpha(alpha)
+        if a.get("soft"):
+            # полупрозрачная декаль (пыль, грязь, пятна): ложится на пол, а не клеится сверху
+            px.putalpha(px.getchannel("A").point(lambda v, k=a["soft"]: int(v * k)))
         for base, im in ((ROOT / "assets" / "hd", hd), (ROOT / "game" / "art", px)):
             dst = base / a["cat"] / f"{a['id']}.png"
             dst.parent.mkdir(parents=True, exist_ok=True)

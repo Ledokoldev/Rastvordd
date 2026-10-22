@@ -6,7 +6,7 @@
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageChops
 import json, os, random, sys
 
-ROOT = 'C:/Users/Xbaza/Desktop/Rastvordd/'
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))).replace('\\', '/') + '/'
 A = ROOT + 'game/art/'
 OUT = ROOT + 'docs/design/img/'
 PPM, HS = 32, 0.75
@@ -35,6 +35,7 @@ class Scene:
         self.shadow = Image.new('L', self.img.size, 0)
         self.objs, self.zones, self.marks, self.plan_walls, self.plan_props, self.notes = [], [], [], [], [], []
         self.keepout = []          # прямоугольники, где не сажать лес и траву
+        self.rooms = []            # метки типа комнат для обстановки (Dressing.cs): (x, y, тип)
         self.roofs = []            # крыши: (x0, y0, x1, y1, высота стен, текстура) — рисуются поверх всего
         # планировка для игры (scripts/mock-tier0.py → game/src/Sim/Tier0Layouts.g.cs): то же, что на макете
         self.ex = {'grounds': [], 'walls': [], 'props': [], 'decals': []}
@@ -204,6 +205,11 @@ class Scene:
             self.plan_props.append((x - w / 2, y - d, x + w / 2, y, plan[0], plan[1]))
         self.objs.append((y, lambda s=s, a=a, b=b: self.img.alpha_composite(s, (a - s.width // 2, b - s.height))))
 
+    def room(self, x, y, kind):
+        """Тип комнаты для обстановки (game/src/Sim/Dressing.cs): точка внутри комнаты и тип (barracks, office, control, workshop,
+        storage, kitchen, washroom, corridor, electrical, medbay, shop)."""
+        self.rooms.append((x, y, kind))
+
     def mark(self, x, y, color, label):
         self.marks.append((x, y, color, label))
 
@@ -301,7 +307,7 @@ class Scene:
         self.draw_roofs()
         import json
         lay = {'W': self.W, 'H': self.H, 'M': self.M, 'grounds': self.ex['grounds'], 'walls': self.ex['walls'], 'props': self.ex['props'],
-               'decals': self.ex['decals'], 'roofs': self.roofs, 'marks': [(x, y, lab) for (x, y, col, lab) in self.marks]}
+               'decals': self.ex['decals'], 'roofs': self.roofs, 'marks': [(x, y, lab) for (x, y, col, lab) in self.marks], 'rooms': self.rooms}
         os.makedirs(ROOT_LAYOUT, exist_ok=True)
         with open(os.path.join(ROOT_LAYOUT, f't1-{key}.json'), 'w', encoding='utf-8') as fh:
             json.dump(lay, fh, ensure_ascii=False)
@@ -753,6 +759,17 @@ def ats():
                '!Охрана: 2–3 сторожа (труба, дубинка),', '   бой в коридорах и между стойками.', '!Награда: фрагменты ×2, перфокарта II.', '',
                'Выходы: ворота (юг), калитка (восток);', 'в здание: главный вход, роллета,', 'боковая дверь (запад), экспедиция.',
                'Корпус ~60×38 м, двор 74×49 м.']
+    # типы комнат для обстановки (Dressing.cs); остальные — по мебели внутри
+    s.room(30, 22, 'control')
+    s.room(50, 22, 'control')
+    s.room(30, 9, 'electrical')
+    s.room(57.5, 22, 'electrical')
+    s.room(62.5, 30, 'corridor')
+    s.room(68, 23, 'office')
+    s.room(57.5, 30, 'control')
+    s.room(68, 32, 'office')
+    s.room(57.5, 39, 'kitchen')
+    s.room(68, 40, 'storage')
     s.render('ats')
 
 
@@ -886,6 +903,10 @@ def depot():
                '!Охрана: 3 (лучник на вагоне,', '   дубинка у депо, труба у рампы).', '!Награда: фрагменты ×2,', '   шанс второй перфокарты II.', '',
                'Открытый двор: простреливается', 'с главного хода и с вагонов.', 'Выходы: по путям на запад и восток,', 'проезд в заборе (юг).',
                'Размер ~110×60 м. Клетка = 1 м.']
+    # типы комнат для обстановки (Dressing.cs); остальные — по мебели внутри
+    s.room(74, 48, 'workshop')
+    s.room(9.5, 19, 'office')
+    s.room(16.5, 19, 'barracks')
     s.render('depot')
 
 
@@ -1043,6 +1064,8 @@ def quarry():
                '!Охрана: 3–4 (лучник на бровке,', '   труба на дне и уступе, дубинка).', '!Награда: фрагменты ×3, перфокарта II', '   гарантированно + шанс второй.', '',
                'Уступы по 3 м, между ними съезды.', 'Выходы: карьерная дорога (юг),', 'подъезд к промплощадке (север),', 'съезд на запад.',
                'Размер ~110×90 м. Клетка = 1 м.']
+    # типы комнат для обстановки (Dressing.cs); остальные — по мебели внутри
+    s.room(76, 7.5, 'office')
     s.render('quarry')
 
 

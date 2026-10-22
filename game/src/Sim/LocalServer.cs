@@ -178,6 +178,9 @@ namespace Rastvordd.Sim
         public List<MapRoof> Roofs = new();
         public List<MapWire> Wires = new();
         public List<MapEntrance> Entrances = new();
+        public List<MapRoom> Rooms = new();          // комнаты РТ (покраска стен)
+        public List<MapPipe> Pipes = new();          // теплотрассы
+        public List<MapAmbient> Ambients = new();    // живое: дым, флаги, вороны, лампы
         // рельеф и биомы (сетка N×N, клетка Cell метров) — отправляются один раз при подключении
         public int N;
         public float Cell;
@@ -270,11 +273,14 @@ namespace Rastvordd.Sim
             foreach (var w in World.RemovableWalls)
                 if (!World.Walls.Contains(w))   // поднятая роллета, выбитая дверь — тоже нужны клиенту, чтобы вернуть их при обновлении РТ
                     m.Walls.Add(new WallInfo { Min = w.Wall.Min, Max = w.Wall.Max, Height = w.Wall.Height, Kind = w.Kind, Id = w.Id, Tex = w.Tex });
-            foreach (var d in World.Decors) m.Decors.Add(new MapDecor { Id = d.Id, Sprite = d.Sprite, Pos = d.Pos, Flip = d.Flip, Flat = d.Flat, Scale = d.Scale, Rot = d.Rot, Pivot = d.Pivot, Lift = d.Lift });
+            foreach (var d in World.Decors) m.Decors.Add(new MapDecor { Id = d.Id, Sprite = d.Sprite, Pos = d.Pos, Flip = d.Flip, Flat = d.Flat, Scale = d.Scale, Rot = d.Rot, Pivot = d.Pivot, Lift = d.Lift, Batch = d.Batch });
             m.Patches.AddRange(World.Patches);
             m.Roofs.AddRange(World.Roofs);
             m.Wires.AddRange(World.Wires);
             m.Entrances.AddRange(World.Entrances);
+            m.Rooms.AddRange(World.Rooms);
+            m.Pipes.AddRange(World.Pipes);
+            m.Ambients.AddRange(World.Ambients);
             return m;
         }
 

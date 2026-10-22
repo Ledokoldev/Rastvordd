@@ -14,11 +14,12 @@ namespace Rastvordd.Sim
         public bool Flat;              // декаль на земле (трещины, разметка, лужи): без тени, под всеми объектами
         public float Scale = 1, Rot;   // для декалей: масштаб и поворот (градусы)
         public bool Pivot;             // стрела крана: вращается вокруг левого края (точка опоры — Pos)
-        public float Lift;             // поднята над землёй, м (стрела крана)
+        public float Lift;             // поднята над землёй, м (стрела крана; на стене — плакат, на столе — мелочь)
+        public bool Batch;             // обстановка (Dressing.cs): мелочь без хитбокса — клиент рисует пачками по рядам
     }
 
     /// <summary>Участок земли другой текстурой (гравий ОРУ, асфальт, кафель в корпусе) — под всеми объектами.</summary>
-    public struct MapPatch { public string Tile; public Vector2 Min, Max; public Vector2[] Poly; }   // Poly — неровный участок (иначе прямоугольник Min–Max)
+    public struct MapPatch { public string Tile; public Vector2 Min, Max; public Vector2[] Poly; public int Slab; }   // Slab: тропа из плит ПАГ (1 — вдоль x, 2 — вдоль y)   // Poly — неровный участок (иначе прямоугольник Min–Max)
 
     /// <summary>Крыша над комнатой: снаружи прячет, что внутри; клиент растворяет её, когда игрок внутри (D40).</summary>
     public struct MapRoof { public string Tile; public Vector2 Min, Max; public List<RoofItem> Items; }

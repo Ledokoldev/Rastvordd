@@ -36,6 +36,7 @@ class Scene:
         self.shadow = Image.new('L', self.img.size, 0)
         self.objs, self.zones, self.marks, self.plan_walls, self.plan_props, self.notes = [], [], [], [], [], []
         self.keepout = []          # прямоугольники, где не сажать лес и траву
+        self.rooms = []            # метки типа комнат для обстановки (Dressing.cs): (x, y, тип)
         self.roofs = []            # крыши: (x0, y0, x1, y1, высота стен, текстура) — рисуются поверх всего
         # планировка для игры (scripts/mock-tier0.py → game/src/Sim/Tier0Layouts.g.cs): то же, что на макете
         self.ex = {'grounds': [], 'walls': [], 'props': [], 'decals': []}
@@ -205,6 +206,11 @@ class Scene:
             self.plan_props.append((x - w / 2, y - d, x + w / 2, y, plan[0], plan[1]))
         self.objs.append((y, lambda s=s, a=a, b=b: self.img.alpha_composite(s, (a - s.width // 2, b - s.height))))
 
+    def room(self, x, y, kind):
+        """Тип комнаты для обстановки (game/src/Sim/Dressing.cs): точка внутри комнаты и тип (barracks, office, control, workshop,
+        storage, kitchen, washroom, corridor, electrical, medbay, shop)."""
+        self.rooms.append((x, y, kind))
+
     def mark(self, x, y, color, label):
         self.marks.append((x, y, color, label))
 
@@ -302,7 +308,7 @@ class Scene:
         self.draw_roofs()
         import json
         lay = {'W': self.W, 'H': self.H, 'M': self.M, 'grounds': self.ex['grounds'], 'walls': self.ex['walls'], 'props': self.ex['props'],
-               'decals': self.ex['decals'], 'roofs': self.roofs, 'marks': [(x, y, lab) for (x, y, col, lab) in self.marks]}
+               'decals': self.ex['decals'], 'roofs': self.roofs, 'marks': [(x, y, lab) for (x, y, col, lab) in self.marks], 'rooms': self.rooms}
         os.makedirs(ROOT_LAYOUT, exist_ok=True)
         with open(os.path.join(ROOT_LAYOUT, f't2-{key}.json'), 'w', encoding='utf-8') as fh:
             json.dump(lay, fh, ensure_ascii=False)
@@ -1008,6 +1014,14 @@ def radio():
                'Входы: КПП (юг), пролом под', 'упавшей мачтой (север), калитка у', 'дизельной (восток, выбить 4 с).',
                'Забор по рельефу: ПО-2, плиты,', 'профлист, доски; на западе рухнул', '(завален плитами).',
                'Территория ~170×125 м. Клетка = 1 м.']
+    # типы комнат для обстановки (Dressing.cs); остальные — по мебели внутри
+    s.room(37, 47, 'corridor')
+    s.room(163, 118, 'storage')
+    s.room(17, 92, 'storage')
+    s.room(90, 18, 'corridor')
+    s.room(78, 29, 'washroom')
+    s.room(81, 18, 'barracks')
+    s.room(102, 18, 'workshop')
     s.render('radio')
 
 

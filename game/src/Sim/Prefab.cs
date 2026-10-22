@@ -67,6 +67,7 @@ namespace Rastvordd.Sim
             if (phase >= 1) bag.Items.Add(new ItemSlot("gunpowder", Rng.Next(40, 100)));
             if (phase >= 2 && Rng.NextDouble() < 0.6) bag.Items.Add(Items.NewSlot("expl_satchel"));
             if (phase >= 2 && Rng.NextDouble() < 0.25) bag.Items.Add(Items.NewSlot("expl_c4"));
+            Clothing.Loot(WearRng, bag, "event");   // тир 4 (СОБР, Ликвидатор), армейская и керамическая пластины — только отсюда (D47)
         }
         /// <summary>Готовые РТ (собранные из спрайтов): площадка не заливается бетоном, лес и узлы внутри убираются.</summary>
         public readonly List<Monument> Prefabs = new();

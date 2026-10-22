@@ -18,6 +18,7 @@ namespace Rastvordd.Sim
         public bool Crouching;
         public bool Swimming;
         public string Label;         // подпись над головой (боты: имя и занятие)
+        public string[] Worn;        // одежда по слотам WearSlot (null — голый) — риг рисует слоями (D47)
     }
 
     public struct ProjSnap { public int Id; public Vector2 Pos; public Vector2 Dir; public bool Arrow; }
@@ -115,6 +116,17 @@ namespace Rastvordd.Sim
         public List<TechInfo> Tech = new();
         public int BenchLevel;          // уровень верстака рядом (0 — нет)
         public int Scrap;
+
+        // одежда, радиация, холод (D47)
+        public List<CellView> Worn = new();          // 10 слотов WearSlot
+        public List<CellView> PlateCells = new();    // перед, спина (Durability — прочность 0..1)
+        public int PlateSlots;                       // сколько пластин держит надетая броня
+        public float ProtHead, ProtTorsoF, ProtTorsoB, ProtLimbs;   // защита от пуль по зонам, 0..1
+        public float RadProt, Warmth, SpeedPen;      // ед. радиации; тепло °C (держит холод до 15 − тепло); штраф скорости (≤ 0)
+        public bool HasWatch;                        // часы на запястье: в HUD время, воздух, радиация
+        public float AirTemp, FeltTemp, RadHere;     // где стоишь
+        public float RadDose, Cold;                  // доза; переохлаждение 0..100
+        public bool Irradiated, Nausea, Freezing, Wet;   // значки состояния (видны всегда)
     }
 
     /// <summary>То, что сервер отправляет клиенту за тик. Только видимое этому клиенту.</summary>
@@ -287,7 +299,7 @@ namespace Rastvordd.Sim
         {
             report = null;
             var save = WorldSave.FromJson(json);
-            if (save == null || save.Version != 3 || save.Seed != World.Seed) return false;
+            if (save == null || save.Version is < 3 or > 5 || save.Seed != World.Seed) return false;   // 3–5 совместимы: v4 переводит id стволов, v5 добавил одежду
             World.Load(save);
             // мир жил, пока игра была закрыта (не больше суток за раз)
             float away = (float)System.Math.Min(24 * 3600, (System.DateTime.UtcNow - save.SavedAtUtc).TotalSeconds);
@@ -327,6 +339,7 @@ namespace Rastvordd.Sim
                 log($"ящики уровня {tier}: {crates.Count} · пример: {(crates.Count > 0 ? string.Join(", ", crates[0].Items.ConvertAll(s => $"{Items.Name(s.Id)} ×{s.Count}")) : "-")}");
             }
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--weapontest") >= 0) World.WeaponSelfTest(log);   // самопроверка ветки оружия D46
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--weartest") >= 0) World.WearSelfTest(log);       // самопроверка одежды D47
             int shown = World.Milestones.Count;
             var thoughtsShown = new Dictionary<int, int>();
             bool basedump = System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--basedump") >= 0;
@@ -660,6 +673,7 @@ namespace Rastvordd.Sim
                     Crouching = a.Crouching,
                     Swimming = a.Swimming,
                     Label = BotLabel(a.Id),
+                    Worn = WornIds(a),
                 });
             }
 
@@ -742,6 +756,36 @@ namespace Rastvordd.Sim
             return snap;
         }
 
+        static string[] WornIds(Actor a)
+        {
+            string[] r = null;
+            for (int i = 0; i < Clothing.Slots; i++)
+                if (a.Worn[i] != null) (r ??= new string[Clothing.Slots])[i] = a.Worn[i].Id;
+            return r;
+        }
+
+        /// <summary>Одежда и среда — в SelfInfo (колонка «Снаряжение», HUD-часы и значки).</summary>
+        void FillWear(SelfInfo s, Actor me)
+        {
+            foreach (var it in me.Worn) s.Worn.Add(World.Cell(it, null));
+            foreach (var it in me.Plates) s.PlateCells.Add(World.Cell(it, null));
+            s.PlateSlots = Clothing.PlateCap(me);
+            s.ProtHead = Clothing.Zone(me, HitZone.Head);
+            s.ProtTorsoF = Clothing.Zone(me, HitZone.Torso, 0);
+            s.ProtTorsoB = Clothing.Zone(me, HitZone.Torso, 1);
+            s.ProtLimbs = Clothing.Zone(me, HitZone.Limbs);
+            s.RadProt = Clothing.RadProt(me);
+            s.Warmth = Clothing.Warmth(me);
+            s.SpeedPen = Clothing.SpeedPenalty(me);
+            s.HasWatch = Clothing.HasWatch(me);
+            s.AirTemp = me.AirTemp; s.FeltTemp = me.FeltTemp; s.RadHere = me.RadHere;
+            s.RadDose = me.RadDose; s.Cold = me.Cold;
+            s.Irradiated = me.RadHere > s.RadProt || me.RadDose >= 1;
+            s.Nausea = me.RadDose >= Clothing.RadNausea;
+            s.Freezing = me.FeltTemp < Clothing.Comfort || me.Cold > 0;
+            s.Wet = me.WetLeft > 0;
+        }
+
         SelfInfo BuildSelf(Actor me)
         {
             var held = me.Held;
@@ -769,7 +813,7 @@ namespace Rastvordd.Sim
             foreach (var n in Tech.All)
             {
                 bool can = World.CanResearch(me, n, out string why);
-                s.Tech.Add(new TechInfo { Id = n.Id, Name = Items.Name(n.Id), Bench = n.Bench, Scrap = n.Scrap, Requires = n.Requires, Known = me.Known.Contains(n.Id), CanResearch = can, Why = why });
+                s.Tech.Add(new TechInfo { Id = n.Id, Name = Clothing.TechName(n.Id) ?? Items.Name(n.Id), Bench = n.Bench, Scrap = n.Scrap, Requires = n.Requires, Known = me.Known.Contains(n.Id), CanResearch = can, Why = why });
             }
 
             for (int i = 0; i < Actor.BeltSize; i++)
@@ -814,6 +858,7 @@ namespace Rastvordd.Sim
             }
 
             s.Armor = World.ArmorReduction(me);
+            FillWear(s, me);
             if (!me.Dead) s.InteractHint = Hint(World.NearestInteract(me), me);
             if (!me.Dead && held?.Def?.Build == true)
             {

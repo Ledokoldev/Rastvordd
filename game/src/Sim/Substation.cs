@@ -78,6 +78,7 @@ namespace Rastvordd.Sim
             if (Rng.NextDouble() < 0.5) bag.Items.Add(new ItemSlot("bandage", Rng.Next(1, 3)));
             if (Rng.NextDouble() < 0.1) bag.Items.Add(new ItemSlot(Pick(Weaponry.FactoryAtts), 1));
             if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot(Rng.Next(4) == 0 ? "weapon_mp133" : "weapon_sawnoff"));
+            Clothing.Loot(WearRng, bag, "punch");   // антирадин, спецовка/кустарная броня, ОЗК, пластины (D47)
         }
 
         void PlaceSubstation()

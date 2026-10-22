@@ -128,7 +128,7 @@ namespace Rastvordd.Sim
         public int AttCount { get { int n = 0; foreach (var id in Att) if (id != null) n++; return n; } }
     }
 
-    public enum ItemCategory { Resource, Component, Tool, Weapon, Ammo, Food, Medical, Deployable }
+    public enum ItemCategory { Resource, Component, Tool, Weapon, Ammo, Food, Medical, Deployable, Clothing }   // Clothing — одежда, пластины, часы (D47, Clothing.cs)
     public enum DeployKind { None, Workbench, Furnace, Claim, Box, SleepBag, Recycler, Lathe }   // Recycler — переработчик на РТ (ничей, не ломается); Lathe — токарный станок (D46)
 
     public sealed class ItemDef
@@ -144,6 +144,8 @@ namespace Rastvordd.Sim
         public bool Lock;               // кодовый замок: ЛКМ по двери — поставить
         public int Stack = 1;           // сколько штук в одном слоте пояса
         public AttachmentDef Attachment;  // обвес на ствол (att_*)
+        public WearDef Wear;              // одежда (wear_*), Clothing.cs
+        public PlateDef Plate;            // бронепластина (plate_*)
 
         /// <summary>Предметы, которые держат в руках, живут на поясе (по одному в слоте).</summary>
         public bool Holdable => Weapon != null || Deploy != DeployKind.None || Build || Explosive != null || Lock;
@@ -155,6 +157,7 @@ namespace Rastvordd.Sim
         public string Id;
         public int Count;
         public WeaponState State;
+        public float Dur = -1;          // прочность пластины (урона до разрушения); −1 — новая
         public ItemSlot(string id, int count, WeaponState state = null) { Id = id; Count = count; State = state; }
         public ItemDef Def => Items.Get(Id);
     }
@@ -224,6 +227,9 @@ namespace Rastvordd.Sim
             // огнестрел, лук, арбалет, калибры, 16 компонентов, обвесы, токарный станок (D46)
             Weaponry.Register(Add);
             Weaponry.Finish();
+
+            // одежда, пластины, часы, резина, кожа, антирадин (D47)
+            Clothing.Register(Add);
 
             // устанавливаемое
             Add("deploy_workbench", "Верстак", ItemCategory.Deployable).Deploy = DeployKind.Workbench;
@@ -331,12 +337,29 @@ namespace Rastvordd.Sim
                 foreach (var (cid, n) in lr.In) parts.Add($"{Name(cid)} {n}");
                 list.Add(("Токарный станок", string.Join(", ", parts) + (lr.Bench3 ? " (верстак 3)" : "")));
             }
+            if (def.Wear is WearDef wd)
+            {
+                list.Add(("Слот", Clothing.SlotNames[(int)wd.Slot]));
+                if (wd.Slot != WearSlot.Wrist)
+                {
+                    list.Add(("Пули", $"{wd.Bullet * 100:0}%" + (Clothing.SlotZone[(int)wd.Slot] is HitZone z ? z switch { HitZone.Head => " (голова)", HitZone.Torso => " (корпус)", _ => " (конечности)" } : "")));
+                    list.Add(("Радиация", $"{wd.Rad:0}"));
+                    list.Add(("Тепло", $"{(wd.Warm > 0 ? "+" : "")}{wd.Warm:0} °C"));
+                    if (wd.Speed < 0) list.Add(("Скорость", $"{wd.Speed * 100:0}%"));
+                    if (wd.Plates > 0) list.Add(("Пластин", wd.Plates == 1 ? "1 (спереди)" : "2 (спереди и сзади)"));
+                }
+            }
+            if (def.Plate is PlateDef pd)
+            {
+                list.Add(("Корпус", $"+{pd.Bonus * 100:0}% со своей стороны"));
+                list.Add(("Прочность", $"{pd.Durability:0} урона"));
+            }
             if (BenchLevel(id) > 0) list.Add(("Открывает", $"крафт уровня {BenchLevel(id)}"));
             return list;
         }
 
         /// <summary>Ценность одной штуки «в ломах» — для решений ботов: стеш, груз, что подобрать, ради чего рисковать.</summary>
-        public static float Value(string id) => id != null && Weaponry.Info.TryGetValue(id, out var m) ? m.Value : id switch
+        public static float Value(string id) => id != null && Weaponry.Info.TryGetValue(id, out var m) ? m.Value : id != null && Clothing.TryMeta(id, out var cm) ? cm.Value : id switch
         {
             "wood" or "stone" => 0.05f,
             "metal_ore" or "sulfur_ore" => 0.15f,
@@ -363,7 +386,7 @@ namespace Rastvordd.Sim
         };
 
         /// <summary>Для чего предмет — одна строка в подсказке инвентаря.</summary>
-        public static string Desc(string id) => id != null && Weaponry.Info.TryGetValue(id, out var m) ? m.Desc : id switch
+        public static string Desc(string id) => id != null && Weaponry.Info.TryGetValue(id, out var m) ? m.Desc : id != null && Clothing.TryMeta(id, out var cm) ? WearDesc(id, cm.Desc) : id switch
         {
             "wood" => "Стройка, крафт, топливо для печи",
             "stone" => "Инструменты, печь, улучшение построек до камня",
@@ -408,8 +431,18 @@ namespace Rastvordd.Sim
             _ => "",
         };
 
+        /// <summary>Описание одежды: своя строка + «как надеть» и откуда (комплект).</summary>
+        static string WearDesc(string id, string own)
+        {
+            var wd = Clothing.Def(id);
+            if (wd == null) return own;
+            var set = Clothing.Sets.Find(s => s.Key == wd.Set);
+            string head = wd.Slot == WearSlot.Wrist ? "" : $"{Clothing.SlotNames[(int)wd.Slot]} · комплект «{set?.Name}» ({set?.Source}). ";
+            return head + (own != "" ? own + ". " : "") + "ПКМ — надеть";
+        }
+
         /// <summary>Редкость (цвет рамки и время обыска): 0 обычное, 1 необычное, 2 редкое, 3 эпическое, 4 легендарное.</summary>
-        public static int Rarity(string id) => id != null && Weaponry.Info.TryGetValue(id, out var m) ? m.Rarity : id switch
+        public static int Rarity(string id) => id != null && Weaponry.Info.TryGetValue(id, out var m) ? m.Rarity : id != null && Clothing.TryMeta(id, out var cm) ? cm.Rarity : id switch
         {
             "keycard" => 3,
             "punchcard_1" => 2,
@@ -433,6 +466,7 @@ namespace Rastvordd.Sim
             if (d == null) return 1;
             if (d.Holdable) return System.Math.Max(1, d.Stack);
             if (Weaponry.Info.TryGetValue(id, out var m) && m.Stack > 0) return m.Stack;
+            if (Clothing.TryMeta(id, out var cm) && cm.Stack > 0) return cm.Stack;
             return d.Category switch
             {
                 ItemCategory.Ammo => id == "arrow" ? 64 : 128,
@@ -487,7 +521,7 @@ namespace Rastvordd.Sim
             new Recipe { Output = "deploy_workbench3", Cost = new[] { ("metal_fragments", 400), ("scrap", 200) }, Time = 25, Bench = 2 },
         };
 
-        static Recipes() => Weaponry.AddRecipes(All);   // стволы, патроны, обвесы, станок (D46)
+        static Recipes() { Weaponry.AddRecipes(All); Clothing.AddRecipes(All); }   // стволы, патроны, обвесы, станок (D46); одежда (D47)
     }
 
     /// <summary>Узел дерева изучения: изучается за металлолом у верстака нужного уровня после предков.</summary>
@@ -513,12 +547,16 @@ namespace Rastvordd.Sim
             new TechNode { Id = "expl_c4", Bench = 3, Scrap = 250, Requires = new[] { "expl_satchel" }, Col = 2, Row = 0 },
         };
 
-        static Tech() => Weaponry.AddTech(All);   // ветка оружия и обвесов (D46)
+        static Tech() { Weaponry.AddTech(All); Clothing.AddTech(All); }   // ветка оружия и обвесов (D46), комплекты одежды (D47)
 
         public static TechNode Get(string id) => All.Find(n => n.Id == id);
 
         /// <summary>Знает ли игрок рецепт (боты изучают так же, как люди).</summary>
-        public static bool Knows(Actor a, string id) => Get(id) == null || a.Known.Contains(id);
+        public static bool Knows(Actor a, string id)
+        {
+            id = Clothing.TechKey(id) ?? id;   // одежда тиров 2–3: один узел на комплект
+            return Get(id) == null || a.Known.Contains(id);
+        }
     }
 
     public sealed class CraftJob
@@ -572,6 +610,15 @@ namespace Rastvordd.Sim
         public readonly List<CraftJob> CraftQueue = new();
         /// <summary>Пробки Подстанции — отдельный счётчик, не занимают ячейку (за забор не выносятся, при смерти возвращаются на РТ).</summary>
         public int Fuses;
+
+        // одежда (D47): 10 слотов (WearSlot), пластины перед/спина; радиация и холод
+        public readonly ItemSlot[] Worn = new ItemSlot[Clothing.Slots];
+        public readonly ItemSlot[] Plates = new ItemSlot[Clothing.PlateSlots];
+        public float RadDose;           // накопленная доза
+        public float Cold;              // переохлаждение 0..100
+        public float WetLeft;           // мокрый ещё столько секунд (вода, дождь)
+        public float RadHere, AirTemp, FeltTemp;   // где стоит: уровень радиации, воздух, воздух + тепло + огонь/дом/мокрый (для HUD и ботов)
+        public bool NearFire, Indoors;
 
         public ItemSlot Held => Belt[Current];
         public WeaponState Weapon => Held?.State;
@@ -669,6 +716,9 @@ namespace Rastvordd.Sim
         {
             for (int i = 0; i < BeltSize; i++) Belt[i] = null;
             for (int i = 0; i < PackSize; i++) Pack[i] = null;
+            for (int i = 0; i < Worn.Length; i++) Worn[i] = null;
+            for (int i = 0; i < Plates.Length; i++) Plates[i] = null;
+            RadDose = 0; Cold = 0; WetLeft = 0;
             CraftQueue.Clear();
             Current = 0;
         }
@@ -778,7 +828,7 @@ namespace Rastvordd.Sim
         public bool Empty => Items.Count == 0;
     }
 
-    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted, Built, Destroyed, Door, HitStruct, Explosion, Locked, Revealed, Machine }
+    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted, Built, Destroyed, Door, HitStruct, Explosion, Locked, Revealed, Machine, Wear }   // Wear — звук одежды/брони (Text — id звука), личное
 
     public struct SimEvent
     {

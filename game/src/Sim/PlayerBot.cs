@@ -97,6 +97,37 @@ namespace Rastvordd.Sim
             return true;
         }
 
+        // ---------- одежда (D47): надеть лучшее, сшить тряпьё/ватник, антирадин ----------
+
+        /// <summary>Что бот шьёт сам, по порядку: тряпьё (в руках), потом у верстака 1 — ватник и кожа.</summary>
+        static readonly string[] WearCraftOrder =
+        {
+            "wear_rags_shirt", "wear_rags_pants", "wear_rags_wraps", "wear_rags_mittens", "wear_rags_bandana",
+            "wear_vatnik_telogreika", "wear_vatnik_pants", "wear_leather_helmet", "wear_vatnik_ushanka", "wear_vatnik_valenki", "wear_leather_bracers", "wear_leather_chestplate",
+        };
+
+        void Clothe(ref InputCmd cmd)
+        {
+            uint t = _w.Tick + (uint)_me.Id;
+            if (t % 150 == 0) _w.BotDress(_me);                                      // раз в 5 с — лучшее из рюкзака на себя
+            if (_me.RadDose >= 150 && _me.Count("antirad") > 0 && !cmd.Eat) cmd.Eat = true;   // F: антирадин идёт первым
+            if (t % 90 != 45 || cmd.Craft >= 0 || _threat != null || _me.CraftQueue.Count > 0) return;
+            foreach (var id in WearCraftOrder)
+            {
+                var wd = Clothing.Def(id);
+                var cur = Clothing.Def(_me.Worn[(int)wd.Slot]?.Id);
+                if (cur != null && Clothing.BotScore(cur) >= Clothing.BotScore(wd)) continue;   // уже не хуже
+                if (_me.Count(id) > 0) continue;                                              // сшито — наденет при следующем BotDress
+                int r = Recipe(id);
+                if (r < 0 || !_w.CanCraft(_me, Recipes.All[r])) continue;
+                int cloth = 0;
+                foreach (var (cid, n) in Recipes.All[r].Cost) if (cid == "cloth") cloth = n;
+                if (_me.Count("cloth") - cloth < 8) continue;                                  // ткань на бинты — не трогать
+                cmd.Craft = r;
+                return;
+            }
+        }
+
         bool CanAfford(string output)
         {
             int r = Recipe(output);
@@ -590,6 +621,7 @@ namespace Rastvordd.Sim
             t0 = SimPerf.Begin();
             Decide(ref cmd);
             CloseDoorBehind();
+            Clothe(ref cmd);
             SimPerf.End("бот: решение+действие", t0);
             NoteMove(cmd);
             return cmd;

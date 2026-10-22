@@ -266,6 +266,8 @@ namespace Rastvordd.Sim
             "cont" => a.OpenUi == UiKind.Box ? BoxSlots : a.OpenUi == UiKind.Recycler ? RecyclerSlots : Math.Max(UiItems(a)?.Count ?? 0, 12),
             "fur" => FurnaceIds.Length,
             "claim" => ClaimIds.Length,
+            "wear" => Clothing.Slots,          // одежда (D47): 10 слотов WearSlot
+            "plate" => Clothing.PlateSlots,    // пластины: перед, спина
             _ => 0,
         };
 
@@ -276,6 +278,8 @@ namespace Rastvordd.Sim
             {
                 case "pack": return a.Pack[i];
                 case "belt": return a.Belt[i];
+                case "wear": return a.Worn[i];
+                case "plate": return a.Plates[i];
                 case "cont":
                     var items = UiItems(a);
                     if (items == null || i >= items.Count || i >= Revealed(a)) return null;   // не обыскано — не взять
@@ -296,6 +300,14 @@ namespace Rastvordd.Sim
             {
                 case "pack": a.Pack[i] = s; break;
                 case "belt": a.Belt[i] = s; break;
+                case "wear":
+                    a.Worn[i] = s;
+                    if (s != null) WearSound(a, s.Id);
+                    break;
+                case "plate":
+                    a.Plates[i] = s;
+                    if (s != null) WearSound(a, s.Id);
+                    break;
                 case "cont":
                     var items = UiItems(a);
                     if (s == null) { if (i < items.Count) { items.RemoveAt(i); Unreveal(a, i); } }
@@ -327,6 +339,8 @@ namespace Rastvordd.Sim
             return inv switch
             {
                 "belt" => s.Def != null && s.Def.Holdable,                     // пояс — то, что держат в руках
+                "wear" => Clothing.Def(s.Id) is WearDef wd && (int)wd.Slot == i,   // вещь — только в свой слот
+                "plate" => Clothing.Plate(s.Id) != null && i < Clothing.PlateCap(a),   // пластина — в карман надетой брони
                 "fur" => i <= 2 && s.Id == FurnaceIds[i],                       // в печь: руда и дерево, готовое только забирают
                 "claim" => s.Id == ClaimIds[i],
                 "cont" => a.OpenUi == UiKind.Box ? i < BoxSlots : a.OpenUi != UiKind.Recycler || i < RecyclerSlots,
@@ -382,6 +396,25 @@ namespace Rastvordd.Sim
         {
             var s = GetCell(a, src, si);
             if (s == null) return;
+            // одежда (D47): из рюкзака/пояса — надеть (окно не открыто); из слота одежды — снять в рюкзак (или в открытый контейнер)
+            if (src is "pack" or "belt" && a.OpenUi == UiKind.None && (Clothing.Def(s.Id) != null || Clothing.Plate(s.Id) != null))
+            {
+                if (Clothing.Def(s.Id) is WearDef wd) { MoveCell(a, src, si, "wear", (int)wd.Slot); FixPlates(a); return; }
+                int cap = Clothing.PlateCap(a);
+                if (cap == 0) { Info(a, "Пластину некуда вставить: надень жилет из знаков, 6Б2 или «Кору»"); return; }
+                int free = Array.FindIndex(a.Plates, 0, cap, p => p == null);
+                MoveCell(a, src, si, "plate", free >= 0 ? free : 0);
+                return;
+            }
+            if (src is "wear" or "plate")
+            {
+                string to = a.OpenUi is UiKind.Box or UiKind.Bag ? "cont" : "pack";
+                if (to == "cont" && Accepts(a, "cont", UiItems(a).Count, s)) { MoveCell(a, src, si, "cont", UiItems(a).Count); return; }
+                int empty = Array.FindIndex(a.Pack, p => p == null);
+                if (empty < 0) { Info(a, "Рюкзак полон"); return; }
+                MoveCell(a, src, si, "pack", empty);
+                return;
+            }
             if (src is "pack" or "belt")
             {
                 string dst = a.OpenUi switch { UiKind.Box or UiKind.Bag or UiKind.Recycler => "cont", UiKind.Furnace => "fur", UiKind.Claim => "claim", _ => src == "pack" ? "belt" : "pack" };
@@ -494,15 +527,17 @@ namespace Rastvordd.Sim
             var (src, si) = ParseCell(parts[0]);
             var (dst, di) = ParseCell(parts[1]);
             if (src == null || dst == null) return;
-            if (a.OpenUi == UiKind.None && (src is not ("pack" or "belt") || dst is not ("pack" or "belt"))) return;
+            if (a.OpenUi == UiKind.None && (src is not ("pack" or "belt" or "wear" or "plate") || dst is not ("pack" or "belt" or "wear" or "plate"))) return;
             MoveCell(a, src, si, dst, di);
+            if (src == "wear" || dst == "wear") FixPlates(a);   // сняли бронежилет — пластины в рюкзак
         }
 
         void DoQuick(Actor a, string arg)
         {
             var (inv, i) = ParseCell(arg);
-            if (inv == null || (a.OpenUi == UiKind.None && inv is not ("pack" or "belt"))) return;
+            if (inv == null || (a.OpenUi == UiKind.None && inv is not ("pack" or "belt" or "wear" or "plate"))) return;
             QuickCell(a, inv, i);
+            if (inv == "wear" || Clothing.Def(GetCell(a, inv, i)?.Id) != null) FixPlates(a);
         }
 
         /// <summary>Не влезшее в рюкзак — сумкой под ноги.</summary>
@@ -518,11 +553,12 @@ namespace Rastvordd.Sim
         void DoDrop(Actor a, string arg)
         {
             var (inv, i) = ParseCell(arg);
-            if (inv is not ("pack" or "belt")) return;
+            if (inv is not ("pack" or "belt" or "wear" or "plate")) return;
             var s = GetCell(a, inv, i);
             if (s == null) return;
             SetCell(a, inv, i, null);
             DropAtFeet(a, s);
+            if (inv == "wear") FixPlates(a);
         }
 
         /// <summary>Положить вещь под ноги: в лежащую рядом выброшенную сумку или новую. Открывается сразу, без обыска.</summary>
@@ -543,7 +579,7 @@ namespace Rastvordd.Sim
         {
             Id = s.Id, Name = Items.Name(s.Id), Count = s.Count, Rarity = Items.Rarity(s.Id), Label = label,
             Ammo = s.State?.Ammo ?? 0, Magazine = s.State != null && !s.State.Def.Melee ? s.State.MagSize : 0,
-            Durability = s.State != null && s.State.Def.MaxDurability > 0 ? s.State.Durability / s.State.Def.MaxDurability : -1,
+            Durability = s.State != null && s.State.Def.MaxDurability > 0 ? s.State.Durability / s.State.Def.MaxDurability : Clothing.PlateFrac(s),   // у пластины — её прочность (D47)
             Att = s.State != null && s.State.AttCount > 0 ? (string[])s.State.Att.Clone() : null,
             SightZoom = s.State?.SightZoom ?? 0,
         };

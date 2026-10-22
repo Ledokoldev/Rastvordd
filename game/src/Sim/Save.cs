@@ -11,7 +11,7 @@ namespace Rastvordd.Sim
     /// </summary>
     public sealed class WorldSave
     {
-        public int Version = 4;   // 4: ветка оружия D46 (калибры, обвесы, износ; старые id переводятся при загрузке)   // 3: рюкзак ячейками   // 2: остров 1 км, малые РТ
+        public int Version = 5;   // 5: одежда D47 (слоты, пластины с прочностью, доза, переохлаждение; старые сейвы — голыми)   // 4: ветка оружия D46 (калибры, обвесы, износ; старые id переводятся при загрузке)   // 3: рюкзак ячейками   // 2: остров 1 км, малые РТ
         public int Seed;
         public float Time, TimeOffset;
         public int NextId;
@@ -45,6 +45,9 @@ namespace Rastvordd.Sim
             public List<SlotS> Belt = new();
             public List<SlotS> Inventory = new();
             public List<string> Known = new();
+            public List<SlotS> Worn;      // v5: одежда по слотам WearSlot
+            public List<SlotS> Plates;    // v5: пластины перед/спина (Dur — прочность)
+            public float RadDose, Cold;
         }
 
         static readonly JsonSerializerOptions Opts = new() { IncludeFields = true, WriteIndented = false };
@@ -59,7 +62,7 @@ namespace Rastvordd.Sim
         static WorldSave.SlotS SaveSlot(ItemSlot s)
         {
             if (s == null) return null;
-            var ss = new WorldSave.SlotS { Id = s.Id, Count = s.Count, Ammo = s.State?.Ammo ?? -1, Dur = s.State?.Durability ?? -1 };
+            var ss = new WorldSave.SlotS { Id = s.Id, Count = s.Count, Ammo = s.State?.Ammo ?? -1, Dur = s.State?.Durability ?? s.Dur };   // у пластины — её прочность
             if (s.State != null && s.State.AttCount > 0) { ss.Att = new List<string>(s.State.Att); ss.AttDur = new List<float>(s.State.AttDur); }
             return ss;
         }
@@ -84,6 +87,7 @@ namespace Rastvordd.Sim
                     }
                 w.Ammo = Math.Min(w.Ammo, w.MagSize);
             }
+            else if (s.Dur >= 0 && Clothing.Plate(id) is PlateDef pd) slot.Dur = Math.Min(s.Dur, pd.Durability);
             return slot;
         }
 
@@ -124,6 +128,9 @@ namespace Rastvordd.Sim
                 foreach (var s in a.Belt) ps.Belt.Add(SaveSlot(s));
                 foreach (var it in a.Pack) ps.Inventory.Add(SaveSlot(it));
                 ps.Known.AddRange(a.Known);
+                ps.Worn = new List<WorldSave.SlotS>(); foreach (var s in a.Worn) ps.Worn.Add(SaveSlot(s));
+                ps.Plates = new List<WorldSave.SlotS>(); foreach (var s in a.Plates) ps.Plates.Add(SaveSlot(s));
+                ps.RadDose = a.RadDose; ps.Cold = a.Cold;
                 w.Players.Add(ps);
             }
             return w;
@@ -201,6 +208,14 @@ namespace Rastvordd.Sim
                 for (int i = 0; i < Actor.PackSize && i < ps.Inventory.Count; i++) a.Pack[i] = LoadSlot(ps.Inventory[i]);
                 a.Current = ps.Current;
                 a.BuildPiece = (StructKind)ps.BuildPiece;
+                // одежда (v5); в старых сейвах её нет — персонаж голый
+                if (ps.Worn != null)
+                    for (int i = 0; i < Clothing.Slots && i < ps.Worn.Count; i++)
+                        if (LoadSlot(ps.Worn[i]) is ItemSlot ws && Clothing.Def(ws.Id)?.Slot == (WearSlot)i) a.Worn[i] = ws;
+                if (ps.Plates != null)
+                    for (int i = 0; i < Clothing.PlateSlots && i < ps.Plates.Count; i++)
+                        if (LoadSlot(ps.Plates[i]) is ItemSlot pl && Clothing.Plate(pl.Id) != null) a.Plates[i] = pl;
+                a.RadDose = ps.RadDose; a.Cold = ps.Cold;
                 a.Known.Clear();
                 if (ps.Known != null) foreach (var k in ps.Known) if (Tech.Get(Weaponry.Migrate(k)) != null) a.Known.Add(Weaponry.Migrate(k));
                 Actors.Add(a);

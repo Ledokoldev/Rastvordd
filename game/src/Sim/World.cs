@@ -356,6 +356,7 @@ namespace Rastvordd.Sim
                 TryTier3(bag, 0.3);
                 if (Rng.NextDouble() < 0.2) bag.Items.Add(Items.NewSlot("expl_satchel"));
                 if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot("expl_c4"));
+                Clothing.Loot(WearRng, bag, "safe");
                 return;
             }
             // общие детали — во всех ящиках; карта доступа — в охраняемых
@@ -417,6 +418,7 @@ namespace Rastvordd.Sim
                     if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot("expl_satchel"));
                     break;
             }
+            Clothing.Loot(WearRng, bag, $"crate{Math.Clamp(bag.Tier, 0, 2)}");   // одежда, резина, кожа, антирадин (D47)
             if (bag.Empty) bag.Items.Add(new ItemSlot("scrap", 10));
         }
 
@@ -508,6 +510,8 @@ namespace Rastvordd.Sim
                 a.AddSlot(Items.NewSlot("weapon_akm", 30));
                 a.Add("ammo_762", Rng.Next(30, 75));
             }
+            // одежда по тиру РТ (D47): тир 1 (дубина, лук, самопал) — ватник или кожа, склад с калашами — армейская
+            Dress(a, Clothing.GuardKit(WearRng, kit is "club" or "bow" or "pipe" ? 1 : 2));
             a.Add("scrap", Rng.Next(5, 20));
             if (Rng.NextDouble() < 0.12) a.Add("keycard", 1);
             if (Rng.NextDouble() < 0.4) a.Add("bandage", 1);
@@ -713,6 +717,7 @@ namespace Rastvordd.Sim
                 speed = WalkSpeed + (SprintSpeed - WalkSpeed) * k;
                 sprint = k > 0.5f;
             }
+            speed *= SpeedMul(a);   // тяжёлая броня: до −15% (D47)
             a.Vel = Geo.MoveToward(a.Vel, move * speed, Accel * Dt);
             var before = a.Pos;
             a.Pos += a.Vel * Dt;
@@ -723,12 +728,15 @@ namespace Rastvordd.Sim
             if (toAimDir.LengthSquared() > 0.04f) a.Facing = MathF.Atan2(toAimDir.Y, toAimDir.X);
 
             StepSurvival(a, sprint);
+            StepEnvironment(a);   // радиация и холод (D47)
+            if (a.Dead) return;
+            ArmorRattle(a, sprint);
 
             // лечение и еда
             a.HealCooldown -= Dt;
             if (cmd.Heal && a.HealCooldown <= 0 && a.Hp < a.MaxHp && a.Take("bandage", 1) > 0)
             {
-                a.Hp = MathF.Min(a.MaxHp, a.Hp + 25);
+                a.Hp = MathF.Min(a.MaxHp, a.Hp + 25 * HealMul(a));   // тошнота от радиации — хуже лечит
                 a.HealCooldown = 2f;
             }
             if (cmd.Eat) Eat(a);
@@ -784,7 +792,7 @@ namespace Rastvordd.Sim
             a.Food = MathF.Max(0, a.Food - FoodDecay * (sprint ? 1.5f : 1f) * Dt);
             a.Water = MathF.Max(0, a.Water - WaterDecay * (sprint ? 1.5f : 1f) * Dt);
             // сытый — понемногу лечится, на нуле — понемногу теряет здоровье
-            if (a.Food > 40 && a.Water > 40) a.Hp = MathF.Min(a.MaxHp, a.Hp + 0.25f * Dt);
+            if (a.Food > 40 && a.Water > 40) a.Hp = MathF.Min(a.MaxHp, a.Hp + 0.25f * HealMul(a) * Dt);
             float starving = (a.Food <= 0 ? 0.35f : 0) + (a.Water <= 0 ? 0.35f : 0);
             if (starving > 0)
             {
@@ -795,6 +803,7 @@ namespace Rastvordd.Sim
 
         void Eat(Actor a)
         {
+            if (TakeAntirad(a)) return;   // облучён и есть антирадин — сначала он (D47)
             // выбираем еду, которая лучше всего закрывает текущий голод и жажду
             string best = null;
             float bestScore = 0;
@@ -1113,7 +1122,7 @@ namespace Rastvordd.Sim
             }
             if (victim != null)
             {
-                Damage(victim, wd.Damage, a.Id, victim.Pos);
+                Damage(victim, MeleeAfterArmor(victim, a, wd.Damage), a.Id, victim.Pos, "torso");   // броня корпуса ×0,5 (D47)
                 return;
             }
 
@@ -1212,6 +1221,7 @@ namespace Rastvordd.Sim
             if (Rng.NextDouble() < 0.05) Put("bandage", 1);
             if (Rng.NextDouble() < 0.2) Put("comp_tape", 1);
             if (Rng.NextDouble() < 0.2) Put(Rng.Next(10) switch { < 4 => "comp_spring", < 7 => "comp_pipe", _ => "comp_gears" }, 1);   // пружины и трубы — на Наган (D46)
+            Clothing.Loot(WearRng, bag, rich ? "barrel_rt" : "barrel");   // резина (покрышки), кожа, редко часы (D47)
             Bags.Add(bag);
             Events.Add(new SimEvent { Kind = SimEventKind.Destroyed, ActorId = byId, Pos = node.Pos, Text = "Бочка" });
             RemoveNode(node);
@@ -1629,7 +1639,7 @@ namespace Rastvordd.Sim
                 if (bestT <= 1)
                 {
                     var hitPos = a + (b - a) * bestT;
-                    if (hitActor != null) Damage(hitActor, p.Damage, p.OwnerId, hitPos);
+                    if (hitActor != null) BulletHit(hitActor, p.Pos, p.Dir, p.Damage, p.OwnerId, hitPos);   // зоны и броня (D47, Armor.cs)
                     else
                     {
                         // пули ломают двери и разметку (D22), стены — нет
@@ -1647,13 +1657,14 @@ namespace Rastvordd.Sim
             }
         }
 
-        public void Damage(Actor target, float dmg, int attackerId, Vector2 pos)
+        /// <param name="zone">куда попали (для звука и маркера): head, helmet, torso, plate, limb; null — без зоны (взрыв, огонь)</param>
+        public void Damage(Actor target, float dmg, int attackerId, Vector2 pos, string zone = null)
         {
             if (target.Spectator) return;
             target.Hp -= dmg;
             target.LastAttacker = attackerId;
             target.LastDamagedTime = Time;
-            Events.Add(new SimEvent { Kind = SimEventKind.HitActor, ActorId = target.Id, OtherId = attackerId, Pos = pos, Value = dmg });
+            Events.Add(new SimEvent { Kind = SimEventKind.HitActor, ActorId = target.Id, OtherId = attackerId, Pos = pos, Value = dmg, Text = zone });
             if (target.Hp <= 0) Kill(target, attackerId);
         }
 
@@ -1673,6 +1684,8 @@ namespace Rastvordd.Sim
                         if (s.State != null) s.State.ReloadLeft = 0;
                         bag.Items.Add(s);
                     }
+                foreach (var s in a.Worn) if (s != null) bag.Items.Add(s);     // одежда и пластины — в рюкзак трупа (D47)
+                foreach (var s in a.Plates) if (s != null) bag.Items.Add(s);
             }
             a.ClearAll();
             if (!bag.Empty) Bags.Add(bag);
@@ -1701,6 +1714,8 @@ namespace Rastvordd.Sim
             Put("keycard", a.Count("keycard"));
             if (Rng.NextDouble() < 0.5) Put("bandage", a.Count("bandage"));
             if (Rng.NextDouble() < 0.5) Put("canned", a.Count("canned"));
+            // одежда охраны: каждая вещь — с шансом 25% (свой ГСЧ: основной поток не сдвигается)
+            foreach (var s in a.Worn) if (s != null && WearRng.NextDouble() < 0.25) bag.Items.Add(new ItemSlot(s.Id, 1));
         }
 
         void StepBags()

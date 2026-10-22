@@ -474,6 +474,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     best ??= w.Bags.Find(b => b.IsCrate);
                     if (best != null) { w.Find(_myId).Pos = best.Pos + new SVec(-1.2f, 0.4f); _autoAim = best.Pos; }
                 }
+                else if (arg == "--dressreport") foreach (var line in _server.World.DressReport) GD.Print("DRESS " + line);   // обстановка РТ: плотность до/после
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
                 else if (arg == "--nohrtf") Tuning.SteamHrtf = false;   // отладка: звук без Steam Audio (сравнить память)
@@ -588,6 +589,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             {
                 if (w.Hidden) continue;   // хитбокс пропса РТ — рисуется спрайтом
                 var v = new WallView2D(w, TerrainView.BiomeAt(map, (w.Min + w.Max) * 0.5f));
+                if (w.Tex != null) v.Paint = DressPaint.For(map, w);
                 _world.AddChild(v);
                 _mapWalls.Add(v);
                 if (w.Tex != null) _prefab.WallsById[w.Id] = v;
@@ -1561,7 +1563,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             _build.UpdateFade(_selfPx, dt);
             foreach (var w in _mapWalls) w.UpdateOcclusion(dt);
             _prefab.Sync(_cur);
-            _prefab.Update(_selfPx, dt);
+            _prefab.Update(_selfPx, dt, Vfx.Night);
             _dirLayer.Sync(_cur.Markers, _cur.Time);
             if (_radio == null)
             {

@@ -1,0 +1,494 @@
+{
+ "assets": [
+  {
+   "id": "wall_poster_worker",
+   "cat": "interior",
+   "desc": "a faded Soviet constructivist propaganda poster pinned to a wall: a bold stylised red and cream illustration of a worker raising a hammer against a sunburst, blocky abstract shapes where lettering would be, torn corner, yellowed paper; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.6
+  },
+  {
+   "id": "wall_poster_safety",
+   "cat": "interior",
+   "desc": "a faded Soviet workplace safety poster: a simple bold illustration of a hand in a glove near a gear and a lightning bolt in red, black and cream, blank colour blocks instead of lettering, water stains, curled edges; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.55
+  },
+  {
+   "id": "wall_poster_space",
+   "cat": "interior",
+   "desc": "a faded Soviet space-age poster: a stylised rocket flying up over a red star and a blue planet, bold flat shapes in red, blue and cream, empty colour bands instead of lettering, torn bottom edge; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.55
+  },
+  {
+   "id": "wall_poster_pinup",
+   "cat": "interior",
+   "desc": "a faded old film poster glued to a wall: a stylised painted portrait of a smiling woman in a headscarf in warm sepia and red, half torn off, blank areas instead of lettering; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.5
+  },
+  {
+   "id": "wall_clock",
+   "cat": "interior",
+   "desc": "a round Soviet wall clock with a white dial, plain black hour marks without digits, black hands, a cracked glass and a brown plastic rim; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.32
+  },
+  {
+   "id": "wall_calendar",
+   "cat": "interior",
+   "desc": "a tear-off wall calendar block hanging on a nail under a small faded picture of a birch forest, pages curled and yellowed, grey blur instead of print; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.32
+  },
+  {
+   "id": "wall_map",
+   "cat": "interior",
+   "desc": "a big faded paper map of a region pinned to a wall: green forests, blue rivers, red roads and grid lines, pins and a pencil circle, no lettering, torn corners; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.1
+  },
+  {
+   "id": "wall_portrait",
+   "cat": "interior",
+   "desc": "a framed dusty black-and-white portrait photograph of a stern middle-aged official in a dark suit, in a plain wooden frame, hung slightly crooked; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.4
+  },
+  {
+   "id": "wall_pennant",
+   "cat": "interior",
+   "desc": "a red velvet Soviet honour pennant with gold fringe and a gold star embroidered, hanging on a cord, faded; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.3
+  },
+  {
+   "id": "wall_electric_box",
+   "cat": "interior",
+   "desc": "a small grey metal electrical switch box on a wall with a lever switch and a black conduit pipe going up, a painted yellow lightning triangle; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.35
+  },
+  {
+   "id": "wall_mirror",
+   "cat": "interior",
+   "desc": "a small rectangular bathroom mirror with a cracked and stained glass and a tiny glass shelf under it with a toothbrush cup; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.4
+  },
+  {
+   "id": "wall_first_aid",
+   "cat": "interior",
+   "desc": "a small white metal first-aid wall cabinet with a red cross painted on its door, chipped enamel; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.35
+  },
+  {
+   "id": "wall_shelf_small",
+   "cat": "interior",
+   "desc": "a narrow wooden wall shelf on two brackets with a few glass jars, a tin can and a folded rag; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.7
+  },
+  {
+   "id": "wall_tool_board",
+   "cat": "interior",
+   "desc": "a wooden pegboard hung on a wall with a few old hand tools on hooks: a hammer, wrenches, pliers, a hand saw, a coil of wire; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.0
+  },
+  {
+   "id": "wall_switchboard_small",
+   "cat": "interior",
+   "desc": "a small grey wall-mounted electrical distribution panel with an open door, rows of black ceramic fuses and dangling wires; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.5
+  },
+  {
+   "id": "wall_plaster_peel",
+   "cat": "interior",
+   "desc": "a patch of peeling and fallen plaster on a wall exposing red bricks underneath, ragged edges, flat on the wall, seen straight on, transparent background around the patch, no text",
+   "view": "front",
+   "w": 0.8,
+   "tone": 0.85
+  },
+  {
+   "id": "wall_mold",
+   "cat": "interior",
+   "desc": "a dark greenish-black damp mould stain spreading on a wall with streaks running down, flat on the wall, seen straight on, transparent background around the stain, no text",
+   "view": "front",
+   "w": 0.8
+  },
+  {
+   "id": "wall_window_boarded",
+   "cat": "interior",
+   "desc": "a small window opening boarded up from inside with three rough grey planks nailed across, cracked glass behind; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.9
+  },
+  {
+   "id": "top_papers",
+   "cat": "interior",
+   "desc": "a messy stack of yellowed paper documents and folders with a few loose sheets, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.396
+  },
+  {
+   "id": "top_mug",
+   "cat": "interior",
+   "desc": "a chipped white enamel mug with a blue rim, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.288
+  },
+  {
+   "id": "top_ashtray",
+   "cat": "interior",
+   "desc": "a heavy glass ashtray overflowing with cigarette butts and ash, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.216
+  },
+  {
+   "id": "top_phone",
+   "cat": "interior",
+   "desc": "an old black rotary dial telephone with a coiled cord, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.36
+  },
+  {
+   "id": "top_lamp",
+   "cat": "interior",
+   "desc": "a green metal desk lamp with an angled shade, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.648
+  },
+  {
+   "id": "top_radio",
+   "cat": "interior",
+   "desc": "a small brown transistor radio receiver with a pull-out antenna, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.36
+  },
+  {
+   "id": "top_jars",
+   "cat": "interior",
+   "desc": "three glass preserving jars, one with dark pickles, one empty, one with nails, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.396
+  },
+  {
+   "id": "top_tools",
+   "cat": "interior",
+   "desc": "a scatter of hand tools lying on a workbench: a wrench, pliers, a screwdriver and a few bolts, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.288
+  },
+  {
+   "id": "top_kettle",
+   "cat": "interior",
+   "desc": "a dented aluminium kettle, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.36
+  },
+  {
+   "id": "top_bottles",
+   "cat": "interior",
+   "desc": "two empty green glass bottles and one tipped over, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.468
+  },
+  {
+   "id": "top_typewriter",
+   "cat": "interior",
+   "desc": "an old grey mechanical typewriter with a sheet of paper in it, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.396
+  },
+  {
+   "id": "top_cards",
+   "cat": "interior",
+   "desc": "playing cards spread on a table in a messy game with a half-empty bottle and two glasses, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.36
+  },
+  {
+   "id": "top_plates",
+   "cat": "interior",
+   "desc": "a stack of dirty enamel plates with a spoon and a crust of bread, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.252
+  },
+  {
+   "id": "top_books",
+   "cat": "interior",
+   "desc": "a small pile of worn hardcover books and a notebook, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.324
+  },
+  {
+   "id": "top_cans",
+   "cat": "interior",
+   "desc": "a few opened rusty tin cans of food, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.252
+  },
+  {
+   "id": "top_box",
+   "cat": "interior",
+   "desc": "a small cardboard box with flaps open, papers sticking out, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.432
+  },
+  {
+   "id": "top_candle",
+   "cat": "interior",
+   "desc": "a melted candle stub in a glass jar lid with wax drips, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.252
+  },
+  {
+   "id": "top_medkit",
+   "cat": "interior",
+   "desc": "an open small first-aid box with rolled bandages and a few pharmacy bottles, small item standing on a table top, slightly from above; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "h": 0.288
+  },
+  {
+   "id": "floor_dirt",
+   "cat": "decals",
+   "desc": "a soft irregular patch of grey-brown dust and dirt with footprints and grit, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.8,
+   "w": 1.6,
+   "soft": 0.38
+  },
+  {
+   "id": "floor_stain",
+   "cat": "decals",
+   "desc": "an old dark brown water stain with dried ring edges, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.6,
+   "w": 1.0,
+   "soft": 0.75
+  },
+  {
+   "id": "floor_lino_patch",
+   "cat": "decals",
+   "desc": "a torn piece of old brown patterned linoleum with curled ripped edges, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.8,
+   "w": 1.2
+  },
+  {
+   "id": "floor_rug",
+   "cat": "decals",
+   "desc": "a small worn oval rag rug woven from faded coloured strips, dirty, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.6,
+   "w": 1.1
+  },
+  {
+   "id": "floor_rug_runner",
+   "cat": "decals",
+   "desc": "a long narrow worn red and green carpet runner with a frayed end, dusty, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 2.9,
+   "w": 0.8
+  },
+  {
+   "id": "floor_plaster",
+   "cat": "decals",
+   "desc": "chunks of fallen white plaster and grey dust lying in a heap, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.5,
+   "w": 0.9,
+   "tone": 0.68
+  },
+  {
+   "id": "floor_papers",
+   "cat": "decals",
+   "desc": "loose scattered sheets of paper and an open folder, some trampled with boot prints, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.5,
+   "w": 1.0,
+   "tone": 0.72
+  },
+  {
+   "id": "floor_bottles",
+   "cat": "decals",
+   "desc": "a few empty glass bottles lying on their sides and a bottle cap, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.4,
+   "w": 0.7
+  },
+  {
+   "id": "floor_cans",
+   "cat": "decals",
+   "desc": "crushed empty tin cans and a torn food wrapper, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.35,
+   "w": 0.6
+  },
+  {
+   "id": "floor_rags",
+   "cat": "decals",
+   "desc": "a dirty crumpled rag, an old jacket thrown down and a sock, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.45,
+   "w": 0.8
+  },
+  {
+   "id": "floor_blood",
+   "cat": "decals",
+   "desc": "a long dried dark red-brown smear dragged along the floor, with a few drops, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 1.3,
+   "w": 0.45
+  },
+  {
+   "id": "floor_bandages",
+   "cat": "decals",
+   "desc": "used stained bandage rolls and a torn pharmacy box lying in a heap, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.4,
+   "w": 0.7,
+   "tone": 0.85
+  },
+  {
+   "id": "floor_campfire",
+   "cat": "decals",
+   "desc": "the remains of a small campfire made on a floor: a circle of bricks, black ash, charred sticks and a soot-blackened tin can, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.6,
+   "w": 0.8
+  },
+  {
+   "id": "floor_cards",
+   "cat": "decals",
+   "desc": "scattered playing cards and a few coins thrown on the floor, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.35,
+   "w": 0.7,
+   "tone": 0.8
+  },
+  {
+   "id": "floor_wood_chips",
+   "cat": "decals",
+   "desc": "broken bits of wood, splinters and a snapped chair leg, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.4,
+   "w": 0.8
+  },
+  {
+   "id": "floor_shoes",
+   "cat": "decals",
+   "desc": "a pair of worn rubber galoshes and a slipper lying askew, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.35,
+   "w": 0.6
+  },
+  {
+   "id": "floor_leak",
+   "cat": "decals",
+   "desc": "a dark wet puddle of rain water with a few bits of fallen ceiling plaster and moss around it, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
+   "h": 0.7,
+   "w": 1.2,
+   "soft": 0.75
+  },
+  {
+   "id": "barricade_planks",
+   "cat": "interior",
+   "desc": "a rough barricade of several grey planks and a broken door leaf nailed and leaned together; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 1.3
+  },
+  {
+   "id": "bucket_mop",
+   "cat": "interior",
+   "desc": "a dented zinc bucket with a wooden floor mop leaning in it; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.45
+  },
+  {
+   "id": "cardboard_pile",
+   "cat": "interior",
+   "desc": "a pile of flattened and torn cardboard boxes; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.8
+  },
+  {
+   "id": "bedside_table",
+   "cat": "interior",
+   "desc": "a small brown Soviet wooden bedside nightstand with one drawer and a small door, a glass on top; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.45,
+   "foot": [
+    0.45,
+    0.4,
+    0.6
+   ]
+  },
+  {
+   "id": "filing_cabinet",
+   "cat": "interior",
+   "desc": "a grey steel office filing cabinet with four drawers, one drawer pulled out with folders; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "front",
+   "w": 0.5,
+   "foot": [
+    0.5,
+    0.5,
+    1.3
+   ]
+  },
+  {
+   "id": "hanging_lamp",
+   "cat": "interior",
+   "desc": "an industrial hanging lamp: a dented green enamel cone shade with a bare bulb, hanging on a short wire",
+   "view": "front",
+   "w": 0.4
+  },
+  {
+   "id": "weeds_wall",
+   "cat": "grass",
+   "desc": "a low strip of wild weeds, nettles and dry grass growing along the base of a wall, wider than tall",
+   "view": "side",
+   "w": 1.6
+  },
+  {
+   "id": "fence_chainlink_torn",
+   "cat": "outdoor",
+   "desc": "a broken section of rusty chain-link fence torn open and peeled back from one concrete post, a hole to crawl through; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "side",
+   "w": 3.0
+  },
+  {
+   "id": "kpp_booth",
+   "cat": "outdoor",
+   "desc": "a small Soviet checkpoint guard booth: a brick base, a glazed upper part with broken windows, a flat roof with a lamp, a door on the side; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos",
+   "view": "angled",
+   "w": 2.4,
+   "foot": [
+    2.2,
+    1.7,
+    2.8
+   ]
+  },
+  {
+   "id": "crow",
+   "cat": "fx",
+   "desc": "a black crow: frames 1-4 the crow standing on the ground, pecking at the ground and lifting its head, seen from the side; frames 5-8 the same crow taking off and flapping its wings in flight",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 24,
+   "anchor": "bottom",
+   "colors": 16
+  },
+  {
+   "id": "flag_red",
+   "cat": "fx",
+   "desc": "a tattered faded red cloth flag fluttering in the wind on the top of a thin pole, the cloth waves through a smooth loop of motion, the pole stays still",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 48,
+   "anchor": "bottom",
+   "colors": 20
+  },
+  {
+   "id": "paper_flutter",
+   "cat": "fx",
+   "desc": "a single sheet of old yellowed paper tumbling and fluttering in the wind, curling and flipping in a smooth loop",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 16,
+   "anchor": "center",
+   "colors": 12
+  },
+  {
+   "id": "steam_rise",
+   "cat": "fx",
+   "desc": "a column of white steam rising from a leaking pipe: it puffs out, rises and spreads into soft wisps",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "bottom",
+   "alpha": "soft",
+   "colors": 12
+  }
+ ],
+ "fx_framing": "A sprite sheet of ONE short visual-effect animation for a 2D top-down pixel-art survival game: a grid of {cols} columns and {rows} rows of equally sized square cells holding {n} frames in reading order (left to right, then the next row). Fully transparent background. Each frame sits in the middle of its own cell with a wide empty margin; nothing touches or crosses the cell borders; the effect has the same scale and the same anchor point in every frame, and consecutive frames change smoothly so they play as a fluid animation. Bold, simple, readable shapes with clear stepped cel shading (3 to 5 tones) and crisp edges, so it still reads when shrunk to a tiny pixel sprite. No text, no numbers, no labels, no grid lines, no cell borders, no background colour, no ground, no cast shadow.",
+ "fx_style": "Classic 16-bit pixel-art game effect look (like Enter the Gungeon, Hyper Light Drifter, Project Zomboid effects); gritty Soviet post-apocalyptic mood, colours slightly desaturated except light-emitting parts (fire, sparks, flashes, flares) which stay bright and saturated."
+}

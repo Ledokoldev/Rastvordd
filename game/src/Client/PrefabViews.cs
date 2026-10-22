@@ -112,9 +112,33 @@ namespace Rastvordd.Client
                 var r = new Rect2(Iso.Px(p.Min), Iso.Px(p.Max) - Iso.Px(p.Min));
                 if (tex != null) DrawTextureRect(tex, r, true);
                 else DrawRect(r, new Color(0.35f, 0.34f, 0.3f));
+                if (p.Slab > 0) { DrawSlabs(r, p.Slab == 2); continue; }
                 // мягкий край: тёмная кромка, чтобы участок не выглядел наклеенным
                 DrawRect(r, new Color(0, 0, 0, 0.12f), false, 2);
             }
+        }
+    }
+
+    public partial class PatchLayer
+    {
+        /// <summary>Тропа из плит ПАГ: плиты по 2 м с тёмными швами, у каждой свой оттенок, края в земле.</summary>
+        void DrawSlabs(Rect2 r, bool alongY)
+        {
+            var rng = new RandomNumberGenerator { Seed = (ulong)(Mathf.Abs(r.Position.X * 3 + r.Position.Y * 7) + 1) };
+            float step = 2 * Iso.PPM;
+            float len = alongY ? r.Size.Y : r.Size.X, wid = alongY ? r.Size.X : r.Size.Y;
+            int across = wid > 2.6f * Iso.PPM ? 2 : 1;
+            for (float t = 0; t < len; t += step)
+                for (int k = 0; k < across; k++)
+                {
+                    float s0 = wid * k / across, s1 = wid * (k + 1) / across;
+                    var cell = alongY ? new Rect2(r.Position.X + s0, r.Position.Y + t, s1 - s0, Mathf.Min(step, len - t)) : new Rect2(r.Position.X + t, r.Position.Y + s0, Mathf.Min(step, len - t), s1 - s0);
+                    float v = rng.RandfRange(-0.08f, 0.1f);
+                    DrawRect(cell, v > 0 ? new Color(1, 1, 0.95f, v) : new Color(0, 0, 0, -v));
+                    DrawRect(cell, new Color(0.05f, 0.05f, 0.04f, 0.55f), false, 1.5f);
+                    if (rng.Randf() < 0.25f) DrawRect(new Rect2(cell.Position + new Vector2(2, 2), new Vector2(3, 3)), new Color(0.2f, 0.18f, 0.12f, 0.6f));   // монтажная петля
+                }
+            DrawRect(r, new Color(0.12f, 0.1f, 0.06f, 0.4f), false, 3);   // края в грязи
         }
     }
 
@@ -355,20 +379,44 @@ namespace Rastvordd.Client
         public readonly Dictionary<int, WallView2D> WallsById = new();
         readonly Dictionary<int, DecorView2D> _decors = new();
         readonly List<RoofView2D> _roofs = new();
+        AmbientLayer _ambient;
+        readonly List<DecorRow> _liftRows = new();
+        bool _linked;
         int _version = -1;
 
         public PrefabLayer(MapInfo map, Node world, Node root)
         {
             var flat = map.Decors.FindAll(d => d.Flat);
             if (flat.Count > 0) root.AddChild(new FlatDecorLayer(flat) { ZIndex = -9 });
+            var batch = new Dictionary<(int, int), List<MapDecor>>();
             foreach (var d in map.Decors)
             {
                 if (d.Flat) continue;
+                if (d.Batch)
+                {
+                    // обстановка: пачками по рядам 0,1 м и кускам 24 м — меньше узлов, сортировка по глубине сохраняется
+                    var key = ((int)System.MathF.Floor(d.Pos.Y / 0.1f), (int)System.MathF.Floor(d.Pos.X / 24f));
+                    if (!batch.TryGetValue(key, out var l)) batch[key] = l = new List<MapDecor>();
+                    l.Add(d);
+                    continue;
+                }
                 var v = new DecorView2D(d);
                 world.AddChild(v);
                 _decors[d.Id] = v;
             }
+            foreach (var l in batch.Values)
+            {
+                var row = new DecorRow(l);
+                world.AddChild(row);
+                if (l.Exists(d => d.Lift > 0.3f)) _liftRows.Add(row);
+            }
             if (map.Patches.Count > 0) root.AddChild(new PatchLayer(map.Patches) { ZIndex = -10 });
+            if (map.Rooms.Count > 0) root.AddChild(new WallAoLayer(map) { ZIndex = -9 });
+            int seed = 0;
+            foreach (var p in map.Pipes)
+                for (int i = 0; i < p.P.Length - 1; i++)
+                    world.AddChild(new PipeSegView(p.P[i], p.H[i], p.P[i + 1], p.H[i + 1], seed++));
+            if (System.Environment.GetEnvironmentVariable("NOAMB") == null) _ambient = new AmbientLayer(map, world, root);
             if (map.Entrances.Count > 0) root.AddChild(new EntranceLayer(map.Entrances) { ZIndex = -8 });
             if (map.Wires.Count > 0) root.AddChild(new WireLayer(map.Wires));
             foreach (var r in map.Roofs)
@@ -391,8 +439,16 @@ namespace Rastvordd.Client
                 if (_decors.TryGetValue(id, out var d)) d.SetSprite(sprite);
         }
 
-        public void Update(Vector2 selfPx, float dt)
+        public void Update(Vector2 selfPx, float dt, float night = 0)
         {
+            _ambient?.Update(selfPx, dt, night);
+            if (!_linked)
+            {
+                _linked = true;
+                var walls = new List<WallView2D>(WallsById.Values);
+                _liftRows.RemoveAll(r => !r.LinkWalls(walls));
+            }
+            foreach (var r in _liftRows) r.SyncAlpha();
             foreach (var d in _decors.Values) d.UpdateOcclusion(dt);
             foreach (var r in _roofs) r.UpdateFade(selfPx, dt);
         }

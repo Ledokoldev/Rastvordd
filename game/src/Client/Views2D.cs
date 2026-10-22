@@ -584,12 +584,18 @@ namespace Rastvordd.Client
                 WallKind.Rock => (Art.Get("walls/wallface_stone"), Art.Get("tiles/ground_gravel")),
                 _ => (Art.Get("walls/wallface_concrete"), Art.Get("tiles/ground_concrete")),
             };
+            if (_texPath != null && _texPath.Contains("chainlink") && frontTex != null)
+            {
+                DrawChainLink(frontR, topR, frontTex, _alpha);
+                return;
+            }
             if (frontTex != null && topTex != null)
             {
                 // лицевая сторона темнее (в тени), верх светлее — так читается высота
                 float a = _alpha;
                 var tint = _kind == WallKind.Built && _tier == 0 ? new Color(0.85f, 0.92f, 1.05f) : _kind == WallKind.Built && _tier >= 4 ? new Color(0.62f, 0.66f, 0.74f) : Colors.White;
                 DrawTextureRect(frontTex, frontR, true, new Color(0.72f * tint.R, 0.72f * tint.G, 0.72f * tint.B, a));
+                if (Paint is Color pc) DrawPaint(frontR, pc, a);
                 ShadeFace(frontR, a);
                 // верх — материал самой стены, светлее лица (на него падает свет), а не текстура пола:
                 // иначе верх сливается с полом и стена выглядит нарисованной на земле
@@ -646,6 +652,64 @@ namespace Rastvordd.Client
             DrawColoredPolygon(hull, new Color(0.03f, 0.04f, 0.03f, 0.3f * _alpha));
             for (int i = 0; i < 4; i++)
                 DrawRect(new Rect2(x0 - 1, i, x1 - x0 + 2, 1), new Color(0, 0, 0, (0.32f - i * 0.075f) * _alpha));
+        }
+
+        /// <summary>Прозрачность (растворение перед персонажем) и края лица по x, px мира — для того, что висит на стене.</summary>
+        public float Alpha => _alpha;
+        public float FaceX0 => Position.X + _front.Position.X;
+        public float FaceX1 => Position.X + _front.End.X;
+
+        /// <summary>Забор-рабица РТ: сквозная сетка, бетонные столбы через 3 м, колючка поверху.</summary>
+        void DrawChainLink(Rect2 f, Rect2 top, Texture2D mesh, float a)
+        {
+            bool alongX = f.Size.X > 16;
+            if (alongX)
+            {
+                DrawTextureRect(mesh, new Rect2(f.Position.X, f.Position.Y + 3, f.Size.X, f.Size.Y - 3), true, new Color(1, 1, 1, a));
+                DrawRect(new Rect2(f.Position.X, f.Position.Y + 3, f.Size.X, 1), new Color(0.3f, 0.31f, 0.3f, 0.9f * a));   // верхняя струна
+                for (float x = f.Position.X; x <= f.End.X + 0.5f; x += 96)
+                {
+                    float px = Mathf.Min(x, f.End.X - 4);
+                    DrawRect(new Rect2(px, f.Position.Y - 4, 4, f.Size.Y + 4), new Color(0.5f, 0.49f, 0.46f, a));
+                    DrawRect(new Rect2(px + 3, f.Position.Y - 4, 1, f.Size.Y + 4), new Color(0, 0, 0, 0.3f * a));
+                }
+                // колючая проволока: три струны с «колючками»
+                for (int k = 0; k < 3; k++)
+                {
+                    float y = f.Position.Y - 1 - k * 2;
+                    DrawLine(new Vector2(f.Position.X, y), new Vector2(f.End.X, y), new Color(0.22f, 0.22f, 0.21f, 0.85f * a), 1);
+                    for (float x = f.Position.X + 3 + k * 2; x < f.End.X; x += 7) DrawRect(new Rect2(x, y - 1, 1, 3), new Color(0.25f, 0.24f, 0.22f, 0.8f * a));
+                }
+                DrawRect(new Rect2(f.Position.X, -2, f.Size.X, 2), new Color(0, 0, 0, 0.2f * a));
+            }
+            else
+            {
+                // вдоль y: сетка видна ребром — столбы и струны сверху
+                DrawRect(new Rect2(f.Position.X + f.Size.X / 2 - 1, top.Position.Y, 2, top.Size.Y), new Color(0.3f, 0.31f, 0.3f, 0.7f * a));
+                for (float y = top.End.Y; y >= top.Position.Y; y -= 96)
+                    DrawRect(new Rect2(f.Position.X + f.Size.X / 2 - 2, y - f.Size.Y - 4, 4, f.Size.Y + 4), new Color(0.5f, 0.49f, 0.46f, a));
+                DrawTextureRect(mesh, new Rect2(f.Position.X + f.Size.X / 2 - 1, f.Position.Y, 2, f.Size.Y), true, new Color(1, 1, 1, a));
+            }
+        }
+
+        /// <summary>Покраска изнутри (обстановка РТ): советская стена в два тона — побелка сверху, масляная панель снизу.</summary>
+        public Color? Paint;
+
+        void DrawPaint(Rect2 r, Color pc, float a)
+        {
+            // верх — побелка поверх штукатурки/кирпича, грязная
+            DrawRect(r, new Color(0.8f, 0.78f, 0.72f, 0.42f * a));
+            float band = Mathf.Min(r.Size.Y * 0.55f, Iso.H(1.25f));
+            var rng = new RandomNumberGenerator { Seed = (ulong)(Mathf.Abs(Position.X * 7 + Position.Y * 13) + 1) };
+            for (float x = r.Position.X; x < r.End.X; x += 6)
+            {
+                float w = Mathf.Min(6, r.End.X - x);
+                float h = band + rng.RandfRange(-1.2f, 1.2f);
+                if (rng.Randf() < 0.07f) h -= rng.RandfRange(3, 9);   // облупилась краска — видно штукатурку
+                DrawRect(new Rect2(x, r.End.Y - h, w, h), new Color(pc, 0.82f * a));
+                DrawRect(new Rect2(x, r.End.Y - h, w, 1), new Color(pc.Darkened(0.45f), 0.9f * a));   // граница панели — тёмная полоса
+                if (rng.Randf() < 0.12f) DrawRect(new Rect2(x + rng.RandfRange(0, 4), r.End.Y - h + 2, 2, rng.RandfRange(2, h - 2)), new Color(0.15f, 0.12f, 0.08f, 0.18f * a));   // подтёки
+            }
         }
 
         /// <summary>Объём лица стены: внизу темнее (цоколь, затенение у земли), вверху светлее, края — тёмной гранью.</summary>

@@ -60,6 +60,7 @@ namespace Rastvordd.Sim
                 _prefabMode = true;
                 BuildTier2(rt, root, rng);
                 _prefabMode = false;
+                RegisterDress(rt.M, key, rt.O, root);
                 Tier2.Add(rt);
             }
         }

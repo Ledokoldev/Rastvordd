@@ -52,6 +52,11 @@ namespace Rastvordd.Sim
             a.Add("fuel", 7);
             Check(a.Count("fuel") == 7, $"топляк 7 л → в канистре, Count = {a.Count("fuel")}");
             Check(a.Take("fuel", 3) == 3 && a.Count("fuel") == 4, "слито 3 л, осталось 4");
+            var lootBag = new LootBag { Id = NextId(), Pos = a.Pos };
+            lootBag.Items.Add(Liquids.Make("canister_5", "diesel", 4));
+            Bags.Add(lootBag);
+            LootBagInto(a, lootBag);
+            Check(a.Count("diesel") == 4, $"канистра из ящика забрана с дизелем: {a.Count("diesel")} л");
             var flask = Liquids.Make("flask_1", null, 0);
             a.AddSlot(flask);
             Check(!Liquids.Fits(flask, "fuel"), "фляга не берёт топливо");

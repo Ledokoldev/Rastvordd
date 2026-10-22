@@ -57,6 +57,13 @@ namespace Rastvordd.Sim
         {
             var d = new Deployable { Id = NextId(), Kind = s.Kind, Pos = at, OwnerId = a.Id, Hp = 1e9f, Half = Footprints.HalfOf(s.Kind, 0) };
             d.Pos = at + new Vector2(0, -d.Half.Y);
+            if (s.OnNode)
+            {
+                // буровая: к ближайшему рудному узлу, игрок — рядом
+                ResourceNode best = null;
+                foreach (var n in Nodes) if (n.Kind == NodeKind.Metal && (best == null || Vector2.Distance(n.Pos, a.Pos) < Vector2.Distance(best.Pos, a.Pos))) best = n;
+                if (best != null) { d.Pos = best.Pos + new Vector2(best.Radius + d.Half.X + 0.2f, 0); a.Pos = d.Pos + new Vector2(0, 2.2f); }
+            }
             d.Storage = new LootBag { Id = NextId(), Pos = d.Pos };
             switch (s.Kind)
             {

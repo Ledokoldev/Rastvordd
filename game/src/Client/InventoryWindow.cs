@@ -1247,7 +1247,7 @@ namespace Rastvordd.Client
                     var row = UiTheme.HBox(12);
                     _contBody.AddChild(row);
                     _cont.Add(AddCell(row, inv, 0, 96));
-                    var note = UiTheme.Small("Перетащи канистру на бак — перельётся. Перетащи бак на пустую ёмкость в рюкзаке — нальётся. Генератор, буровая и станки в 3 м берут топливо отсюда.", UiTheme.Dim, UiTheme.FontSmall);
+                    var note = UiTheme.Small("Канистра → бак: долить. Бак → пустая ёмкость: налить. Shift+клик — то же самое.", UiTheme.Dim, UiTheme.FontSmall);
                     note.CustomMinimumSize = new Vector2(380, 0);
                     note.SizeFlagsVertical = SizeFlags.ShrinkCenter;
                     row.AddChild(note);

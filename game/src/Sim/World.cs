@@ -1642,6 +1642,12 @@ namespace Rastvordd.Sim
                     else if (!a.AddSlot(s)) continue;     // пояс полон — остаётся в сумке
                     else parts.Add(def.Name);
                 }
+                else if (s.IsContainer)
+                {
+                    // ёмкость (D54) — целиком, с тем, что налито
+                    if (!a.AddSlot(s)) continue;
+                    parts.Add(Liquids.Label(s) is string lb ? $"{Items.Name(s.Id)} ({lb})" : Items.Name(s.Id));
+                }
                 else
                 {
                     // сколько влезет; остальное остаётся в сумке (иначе бот бесконечно перекладывал бы сумки)

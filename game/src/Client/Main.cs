@@ -41,7 +41,6 @@ namespace Rastvordd.Client
         bool UiShown => _inv.Visible;
         bool _uiWasOpen;
         string _lastPlace;
-        readonly Dictionary<int, float> _stepAcc = new();
         CanvasModulate _daylight;
         Ambient _ambient;
         bool _overview, _perf, _timeEdge, _forceCrouch, _forceSprint;
@@ -171,6 +170,9 @@ namespace Rastvordd.Client
                 else if (a == "info") GD.Print($"info: {_server.World.LastInfo.GetValueOrDefault(_myId)} | structs {_server.World.Structures.Count} | aim {_autoAim} | me {_server.World.Find(_myId).Pos}" + (_server.World.Substations.Count > 0 ? $" | тир1: {string.Join(", ", _server.World.Tier1.ConvertAll(r => $"{r.Key} готов={r.Ready} кабели={r.CablesIn} вагон={r.WagonT:0.00} кран={(r.Cabin != null ? r.Cabin.Progress : 0):0} крейт={(r.Crate.Unlocked ? "открыт" : "закрыт")}@{r.Crate.Pos.X:0};{r.Crate.Pos.Y:0}"))} | подстанция: питание {_server.World.Substations[0].Powered}, крейт открыт {_server.World.Substations[0].Crate.Unlocked}, таймер {_server.World.Substations[0].CrateTimer:0}" : ""));   // отладка: последнее сообщение
                 else if (a == "map") { _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); }
                 else if (a == "crouch") _forceCrouch = true;
+                else if (a == "sprint") _forceSprint = true;
+                else if (a == "walk") _forceSprint = false;
+                else if (a == "gait") { if (_gaitLog) GaitReport(); _gaitLog = true; _gaitTimes.Clear(); }   // отладка: темп шагов
                 else if (a == "save") SaveWorld();
                 else if (a == "stand") _forceCrouch = false;
                 else if (a.StartsWith("code")) _scriptCode = int.Parse(a.Substring(4));
@@ -1014,20 +1016,38 @@ else if (arg == "--atcrate")
             return "hit_stone";
         }
 
-        /// <summary>Шаги: звук каждые ~0.8 м пути; по траве мягко, по гравию/песку/снегу/бетону жёстче.</summary>
-        void Footstep(int id, SVec pos, float speed, float dt, bool crouch = false)
+        /// <summary>
+        /// Шаги: ровно один звук на каждое касание стопы в анимации (view.StepContacts) — звук и ноги всегда в такт;
+        /// по траве мягко, по гравию/песку/снегу/бетону жёстче.
+        /// </summary>
+        void Footstep(int id, SVec pos, float speed, int contacts, bool crouch = false)
         {
-            if (speed < 0.5f) return;
-            _stepAcc.TryGetValue(id, out var acc);
-            acc += speed * dt;
-            if (acc >= Footsteps.Stride(speed, crouch))
+            for (int i = 0; i < contacts; i++)
             {
-                acc = 0;
                 bool sprint = speed > Sim.World.WalkSpeed * 1.3f;
                 float vol = (id == _myId ? Tuning.StepsVolumeDb : -4) + (sprint ? 3 : 0) - (crouch ? 10 : 0);
                 Footsteps.Play(SurfaceAt(pos), Iso.Px(pos), vol, crouch ? 7 : sprint ? 24 : 18);
+                if (_gaitLog && id == _myId)
+                {
+                    float t = Time.GetTicksMsec() / 1000f;
+                    _gaitTimes.Add(t);
+                    GD.Print($"gait: шаг t={t:0.000} скорость {speed:0.00} м/с темп {Footsteps.Cadence(speed, crouch):0.00} шаг/с{(crouch ? " присед" : sprint ? " бег" : "")}");
+                }
             }
-            _stepAcc[id] = acc;
+        }
+
+        bool _gaitLog;
+        readonly List<float> _gaitTimes = new();
+        /// <summary>Отладка (--do=N:gait): сколько касаний (= звуков шага) в секунду за последний отрезок.</summary>
+        void GaitReport()
+        {
+            if (_gaitTimes.Count >= 3)
+            {
+                int n = _gaitTimes.Count - 1;
+                GD.Print($"gait: {_gaitTimes.Count} касаний за {_gaitTimes[^1] - _gaitTimes[0]:0.00} с → {n / (_gaitTimes[^1] - _gaitTimes[0]):0.00} шаг/с");
+            }
+            else GD.Print($"gait: касаний {_gaitTimes.Count}");
+            _gaitTimes.Clear();
         }
 
         /// <summary>Для админки: что сейчас реально звучит (имя файла и громкость).</summary>
@@ -1203,7 +1223,7 @@ else if (arg == "--atcrate")
                 view.SetLabel(a.Label);
                 view.Swimming = a.Swimming;
                 view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId, a.Crouching);
-                if (!a.Dead && !a.Swimming) Footstep(a.Id, pos, speed, dt, a.Crouching);
+                if (!a.Dead && !a.Swimming) Footstep(a.Id, pos, speed, view.StepContacts, a.Crouching);
             }
             ReapViews(_actorViews, seen, dt);
             CollectOcclusionFocus();

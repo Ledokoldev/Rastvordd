@@ -28,7 +28,9 @@ namespace Rastvordd.Client
         public float Speed;          // м/с
         public bool Sprint, Crouch, Dead;
         public float AimDown;        // 0..1: прицеливание (ПКМ) — оружие у головы
-        public float Phase;          // фаза шага
+        public float Phase;          // фаза шага: цикл 2π = два шага, касание пяткой при Phase = kπ
+        public float Gait = -1;      // 0..1: насколько ноги «в шаге» (плавно гаснет при остановке); −1 — по Speed
+        public float Cadence;        // шагов/с (0 — по Speed)
         public string Held;          // id предмета в руках
         public float Kick;           // 0..1 отдача
         public float Reload = -1;    // 0..1 или −1
@@ -116,14 +118,19 @@ namespace Rastvordd.Client
         bool _mirror;
 
         /// <summary>Рисует часть: позиция в «правом» пространстве (смотрим вправо), поворот, точка крепления в текстуре.</summary>
-        void Part(Texture2D t, Vector2 pos, float rot, Vector2 pivot, float sy = 1f)
+        void Part(Texture2D t, Vector2 pos, float rot, Vector2 pivot, float sy = 1f, float sx = 1f)
         {
             if (t == null) return;
             var p = pos + RigView.Feet;
             if (_mirror) { p.X = RigView.VW - p.X; rot = -rot; }
-            DrawSetTransform(p.Round(), rot, new Vector2(_mirror ? -1 : 1, sy));
+            DrawSetTransform(p.Round(), rot, new Vector2(_mirror ? -sx : sx, sy));
             DrawTexture(t, -pivot);
         }
+
+        /// <summary>Телосложение: корпус, таз и конечности шире нарисованных на ~20% (рост тот же).</summary>
+        const float Broad = 1.2f;
+        /// <summary>Множитель толщины части: до целого числа пикселей, чтобы пиксели не «плясали».</summary>
+        static float Thick(int px) => Mathf.Max(px + 1, Mathf.Round(px * Broad)) / px;
 
         /// <summary>Двухзвенный IK: из плеча (бедра) к цели, сгиб в сторону bendSign. Возвращает углы звеньев.</summary>
         static (float a1, float a2, Vector2 joint) Ik(Vector2 root, Vector2 target, float l1, float l2, float bendSign)
@@ -152,10 +159,28 @@ namespace Rastvordd.Client
             var fwd = new Vector2(Mathf.Cos(aim), Mathf.Sin(aim));
 
             float crouch = s.Crouch ? 1 : 0;
-            bool moving = s.Speed > 0.4f && !s.Dead;
-            float stride = moving ? (s.Sprint ? 5.5f : s.Crouch ? 2.5f : 4f) : 0;
-            float lift = moving ? (s.Sprint ? 3.5f : 2f) : 0;
-            float bob = moving ? -Mathf.Abs(Mathf.Sin(s.Phase)) * (s.Sprint ? 1.5f : 1f) : Mathf.Sin(s.Breath) * 0.4f;
+            float gait = s.Dead ? 0 : s.Gait >= 0 ? s.Gait : s.Speed > 0.4f ? 1 : 0;
+            bool moving = gait > 0.5f;
+            var fwdG = new Vector2(fwd.X, fwd.Y * 0.5f);   // направление по земле с ракурсным сжатием глубины
+
+            // ---------- походка ----------
+            // Цикл 2π = два шага. У каждой ноги своя доля цикла u: [0, duty) — опора (стопа на земле, едет назад
+            // равномерно, как земля под идущим), [duty, 1) — перенос (стопа поднимается и выносится вперёд).
+            // u = 0 — удар пяткой: ровно в этот момент Views2D считает касание и звучит шаг.
+            float lThigh = _set.Thigh.GetHeight() - 1, lShin = _set.Shin.GetHeight() - 1, legL = lThigh + lShin;
+            float cad = s.Cadence > 0 ? s.Cadence : Footsteps.Cadence(s.Speed, s.Crouch);
+            float duty = s.Sprint ? 0.4f : 0.6f;     // бег — с фазой полёта, ходьба — с двойной опорой
+            // полуразмах шага без проскальзывания: за время опоры стопа проходит 2S = скорость × время опоры.
+            // Скорость в игре выше человеческой, поэтому шаг ограничен длиной ноги — остаток «доезжает» скольжением.
+            float noSlide = cad > 0 ? s.Speed * (Iso.PPM / RigView.BodyScale) * duty / cad : 0;
+            float strideMax = legL * (s.Crouch ? 0.26f : s.Sprint ? 0.44f : 0.36f);
+            float stride = Mathf.Min(noSlide, strideMax) * gait;
+            float lift = (s.Crouch ? 1.5f : s.Sprint ? 4f : 2.2f) * gait;
+            // таз: ниже всего при двойной опоре (обе ноги врозь), выше всего над опорной ногой; ноги в стойке прямые
+            float sEff = stride * fwdG.Length();
+            float bobAmp = legL - Mathf.Sqrt(Mathf.Max(0, legL * legL - sEff * sEff));
+            float bob = gait * ((s.Crouch ? 0 : s.Sprint ? 1.2f : 0.4f) + bobAmp * (0.5f + 0.5f * Mathf.Cos(2 * s.Phase)));
+            float breath = moving ? 0 : Mathf.Sin(s.Breath) * 0.4f;   // дыхание — только корпусом, колени не гнутся
 
             // удар инструментом: корпус откидывается назад на замахе, «падает» вперёд в удар, колени пружинят
             bool toolSwing = s.Swing >= 0 && s.Held != null && IsTool(s.Held) && s.Held != "weapon_spear";
@@ -169,34 +194,42 @@ namespace Rastvordd.Client
                 swingDip = t > 0.38f && t < 0.75f ? Mathf.Sin((t - 0.38f) / 0.37f * Mathf.Pi) * 2.5f : 0;
             }
 
-            float lThigh = _set.Thigh.GetHeight() - 1, lShin = _set.Shin.GetHeight() - 1;
-            float hipY = -(lThigh + lShin) + 0.6f + crouch * 12 + bob + swingDip;   // в стойке ноги почти прямые
+            // стоя ноги прямые (таз на полную длину ноги); присед стоя — полуколено, вприсядку на ходу таз чуть выше
+            float hipY = -legL + 0.05f + crouch * (12 - 3 * gait) + bob + swingDip;
             var hipL = new Vector2(-3, hipY);
-            var hipR = new Vector2(3, hipY);
+            var hipR = new Vector2(4, hipY);
 
-            // стопы: шаг вперёд-назад вдоль взгляда + подъём; в приседе шире
-            Vector2 Foot(float ph, float x)
+            // стопа ноги с долей цикла u: вдоль взгляда (по земле) + подъём при переносе
+            Vector2 Foot(float u, float x)
             {
-                float sw = Mathf.Sin(ph);
-                var f = new Vector2(x, 0) + new Vector2(fwd.X, fwd.Y * 0.5f) * stride * sw;
-                f.Y -= Mathf.Max(0, Mathf.Cos(ph)) * lift;
-                return f;
+                u -= Mathf.Floor(u);
+                float along, up = 0;
+                if (u < duty) along = stride * (1 - 2 * u / duty);
+                else
+                {
+                    float t = (u - duty) / (1 - duty);
+                    along = -stride + 2 * stride * Ease(t);
+                    up = Mathf.Sin(t * Mathf.Pi) * lift;
+                }
+                return new Vector2(x, -up) + fwdG * along;
             }
-            // присед — полуколено: ближняя нога шагнула вперёд (колено вверх), дальняя отставлена назад (колено к земле)
-            var fwdG = new Vector2(fwd.X, fwd.Y * 0.5f);   // направление по земле с ракурсным сжатием глубины
-            var footFar = Foot(s.Phase + Mathf.Pi, -3) + crouch * (-fwdG * 11);
-            var footNear = Foot(s.Phase, 4) + crouch * (fwdG * 7);
+            float cyc = s.Phase / Mathf.Tau;
+            // присед — полуколено: ближняя нога шагнула вперёд (колено вверх), дальняя отставлена назад (колено к земле);
+            // на ходу вприсядку — обычный шаг на согнутых ногах
+            float kneel = crouch * (1 - gait);
+            var footFar = Foot(cyc + 0.5f, hipL.X) + kneel * (-fwdG * 11);
+            var footNear = Foot(cyc, hipR.X) + kneel * (fwdG * 7);
             if (s.Dead) { footFar = new Vector2(-7, -1); footNear = new Vector2(6, 0); }   // мёртв: ноги врозь (спрайт потом кладётся на бок)
             float kneeBend = -1;   // колени сгибаются «вперёд» (к взгляду)
 
             // корпус: наклон вперёд на бегу
-            float lean = (s.Sprint ? 0.18f : moving ? 0.06f : 0) + crouch * 0.12f - s.Flinch * 0.3f;
+            float lean = (s.Sprint ? 0.18f : 0.06f) * gait + crouch * 0.12f - s.Flinch * 0.3f;
             lean += swingLean * Mathf.Clamp(Mathf.Abs(fwd.X) + 0.3f, 0, 1);   // в профиль наклон виден, анфас — меньше
-            var waist = new Vector2(0, hipY - 2);
+            var waist = new Vector2(0, hipY - 2 + breath);
             float torsoH = (back ? _set.TorsoB : _set.TorsoF).GetHeight();
             var torsoTop = waist + new Vector2(Mathf.Sin(lean) * torsoH, -Mathf.Cos(lean) * torsoH);
-            var shNear = torsoTop + new Vector2(4, 3);
-            var shFar = torsoTop + new Vector2(-4, 3);
+            var shNear = torsoTop + new Vector2(5, 3);   // плечи шире (телосложение крепче)
+            var shFar = torsoTop + new Vector2(-5, 3);
             var neck = torsoTop + new Vector2(1, 1);
 
             // ---------- оружие и кисти ----------
@@ -309,27 +342,27 @@ namespace Rastvordd.Client
 
             void DrawArm((float a1, float a2, Vector2 joint) arm, Vector2 sh)
             {
-                Part(_set.UpperArm, sh, arm.a1, new Vector2(1, _set.UpperArm.GetHeight() / 2f));
-                Part(_set.ForeArm, arm.joint, arm.a2, new Vector2(1, _set.ForeArm.GetHeight() / 2f));
+                Part(_set.UpperArm, sh, arm.a1, new Vector2(1, _set.UpperArm.GetHeight() / 2f), Thick(_set.UpperArm.GetHeight()));
+                Part(_set.ForeArm, arm.joint, arm.a2, new Vector2(1, _set.ForeArm.GetHeight() / 2f), Thick(_set.ForeArm.GetHeight()));
             }
 
             void DrawLeg(Vector2 hip, Vector2 foot)
             {
                 var leg = Ik(hip, foot, lThigh, lShin, kneeBend);
-                Part(_set.Thigh, hip, leg.a1 - Mathf.Pi / 2, new Vector2(_set.Thigh.GetWidth() / 2f, 1));
-                Part(_set.Shin, leg.joint, leg.a2 - Mathf.Pi / 2, new Vector2(_set.Shin.GetWidth() / 2f, 1));
+                Part(_set.Thigh, hip, leg.a1 - Mathf.Pi / 2, new Vector2(_set.Thigh.GetWidth() / 2f, 1), 1, Thick(_set.Thigh.GetWidth()));
+                Part(_set.Shin, leg.joint, leg.a2 - Mathf.Pi / 2, new Vector2(_set.Shin.GetWidth() / 2f, 1), 1, Thick(_set.Shin.GetWidth()));
             }
 
             // звено ноги от a до b: текстура тянется/сжимается — так видно ракурсное сокращение (бедро к камере)
             void Seg(Texture2D t, Vector2 a, Vector2 b, float l)
             {
                 var d = b - a;
-                Part(t, a, Mathf.Atan2(d.Y, d.X) - Mathf.Pi / 2, new Vector2(t.GetWidth() / 2f, 1), Mathf.Max(0.25f, d.Length() / l));
+                Part(t, a, Mathf.Atan2(d.Y, d.X) - Mathf.Pi / 2, new Vector2(t.GetWidth() / 2f, 1), Mathf.Max(0.25f, d.Length() / l), Thick(t.GetWidth()));
             }
 
             void DrawBody()
             {
-                if (crouch > 0 && Mathf.Abs(fwd.X) < 0.45f)
+                if (crouch > 0 && gait < 0.5f && Mathf.Abs(fwd.X) < 0.45f)
                 {
                     // присед анфас/спиной: опорное колено на земле, другая нога выставлена вперёд — бедро сокращено ракурсом
                     float f = Mathf.Sign(fwd.Y);   // +1 — к камере, −1 — от камеры
@@ -347,9 +380,9 @@ namespace Rastvordd.Client
                     DrawLeg(hipL, footFar);
                     DrawLeg(hipR, footNear);
                 }
-                Part(_set.Pelvis, waist + new Vector2(0, 1), lean * 0.5f, new Vector2(_set.Pelvis.GetWidth() / 2f, _set.Pelvis.GetHeight() * 0.7f));
+                Part(_set.Pelvis, new Vector2(0.5f, hipY - 1), lean * 0.5f, new Vector2(_set.Pelvis.GetWidth() / 2f, _set.Pelvis.GetHeight() * 0.7f), 1, Thick(_set.Pelvis.GetWidth()));
                 var torso = back ? _set.TorsoB : _set.TorsoF;
-                Part(torso, waist, lean, new Vector2(torso.GetWidth() / 2f, torso.GetHeight()));
+                Part(torso, waist, lean, new Vector2(torso.GetWidth() / 2f, torso.GetHeight()), 1, Thick(torso.GetWidth()));
                 var head = back ? _set.HeadB : _set.HeadF;
                 float headTilt = s.AimDown * 0.15f + lean * 0.5f - s.Flinch * 0.25f;   // в прицеле голова к прикладу; от удара голова дёргается
                 Part(head, neck, headTilt, new Vector2(head.GetWidth() / 2f, head.GetHeight()));

@@ -19,10 +19,13 @@ namespace Rastvordd.Client
         static readonly (string name, string held, System.Action<RigState> set)[] Columns =
         {
             ("стоит", "weapon_ak", s => { }),
-            ("шаг 1", "weapon_ak", s => { s.Speed = 3; s.Phase = 0.8f; }),
-            ("шаг 2", "weapon_ak", s => { s.Speed = 3; s.Phase = 0.8f + Mathf.Pi; }),
-            ("бег", "weapon_ak", s => { s.Speed = 6; s.Sprint = true; s.Phase = 1.2f; }),
+            ("пятка", "weapon_ak", s => { s.Speed = 4.5f; s.Phase = 0; }),
+            ("опора", "weapon_ak", s => { s.Speed = 4.5f; s.Phase = 0.6f; }),
+            ("перенос", "weapon_ak", s => { s.Speed = 4.5f; s.Phase = 1.5f; }),
+            ("бег 1", "weapon_ak", s => { s.Speed = 6.8f; s.Sprint = true; s.Phase = 0.4f; }),
+            ("бег 2", "weapon_ak", s => { s.Speed = 6.8f; s.Sprint = true; s.Phase = 1.6f; }),
             ("присед", "weapon_ak", s => { s.Crouch = true; }),
+            ("присед-шаг", "weapon_ak", s => { s.Crouch = true; s.Speed = 2.25f; s.Phase = 0.8f; }),
             ("прицел", "weapon_ak", s => { s.AimDown = 1; }),
             ("выстрел", "weapon_ak", s => { s.AimDown = 1; s.Kick = 1; }),
             ("перезар.", "weapon_ak", s => { s.Reload = 0.5f; }),

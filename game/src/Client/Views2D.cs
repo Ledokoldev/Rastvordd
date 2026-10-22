@@ -82,6 +82,10 @@ namespace Rastvordd.Client
 
         public void StartSwing() => _swing = SwingTime;
 
+        /// <summary>Сколько раз стопа коснулась земли за последний SetState (по анимации шага) — столько звуков шага.</summary>
+        public int StepContacts { get; private set; }
+        float _gait, _gaitSpeed;
+
         float _flinch;
         /// <summary>Попадание: корпус и голова дёргаются от удара, тело на миг краснеет. fromFront — бьют спереди.</summary>
         public void Flinch(bool fromFront) => _flinch = fromFront ? 1f : -1f;
@@ -197,8 +201,21 @@ namespace Rastvordd.Client
                 MoveChild(_held, back ? 0 : 1);   // смотрит вверх — предмет за спиной, вниз — перед телом
             }
             _body.Back = back;
-            _body.Moving = speed > 0.3f;
-            _body.Phase += dt * (4f + speed * 1.6f);
+            // шаг: фаза идёт по человеческому темпу (Footsteps.Cadence), один цикл 2π = два шага;
+            // касание пяткой — при переходе фазы через kπ (ближняя нога — чётные, дальняя — нечётные).
+            // Остановился — фаза замирает (лишних шагов нет), ноги мягко сходятся (Gait → 0).
+            bool moving = speed > 0.3f;
+            _body.Moving = moving;
+            _gaitSpeed = Mathf.Lerp(_gaitSpeed, speed, Mathf.Min(1f, dt * 10f));
+            StepContacts = 0;
+            if (moving)
+            {
+                float before = _body.Phase;
+                _body.Phase += dt * Mathf.Pi * Footsteps.Cadence(_gaitSpeed, crouch);
+                StepContacts = Mathf.FloorToInt(_body.Phase / Mathf.Pi) - Mathf.FloorToInt(before / Mathf.Pi);
+                if (_body.Phase > Mathf.Tau * 64) _body.Phase -= Mathf.Tau * 64;   // без потери чётности касаний
+            }
+            _gait = Mathf.MoveToward(_gait, moving ? 1f : 0f, dt * (moving ? 6f : 5f));
             _body.QueueRedraw();
 
             // замах: предмет уходит назад и резко бьёт вперёд
@@ -259,6 +276,8 @@ namespace Rastvordd.Client
                 rs.Dead = dead;
                 rs.AimDown = Mathf.MoveToward(rs.AimDown, AimDown, dt * 6);
                 rs.Phase = _body.Phase;
+                rs.Gait = _gait;
+                rs.Cadence = Footsteps.Cadence(_gaitSpeed, crouch);
                 rs.Breath += dt * 1.6f;
                 _flinch = Mathf.MoveToward(_flinch, 0, dt * 6);
                 rs.Flinch = _flinch * Mathf.Abs(_flinch);   // резкий рывок и мягкий возврат

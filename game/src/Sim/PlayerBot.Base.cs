@@ -406,9 +406,16 @@ namespace Rastvordd.Sim
                 foreach (var (item, at) in st.Deploys)
                 {
                     var spot = AtPlan(at);
-                    bool placed = false;
-                    foreach (var d in _w.DeploysInRadius(spot, 0.8f, _depBuf))
-                        if (d.OwnerId == _me.Id && Vector2.Distance(d.Pos, spot) < 0.8f) placed = true;
+                    // сетка D52: предмет встаёт в ближайший свободный слот, а не точно в точку чертежа — считаем штуки:
+                    // это k-й ящик чертежа (по стадиям) — стоит, если своих ящиков у базы не меньше k
+                    int ord = 0;
+                    for (int sj = 0; sj <= si; sj++)
+                        foreach (var (it2, at2) in _plan.Stages[sj].Deploys)
+                        {
+                            if (sj == si && at2 == at && it2 == item) break;
+                            if (it2 == item) ord++;
+                        }
+                    bool placed = OwnDeployCount(Items.Get(item).Deploy) > ord;
                     if (placed || (item == "deploy_sleepbag" && _w.ReadyBag(_me) != null)) continue;
                     if (!Has(item))
                     {
@@ -418,9 +425,8 @@ namespace Rastvordd.Sim
                         return true;
                     }
                     Doing = item == "deploy_box" ? "ставит ящик" : "стелет спальник";
-                    if (!Reach(spot, ref cmd, 1.1f)) return true;
-                    if (Hold(item, ref cmd)) Click(ref cmd);
-                    return true;
+                    if (PlaceDeploy(item, spot, ref cmd)) return true;
+                    continue;
                 }
             }
             // 3а. открытые свои двери (забыл, открыл кто-то чужой) — закрыть; 3б. замок с ключом → кодовый
@@ -668,8 +674,7 @@ namespace Rastvordd.Sim
             {
                 // после загрузки или смерти: угол базы — от шкафа по чертежу
                 _plan ??= PickPlan(out _);
-                var corner = claim.Pos - _plan.Claim;
-                _origin = Building.CellOf(corner + new Vector2(0.2f));
+                _origin = OriginFromClaim(claim);
                 _site = Building.CellCenter(_origin.i, _origin.j);
                 _stage = 0;
                 while (_stage + 1 < _plan.Stages.Count && _plan.Stages[_stage + 1].Pieces.TrueForAll(p => Existing(p) != null)) _stage++;
@@ -684,6 +689,7 @@ namespace Rastvordd.Sim
                 if (!Has("deploy_claim")) { if (!Craft("deploy_claim", ref cmd)) Gather(NodeKind.Tree, ref cmd); return; }
                 Doing = "ставит шкаф";
                 var spot = AtPlan(_plan.Claim);
+                if (_w.FloorAt(spot) != null && PlaceDeploy("deploy_claim", spot, ref cmd)) return;   // база уже стоит (шкаф сломали) — в слот
                 if (!Reach(spot, ref cmd, 1.1f)) return;
                 if (Hold("deploy_claim", ref cmd)) Click(ref cmd);
                 return;
@@ -724,10 +730,7 @@ namespace Rastvordd.Sim
                     return;
                 }
                 Doing = "ставит печь";
-                var spot = AtPlan(_plan.Furnace);
-                if (!Reach(spot, ref cmd, 1.3f)) return;
-                if (Hold("deploy_furnace", ref cmd)) Click(ref cmd);
-                return;
+                if (PlaceDeploy("deploy_furnace", AtPlan(_plan.Furnace), ref cmd)) return;
             }
             if (furnace != null)
             {

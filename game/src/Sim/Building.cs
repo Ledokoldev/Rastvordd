@@ -485,13 +485,13 @@ namespace Rastvordd.Sim
             }
         }
 
-        void RemoveStructure(Structure s)
+        void RemoveStructure(Structure s, bool quiet = false)
         {
             if (!Structures.Remove(s)) return;
             foreach (var w in s.Boxes) { Walls.Remove(w); _wallGrid.Remove(w); }
             s.Boxes.Clear();
             StructVersion++;
-            Events.Add(new SimEvent { Kind = SimEventKind.Destroyed, OtherId = s.Id, Pos = s.Center, Text = Building.KindName(s.Kind), Value = s.Tier });
+            if (!quiet) Events.Add(new SimEvent { Kind = SimEventKind.Destroyed, OtherId = s.Id, Pos = s.Center, Text = Building.KindName(s.Kind), Value = s.Tier });
             switch (s.Kind)
             {
                 case StructKind.Foundation:
@@ -579,6 +579,88 @@ namespace Rastvordd.Sim
             if (!CanPay(a, up)) { Info(a, $"До уровня «{Building.TierNames[s.Tier + 1]}» не хватает: {CostText(up)}"); return; }
             Pay(a, up);
             s.Tier++;
+            s.Hp = s.MaxHp;
+            StructVersion++;
+            Events.Add(new SimEvent { Kind = SimEventKind.Built, ActorId = a.Id, OtherId = s.Id, Pos = s.Center, Text = Building.TierNames[s.Tier], Value = s.Tier });
+        }
+
+        // ---------- колесо киянки (ПКМ): улучшить сразу до уровня, снести ----------
+
+        public const int HammerDemolish = 9;      // пункт колеса «Снести» (1–4 — улучшить до уровня)
+        public const float HammerWheelRange = 5f; // от персонажа до центра постройки
+
+        public Structure StructById(int id)
+        {
+            if (id <= 0) return null;
+            foreach (var s in Structures) if (s.Id == id) return s;
+            return null;
+        }
+
+        /// <summary>Право стройки на постройку: шкаф, к которому она привязана, и ты в нём вписан.</summary>
+        public bool HasBuildPrivilege(Actor a, Structure s)
+        {
+            Deployable claim = null;
+            foreach (var d in Deployables) if (d.Kind == DeployKind.Claim && d.Id == s.ClaimId) { claim = d; break; }
+            claim ??= ClaimAt(s.IsFloor ? Building.CellOf(s.Center) : EdgeOwnerCell(s.A, s.B));
+            return claim != null && claim.Auth.Contains(a.Id);
+        }
+
+        /// <summary>Возврат за снос: половина цены текущего уровня (минимум 1 каждого ресурса).</summary>
+        public static (string id, int n)[] DemolishRefund(Structure s) =>
+            Array.ConvertAll(Building.Cost(s.Kind, s.Tier), c => (c.id, Math.Max(1, c.n / 2)));
+
+        /// <summary>
+        /// Почему пункт колеса киянки сейчас нельзя выбрать ("" — можно). Улучшить — только вверх и в зоне своего шкафа;
+        /// снести — только своё, в зоне своего шкафа и если на элементе ничего не держится
+        /// (стена на краю пола без соседнего пола, дверь в проёме, установленное на полу).
+        /// </summary>
+        public string HammerWhy(Actor a, Structure s, int op)
+        {
+            if (s == null || !Structures.Contains(s)) return "постройки нет";
+            if (Vector2.Distance(a.Pos, s.Center) > HammerWheelRange) return "далеко";
+            if (!HasBuildPrivilege(a, s)) return "нет права стройки — впишись в шкаф";
+            if (op >= 1 && op <= Building.MaxTier)
+            {
+                if (op <= s.Tier) return op == s.Tier ? "уже этот уровень" : "ниже текущего уровня";
+                if (!CanPay(a, Building.Cost(s.Kind, op))) return "не хватает ресурсов";
+                return "";
+            }
+            if (op != HammerDemolish) return "нет такого действия";
+            if (s.OwnerId != a.Id) return "сносить можно только своё";
+            if (s.Kind == StructKind.Doorway && _doors.ContainsKey(s.EdgeKey)) return "в проёме дверь — сначала снеси её";
+            if (s.IsFloor)
+            {
+                foreach (var d in Deployables) if (d.FloorId == s.Id) return "на полу стоит установленное — убери его";
+                var poly = s.Poly;
+                for (int i = 0; i < poly.Length; i++)
+                {
+                    long key = Building.EdgeKey(poly[i], poly[(i + 1) % poly.Length]);
+                    bool alone = !_floorEdges.TryGetValue(key, out var fe) || fe.n <= 1;
+                    if (alone && (_edges.ContainsKey(key) || _doors.ContainsKey(key))) return "на краю стоит стена — сначала снеси её";
+                }
+            }
+            return "";
+        }
+
+        /// <summary>Пункт колеса киянки выбран: улучшить постройку сразу до уровня или снести с возвратом половины цены.</summary>
+        void HammerWheel(Actor a, int structId, int op)
+        {
+            if (a.Held?.Id != "tool_hammer") return;
+            var s = StructById(structId);
+            string why = HammerWhy(a, s, op);
+            if (why != "") { Info(a, s == null ? why : $"{Building.KindName(s.Kind)}: {why}"); return; }
+            if (op == HammerDemolish)
+            {
+                var refund = DemolishRefund(s);
+                foreach (var (id, n) in refund) a.Add(id, n);
+                if (s.Kind == StructKind.Door && s.Locked) a.Add(s.KeyLock ? "lock_key" : "lock_code", 1);   // замок — обратно в руки
+                Events.Add(new SimEvent { Kind = SimEventKind.Demolished, ActorId = a.Id, OtherId = s.Id, Pos = s.Center, Value = s.Tier, Text = Building.KindName(s.Kind) });
+                RemoveStructure(s, quiet: true);
+                Info(a, $"Снесено: {Building.KindName(s.Kind)} · возврат {CostText(refund)}");
+                return;
+            }
+            Pay(a, Building.Cost(s.Kind, op));
+            s.Tier = op;
             s.Hp = s.MaxHp;
             StructVersion++;
             Events.Add(new SimEvent { Kind = SimEventKind.Built, ActorId = a.Id, OtherId = s.Id, Pos = s.Center, Text = Building.TierNames[s.Tier], Value = s.Tier });

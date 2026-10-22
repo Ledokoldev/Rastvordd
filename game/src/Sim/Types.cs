@@ -30,6 +30,9 @@ namespace Rastvordd.Sim
         public int SetPiece;      // выбор элемента плана из меню (−1 — нет)
         public string Research;   // изучить узел дерева (id предмета) у верстака
         public int Follow;        // наблюдатель: за кем следить (id; 0 — свободная камера)
+        public int HammerFocus;   // колесо киянки открыто над этой постройкой (id; 0 — нет): сервер считает пункты колеса для неё
+        public int HammerOp;      // выбор в колесе киянки: 1–4 — улучшить до уровня, World.HammerDemolish — снести (0 — нет)
+        public int HammerTarget;  // над какой постройкой выбран пункт колеса киянки
 
         public static InputCmd Empty => new InputCmd { SelectSlot = -1, Craft = -1, Code = -1, SetPiece = -1 };
     }
@@ -608,6 +611,7 @@ namespace Rastvordd.Sim
         public object OpenTarget;
         public float PendingSwingAt = -1;   // удар инструментом засчитывается с задержкой — когда он опускается на цель
         public WeaponState PendingSwing;
+        public int HammerFocus;         // колесо киянки открыто над этой постройкой (не сохраняется)
         public StructKind BuildPiece = StructKind.Foundation;   // что ставит план постройки (R — сменить)
         public int DeployRot;           // поворот установленного в руках (R), 0..3
         public Vector2 LastAim;
@@ -849,7 +853,7 @@ namespace Rastvordd.Sim
         public bool Empty => Items.Count == 0;
     }
 
-    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted, Built, Destroyed, Door, HitStruct, Explosion, Locked, Revealed, Machine, Wear }   // Wear — звук одежды/брони (Text — id звука), личное
+    public enum SimEventKind { Reload, Shot, Swing, HitActor, HitWall, HitNode, Gather, Death, Loot, Respawn, Info, Placed, Crafted, Built, Destroyed, Door, HitStruct, Explosion, Locked, Revealed, Machine, Wear, Demolished }   // Wear — звук одежды/брони (Text — id звука), личное
 
     public struct SimEvent
     {

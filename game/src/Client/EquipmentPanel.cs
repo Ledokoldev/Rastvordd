@@ -31,7 +31,7 @@ namespace Rastvordd.Client
             var g = UiTheme.VBox(6);
             AddChild(g);
             g.AddChild(UiTheme.Caption("Снаряжение"));
-            _preview = new RigPreview { CustomMinimumSize = new Vector2(0, 136) };
+            _preview = new RigPreview { CustomMinimumSize = new Vector2(0, 124) };
             g.AddChild(_preview);
 
             SlotCell Make(string inv, int i, float side)
@@ -142,7 +142,7 @@ namespace Rastvordd.Client
             MouseFilter = MouseFilterEnum.Ignore;
             ClipContents = true;
             AddChild(_holder);
-            _rig = new RigView(RigSet.Load("naked")) { Scale = new Vector2(3f, 3f) };
+            _rig = new RigView(RigSet.Load("naked")) { Scale = new Vector2(2.5f, 2.5f) };   // × BodyScale 0,8 = ровно 2 пикселя экрана на пиксель арта
             if (RigSet.Load("naked") != null) _holder.AddChild(_rig);
         }
 
@@ -158,7 +158,7 @@ namespace Rastvordd.Client
         {
             if (!IsVisibleInTree()) return;
             _t += (float)delta;
-            _holder.Position = new Vector2(Size.X / 2, Size.Y - 4);
+            _holder.Position = new Vector2(Mathf.Round(Size.X / 2), Mathf.Round(Size.Y - 4));
             var s = _rig.S;
             s.Aim = 0.55f;               // анфас, чуть вправо
             s.Speed = 0; s.Gait = 0;

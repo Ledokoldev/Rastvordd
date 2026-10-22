@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 using Rastvordd.Sim;
 
 namespace Rastvordd.Client
@@ -21,13 +21,13 @@ namespace Rastvordd.Client
         {
             _s = s; _day = dayTime;
             int mins = (int)(dayTime * 24 * 60);
-            string sig = s.HasWatch + "|" + mins + "|" + Mathf.RoundToInt(s.AirTemp) + "|" + Mathf.RoundToInt(s.RadHere) + "|" + s.Irradiated + s.Nausea + s.Freezing + s.Wet + (s.Cold >= 100) + "|" + Mathf.RoundToInt(s.RadDose / 10);
+            string sig = s.HasWatch + "|" + mins + "|" + Mathf.RoundToInt(s.AirTemp) + "|" + Mathf.RoundToInt(s.RadHere) + "|" + s.Irradiated + s.Nausea + s.Freezing + s.Wet + s.Poisoned + (s.Cold >= 100) + "|" + Mathf.RoundToInt(s.RadDose / 10);
             if (sig == _sig) return;
             _sig = sig;
             QueueRedraw();
         }
 
-        public bool HasContent => _s != null && (_s.HasWatch || _s.Irradiated || _s.Nausea || _s.Freezing || _s.Wet);
+        public bool HasContent => _s != null && (_s.HasWatch || _s.Irradiated || _s.Nausea || _s.Freezing || _s.Wet || _s.Poisoned);
 
         public override void _Draw()
         {
@@ -47,6 +47,7 @@ namespace Rastvordd.Client
             }
             if (s.Irradiated) Chip(0, s.HasWatch && s.RadDose >= 1 ? $"облучение · {s.RadDose:0}" : "облучение", s.RadDose >= Clothing.RadHurt1 ? UiTheme.Bad : UiTheme.Accent);
             if (s.Nausea) Chip(1, "тошнота", s.RadDose >= Clothing.RadHurt1 ? UiTheme.Bad : UiTheme.Accent);
+            if (s.Poisoned) Chip(1, "отравление", UiTheme.Bad);   // сырая вода (D54)
             if (s.Freezing) Chip(2, s.Cold >= 100 ? "переохлаждение" : "холодно", s.Cold >= 100 ? UiTheme.Bad : UiTheme.Info);
             if (s.Wet) Chip(3, "мокрый", UiTheme.Info);
 

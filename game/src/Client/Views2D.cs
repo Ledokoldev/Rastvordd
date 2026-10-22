@@ -593,7 +593,7 @@ namespace Rastvordd.Client
             {
                 // лицевая сторона темнее (в тени), верх светлее — так читается высота
                 float a = _alpha;
-                var tint = _kind == WallKind.Built && _tier == 0 ? new Color(0.85f, 0.92f, 1.05f) : _kind == WallKind.Built && _tier >= 4 ? new Color(0.62f, 0.66f, 0.74f) : Colors.White;
+                var tint = _kind == WallKind.Built && _tier == 0 ? new Color(0.85f, 0.92f, 1.05f) : _kind == WallKind.Built && _tier >= 5 ? new Color(0.44f, 0.46f, 0.52f) : _tier >= 4 ? new Color(0.62f, 0.66f, 0.74f) : Colors.White;
                 DrawTextureRect(frontTex, frontR, true, new Color(0.72f * tint.R, 0.72f * tint.G, 0.72f * tint.B, a));
                 if (Paint is Color pc) DrawPaint(frontR, pc, a);
                 ShadeFace(frontR, a);
@@ -953,7 +953,7 @@ namespace Rastvordd.Client
         {
             _kind = kind;
             _biome = biome;
-            Material = kind == PickupKind.WaterBarrel ? VisionFx.ObjectMat : VisionFx.GrassMat;
+            Material = kind is PickupKind.WaterBarrel or PickupKind.OilBarrel or PickupKind.CanisterPile ? VisionFx.ObjectMat : VisionFx.GrassMat;
             TextureFilter = TextureFilterEnum.Nearest;
         }
 
@@ -985,12 +985,14 @@ namespace Rastvordd.Client
                 PickupKind.Berries => _biome == Biome.Tundra
                     ? (Available ? Art.Get("plants/berry_tundra") : Art.Get("grass/grass_tundra_2")) ?? Art.Get("plants/berry_bush")
                     : Art.Get(Available ? "plants/berry_bush" : "plants/bush_1"),
+                PickupKind.OilBarrel => Art.Get("props/barrel_mazut"),        // бочка с мазутом (D54): после слива — та же бочка, тусклее
+                PickupKind.CanisterPile => Art.Get("props/canister_pile_rusty"),
                 _ => Art.Get("props/barrel_water"),
             };
             if (tex != null)
             {
                 Shade.Sprite(this, tex);
-                DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 2));
+                DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 2), _kind is PickupKind.OilBarrel or PickupKind.CanisterPile && !Available ? new Color(0.7f, 0.7f, 0.7f) : Colors.White);
                 return;
             }
             switch (_kind)
@@ -1053,22 +1055,55 @@ namespace Rastvordd.Client
                 _crackle = Sfx.Loop("furnace_loop", -8, 14);
                 AddChild(_crackle);
             }
+            else if (StationDefs.Get(kind) is StationDef st && !st.Registered)
+            {
+                // станции D54: свет (лампы — белый, огонь — тёплый), звук работы
+                _st = st;
+                // след на полу у станций не рисуем: яркая лампа рядом «засвечивает» полупрозрачный прямоугольник (светлые квадраты)
+                if (st.Light > 0)
+                {
+                    bool lamp = kind is DeployKind.Lamp or DeployKind.Floodlight;
+                    _light = Art.FireLight(lamp ? st.Light * 0.8f : st.Light, 0f);
+                    if (lamp) _light.Color = new Color(1f, 0.95f, 0.82f);
+                    _light.Position = new Vector2(0, lamp ? -Iso.H(1.6f) : -10);
+                    AddChild(_light);
+                }
+                string loop = kind switch
+                {
+                    DeployKind.Generator => Sfx.Pick("generator_loop", Sfx.Pick("lathe_work", "furnace_loop")),
+                    DeployKind.Campfire => "furnace_loop",
+                    DeployKind.Still => Sfx.Pick("still_loop", "furnace_loop"),
+                    DeployKind.Drill => Sfx.Pick("drill_rig_loop", Sfx.Pick("generator_loop", "lathe_work")),
+                    DeployKind.Rectifier => Sfx.Pick("rectifier_loop", Sfx.Pick("generator_loop", "furnace_loop")),
+                    DeployKind.EFurnace => Sfx.Pick("efurnace_loop", "furnace_loop"),
+                    DeployKind.Conveyor => Sfx.Pick("conveyor_loop", "lathe_work"),
+                    _ => null,
+                };
+                if (loop != null) { _crackle = Sfx.Loop(loop, -9, 16); AddChild(_crackle); }
+            }
         }
+        readonly StationDef _st;
 
         public void Tick(float dt)
         {
             if (_crackle != null && _crackle.Stream != null && Burning != _crackle.Playing) { if (Burning) _crackle.Play(); else _crackle.Stop(); }
-            if (_light != null) _light.Energy = Burning ? 0.9f + 0.25f * Mathf.Sin(_flicker * 11) * Mathf.Sin(_flicker * 5.7f) : 0f;
+            bool steady = _kind is DeployKind.Lamp or DeployKind.Floodlight or DeployKind.EFurnace;   // электрический свет не мерцает
+            if (_light != null) _light.Energy = Burning ? (steady ? 0.75f : 0.9f + 0.25f * Mathf.Sin(_flicker * 11) * Mathf.Sin(_flicker * 5.7f)) : 0f;
             if (!Burning) return;
             _flicker += dt;
             // дымок из трубы печи (верх спрайта)
             if (_kind == DeployKind.Furnace && (_smokeAcc += dt) > 0.8f) { _smokeAcc = 0; Vfx.Puff("smoke_wisp", Position + new Vector2(0, 1), 42, 12, 0.6f, 5, 3); }
+            // станции D54: самогонный аппарат, буровая и костёр дымят — базу видно издалека (столб выше печного)
+            if (_st != null && _st.Smoke && (_smokeAcc += dt) > (_kind == DeployKind.Campfire ? 0.9f : 0.5f))
+            { _smokeAcc = 0; Vfx.Puff("smoke_wisp", Position + new Vector2(0, 1), _kind == DeployKind.Campfire ? 16 : 52, _kind == DeployKind.Campfire ? 14 : 26, 0.7f, 5, 3); }
             QueueRedraw();
         }
 
         public override void _Draw()
         {
-            var tex = Art.Get(_kind switch { DeployKind.Workbench => _level >= 2 ? $"props/workbench{_level}" : "props/workbench", DeployKind.Claim => "props/claim_post", DeployKind.Box => "props/crate_wood", DeployKind.SleepBag => "props/sleeping_bag", DeployKind.Recycler => "props/recycler", DeployKind.Lathe => Art.Get("props/lathe") != null ? "props/lathe" : "props/recycler", _ => "props/furnace" });
+            if (_st != null && _st.Sprite == null) { DrawCampfire(); return; }
+            var tex = Art.Get(_kind switch { DeployKind.Workbench => _level >= 2 ? $"props/workbench{_level}" : "props/workbench", DeployKind.Claim => "props/claim_post", DeployKind.Box => "props/crate_wood", DeployKind.SleepBag => "props/sleeping_bag", DeployKind.Recycler => "props/recycler", DeployKind.Lathe => Art.Get("props/lathe") != null ? "props/lathe" : "props/recycler",
+                _ when _st != null => "props/" + (_rot % 2 == 1 && Art.Get($"props/{_st.Sprite}_side") != null ? _st.Sprite + "_side" : _st.Sprite), _ => "props/furnace" });
             if (tex == null && _kind == DeployKind.Claim)
             {
                 // запасной вид столба: столб с жестяным ящиком и красной тряпкой
@@ -1078,7 +1113,7 @@ namespace Rastvordd.Client
                 return;
             }
             // след на полу: прямоугольник хитбокса (сетка клеток D52) — база выглядит аккуратно, видно, что сколько занимает
-            if (_kind != DeployKind.Recycler) DrawRect(new Rect2(-_foot.X / 2, -_foot.Y, _foot.X, _foot.Y), new Color(0, 0, 0, 0.14f));
+            if (_kind != DeployKind.Recycler && _st == null) DrawRect(new Rect2(-_foot.X / 2, -_foot.Y, _foot.X, _foot.Y), new Color(0, 0, 0, 0.14f));
             if (tex != null)
             {
                 // спрайт вписан в ширину следа (станок без своей картинки — переработчик, он крупнее клетки), поворот 2/3 — зеркало
@@ -1095,6 +1130,21 @@ namespace Rastvordd.Client
                     DrawCircle(new Vector2(-1, -11), 7, new Color(1f, 0.6f, 0.25f, 0.35f * k));
                     // огонь в топке: лист fire_torch (12 px), 12 к/с
                     Vfx.DrawFrame(this, "fire_torch", new Vector2(-1, -5), _flicker, 12);
+                }
+                if (_kind == DeployKind.Conveyor)
+                {
+                    // стрелка «куда несёт» (поворот R)
+                    var d = World.ConveyorDir(_rot);
+                    var dir = new Vector2(d.X, d.Y);
+                    var c = new Vector2(0, -_foot.Y / 2);
+                    DrawLine(c - dir * 9, c + dir * 9, new Color(1f, 0.85f, 0.3f, 0.9f), 2f);
+                    DrawLine(c + dir * 9, c + dir * 4 + dir.Orthogonal() * 4, new Color(1f, 0.85f, 0.3f, 0.9f), 2f);
+                    DrawLine(c + dir * 9, c + dir * 4 - dir.Orthogonal() * 4, new Color(1f, 0.85f, 0.3f, 0.9f), 2f);
+                }
+                if (_st != null && Burning && _kind is DeployKind.Still or DeployKind.EFurnace)
+                {
+                    float k = 0.75f + 0.25f * Mathf.Sin(_flicker * 13) * Mathf.Sin(_flicker * 7.3f);
+                    DrawCircle(new Vector2(0, -8), 12, new Color(1f, 0.55f, 0.2f, (_kind == DeployKind.EFurnace ? 0.25f : 0.14f) * k));
                 }
                 return;
             }
@@ -1119,6 +1169,30 @@ namespace Rastvordd.Client
                 DrawRect(new Rect2(-5, -14, 10, 8), new Color(1f, 0.55f, 0.15f, k));
                 DrawCircle(new Vector2(0, -10), 18, new Color(1f, 0.55f, 0.2f, 0.12f * k));
             }
+        }
+    }
+
+    public partial class DeployView2D
+    {
+        /// <summary>Костёр (D54): камни по кругу, поленья, огонь из листа fire_torch, угли.</summary>
+        void DrawCampfire()
+        {
+            DrawCircle(new Vector2(0, -6), 13, new Color(0, 0, 0, 0.18f));
+            var stone = new Color(0.46f, 0.45f, 0.43f);
+            for (int i = 0; i < 9; i++)
+            {
+                float a = i / 9f * Mathf.Tau;
+                var p = new Vector2(Mathf.Cos(a) * 11, -6 + Mathf.Sin(a) * 11);
+                DrawCircle(p, 3f, stone.Darkened(0.12f * (i % 3)));
+            }
+            var wood = new Color(0.38f, 0.25f, 0.14f);
+            DrawLine(new Vector2(-8, -3), new Vector2(7, -10), wood, 3f);
+            DrawLine(new Vector2(-7, -10), new Vector2(8, -3), wood.Darkened(0.2f), 3f);
+            if (!Burning) { DrawCircle(new Vector2(0, -6), 4, new Color(0.2f, 0.18f, 0.16f)); return; }
+            float k = 0.75f + 0.25f * Mathf.Sin(_flicker * 13) * Mathf.Sin(_flicker * 7.3f);
+            DrawCircle(new Vector2(0, -8), 18, new Color(1f, 0.55f, 0.2f, 0.12f * k));
+            DrawCircle(new Vector2(0, -7), 6, new Color(1f, 0.45f, 0.15f, 0.5f * k));
+            Vfx.DrawFrame(this, "fire_torch", new Vector2(0, -4), _flicker, 12);
         }
     }
 

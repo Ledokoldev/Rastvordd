@@ -149,6 +149,15 @@ namespace Rastvordd.Client
             ["expl_fire"] = "icons/icon_molotov",
             ["lock_code"] = "icons/icon_code_lock",
             ["lock_key"] = "icons/icon_key_lock",
+            // D54: станции, инструменты
+            ["deploy_still"] = "icons/icon_still", ["deploy_sewing"] = "icons/icon_sewing", ["deploy_chem"] = "icons/icon_chem",
+            ["deploy_generator"] = "icons/icon_generator", ["deploy_lamp"] = "icons/icon_lamp", ["deploy_floodlight"] = "icons/icon_lamp",
+            ["deploy_efurnace"] = "icons/icon_efurnace", ["deploy_guntable"] = "icons/icon_guntable", ["deploy_medtable"] = "icons/icon_medtable",
+            ["deploy_conveyor"] = "icons/icon_conveyor", ["deploy_rectifier"] = "icons/icon_rectifier", ["deploy_campfire"] = "icons/icon_campfire",
+            ["deploy_barrel"] = "icons/icon_barrel_200", ["deploy_box_large"] = "icons/icon_box_large", ["deploy_drill"] = "icons/icon_drill_rig",
+            ["deploy_lathe"] = "icons/icon_lathe",
+            ["tool_metal_hatchet"] = "weapons/weapon_metal_hatchet", ["tool_metal_pickaxe"] = "weapons/weapon_metal_pickaxe",
+            ["tool_chainsaw"] = "icons/icon_chainsaw", ["tool_jackhammer"] = "icons/icon_jackhammer",
         };
 
         // D46: пока нет арта нового ствола/детали/обвеса — похожая старая картинка (новый файл icons/icon_<id> или weapons/<id> перекроет)
@@ -161,6 +170,7 @@ namespace Rastvordd.Client
             ["weapon_mosin"] = "weapons/weapon_bolt", ["weapon_akm"] = "weapons/weapon_ak", ["weapon_an94"] = "weapons/weapon_ak",
             ["ammo_9mm"] = "icons/icon_ammo_pistol", ["ammo_545"] = "icons/icon_ammo_rifle", ["ammo_762"] = "icons/icon_ammo_rifle",
             ["ammo_12g"] = "icons/icon_ammo_shotgun", ["ammo_bolt"] = "icons/icon_arrow", ["deploy_lathe"] = "icons/icon_workbench2",
+            ["tool_chainsaw"] = "weapons/weapon_metal_hatchet", ["tool_jackhammer"] = "weapons/weapon_metal_pickaxe",   // в руках — пока похожий спрайт (D54)
             ["att_compensator_army"] = "icons/icon_att_compensator", ["att_mag_ext_army"] = "icons/icon_att_mag_ext", ["att_mag_twin_crude"] = "icons/icon_att_mag_twin",
         };
 

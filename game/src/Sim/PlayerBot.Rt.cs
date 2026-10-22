@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -111,7 +111,7 @@ namespace Rastvordd.Sim
         readonly Dictionary<string, int> _rtDeaths = new();
         float _scrapWant, _scrapWantAt = -999;   // прогрессия упёрлась в лом: сколько не хватает
 
-        static readonly string[] RunItems = { "scrap", "comp_gears", "comp_spring", "comp_pipe", "comp_tape", "comp_trigger", "comp_bolt_carrier", "comp_barrel_rifled", "comp_frame_pistol", "comp_body_smg", "comp_body_rifle", "comp_receiver_ak", "comp_circuit", "comp_lens", "keycard", "punchcard_1", "punchcard_2", "ammo_9mm", "ammo_12g", "ammo_762", "metal_fragments", "bandage", "gunpowder" };
+        static readonly string[] RunItems = { "scrap", "comp_gears", "comp_spring", "comp_pipe", "comp_tape", "comp_trigger", "comp_bolt_carrier", "comp_barrel_rifled", "comp_frame_pistol", "comp_body_smg", "comp_body_rifle", "comp_receiver_ak", "comp_circuit", "comp_lens", "keycard", "punchcard_1", "punchcard_2", "ammo_9mm", "ammo_12g", "ammo_762", "metal_fragments", "bandage", "gunpowder", "alloy" };
 
         /// <summary>Сколько общих деталей бот держит под крафт стволов (D46): лишнее — в переработчик.</summary>
         public static int CompKeep(string id) => id switch

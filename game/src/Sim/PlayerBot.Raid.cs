@@ -108,7 +108,7 @@ namespace Rastvordd.Sim
 
         static int BombsFor(int tier, float hp)
         {
-            float perBomb = 75f * 0.95f * World.BlastTierMult[Math.Clamp(tier, 0, 4)];
+            float perBomb = 75f * 0.95f * World.BlastTierMult[Math.Clamp(tier, 0, World.BlastTierMult.Length - 1)];
             return (int)MathF.Ceiling(hp / perBomb * 1.25f);
         }
 

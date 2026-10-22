@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text.Json;
@@ -103,7 +103,7 @@ namespace Rastvordd.Sim
             foreach (var r in root.GetProperty("roofs").EnumerateArray())
                 Roof("tiles/" + r[5].GetString(), P(V(r, 0)), P(V(r, 2)), rng);
 
-            Vector2? carPos = null;
+            Vector2? carPos = null, pumpPos = null;
             foreach (var pr in root.GetProperty("props").EnumerateArray())
             {
                 string sprite = pr[0].GetString();
@@ -119,6 +119,7 @@ namespace Rastvordd.Sim
                 if (id == "clutter_tire") { AddTireSpot(NodeKind.Tire, p); continue; }                          // покрышки режутся на резину
                 if (id is "gar_tire_stack" or "tires_pile") { AddTireSpot(NodeKind.TireStack, p); continue; }
                 if (id == "car_police_2101") carPos = p;
+                if (id == "fuel_pump" && pumpPos == null) pumpPos = p;   // у первой колонки — ручной насос цистерны (D54)
                 if (sprite.StartsWith("grass/") || sprite.StartsWith("plants/") || sprite.StartsWith("clutter/")) { Decor(sprite, p, flip); continue; }
                 Prop(sprite, p, flip);
             }
@@ -137,6 +138,7 @@ namespace Rastvordd.Sim
                         break;
                     case "fuel":
                         rt.Stashes.Add(new Stash { Pos = p + new Vector2(0, 1.4f), Verb = "Разбить кассу", Sound = "glass", Seconds = 3, Noise = 30, GivesCard = true });
+                        if (pumpPos is Vector2 pp) AddFuelPump(rt, pp + new Vector2(1.3f, 0));
                         break;
                     case "shop":
                         AddPickup(PickupKind.PunchCard, p);

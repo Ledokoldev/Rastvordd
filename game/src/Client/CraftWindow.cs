@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Godot;
 using Rastvordd.Sim;
@@ -38,7 +38,7 @@ namespace Rastvordd.Client
                 float w = UiTheme.TextWidth(n, 12, UiTheme.Semi);
                 UiTheme.DrawText(this, new Vector2(Size - 8 - w, Size - 8), n, 12, UiTheme.Ink, UiTheme.Semi);
             }
-            if (R.NeedsBench) UiTheme.DrawText(this, new Vector2(9, 18), $"В{R.Bench}", 11, Blocked ? UiTheme.Bad : UiTheme.Dim, UiTheme.Semi);
+            if (R.NeedsBench || R.Station != null) UiTheme.DrawText(this, new Vector2(9, 18), R.Station != null ? "Ст" : $"В{R.Bench}", 11, Blocked ? UiTheme.Bad : UiTheme.Dim, UiTheme.Semi);   // Ст — рецепт станции (D54)   // С — нужна станция (D54)
         }
 
         public override string _GetTooltip(Vector2 atPosition) => $"{R.Name}\n{R.CostText}{(R.Known ? "" : "\nне изучено — дерево изучения у верстака")}";
@@ -66,11 +66,11 @@ namespace Rastvordd.Client
 
         static int TabOf(string id) => id switch
         {
-            _ when id.StartsWith("tool_") || id == "build_plan" => 1,
+            _ when id.StartsWith("tool_") || id == "build_plan" || id.StartsWith("flask_") || id.StartsWith("canister_") => 1,
             _ when id.StartsWith("weapon_") || id.StartsWith("ammo_") || id == "arrow" => 2,
             _ when id.StartsWith("att_") => 3,
             _ when id.StartsWith("comp_") => 4,
-            _ when id.StartsWith("deploy_") || id.StartsWith("lock_") => 5,
+            _ when id.StartsWith("deploy_") || id.StartsWith("lock_") || id == "bars" => 5,
             _ when id.StartsWith("expl_") => 6,
             _ => 7,
         };
@@ -223,7 +223,7 @@ namespace Rastvordd.Client
 
         static Control Gap(float h) => new Control { CustomMinimumSize = new Vector2(0, h), MouseFilter = MouseFilterEnum.Ignore };
 
-        bool Blocked(RecipeInfo r) => !r.Known || r.Bench > _benchLevel;
+        bool Blocked(RecipeInfo r) => !r.Known || (r.NeedsBench && r.Bench > _benchLevel) || !r.StationOk;   // станция рядом (D54)
 
         /// <summary>Сколько раз можно скрафтить выбранное прямо сейчас.</summary>
         int MaxTimes()
@@ -318,7 +318,9 @@ namespace Rastvordd.Client
                 }
                 _time.Text = $"Время: {r.Time * _amount:0} с" + (r.Count > 1 ? $" · получишь {r.Count * _amount} шт." : "");
                 _bench.Text = !r.Known ? $"Не изучено — изучи в дереве у верстака {Math.Max(1, Tech.Get(r.Output)?.Bench ?? 1)}"
+                    : r.Station != null ? (r.StationOk ? $"{r.Station} рядом ✓" : $"Нужен {r.Station.ToLower()} рядом")
                     : !r.NeedsBench ? "Можно в руках" : _benchLevel >= r.Bench ? $"Верстак {r.Bench} рядом ✓" : $"Нужен верстак {r.Bench} рядом";
+                if (r.Boosted) _bench.Text += " · станция рядом: быстрее";
                 _bench.AddThemeColorOverride("font_color", Blocked(r) ? UiTheme.Bad : UiTheme.Dim);
                 _amountLabel.Text = $"×{_amount}";
                 _craftBtn.Disabled = MaxTimes() < _amount;

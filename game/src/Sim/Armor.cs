@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Numerics;
 
 namespace Rastvordd.Sim
@@ -74,7 +74,7 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Множитель скорости от брони: 1 + сумма штрафов (не ниже 0,85).</summary>
-        public static float SpeedMul(Actor a) => 1f + Clothing.SpeedPenalty(a);
+        public static float SpeedMul(Actor a) => (1f + Clothing.SpeedPenalty(a)) * Liquids.HeavyMul(a);   // + полная канистра 20 л (D54)
 
         // ---------- радиация и температура ----------
 
@@ -114,7 +114,7 @@ namespace Rastvordd.Sim
 
         bool NearHeat(Vector2 p)
         {
-            foreach (var d in DeploysNear(p, 4f)) if (d.Kind == DeployKind.Furnace && d.Burning && Vector2.Distance(d.Pos, p) < 4f) return true;
+            foreach (var d in DeploysNear(p, 4f)) if ((d.Kind == DeployKind.Furnace || StationDefs.Get(d.Kind)?.Warm == true) && d.Burning && Vector2.Distance(d.Pos, p) < 4f) return true;   // печь и костёр (D54)
             foreach (var f in Fires) if (Vector2.Distance(f.Pos, p) < f.Radius + 3f) return true;
             return false;
         }

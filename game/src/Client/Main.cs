@@ -312,6 +312,8 @@ namespace Rastvordd.Client
                 var p = st.Substring(10).Split(',');
                 var rk = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--raidkit="));
                 if (rk != null) _server.RaidKitAt = float.Parse(rk.Substring(10), System.Globalization.CultureInfo.InvariantCulture);
+                var gk = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--gunkit="));   // D54: набор на оружейный стол боту
+                if (gk != null) _server.GunKitAt = float.Parse(gk.Substring(9), System.Globalization.CultureInfo.InvariantCulture);
                 _server.FastForward(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), s => GD.Print(s), _myId);
                 var me = _server.World.Find(_myId);
 int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
@@ -1140,6 +1142,8 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     case SimEventKind.Machine:
                         // механизмы готовых РТ: пробка, питание, роллета, считыватель крейта
                         if (e.Text != null && e.Text.StartsWith("станок:")) { Sfx.Play(Sfx.Pick("lathe_done", "craft_done"), Iso.Px(e.Pos), -2, 30, 0.05f); break; }   // деталь готова (D46)
+                        if (e.Text != null && e.Text.StartsWith("станция:")) { Sfx.Play(Sfx.Pick("station_done", "craft_done"), Iso.Px(e.Pos), -8, 15, 0.05f); break; }   // станция D54 сделала порцию
+                        if (e.Text == "pump") { Sfx.Play(Sfx.Pick("hand_pump", "hit_metal_ore"), Iso.Px(e.Pos), -4, 40, 0.15f); break; }   // насос Заправки (D54)
                         switch (e.Text)
                         {
                             case "fuse": Sfx.Play("lock_click", Iso.Px(e.Pos), 0, 15, 0f); Vfx.Electric(Iso.Px(e.Pos), Iso.H(1.3f), false); break;
@@ -1329,6 +1333,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         string NodeHitSound(int nodeId)
         {
             if (nodeId == -2) return Sfx.Pick("lathe_work", "hit_metal_ore");   // токарный станок (D46)
+            if (nodeId == -3) return Sfx.Pick("drill_work", "hit_stone");       // буровая (D54)
             foreach (var n in _cur.Nodes)
                 if (n.Id == nodeId)
                     return n.Kind == NodeKind.Tree ? "hit_wood" : n.Kind == NodeKind.Stone ? "hit_stone" : "hit_metal_ore";
@@ -1717,7 +1722,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 if (!_inv.Visible) _invOpen = false;
                 Input.MouseMode = _inv.Visible || _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
             }
-            if (_cur.Self.OpenCraft) { _hud.OpenTech(); Input.MouseMode = Input.MouseModeEnum.Visible; }   // E у верстака — дерево изучения
+            if (_cur.Self.OpenCraft) { if (_cur.Self.OpenCraftList) _hud.OpenCraftList(); else _hud.OpenTech(); Input.MouseMode = Input.MouseModeEnum.Visible; }   // у станции D54 — сразу список крафта   // E у верстака — дерево изучения
 
             // вход на РТ — название
             if (_cur.Self.Place != _lastPlace) { _lastPlace = _cur.Self.Place; if (_lastPlace != null) _hud.Toast(_lastPlace); }

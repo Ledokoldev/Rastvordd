@@ -179,6 +179,7 @@ namespace Rastvordd.Sim
             PlaceTier2();   // тир 2 (D50): Радиоцентр «Маяк» — большой, свой генератор
             PlaceWorldTires();   // покрышки — резина (после РТ, своим генератором)
             DressAllPrefabs();   // обстановка РТ (Dressing.cs): в самом конце, своим генератором на РТ
+            PlaceFuelSpots();    // бочки с мазутом и ржавые канистры (D54): после всего, своим генератором — индексы старых находок не сдвигаются
         }
 
         // площадь на один объект (м²) и веса: дерево, камень, металл, сера, конопля, ягоды, бочка воды, ящик-укрытие, руины
@@ -771,8 +772,9 @@ namespace Rastvordd.Sim
         public bool CanCraft(Actor a, Recipe r)
         {
             if (!Tech.Knows(a, r.Output)) return false;
-            if (r.Bench > 0 && BenchLevel(a.Pos) < r.Bench) return false;
-            foreach (var (id, n) in r.Cost) if (a.Count(id) < n) return false;
+            if (r.Station != DeployKind.None) { if (!StationOk(a, r)) return false; }   // рецепт станции (D54): сама станция заменяет верстак
+            else if (r.Bench > 0 && BenchLevel(a.Pos) < r.Bench) return false;
+            foreach (var (id, n) in CraftCost(a, r)) if (a.Count(id) < n) return false;
             return true;
         }
 
@@ -812,6 +814,7 @@ namespace Rastvordd.Sim
             StepFurnaces();
             StepRecyclers();
             StepLathes();
+            StepStations();   // станции D54: ток, перегонка, электропечь, буровая, конвейер, костёр
             if (Tick % 30 == 0) TrackArms();
             StepClaims();
             StepThrowns();
@@ -871,11 +874,7 @@ namespace Rastvordd.Sim
 
             // лечение и еда
             a.HealCooldown -= Dt;
-            if (cmd.Heal && a.HealCooldown <= 0 && a.Hp < a.MaxHp && a.Take("bandage", 1) > 0)
-            {
-                a.Hp = MathF.Min(a.MaxHp, a.Hp + 25 * HealMul(a));   // тошнота от радиации — хуже лечит
-                a.HealCooldown = 2f;
-            }
+            if (cmd.Heal) Heal(a);   // бинт, шприц, аптечка — по ранению (D54, Stations.cs); тошнота от радиации — хуже лечит
             if (cmd.Eat) Eat(a);
             if (cmd.DebugKit && a.Team == Team.Player) GiveDebugKit(a);
             if (cmd.ToggleTime && a.Team == Team.Player) ToggleDayNight();
@@ -928,6 +927,8 @@ namespace Rastvordd.Sim
         void StepSurvival(Actor a, bool sprint)
         {
             if (a.Team == Team.Npc) return;   // охране РТ голод не нужен
+            StepPoison(a);   // сырая вода (D54)
+            if (a.Dead) return;
             a.Food = MathF.Max(0, a.Food - FoodDecay * (sprint ? 1.5f : 1f) * Dt);
             a.Water = MathF.Max(0, a.Water - WaterDecay * (sprint ? 1.5f : 1f) * Dt);
             // сытый — понемногу лечится, на нуле — понемногу теряет здоровье
@@ -954,6 +955,9 @@ namespace Rastvordd.Sim
                 float score = MathF.Min(d.Food, 100 - a.Food) + MathF.Min(d.Water, 100 - a.Water);
                 if (score > bestScore) { bestScore = score; best = s.Id; }
             }
+            // вода из фляги/канистры (D54): кипячёная — как бутылка; сырая — только если пить больше нечего
+            if (a.Water < 95 && WaterToDrink(a, best == null || a.Water < 30) is ItemSlot flask && (best == null || flask.Liquid == "water_boiled" && MathF.Min(Prog.WaterPerSip, 100 - a.Water) >= bestScore))
+            { DrinkFrom(a, flask); return; }
             if (best == null) { Info(a, "Нечего есть"); return; }
             var def = Items.Get(best);
             a.Take(best, 1);
@@ -968,10 +972,12 @@ namespace Rastvordd.Sim
         {
             if (a.CraftQueue.Count >= 8) { Info(a, "Очередь крафта заполнена"); return; }
             if (!Tech.Knows(a, r.Output)) { Info(a, $"{Items.Name(r.Output)}: сначала изучи на верстаке"); return; }
-            if (r.Bench > 0 && BenchLevel(a.Pos) < r.Bench) { Info(a, $"Нужен верстак {r.Bench} рядом"); return; }
+            if (r.Station == DeployKind.None && r.Bench > 0 && BenchLevel(a.Pos) < r.Bench) { Info(a, $"Нужен верстак {r.Bench} рядом"); return; }
+            if (!StationOk(a, r)) { Info(a, $"{Items.Name(r.Output)}: нужен {StationName(r.Station).ToLower()} рядом"); return; }
             if (!CanCraft(a, r)) { Info(a, "Не хватает ресурсов"); return; }
-            foreach (var (id, n) in r.Cost) a.Take(id, n);   // как в Расте: ресурсы списываются сразу
-            a.CraftQueue.Add(new CraftJob { Recipe = r, Left = r.Time });
+            foreach (var (id, n) in CraftCost(a, r)) a.Take(id, n);   // как в Расте: ресурсы списываются сразу (у станции — со скидкой, D54)
+            float t = CraftTime(a, r);
+            a.CraftQueue.Add(new CraftJob { Recipe = r, Left = t, Total = t });
         }
 
         /// <summary>Можно ли изучить узел прямо сейчас; причина — для подсказки.</summary>
@@ -1069,6 +1075,13 @@ namespace Rastvordd.Sim
                 trigger = cmd.Fire && !a.FireHeldLastTick;
                 a.FireHeldLastTick = cmd.Fire;
                 if (trigger) InstallLock(a);
+                return;
+            }
+            if (def.Bars)
+            {
+                trigger = cmd.Fire && !a.FireHeldLastTick;
+                a.FireHeldLastTick = cmd.Fire;
+                if (trigger) InstallBars(a);   // решётка со ставнями на окно (D54)
                 return;
             }
 
@@ -1297,7 +1310,7 @@ namespace Rastvordd.Sim
                 ? MathF.Min(node.Amount, wd.Id == "tool_hatchet" || wd.Id == "weapon_spear" ? 2 : 1)   // покрышку режут: топором быстрее
                 : node.Kind == NodeKind.Junk
                 ? MathF.Min(node.Amount, wd.Id == "tool_pickaxe" || wd.Id == "tool_hatchet" ? 2 : 1)   // хлам ковыряют: инструментом быстрее
-                : MathF.Min(node.Amount, wd.Gather(node.Kind));
+                : MathF.Min(node.Amount, wd.Gather(node.Kind) * ToolFuelMul(a));   // бензопила/отбойник без топлива — как булыжник (D54)
             int got = (int)MathF.Round(yield);
             node.Amount -= yield;
             Events.Add(new SimEvent { Kind = SimEventKind.HitNode, ActorId = a.Id, OtherId = node.Id, Pos = node.Pos });
@@ -1416,6 +1429,13 @@ namespace Rastvordd.Sim
             if (def.Deploy is DeployKind.Workbench or DeployKind.Claim or DeployKind.Furnace or DeployKind.Lathe) Milestone(a, $"поставил: {def.Name}");   // столб тонкий, спальник плоский, ящик компактный
             if (def.Deploy is DeployKind.Box or DeployKind.Lathe) dep.Storage = new LootBag { Id = NextId(), Pos = at };
             if (def.Deploy == DeployKind.Lathe) dep.On = false;
+            if (StationDefs.Get(def.Deploy) is StationDef sd && !sd.Registered)
+            {
+                // станции D54: хранилище (станок, ящик, генератор, буровая, конвейер-фильтр, костёр); машины сразу «включены» — работают, как только есть сырьё
+                if (sd.Machine != null || sd.Burn != null || def.Deploy is DeployKind.BoxLarge or DeployKind.Conveyor) dep.Storage = new LootBag { Id = NextId(), Pos = at };
+                dep.On = def.Deploy != DeployKind.Generator || a.IsBot;
+                if (sd.Bench >= 2) Milestone(a, $"поставил: {def.Name}");
+            }
             dep.Auth.Add(a.Id);
             if (def.Deploy == DeployKind.Furnace && !a.IsBot) dep.On = false;   // игрок зажигает сам в окне печи
             AddDeployable(dep);
@@ -1444,7 +1464,7 @@ namespace Rastvordd.Sim
 
         // ---------- взаимодействие (E) ----------
 
-        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box, Recycler, Panel, Stash, Lathe }
+        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box, Recycler, Panel, Stash, Lathe, Station, Shutter }   // Station — станции D54, Shutter — ставни окна
 
         /// <summary>Что ближе всего под рукой. Используется и сервером, и подсказкой на экране.</summary>
         public (InteractKind kind, object target) NearestInteract(Actor a)
@@ -1468,7 +1488,7 @@ namespace Rastvordd.Sim
             {
                 if (dp.Kind == DeployKind.SleepBag || !ClearLine(a.Pos, dp.Pos, null, true)) continue;   // спальник — не для E
                 float d = Vector2.Distance(a.Pos, Vector2.Clamp(a.Pos, dp.Min, dp.Max)) + 0.3f;   // до края хитбокса
-                if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, DeployKind.Recycler => InteractKind.Recycler, DeployKind.Lathe => InteractKind.Lathe, _ => InteractKind.Workbench }, dp); }
+                if (d < bestD) { bestD = d; best = (dp.Kind switch { DeployKind.Furnace => InteractKind.Furnace, DeployKind.Claim => InteractKind.Claim, DeployKind.Box => InteractKind.Box, DeployKind.Recycler => InteractKind.Recycler, DeployKind.Lathe => InteractKind.Lathe, DeployKind.Workbench => InteractKind.Workbench, _ => InteractKind.Station }, dp); }
             }
             foreach (var st in AllStashes())
             {
@@ -1480,6 +1500,7 @@ namespace Rastvordd.Sim
                 float d = Vector2.Distance(a.Pos, s.PanelPos);
                 if (d < bestD && ClearLine(a.Pos, s.PanelPos, null, true)) { bestD = d; best = (InteractKind.Panel, s); }
             }
+            if (NearestShutter(a.Pos, best.Item1 == InteractKind.None ? InteractRange + 0.4f : bestD) is Structure sh) best = (InteractKind.Shutter, sh);   // ставни окна (D54)
             var door = NearestDoor(a.Pos, best.Item1 == InteractKind.None ? InteractRange + 0.4f : bestD);   // дверь — если ближе остального
             if (door != null && ClearLine(a.Pos, door.Center, door, true)) best = (InteractKind.Door, door);
             return best;
@@ -1524,6 +1545,9 @@ namespace Rastvordd.Sim
             {
                 // у живого игрока — окна, боты пользуются быстрыми действиями
                 case InteractKind.Panel: UsePanel(a, (Substation)target); break;
+                case InteractKind.Station when a.Crouching && ((Deployable)target).Kind == DeployKind.GunTable && a.Weapon is WeaponState gw && !gw.Def.Melee: Repair(a, gw); break;   // Alt+E со стволом — починка до 100% (D54)
+                case InteractKind.Station: UseStation(a, (Deployable)target); break;
+                case InteractKind.Shutter: ToggleShutters(a, (Structure)target); break;
                 case InteractKind.Stash: UseStash(a, (Stash)target); break;
                 case InteractKind.Bag when ((LootBag)target).Punch && !((LootBag)target).Unlocked && Director?.Events.Find(e => e.Crate == target) is { } dev:
                     Info(a, dev.Kind == "airdrop" ? $"Груз ещё закрыт — {MathF.Ceiling(dev.StartsAt - Time)} с" : dev.StartsAt > 0 ? $"Идёт взлом — {MathF.Ceiling(dev.StartsAt - Time)} с" : "Закрытый ящик: запусти взлом (рядом, держи E)");
@@ -1620,6 +1644,12 @@ namespace Rastvordd.Sim
                     else if (!a.AddSlot(s)) continue;     // пояс полон — остаётся в сумке
                     else parts.Add(def.Name);
                 }
+                else if (s.IsContainer)
+                {
+                    // ёмкость (D54) — целиком, с тем, что налито
+                    if (!a.AddSlot(s)) continue;
+                    parts.Add(Liquids.Label(s) is string lb ? $"{Items.Name(s.Id)} ({lb})" : Items.Name(s.Id));
+                }
                 else
                 {
                     // сколько влезет; остальное остаётся в сумке (иначе бот бесконечно перекладывал бы сумки)
@@ -1656,9 +1686,20 @@ namespace Rastvordd.Sim
                     p.RespawnLeft = 90;
                     Events.Add(new SimEvent { Kind = SimEventKind.Gather, ActorId = a.Id, Pos = p.Pos, Value = 3, Text = "Ягоды" });
                     break;
+                case PickupKind.WaterBarrel when a.Crouching && !a.IsBot:
+                    // Alt+E — набрать сырой воды в ёмкость (D54)
+                    ItemSlot wc = null;
+                    foreach (var s in a.Pack) if (Liquids.Fits(s, "water_raw") && Liquids.Room(s) > 0.01f) { wc = s; break; }
+                    if (wc == null) foreach (var s in a.Belt) if (Liquids.Fits(s, "water_raw") && Liquids.Room(s) > 0.01f) { wc = s; break; }
+                    if (wc == null) Info(a, "Набрать некуда: нужна фляга или канистра");
+                    else FillContainer(a, wc);
+                    break;
                 case PickupKind.WaterBarrel:
-                    a.Water = MathF.Min(100, a.Water + 40);
-                    Info(a, "Напился воды");
+                    a.Water = MathF.Min(100, a.Water + Prog.BarrelDrink);
+                    Info(a, "Напился воды · Alt+E — набрать во флягу");
+                    break;
+                case PickupKind.OilBarrel or PickupKind.CanisterPile:
+                    CollectCrude(a, p);
                     break;
                 case PickupKind.LocalItem:
                     a.Add(p.Item, 1);

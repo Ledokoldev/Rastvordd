@@ -5,14 +5,14 @@ using System.Numerics;
 namespace Rastvordd.Sim
 {
     /// <summary>Какое окно открыто у игрока (по E): ящик, рюкзак/ящик РТ, печь, шкаф.</summary>
-    public enum UiKind { None, Box, Bag, Furnace, Claim, Recycler }
+    public enum UiKind { None, Box, Bag, Furnace, Claim, Recycler, Tank }   // Tank — бочка 200 л (D54)
 
     /// <summary>
     /// Действия в инвентаре. Всё — ячейки: «pack» (рюкзак), «belt» (пояс), «cont» (открытый ящик/рюкзак),
     /// «fur» (печь: 0 руда, 1 серная руда, 2 топливо, 3–5 готовое), «claim» (шкаф: дерево, камень, металл, лом).
     /// Move — перетаскивание A→B, Quick — «на другую сторону» (Shift+клик, ховер-лут).
     /// </summary>
-    public enum UiOp { None, Close, Move, Quick, TakeAll, PutAll, Toggle, TakeOut, Drop, Detach, Repair }   // Detach — снять обвесы со ствола в ячейке, Repair — починить ствол маслом у верстака
+    public enum UiOp { None, Close, Move, Quick, TakeAll, PutAll, Toggle, TakeOut, Drop, Detach, Repair, Fill, Empty, Drink }   // Fill/Empty/Drink — ёмкость в карточке: налить у источника, вылить, выпить (D54)   // Detach — снять обвесы со ствола в ячейке, Repair — починить ствол маслом у верстака
 
     /// <summary>Ячейка для отрисовки.</summary>
     public struct CellView
@@ -25,6 +25,8 @@ namespace Rastvordd.Sim
         public float Durability;     // у оружия: 0..1 (−1 — не изнашивается)
         public string[] Att;         // у оружия: id обвесов по слотам (прицел, дуло, цевьё, магазин, приклад), null — пусто
         public float SightZoom;      // кратность прицела на стволе (0 — нет)
+        public string Liquid;        // ёмкость (D54): что налито
+        public float Liters, Capacity;
     }
 
     /// <summary>Что показать в окне справа (контейнер); рюкзак и пояс приходят в SelfInfo всегда.</summary>
@@ -111,7 +113,7 @@ namespace Rastvordd.Sim
                 var r = LatheJob(d);
                 if (r == null) { d.On = false; d.SmeltTimer = 0; continue; }
                 float before = d.SmeltTimer;
-                d.SmeltTimer += Dt;
+                d.SmeltTimer += Dt * (d.Powered ? StationDefs.Get(DeployKind.Lathe).PowerSpeed : 1f);   // под током — быстрее (D54)
                 if ((int)(before / 2f) != (int)(d.SmeltTimer / 2f))
                 {
                     Noises.Add(new Noise { Pos = d.Pos, Radius = 45f, SourceId = d.OwnerId, Time = Time });   // визг резца — слышно издалека
@@ -191,7 +193,8 @@ namespace Rastvordd.Sim
         public bool Repair(Actor a, WeaponState w)
         {
             if (w == null || w.Def.Melee || w.Def.MaxDurability <= 0) { Info(a, "Чинить нечего: возьми ствол в руки"); return false; }
-            if (BenchLevel(a.Pos) < 1) { Info(a, "Чинить — у верстака"); return false; }
+            bool table = StationNear(a.Pos, DeployKind.GunTable) != null;   // оружейный стол (D54): до 100%
+            if (BenchLevel(a.Pos) < 1 && !table) { Info(a, "Чинить — у верстака или оружейного стола"); return false; }
             bool worn = w.Durability < w.Def.MaxDurability - 0.5f;
             for (int k = 0; k < w.Att.Length; k++) if (Weaponry.Att(w.Att[k]) is AttachmentDef ad && ad.MaxShots > 0 && w.AttDur[k] < ad.MaxShots) worn = true;
             if (!worn) { Info(a, $"{Items.Name(w.Def.Id)} в порядке"); return false; }
@@ -199,7 +202,7 @@ namespace Rastvordd.Sim
             if (w.Broken && a.Count("comp_spring") < 1) { Info(a, "Ствол сломан: нужно масло и пружина"); return false; }
             a.Take("comp_oil", 1);
             if (w.Broken) a.Take("comp_spring", 1);
-            w.Durability = MathF.Min(w.Def.MaxDurability, w.Durability + w.Def.MaxDurability * 0.5f);
+            w.Durability = MathF.Min(w.Def.MaxDurability, w.Durability + w.Def.MaxDurability * (table ? Prog.GunRepairTable : Prog.GunRepairBench));
             for (int k = 0; k < w.Att.Length; k++) if (Weaponry.Att(w.Att[k]) is AttachmentDef ad) w.AttDur[k] = ad.MaxShots;
             Info(a, $"{Items.Name(w.Def.Id)} починен: {w.Durability / w.Def.MaxDurability * 100:0}%");
             return true;
@@ -264,7 +267,8 @@ namespace Rastvordd.Sim
         {
             "pack" => Actor.PackSize,
             "belt" => Actor.BeltSize,
-            "cont" => a.OpenUi == UiKind.Box ? BoxSlots : a.OpenUi == UiKind.Recycler ? RecyclerSlots : Math.Max(UiItems(a)?.Count ?? 0, 12),
+            "cont" => a.OpenTarget is Deployable cd && cd.Storage != null ? StorageCap(cd) : Math.Max(UiItems(a)?.Count ?? 0, 12),
+            "tank" => 1,
             "fur" => FurnaceIds.Length,
             "claim" => ClaimIds.Length,
             "wear" => Clothing.Slots,          // одежда (D47): 10 слотов WearSlot
@@ -291,6 +295,8 @@ namespace Rastvordd.Sim
                 case "claim" when a.OpenTarget is Deployable c:
                     int m = (int)c.Store.GetValueOrDefault(ClaimIds[i]);
                     return m > 0 ? new ItemSlot(ClaimIds[i], m) : null;
+                case "tank" when a.OpenTarget is Deployable t && Liquids.Tank(t) is var (lq, l) && lq != null:
+                    return new ItemSlot(lq, (int)l);
             }
             return null;
         }
@@ -344,7 +350,8 @@ namespace Rastvordd.Sim
                 "plate" => Clothing.Plate(s.Id) != null && i < Clothing.PlateCap(a),   // пластина — в карман надетой брони
                 "fur" => i <= 2 && s.Id == FurnaceIds[i],                       // в печь: руда и дерево, готовое только забирают
                 "claim" => s.Id == ClaimIds[i],
-                "cont" => a.OpenUi == UiKind.Box ? i < BoxSlots : a.OpenUi != UiKind.Recycler || i < RecyclerSlots,
+                "cont" => a.OpenTarget is not Deployable cd || cd.Storage == null || i < StorageCap(cd),
+                "tank" => false,
                 _ => true,
             };
         }
@@ -367,6 +374,7 @@ namespace Rastvordd.Sim
                 Info(a, msg);
                 return;
             }
+            if (LiquidMove(a, src, si, s, dst, di)) return;   // ёмкости: перелить / в бочку / из бочки (D54)
             if (s == null || di < 0 || di >= CellCount(a, dst) || !Accepts(a, dst, di, s)) return;
             if (dst == "cont" && di >= Revealed(a) && di < (UiItems(a)?.Count ?? 0)) return;   // в необысканную — нельзя
             var d = GetCell(a, dst, di);
@@ -416,6 +424,8 @@ namespace Rastvordd.Sim
                 MoveCell(a, src, si, "pack", empty);
                 return;
             }
+            if (src == "tank") { foreach (var dst0 in new[] { "pack", "belt" }) for (int k = 0; k < CellCount(a, dst0); k++) if (Liquids.Fits(GetCell(a, dst0, k), s.Id) && LiquidMove(a, "tank", 0, s, dst0, k)) return; Info(a, "Некуда налить: нужна пустая ёмкость"); return; }
+            if (src is "pack" or "belt" && a.OpenUi == UiKind.Tank) { if (!LiquidMove(a, src, si, s, "tank", 0)) Info(a, "В бочку — только ёмкость с жидкостью (бочка держит одну жидкость)"); return; }
             if (src is "pack" or "belt")
             {
                 string dst = a.OpenUi switch { UiKind.Box or UiKind.Bag or UiKind.Recycler => "cont", UiKind.Furnace => "fur", UiKind.Claim => "claim", _ => src == "pack" ? "belt" : "pack" };
@@ -454,7 +464,8 @@ namespace Rastvordd.Sim
                 else if (op == UiOp.Quick) DoQuick(a, cmd.UiItem);
                 else if (op == UiOp.Drop) DoDrop(a, cmd.UiItem);
                 else if (op == UiOp.Detach) DoDetach(a, cmd.UiItem);
-                else if (op == UiOp.Repair && ParseCell(cmd.UiItem) is var (ri, rj) && ri is "pack" or "belt") Repair(a, GetCell(a, ri, rj)?.State);
+                else if (op == UiOp.Repair && ParseCell(cmd.UiItem) is var (ri, rj) && ri is "pack" or "belt") RepairCell(a, GetCell(a, ri, rj));
+                else if (op is UiOp.Fill or UiOp.Empty or UiOp.Drink) ContainerOp(a, op, cmd.UiItem);
                 return;
             }
             var pos = UiTargetPos(a);
@@ -486,7 +497,8 @@ namespace Rastvordd.Sim
                 case UiOp.Quick: DoQuick(a, cmd.UiItem); break;
                 case UiOp.Drop: DoDrop(a, cmd.UiItem); break;
                 case UiOp.Detach: DoDetach(a, cmd.UiItem); break;
-                case UiOp.Repair when ParseCell(cmd.UiItem) is var (ri, rj) && ri is "pack" or "belt": Repair(a, GetCell(a, ri, rj)?.State); break;
+                case UiOp.Repair when ParseCell(cmd.UiItem) is var (ri, rj) && ri is "pack" or "belt": RepairCell(a, GetCell(a, ri, rj)); break;
+                case UiOp.Fill or UiOp.Empty or UiOp.Drink: ContainerOp(a, op, cmd.UiItem); break;
                 case UiOp.TakeAll:
                     string inv = a.OpenUi switch { UiKind.Furnace => "fur", UiKind.Claim => "claim", _ => "cont" };
                     for (int i = CellCount(a, inv) - 1; i >= 0; i--) if (inv != "fur" || i >= 3) QuickCell(a, inv, i);
@@ -501,6 +513,11 @@ namespace Rastvordd.Sim
                 case UiOp.Toggle when a.OpenTarget is Deployable lt && lt.Kind == DeployKind.Lathe:
                     lt.On = !lt.On;
                     if (lt.On && LatheJob(lt) == null) { lt.On = false; Info(a, "Станку не из чего точить: положи металл, ткань, уголь или детали по рецепту"); }
+                    break;
+                case UiOp.Toggle when a.OpenTarget is Deployable st && StationDefs.Get(st.Kind) is StationDef sdef && !sdef.Registered:
+                    st.On = !st.On;
+                    if (st.On && sdef.NeedsPower && !st.Powered) Info(a, $"{sdef.Name}: нет тока — поставь дизель-генератор рядом (15 м) и залей топляк");
+                    else if (st.On && sdef.Burn != null && !HasBurn(st, sdef)) Info(a, $"{sdef.Name}: нет топлива — {Items.Name(sdef.Burn).ToLower()}");
                     break;
                 case UiOp.Toggle when a.OpenTarget is Deployable rc && rc.Kind == DeployKind.Recycler:
                     rc.On = !rc.On;
@@ -583,6 +600,7 @@ namespace Rastvordd.Sim
             Durability = s.State != null && s.State.Def.MaxDurability > 0 ? s.State.Durability / s.State.Def.MaxDurability : Clothing.PlateFrac(s),   // у пластины — её прочность (D47)
             Att = s.State != null && s.State.AttCount > 0 ? (string[])s.State.Att.Clone() : null,
             SightZoom = s.State?.SightZoom ?? 0,
+            Liquid = s.Liquid, Liters = s.Liters, Capacity = s.Def?.Capacity ?? 0,
         };
 
         public UiView BuildUi(Actor a)
@@ -593,7 +611,7 @@ namespace Rastvordd.Sim
             {
                 case UiKind.Box:
                 case UiKind.Bag:
-                    v.Title = a.OpenUi == UiKind.Box ? "ЯЩИК" : a.OpenTarget is LootBag lb ? (lb.Safe ? "СЕЙФ" : lb.IsCrate ? "ЯЩИК" : lb.Corpse ? "РЮКЗАК" : "ВЕЩИ НА ЗЕМЛЕ") : "РЮКЗАК";
+                    v.Title = a.OpenUi == UiKind.Box ? (a.OpenTarget is Deployable bx && bx.Kind == DeployKind.BoxLarge ? "БОЛЬШОЙ ЯЩИК" : "ЯЩИК") : a.OpenTarget is LootBag lb ? (lb.Safe ? "СЕЙФ" : lb.IsCrate ? "ЯЩИК" : lb.Corpse ? "РЮКЗАК" : "ВЕЩИ НА ЗЕМЛЕ") : "РЮКЗАК";
                     var items = UiItems(a);
                     int revealed = Math.Min(Revealed(a), items.Count);
                     int cells = CellCount(a, "cont");
@@ -613,6 +631,11 @@ namespace Rastvordd.Sim
                     v.FuelSeconds = f.Fuel * 0.8f;                        // 0.5 дерева за 0.4 с (StepFurnaces)
                     v.OreSeconds = (f.Ore + f.SulfurOre) * 0.4f;
                     v.Info = f.Burning ? "Горит: руда плавится, дерево горит, копится уголь" : f.On ? "Зажжена, но не хватает руды или дерева" : "Потушена: положи руду и дерево, нажми «Зажечь»";
+                    break;
+                case UiKind.Tank when a.OpenTarget is Deployable tk:
+                    return BuildTankUi(tk);
+                case UiKind.Recycler when a.OpenTarget is Deployable sd && StationDefs.Get(sd.Kind) is StationDef sdf && !sdf.Registered:
+                    BuildStationUi(a, sd, sdf, v);
                     break;
                 case UiKind.Recycler when a.OpenTarget is Deployable lt && lt.Kind == DeployKind.Lathe:
                 {

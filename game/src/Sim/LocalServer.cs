@@ -70,6 +70,9 @@ namespace Rastvordd.Sim
         public float Time;
         public int Count;                                     // сколько штук за раз
         public List<(string id, int n, int have)> Costs;      // ингредиенты: нужно / есть
+        public string Station;     // нужна станция рядом (D54): название; null — не нужна
+        public bool StationOk;
+        public bool Boosted;       // у станции рядом — быстрее/дешевле
     }
 
     /// <summary>Пункт радиального колеса (План, киянка): иконка, название, пояснение, цена с тем, что есть в инвентаре.</summary>
@@ -124,6 +127,8 @@ namespace Rastvordd.Sim
         public int HammerTarget;        // постройка под киянкой (или та, над которой открыто колесо), 0 — нет
         public List<WheelItem> HammerWheel = new();   // колесо киянки для HammerTarget
         public bool OpenCraft;          // открыть крафт (E у верстака)
+        public bool OpenCraftList;      // …у станции (D54) — сразу список рецептов
+        public bool Poisoned;           // отравление сырой водой (D54)
         public bool HasZone;            // зона столба под курсором (клетка столба, радиус World.ClaimRadius)
         public (int i, int j) ZoneCell;
         public BeltSlotInfo?[] Belt = new BeltSlotInfo?[Actor.BeltSize];
@@ -355,6 +360,7 @@ namespace Rastvordd.Sim
         /// <summary>Отладка: прокрутить мир на seconds без клиента, печатая занятия ботов.</summary>
         /// <summary>Отладка рейдов: в эту секунду мира первый бот получает бомбы и патроны (−1 — нет).</summary>
         public float RaidKitAt = -1;
+        public float GunKitAt = -1;   // --gunkit=сек (D54)
 
         public void FastForward(float seconds, System.Action<string> log, int focusId = -1)
         {
@@ -367,6 +373,7 @@ namespace Rastvordd.Sim
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--weapontest") >= 0) World.WeaponSelfTest(log);   // самопроверка ветки оружия D46
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--weartest") >= 0) World.WearSelfTest(log);       // самопроверка одежды D47
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--guardtest") >= 0) World.GuardSelfTest(log);     // меткость охраны РТ
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--progtest") >= 0) World.ProgSelfTest(log);       // прогрессия D54: станции, ток, ёмкости, вода
             int shown = World.Milestones.Count; int envShown = 0;
             var thoughtsShown = new Dictionary<int, int>();
             bool basedump = System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--basedump") >= 0;
@@ -421,6 +428,20 @@ namespace Rastvordd.Sim
                         if (b.Me.Count("weapon_nagant") == 0 && !System.Array.Exists(b.Me.Belt, s => s?.Id == "weapon_nagant")) b.Me.AddSlot(Items.NewSlot("weapon_nagant", 7));
                         b.Me.Add("ammo_9mm", 60); b.Me.Add("bandage", 3); b.Me.Add("punchcard_1", 1);
                         log($"[{World.Time,6:0}s] отладка: {b.Me.Name} получил наган, 60 патронов, 3 бинта, перфокарту I");
+                    }
+                }
+                if (GunKitAt >= 0 && World.Time >= GunKitAt)
+                {
+                    // отладка D54 (--gunkit=сек): самому продвинутому боту — всё на верстак 3, оружейный стол и АКМ; проверка, что бот сам ставит стол и собирает ствол
+                    GunKitAt = -1;
+                    PlayerBot best = null; int bl = -1;
+                    foreach (var b in _bots.Values) { int l = World.BenchLevel(b.Me.Pos, 60); if (!b.Me.Dead && l > bl) { bl = l; best = b; } }
+                    if (best != null)
+                    {
+                        var m = best.Me;
+                        foreach (var (id, n) in new (string, int)[] { (Prog.Alloy, 120), ("comp_receiver_ak", 1), ("comp_bolt_carrier", 1), ("comp_gas_block", 1), ("comp_spring", 8), ("comp_gears", 9), ("comp_circuit", 3), ("metal_fragments", 4000), ("scrap", 2500), ("wood", 400) })
+                            m.Add(id, n);
+                        log($"[{World.Time,6:0}s] отладка: {m.Name} (верстак {bl}) получил набор на оружейный стол и АКМ");
                     }
                 }
                 if (RaidKitAt >= 0 && World.Time >= RaidKitAt)
@@ -697,7 +718,9 @@ namespace Rastvordd.Sim
                 }
             if (!me.Dead && me.Held?.Id == "tool_hammer") FillHammerWheel(snap.Self, me);
             snap.Self.OpenCraft = me.WantsCraftMenu;
+            snap.Self.OpenCraftList = me.WantsCraftList;
             me.WantsCraftMenu = false;
+            me.WantsCraftList = false;
             foreach (var d in World.Deployables) if (d.Kind == DeployKind.Claim && d.Auth.Contains(me.Id)) { snap.Self.Home = d.Pos; break; }
             var myBag = World.ReadyBag(me);
             snap.Self.HasBag = myBag != null;
@@ -829,6 +852,7 @@ namespace Rastvordd.Sim
             s.RadDose = me.RadDose; s.Cold = me.Cold;
             s.Irradiated = me.RadHere > s.RadProt || me.RadDose >= 1;
             s.Nausea = me.RadDose >= Clothing.RadNausea;
+            s.Poisoned = me.Poison > 0;
             s.Freezing = me.FeltTemp < Clothing.Comfort || me.Cold > 0;
             s.Wet = me.WetLeft > 0;
         }
@@ -880,14 +904,16 @@ namespace Rastvordd.Sim
             foreach (var it in me.Pack) s.Pack.Add(World.Cell(it));
             foreach (var it in me.Belt) s.BeltCells.Add(World.Cell(it));
             foreach (var job in me.CraftQueue)
-                s.CraftQueue.Add((job.Recipe.Output, Items.Name(job.Recipe.Output), 1f - job.Left / job.Recipe.Time));
+                s.CraftQueue.Add((job.Recipe.Output, Items.Name(job.Recipe.Output), 1f - job.Left / (job.Total > 0 ? job.Total : job.Recipe.Time)));
 
             for (int i = 0; i < Recipes.All.Count; i++)
             {
                 var r = Recipes.All[i];
                 var cost = new List<string>();
                 var costs = new List<(string, int, int)>();
-                foreach (var (id, n) in r.Cost) { cost.Add($"{Items.Name(id)} {n}"); costs.Add((id, n, me.Count(id))); }
+                var eff = World.CraftCost(me, r);   // у станции рядом — со скидкой (D54)
+                foreach (var (id, n) in eff) { cost.Add($"{Items.Name(id)} {n}"); costs.Add((id, n, me.Count(id))); }
+                float ct = World.CraftTime(me, r);
                 s.Recipes.Add(new RecipeInfo
                 {
                     Index = i,
@@ -895,12 +921,15 @@ namespace Rastvordd.Sim
                     Name = Items.Name(r.Output) + (r.Count > 1 ? $" ×{r.Count}" : ""),
                     CostText = string.Join(", ", cost),
                     CanCraft = World.CanCraft(me, r),
-                    NeedsBench = r.Bench > 0,
+                    NeedsBench = r.Bench > 0 && r.Station == DeployKind.None,   // рецепт станции (D54): нужна только сама станция
                     Bench = r.Bench,
                     Known = Tech.Knows(me, r.Output),
-                    Time = r.Time,
+                    Time = ct,
                     Count = r.Count,
                     Costs = costs,
+                    Station = r.Station != DeployKind.None ? World.StationName(r.Station) : null,
+                    StationOk = World.StationOk(me, r),
+                    Boosted = ct < r.Time - 0.01f,
                 });
             }
 
@@ -1002,6 +1031,8 @@ namespace Rastvordd.Sim
             World.InteractKind.Bag => ((LootBag)it.target) is var lb && lb.Safe && !lb.Unlocked ? "[E] Сейф — нужна карта доступа" : lb.Safe ? "[E] Открыть сейф" : lb.IsCrate ? "[E] Открыть ящик" : lb.Corpse ? "[E] Обыскать рюкзак" : "[E] Подобрать вещи",
             World.InteractKind.Recycler => "[E] Переработчик — детали в лом",
             World.InteractKind.Lathe => ((Deployable)it.target).On ? "[E] Токарный станок — работает" : "[E] Токарный станок — детали из деталей",
+            World.InteractKind.Shutter => ((Structure)it.target).Open ? "[E] Открыть ставни" : "[E] Закрыть ставни",
+            World.InteractKind.Station => World.StationHint((Deployable)it.target) + (((Deployable)it.target).Kind == DeployKind.GunTable && me?.Weapon is WeaponState gw && gw.Def.MaxDurability > 0 && gw.Durability < gw.Def.MaxDurability ? " · Alt+E — починить до 100%" : ""),
             World.InteractKind.Pickup => ((Pickup)it.target).Kind switch
             {
                 PickupKind.Hemp => "[E] Собрать коноплю",
@@ -1009,7 +1040,9 @@ namespace Rastvordd.Sim
                 PickupKind.Fuse => "[E] Взять пробку",
                 PickupKind.PunchCard => "[E] Взять перфокарту I",
                 PickupKind.LocalItem => $"[E] Взять: {Items.Name(((Pickup)it.target).Item)}",
-                _ => "[E] Попить",
+                PickupKind.OilBarrel => "[E] Бочка с мазутом — набрать нефть в канистру",
+                PickupKind.CanisterPile => "[E] Ржавые канистры — слить остатки нефти",
+                _ => "[E] Попить · Alt+E — набрать во флягу",
             },
             World.InteractKind.Furnace => FurnaceHint((Deployable)it.target),
             World.InteractKind.Workbench => "[E] Верстак — изучение и крафт" + (me?.Weapon is WeaponState hw && hw.Def.MaxDurability > 0 && hw.Durability < hw.Def.MaxDurability ? $" · Alt+E — починить ({hw.Durability / hw.Def.MaxDurability * 100:0}%)" : ""),

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Godot;
 using Rastvordd.Sim;
@@ -428,6 +428,7 @@ void fragment() {
         }
 
         public void OpenTech() { _craftWin.Visible = false; _techWin.Visible = true; }
+        public void OpenCraftList() { _techWin.Visible = false; _craftWin.Visible = true; }   // E у станции (D54)
 
         /// <summary>Окно закрыли кликом мимо (крафт, изучение, админка) — Main прячет курсор.</summary>
         public event Action MenuClosed;

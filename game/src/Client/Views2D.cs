@@ -275,8 +275,14 @@ namespace Rastvordd.Client
             if (Swimming) { _ripple += dt; QueueRedraw(); }
             // звук воды: всплеск при входе, гребки на ходу
             if (Swimming && !_wasSwimming) Sfx.Play("splash", GlobalPosition, -4, 30, 0.1f);
+            if (Swimming != _wasSwimming && !dead) Vfx.Splash(Position);   // вход в воду и выход — всплеск
             _wasSwimming = Swimming;
-            if (Swimming && speed > 0.3f && (_strokeT -= dt) <= 0) { _strokeT = 0.85f; Sfx.Play("swim_stroke", GlobalPosition, -8, 22, 0.15f); }
+            if (Swimming && speed > 0.3f && (_strokeT -= dt) <= 0)
+            {
+                _strokeT = 0.85f;
+                Sfx.Play("swim_stroke", GlobalPosition, -8, 22, 0.15f);
+                Vfx.Splash(Position + new Vector2(Mathf.Cos(facing) * 8, -2), true);   // брызги от гребка
+            }
             if (_rig != null)
             {
                 _rig.SetSwim(Swimming);
@@ -957,7 +963,7 @@ namespace Rastvordd.Client
     {
         public bool Burning;
         readonly DeployKind _kind;
-        float _flicker;
+        float _flicker, _smokeAcc;
 
         readonly PointLight2D _light;
         readonly AudioStreamPlayer2D _crackle;
@@ -986,6 +992,8 @@ namespace Rastvordd.Client
             if (_light != null) _light.Energy = Burning ? 0.9f + 0.25f * Mathf.Sin(_flicker * 11) * Mathf.Sin(_flicker * 5.7f) : 0f;
             if (!Burning) return;
             _flicker += dt;
+            // дымок из трубы печи (верх спрайта)
+            if (_kind == DeployKind.Furnace && (_smokeAcc += dt) > 0.8f) { _smokeAcc = 0; Vfx.Puff("smoke_wisp", Position + new Vector2(0, 1), 42, 12, 0.6f, 5, 3); }
             QueueRedraw();
         }
 
@@ -1010,14 +1018,8 @@ namespace Rastvordd.Client
                     float k = 0.75f + 0.25f * Mathf.Sin(_flicker * 13) * Mathf.Sin(_flicker * 7.3f);
                     DrawCircle(new Vector2(-1, -11), 16, new Color(1f, 0.55f, 0.2f, 0.16f * k));
                     DrawCircle(new Vector2(-1, -11), 7, new Color(1f, 0.6f, 0.25f, 0.35f * k));
-                    var fire = Art.Get($"fx/fire_{(int)(_flicker * 10) % 4 + 1}");
-                    if (fire != null)
-                    {
-                        float fs = 0.6f;
-                        DrawSetTransform(new Vector2(-1, -6), 0, new Vector2(fs, fs));
-                        DrawTexture(fire, new Vector2(-fire.GetWidth() / 2, -fire.GetHeight()));
-                        DrawSetTransform(Vector2.Zero, 0, Vector2.One);
-                    }
+                    // огонь в топке: лист fire_torch (12 px), 12 к/с
+                    Vfx.DrawFrame(this, "fire_torch", new Vector2(-1, -5), _flicker, 12);
                 }
                 return;
             }
@@ -1148,17 +1150,6 @@ namespace Rastvordd.Client
         }
     }
 
-    public partial class FlashView2D : Node2D
-    {
-        public Color Color;
-        public float Radius, Life, Max;
-
-        public override void _Draw()
-        {
-            float k = Mathf.Clamp(Life / Max, 0, 1);
-            DrawCircle(new Vector2(0, -Iso.GunH), Radius * (0.6f + 0.4f * k), new Color(Color, k));
-        }
-    }
 
     /// <summary>Всплывающая надпись над точкой мира: «+16 Дерево».</summary>
     public partial class FloatText2D : Node2D

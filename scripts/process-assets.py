@@ -172,6 +172,51 @@ def process_sheet(a: dict, src: pathlib.Path) -> Image.Image:
     return strip
 
 
+def process_fx(a: dict, src: pathlib.Path) -> Image.Image:
+    """Лист эффекта cols×rows (кадры по порядку чтения) -> полоса кадров px×px в один ряд: game/art/fx/<id>.png.
+    Все кадры режутся одной общей рамкой (объединение рамок всех кадров), поэтому масштаб и точка привязки
+    (anchor: center — по центру, bottom — низ по центру, left — левый край по центру, для вспышек выстрела) не прыгают.
+    Палитра своя (огонь и вспышки ярче общей палитры мира); альфа ступенчатая: hard — 0/255, soft (дым) — 0/150/255."""
+    cols, rows = a["fx"]
+    px = a["px"]
+    raw = Image.open(src).convert("RGBA")
+    cw, ch = raw.width / cols, raw.height / rows
+    cells = []
+    for i in range(cols * rows):
+        c, r = i % cols, i // cols
+        cell = raw.crop((round(c * cw), round(r * ch), round((c + 1) * cw), round((r + 1) * ch)))
+        rr, gg, bb, al = cell.split()
+        al = al.point(lambda v: 0 if v < 24 else v)
+        cells.append(Image.merge("RGBA", (rr, gg, bb, al)))
+    boxes = [cl.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox() for cl in cells]
+    boxes = [b for b in boxes if b]
+    union = (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
+    uw, uh = union[2] - union[0], union[3] - union[1]
+    scale = (px - 1) / max(uw, uh)
+    size = (max(1, round(uw * scale)), max(1, round(uh * scale)))
+    anchor = a.get("anchor", "center")
+    ox = 0 if anchor == "left" else (px - size[0]) // 2
+    oy = px - size[1] if anchor == "bottom" else (px - size[1]) // 2
+    strip = Image.new("RGBA", (px * len(cells), px), (0, 0, 0, 0))
+    for i, cl in enumerate(cells):
+        small = cl.crop(union).resize(size, Image.BOX)
+        strip.paste(small, (i * px + ox, oy))
+    # своя палитра на весь лист: прозрачные пиксели не должны отнимать цвета
+    rgb = strip.convert("RGB").filter(ImageFilter.UnsharpMask(radius=1.0, percent=70, threshold=2))
+    alpha = strip.getchannel("A")
+    q = rgb.quantize(colors=a.get("colors", 24), method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).convert("RGB")
+    if a.get("alpha") == "soft":
+        alpha = alpha.point(lambda v: 0 if v < 50 else 150 if v < 150 else 255)
+    else:
+        alpha = alpha.point(lambda v: 255 if v >= 100 else 0)
+    out = q.convert("RGBA")
+    out.putalpha(alpha)
+    dst = ROOT / "game" / "art" / "fx" / f"{a['id']}.png"
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    out.save(dst)
+    return out
+
+
 def sheet(items: list[tuple[str, Image.Image]], scale: int, path: pathlib.Path, cols: int = 8) -> None:
     pad = 16
     imgs = [(n, im.resize((im.width * scale, im.height * scale), Image.NEAREST)) for n, im in items]
@@ -249,8 +294,12 @@ def main() -> None:
             _global_palette.save(PALETTE_FILE)
     pix, compare = [], []
     for a in manifest["assets"]:
-        src = ROOT / "assets" / "gen" / a["cat"] / f"{a['id']}.png"
+        src = ROOT / "assets" / "gen" / a["cat"] / f"{a.get('src', a['id'])}.png"   # src — производный ассет из чужого исходника
         if not src.exists() or (only and a["id"] not in only):
+            continue
+        if a.get("fx"):
+            strip = process_fx(a, src)
+            print(f"{a['id']:<24} fx -> {strip.width // strip.height} frames {strip.height}px")
             continue
         if a.get("sheet"):
             strip = process_sheet(a, src)

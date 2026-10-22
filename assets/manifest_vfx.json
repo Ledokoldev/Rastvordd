@@ -1,0 +1,368 @@
+{
+ "fx_framing": "A sprite sheet of ONE short visual-effect animation for a 2D top-down pixel-art survival game: a grid of {cols} columns and {rows} rows of equally sized square cells holding {n} frames in reading order (left to right, then the next row). Fully transparent background. Each frame sits in the middle of its own cell with a wide empty margin; nothing touches or crosses the cell borders; the effect has the same scale and the same anchor point in every frame, and consecutive frames change smoothly so they play as a fluid animation. Bold, simple, readable shapes with clear stepped cel shading (3 to 5 tones) and crisp edges, so it still reads when shrunk to a tiny pixel sprite. No text, no numbers, no labels, no grid lines, no cell borders, no background colour, no ground, no cast shadow.",
+ "fx_style": "Classic 16-bit pixel-art game effect look (like Enter the Gungeon, Hyper Light Drifter, Project Zomboid effects); gritty Soviet post-apocalyptic mood, colours slightly desaturated except light-emitting parts (fire, sparks, flashes, flares) which stay bright and saturated.",
+ "assets": [
+  {
+   "id": "smoke_puff",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a single puff of light grey smoke: frame 1 a small dense round puff, it swells into a soft lumpy cloud and slowly thins out and breaks apart into wisps by the last frame; light grey with white highlights on the top-left and blue-grey shadow on the bottom-right"
+  },
+  {
+   "id": "smoke_black",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 48,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a thick oily black smoke billow from a burning wreck: a heavy rolling cumulus of near-black and dark brown-grey smoke that churns and expands, with a faint dull orange underglow at the bottom of the first frames; by the last frames it is wider and slightly thinner"
+  },
+  {
+   "id": "smoke_red",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a puff of dense bright crimson-red signal smoke from a smoke flare: a round red puff that swells into a soft lumpy cloud and slowly thins out into pink-red wisps; saturated red with light pink highlights and dark red shadows"
+  },
+  {
+   "id": "smoke_green",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a puff of dense acid-green signal smoke from a smoke grenade: a round green puff that swells into a soft lumpy cloud and slowly thins into pale green wisps; saturated green with pale highlights and dark green shadows"
+  },
+  {
+   "id": "smoke_yellow",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a puff of dense mustard-yellow signal smoke: a round yellow puff that swells into a soft lumpy cloud and slowly thins into pale yellow wisps; yellow with cream highlights and ochre shadows"
+  },
+  {
+   "id": "smoke_cloud",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "a big dense white-grey smoke-grenade cloud spreading low over the ground: starts as a tight burst and billows outward into a wide lumpy flattened cloud of many round puffs, then slowly thins; off-white with grey shadows"
+  },
+  {
+   "id": "dust_puff",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "bottom",
+   "alpha": "soft",
+   "desc": "a burst of dry tan-brown dust kicked up from the ground by an impact or a landing: a low wide puff spreading sideways along the ground and rising a little, then settling and fading; sandy beige with brown shadows"
+  },
+  {
+   "id": "dust_step",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 16,
+   "anchor": "bottom",
+   "alpha": "soft",
+   "desc": "same as dust_puff",
+   "src": "dust_puff"
+  },
+  {
+   "id": "smoke_wisp",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "bottom",
+   "alpha": "soft",
+   "desc": "a thin curling wisp of grey chimney smoke rising straight up from a small source at the bottom center and drifting slightly to the right, looping animation where the curls move upward; tall and narrow, pale grey"
+  },
+  {
+   "id": "fire_small",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 24,
+   "anchor": "bottom",
+   "alpha": "hard",
+   "desc": "a small campfire or torch flame looping flicker: a few orange and yellow tongues of fire with a white-yellow core and a dark red rim, licking upward, base at the bottom center; each frame a slightly different flame shape so it loops"
+  },
+  {
+   "id": "fire_torch",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 12,
+   "anchor": "bottom",
+   "alpha": "hard",
+   "desc": "same as fire_small",
+   "src": "fire_small"
+  },
+  {
+   "id": "fire_medium",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 40,
+   "anchor": "bottom",
+   "alpha": "hard",
+   "desc": "a medium patch of burning fuel fire looping flicker (molotov fire on the ground): several tall orange and yellow tongues of flame with a bright yellow-white core and dark red tips, wide base at the bottom; each frame different so it loops"
+  },
+  {
+   "id": "fire_big",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "bottom",
+   "alpha": "hard",
+   "desc": "a big roaring fire from a burning wrecked vehicle, looping flicker: a tall wide mass of orange, yellow and red flames with a white-hot core, dark red and black smoky tips at the top; each frame different so it loops"
+  },
+  {
+   "id": "embers",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 24,
+   "anchor": "bottom",
+   "alpha": "hard",
+   "desc": "a few glowing orange and yellow ember sparks rising up from a fire and drifting, small bright dots and short streaks that move upward and fade out; looping"
+  },
+  {
+   "id": "explosion_small",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 64,
+   "anchor": "center",
+   "alpha": "hard",
+   "desc": "a small explosion of a hand grenade or satchel charge seen from above at a 3/4 angle: frame 1 a white-yellow flash, then a round fireball of orange and yellow with red edges, then it turns into dark grey smoke with a few flying debris specks, last frames dissipating smoke"
+  },
+  {
+   "id": "explosion_big",
+   "cat": "fx",
+   "fx": [
+    4,
+    3
+   ],
+   "px": 112,
+   "anchor": "center",
+   "alpha": "hard",
+   "desc": "a big powerful explosion of a C4 charge or rocket seen from above at a 3/4 angle: frame 1 a blinding white flash, then a huge expanding orange-yellow fireball with a red rim, chunks of concrete debris and dirt flying outward, then a rolling column of black and grey smoke with dying flames inside, last frames thin dark smoke"
+  },
+  {
+   "id": "shockwave",
+   "cat": "fx",
+   "fx": [
+    3,
+    2
+   ],
+   "px": 96,
+   "anchor": "center",
+   "alpha": "soft",
+   "desc": "an expanding shockwave ring of dust on the ground seen from directly above: a thin pale bright ring that grows outward and gets thinner and more transparent with each frame, empty in the middle"
+  },
+  {
+   "id": "muzzle_pistol",
+   "cat": "fx",
+   "fx": [
+    3,
+    2
+   ],
+   "px": 24,
+   "anchor": "left",
+   "alpha": "hard",
+   "desc": "a pistol muzzle flash seen from the side, the gun muzzle is at the left edge and the flash shoots to the right: a small bright yellow-white star-shaped burst with a few orange spikes; each frame a different burst shape"
+  },
+  {
+   "id": "muzzle_rifle",
+   "cat": "fx",
+   "fx": [
+    3,
+    2
+   ],
+   "px": 32,
+   "anchor": "left",
+   "alpha": "hard",
+   "desc": "an assault rifle (AK) muzzle flash seen from the side, the muzzle is at the left edge and the flash shoots to the right: a long bright yellow-white cone with a forked star of orange spikes and a hot white core; each frame a different shape"
+  },
+  {
+   "id": "muzzle_shotgun",
+   "cat": "fx",
+   "fx": [
+    3,
+    2
+   ],
+   "px": 40,
+   "anchor": "left",
+   "alpha": "hard",
+   "desc": "a shotgun muzzle blast seen from the side, the muzzle is at the left edge and the blast shoots to the right: a big wide fan of orange and yellow fire with a white core and a puff of grey smoke at its end; frames go from the biggest blast to fading smoke"
+  },
+  {
+   "id": "muzzle_suppressed",
+   "cat": "fx",
+   "fx": [
+    3,
+    2
+   ],
+   "px": 12,
+   "anchor": "left",
+   "alpha": "hard",
+   "desc": "a tiny suppressed muzzle flash seen from the side, the muzzle is at the left edge: a very small dim pale-yellow puff with a little grey smoke; each frame slightly different and smaller"
+  },
+  {
+   "id": "hit_sparks",
+   "cat": "fx",
+   "fx": [
+    3,
+    2
+   ],
+   "px": 24,
+   "anchor": "center",
+   "alpha": "hard",
+   "desc": "a burst of bright yellow-white metal sparks from a bullet ricochet on steel: short straight streaks flying out in a fan from the center, then fewer and dimmer orange sparks"
+  },
+  {
+   "id": "hit_wood",
+   "cat": "fx",
+   "fx": [
+    3,
+    2
+   ],
+   "px": 24,
+   "anchor": "center",
+   "alpha": "hard",
+   "desc": "a burst of small brown wood chips and splinters with a little pale sawdust flying out from a bullet hit on a wooden plank, then falling and fading"
+  },
+  {
+   "id": "hit_stone",
+   "cat": "fx",
+   "fx": [
+    3,
+    2
+   ],
+   "px": 24,
+   "anchor": "center",
+   "alpha": "hard",
+   "desc": "a burst of small grey stone chips and pale concrete dust flying out from a bullet hit on a wall, then a small dust cloud that fades"
+  },
+  {
+   "id": "hit_blood",
+   "cat": "fx",
+   "fx": [
+    3,
+    2
+   ],
+   "px": 24,
+   "anchor": "center",
+   "alpha": "hard",
+   "desc": "a small stylized burst of dark red droplets from a hit, cartoony and not gory: a few round dark-red drops and a tiny splash flying out and falling, then fading"
+  },
+  {
+   "id": "water_splash",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "bottom",
+   "alpha": "hard",
+   "desc": "a water splash on a pond surface: a crown of white and light-blue water droplets jumping up from the bottom center with ripples, then the droplets fall back and a ring of ripples remains and fades"
+  },
+  {
+   "id": "glass_shards",
+   "cat": "fx",
+   "fx": [
+    3,
+    2
+   ],
+   "px": 24,
+   "anchor": "center",
+   "alpha": "hard",
+   "desc": "a burst of small sharp pale-cyan glass shards glinting with white highlights, flying outward from the center and falling"
+  },
+  {
+   "id": "flare_burn",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "hard",
+   "desc": "a burning red signal flare hanging in the air: a blinding white-pink core surrounded by intense crimson-red fire and a ring of red glow, a few red sparks dripping down; looping flicker, each frame slightly different"
+  },
+  {
+   "id": "spark_electric",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "center",
+   "alpha": "hard",
+   "desc": "an electric short-circuit spark burst: jagged bright blue-white lightning arcs and small white-yellow sparks crackling out from the center, then fading to a few dim blue sparks"
+  },
+  {
+   "id": "steam_puff",
+   "cat": "fx",
+   "fx": [
+    4,
+    2
+   ],
+   "px": 32,
+   "anchor": "bottom",
+   "alpha": "soft",
+   "desc": "a jet of white steam hissing out of a leaking pipe at the bottom-left and puffing up and to the right, swelling into a soft white cloud that thins and fades"
+  }
+ ]
+}

@@ -341,13 +341,16 @@ namespace Rastvordd.Client
 
 namespace Rastvordd.Client
 {
-    /// <summary>Горящее пятно: несколько языков пламени из fx/fire_*, тёплый свет, треск.</summary>
+    /// <summary>Горящее пятно (молотов): языки пламени fx/fire_medium, подпалина, угольки-частицы, столб чёрного дыма, тёплый свет, треск.</summary>
     public partial class FireView2D : Godot.Node2D
     {
         public float Radius, Left;
         float _t;
         readonly Godot.PointLight2D _light;
         readonly Godot.Vector2[] _spots;
+        readonly Godot.CpuParticles2D _embers;
+        float _smokeAcc;
+        int _smokeI;
 
         public FireView2D(float radiusM, int seed)
         {
@@ -358,31 +361,49 @@ namespace Rastvordd.Client
             AddChild(_light);
             var crackle = Sfx.Loop("furnace_loop", -4, 25);
             if (crackle != null) { crackle.Autoplay = true; AddChild(crackle); }
+            // угольки над огнём — частицы с листом embers
+            _embers = Vfx.Embers(radiusM * Iso.PPM * 1.4f, 10);
+            _embers.Position = new Godot.Vector2(0, -Iso.H(0.6f));
+            AddChild(_embers);
             var rng = new Godot.RandomNumberGenerator { Seed = (ulong)seed };
-            _spots = new Godot.Vector2[7];
+            _spots = new Godot.Vector2[System.Math.Clamp((int)(radiusM * 2.5f), 3, 7)];
             for (int i = 0; i < _spots.Length; i++)
             {
                 float a = rng.Randf() * Godot.Mathf.Tau, r = Godot.Mathf.Sqrt(rng.Randf()) * radiusM * Iso.PPM * 0.8f;
-                _spots[i] = new Godot.Vector2(Godot.Mathf.Cos(a) * r, Godot.Mathf.Sin(a) * r * 0.5f);
+                _spots[i] = new Godot.Vector2(Godot.Mathf.Cos(a) * r, Godot.Mathf.Sin(a) * r * 0.5f).Round();
             }
+            System.Array.Sort(_spots, (p, q) => p.Y.CompareTo(q.Y));   // дальние языки рисуются первыми
         }
 
-        public void Tick(float dt) { _t += dt; _light.Energy = (Left < 2 ? Left / 2 : 1) * (1.2f + 0.3f * Godot.Mathf.Sin(_t * 13) * Godot.Mathf.Sin(_t * 5.3f)); QueueRedraw(); }
+        public void Tick(float dt)
+        {
+            _t += dt;
+            _light.Energy = (Left < 2 ? Left / 2 : 1) * (1.2f + 0.3f * Godot.Mathf.Sin(_t * 13) * Godot.Mathf.Sin(_t * 5.3f));
+            _embers.Emitting = Left > 1.5f;
+            // столб чёрного маслянистого дыма над огнём (Vfx: вне кадра не создаётся)
+            _smokeAcc += dt * (Left > 2 ? 1f : 0.4f);
+            if (_smokeAcc > 0.45f / Godot.Mathf.Max(1f, Radius))
+            {
+                _smokeAcc = 0;
+                Vfx.Puff("smoke_black", Position + _spots[_smokeI++ % _spots.Length], Iso.H(1.2f), 22, 0.75f, 2.4f, 4);
+            }
+            QueueRedraw();
+        }
 
         public override void _Draw()
         {
             float fade = Left < 2 ? Left / 2 : 1;
-            DrawSetTransform(Godot.Vector2.Zero, 0, new Godot.Vector2(1, 0.5f));
-            DrawCircle(Godot.Vector2.Zero, Radius * Iso.PPM, new Godot.Color(0.08f, 0.05f, 0.03f, 0.45f * fade));   // копоть
-            DrawSetTransform(Godot.Vector2.Zero, 0, Godot.Vector2.One);
-            for (int i = 0; i < _spots.Length; i++)
+            var scorch = Art.Get("decals/decal_burnt_spot");
+            if (scorch != null)
             {
-                var tex = Art.Get($"fx/fire_{((int)(_t * 10) + i) % 4 + 1}");
-                if (tex == null) continue;
-                float s = (1.3f + 0.45f * (i % 3) + 0.15f * Godot.Mathf.Sin(_t * 7 + i)) * fade;
-                var size = tex.GetSize() * s;
-                DrawTextureRect(tex, new Godot.Rect2(_spots[i] - new Godot.Vector2(size.X / 2, size.Y), size), false);
+                // копоть: существующая декаль подпалины по размеру пятна (целый масштаб — пиксели не плывут)
+                float sc = Godot.Mathf.Max(1, Godot.Mathf.Round(Radius * 2 * Iso.PPM / scorch.GetWidth()));
+                var sz = scorch.GetSize() * sc;
+                DrawTextureRect(scorch, new Godot.Rect2(-sz / 2, sz), false, new Godot.Color(1, 1, 1, 0.55f * fade));
             }
+            // языки пламени — лист fire_medium (40 px), у каждого своя фаза; на угасании — маленький огонь
+            for (int i = 0; i < _spots.Length; i++)
+                Vfx.DrawFrame(this, fade > 0.5f && i % 3 != 2 ? "fire_medium" : "fire_small", _spots[i], _t, 12, 1, null, i * 3);
         }
     }
 }

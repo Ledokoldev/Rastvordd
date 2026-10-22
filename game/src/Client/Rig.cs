@@ -339,19 +339,9 @@ namespace Rastvordd.Client
             // пиксельное пламя: язычки разной высоты, мерцают; всегда тянутся вверх
             void DrawFlame(Vector2 at)
             {
+                // лист fx/fire_torch (12 px, 8 кадров), низ пламени — на конце факела
                 DrawSetTransform(Vector2.Zero, 0, Vector2.One);
-                int f = (int)(s.Breath * 9f);
-                for (int i = -2; i <= 2; i++)
-                {
-                    uint hsh = (uint)(f * 73856093 ^ (i + 7) * 19349663);
-                    int h = 2 + (int)(hsh % 4) - Mathf.Abs(i);
-                    if (h <= 0) continue;
-                    var x = at.X + i;
-                    DrawRect(new Rect2(x, at.Y - h - 1, 1, h + 1), new Color(0.95f, 0.35f, 0.1f));
-                    if (h > 1) DrawRect(new Rect2(x, at.Y - h + 1, 1, h - 1), new Color(1f, 0.72f, 0.2f));
-                    if (Mathf.Abs(i) <= 1 && h > 2) DrawRect(new Rect2(x, at.Y - 1, 1, 1), new Color(1f, 0.95f, 0.65f));
-                }
-                if ((f & 3) == 0) DrawRect(new Rect2(at.X + ((f >> 2) % 3) - 1, at.Y - 7, 1, 1), new Color(1f, 0.6f, 0.2f, 0.8f));   // искра
+                Vfx.DrawFrame(this, "fire_torch", at + new Vector2(0, 2), s.Breath, 9f);
             }
 
             void DrawArm((float a1, float a2, Vector2 joint) arm, Vector2 sh)

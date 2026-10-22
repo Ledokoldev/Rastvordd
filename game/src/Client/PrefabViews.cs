@@ -87,7 +87,7 @@ namespace Rastvordd.Client
             _patches = patches;
             TextureFilter = TextureFilterEnum.Nearest;
             TextureRepeat = TextureRepeatEnum.Enabled;
-            Material = VisionFx.ObjectMat;
+            Material = VisionFx.GroundMat;
         }
 
         public override void _Draw()
@@ -132,7 +132,7 @@ namespace Rastvordd.Client
             _list = list;
             TextureFilter = TextureFilterEnum.Nearest;
             TextureRepeat = TextureRepeatEnum.Enabled;
-            Material = VisionFx.ObjectMat;
+            Material = VisionFx.GroundMat;
         }
 
         // прямоугольник по осям «вдоль проёма» u и «наружу» n → мировые min/max
@@ -303,7 +303,7 @@ namespace Rastvordd.Client
         {
             _items = items;
             TextureFilter = TextureFilterEnum.Nearest;
-            Material = VisionFx.ObjectMat;
+            Material = VisionFx.GroundMat;
         }
 
         public override void _Draw()
@@ -328,7 +328,7 @@ namespace Rastvordd.Client
         {
             _wires = wires;
             ZIndex = 3;
-            Material = VisionFx.ObjectMat;
+            Material = VisionFx.GroundMat;
         }
 
         public override void _Draw()

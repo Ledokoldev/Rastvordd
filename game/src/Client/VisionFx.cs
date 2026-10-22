@@ -43,6 +43,14 @@ void vertex() { base_px = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xy; }
 void fragment() { COLOR.rgb = vis_apply(COLOR.rgb, vis_at(base_px)); }
 ";
 
+        // земля и плоские слои (участки РТ, декали, входы, провода): видимость по каждому пикселю, а не по точке узла —
+        // иначе весь слой РТ гаснет или светится целиком от одной точки
+        const string GroundShader = "shader_type canvas_item;\n" + Lib + @"
+varying vec2 world_px;
+void vertex() { world_px = (MODEL_MATRIX * vec4(VERTEX, 0.0, 1.0)).xy; }
+void fragment() { COLOR.rgb = vis_apply(COLOR.rgb, vis_at(world_px)); }
+";
+
         const string SwayShader = "shader_type canvas_item;\n" + Lib + @"
 uniform float sway_amp = 1.5;
 uniform float sway_height = 120.0;
@@ -92,6 +100,8 @@ void fragment() {
 
         static ShaderMaterial _objectMat;
         /// <summary>Материал для объектов мира (не персонажей): видимость по точке основания узла.</summary>
+        static ShaderMaterial _groundMat;
+        public static ShaderMaterial GroundMat => _groundMat ??= new ShaderMaterial { Shader = new Shader { Code = GroundShader } };
         public static ShaderMaterial ObjectMat => _objectMat ??= new ShaderMaterial { Shader = new Shader { Code = ObjectShader } };
 
         static bool _registered;

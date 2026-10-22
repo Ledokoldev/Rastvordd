@@ -127,3 +127,21 @@
 
 ## Арт
 Для каждого ствола, компонента, обвеса, патрона и ивента (самолёт, контейнер, УАЗ, вертолёт, вагоны, схрон): иконка 64×64 + спрайт в руках / в мире. «Мужицкий смак» — детально, потёрто, советско, на тёмном фоне читается. Генерация через Codex (scripts/gen-assets.ps1).
+
+## Реализация (2026-10-22, код: game/src/Sim/Weaponry.cs)
+**id для арта** (иконки `icons/icon_<id>.png`, в руках `weapons/<id>.png`; нет файла — клиент берёт похожую старую картинку):
+- Стволы: weapon_bow, weapon_crossbow, weapon_pipeshotgun, weapon_sawnoff, weapon_nagant, weapon_homesmg, weapon_grach, weapon_pps43, weapon_svt40, weapon_mp133, weapon_akm, weapon_an94, weapon_ppsh, weapon_svd, weapon_saiga12, weapon_mosin, weapon_aps.
+- Патроны: ammo_9mm, ammo_12g, ammo_762, ammo_545, ammo_bolt (болт арбалета), arrow.
+- Компоненты (16): comp_spring, comp_pipe, comp_tape, comp_gears, comp_circuit, comp_lens, comp_trigger, comp_bolt_carrier (затворная группа), comp_barrel_rifled, comp_frame_pistol, comp_body_smg, comp_body_rifle, comp_receiver_ak, comp_barrel_chrome, comp_gas_block, comp_oil.
+- Обвесы: att_reddot, att_scope2x, att_scope4x (ПСО), att_suppressor_can (банка), att_suppressor, att_suppressor_pbs, att_compensator, att_compensator_army, att_grip_wood, att_grip, att_torch, att_flashlight, att_laser (ЛЦУ), att_mag_ext, att_mag_ext_army, att_mag_twin_crude, att_mag_twin, att_stock_tac.
+- Станок: deploy_lathe.
+
+**Старые сейвы:** ammo_pistol → ammo_9mm, ammo_rifle → ammo_762, weapon_ak → weapon_akm, weapon_pipe → weapon_nagant (и в изученном).
+
+**Обвесы:** перетащить обвес на ствол в рюкзаке/поясе — встаёт (старый из слота — в рюкзак); колёсико мыши по стволу — снять все. Прицел хранит только `SightZoom` (1 / 1,5 / 2,2) и бонус к разбросу в прицеливании; механика прицеливания — позже. Кустарный глушитель — 40 выстрелов, потом разваливается.
+
+**Износ и ремонт (минимально):** у ствола ресурс в выстрелах (тир 1 ≈ 120–500, тир 2 ≈ 700–800, тир 3 — 1000, элита — 900). При 0 — не стреляет; ниже 20% — разброс +25%. Ремонт: у любого верстака Alt+E со стволом в руках (или UiOp.Repair по ячейке): 1 оружейное масло = +50% ресурса и свежие обвесы; сломанный — ещё пружина.
+
+**Токарный станок:** ставится как печь, окно — как у переработчика. Точит самый сложный рецепт, на который хватает содержимого; масло — из угля 20 (жира и топлива в игре пока нет). Шумит (радиус 45 м каждые 2 с). Хромированный ствол и газоотвод — только при верстаке 3 рядом.
+
+**Темп:** детали тира 3 в луте — с 4,5 ч вайпа (и фаза режиссёра ≥ 1), не больше 3 штук на мир в час (ящики РТ 2, сейфы, ивенты). Охрана РТ иногда (10%) роняет свой ствол тира 1–2, калаши — нет. Элита — только ивенты режиссёра (5%). В летописи вехи «первый ствол (тир N)» по каждому и «МИР — впервые ствол (тир N)».

@@ -436,6 +436,14 @@ namespace Rastvordd.Sim
             float tf = 0, th = 0, ta = 0;
             foreach (var b in _bots.Values) { tf += b.TotFlee; th += b.TotFight; ta += b.TotAll; }
             if (ta > 0) log($"ЗДОРОВЬЕ итог: в бегстве {tf / ta:P1}, в бою/охоте {th / ta:P1} времени живых ботов");
+            // итог баз: полы, установленное по видам (для сравнения прогонов, D52)
+            foreach (var b in _bots.Values)
+            {
+                int floors = World.Structures.FindAll(s => s.OwnerId == b.Me.Id && s.IsFloor).Count, edges = World.Structures.FindAll(s => s.OwnerId == b.Me.Id && s.IsEdge).Count;
+                var kinds = new SortedDictionary<string, int>();
+                foreach (var d in World.Deployables) if (d.OwnerId == b.Me.Id) kinds[d.Kind.ToString()] = kinds.GetValueOrDefault(d.Kind.ToString()) + 1;
+                log($"СЕТКА {b.Me.Name}: {b.PlanInfo} · полов {floors}, рёбер {edges} · {string.Join(", ", System.Linq.Enumerable.Select(kinds, kv => $"{kv.Key} {kv.Value}"))}");
+            }
             foreach (var b in _bots.Values)
             {
                 var parts = new List<string>();

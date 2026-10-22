@@ -80,6 +80,16 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Слышимость выстрела для ботов: по шуму ствола.</summary>
+        /// <summary>
+        /// Дальность, на которой игрок слышит выстрел (м), по типу ствола: пистолет 150, ПП 170, дробовик 200, автомат 250,
+        /// винтовка 300, марксманка/снайперка 350, лук и арбалет 25. Громкость к краю падает линейно (Acoustics).
+        /// </summary>
+        public static float ShotHearM(string id)
+        {
+            if (Items.Get(id)?.Weapon is not WeaponDef w || w.Melee) return 25f;
+            return w.NoiseRadius switch { <= 12 => 25f, <= 45 => 150f, <= 50 => 170f, <= 55 => 200f, <= 70 => 250f, <= 75 => 300f, _ => 350f };
+        }
+
         public static float HearRange(string id) => Items.Get(id)?.Weapon is WeaponDef w && !w.Melee ? Math.Max(25f, w.NoiseRadius * 2.6f) : 25f;
 
         // ---------- лут ----------

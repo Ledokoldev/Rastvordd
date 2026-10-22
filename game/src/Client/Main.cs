@@ -984,11 +984,14 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         if (e.Text == "weapon_bow") Sfx.Play("shot_bow", Iso.Px(e.Pos), -4, 25, 0.06f);
                         else
                         {
-                            // D46: свой звук shot_<ствол> (shot_akm, shot_nagant…), пока файла нет — сэмпл калаша (громкие — как есть, тихие — выше и тише)
+                            // D46: свой звук shot_<ствол> (shot_akm, shot_nagant…), пока файла нет — сэмпл калаша (громкие — как есть, тихие — выше и тише).
+                            // Дальность слышимости — по типу ствола (Weaponry.ShotHearM), глушитель сокращает её и громкость.
                             string own = "shot_" + (e.Text ?? "").Replace("weapon_", "");
                             bool loud = (Items.Get(e.Text)?.Weapon?.NoiseRadius ?? 0) >= 70;
-                            if (Sfx.Get(own) != null) Sfx.Play(own, Iso.Px(e.Pos), 0, 120, 0.03f);
-                            else Sfx.Play("shot_ak", Iso.Px(e.Pos), loud ? 0 : -3, 120, 0.03f, loud ? 1f : 1.12f);
+                            float muf = e.OtherId > 0 ? Mathf.Clamp(e.OtherId / 100f, 0.2f, 1f) : 1f;
+                            float hear = Weaponry.ShotHearM(e.Text) * muf, supDb = muf < 0.95f ? -8f : 0f;
+                            if (Sfx.Get(own) != null) Sfx.Play(own, Iso.Px(e.Pos), supDb, hear, 0.03f);
+                            else Sfx.Play("shot_ak", Iso.Px(e.Pos), (loud ? 0 : -3) + supDb, hear, 0.03f, loud ? 1f : 1.12f);
                         }
                         break;
                     case SimEventKind.Reload:
@@ -1229,9 +1232,10 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             for (int i = 0; i < contacts; i++)
             {
                 bool sprint = speed > Sim.World.WalkSpeed * 1.3f;
-                float vol = (id == _myId ? Tuning.StepsVolumeDb : -4) + (sprint ? 3 : 0) - (crouch ? 10 : 0);
+                float vol = (id == _myId ? Tuning.StepsVolumeDb : -2) + (sprint ? 3 : 0) - (crouch ? 6 : 0);
                 var surf = SurfaceAt(pos);
-                Footsteps.Play(surf, Iso.Px(pos), vol, crouch ? 7 : sprint ? 24 : 18);
+                // слышимость чужих шагов от радиуса обзора (50 м): бег — почти весь обзор, шаг — 3/5, присед — четверть
+                Footsteps.Play(surf, Iso.Px(pos), vol, crouch ? Footsteps.HearCrouch : sprint ? Footsteps.HearRun : Footsteps.HearWalk);
                 // пыль из-под ног: только песок/грунт и снег, едва заметно; в приседе не пылит
                 if (!crouch && surf is Surface.Sand or Surface.Snow && (sprint || (_frame + id) % 2 == 0))
                     Vfx.Dust(Iso.Px(pos), true, sprint ? 0.55f : 0.35f);

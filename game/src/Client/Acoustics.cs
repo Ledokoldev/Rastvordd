@@ -10,10 +10,11 @@ namespace Rastvordd.Client
     ///
     /// Уровень 1 — физика звука в мире:
     ///  • задержка по скорости звука (343 м/с): дальний выстрел слышен позже вспышки;
-    ///  • затухание с расстоянием (≈ закон обратных квадратов от опорных 4 м, мягкий край на пределе слышимости);
-    ///  • ближний/дальний звук: с расстоянием растёт глухой «дальний» слой (низкие частоты + большая реверберация);
+    ///  • затухание с расстоянием — линейное (по просьбе пользователя): вплотную полная громкость, на краю слышимости
+    ///    тихо (−16 дБ), но слышно; дальше края — тишина. Край у каждого звука свой (шаги, выстрелы по типу ствола);
+    ///  • ближний/дальний звук: с расстоянием растёт глухой «дальний» слой — тоже по направлению, чтобы было понятно, откуда;
     ///  • окклюзия: стены и стволы между слушателем и источником глушат звук (НЧ-фильтр, −7 дБ);
-    ///  • реверберация по месту, где стоит слушатель: двор РТ гулкий, лес мягкий, поле почти сухое.
+    ///  • реверберация по месту, где стоит слушатель: двор РТ гулкий, лес мягкий, поле сухое; шаги почти без неё.
     ///
     /// Уровень 2 — бинаурал для наушников (упрощённый HRTF):
     ///  • 16 шин-направлений; в каждой своя межушная задержка (до 0,66 мс) и разница громкостей ушей;
@@ -25,11 +26,12 @@ namespace Rastvordd.Client
         const int Sectors = 16;
         const float SpeedOfSound = 343f;
         const float MaxItdMs = 0.66f;
-        const float RefDistM = 4f;
+        const float EdgeGain = 0.16f;   // громкость на краю слышимости (≈ −16 дБ)
 
         static Node _parent;
         static readonly string[] Dry = new string[Sectors];
         static readonly string[] DryOccluded = new string[Sectors];
+        static readonly string[] FarDir = new string[Sectors];
         static AudioEffectReverb _roomReverb;
         static SVec _listener;
         static readonly List<(SVec a, SVec b)> _wallBoxes = new();
@@ -52,17 +54,14 @@ namespace Rastvordd.Client
             _roomReverb = new AudioEffectReverb { RoomSize = 0.3f, Damping = 0.6f, Wet = 0.12f, Dry = 0f, PredelayMsec = 20 };
             AudioServer.AddBusEffect(room, _roomReverb);
 
-            int far = AddBus("AcFar");
-            AudioServer.AddBusEffect(far, new AudioEffectLowPassFilter { CutoffHz = 1300 });
-            AudioServer.AddBusEffect(far, new AudioEffectReverb { RoomSize = 0.85f, Damping = 0.55f, Wet = 0.55f, Dry = 0.45f, PredelayMsec = 60, Spread = 1f });
-
             // бинауральные направления
             for (int i = 0; i < Sectors; i++)
             {
                 float az = i * Mathf.Tau / Sectors;   // 0 — перед (верх экрана), по часовой
                 Dry[i] = $"AcDir{i}";
                 DryOccluded[i] = $"AcDirOcc{i}";
-                foreach (var (name, occluded) in new[] { (Dry[i], false), (DryOccluded[i], true) })
+                FarDir[i] = $"AcFarDir{i}";
+                foreach (var (name, occluded) in new[] { (Dry[i], false), (DryOccluded[i], true), (FarDir[i], false) })
                 {
                     int bus = AddBus(name);
                     float s = Mathf.Sin(az), c = Mathf.Cos(az);
@@ -77,6 +76,12 @@ namespace Rastvordd.Client
                     // сзади — тусклее на высоких
                     if (c < 0) AudioServer.AddBusEffect(bus, new AudioEffectHighShelfFilter { CutoffHz = 2500, Gain = Mathf.DbToLinear(-7f * -c) });
                     if (occluded) AudioServer.AddBusEffect(bus, new AudioEffectLowPassFilter { CutoffHz = 750 });
+                    if (name == FarDir[i])
+                    {
+                        // дальний раскат: глухой и чуть размытый, но с того же направления (раньше шёл отовсюду — не понять, откуда)
+                        AudioServer.AddBusEffect(bus, new AudioEffectLowPassFilter { CutoffHz = 1300 });
+                        AudioServer.AddBusEffect(bus, new AudioEffectReverb { RoomSize = 0.6f, Damping = 0.6f, Wet = 0.18f, Dry = 0.82f, PredelayMsec = 40, Spread = 0.2f });
+                    }
                 }
             }
         }
@@ -102,11 +107,12 @@ namespace Rastvordd.Client
             (float room, float damp, float wet, float pre) target = inConcreteYard ? (0.82f, 0.25f, 0.32f, 45f)
                 : biome switch
                 {
-                    Biome.Forest => (0.45f, 0.75f, 0.18f, 15f),
-                    Biome.Swamp => (0.4f, 0.8f, 0.14f, 15f),
-                    Biome.Tundra => (0.35f, 0.85f, 0.08f, 25f),   // снег глушит
-                    Biome.Arid or Biome.Beach => (0.3f, 0.4f, 0.09f, 30f),
-                    _ => (0.3f, 0.6f, 0.1f, 20f),
+                    // открытое место почти сухое: отражать звук нечему (раньше в поле «гудело»)
+                    Biome.Forest => (0.4f, 0.75f, 0.1f, 15f),
+                    Biome.Swamp => (0.3f, 0.8f, 0.05f, 15f),
+                    Biome.Tundra => (0.25f, 0.9f, 0.03f, 20f),   // снег глушит
+                    Biome.Arid or Biome.Beach => (0.2f, 0.6f, 0.03f, 20f),
+                    _ => (0.2f, 0.7f, 0.03f, 15f),
                 };
             float k = (float)Mathf.Min(1, dt * 1.5);
             _roomReverb.RoomSize = Mathf.Lerp(_roomReverb.RoomSize, target.room, k);
@@ -120,16 +126,17 @@ namespace Rastvordd.Client
         }
 
         /// <summary>Звук в точке мира. Задержка, расстояние, окклюзия, направление и эхо считаются здесь.</summary>
-        public static void Play(AudioStream stream, SVec posM, float volumeDb, float hearM, float pitch)
+        /// <param name="roomSend">доля эха места: 1 — выстрелы и взрывы, 0,3 — шаги и мелочь</param>
+        public static void Play(AudioStream stream, SVec posM, float volumeDb, float hearM, float pitch, float roomSend = 1f)
         {
             if (stream == null || _parent == null) return;
             var d = posM - _listener;
             float dist = d.Length();
             if (dist > hearM) return;
 
-            // затухание: обратные квадраты от опорного расстояния + мягкий край у предела слышимости
-            float db = volumeDb - 20f * Mathf.Log(Mathf.Max(1f, dist / RefDistM)) / Mathf.Log(10f) * 0.75f;
-            db += Mathf.LinearToDb(Mathf.Clamp(1f - Mathf.Max(0, dist - hearM * 0.7f) / (hearM * 0.3f), 0.001f, 1f));
+            // затухание линейное: вплотную (≤ 1 м) — полная громкость, на краю слышимости — EdgeGain
+            float near = Mathf.Clamp((dist - 1f) / Mathf.Max(1f, hearM - 1f), 0f, 1f);
+            float db = volumeDb + Mathf.LinearToDb(Mathf.Lerp(1f, EdgeGain, near));
 
             bool occluded = dist > 1.5f && Occluded(_listener, posM);
             if (occluded) db -= 7f;
@@ -139,7 +146,7 @@ namespace Rastvordd.Client
             int sector = ((int)Mathf.Round(az / Mathf.Tau * Sectors) % Sectors + Sectors) % Sectors;
             string dryBus = occluded ? DryOccluded[sector] : Dry[sector];
 
-            float farMix = Mathf.SmoothStep(25f, 110f, dist);   // доля «дальнего» слоя
+            float farMix = Mathf.SmoothStep(40f, 220f, dist) * 0.6f;   // доля «дальнего» слоя
             double delay = dist / SpeedOfSound;
 
             void Start()
@@ -147,8 +154,8 @@ namespace Rastvordd.Client
                 float dryDb = db + Mathf.LinearToDb(Mathf.Max(0.001f, 1f - farMix * 0.75f));
                 if (Tuning.SteamHrtf && SteamHrtf.Ready) SteamHrtf.Play(stream, posM - _listener, dryDb, pitch, occluded);   // HRTF Valve
                 else Spawn(stream, dryBus, dryDb, pitch);
-                Spawn(stream, "AcRoom", db - 2f, pitch);                                         // эхо места слушателя
-                if (farMix > 0.02f) Spawn(stream, "AcFar", db + Mathf.LinearToDb(farMix) + 1f, pitch); // глухой дальний раскат
+                if (roomSend > 0.01f) Spawn(stream, "AcRoom", db - 2f + Mathf.LinearToDb(roomSend), pitch);   // эхо места слушателя
+                if (farMix > 0.02f) Spawn(stream, FarDir[sector], db + Mathf.LinearToDb(farMix), pitch);     // глухой дальний раскат — с той же стороны
             }
             if (delay < 0.015) Start();
             else _pending.Add((_clock + delay, Start));

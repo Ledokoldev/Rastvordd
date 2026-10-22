@@ -32,7 +32,10 @@ namespace Rastvordd.Client
         public static string Pick(string name, string fallback) => Get(name) != null ? name : fallback;
 
         /// <param name="hearM">Дальше этого расстояния (м) не слышно.</param>
-        public static void Play(string name, Vector2 posPx, float volumeDb = 0, float hearM = 40, float pitchVar = 0.08f, float basePitch = 1f)
+        /// <summary>Сколько эха места подмешать: шаги и мелочь — чуть-чуть (в поле не гудят), выстрелы и взрывы — полностью.</summary>
+        public enum Room { Full, Quiet }
+
+        public static void Play(string name, Vector2 posPx, float volumeDb = 0, float hearM = 40, float pitchVar = 0.08f, float basePitch = 1f, Room room = Room.Full)
         {
             var s = Get(name);
             if (s == null || _parent == null) return;
@@ -40,7 +43,7 @@ namespace Rastvordd.Client
             if (Acoustics.Ready)
             {
                 // звук мира — через акустику: задержка, окклюзия, эхо, бинаурал
-                Acoustics.Play(s, new System.Numerics.Vector2(posPx.X / Iso.PPM, posPx.Y / Iso.PPM), volumeDb, hearM, Acoustics.RandomPitch(basePitch, pitchVar));
+                Acoustics.Play(s, new System.Numerics.Vector2(posPx.X / Iso.PPM, posPx.Y / Iso.PPM), volumeDb, hearM, Acoustics.RandomPitch(basePitch, pitchVar), room == Room.Full ? 1f : 0.3f);
                 return;
             }
             var p = new AudioStreamPlayer2D

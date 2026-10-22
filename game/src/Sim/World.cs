@@ -1204,7 +1204,7 @@ namespace Rastvordd.Sim
             }
             a.LastShotTime = Time;
             Noises.Add(new Noise { Pos = a.Pos, Radius = w.Noise, SourceId = a.Id, Time = Time });
-            Events.Add(new SimEvent { Kind = SimEventKind.Shot, ActorId = a.Id, Pos = muzzle, Dir = dir0, Text = wd.Id, Value = w.NoFlash ? 1 : 0 });
+            Events.Add(new SimEvent { Kind = SimEventKind.Shot, ActorId = a.Id, Pos = muzzle, Dir = dir0, Text = wd.Id, Value = w.NoFlash ? 1 : 0, OtherId = (int)MathF.Round(100 * w.Noise / MathF.Max(1, wd.NoiseRadius)) });   // OtherId — громкость с глушителем, %
         }
 
         /// <summary>Удар инструментом: сначала люди в дуге перед собой, потом ресурсы.</summary>

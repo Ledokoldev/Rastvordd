@@ -28,14 +28,14 @@ namespace Rastvordd.Client
         BuildBar _buildBar;
         StructTip _structTip;
         PickupFeed _feed;
-        Label _guide;
+        BuildGuidePanel _guide;
         int _setPiece = -1;
         // наблюдатель (песочница ботов)
         bool _spectate;
         int _followId, _timeScale = 1;
         float _effSpeed = 1;   // сколько секунд мира проходит за секунду на деле (песочница может не успевать)
         float _specRefresh;
-        Label _specPanel;
+        SpectatorPanel _specPanel;
         string _researchReq;      // изучить узел дерева (id)
         (UiOp op, string item, int index)? _uiReq;
         bool UiShown => _inv.Visible;
@@ -308,7 +308,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _buildBar = new BuildBar { Visible = false };
             _buildBar.SetAnchorsPreset(Control.LayoutPreset.CenterBottom);
             _buildBar.OffsetLeft = -_buildBar.CustomMinimumSize.X / 2; _buildBar.OffsetRight = _buildBar.CustomMinimumSize.X / 2;
-            _buildBar.OffsetTop = -205; _buildBar.OffsetBottom = -145;
+            _buildBar.OffsetTop = -300; _buildBar.OffsetBottom = -234;   // над подсказкой действия
             _hud.AddChild(_buildBar);
             _structTip = new StructTip();
             _hud.AddChild(_structTip);
@@ -317,11 +317,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _feed.OffsetRight = -20; _feed.OffsetLeft = -20 - _feed.CustomMinimumSize.X;
             _feed.OffsetBottom = -96; _feed.OffsetTop = -96 - _feed.CustomMinimumSize.Y;   // над плашкой оружия
             _hud.AddChild(_feed);
-            _guide = new Label { Position = new Vector2(0, 120), MouseFilter = Control.MouseFilterEnum.Ignore };
-            _guide.AddThemeFontSizeOverride("font_size", 15);
-            _guide.AddThemeColorOverride("font_color", new Color(0.85f, 0.92f, 1f));
-            _guide.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.9f));
-            _guide.AddThemeConstantOverride("outline_size", 5);
+            _guide = new BuildGuidePanel();
             _hud.AddChild(_guide);
             _hud.CraftRequested += (i, n) => { _craftPendIdx = i; _craftPendLeft = n; };
             _hud.ResearchRequested += id => _researchReq = id;
@@ -631,41 +627,18 @@ else if (arg == "--atcrate")
             if (_specPanel == null)
             {
                 _hud.SpectatorMode();
-                _specPanel = new Label { Position = new Vector2(16, 14), MouseFilter = Control.MouseFilterEnum.Ignore };
-                _specPanel.AddThemeFontSizeOverride("font_size", 14);
-                _specPanel.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.9f));
-                _specPanel.AddThemeConstantOverride("outline_size", 5);
+                _specPanel = new SpectatorPanel { Position = new Vector2(16, 14) };
                 _hud.AddChild(_specPanel);
             }
             if ((_specRefresh -= dt) > 0) return;
             _specRefresh = 0.4f;
-            var sb = new System.Text.StringBuilder();
-            sb.Append($"НАБЛЮДАТЕЛЬ · скорость ×{_timeScale}{(_timeScale > 1 && _effSpeed < _timeScale * 0.85f ? $" (факт ×{_effSpeed:0.#})" : "")} · время {(int)(_server.World.Time / 60):00}:{(int)(_server.World.Time % 60):00}\n");
-            sb.Append("Tab — следующий бот · F — свободная камера · WASD/Shift — лететь · 1–6 — скорость ×1/×2/×4/×8/×10/×20\n\n");
-            var lines = _server.BotLines();
-            if (lines.Count <= 5)
-                foreach (var (id, line) in lines) sb.Append(id == _followId ? "▶ " : "   ").Append(line).Append('\n');
-            else
-            {
-                // много ботов: подробно — тот, за кем следим; остальные — таблица гонки (кто впереди)
-                var f = lines.Find(l => l.id == _followId);
-                if (f.line != null) sb.Append("▶ ").Append(f.line).Append("\n\n");
-                sb.Append("ГОНКА\n");
-                int n = 0;
-                foreach (var (id, _, line) in _server.BotShortLines())
-                    if (n++ < 24) sb.Append(id == _followId ? " ▶ " : "    ").Append(line).Append('\n');
-            }
-            sb.Append($"\nРЕЖИССЁР · фаза {(_cur.Phase == 0 ? "ранняя" : _cur.Phase == 1 ? "средняя" : "поздняя")}");
-            foreach (var m in _cur.Markers) sb.Append($" · {m.Name}{(m.Open ? " (открыт)" : "")}");
-            if (_cur.Hot.Count > 0) sb.Append($" · самое горячее место: жар {_cur.Hot[0].heat:0}");
-            sb.Append('\n');
-            var ms = _server.World.Milestones;
-            if (ms.Count > 0)
-            {
-                sb.Append("\nВЕХИ\n");
-                for (int i = System.Math.Max(0, ms.Count - 12); i < ms.Count; i++) sb.Append("   ").Append(ms[i]).Append('\n');
-            }
-            _specPanel.Text = sb.ToString();
+            string speed = $"×{_timeScale}{(_timeScale > 1 && _effSpeed < _timeScale * 0.85f ? $" (факт ×{_effSpeed:0.#})" : "")}";
+            string time = $"{(int)(_server.World.Time / 60):00}:{(int)(_server.World.Time % 60):00}";
+            var f = _server.BotLines().Find(l => l.id == _followId);
+            var rows = _server.BotRows().ConvertAll(r => new SpectatorPanel.Row { Id = r.id, Name = r.name, Roamer = r.roamer, Bench = r.bench, Known = r.known, Stash = r.stash, Dead = r.dead, Goal = r.goal });
+            string phase = _cur.Phase == 0 ? "ранняя" : _cur.Phase == 1 ? "средняя" : "поздняя";
+            _specPanel.Set(speed, time, f.line != null ? "▶ " + f.line : null, rows, _followId, phase,
+                _cur.Markers.ConvertAll(m => (m.Name, m.Open)), _cur.Hot.Count > 0 ? _cur.Hot[0].heat : 0, _server.World.Milestones);
         }
 
         InputCmd BuildCmd()
@@ -1401,8 +1374,9 @@ else if (arg == "--atcrate")
             if (_buildBar.Visible) _buildBar.Set((int)_cur.Self.BuildPiece, (int)_cur.Self.GhostPiece);
             if (_cur.Self.HoldingPlan) _buildMenu.Fill(_cur.Self.BuildPieces, (int)_cur.Self.BuildPiece);
             else if (_buildMenu.Visible) { _buildMenu.Visible = false; Input.MouseMode = Input.MouseModeEnum.Hidden; }
-            _guide.Text = _cur.Self.BuildGuide ?? "";
-            _guide.Position = new Vector2(GetViewport().GetVisibleRect().Size.X - _guide.GetCombinedMinimumSize().X - 16, MiniMap.Side + 48);
+            _guide.SetText(UiShown || _mapView.Visible ? null : _cur.Self.BuildGuide);
+            _guide.Position = new Vector2(GetViewport().GetVisibleRect().Size.X - _guide.GetCombinedMinimumSize().X - 16, MiniMap.Side + 60);
+            _hud.MapOpen = _mapView.Visible;
 
             // окно по E (ящик, печь, столб) и крафт у верстака
             bool showInv = !_cur.Self.Dead && (_invOpen || _cur.Self.Ui != null);
@@ -1435,7 +1409,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             _dirLayer.Sync(_cur.Markers, _cur.Time);
             if (_radio == null)
             {
-                _radio = new RadioFeed { AnchorLeft = 0, AnchorRight = 1, AnchorTop = 1, AnchorBottom = 1, OffsetTop = -175, OffsetBottom = -100 };   // над поясом: не мешает панели наблюдателя
+                _radio = new RadioFeed { AnchorLeft = 0.5f, AnchorRight = 0.5f, AnchorTop = 0, AnchorBottom = 0, OffsetLeft = -400, OffsetRight = 400, OffsetTop = 116, OffsetBottom = 230 };   // вверху по центру, под сообщениями
                 _hud.AddChild(_radio);
             }
             _radio.Sync(_cur.Radio, dt);

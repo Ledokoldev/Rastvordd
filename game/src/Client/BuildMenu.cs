@@ -7,14 +7,15 @@ namespace Rastvordd.Client
     /// <summary>Полоска элементов над поясом, пока План в руках: выбранный подсвечен, колесо мыши листает.</summary>
     public partial class BuildBar : Control
     {
-        const float C = 40, Gap = 4;
+        const float C = 44, Gap = 6;
         static readonly string[] IconIds = { "foundation", "wall", "doorway", "window", "door", "triangle" };   // по номеру вида
         int _sel = -1, _ghost = -1;
 
         public BuildBar()
         {
             MouseFilter = MouseFilterEnum.Ignore;
-            CustomMinimumSize = new Vector2(6 * C + 5 * Gap, C + 20);
+            TextureFilter = TextureFilterEnum.Linear;
+            CustomMinimumSize = new Vector2(6 * C + 5 * Gap, C + 22);
         }
 
         public void Set(int selected, int ghost)
@@ -28,18 +29,18 @@ namespace Rastvordd.Client
         {
             float w = 6 * C + 5 * Gap;
             string cap = $"{Rastvordd.Sim.Building.KindName((Rastvordd.Sim.StructKind)_sel)}   ·   зажми ПКМ — колесо";
-            var fs = UiTheme.Text.GetStringSize(cap, HorizontalAlignment.Left, -1, 12);
-            DrawString(UiTheme.Text, new Vector2((w - fs.X) / 2 + 1, 13), cap, HorizontalAlignment.Left, -1, 12, new Color(0, 0, 0, 0.8f));
-            DrawString(UiTheme.Text, new Vector2((w - fs.X) / 2, 12), cap, HorizontalAlignment.Left, -1, 12, UiTheme.Ink);
+            float cw = UiTheme.TextWidth(cap, UiTheme.FontCaption);
+            var pill = new Rect2((w - cw) / 2 - 10, -4, cw + 20, 20);
+            UiTheme.DrawRound(this, pill, new Color(UiTheme.PanelBg, 0.7f), 10);
+            UiTheme.DrawText(this, pill.Position + new Vector2(10, 14), cap, UiTheme.FontCaption, UiTheme.Body);
             for (int slot = 0; slot < Rastvordd.Sim.Building.PieceOrder.Length; slot++)
             {
                 int k = (int)Rastvordd.Sim.Building.PieceOrder[slot];
-                var r = new Rect2(slot * (C + Gap), 20, C, C);
-                DrawRect(r, new Color(0.07f, 0.07f, 0.07f, 0.75f));
+                var r = new Rect2(slot * (C + Gap), 22, C, C);
+                bool on = k == _sel, gh = k == _ghost;
+                UiTheme.DrawRound(this, r, on ? new Color(1, 1, 1, 0.2f) : new Color(UiTheme.PanelBg, 0.7f), 10, on ? new Color(1, 1, 1, 0.8f) : gh ? new Color(1, 1, 1, 0.35f) : UiTheme.PanelBorder, on ? 2 : 1);
                 var icon = Art.Get($"icons/icon_build_{IconIds[k]}");
-                if (icon != null) DrawTextureRect(icon, r.Grow(-4), false, k == _sel || k == _ghost ? Colors.White : new Color(1, 1, 1, 0.45f));
-                if (k == _sel) DrawRect(r.Grow(-1), UiTheme.Accent, false, 2);
-                else if (k == _ghost) DrawRect(r.Grow(-1), new Color(UiTheme.Accent, 0.55f), false, 1);
+                if (icon != null) DrawTextureRect(icon, r.Grow(-6), false, on || gh ? Colors.White : new Color(1, 1, 1, 0.5f));
             }
         }
     }
@@ -69,6 +70,7 @@ namespace Rastvordd.Client
         {
             Visible = false;
             MouseFilter = MouseFilterEnum.Ignore;
+            TextureFilter = TextureFilterEnum.Linear;
             SetAnchorsPreset(LayoutPreset.FullRect);
         }
 
@@ -149,33 +151,116 @@ namespace Rastvordd.Client
                 float mid = SectorAngle(k, n);
                 bool hov = k == _hover, cur = _pieces[k].kind == _current;
                 float r1 = hov ? Outer + 8 : Outer;
-                DrawColoredPolygon(Ring(c, Inner, r1, mid - step / 2 + gap, mid + step / 2 - gap),
-                    hov ? new Color(0.2f, 0.2f, 0.19f, 0.92f) : new Color(0.07f, 0.07f, 0.07f, 0.82f));
-                if (hov || cur)
-                    DrawColoredPolygon(Ring(c, r1 - 3, r1, mid - step / 2 + gap, mid + step / 2 - gap), hov ? UiTheme.Accent : new Color(UiTheme.Accent, 0.5f));
+                var seg = Ring(c, Inner, r1, mid - step / 2 + gap, mid + step / 2 - gap);
+                DrawColoredPolygon(seg, hov ? new Color(0.24f, 0.24f, 0.26f, 0.88f) : new Color(UiTheme.PanelBg, 0.8f));
+                var outline = new Vector2[seg.Length + 1];
+                seg.CopyTo(outline, 0); outline[seg.Length] = seg[0];
+                DrawPolyline(outline, hov ? new Color(1, 1, 1, 0.7f) : UiTheme.PanelBorder, hov ? 1.5f : 1f, true);
+                if (cur) DrawColoredPolygon(Ring(c, r1 - 3, r1, mid - step / 2 + gap + 0.02f, mid + step / 2 - gap - 0.02f), Colors.White);
                 var icon = Art.Get($"icons/icon_build_{IconIds[Math.Clamp(_pieces[k].kind, 0, IconIds.Length - 1)]}");
                 var ip = c + Vector2.FromAngle(mid) * (hov ? IconR + 4 : IconR);
                 float s = hov ? IconSize + 8 : IconSize;
                 if (icon != null) DrawTextureRect(icon, new Rect2(ip - new Vector2(s, s) / 2, new Vector2(s, s)), false, _pieces[k].can ? Colors.White : new Color(0.6f, 0.55f, 0.55f));
             }
             // центр: что под курсором
-            DrawCircle(c, Inner - 6, new Color(0.05f, 0.05f, 0.05f, 0.88f));
+            DrawCircle(c, Inner - 6, new Color(UiTheme.PanelBg, 0.92f), true, -1, true);
+            DrawArc(c, Inner - 6, 0, Mathf.Tau, 48, UiTheme.PanelBorder, 1, true);
             int show = _hover >= 0 ? _hover : _pieces.FindIndex(p => p.kind == _current);
             if (show < 0) return;
             var (_, name, cost, can) = _pieces[show];
             var font = UiTheme.Text;
             void Line(string t, float y, int size, Color col)
             {
-                var sz = font.GetStringSize(t, HorizontalAlignment.Left, -1, size);
-                DrawString(font, new Vector2(c.X - sz.X / 2, c.Y + y), t, HorizontalAlignment.Left, -1, size, col);
+                var f = size >= 14 ? UiTheme.Semi : font;
+                var sz = f.GetStringSize(t, HorizontalAlignment.Left, -1, size);
+                DrawString(f, new Vector2(c.X - Mathf.Min(sz.X, Inner * 2 - 16) / 2, c.Y + y), t, HorizontalAlignment.Left, Inner * 2 - 16, size, col);
             }
-            Line(name, -4, 14, _hover >= 0 ? UiTheme.Accent : UiTheme.Ink);
-            Line(cost, 14, 11, can ? UiTheme.Dim : new Color(0.9f, 0.42f, 0.38f));
+            Line(name, -2, 14, UiTheme.Ink);
+            Line(cost, 15, 11, can ? UiTheme.Dim : UiTheme.Bad);
             string hint = Hints.GetValueOrDefault(name, "");
-            var hs = font.GetStringSize(hint, HorizontalAlignment.Left, -1, 13);
-            var hp = new Vector2(c.X - hs.X / 2, c.Y + Outer + 34);
-            DrawString(font, hp + Vector2.One, hint, HorizontalAlignment.Left, -1, 13, new Color(0, 0, 0, 0.9f));
-            DrawString(font, hp, hint, HorizontalAlignment.Left, -1, 13, UiTheme.Ink);
+            if (hint == "") return;
+            float hw = UiTheme.TextWidth(hint, UiTheme.FontSmall);
+            var pill = new Rect2(c.X - hw / 2 - 14, c.Y + Outer + 24, hw + 28, 30);
+            UiTheme.DrawRound(this, pill, new Color(UiTheme.PanelBg, 0.8f), 15, UiTheme.PanelBorder);
+            UiTheme.DrawText(this, pill.Position + new Vector2(14, 20), hint, UiTheme.FontSmall, UiTheme.Body);
+        }
+    }
+
+    /// <summary>Шпаргалка «Как построить дом» (с Планом/киянкой/шкафом в руках): стеклянная панель, шаги с галочками.</summary>
+    public partial class BuildGuidePanel : PanelContainer
+    {
+        readonly VBoxContainer _rows;
+        readonly Label _title;
+        string _text;
+
+        public BuildGuidePanel()
+        {
+            MouseFilter = MouseFilterEnum.Ignore;
+            Theme = UiTheme.Theme;
+            AddThemeStyleboxOverride("panel", UiTheme.Glass(16, 0.66f, 14));
+            var box = UiTheme.VBox(7);
+            AddChild(box);
+            _title = UiTheme.Caption("");
+            box.AddChild(_title);
+            _rows = UiTheme.VBox(5);
+            box.AddChild(_rows);
+            Visible = false;
+        }
+
+        /// <summary>Текст с сервера: первая строка — заголовок, дальше «[x] шаг» / «[ ] шаг».</summary>
+        public void SetText(string text)
+        {
+            text ??= "";
+            Visible = text != "";
+            if (text == _text) return;
+            _text = text;
+            foreach (var c in _rows.GetChildren()) c.QueueFree();
+            var lines = text.Split('\n');
+            _title.Text = lines.Length > 0 ? lines[0] : "";
+            bool nextFound = false;
+            for (int i = 1; i < lines.Length; i++)
+            {
+                string l = lines[i];
+                bool done = l.StartsWith("[x]");
+                string t = l.Length > 4 && l[0] == '[' ? l.Substring(4) : l;
+                bool next = !done && !nextFound;
+                if (next) nextFound = true;
+                _rows.AddChild(new Step { Done = done, Next = next, Text = t });
+            }
+            ResetSize();
+        }
+
+        /// <summary>Шаг: кружок (пустой / зелёный с галочкой) и текст с переносом.</summary>
+        partial class Step : HBoxContainer
+        {
+            public bool Done, Next;
+            public string Text;
+            public override void _Ready()
+            {
+                MouseFilter = MouseFilterEnum.Ignore;
+                AddThemeConstantOverride("separation", 9);
+                var mark = new Mark { Done = Done, Next = Next, CustomMinimumSize = new Vector2(16, 18), SizeFlagsVertical = SizeFlags.ShrinkBegin };
+                AddChild(mark);
+                var l = UiTheme.Small(Text, Done ? UiTheme.Dim : Next ? UiTheme.Ink : UiTheme.Body, UiTheme.FontSmall);
+                if (Next) l.AddThemeFontOverride("font", UiTheme.Semi);
+                l.CustomMinimumSize = new Vector2(300, 0);
+                AddChild(l);
+            }
+        }
+
+        partial class Mark : Control
+        {
+            public bool Done, Next;
+            public override void _Draw()
+            {
+                var c = new Vector2(8, 10);
+                if (Done)
+                {
+                    UiTheme.DrawDot(this, c, 7, UiTheme.Good);
+                    DrawPolyline(new[] { c + new Vector2(-3.5f, 0), c + new Vector2(-1, 2.5f), c + new Vector2(3.5f, -2.5f) }, UiTheme.Dark, 1.8f, true);
+                }
+                else DrawArc(c, 6.5f, 0, Mathf.Tau, 24, Next ? UiTheme.Ink : new Color(1, 1, 1, 0.3f), 1.5f, true);
+            }
         }
     }
 }

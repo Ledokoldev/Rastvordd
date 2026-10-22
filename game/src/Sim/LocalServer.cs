@@ -197,6 +197,22 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Строка для таблицы песочницы: кто впереди в гонке (верстак, изучено, лом в ящике).</summary>
+        /// <summary>Таблица гонки для панели наблюдателя: те же данные, что в BotShortLines, по столбцам.</summary>
+        public List<(int id, string name, bool roamer, int bench, int known, float stash, bool dead, string goal)> BotRows()
+        {
+            var list = new List<(int id, string name, bool roamer, int bench, int known, float stash, bool dead, string goal, int score)>();
+            foreach (var b in _bots.Values)
+            {
+                var a = b.Me;
+                int bench = 0;
+                foreach (var d in World.Deployables) if (d.Kind == DeployKind.Workbench && d.OwnerId == a.Id) bench = System.Math.Max(bench, System.Math.Max(1, d.Level));
+                int score = bench * 1000 + a.Known.Count * 50 + (int)(b.Stash / 10);
+                list.Add((a.Id, a.Name, b.Archetype == BotArchetype.Roamer, bench, a.Known.Count, b.Stash, a.Dead, b.GoalName, score));
+            }
+            list.Sort((x, y) => y.score.CompareTo(x.score));
+            return list.ConvertAll(x => (x.id, x.name, x.roamer, x.bench, x.known, x.stash, x.dead, x.goal));
+        }
+
         public List<(int id, int score, string line)> BotShortLines()
         {
             var list = new List<(int, int, string)>();

@@ -31,6 +31,6 @@
 
 ## Договорённости
 - Коммиты: `git -c user.name=LedokoI -c user.email=ledokolagent@gmail.com commit …`, в конце сообщения строка `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
-- Интерфейс — минималистичный и плоский (`UiTheme`: тёмные полупрозрачные панели, квадратные ячейки, один акцент, шрифт Rubik). Ржавые рамки и пиксельный шрифт пользователь отверг.
+- Интерфейс — «стекло» (дизайн D2, в духе Arc Raiders / Project Zomboid): тёмные полупрозрачные скруглённые панели, скруглённые ячейки, редкость — цветная точка, системный шрифт Segoe UI. Все цвета, размеры и фабрики стилей — в `game/src/Client/UiTheme.cs`. Ржавые рамки и пиксельный шрифт пользователь отверг.
 - Решения — в `docs/decisions.md` (D-номера), состояние и прогоны ботов — `docs/bot-sandbox-journal.md`, мозг ботов — `docs/design/bot-brain.md`, роадмап — `docs/roadmap.md`, сводка последней сессии — `docs/handoff.md`.
 - Переносная сборка для виртуалки: `dist/Rastvordd-VM` + zip (в .gitignore); пересобирать копированием `game/` без `screenshots`, `.godot/editor`, `.godot/shader_cache`.

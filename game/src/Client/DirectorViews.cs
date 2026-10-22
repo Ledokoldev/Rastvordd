@@ -87,26 +87,25 @@ namespace Rastvordd.Client
         }
     }
 
-    /// <summary>Радио: новые слухи режиссёра — короткой строкой вверху экрана, держатся 12 с.</summary>
-    public partial class RadioFeed : Label
+    /// <summary>Радио: новые слухи режиссёра — стеклянные плашки вверху по центру, держатся 12 с, последние полсекунды гаснут.</summary>
+    public partial class RadioFeed : VBoxContainer
     {
         readonly List<(string text, float left)> _lines = new();
+        readonly List<PanelContainer> _pills = new();
         int _lastN;
+        string _sig;
 
         public RadioFeed()
         {
-            HorizontalAlignment = HorizontalAlignment.Center;
             MouseFilter = MouseFilterEnum.Ignore;
-            AddThemeFontSizeOverride("font_size", 15);
-            AddThemeColorOverride("font_color", new Color(1f, 0.86f, 0.55f));
-            AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.9f));
-            AddThemeConstantOverride("outline_size", 5);
+            Theme = UiTheme.Theme;
+            AddThemeConstantOverride("separation", 6);
         }
 
         public void Sync(List<(int n, string text)> radio, float dt)
         {
             foreach (var (n, text) in radio)
-                if (n > _lastN) { _lastN = n; _lines.Add(("Радио: " + text, 12)); }
+                if (n > _lastN) { _lastN = n; _lines.Add((text, 12)); }
             for (int i = _lines.Count - 1; i >= 0; i--)
             {
                 var (t, left) = _lines[i];
@@ -114,9 +113,29 @@ namespace Rastvordd.Client
                 if (left <= 0) _lines.RemoveAt(i); else _lines[i] = (t, left);
             }
             while (_lines.Count > 3) _lines.RemoveAt(0);
-            var sb = new System.Text.StringBuilder();
-            foreach (var (t, _) in _lines) sb.Append(t).Append('\n');
-            Text = sb.ToString();
+            string sig = string.Join("|", _lines.ConvertAll(l => l.text));
+            if (sig != _sig)
+            {
+                _sig = sig;
+                foreach (var p in _pills) p.QueueFree();
+                _pills.Clear();
+                foreach (var (t, _) in _lines)
+                {
+                    var p = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore, SizeFlagsHorizontal = SizeFlags.ShrinkCenter };
+                    p.AddThemeStyleboxOverride("panel", UiTheme.Pill(0.66f));
+                    var row = UiTheme.HBox(10);
+                    p.AddChild(row);
+                    var tag = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore, SizeFlagsVertical = SizeFlags.ShrinkCenter };
+                    tag.AddThemeStyleboxOverride("panel", UiTheme.Box(new Color(UiTheme.Accent, 0.18f), 6, null, 0, 7, 1));
+                    tag.AddChild(UiTheme.Strong("РАДИО", 11, UiTheme.Accent));
+                    row.AddChild(tag);
+                    row.AddChild(UiTheme.Strong(t, UiTheme.FontSmall, UiTheme.Ink));
+                    AddChild(p);
+                    _pills.Add(p);
+                }
+            }
+            for (int i = 0; i < _pills.Count && i < _lines.Count; i++)
+                _pills[i].Modulate = new Color(1, 1, 1, Mathf.Clamp(_lines[i].left / 0.5f, 0, 1));
         }
     }
 }

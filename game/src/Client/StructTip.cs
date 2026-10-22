@@ -46,19 +46,16 @@ namespace Rastvordd.Client
             float max = Building.MaxHp(s.Kind, s.Tier), k = Mathf.Clamp(s.Hp, 0, 1);   // в снапшоте прочность — доля
             string title = $"{Building.KindName(s.Kind)} · {Building.TierNames[s.Tier]}{(s.Locked ? " · замок" : "")}";
             string hp = $"{Mathf.CeilToInt(s.Hp * max)} / {(int)max}";
-            var font = UiTheme.Text;
-            var ts = font.GetStringSize(title, HorizontalAlignment.Left, -1, 13);
-            float w = Mathf.Max(ts.X, 120) + 16, h = 52;
-            var at = GetViewport().GetMousePosition() + new Vector2(20, 18);
+            float tw = UiTheme.TextWidth(title, UiTheme.FontSmall, UiTheme.Semi);
+            float w = Mathf.Max(tw, 140) + 28, h = 62;
+            var at = GetViewport().GetMousePosition() + new Vector2(22, 20);
             var vs = GetViewportRect().Size;
             at.X = Mathf.Min(at.X, vs.X - w - 4); at.Y = Mathf.Min(at.Y, vs.Y - h - 4);
-            DrawRect(new Rect2(at, new Vector2(w, h)), UiTheme.PanelBg);
-            DrawString(font, at + new Vector2(8, 17), title, HorizontalAlignment.Left, -1, 13, UiTheme.Ink);
-            var bar = new Rect2(at + new Vector2(8, 26), new Vector2(w - 16, 6));
-            DrawRect(bar, new Color(1, 1, 1, 0.1f));
-            var col = new Color(0.9f, 0.35f, 0.3f).Lerp(new Color(0.45f, 0.8f, 0.4f), k);
-            DrawRect(new Rect2(bar.Position, new Vector2(bar.Size.X * k, bar.Size.Y)), col);
-            DrawString(font, at + new Vector2(8, 44), hp, HorizontalAlignment.Left, -1, 11, UiTheme.Dim);
+            DrawStyleBox(UiTheme.Glass(0, 0.8f, 12), new Rect2(at, new Vector2(w, h)));
+            UiTheme.DrawText(this, at + new Vector2(14, 22), title, UiTheme.FontSmall, UiTheme.Ink, UiTheme.Semi);
+            var col = UiTheme.Bad.Lerp(UiTheme.Good, k);
+            UiTheme.DrawBar(this, new Rect2(at + new Vector2(14, 32), new Vector2(w - 28, 6)), k, col);
+            UiTheme.DrawText(this, at + new Vector2(14, 54), hp, UiTheme.FontCaption, UiTheme.Dim);
         }
     }
 }

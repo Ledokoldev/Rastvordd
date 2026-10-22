@@ -15,7 +15,7 @@ namespace Rastvordd.Client
         const float HintsShowTime = 25;   // сколько секунд видны подсказки клавиш после старта
 
         Label _toastLabel, _buildLabel, _clockLabel, _deathText, _deathBag;
-        PanelContainer _toastPanel, _promptPanel, _clockPanel, _ammoPanel, _hintsPanel, _deathCard;
+        PanelContainer _buildPanel, _toastPanel, _promptPanel, _clockPanel, _ammoPanel, _hintsPanel, _deathCard;
         Label _promptKey, _promptText, _ammoName, _ammoCount, _ammoReserve;
         PanelContainer _promptKeyCap;
         ColorRect _damageRect, _deathRect, _vision;
@@ -29,6 +29,8 @@ namespace Rastvordd.Client
         public bool CraftOpen => _craftWin.Visible || _techWin.Visible;   // любое окно крафта/изучения: мышь видна, не стреляем
         /// <summary>Открыт инвентарь — у него свой пояс (с перетаскиванием), HUD-пояс прячем.</summary>
         public bool InventoryOpen;
+        /// <summary>Открыта большая карта — прячем мелочь HUD.</summary>
+        public bool MapOpen;
         bool _spectator;
         PanelContainer _adminPanel;
         public bool AdminOpen => _adminPanel != null && _adminPanel.Visible;
@@ -187,12 +189,10 @@ void fragment() {
             prow.AddChild(_promptKeyCap);
             _promptText = UiTheme.Strong("", UiTheme.FontBody);
             prow.AddChild(_promptText);
-            _buildLabel = UiTheme.Small("", UiTheme.Body, UiTheme.FontSmall);
+            _buildPanel = Pill(0.55f);
+            _buildLabel = UiTheme.Small("", UiTheme.Body, UiTheme.FontCaption);
             _buildLabel.AutowrapMode = TextServer.AutowrapMode.Off;
-            _buildLabel.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.8f));
-            _buildLabel.AddThemeConstantOverride("outline_size", 4);
-            _buildLabel.MouseFilter = Control.MouseFilterEnum.Ignore;
-            Add(_buildLabel);
+            _buildPanel.AddChild(_buildLabel);
 
             // оружие и патроны — справа внизу
             _ammoPanel = Pill(0.62f);
@@ -290,7 +290,7 @@ void fragment() {
         public void SpectatorMode()
         {
             _spectator = true;
-            foreach (var c in new CanvasItem[] { _hotbar, _hintsPanel, _clockPanel, _promptPanel, _ammoPanel, _buildLabel, Crosshair, _vision })
+            foreach (var c in new CanvasItem[] { _hotbar, _hintsPanel, _clockPanel, _promptPanel, _ammoPanel, _buildPanel, Crosshair, _vision })
                 if (c != null) c.Visible = false;
         }
 
@@ -344,7 +344,9 @@ void fragment() {
                 head.AddChild(UiTheme.IconBox("lock_code", 44));
                 var tt = UiTheme.VBox(0);
                 tt.AddChild(UiTheme.Title("Заперто", 22));
-                tt.AddChild(UiTheme.Small("Кодовый замок · 4 цифры", UiTheme.Dim, UiTheme.FontSmall));
+                var sub = UiTheme.Small("Кодовый замок · 4 цифры", UiTheme.Dim, UiTheme.FontSmall);
+                sub.AutowrapMode = TextServer.AutowrapMode.Off;
+                tt.AddChild(sub);
                 head.AddChild(tt);
                 box.AddChild(head);
                 _codeEdit = new LineEdit { MaxLength = 4, PlaceholderText = "• • • •", Alignment = HorizontalAlignment.Center, CustomMinimumSize = new Vector2(0, 58) };
@@ -411,7 +413,7 @@ void fragment() {
         public void UpdateHud(SelfInfo s, float dt, string modeText)
         {
             var vs = GetViewport().GetVisibleRect().Size;
-            bool bigWindow = InventoryOpen || CraftOpen;
+            bool bigWindow = InventoryOpen || CraftOpen || MapOpen;
 
             // низ: шкалы и пояс
             _hotbar.Visible = !_spectator && !bigWindow && !s.Dead;
@@ -423,13 +425,13 @@ void fragment() {
             Place(_clockPanel, vs, 0, 0, new Vector2(16, 14));
             _hintsTime -= dt;
             float ha = AdminOpen ? 1 : Mathf.Clamp(_hintsTime / 2f, 0, 1);
-            _hintsPanel.Visible = !_spectator && ha > 0.01f && !bigWindow;
+            _hintsPanel.Visible = !_spectator && ha > 0.01f && !bigWindow && !s.Dead;
             _hintsPanel.Modulate = new Color(1, 1, 1, ha);
             Place(_hintsPanel, vs, 0, 0, new Vector2(16 + _clockPanel.Size.X + 8, 14));
             _clockPanel.Visible = !_spectator && !bigWindow;
 
             // оружие
-            _ammoPanel.Visible = !_spectator && !s.Dead && !InventoryOpen && !string.IsNullOrEmpty(s.WeaponName);
+            _ammoPanel.Visible = !_spectator && !s.Dead && !bigWindow && !string.IsNullOrEmpty(s.WeaponName);
             _ammoName.Text = s.WeaponName ?? "";
             _ammoCount.Visible = _ammoReserve.Visible = s.HoldingGun;
             _ammoCount.Text = s.HoldingGun ? $"{s.Ammo} / {s.Magazine}" : "";
@@ -446,11 +448,12 @@ void fragment() {
             _promptKeyCap.Visible = key != null;
             _promptKey.Text = key ?? "";
             _promptText.Text = hint;
-            _promptPanel.Visible = !_spectator && hint != "" && !InventoryOpen;
+            _promptPanel.Visible = !_spectator && hint != "" && !bigWindow;
             float promptY = -(28 + UiTheme.CellSize + 18);
             Place(_promptPanel, vs, 0.5f, 1, new Vector2(0, promptY));
-            _buildLabel.Text = s.Dead || InventoryOpen ? "" : s.BuildStatus ?? "";
-            Place(_buildLabel, vs, 0.5f, 1, new Vector2(0, promptY - (_promptPanel.Visible ? _promptPanel.Size.Y + 8 : 0)));
+            _buildLabel.Text = s.Dead || bigWindow ? "" : s.BuildStatus ?? "";
+            _buildPanel.Visible = !_spectator && _buildLabel.Text != "";
+            Place(_buildPanel, vs, 0.5f, 1, new Vector2(0, promptY - (_promptPanel.Visible ? _promptPanel.Size.Y + 6 : 0)));
 
             if (_craftWin.Visible) _craftWin.Refresh(s);
             if (_techWin.Visible) _techWin.Refresh(s);

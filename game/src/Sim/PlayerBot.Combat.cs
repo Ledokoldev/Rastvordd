@@ -74,7 +74,7 @@ namespace Rastvordd.Sim
         float FoeHp(Actor t) => t == _foe ? Math.Clamp(100 - _foeDamage, 5, 100) : 100;
 
         /// <summary>Вижу ли его сейчас: дальность обзора, стены и стволы; присевшего за низким укрытием — нет.</summary>
-        bool SeesFoe(Actor t) => !t.Dead && _w.CanSeeActor(_me, t, _w.ViewRange(_me) + 10, 260f);
+        bool SeesFoe(Actor t) => !t.Dead && _w.CanSeeActor(_me, t, _w.BotSightRange(_me, t), World.BotSightCone);
 
         /// <summary>Где он, насколько я знаю: вижу — где стоит, нет — где видел или слышал последний раз.</summary>
         Vector2 KnownPos(Actor t) => t != _foe || SeesFoe(t) ? t.Pos : _foeSeenPos;

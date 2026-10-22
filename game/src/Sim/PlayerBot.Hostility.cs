@@ -113,7 +113,7 @@ namespace Rastvordd.Sim
                 if (a.Dead) { _enc.Remove(a.Id); continue; }
                 float d = Vector2.Distance(a.Pos, _me.Pos);
                 bool hitMe = _me.LastAttacker == a.Id && _w.Time - _me.LastDamagedTime < 2f;
-                bool sees = hitMe || d < 6f || (d < range && _w.CanSeeActor(_me, a, range, 260f));   // вплотную слышно шаги
+                bool sees = hitMe || d < 6f || (d < range && _w.CanSeeActor(_me, a, _w.BotSightRange(_me, a), World.BotSightCone));   // вплотную слышно шаги
                 _enc.TryGetValue(a.Id, out var en);
                 if (sees)
                 {

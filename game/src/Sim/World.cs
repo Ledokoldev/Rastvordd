@@ -732,6 +732,14 @@ namespace Rastvordd.Sim
         public static float ViewCone(Actor a) => 130f - 70f * a.Peek;
 
         /// <summary>Видит ли наблюдатель человека. Присевшего прячут и низкие укрытия (машины, блоки, ящики).</summary>
+        /// <summary>
+        /// Дальность, на которой бот-игрок замечает цель: ¾ обзора человека, присевшего — ещё ×0,6, стоящего на месте — ×0,85.
+        /// Раньше боты видели на 60 м почти по кругу (260°) — замечали раньше, чем их видел игрок.
+        /// </summary>
+        public float BotSightRange(Actor viewer, Actor target) =>
+            ViewRange(viewer) * 0.75f * (target.Crouching ? 0.6f : 1f) * (target.Vel.LengthSquared() < 0.25f ? 0.85f : 1f);
+        public const float BotSightCone = 150f;   // конус обзора бота (у игрока ~130°)
+
         public bool CanSeeActor(Actor viewer, Actor target, float range, float coneDeg)
         {
             if (!CanSee(viewer, target.Pos, range, coneDeg)) return false;

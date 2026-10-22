@@ -494,6 +494,15 @@ else if (arg == "--atcrate")
         void BuildMap(MapInfo map)
         {
             _prefab = new PrefabLayer(map, _world, this);
+            {
+                var tps = new System.Collections.Generic.List<(string, System.Action)>();
+                foreach (var m in _server.World.Monuments)
+                {
+                    var mon = m;
+                    tps.Add((mon.Name, () => { var me = _server.World.Find(_myId); if (me != null && !me.Dead) me.Pos = new SVec(mon.Center.X, mon.Max.Y + 5); }));
+                }
+                _hud.SetTeleports(tps);
+            }
             _lighting = new LightingLayer(map, _world);
             _dirLayer = new DirectorLayer();
             AddChild(_dirLayer);

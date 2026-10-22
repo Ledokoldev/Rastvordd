@@ -63,6 +63,12 @@ namespace Rastvordd.Client
             var hrtf = new CheckBox { Text = SteamHrtf.Ready ? "Направление звука: Steam Audio HRTF" : "Steam Audio не загрузился — наш бинаурал", ButtonPressed = Tuning.SteamHrtf && SteamHrtf.Ready, Disabled = !SteamHrtf.Ready, FocusMode = Control.FocusModeEnum.None };
             hrtf.Toggled += on => { Tuning.SteamHrtf = on; Tuning.Save(); };
             box.AddChild(hrtf);
+            // проверка РТ: телепорт к южному краю любой РТ
+            _tpBox = new HFlowContainer { CustomMinimumSize = new Vector2(620, 0) };
+            _tpBox.AddThemeConstantOverride("h_separation", 6);
+            _tpBox.AddThemeConstantOverride("v_separation", 6);
+            box.AddChild(new Label { Text = "Телепорт к РТ (для проверки):" });
+            box.AddChild(_tpBox);
             var wipe = new Button { Text = "Новый вайп (стереть сохранение и начать заново)", FocusMode = Control.FocusModeEnum.None };
             wipe.Pressed += () => WipeRequested?.Invoke();
             box.AddChild(wipe);
@@ -77,6 +83,19 @@ namespace Rastvordd.Client
         }
 
         public void ToggleAdmin() => _adminPanel.Visible = !_adminPanel.Visible;
+        HFlowContainer _tpBox;
+        /// <summary>Кнопки телепорта к РТ: имя → действие.</summary>
+        public void SetTeleports(System.Collections.Generic.List<(string name, System.Action go)> list)
+        {
+            if (_tpBox == null) return;
+            foreach (var c in _tpBox.GetChildren()) c.QueueFree();
+            foreach (var (name, go) in list)
+            {
+                var b = new Button { Text = name, FocusMode = Control.FocusModeEnum.None };
+                b.Pressed += () => go();
+                _tpBox.AddChild(b);
+            }
+        }
         Label _adminSounds;
         public void SetAdminSounds(string text) { if (_adminSounds != null) _adminSounds.Text = text; }
         public event Action<int, int> CraftRequested;   // (рецепт, сколько раз)

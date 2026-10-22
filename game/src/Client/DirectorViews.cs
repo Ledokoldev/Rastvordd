@@ -40,23 +40,27 @@ namespace Rastvordd.Client
                         var p = Iso.Px(System.Numerics.Vector2.Lerp(m.PlaneFrom, m.PlaneTo, k));
                         var dir = (Iso.Px(m.PlaneTo) - Iso.Px(m.PlaneFrom)).Normalized();
                         DrawPlane(p + new Vector2(30, 20), dir, new Color(0, 0, 0, 0.35f));                 // тень на земле
-                        DrawPlane(p - new Vector2(0, Iso.H(60)), dir, new Color(0.32f, 0.36f, 0.3f, 1f));   // сам «кукурузник»
+                        DrawPlane(p - new Vector2(0, Iso.H(14)), dir, Colors.White);   // высота сжата: камера сверху, иначе самолёт за краем экрана                         // сам «кукурузник» Ан-2
                     }
                     float fall = (_time - (m.StartsAt - 25)) / 25f;
                     if (fall > 0 && fall < 1)
                     {
-                        float h = Iso.H(80 * (1 - fall));
+                        float h = Iso.H(10 * (1 - fall));   // высота сжата под вид сверху
                         var c = at - new Vector2(Mathf.Sin(_time * 1.3f) * 6, h);
-                        DrawCircle(at + new Vector2(6, 3), 10 * (0.4f + 0.6f * fall), new Color(0, 0, 0, 0.25f));   // тень груза
-                        // купол и стропы
-                        var dome = new List<Vector2>();
-                        for (int i = 0; i <= 12; i++) { float a = Mathf.Pi + Mathf.Pi * i / 12f; dome.Add(c + new Vector2(Mathf.Cos(a) * 22, Mathf.Sin(a) * 14 - 28)); }
-                        DrawColoredPolygon(dome.ToArray(), new Color(0.85f, 0.35f, 0.2f));
-                        DrawLine(c + new Vector2(-22, -28), c + new Vector2(-4, -6), new Color(0.2f, 0.2f, 0.2f), 1);
-                        DrawLine(c + new Vector2(22, -28), c + new Vector2(4, -6), new Color(0.2f, 0.2f, 0.2f), 1);
-                        DrawLine(c + new Vector2(0, -42), c + new Vector2(0, -6), new Color(0.2f, 0.2f, 0.2f), 1);
-                        DrawRect(new Rect2(c + new Vector2(-8, -8), new Vector2(16, 12)), new Color(0.3f, 0.36f, 0.22f));
-                        DrawRect(new Rect2(c + new Vector2(-8, -8), new Vector2(16, 12)), new Color(0.9f, 0.75f, 0.2f), false, 1);
+                        // тень груза — вытянутая по земле, растёт к приземлению
+                        float r = 10 * (0.4f + 0.6f * fall);
+                        DrawSetTransform(at + new Vector2(6, 2), 0, new Vector2(1.6f, 0.6f));
+                        DrawCircle(Vector2.Zero, r, new Color(0, 0, 0, 0.22f));
+                        DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                        var chute = Art.Get("containers/airdrop_descending");
+                        if (chute != null)
+                        {
+                            // контейнер на парашюте: низ картинки — днище груза; покачивается
+                            float sc = 1.1f, sway = Mathf.Sin(_time * 1.3f) * 0.08f;
+                            DrawSetTransform(c, sway, new Vector2(sc, sc));
+                            DrawTexture(chute, new Vector2(-chute.GetWidth() / 2f, -chute.GetHeight()));
+                            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                        }
                     }
                     continue;
                 }
@@ -79,11 +83,19 @@ namespace Rastvordd.Client
 
         void DrawPlane(Vector2 p, Vector2 dir, Color c)
         {
-            // силуэт биплана сверху: фюзеляж, крылья, хвост
-            var side = new Vector2(-dir.Y, dir.X);
-            DrawColoredPolygon(new[] { p + dir * 26, p + side * 4, p - dir * 22 + side * 3, p - dir * 22 - side * 3, p - side * 4 }, c);
-            DrawColoredPolygon(new[] { p + dir * 8 + side * 34, p + dir * 2 + side * 34, p + dir * 2 - side * 34, p + dir * 8 - side * 34 }, c);
-            DrawColoredPolygon(new[] { p - dir * 16 + side * 12, p - dir * 21 + side * 12, p - dir * 21 - side * 12, p - dir * 16 - side * 12 }, c);
+            // Ан-2 сверху: нос картинки смотрит вправо, размах крыльев 18 м
+            var tex = Art.Get("vehicles/plane_an2_top");
+            if (tex == null)
+            {
+                var side = new Vector2(-dir.Y, dir.X);
+                DrawColoredPolygon(new[] { p + dir * 26, p + side * 4, p - dir * 22 + side * 3, p - dir * 22 - side * 3, p - side * 4 }, c);
+                DrawColoredPolygon(new[] { p + dir * 8 + side * 34, p + dir * 2 + side * 34, p + dir * 2 - side * 34, p + dir * 8 - side * 34 }, c);
+                return;
+            }
+            float sc = 18f * Iso.PPM / tex.GetHeight();
+            DrawSetTransform(p, dir.Angle(), new Vector2(sc, sc));
+            DrawTexture(tex, -tex.GetSize() / 2, c);
+            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
         }
     }
 

@@ -177,6 +177,14 @@ namespace Rastvordd.Sim
             return n > 0 ? sum / n : Vector2.Zero;
         }
 
+        /// <summary>Отладка: сброс груза рядом с точкой, приземлится через secs секунд.</summary>
+        public void DebugAirdrop(World w, Vector2 at, float secs)
+        {
+            float ang = R(0, MathF.Tau);
+            var dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
+            Events.Add(new DirectorEvent { Id = ++_eventId, Kind = "airdrop", Name = "Сброс груза", Pos = at, StartsAt = w.Time + secs, EndsAt = w.Time + secs + 600, PlaneFrom = at - dir * 700, PlaneTo = at + dir * 700 });
+        }
+
         void StartAirdrop(World w)
         {
             var p = OpenGround(w, Activity(w), 220) ?? OpenGround(w, Vector2.Zero, World.HalfSize * 0.7f);
@@ -205,7 +213,7 @@ namespace Rastvordd.Sim
                 var q = new Vector2(R(m.Min.X + 4, m.Max.X - 4), R(m.Min.Y + 4, m.Max.Y - 4));
                 if (w.IsFree(q, 1.5f)) { p = q; break; }
             }
-            var crate = new LootBag { Id = w.NextId(), Pos = p, IsCrate = true, Tier = 2, Punch = true };
+            var crate = new LootBag { Id = w.NextId(), Pos = p, IsCrate = true, Tier = 2, Punch = true, Look = "military" };
             w.FillEventCrate(crate, Phase);
             w.Bags.Add(crate);
             var ev = new DirectorEvent { Id = ++_eventId, Kind = "locked_crate", Name = $"Закрытый ящик — {m.Name}", Pos = p, Crate = crate, EndsAt = w.Time + 15 * 60 };
@@ -230,20 +238,29 @@ namespace Rastvordd.Sim
                 {
                     if (ev.Crate == null && w.Time >= ev.StartsAt)
                     {
-                        // приземлился: крейт на месте, но закрыт ещё минуту — сбегутся все
-                        ev.Crate = new LootBag { Id = w.NextId(), Pos = ev.Pos, IsCrate = true, Tier = 2, Punch = true };
+                        // приземлился: контейнер на месте, но заперт 1,5 мин (горит дым) — сбегутся все; потом вскрывать 10 с, шумно
+                        ev.Crate = new LootBag { Id = w.NextId(), Pos = ev.Pos, IsCrate = true, Tier = 2, Punch = true, Look = "airdrop" };
                         w.FillEventCrate(ev.Crate, Phase);
                         w.Bags.Add(ev.Crate);
                         w.Noises.Add(new Noise { Pos = ev.Pos, Radius = 150, SourceId = -1, Time = w.Time });
                         w.Events.Add(new SimEvent { Kind = SimEventKind.Machine, Pos = ev.Pos, Text = "drop" });
-                        ev.StartsAt = w.Time + 60;
+                        ev.StartsAt = w.Time + 90;
+                        AddRumor(w, "airdrop", ev.Pos, 25, 600, "груз приземлился — контейнер заперт, через полторы минуты можно вскрывать");
                     }
-                    else if (ev.Crate != null && !ev.Open && w.Time >= ev.StartsAt)
+                    else if (ev.Crate != null && !ev.Open && ev.Start == null && w.Time >= ev.StartsAt)
                     {
-                        ev.Open = true;
-                        ev.Crate.Unlocked = true;
-                        ev.EndsAt = w.Time + 8 * 60;
-                        w.Events.Add(new SimEvent { Kind = SimEventKind.Machine, Pos = ev.Pos, Text = "crate" });
+                        // замок «остыл»: теперь вскрыть — держать E 10 с, слышно далеко
+                        var drop = ev;
+                        drop.Start = new Stash { Pos = drop.Pos + new Vector2(0, 0.9f), Verb = "Вскрыть контейнер сброса (10 с, громко)", Sound = "pry", Seconds = 10, Noise = 60 };
+                        drop.Start.OnDone = a =>
+                        {
+                            drop.Open = true;
+                            drop.Crate.Unlocked = true;
+                            drop.EndsAt = w.Time + 8 * 60;
+                            w.Events.Add(new SimEvent { Kind = SimEventKind.Machine, Pos = drop.Pos, Text = "crate" });
+                        };
+                        w.DirectorStashes.Add(drop.Start);
+                        ev.EndsAt = w.Time + 10 * 60;
                     }
                 }
                 else if (ev.Kind == "locked_crate")

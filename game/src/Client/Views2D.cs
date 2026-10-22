@@ -1049,6 +1049,7 @@ namespace Rastvordd.Client
     {
         public bool IsCrate, Empty, Safe, Punch, Unlocked;
         public int Id, Tier;
+        public string Look;   // ивент-ящик: "airdrop" — контейнер сброса, "military" — военный ящик
         PointLight2D _aura;
 
         public BagView2D()
@@ -1087,6 +1088,21 @@ namespace Rastvordd.Client
         public override void _Draw()
         {
             string style = Style;
+            if (Look != null)
+            {
+                // ивент: свой спрайт; закрыт — с подсветкой лута, вскрыт и пуст — темнее
+                var et = Art.Get(Look == "airdrop" ? "containers/airdrop_crate" : "containers/crate_army_green");
+                if (et != null)
+                {
+                    (Material as ShaderMaterial)?.SetShaderParameter("loot_on", Empty ? 0f : 1f);
+                    float es = Look == "airdrop" ? 1.5f : 1.8f;
+                    Shade.Sprite(this, et, es, 0.32f, 1f);
+                    DrawSetTransform(Vector2.Zero, 0, new Vector2(es, es));
+                    DrawTexture(et, new Vector2(-et.GetWidth() / 2, -et.GetHeight() + 1), Empty ? new Color(0.5f, 0.5f, 0.5f) : Colors.White);
+                    DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                    return;
+                }
+            }
             Texture2D tex = style == null ? Art.Get("props/loot_bag")
                 : Punch ? Art.Get(Unlocked ? "props/crate_punch_open" : "props/crate_punch")
                 : (Empty ? Art.Get($"loot/{style}_open") : null) ?? Art.Get($"loot/{style}") ?? Art.Get(Safe ? "props/safe" : "props/crate_military");

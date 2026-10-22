@@ -177,6 +177,7 @@ namespace Rastvordd.Client
                 else if (a == "inv") _invOpen = !_invOpen;
                 else if (a.StartsWith("invsel")) _inv.DebugSelect(a.Substring(6));   // отладка: invsel<pack|belt>~<i> — карточка этой ячейки
                 else if (a == "admin") _hud.ToggleAdmin();
+                else if (a.StartsWith("drop")) { var w0 = _server.World; (w0.Director ??= new Director(w0.Seed)).DebugAirdrop(w0, w0.Find(_myId).Pos + new SVec(3, 5), a.Length > 4 ? float.Parse(a[4..]) : 30); }   // отладка: сброс груза рядом
                 else if (a == "code") _hud.ShowCode(0);
                 else if (a == "die") _server.World.DebugKill(_server.World.Find(_myId));
                 else if (a == "steps") GD.Print("steps: " + string.Join(", ", System.Linq.Enumerable.Select(System.Linq.Enumerable.Where(Sfx.Played, kv => kv.Key.StartsWith("steps/")), kv => kv.Key[6..] + "×" + kv.Value)));   // отладка: какие шаги звучали
@@ -1277,7 +1278,7 @@ else if (arg == "--atcrate")
                 seen.Add(b.Id);
                 if (!_bagViews.TryGetValue(b.Id, out var v))
                 {
-                    v = new BagView2D { IsCrate = b.IsCrate, Safe = b.Safe, Punch = b.Punch, Id = b.Id, Tier = b.Tier, Position = Iso.Px(b.Pos) };
+                    v = new BagView2D { IsCrate = b.IsCrate, Safe = b.Safe, Punch = b.Punch, Id = b.Id, Tier = b.Tier, Look = b.Look, Position = Iso.Px(b.Pos) };
                     _world.AddChild(v);
                     _bagViews[b.Id] = v;
                 }

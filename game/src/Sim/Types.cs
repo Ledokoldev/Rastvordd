@@ -820,6 +820,7 @@ namespace Rastvordd.Sim
         public bool Unlocked;
         public bool Punch;              // крейт РТ под перфокарту: открывает таймер РТ, наполняет обновление РТ
         public int Tier = 2;            // уровень лута ящика: 0 — без охраны, 1 — малая охрана, 2 — крупный РТ
+        public string Look;             // вид ивент-ящика: "airdrop" — контейнер сброса, "military" — военный ящик (иначе по тиру)
         /// <summary>Обыск по игрокам: сколько ячеек уже раскрыто и сколько идёт текущая.</summary>
         public readonly Dictionary<int, (int n, float t)> Search = new();
         public float Despawn;           // для сумок

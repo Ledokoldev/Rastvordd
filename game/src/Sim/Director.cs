@@ -23,6 +23,8 @@ namespace Rastvordd.Sim
         public LootBag Crate;
         public Stash Start;                 // закрытый ящик: «держи E» запускает взлом
         public Vector2 PlaneFrom, PlaneTo;  // самолёт сброса
+        public float LockSecs = 90;         // сброс: сколько контейнер заперт после приземления
+        public Action<LootBag> Fill;        // свой лут (вызов с РТ, например «Маяк»); иначе — лут ивента
     }
 
     /// <summary>
@@ -185,6 +187,24 @@ namespace Rastvordd.Sim
             Events.Add(new DirectorEvent { Id = ++_eventId, Kind = "airdrop", Name = "Сброс груза", Pos = at, StartsAt = w.Time + secs, EndsAt = w.Time + secs + 600, PlaneFrom = at - dir * 700, PlaneTo = at + dir * 700 });
         }
 
+        /// <summary>
+        /// Сброс по вызову (Радиоцентр «Маяк»): Ан-2 пролетает, контейнер падает РОВНО в точку at через secs секунд,
+        /// заперт lockSecs, потом вскрыть 10 с. Слух — всей карте сразу.
+        /// </summary>
+        public DirectorEvent CallDrop(World w, Vector2 at, float secs, float lockSecs, Action<LootBag> fill, string rumor)
+        {
+            float ang = R(0, MathF.Tau);
+            var dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
+            var ev = new DirectorEvent
+            {
+                Id = ++_eventId, Kind = "airdrop", Name = "Груз по вызову", Pos = at, StartsAt = w.Time + secs, EndsAt = w.Time + secs + 600,
+                PlaneFrom = at - dir * 700, PlaneTo = at + dir * 700, LockSecs = lockSecs, Fill = fill,
+            };
+            Events.Add(ev);
+            AddRumor(w, "airdrop", at, 20, secs + 600, rumor);
+            return ev;
+        }
+
         void StartAirdrop(World w)
         {
             var p = OpenGround(w, Activity(w), 220) ?? OpenGround(w, Vector2.Zero, World.HalfSize * 0.7f);
@@ -240,12 +260,13 @@ namespace Rastvordd.Sim
                     {
                         // приземлился: контейнер на месте, но заперт 1,5 мин (горит дым) — сбегутся все; потом вскрывать 10 с, шумно
                         ev.Crate = new LootBag { Id = w.NextId(), Pos = ev.Pos, IsCrate = true, Tier = 2, Punch = true, Look = "airdrop" };
-                        w.FillEventCrate(ev.Crate, Phase);
+                        if (ev.Fill != null) ev.Fill(ev.Crate); else w.FillEventCrate(ev.Crate, Phase);
                         w.Bags.Add(ev.Crate);
                         w.Noises.Add(new Noise { Pos = ev.Pos, Radius = 150, SourceId = -1, Time = w.Time });
                         w.Events.Add(new SimEvent { Kind = SimEventKind.Machine, Pos = ev.Pos, Text = "drop" });
-                        ev.StartsAt = w.Time + 90;
-                        AddRumor(w, "airdrop", ev.Pos, 25, 600, "груз приземлился — контейнер заперт, через полторы минуты можно вскрывать");
+                        ev.StartsAt = w.Time + ev.LockSecs;
+                        AddRumor(w, "airdrop", ev.Pos, 25, 600, ev.LockSecs >= 60 ? "груз приземлился — контейнер заперт, через полторы минуты можно вскрывать"
+                            : $"груз приземлился — контейнер заперт, через {ev.LockSecs:0} секунд можно вскрывать");
                     }
                     else if (ev.Crate != null && !ev.Open && ev.Start == null && w.Time >= ev.StartsAt)
                     {

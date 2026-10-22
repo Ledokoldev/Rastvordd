@@ -223,11 +223,12 @@ namespace Rastvordd.Sim
             return s.OnDone == null ? a : null;
         }
 
-        /// <summary>Все «держи E» готовых РТ (тир 0 и тир 1).</summary>
+        /// <summary>Все «держи E» готовых РТ (тиры 0–2) и ивентов режиссёра.</summary>
         public IEnumerable<Stash> AllStashes()
         {
             foreach (var rt in Tier0) foreach (var s in rt.Stashes) yield return s;
             foreach (var rt in Tier1) foreach (var s in rt.Stashes) yield return s;
+            foreach (var rt in Tier2) foreach (var s in rt.Stashes) yield return s;
             foreach (var s in DirectorStashes) yield return s;
         }
 

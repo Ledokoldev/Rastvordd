@@ -330,6 +330,7 @@ void fragment() {
         PanelContainer _codePanel;
         LineEdit _codeEdit;
         int _codeDoor;
+        Label _codeTitle, _codeSub;
         public bool CodeOpen => _codePanel != null && _codePanel.Visible;
         /// <summary>Игрок ввёл код: (id двери, код).</summary>
         public event System.Action<int, int> CodeEntered;
@@ -348,8 +349,8 @@ void fragment() {
                 var head = UiTheme.HBox(12);
                 head.AddChild(UiTheme.IconBox("lock_code", 44));
                 var tt = UiTheme.VBox(0);
-                tt.AddChild(UiTheme.Title("Заперто", 22));
-                var sub = UiTheme.Small("Кодовый замок · 4 цифры", UiTheme.Dim, UiTheme.FontSmall);
+                tt.AddChild(_codeTitle = UiTheme.Title("Заперто", 22));
+                var sub = _codeSub = UiTheme.Small("Кодовый замок · 4 цифры", UiTheme.Dim, UiTheme.FontSmall);
                 sub.AutowrapMode = TextServer.AutowrapMode.Off;
                 tt.AddChild(sub);
                 head.AddChild(tt);
@@ -371,6 +372,9 @@ void fragment() {
                 _codeEdit.GuiInput += e => { if (e is InputEventKey k && k.Pressed && k.Keycode == Key.Escape) HideCode(); };
             }
             _codeDoor = doorId;
+            // отрицательный id — пульт вызова РТ тира 2 (Радиоцентр «Маяк»), иначе дверь с кодовым замком
+            _codeTitle.Text = doorId < 0 ? "Пульт вызова" : "Заперто";
+            _codeSub.Text = doorId < 0 ? "Код из журнала дежурного · 4 цифры" : "Кодовый замок · 4 цифры";
             _codeEdit.Text = "";
             _codePanel.Visible = true;
             var vs = GetViewport().GetVisibleRect().Size;

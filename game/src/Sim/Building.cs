@@ -608,6 +608,7 @@ namespace Rastvordd.Sim
         /// <summary>Ввод кода у запертой двери: верный — доступ и дверь открывается; неверный — удар током.</summary>
         void EnterCode(Actor a, int doorId, int code)
         {
+            if (doorId < 0) { EnterConsoleCode(a, doorId, code); return; }   // пульт РТ тира 2 (Радиоцентр)
             Structure door = null;
             foreach (var s in Structures) if (s.Id == doorId) { door = s; break; }
             if (door == null || !door.Locked || Vector2.Distance(door.Center, a.Pos) > 3f) return;

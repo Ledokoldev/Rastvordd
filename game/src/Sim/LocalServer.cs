@@ -149,6 +149,7 @@ namespace Rastvordd.Sim
         public int PrefabVersion;         // состояние готовых РТ: роллеты, щитки
         public List<int> GoneWalls = new();
         public List<(int id, string sprite)> DecorSprites = new();
+        public bool RadioPower;           // дизель Радиоцентра молотит — аппаратура светится
         public List<(int id, Vector2 pos, float rot)> DecorMoves = new();   // вагон, стрела крана, контейнер
         public List<DirectorMarker> Markers = new();   // ивенты режиссёра — видны всей карте
         public List<(int n, string text)> Radio = new();   // последние слухи по радио
@@ -720,6 +721,7 @@ namespace Rastvordd.Sim
             snap.PrefabVersion = World.PrefabVersion;
             World.CollectGoneWalls(snap.GoneWalls);
             foreach (var s in World.Substations) snap.DecorSprites.Add((s.Panel.Id, s.Panel.Sprite));
+            snap.RadioPower = World.AnyTier2Powered;
             foreach (var d in World.MovingDecors) snap.DecorMoves.Add((d.Id, d.Pos, d.Rot));
             if (World.Director is { } dir)
             {

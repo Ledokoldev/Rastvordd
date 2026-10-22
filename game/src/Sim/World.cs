@@ -170,6 +170,7 @@ namespace Rastvordd.Sim
             PlaceSubstation();
             PlaceTier0();
             PlaceTier1();
+            PlaceTier2();   // тир 2 (D50): Радиоцентр «Маяк» — большой, свой генератор
             PlaceWorldTires();   // покрышки — резина (после РТ, своим генератором)
         }
 
@@ -580,6 +581,14 @@ namespace Rastvordd.Sim
                 a.AddSlot(Items.NewSlot(shotgun ? "weapon_pipeshotgun" : "weapon_nagant", shotgun ? 1 : 7));
                 a.Add(shotgun ? "ammo_12g" : "ammo_9mm", Rng.Next(10, 25));
             }
+            else if (kit is "pps" or "grach" or "svt")
+            {
+                // тир 2 (Радиоцентр): ППС-43, Грач, снайпер с СВТ-40 на вышке
+                string gun = kit == "pps" ? "weapon_pps43" : kit == "svt" ? "weapon_svt40" : "weapon_grach";
+                a.AddSlot(Items.NewSlot(gun, kit == "pps" ? 35 : kit == "svt" ? 10 : 17));
+                a.Add(kit == "svt" ? "ammo_762" : "ammo_9mm", Rng.Next(30, 70));
+                if (Rng.NextDouble() < 0.3) a.Add(Economy.Tier2(Rng), 1);
+            }
             else
             {
                 a.AddSlot(Items.NewSlot("weapon_akm", 30));
@@ -778,6 +787,7 @@ namespace Rastvordd.Sim
             StepSubstations();
             StepTier0();
             StepTier1();
+            StepTier2();
             foreach (var s in DirectorStashes.ToArray()) StepStash(s);
             (Director ??= new Director(Seed)).Step(this);
             SimPerf.End("шаг: прочее (печи, РТ, сумки)", t0);

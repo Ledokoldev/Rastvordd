@@ -316,6 +316,7 @@ namespace Rastvordd.Sim
                 foreach (var r in rooms) { FillFloor(r, rng); covAfter += Coverage(r) * r.Area; area += r.Area; }
                 allRooms.AddRange(rooms);
             }
+            AddAnnexes(m, roofs, rng);
             DressExterior(m, roofs, rng);
             AddPerimeter(m, rng);
             int pipes = AddHeatingMains(m, roofs, rng);
@@ -1336,6 +1337,47 @@ namespace Rastvordd.Sim
                 if (rng.NextDouble() < 0.5) AddFlat("decals/decal_trash_scatter", front + new Vector2(-0.8f, 0.4f), 0.8f, rng);
                 if (e.Ramp) AddFlat("decals/decal_tire_tracks_mud", front + outDir * 1.5f, 1.1f, rng, e.Side < 2 ? 0 : 90);
                 SlabPath(m, e, mid, outDir, rng);
+            }
+        }
+
+        /// <summary>
+        /// Ломаем «коробку»: к наружным стенам приставлены сарайчик, мусорные баки, поленница, кольца, кабельный шкаф,
+        /// газовая труба вдоль фасада, куча кирпича — по 1–3 на здание, не у входов и не на дороге.
+        /// </summary>
+        void AddAnnexes(Monument m, List<MapRoof> roofs, Random rng)
+        {
+            string[] sideItems = { "outdoor/shed_wood", "outdoor/dumpster_skip_side", "outdoor/concrete_rings", "outdoor/ruins_brick_pile", "outdoor/trash_containers_row_angled", "outdoor/shed_wood_angled" };
+            string[] southItems = { "outdoor/gas_pipe_side", "outdoor/electric_cabinet", "outdoor/firewood_stack_side", "outdoor/trash_container", "outdoor/tires_pile", "outdoor/log_pile_side", "outdoor/gas_pipe_side" };
+            foreach (var r in roofs)
+            {
+                var size = r.Max - r.Min;
+                if (size.X * size.Y < 40) continue;
+                int want = 1 + (size.X * size.Y > 200 ? 1 : 0) + rng.Next(2);
+                for (int t = 0, made = 0; t < 30 && made < want; t++)
+                {
+                    int side = rng.Next(3);   // 0 — юг, 1 — восток, 2 — запад (север за зданием не видно)
+                    string s = side == 0 ? southItems[rng.Next(southItems.Length)] : sideItems[rng.Next(sideItems.Length)];
+                    var f = FootOf(s);
+                    if (f == null) continue;
+                    var (w, d, h, legs) = f.Value;
+                    Vector2 p = side switch
+                    {
+                        0 => new Vector2(Lerp(r.Min.X + w / 2 + 0.5f, r.Max.X - w / 2 - 0.5f, (float)rng.NextDouble()), r.Max.Y + 0.2f + d),
+                        1 => new Vector2(r.Max.X + 0.2f + w / 2, Lerp(r.Min.Y + d + 0.6f, r.Max.Y - 0.3f, (float)rng.NextDouble())),
+                        _ => new Vector2(r.Min.X - 0.2f - w / 2, Lerp(r.Min.Y + d + 0.6f, r.Max.Y - 0.3f, (float)rng.NextDouble())),
+                    };
+                    if (!m.Contains(p, 3)) continue;
+                    // свободно: след с запасом 0,8 м (кроме стороны у стены), не у входа, не на дороге, не в другом здании
+                    var mn = new Vector2(p.X - w / 2 - 0.8f, p.Y - d - 0.8f); var mx = new Vector2(p.X + w / 2 + 0.8f, p.Y + 0.8f);
+                    if (side == 0) mn.Y = r.Max.Y + 0.2f; else if (side == 1) mn.X = r.Max.X + 0.2f; else mx.X = r.Min.X - 0.2f;
+                    bool ok = !Entrances.Exists(e => Vector2.Distance((e.A + e.B) * 0.5f, p) < e.Depth + w / 2 + 2.5f) && !(HardGround(p) && h > 1.5f);
+                    for (float x = mn.X; x <= mx.X && ok; x += 0.4f)
+                        for (float y = mn.Y; y <= mx.Y && ok; y += 0.4f)
+                            ok = !WalkBlocked(new Vector2(x, y), 0.05f) && !Roofs.Exists(q => x > q.Min.X && x < q.Max.X && y > q.Min.Y && y < q.Max.Y);
+                    if (!ok) continue;
+                    Prop(s, p, side == 2 || rng.NextDouble() < 0.3);
+                    made++;
+                }
             }
         }
 

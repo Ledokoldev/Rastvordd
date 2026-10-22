@@ -46,7 +46,9 @@ namespace Rastvordd.Sim
             var d = dir.LengthSquared() > 1e-6f ? Vector2.Normalize(dir) : Vector2.UnitX;
             var rel = t.Pos - from;
             float offset = MathF.Abs(rel.X * d.Y - rel.Y * d.X);
-            var zone = ZoneOf(offset, t.Radius);
+            // зона — шансом (D55, Data/Headshots.cs): прицел, присед, тир ствола, обвесы, марксманки; без стрелка (тесты) — по смещению
+            var shooter = ownerId >= 0 ? Find(ownerId) : null;
+            var zone = shooter?.Weapon is WeaponState sw ? Headshots.Roll(Rng, shooter, sw, Vector2.Distance(shooter.Pos, hitPos)) : ZoneOf(offset, t.Radius);
             float raw = damage * ZoneMul(zone);
             int side = SideOf(t, d);
             float prot = Clothing.Zone(t, zone, side);

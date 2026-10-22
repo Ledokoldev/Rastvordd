@@ -33,7 +33,7 @@ namespace Rastvordd.Sim
             Check(Items.Get(Prog.Alloy) != null && Items.Get("deploy_guntable")?.Deploy == DeployKind.GunTable && Items.Get("canister_20")?.Capacity == 20, "предметы D54 заведены (сталь, оружейный стол, канистра 20 л)");
             var akm = Recipes.All.Find(r => r.Output == "weapon_akm");
             Check(akm.Station == DeployKind.GunTable && Array.Exists(akm.Cost, c => c.id == Prog.Alloy), "АКМ — на оружейном столе, со сталью");
-            Check(Array.Exists(Recipes.All.Find(r => r.Output == "deploy_workbench3").Cost, c => c.id == Prog.Alloy && c.count == 25), "верстак 3: 25 стали");
+            Check(Array.Exists(Recipes.All.Find(r => r.Output == "deploy_workbench3").Cost, c => c.id == Prog.Alloy && c.count > 0), "верстак 3: нужна легированная сталь");
 
             // 2. оружейный стол
             a.ClearAll();

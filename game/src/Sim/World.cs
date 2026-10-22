@@ -625,20 +625,33 @@ namespace Rastvordd.Sim
                     Info(a, "Отладочный набор: взрывчатка");
                     return;
                 }
-            a.AddSlot(Items.NewSlot("weapon_akm", 30));
+            // топ-гир: СОБР с керамикой и часами, стволы тира 3–4 с армейскими обвесами
+            Dress(a, Clothing.Sets.Find(s => s.Key == "sobr").Items.ToArray());
+            Dress(a, "plate_ceramic", "plate_ceramic", "wear_watch");
+            foreach (var (gun, atts) in new[] {
+                ("weapon_an94", new[] { "att_scope2x", "att_suppressor_pbs", "att_mag_ext_army", "att_grip" }),
+                ("weapon_svd", new[] { "att_scope4x", "att_compensator_army" }),
+                ("weapon_saiga12", new[] { "att_reddot", "att_flashlight", "att_mag_ext_army" }),
+                ("weapon_akm", new[] { "att_reddot", "att_compensator_army", "att_mag_ext_army", "att_stock_tac" }) })
+            {
+                var slot = Items.NewSlot(gun);
+                foreach (var at in atts) Attach(a, slot.State, at, out _);
+                slot.State.Ammo = slot.State.MagSize;
+                a.AddSlot(slot);
+            }
             a.AddSlot(Items.NewSlot("build_plan"));
             a.AddSlot(Items.NewSlot("tool_hammer"));
             a.AddSlot(Items.NewSlot("deploy_claim"));
             a.AddSlot(Items.NewSlot("weapon_torch"));
             a.Add("expl_c4", 6);
             a.Add("expl_satchel", 10);
-            a.Add("ammo_762", 120);
+            foreach (var (id, n) in new[] { ("ammo_545", 384), ("ammo_762", 256), ("ammo_12g", 128), ("antirad", 5), ("plate_ceramic", 2) })
+                a.Add(id, n);
             a.Add("comp_oil", 3);
-            foreach (var at in new[] { "att_reddot", "att_mag_ext" }) a.Add(at, 1);
             a.Add("punchcard_1", 2);   // проверить Подстанцию, пока РТ тира 0 нет в игре
             a.Add("metal_ore", 60);
             a.Add("sulfur_ore", 30);
-            foreach (var (id, n) in new[] { ("wood", 5000), ("stone", 5000), ("metal_fragments", 3000), ("cloth", 100), ("scrap", 500), ("charcoal", 100), ("sulfur", 100), ("bandage", 5) })
+            foreach (var (id, n) in new[] { ("wood", 3000), ("stone", 3000), ("metal_fragments", 2000), ("cloth", 100), ("scrap", 500), ("charcoal", 100), ("sulfur", 100), ("bandage", 20) })
                 a.Add(id, n);
             Info(a, "Отладочный набор выдан");
         }

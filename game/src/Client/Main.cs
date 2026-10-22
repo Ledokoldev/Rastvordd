@@ -320,6 +320,23 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _hud = new Hud();
             AddChild(_hud);
             if (_teleports != null) _hud.SetTeleports(_teleports);
+            // админка: надеть любой комплект (снятое — в рюкзак), антирадин
+            var gear = new List<(string, System.Action)>();
+            foreach (var set in Clothing.Sets)
+            {
+                if (set.Key == "watch") continue;
+                var s = set;
+                gear.Add(($"{s.Name} ({s.Tier})", () =>
+                {
+                    var me = _server.World.Find(_myId);
+                    for (int i = 0; i < me.Worn.Length; i++)
+                        if (me.Worn[i] != null && me.Worn[i].Id != "wear_watch") { me.Add(me.Worn[i].Id, 1); me.Worn[i] = null; }
+                    _server.World.Dress(me, s.Items.ToArray());
+                    _hud.Toast($"Надет комплект «{s.Name}»");
+                }));
+            }
+            gear.Add(("Антирадин ×5", () => { _server.World.Find(_myId).Add("antirad", 5); _hud.Toast("Антирадин ×5"); }));
+            _hud.SetGear(gear);
             var monList = new List<(string, SVec, SVec)>();
             for (int i = 0; i < _map.Yards.Count; i++) monList.Add((_map.YardNames[i], _map.Yards[i].min, _map.Yards[i].max));
             _mapView = new MapView(_map, monList);

@@ -94,7 +94,13 @@ namespace Rastvordd.Client
             _tpBox.AddThemeConstantOverride("v_separation", 6);
             box.AddChild(_tpBox);
             box.AddChild(UiTheme.Sep());
-            var wipe = UiTheme.Btn("Новый вайп — стереть сохранение и начать заново");
+            box.AddChild(UiTheme.Caption("Надеть комплект (снятое — в рюкзак)"));
+            _gearBox = new HFlowContainer { CustomMinimumSize = new Vector2(620, 0) };
+            _gearBox.AddThemeConstantOverride("h_separation", 6);
+            _gearBox.AddThemeConstantOverride("v_separation", 6);
+            box.AddChild(_gearBox);
+            box.AddChild(UiTheme.Sep());
+            var wipe =UiTheme.Btn("Новый вайп — стереть сохранение и начать заново");
             wipe.AddThemeColorOverride("font_color", UiTheme.Bad);
             wipe.Pressed += () => WipeRequested?.Invoke();
             box.AddChild(wipe);
@@ -115,6 +121,19 @@ namespace Rastvordd.Client
                 var b = UiTheme.Btn(name, false, 0, 32);
                 b.Pressed += () => go();
                 _tpBox.AddChild(b);
+            }
+        }
+        HFlowContainer _gearBox;
+        /// <summary>Кнопки выдачи снаряжения в админке.</summary>
+        public void SetGear(System.Collections.Generic.List<(string name, System.Action go)> list)
+        {
+            if (_gearBox == null) return;
+            foreach (var c in _gearBox.GetChildren()) c.QueueFree();
+            foreach (var (name, go) in list)
+            {
+                var b = UiTheme.Btn(name, false, 0, 32);
+                b.Pressed += () => go();
+                _gearBox.AddChild(b);
             }
         }
         Label _adminSounds;

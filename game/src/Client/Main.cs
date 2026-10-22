@@ -659,6 +659,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         Input.MouseMode = _hud.AdminOpen || _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
                         break;
                     case Key.F9: _debugEdge = true; break;
+                    case Key.F8: _server.World.GiveBuilderKit(_server.World.Find(_myId)); break;   // набор строителя
                     case Key.Equal: case Key.KpAdd:
                         if (_autoRun != SVec.Zero) { _autoRun = SVec.Zero; _hud.Toast("Автобег выключен"); break; }
                         _autoRun = WasdVector();

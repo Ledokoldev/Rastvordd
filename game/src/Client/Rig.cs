@@ -179,6 +179,8 @@ namespace Rastvordd.Client
         /// <summary>Множитель толщины части: до целого числа пикселей, чтобы пиксели не «плясали».</summary>
         static float Thick(int px) => Mathf.Max(px + 1, Mathf.Round(px * Broad)) / px;
         /// <summary>Корпус шире нарисованного меньше, чем ноги и таз: плечи ≈ 0,9 высоты корпуса, как у человека.</summary>
+        /// <summary>Ноги не толще нужного (иначе «жирный»), зато шире расставлены.</summary>
+        static float LegThick(int px) => Mathf.Max(px + 1, Mathf.Round(px * 1.25f)) / px;
         static float TorsoThick(int px) => Mathf.Max(px + 1, Mathf.Round(px * 1.15f)) / px;
         /// <summary>Руки толще остального тела (иначе на крепком торсе они выглядят тонкими и кривыми).</summary>
         static float ArmThick(int px) => Mathf.Max(px + 2, Mathf.Round(px * 1.8f)) / px;
@@ -283,8 +285,8 @@ namespace Rastvordd.Client
 
             // стоя ноги прямые (таз на полную длину ноги); присед стоя — полуколено, вприсядку на ходу таз чуть выше
             float hipY = -legL + 0.05f + crouch * (12 - 3 * gait) + bob + swingDip;
-            var hipL = new Vector2(-3, hipY);
-            var hipR = new Vector2(4, hipY);
+            var hipL = new Vector2(-4, hipY);   // ноги шире расставлены: просвет между ними, фигура не «бочкой»
+            var hipR = new Vector2(5, hipY);
 
             // стопа ноги с долей цикла u: вдоль взгляда (по земле) + подъём при переносе
             Vector2 Foot(float u, float x)
@@ -448,15 +450,15 @@ namespace Rastvordd.Client
             void DrawLeg(Vector2 hip, Vector2 foot)
             {
                 var leg = Ik(hip, foot, lThigh, lShin, kneeBend);
-                Part(_set.Thigh, hip, leg.a1 - Mathf.Pi / 2, new Vector2(_set.Thigh.GetWidth() / 2f, 1), 1, Thick(_set.Thigh.GetWidth()));
-                Part(_set.Shin, leg.joint, leg.a2 - Mathf.Pi / 2, new Vector2(_set.Shin.GetWidth() / 2f, 1), 1, Thick(_set.Shin.GetWidth()));
+                Part(_set.Thigh, hip, leg.a1 - Mathf.Pi / 2, new Vector2(_set.Thigh.GetWidth() / 2f, 1), 1, LegThick(_set.Thigh.GetWidth()));
+                Part(_set.Shin, leg.joint, leg.a2 - Mathf.Pi / 2, new Vector2(_set.Shin.GetWidth() / 2f, 1), 1, LegThick(_set.Shin.GetWidth()));
             }
 
             // звено ноги от a до b: текстура тянется/сжимается — так видно ракурсное сокращение (бедро к камере)
             void Seg(Texture2D t, Vector2 a, Vector2 b, float l)
             {
                 var d = b - a;
-                Part(t, a, Mathf.Atan2(d.Y, d.X) - Mathf.Pi / 2, new Vector2(t.GetWidth() / 2f, 1), Mathf.Max(0.25f, d.Length() / l), Thick(t.GetWidth()));
+                Part(t, a, Mathf.Atan2(d.Y, d.X) - Mathf.Pi / 2, new Vector2(t.GetWidth() / 2f, 1), Mathf.Max(0.25f, d.Length() / l), LegThick(t.GetWidth()));
             }
 
             void DrawBody()

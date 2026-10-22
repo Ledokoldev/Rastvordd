@@ -610,6 +610,18 @@ namespace Rastvordd.Sim
             if (Rng.NextDouble() < 0.3) a.Add("canned", 1);
         }
 
+        /// <summary>Отладка (F8): набор строителя — план, киянка, шкаф, ящики, верстаки 1–3, печи, спальники, замки и ресурсы.</summary>
+        public void GiveBuilderKit(Actor a)
+        {
+            if (a == null || a.Dead) return;
+            foreach (var id in new[] { "build_plan", "tool_hammer", "deploy_claim", "deploy_box", "deploy_workbench", "deploy_sleepbag" })
+                a.AddSlot(Items.NewSlot(id));
+            foreach (var (id, n) in new[] { ("wood", 2000), ("stone", 2000), ("metal_fragments", 2000), ("scrap", 300),
+                ("deploy_box", 4), ("deploy_furnace", 2), ("deploy_workbench2", 1), ("deploy_workbench3", 1), ("deploy_sleepbag", 1), ("lock_code", 4) })
+                a.Add(id, n);
+            Info(a, "Набор строителя выдан");
+        }
+
         void GiveDebugKit(Actor a)
         {
             // повторное нажатие — набор для рейда: столб и факел меняются на взрывчатку

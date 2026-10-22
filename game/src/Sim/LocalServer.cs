@@ -72,6 +72,18 @@ namespace Rastvordd.Sim
         public List<(string id, int n, int have)> Costs;      // ингредиенты: нужно / есть
     }
 
+    /// <summary>Пункт радиального колеса (План, киянка): иконка, название, пояснение, цена с тем, что есть в инвентаре.</summary>
+    public struct WheelItem
+    {
+        public int Id;                  // План — вид элемента; киянка — 1–4 уровень, World.HammerDemolish — снос
+        public string Icon;             // путь в art/ («icons/icon_build_wall») или «item:id» — иконка предмета, «@demolish» — значок сноса
+        public string Name, Hint;
+        public string Why;              // почему нельзя ("" — можно)
+        public bool Enabled, Current;
+        public bool Refund;             // цена — это возврат (снос)
+        public List<(string id, int n, int have)> Costs;
+    }
+
     public sealed class SelfInfo
     {
         public int Id;
@@ -107,7 +119,10 @@ namespace Rastvordd.Sim
         public string BuildStatus;      // с планом в руках: лимиты базы под курсором
         public UiView Ui;               // открытое окно (ящик, печь, столб…)
         public string BuildGuide;       // шпаргалка «как построить дом» с отметками
-        public List<(int kind, string name, string cost, bool can)> BuildPieces = new();   // меню плана
+        public List<WheelItem> BuildPieces = new();   // колесо плана
+        public bool HoldingHammer;      // киянка в руках
+        public int HammerTarget;        // постройка под киянкой (или та, над которой открыто колесо), 0 — нет
+        public List<WheelItem> HammerWheel = new();   // колесо киянки для HammerTarget
         public bool OpenCraft;          // открыть крафт (E у верстака)
         public bool HasZone;            // зона столба под курсором (клетка столба, радиус World.ClaimRadius)
         public (int i, int j) ZoneCell;
@@ -668,10 +683,15 @@ namespace Rastvordd.Sim
             if (!me.Dead && me.Held?.Def?.Build == true)
                 foreach (var pk in Building.PieceOrder)
                 {
-                    int k = (int)pk;
                     var cost = Building.Cost(pk, pk == StructKind.Door ? 1 : 0);
-                    snap.Self.BuildPieces.Add((k, Building.KindName((StructKind)k), string.Join(", ", System.Array.ConvertAll(cost, c => $"{Items.Name(c.id)} {c.n}")), System.Array.TrueForAll(cost, c => me.Count(c.id) >= c.n)));
+                    bool can = System.Array.TrueForAll(cost, c => me.Count(c.id) >= c.n);
+                    snap.Self.BuildPieces.Add(new WheelItem
+                    {
+                        Id = (int)pk, Icon = "icons/icon_build_" + PieceIcon(pk), Name = Building.KindName(pk), Hint = PieceHint(pk),
+                        Enabled = true, Current = pk == me.BuildPiece, Why = can ? "" : "не хватает ресурсов", Costs = CostRows(me, cost),
+                    });
                 }
+            if (!me.Dead && me.Held?.Id == "tool_hammer") FillHammerWheel(snap.Self, me);
             snap.Self.OpenCraft = me.WantsCraftMenu;
             me.WantsCraftMenu = false;
             foreach (var d in World.Deployables) if (d.Kind == DeployKind.Claim && d.Auth.Contains(me.Id)) { snap.Self.Home = d.Pos; break; }
@@ -916,8 +936,57 @@ namespace Rastvordd.Sim
                     s.InteractHint = $"{state} · ЛКМ — {Building.TierNames[t.Tier + 1]}: " + string.Join(", ", System.Array.ConvertAll(up, c => $"{Items.Name(c.id)} {c.n}"));
                 }
                 else s.InteractHint = state + (t.Hp < t.MaxHp ? " · ЛКМ — починить" : "");
+                s.InteractHint += " · ПКМ — колесо";
             }
             return s;
+        }
+
+        static string PieceIcon(StructKind k) => k switch
+        {
+            StructKind.Foundation => "foundation", StructKind.TriFoundation => "triangle", StructKind.Wall => "wall",
+            StructKind.Doorway => "doorway", StructKind.Window => "window", _ => "door",
+        };
+
+        static string PieceHint(StructKind k) => k switch
+        {
+            StructKind.Foundation => "Пол 2×2 м — с него начинается дом",
+            StructKind.TriFoundation => "К любому свободному краю пола",
+            StructKind.Wall => "На край фундамента, закрывает обзор",
+            StructKind.Doorway => "Стена с проходом — под дверь",
+            StructKind.Window => "Видно наружу, можно стрелять",
+            _ => "В дверной проём; замок — с пояса",
+        };
+
+        static List<(string id, int n, int have)> CostRows(Actor me, (string id, int n)[] cost) =>
+            new(System.Array.ConvertAll(cost, c => (c.id, c.n, me.Count(c.id))));
+
+        static readonly string[] TierIcons = { "", "item:wood", "item:stone", "item:metal_fragments", "item:hqm" };
+        static readonly string[] TierHints = { "", "Дешёвый, горит и рубится", "Пулей не взять, нужна взрывчатка", "Вдвое крепче камня", "Самый прочный уровень" };
+
+        /// <summary>Колесо киянки: постройка, над которой оно открыто (или под прицелом), — уровни и снос.</summary>
+        void FillHammerWheel(SelfInfo s, Actor me)
+        {
+            s.HoldingHammer = true;
+            var t = me.HammerFocus != 0 ? World.StructById(me.HammerFocus) : World.TargetStructure(me, 2f);
+            if (t == null) return;
+            s.HammerTarget = t.Id;
+            for (int tier = 1; tier <= Building.MaxTier; tier++)
+            {
+                string tn = Building.TierNames[tier];
+                s.HammerWheel.Add(new WheelItem
+                {
+                    Id = tier, Icon = TierIcons[tier], Name = char.ToUpper(tn[0]) + tn.Substring(1), Hint = TierHints[tier],
+                    Why = World.HammerWhy(me, t, tier), Current = t.Tier == tier, Costs = CostRows(me, Building.Cost(t.Kind, tier)),
+                });
+            }
+            var refund = World.DemolishRefund(t);
+            s.HammerWheel.Add(new WheelItem
+            {
+                Id = World.HammerDemolish, Icon = "@demolish", Name = "Снести", Hint = "Вернёт половину цены текущего уровня",
+                Why = World.HammerWhy(me, t, World.HammerDemolish), Refund = true,
+                Costs = new(System.Array.ConvertAll(refund, c => (c.id, c.n, me.Count(c.id)))),
+            });
+            for (int i = 0; i < s.HammerWheel.Count; i++) { var w = s.HammerWheel[i]; w.Enabled = w.Why == ""; s.HammerWheel[i] = w; }
         }
 
         string Hint((World.InteractKind kind, object target) it, Actor me = null) => it.kind switch

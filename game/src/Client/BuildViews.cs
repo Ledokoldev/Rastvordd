@@ -222,6 +222,8 @@ namespace Rastvordd.Client
 
         public BuildGhost2D() { ZIndex = 6; }
 
+        public Color? Tint;   // подсветка цели киянки (иначе — цвета призрака: годится / нет)
+
         bool _zone;
         (int i, int j) _zoneCell;
         /// <summary>Зона столба под курсором — пунктирный квадрат 17×17 клеток.</summary>
@@ -248,6 +250,8 @@ namespace Rastvordd.Client
         {
             var fill = _ok ? new Color(0.45f, 0.8f, 1f, 0.28f) : new Color(1f, 0.35f, 0.3f, 0.28f);
             var line = _ok ? new Color(0.6f, 0.9f, 1f, 0.85f) : new Color(1f, 0.45f, 0.4f, 0.85f);
+            float lw = Tint != null ? 2.5f : 1;
+            if (Tint is Color tint) { fill = new Color(tint, 0.32f); line = new Color(tint, 0.95f); }
             if (_zone)
             {
                 float c = Building.Cell * Iso.PPM;
@@ -262,7 +266,7 @@ namespace Rastvordd.Client
                 var pts = new Vector2[_poly.Length];
                 for (int i = 0; i < pts.Length; i++) pts[i] = Iso.Px(_poly[i]) + new Vector2(0, -4);
                 DrawColoredPolygon(pts, fill);
-                for (int i = 0; i < pts.Length; i++) DrawLine(pts[i], pts[(i + 1) % pts.Length], line, 1);
+                for (int i = 0; i < pts.Length; i++) DrawLine(pts[i], pts[(i + 1) % pts.Length], line, lw);
                 return;
             }
             if (_ea == _eb) return;
@@ -274,7 +278,7 @@ namespace Rastvordd.Client
                 var top = new Rect2(x0, y0 - hh, x1 - x0, y1 - y0);
                 DrawRect(front, fill);
                 DrawRect(top, fill.Lightened(0.2f));
-                DrawRect(front, line, false, 1);
+                DrawRect(front, line, false, lw); if (Tint != null) DrawRect(top, line, false, lw);
             }
         }
     }

@@ -24,7 +24,9 @@ namespace Rastvordd.Client
         MiniMap _miniMap;
         InventoryWindow _inv;
         bool _invOpen;
-        BuildMenu _buildMenu;
+        BuildMenu _buildMenu, _hammerMenu;   // колёса Плана и киянки (ПКМ)
+        BuildGhost2D _hammerMark;            // подсветка постройки, над которой открыто колесо киянки
+        int _hammerFocus, _hammerOp, _hammerTarget;
         BuildBar _buildBar;
         StructTip _structTip;
         PickupFeed _feed;
@@ -162,7 +164,20 @@ namespace Rastvordd.Client
                 else if (a == "stop") _forceWalk = SVec.Zero;
                 else if (a == "bmenu") _buildMenu.Open();
                 else if (a == "bdone") _buildMenu.Release();   // отладка: отпустить ПКМ
-                else if (a.StartsWith("bpick")) { GetViewport().WarpMouse(GetViewport().GetVisibleRect().Size / 2 + new Vector2(0, -1).Rotated(int.Parse(a.Substring(5)) * Mathf.Tau / 5) * 110); }   // отладка: навести на сектор колеса
+                else if (a.StartsWith("bpick")) _buildMenu.PointAt(int.Parse(a.Substring(5)));   // отладка: навести на сектор колеса (с 0)
+                else if (a == "hammer") { var me = _server.World.Find(_myId); me.Belt[5] = Items.NewSlot("tool_hammer"); me.Current = 5; }   // отладка: киянку в руки
+                else if (a == "hmenu") OpenHammerWheel();     // отладка: ПКМ с киянкой
+                else if (a.StartsWith("aimst"))
+                {
+                    // отладка: aimst<вид> — встать у своей постройки этого вида (стена — 1) и навести на неё
+                    var w = _server.World; var me = w.Find(_myId);
+                    var kind = (StructKind)int.Parse(a.Substring(5));
+                    Structure best = null;
+                    foreach (var st in w.Structures) if (st.Kind == kind && st.OwnerId == _myId && (best == null || SVec.Distance(st.Center, me.Pos) < SVec.Distance(best.Center, me.Pos))) best = st;
+                    if (best != null) { me.Pos = best.Center + (best.IsFloor ? new SVec(-1.6f, 0.4f) : new SVec(0.2f, 1.1f)); _autoAim = best.Center; }
+                }
+                else if (a == "hdone") _hammerMenu.Release();
+                else if (a.StartsWith("hpick")) _hammerMenu.PointAt(int.Parse(a.Substring(5)));
                 else if (a.StartsWith("dose")) _server.World.Find(_myId).RadDose = float.Parse(a.Substring(4));   // отладка (D47): dose<n> — доза радиации
                 else if (a.StartsWith("dress:"))
                 {
@@ -369,6 +384,10 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _buildMenu = new BuildMenu();
             _buildMenu.Picked += k => _setPiece = k;
             _hud.AddChild(_buildMenu);
+            _hammerMenu = new BuildMenu();
+            _hammerMenu.Picked += op => { _hammerOp = op; _hammerTarget = _hammerFocus; };
+            _hammerMenu.Rejected += why => _hud.Toast(why);
+            _hud.AddChild(_hammerMenu);
             _buildBar = new BuildBar { Visible = false };
             _buildBar.SetAnchorsPreset(Control.LayoutPreset.CenterBottom);
             _buildBar.OffsetLeft = -_buildBar.CustomMinimumSize.X / 2; _buildBar.OffsetRight = _buildBar.CustomMinimumSize.X / 2;
@@ -637,7 +656,8 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         {
             if (e is InputEventKey k && k.Pressed && !k.Echo)
             {
-                if (_buildMenu.PickByKey(k.PhysicalKeycode)) return;
+                if (_buildMenu.PickByKey(k.PhysicalKeycode) || _hammerMenu.PickByKey(k.PhysicalKeycode)) return;
+                if (k.PhysicalKeycode == Key.Escape && (_buildMenu.Visible || _hammerMenu.Visible)) { _buildMenu.Close(); _hammerMenu.Close(); return; }
                 if (_spectate && SpectatorKey(k.PhysicalKeycode)) return;
                 switch (k.PhysicalKeycode)
                 {
@@ -691,11 +711,13 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         break;
                 }
             }
-            else if (e is InputEventMouseButton rb && rb.ButtonIndex == MouseButton.Right && !rb.Pressed) _buildMenu.Release();
+            else if (e is InputEventMouseButton rb && rb.ButtonIndex == MouseButton.Right && !rb.Pressed) { _buildMenu.Release(); _hammerMenu.Release(); }
             else if (e is InputEventMouseButton mb && mb.Pressed)
             {
                 // ПКМ с Планом — колесо элементов (держишь, наводишь, отпускаешь) вместо прицела
                 if (mb.ButtonIndex == MouseButton.Right && _cur?.Self != null && _cur.Self.HoldingPlan && !UiShown) _buildMenu.Open();
+                // ПКМ с киянкой по своей постройке — колесо: уровни и снос
+                if (mb.ButtonIndex == MouseButton.Right && _cur?.Self != null && _cur.Self.HoldingHammer && !UiShown) OpenHammerWheel();
                 // с Планом колесо листает элементы стройки (Ctrl+колесо — зум), иначе — зум
                 bool plan = _cur?.Self != null && _cur.Self.HoldingPlan && !mb.CtrlPressed;
                 if (plan && mb.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown)
@@ -703,6 +725,34 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 else if (mb.ButtonIndex == MouseButton.WheelUp) _zoom = Mathf.Min(2.6f, _zoom * 1.1f);
                 else if (mb.ButtonIndex == MouseButton.WheelDown) _zoom = Mathf.Max(0.9f, _zoom / 1.1f);
             }
+        }
+
+        /// <summary>ПКМ с киянкой: колесо над постройкой под прицелом (её id запоминается — колесо держит цель, пока открыто).</summary>
+        void OpenHammerWheel()
+        {
+            if (_cur?.Self == null || !_cur.Self.HoldingHammer || _cur.Self.HammerTarget == 0 || _cur.Self.Dead) return;
+            _hammerFocus = _cur.Self.HammerTarget;
+            _hammerMenu.Fill(_cur.Self.HammerWheel);
+            _hammerMenu.Open();
+        }
+
+        /// <summary>Колесо киянки: пункты с сервера, подсветка цели; цель пропала или киянку убрали — закрыть.</summary>
+        void UpdateHammerWheel()
+        {
+            var self = _cur.Self;
+            bool open = _hammerMenu.Visible && self.HoldingHammer && !self.Dead && self.HammerTarget == _hammerFocus;
+            if (_hammerMenu.Visible && !open) _hammerMenu.Close();
+            StructSnap? target = null;
+            if (open) foreach (var st in _cur.Structures) if (st.Id == _hammerFocus) { target = st; break; }
+            if (open)
+            {
+                _hammerMenu.Fill(self.HammerWheel);
+                _hammerMenu.Title = target is StructSnap t ? $"{Building.KindName(t.Kind)} · {Building.TierNames[t.Tier]} · {Mathf.CeilToInt(t.Hp * Building.MaxHp(t.Kind, t.Tier))}/{(int)Building.MaxHp(t.Kind, t.Tier)}" : "";
+            }
+            if (_hammerMark == null) { _hammerMark = new BuildGhost2D { Tint = UiTheme.Accent }; _world.AddChild(_hammerMark); }
+            _hammerMark.Visible = target != null;
+            _hammerMark.Modulate = new Color(1, 1, 1, 0.65f + 0.35f * Mathf.Sin(Time.GetTicksMsec() / 1000f * 6f));   // пульсирует
+            if (target is StructSnap ts) _hammerMark.Set(ts.Kind, Building.IsFloor(ts.Kind) ? ts.Poly : null, ts.A, ts.B, true);
         }
 
         /// <summary>Наблюдатель: Tab — следующий бот, F — свободная камера, 1–4 — скорость ×1/×2/×4/×8.</summary>
@@ -803,13 +853,16 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 Follow = _followId,
                 Move = move,
                 Aim = _aim,
-                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
+                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && !_hammerMenu.Visible && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
                 Eat = _eatEdge,
                 DebugKit = _debugEdge,
                 Craft = _craftReq,
                 Code = _codeReq?.code ?? -1,
                 UiOp = (int)(_uiReq?.op ?? UiOp.None),
                 SetPiece = _setPiece,
+                HammerFocus = _hammerMenu.Visible ? _hammerFocus : 0,
+                HammerOp = _hammerOp,
+                HammerTarget = _hammerTarget,
                 Research = _researchReq,
                 UiItem = _uiReq?.item,
                 UiIndex = _uiReq?.index ?? 0,
@@ -836,7 +889,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _screenDir = ((screen - vs / 2) / (vs / 2)).Clamp(-Vector2.One, Vector2.One);
 
             // прицеливание на ПКМ: конус уже, видно дальше, камеру можно протянуть к курсору
-            float peekTarget = _forcedPeek ?? (Input.IsMouseButtonPressed(MouseButton.Right) && !(_cur?.Self?.HoldingPlan ?? false) ? 1f : 0f);   // с Планом ПКМ — меню
+            float peekTarget = _forcedPeek ?? (Input.IsMouseButtonPressed(MouseButton.Right) && !(_cur?.Self?.HoldingPlan ?? false) && !(_hammerMenu?.Visible ?? false) ? 1f : 0f);   // с Планом ПКМ — меню
             _peek = Mathf.MoveToward(_peek, peekTarget, dt * 5f);
 
             if (_autoAim.HasValue) { _aim = _autoAim.Value; return; }
@@ -922,6 +975,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _codeReq = null;
                 _uiReq = null;
                 _setPiece = -1;
+                _hammerOp = 0;
                 _researchReq = null;
                 if (_autoFireFrames > 0) _autoFireFrames--;
                 HandleEvents();
@@ -940,6 +994,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _codeReq = null;
                 _uiReq = null;
                 _setPiece = -1;
+                _hammerOp = 0;
                 _researchReq = null;
                 HandleEvents();
             }
@@ -1065,6 +1120,14 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         SpawnChipsAt(e.Pos, TierChips[System.Math.Clamp((int)e.Value, 0, 4)], -1, 18);
                         Vfx.Collapse(Iso.Px(e.Pos), 7);   // обрушение: кольцо пыли и дым
                         _shake = Mathf.Min(1.2f, _shake + 0.3f);
+                        break;
+                    case SimEventKind.Demolished:
+                        // снос киянкой: разбор, а не обрушение — пыль, щепа/крошка, глухой стук (своего звука нет — заглушки)
+                        Sfx.Play(Sfx.Pick("build_demolish", (int)e.Value >= 2 ? "hit_stone" : "hit_wood"), Iso.Px(e.Pos), 0, 30, 0.08f);
+                        SpawnChipsAt(e.Pos, TierChips[System.Math.Clamp((int)e.Value, 0, 4)], e.ActorId, 12);
+                        Vfx.Dust(Iso.Px(e.Pos));
+                        Vfx.Collapse(Iso.Px(e.Pos), 4);
+                        if (e.ActorId == _myId) _shake = Mathf.Min(1.2f, _shake + 0.15f);
                         break;
                     case SimEventKind.Revealed:
                         // ячейка раскрылась: звоночек по редкости (Arc Raiders)
@@ -1617,11 +1680,12 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             // меню плана и шпаргалка стройки
             _feed.Update(_cur.Self, dt);
             _feed.Visible = !_hud.CraftOpen && !_mapView.Visible;   // лента у пояса; пояс спрятан под крафтом и картой
-            _structTip.Set(_cur.Self.Dead || UiShown || _buildMenu.Visible || _mapView.Visible ? null : StructTip.Pick(_cur.Structures, _aim));
+            _structTip.Set(_cur.Self.Dead || UiShown || _buildMenu.Visible || _hammerMenu.Visible || _mapView.Visible ? null : StructTip.Pick(_cur.Structures, _aim));
             _buildBar.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_buildMenu.Visible && !UiShown;
             if (_buildBar.Visible) _buildBar.Set((int)_cur.Self.BuildPiece, (int)_cur.Self.GhostPiece);
-            if (_cur.Self.HoldingPlan) _buildMenu.Fill(_cur.Self.BuildPieces, (int)_cur.Self.BuildPiece);
-            else if (_buildMenu.Visible) { _buildMenu.Visible = false; Input.MouseMode = Input.MouseModeEnum.Hidden; }
+            if (_cur.Self.HoldingPlan) _buildMenu.Fill(_cur.Self.BuildPieces);
+            else _buildMenu.Close();
+            UpdateHammerWheel();
             _guide.SetText(UiShown || _mapView.Visible ? null : _cur.Self.BuildGuide);
             _guide.Position = new Vector2(GetViewport().GetVisibleRect().Size.X - _guide.GetCombinedMinimumSize().X - 16, MiniMap.Side + 60);
             _hud.MapOpen = _mapView.Visible;

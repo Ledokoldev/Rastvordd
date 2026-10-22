@@ -96,7 +96,7 @@ namespace Rastvordd.Sim
         }
 
         static readonly string[] Posters = { "interior/wall_poster_worker", "interior/wall_poster_safety", "interior/wall_poster_space", "interior/wall_poster_pinup" };
-        static readonly string[] GenericFloor = { "decals/floor_dirt", "decals/floor_dirt", "decals/floor_stain", "decals/decal_debris", "decals/floor_plaster", "decals/floor_papers", "decals/decal_cigarette_butts" };
+        static readonly string[] GenericFloor = { "decals/floor_grime", "decals/floor_grime", "decals/floor_stain", "decals/decal_debris", "decals/floor_plaster", "decals/floor_papers", "decals/decal_cigarette_butts" };
         static readonly string[] GenericClutter = { "clutter/clutter_planks", "clutter/clutter_bucket", "interior/cardboard_pile", "decals/floor_bottles", "decals/floor_cans", "interior/top_cans", "interior/top_bottles" };
 
         static readonly Dictionary<string, Kit> Kits = new()
@@ -127,7 +127,7 @@ namespace Rastvordd.Sim
                 },
                 Wall = new[] { "interior/wall_portrait", "interior/wall_map", "interior/wall_calendar", "interior/wall_clock", "interior/wall_pennant", "interior/wall_poster_worker", "furniture/int_notice_board", "interior/wall_shelf_small" },
                 Clutter = new[] { "furniture/int_dead_plant", "furniture/coat_rack", "outdoor/trash_urn", "interior/cardboard_pile", "interior/top_box", "interior/top_papers", "furniture/chair_office" },
-                Floor = new[] { "decals/floor_papers", "decals/floor_papers", "decals/decal_newspapers", "decals/floor_rug", "decals/floor_lino_patch", "decals/floor_stain", "decals/decal_carpet_red" },
+                Floor = new[] { "decals/floor_papers", "decals/floor_rug", "decals/floor_lino_patch", "decals/floor_stain", "decals/decal_carpet_red" },
                 Tops = new[] { "interior/top_papers", "interior/top_papers", "interior/top_phone", "interior/top_lamp", "interior/top_typewriter", "interior/top_ashtray", "interior/top_mug", "interior/top_books" },
                 Radiators = 0.7f,
             },
@@ -168,7 +168,7 @@ namespace Rastvordd.Sim
                 },
                 Wall = new[] { "interior/wall_poster_safety", "interior/wall_calendar", "interior/wall_electric_box" },
                 Clutter = new[] { "interior/cardboard_pile", "interior/cardboard_pile", "clutter/clutter_pallet", "clutter/clutter_planks", "interior/top_box", "clutter/clutter_bucket", "props/crate_wood" },
-                Floor = new[] { "decals/floor_wood_chips", "decals/decal_newspapers", "decals/floor_plaster", "decals/floor_papers" },
+                Floor = new[] { "decals/floor_wood_chips", "decals/floor_plaster", "decals/floor_papers" },
                 Tops = new[] { "interior/top_box", "interior/top_jars", "interior/top_cans" },
                 Radiators = 0.15f,
             },
@@ -208,7 +208,7 @@ namespace Rastvordd.Sim
                 Big = new[] { new KitItem("outdoor/electric_cabinet", 1, 3, "N", run: true), new KitItem("props/subst_relay_cabinet", 0, 2, "NWE", run: true) },
                 Wall = new[] { "interior/wall_switchboard_small", "interior/wall_electric_box", "interior/wall_poster_safety", "interior/wall_switchboard_small" },
                 Clutter = new[] { "props/ats_cable_bundle", "furniture/int_fire_extinguisher", "clutter/clutter_bucket" },
-                Floor = new[] { "decals/decal_cables", "decals/decal_cables", "decals/floor_dirt" },
+                Floor = new[] { "decals/decal_cables", "decals/floor_stain", "decals/decal_debris" },
                 Radiators = 0.1f,
             },
             ["medbay"] = new Kit
@@ -239,9 +239,9 @@ namespace Rastvordd.Sim
         /// <summary>Размер декали (диаметр «пятна», м) — для учёта плотности.</summary>
         static float DecalSize(string s) => s switch
         {
-            "decals/floor_dirt" => 1.5f, "decals/floor_lino_patch" => 1.1f, "decals/floor_rug" => 1.0f, "decals/floor_rug_runner" => 1.3f,
+            "decals/floor_dirt" => 1.5f, "decals/floor_grime" => 3.2f, "decals/floor_grime_2" => 3.6f, "decals/floor_lino_patch" => 1.1f, "decals/floor_rug" => 1.0f, "decals/floor_rug_runner" => 1.3f,
             "decals/floor_stain" => 0.9f, "decals/floor_leak" => 1.1f, "decals/floor_blood" => 1.0f, "decals/decal_oil_stain" => 1.4f, "decals/decal_oil_stain_big" => 1.1f,
-            "decals/decal_puddle_oily" => 1.3f, "decals/decal_cables" => 1.1f, "decals/decal_trash_scatter" => 1.3f, "decals/decal_newspapers" => 0.9f,
+            "decals/decal_puddle_oily" => 1.3f, "decals/decal_cables" => 1.1f, "decals/decal_trash_scatter" => 1.3f,
             _ => 0.7f,
         };
 
@@ -282,6 +282,7 @@ namespace Rastvordd.Sim
 
         (int rooms, float before, float after, int pipes) DressMonument(Monument m, string key, List<(Vector2 p, string kind)> tags, Random rng)
         {
+            if (Environment.GetEnvironmentVariable("NOWINGS") == null) AddWings(m, tags, rng);
             var roofs = Roofs.FindAll(r => m.Contains((r.Min + r.Max) * 0.5f));
             var allRooms = new List<DressRoom>();
             float covBefore = 0, covAfter = 0, area = 0;
@@ -316,6 +317,7 @@ namespace Rastvordd.Sim
                 foreach (var r in rooms) { FillFloor(r, rng); covAfter += Coverage(r) * r.Area; area += r.Area; }
                 allRooms.AddRange(rooms);
             }
+            if (key == "gai") GaiCheckpoint(m, rng);
             AddAnnexes(m, roofs, rng);
             DressExterior(m, roofs, rng);
             AddPerimeter(m, rng);
@@ -887,16 +889,29 @@ namespace Rastvordd.Sim
             return runs;
         }
 
+        /// <summary>
+        /// Стулья лицом к столу: с юга — спинкой к камере (вид сзади), с боков — профилем к столу, с севера (если стол
+        /// не у стены) — лицом к камере. Стол у стены — один стул спереди, спинкой к нам.
+        /// </summary>
         void AddChairs(DressRoom r, string table, Vector2 p, float w, float d, Random rng)
         {
             bool office = table.Contains("office") || table.Contains("desk");
-            // стул спереди (к камере) — спинкой к нам не бывает: спрайты стульев смотрят на юг, так стул «отодвинут»
-            PlaceSmallAt(r, office ? "furniture/chair_office" : "furniture/chair_kitchen", p + new Vector2((float)(rng.NextDouble() - 0.5) * w * 0.4f, 0.42f), rng, force: true);
-            if (!office && w >= 1.0f)
+            string front = office ? "furniture/chair_office" : "furniture/chair_kitchen";
+            string back = office ? "furniture/chair_office_back" : "furniture/chair_kitchen_back";
+            string side = office ? "furniture/chair_office_side" : "furniture/chair_kitchen_side";
+            var g = r.G;
+            var (ni, nj) = g.Cell(new Vector2(p.X, p.Y - d - 0.3f));
+            bool atWall = !g.In(ni, nj) || g.K[g.Idx(ni, nj)] is GWall or GSolid;
+            // юг: стул отодвинут от стола, спинкой к камере (сортируется после стола — закрывает его край, как и должен)
+            PlaceSmallAt(r, rng.NextDouble() < 0.12 ? "interior/chair_overturned" : back, p + new Vector2((float)(rng.NextDouble() - 0.5) * w * 0.4f, 0.3f), rng, flip: rng.NextDouble() < 0.5, force: true);
+            if (office && atWall) return;
+            if (w >= 1.0f || !office)
             {
-                PlaceSmallAt(r, "furniture/chair_kitchen_side", p + new Vector2(-w / 2 - 0.22f, -d * 0.35f), rng, force: true);
-                if (rng.NextDouble() < 0.7) PlaceSmallAt(r, rng.NextDouble() < 0.25 ? "interior/chair_overturned" : "furniture/chair_kitchen_side", p + new Vector2(w / 2 + 0.22f, -d * 0.35f), rng, flip: true, force: true);
+                // запад: профилем, смотрит вправо (на стол); восток — зеркально
+                PlaceSmallAt(r, side, p + new Vector2(-w / 2 - 0.2f, -d * 0.3f), rng, flip: false, force: true);
+                if (rng.NextDouble() < 0.75) PlaceSmallAt(r, side, p + new Vector2(w / 2 + 0.2f, -d * 0.3f), rng, flip: true, force: true);
             }
+            if (!atWall && rng.NextDouble() < 0.6) PlaceSmallAt(r, front, p + new Vector2((float)(rng.NextDouble() - 0.5) * w * 0.3f, -d - 0.05f), rng, flip: rng.NextDouble() < 0.5, force: true);
         }
 
         void AddTops(DressRoom r, Vector2 p, float w, float d, float h, string[] tops, Random rng)
@@ -920,6 +935,7 @@ namespace Rastvordd.Sim
         void DressWalls(DressRoom r, Kit kit, Random rng)
         {
             var g = r.G;
+            var hungUsed = new Dictionary<string, int>();
             var near = Decors.FindAll(d => !d.Flat && !d.Batch && d.Pos.X > r.Min.X - 2 && d.Pos.X < r.Max.X + 2 && d.Pos.Y > r.Min.Y - 0.5f && d.Pos.Y < r.Max.Y + 1.5f);
             foreach (var (x0, x1, y, win) in WallRuns(r, 0))
             {
@@ -955,6 +971,10 @@ namespace Rastvordd.Sim
                     float under = RunHeight(x - 0.4f, x + 0.4f);
                     if (under > 2.1f) continue;   // высокие стеллажи и шкафы закрывают стену
                     string s = kit.Wall.Length > 0 && rng.NextDouble() < 0.8 ? kit.Wall[rng.Next(kit.Wall.Length)] : Posters[rng.Next(Posters.Length)];
+                    // часы, карта, портрет — по одному на комнату; плакаты и доски — не больше двух одинаковых
+                    int lim = s.Contains("poster") || s.Contains("notice") || s.Contains("tool_board") || s.Contains("switchboard") ? 2 : 1;
+                    if (hungUsed.GetValueOrDefault(s) >= lim) { s = Posters[rng.Next(Posters.Length)]; if (hungUsed.GetValueOrDefault(s) >= 2) continue; }
+                    hungUsed[s] = hungUsed.GetValueOrDefault(s) + 1;
                     float lift = s switch
                     {
                         "interior/wall_clock" => 1.95f, "interior/wall_pennant" => 1.5f, "interior/wall_map" => 1.05f, "furniture/int_notice_board" => 1.0f,
@@ -968,9 +988,10 @@ namespace Rastvordd.Sim
                 // отвалившаяся штукатурка, плесень у пола и под потолком
                 for (float x = x0 + 0.4f; x < x1 - 0.4f; x += 1.0f + (float)rng.NextDouble() * 2.5f)
                 {
-                    if (rng.NextDouble() < 0.55) continue;
-                    var dec = Decor(rng.NextDouble() < 0.6 ? "interior/wall_plaster_peel" : "interior/wall_mold", new Vector2(x, y + 0.02f), rng.NextDouble() < 0.5);
-                    dec.Lift = rng.NextDouble() < 0.5 ? 0.05f : 1.3f + (float)rng.NextDouble() * 0.8f;
+                    if (rng.NextDouble() < 0.6) continue;
+                    bool mold = rng.NextDouble() < 0.35;
+                    var dec = Decor(mold ? "interior/wall_mold" : "interior/wall_plaster_peel", new Vector2(x, y + 0.02f), rng.NextDouble() < 0.5);
+                    dec.Lift = !mold && rng.NextDouble() < 0.4 ? 0.05f : 1.4f + (float)rng.NextDouble() * 0.7f;   // плесень — под потолком, не у пола
                     dec.Batch = true;
                     if (dec.Lift < 0.1f) { var p = new Vector2(x, y + 0.25f); AddFlat("decals/floor_plaster", p, 0.8f + (float)rng.NextDouble() * 0.3f, rng); MarkCov(r, p, 0.4f); }
                 }
@@ -995,13 +1016,37 @@ namespace Rastvordd.Sim
                     }
                 }
             }
-            // огнетушитель / вешалка у боковой стены
+            // боковые стены: их лицо в 3/4 не видно, поэтому вешаем то, что торчит из стены в комнату и читается сверху:
+            // бра, щиток с трубкой проводки, огнетушитель на кронштейне, аптечка; на полу у стены — вешалка, ведро
             foreach (var (y0, y1, x, west) in SideRuns(r))
             {
-                if (y1 - y0 < 2.5f || rng.NextDouble() < 0.45) continue;
-                float y = Lerp(y0 + 0.8f, y1 - 0.4f, (float)rng.NextDouble());
-                string s = rng.NextDouble() < 0.5 ? "furniture/int_fire_extinguisher" : r.Kind is "barracks" or "office" or "corridor" ? "furniture/coat_rack" : "clutter/clutter_bucket";
-                PlaceSmallAt(r, s, new Vector2(west ? x + 0.25f : x - 0.25f, y), rng);
+                if (y1 - y0 < 2.0f) continue;
+                for (float y = y0 + 0.9f + (float)rng.NextDouble(); y < y1 - 0.3f; y += 2.2f + (float)rng.NextDouble() * 2.2f)
+                {
+                    if (rng.NextDouble() < 0.3) continue;
+                    var at = new Vector2(west ? x + 0.14f : x - 0.14f, y);
+                    var (ci, cj) = g.Cell(at);
+                    if (!g.In(ci, cj) || g.K[g.Idx(ci, cj)] == GSolid) continue;
+                    double k = rng.NextDouble();
+                    if (k < 0.3) { var dl = Decor("props/lamp_wall", at, !west); dl.Lift = 1.85f; dl.Batch = true; }
+                    else if (k < 0.5) { var de = Decor(r.Kind == "medbay" ? "interior/wall_first_aid" : "interior/wall_electric_box", at, !west); de.Lift = 0.95f; de.Batch = true; }
+                    else if (k < 0.75) { var df = Decor("furniture/int_fire_extinguisher", at + new Vector2(west ? 0.08f : -0.08f, 0), !west); df.Lift = 0.35f; df.Batch = true; }
+                    else PlaceSmallAt(r, r.Kind is "barracks" or "office" or "corridor" ? "furniture/coat_rack" : "clutter/clutter_bucket", new Vector2(west ? x + 0.3f : x - 0.3f, y), rng);
+                }
+            }
+            // южная стена: её лицо изнутри не видно (стена срезается, когда игрок внутри) — только низкое у плинтуса:
+            // батареи под окнами, ведро, пыль
+            foreach (var (x0, x1, y, win) in WallRuns(r, 1))
+            {
+                if (!win && rng.NextDouble() < 0.6) continue;
+                for (float x = x0 + 1.0f; x < x1 - 0.8f; x += rng.Next(3, 6))
+                {
+                    var at = new Vector2(x, y - 0.06f);
+                    var (ci, cj) = g.Cell(at - new Vector2(0, 0.1f));
+                    if (!g.In(ci, cj) || g.K[g.Idx(ci, cj)] != GFree || g.Occ[g.Idx(ci, cj)] || g.Res[g.Idx(ci, cj)]) continue;
+                    var dr = Decor("furniture/radiator", at); dr.Batch = true;
+                    MarkOcc(r, at - new Vector2(0, 0.1f), 0.5f);
+                }
             }
         }
 
@@ -1061,13 +1106,19 @@ namespace Rastvordd.Sim
             if (g.Comp[c] != g.Comp[r.Cells[0]] || g.K[c] is GWall or GSolid) return;
             if (!force && g.Occ[c]) return;
             if (sprite.StartsWith("decals/")) { AddFlat(sprite, p, 0.85f + (float)rng.NextDouble() * 0.3f, rng); MarkCov(r, p, DecalSize(sprite) * 0.4f); return; }
+            if (!force && (sprite == "furniture/chair_office" || sprite == "furniture/chair_kitchen"))
+            {
+                // брошенный стул — как стоял: лицом, боком или спинкой
+                double k = rng.NextDouble();
+                if (k < 0.33) sprite += "_side"; else if (k < 0.6) sprite += "_back";
+            }
             var d = Decor(sprite, p, flip ?? rng.NextDouble() < 0.5);
             d.Batch = true;
             MarkOcc(r, p - new Vector2(0, 0.15f), 0.3f);
         }
 
         static readonly HashSet<string> FeatureDecals = new() { "decals/decal_cables", "decals/floor_rug", "decals/floor_rug_runner", "decals/floor_lino_patch", "decals/floor_blood", "decals/decal_carpet_red", "decals/floor_leak", "decals/decal_puddle_oily", "decals/decal_oil_stain_big" };
-        static readonly string[] Litter = { "decals/decal_debris", "decals/floor_papers", "decals/decal_cigarette_butts", "decals/floor_plaster", "decals/floor_bottles", "decals/floor_cans", "decals/decal_newspapers", "decals/floor_stain", "decals/floor_wood_chips", "decals/decal_leaves" };
+        static readonly string[] Litter = { "decals/decal_debris", "decals/floor_papers", "decals/decal_cigarette_butts", "decals/floor_plaster", "decals/floor_bottles", "decals/floor_cans", "decals/floor_stain", "decals/floor_wood_chips", "decals/decal_leaves" };
 
         /// <summary>Клетки троп между дверями и к луту (кратчайшие пути, раздутые на ~0,5 м) — там чище, «натоптано».</summary>
         static HashSet<int> PathCells(DressRoom r)
@@ -1129,13 +1180,23 @@ namespace Rastvordd.Sim
                     int c = r.Cells[rng.Next(r.Cells.Count)];
                     if (WallNear(c % g.W, c / g.W, 3) > 0 && !f.Contains("runner")) continue;
                     var p = g.C(c % g.W, c / g.W);
-                    float sc = 0.9f + (float)rng.NextDouble() * 0.3f;
+                    // дорожка ~0,8×2,6 м, большой ковёр — не больше 2×3 м (иначе не по масштабу 32 px/м)
+                    float sc = f.Contains("runner") ? 0.85f + (float)rng.NextDouble() * 0.1f : f.Contains("carpet") ? 0.6f : 0.9f + (float)rng.NextDouble() * 0.2f;
                     AddFlat(f, p, sc, rng, f.Contains("rug") || f.Contains("lino") ? (float)(rng.Next(2) * 90 + rng.NextDouble() * 12 - 6) : null);
                     MarkCov(r, p, DecalSize(f) * sc * 0.5f);
                     break;
                 }
             }
-            // пыль и грязь у стен: крупно, полупрозрачно; по углам — гуще
+            // грязь у стен: мягкие вытянутые пятна вдоль плинтуса и в углах (гладкие, без пиксельной ряби)
+            foreach (var (x0, x1, y, _) in WallRuns(r, 0))
+                for (float x = x0 + 0.6f + (float)rng.NextDouble(); x < x1 - 0.4f; x += 2.2f + (float)rng.NextDouble() * 1.6f)
+                { var q = new Vector2(x, y + 0.55f); AddFlat("decals/floor_grime_2", q, 0.55f + (float)rng.NextDouble() * 0.25f, rng, (float)(rng.NextDouble() * 8 - 4)); MarkCov(r, q, 0.7f); }
+            foreach (var (x0, x1, y, _) in WallRuns(r, 1))
+                for (float x = x0 + 0.6f + (float)rng.NextDouble(); x < x1 - 0.4f; x += 2.4f + (float)rng.NextDouble() * 1.8f)
+                { var q = new Vector2(x, y - 0.5f); AddFlat("decals/floor_grime_2", q, 0.5f + (float)rng.NextDouble() * 0.25f, rng, (float)(rng.NextDouble() * 8 - 4)); MarkCov(r, q, 0.6f); }
+            foreach (var (y0, y1, x, west) in SideRuns(r))
+                for (float y = y0 + 0.6f + (float)rng.NextDouble(); y < y1 - 0.4f; y += 2.2f + (float)rng.NextDouble() * 1.6f)
+                { var q = new Vector2(west ? x + 0.5f : x - 0.5f, y); AddFlat("decals/floor_grime_2", q, 0.55f + (float)rng.NextDouble() * 0.25f, rng, (float)(90 + rng.NextDouble() * 8 - 4)); MarkCov(r, q, 0.7f); }
             // мусор у комнаты свой: 2 общих вида + то, что из комплекта (не всё подряд — иначе каша)
             var litterPool = new List<string>();
             for (int k = 0; k < 2; k++) litterPool.Add(Litter[rng.Next(Litter.Length)]);
@@ -1158,10 +1219,10 @@ namespace Rastvordd.Sim
                 // основа — мягкая пыль и пятна (низкий контраст), мусор — редкими акцентами, больше у стен
                 string s;
                 double roll = rng.NextDouble();
-                if (onPath) s = roll < 0.75 ? "decals/floor_dirt" : roll < 0.9 ? "decals/floor_stain" : "decals/decal_debris";
-                else if (wn > 0) s = roll < 0.62 ? "decals/floor_dirt" : roll < 0.74 ? "decals/floor_stain" : litterPool[rng.Next(litterPool.Count)];
-                else s = roll < 0.5 ? "decals/floor_dirt" : roll < 0.72 ? "decals/floor_stain" : litterPool[rng.Next(litterPool.Count)];
-                float sc = s == "decals/floor_dirt" ? 1.0f + (float)rng.NextDouble() * 0.5f : 0.8f + (float)rng.NextDouble() * 0.4f;
+                if (onPath) s = roll < 0.6 ? "decals/floor_grime" : roll < 0.85 ? "decals/floor_stain" : "decals/decal_debris";
+                else if (wn > 0) s = roll < 0.45 ? "decals/floor_grime" : roll < 0.62 ? "decals/floor_stain" : litterPool[rng.Next(litterPool.Count)];
+                else s = roll < 0.4 ? "decals/floor_grime" : roll < 0.62 ? "decals/floor_stain" : litterPool[rng.Next(litterPool.Count)];
+                float sc = s == "decals/floor_grime" ? 0.45f + (float)rng.NextDouble() * 0.4f : 0.8f + (float)rng.NextDouble() * 0.4f;
                 AddFlat(s, p, sc, rng);
                 MarkCov(r, p, DecalSize(s) * sc * 0.42f);
                 // изредка рядом — мелочь-спрайт (бутылка, сапоги, ведро), не на тропе
@@ -1247,8 +1308,8 @@ namespace Rastvordd.Sim
                     if (f == null || !TryFurniture(r, "furniture/table_folding_card", p, f.Value.w, f.Value.d, f.Value.h, false, false)) return;
                     var top = Decor("interior/top_cards", p + new Vector2(0, 0.01f));
                     top.Lift = f.Value.h + 0.15f; top.Batch = true;
-                    PlaceSmallAt(r, "furniture/chair_kitchen", p + new Vector2(0.1f, 0.42f), rng, force: true);
-                    PlaceSmallAt(r, "furniture/chair_kitchen_side", p + new Vector2(-0.68f, -0.15f), rng, force: true);
+                    PlaceSmallAt(r, "furniture/chair_kitchen_back", p + new Vector2(0.1f, 0.3f), rng, force: true);
+                    PlaceSmallAt(r, "furniture/chair_kitchen_side", p + new Vector2(-0.68f, -0.15f), rng, flip: false, force: true);
                     PlaceSmallAt(r, "interior/chair_overturned", p + new Vector2(0.8f, -0.1f), rng, force: true);
                     AddFlat("decals/floor_cards", p + new Vector2(0.4f, 0.75f), 1f, rng);
                     AddFlat("decals/floor_bottles", p + new Vector2(-0.6f, 0.7f), 1f, rng);
@@ -1297,7 +1358,7 @@ namespace Rastvordd.Sim
                         var p = d.Pos + new Vector2(t, dy);
                         if (rng.NextDouble() < 0.5 || WalkBlocked(p, 0.1f)) continue;
                         if (rng.NextDouble() < 0.6) { var w = Decor(weeds[rng.Next(weeds.Length)], p, rng.NextDouble() < 0.5); w.Batch = true; }
-                        else AddFlat(rng.NextDouble() < 0.5 ? "decals/floor_dirt" : "decals/decal_leaves", p, 1f, rng);
+                        else AddFlat(rng.NextDouble() < 0.5 ? "decals/floor_grime" : "decals/decal_leaves", p, rng.NextDouble() < 0.5 ? 0.6f : 1f, rng);
                     }
                 }
             }
@@ -1319,8 +1380,10 @@ namespace Rastvordd.Sim
                         if (roll < 0.42) { var d = Decor(weeds[rng.Next(weeds.Length)], p, rng.NextDouble() < 0.5); d.Batch = true; }
                         else if (roll < 0.7)
                         {
-                            string[] dirt = { "decals/floor_dirt", "decals/floor_dirt", "decals/decal_moss_patch", "decals/decal_leaves", "decals/decal_debris", "decals/decal_bricks_scatter" };
-                            AddFlat(dirt[rng.Next(dirt.Length)], p + new Vector2(0, side == 1 ? -0.2f : 0.2f), 0.8f + (float)rng.NextDouble() * 0.4f, rng);
+                            string[] dirt = { "decals/floor_grime_2", "decals/floor_grime_2", "decals/decal_moss_patch", "decals/decal_leaves", "decals/decal_debris", "decals/decal_bricks_scatter" };
+                            string ds = dirt[rng.Next(dirt.Length)];
+                            bool gr = ds.Contains("grime");
+                            AddFlat(ds, p + new Vector2(0, side == 1 ? -0.2f : 0.2f), gr ? 0.5f + (float)rng.NextDouble() * 0.25f : 0.8f + (float)rng.NextDouble() * 0.4f, rng, gr ? (side < 2 ? 0 : 90) + (float)(rng.NextDouble() * 8 - 4) : null);
                         }
                     }
                 }
@@ -1338,6 +1401,185 @@ namespace Rastvordd.Sim
                 if (e.Ramp) AddFlat("decals/decal_tire_tracks_mud", front + outDir * 1.5f, 1.1f, rng, e.Side < 2 ? 0 : 90);
                 SlabPath(m, e, mid, outDir, rng);
             }
+        }
+
+        /// <summary>
+        /// Пристройки к корпусам (Г/Т-силуэт): комната 5–9 × 3,5–5 м со своей крышей и наружной дверью у глухой стены корпуса,
+        /// а если на этом участке стены была дверь — тамбур перед ней (проход сохраняется, крыльцо переезжает на новую дверь).
+        /// Место проверяется: ничего не стоит, не дорога, не лут, не чужие входы, перед новой дверью свободно.
+        /// </summary>
+        void AddWings(Monument m, List<(Vector2 p, string kind)> tags, Random rng)
+        {
+            var roofs = Roofs.FindAll(r => m.Contains((r.Min + r.Max) * 0.5f));
+            roofs.Sort((a, b) => ((b.Max - b.Min).X * (b.Max - b.Min).Y).CompareTo((a.Max - a.Min).X * (a.Max - a.Min).Y));
+            string[] kinds = { "storage", "kitchen", "workshop", "office", "washroom", "storage", "barracks" };
+            string[] roofTiles = { "tiles/roof_metal_patched", "tiles/roof_ruberoid_torn", "tiles/roof_tar", "tiles/roof_ruberoid_patched" };
+            int[] sides = { 0, 2, 3 };
+            foreach (var r in roofs)
+            {
+                var size = r.Max - r.Min;
+                float area = size.X * size.Y;
+                if (area < 60) continue;
+                int want = area > 300 ? 2 : 1;
+                var why = new int[8];
+                for (int t = 0, made = 0; t < (r.Equals(roofs[0]) ? 400 : 150) && made < want; t++)
+                {
+                    int side = rng.NextDouble() < 0.15 ? 1 : sides[rng.Next(3)];   // 0 юг, 1 север, 2 восток, 3 запад
+                    bool horiz = side < 2;
+                    float edge = horiz ? size.X : size.Y;
+                    float L = MathF.Min(4 + (float)rng.NextDouble() * 5, edge - 2), D = 3.0f + (float)rng.NextDouble() * 2f;
+                    if (L < 4f) continue;
+                    float lo = (horiz ? r.Min.X : r.Min.Y) + 0.6f, hi = (horiz ? r.Max.X : r.Max.Y) - 0.6f - L;
+                    if (hi < lo) continue;
+                    float t0 = MathF.Max(lo, MathF.Round(lo + (float)rng.NextDouble() * (hi - lo)));
+                    Vector2 mn, mx;
+                    switch (side)
+                    {
+                        case 0: mn = new Vector2(t0, r.Max.Y); mx = new Vector2(t0 + L, r.Max.Y + D); break;
+                        case 1: mn = new Vector2(t0, r.Min.Y - D); mx = new Vector2(t0 + L, r.Min.Y); break;
+                        case 2: mn = new Vector2(r.Max.X, t0); mx = new Vector2(r.Max.X + D, t0 + L); break;
+                        default: mn = new Vector2(r.Min.X - D, t0); mx = new Vector2(r.Min.X, t0 + L); break;
+                    }
+                    if (!m.Contains(mn, 2) || !m.Contains(mx, 2)) { why[0]++; continue; }
+                    float line = side switch { 0 => r.Max.Y, 1 => r.Min.Y, 2 => r.Max.X, _ => r.Min.X };
+                    // двери корпуса на этом участке стены → тамбур
+                    var covered = Entrances.FindAll(e =>
+                    {
+                        var c = (e.A + e.B) * 0.5f;
+                        if (e.Side != side) return false;
+                        return horiz ? c.X > mn.X + 0.6f && c.X < mx.X - 0.6f && MathF.Abs(c.Y - line) < 0.5f
+                                     : c.Y > mn.Y + 0.6f && c.Y < mx.Y - 0.6f && MathF.Abs(c.X - line) < 0.5f;
+                    });
+                    if (covered.Exists(e => e.Ramp)) { why[1]++; continue; }   // ворота и роллеты тамбуром не закрываем
+                    // вход, задетый только краем, — нельзя
+                    bool clash = false;
+                    foreach (var e in Entrances)
+                    {
+                        if (covered.Contains(e)) continue;
+                        var ext = e.Side switch { 0 => new Vector2(0, e.Depth), 1 => new Vector2(0, -e.Depth), 2 => new Vector2(e.Depth, 0), _ => new Vector2(-e.Depth, 0) };
+                        var a0 = Vector2.Min(e.A, e.B + ext); var a1 = Vector2.Max(e.A + ext, e.B);
+                        if (BoxHit(a0 - new Vector2(0.3f), a1 + new Vector2(0.3f), mn - new Vector2(0.3f), mx + new Vector2(0.3f))) { clash = true; break; }
+                    }
+                    if (clash) { why[1]++; continue; }
+                    // пусто: отступ 0,35 м от стены корпуса, чтобы не цеплять её саму
+                    var smn = mn; var smx = mx;
+                    switch (side) { case 0: smn.Y += 0.35f; break; case 1: smx.Y -= 0.35f; break; case 2: smn.X += 0.35f; break; default: smx.X -= 0.35f; break; }
+                    bool ok = true; int hard = 0, n = 0;
+                    var clear = new HashSet<MapWall>();   // мелкие пропсы макета на месте пристройки — убрать (бочка, ящик, хлам)
+                    float ex0 = side == 2 ? 0 : 0.3f, ex1 = side == 3 ? 0 : 0.3f, ey0 = side == 0 ? 0 : 0.3f, ey1 = side == 1 ? 0 : 0.3f;   // к стене корпуса — без запаса
+                    for (float x = smn.X - ex0; x <= smx.X + ex1 && ok; x += 0.4f)
+                        for (float y = smn.Y - ey0; y <= smx.Y + ey1 && ok; y += 0.4f)
+                        {
+                            var q = new Vector2(x, y);
+                            n++; if (OnAsphalt(q)) hard++;
+                            if (Roofs.Exists(o => x > o.Min.X - 0.1f && x < o.Max.X + 0.1f && y > o.Min.Y - 0.1f && y < o.Max.Y + 0.1f)) { ok = false; break; }
+                            foreach (var w in WallsNear(q, 0.6f))
+                            {
+                                if (!Geo.CircleBox(q, 0.1f, w.Wall.Min, w.Wall.Max)) continue;
+                                var ws = w.Wall.Max - w.Wall.Min;
+                                if (w.Hidden && w.Prefab && ws.X < 3.5f && ws.Y < 3.5f && !RemovableWalls.Contains(w)) clear.Add(w); else { ok = false; break; }
+                            }
+                            if (ok && (NodesNear(q, 1.5f).Exists(nd => Vector2.Distance(nd.Pos, q) < nd.Radius + 0.1f) || Deployables.Exists(dp => Vector2.Distance(dp.Pos, q) < 1.5f))) ok = false;
+                        }
+                    if (!ok) { why[2]++; continue; }
+                    if (hard > n * 0.25f) { why[3]++; continue; }   // на дорогу не строим
+                    var gmn = mn - new Vector2(1.5f); var gmx = mx + new Vector2(1.5f);
+                    if (Bags.Exists(b => BoxHit(b.Pos, b.Pos, gmn, gmx)) || Pickups.Exists(pk => BoxHit(pk.Pos, pk.Pos, gmn, gmx))) { why[4]++; continue; }
+                    bool stash = false;
+                    foreach (var st in AllStashes()) if (BoxHit(st.Pos, st.Pos, gmn, gmx)) { stash = true; break; }
+                    if (stash) continue;
+                    // наружная дверь: в дальней стене (у тамбура — против старой двери)
+                    float along0 = horiz ? mn.X : mn.Y, along1 = horiz ? mx.X : mx.Y;
+                    float dc = covered.Count > 0 ? (horiz ? (covered[0].A.X + covered[0].B.X) / 2 : (covered[0].A.Y + covered[0].B.Y) / 2) : along0 + 1.2f + (float)rng.NextDouble() * (along1 - along0 - 2.4f);
+                    dc = Math.Clamp(dc, along0 + 1.0f, along1 - 1.0f);
+                    float far = side switch { 0 => mx.Y, 1 => mn.Y, 2 => mx.X, _ => mn.X };
+                    float outS = side is 0 or 2 ? 1 : -1;
+                    var doorOut = horiz ? new Vector2(dc, far + outS * 1.5f) : new Vector2(far + outS * 1.5f, dc);
+                    bool doorFree = m.Contains(doorOut, 6);
+                    for (float k = -1; k <= 1 && doorFree; k += 0.5f)
+                        doorFree = !WalkBlocked(doorOut + (horiz ? new Vector2(k, 0) : new Vector2(0, k)), 0.3f);
+                    if (!doorFree) { why[5]++; continue; }
+                    // стены: материал — как у корпуса
+                    string tex = "walls/wallface_brick";
+                    float bestD = 99;
+                    foreach (var w in Walls)
+                    {
+                        if (!w.Prefab || w.Hidden || w.Tex == null || IsGateTex(w.Tex) || w.Tex.Contains("fence") || w.Tex.Contains("window") || w.Tex.Contains("storefront") || w.Tex.Contains("chainlink")) continue;
+                        float dd = Vector2.Distance((w.Wall.Min + w.Wall.Max) * 0.5f, (mn + mx) * 0.5f);
+                        if (dd < bestD && dd < 20) { bestD = dd; tex = w.Tex; }
+                    }
+                    const float h = 3.0f;
+                    if (horiz)
+                    {
+                        WallT(new Vector2(mn.X, line), new Vector2(mn.X, far), h, tex);
+                        WallT(new Vector2(mx.X, line), new Vector2(mx.X, far), h, tex);
+                        WallT(new Vector2(mn.X, far), new Vector2(dc - 0.65f, far), h, tex);
+                        WallT(new Vector2(dc + 0.65f, far), new Vector2(mx.X, far), h, tex);
+                    }
+                    else
+                    {
+                        WallT(new Vector2(line, mn.Y), new Vector2(far, mn.Y), h, tex);
+                        WallT(new Vector2(line, mx.Y), new Vector2(far, mx.Y), h, tex);
+                        WallT(new Vector2(far, mn.Y), new Vector2(far, dc - 0.65f), h, tex);
+                        WallT(new Vector2(far, dc + 0.65f), new Vector2(far, mx.Y), h, tex);
+                    }
+                    foreach (var w in clear) { Walls.Remove(w); _wallGrid.Remove(w); }
+                    // спрайты на месте пристройки — спрятать (id декора не трогаем: по нему клиент двигает подвижные)
+                    foreach (var d in Decors)
+                        if (!d.Flat && d.Pos.X > mn.X - 0.2f && d.Pos.X < mx.X + 0.2f && d.Pos.Y > mn.Y && d.Pos.Y < mx.Y + 0.6f && !MovingDecors.Contains(d)) d.Sprite = "none";
+                    foreach (var e in covered) Entrances.Remove(e);
+                    Roof(roofTiles[rng.Next(roofTiles.Length)], mn, mx, rng);
+                    AddEntrances(Roofs.Count - 1);
+                    tags.Add(((mn + mx) * 0.5f, covered.Count > 0 ? "corridor" : kinds[rng.Next(kinds.Length)]));
+                    DressReport.Add($"   пристройка {(covered.Count > 0 ? "тамбур" : "комната")} {mn - m.Min}–{mx - m.Min}");
+                    made++;
+                }
+                if (r.Equals(roofs[0])) DressReport.Add($"   крыло: отказы {string.Join(",", why)}");
+            }
+        }
+
+        static bool BoxHit(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax) =>
+            MathF.Min(amin.X, amax.X) < bmax.X && MathF.Max(amin.X, amax.X) > bmin.X && MathF.Min(amin.Y, amax.Y) < bmax.Y && MathF.Max(amin.Y, amax.Y) > bmin.Y;
+
+        /// <summary>
+        /// Пост ГАИ стоит на асфальте — забор там не ставят: на дороге у будки «змейка» из бетонных блоков (полосы в разбежку,
+        /// проезд остаётся), конусы по осевой, позиция из мешков с песком у будки.
+        /// </summary>
+        void GaiCheckpoint(Monument m, Random rng)
+        {
+            var post = Decors.Find(d => d.Sprite.EndsWith("gai_post") && m.Contains(d.Pos));
+            if (post == null) return;
+            // дорога: ближайшая полоса асфальта слева или справа от будки
+            float? x0 = null, x1 = null;
+            foreach (int dir in new[] { -1, 1 })
+            {
+                for (float x = post.Pos.X + dir * 3; MathF.Abs(x - post.Pos.X) < 25; x += dir * 0.5f)
+                {
+                    var q = new Vector2(x, post.Pos.Y - 1);
+                    if (OnAsphalt(q)) { if (x0 == null) x0 = x; x1 = x; }
+                    else if (x0 != null) break;
+                }
+                if (x0 != null) break;
+            }
+            if (x0 == null || x1 == null) return;
+            float lo = MathF.Min(x0.Value, x1.Value), hi = MathF.Max(x0.Value, x1.Value), c = (lo + hi) / 2;
+            if (hi - lo < 5) return;
+            void Block(Vector2 p, string s)
+            {
+                var f = FootOf(s);
+                float w = f?.w ?? 1.2f, d = f?.d ?? 0.5f;
+                for (float x = -w / 2; x <= w / 2; x += 0.4f) if (WalkBlocked(p + new Vector2(x, -d / 2), 0.3f)) return;
+                Prop(s, p, rng.NextDouble() < 0.5);
+            }
+            // две линии блоков в разбежку: севернее будки перекрыта левая половина, южнее — правая
+            for (float x = lo + 0.7f; x < c + 0.3f; x += 1.3f) Block(new Vector2(x, post.Pos.Y - 9), "props/concrete_barrier");
+            for (float x = hi - 0.7f; x > c - 0.3f; x -= 1.3f) Block(new Vector2(x, post.Pos.Y + 5), "props/concrete_barrier");
+            for (float y = post.Pos.Y - 7.5f; y < post.Pos.Y + 4; y += 2.2f) { var cn = Decor("clutter/clutter_cone", new Vector2(c + (float)(rng.NextDouble() - 0.5) * 0.4f, y), rng.NextDouble() < 0.5); cn.Batch = true; }
+            // мешки с песком у будки со стороны дороги
+            float side = post.Pos.X > c ? -1 : 1;
+            Block(new Vector2(post.Pos.X + side * 4.2f, post.Pos.Y + 1.6f), "props/sandbag_wall");
+            Block(new Vector2(post.Pos.X + side * 4.2f, post.Pos.Y - 5.6f), "props/sandbag_corner");
+            DressReport.Add($"   пост ГАИ: дорога {lo - m.Min.X:0}–{hi - m.Min.X:0}");
         }
 
         /// <summary>
@@ -1435,6 +1677,38 @@ namespace Rastvordd.Sim
                     }
                 }
             }
+            // на асфальте забор не ставят: проезд перекрыт бетонными блоками по краям, в полосе — «змейка», конусы, мешки
+            foreach (var (a, b, side) in gates)
+            {
+                float len = Vector2.Distance(a, b);
+                if (len < 6) continue;
+                var along = Vector2.Normalize(b - a);
+                var inward = side switch { 0 => new Vector2(0, -1), 1 => new Vector2(0, 1), 2 => new Vector2(-1, 0), _ => new Vector2(1, 0) };
+                float lane0 = len / 2 - 2.6f, lane1 = len / 2 + 2.6f;   // полоса 5,2 м посередине свободна
+                bool horizLine = MathF.Abs(along.X) > 0.5f;
+                void Block(Vector2 p, string s)
+                {
+                    var f = FootOf(s);
+                    float w = f?.w ?? 1.2f, d = f?.d ?? 0.5f;
+                    for (float x = -w / 2; x <= w / 2; x += 0.4f) if (WalkBlocked(p + new Vector2(x, -d / 2), 0.35f)) return;
+                    Prop(s, p, rng.NextDouble() < 0.5);
+                }
+                for (float t = 0.8f; t < len - 0.6f; t += 1.35f)
+                {
+                    if (t > lane0 - 0.7f && t < lane1 + 0.7f) continue;
+                    if (rng.NextDouble() < 0.2) { t += 1.2f; continue; }   // выбитый блок — щель
+                    var p = a + along * t;
+                    Block(horizLine ? p : p + new Vector2(0, 0.3f), horizLine ? "props/concrete_barrier" : "props/concrete_barrier");
+                }
+                // «змейка» в полосе: два блока внутрь территории в разбежку
+                Block(a + along * (lane0 + 1.0f) + inward * 3.5f, "props/concrete_barrier");
+                Block(a + along * (lane1 - 1.0f) + inward * 7f, "props/concrete_barrier");
+                foreach (float t in new[] { lane0, lane1 })
+                    if (rng.NextDouble() < 0.8) { var c = Decor("clutter/clutter_cone", a + along * t + inward * 0.6f, rng.NextDouble() < 0.5); c.Batch = true; }
+                // мешки с песком у края полосы, будто пост
+                var sb = a + along * (lane0 - 2.2f) + inward * 2.2f;
+                if (rng.NextDouble() < 0.7) Block(sb, "props/sandbag_wall");
+            }
             // КПП у самого широкого проезда: будка сбоку, внутри территории
             gates.Sort((x, y) => Vector2.Distance(y.a, y.b).CompareTo(Vector2.Distance(x.a, x.b)));
             foreach (var (a, b, side) in gates)
@@ -1483,6 +1757,17 @@ namespace Rastvordd.Sim
                 AddFlat(rng.NextDouble() < 0.5 ? "decals/decal_crack_concrete" : "decals/decal_grass_tuft_2", start + dir * t + side * ((float)rng.NextDouble() - 0.5f), 0.8f, rng);
         }
 
+        bool OnAsphalt(Vector2 p)
+        {
+            foreach (var pt in Patches)
+            {
+                if (pt.Tile == null || !pt.Tile.Contains("asphalt")) continue;
+                if (pt.Poly != null) { if (InPoly(p, pt.Poly)) return true; }
+                else if (p.X >= pt.Min.X && p.X <= pt.Max.X && p.Y >= pt.Min.Y && p.Y <= pt.Max.Y) return true;
+            }
+            return false;
+        }
+
         bool HardGround(Vector2 p)
         {
             foreach (var pt in Patches)
@@ -1505,19 +1790,21 @@ namespace Rastvordd.Sim
             for (int ai = 0; ai < order.Count && made < 3; ai++)
             {
                 var A = order[ai];
-                // ближайшее другое здание, не соседнее вплотную
-                int bestJ = -1; float bd = 45;
+                if ((A.Max - A.Min).X * (A.Max - A.Min).Y < 40) continue;   // пристройки — не концы трассы
+                // ближайшие другие здания (не вплотную) по очереди, пока трасса не найдётся
+                var cand = new List<int>();
                 for (int bj = 0; bj < order.Count; bj++)
                 {
                     if (bj == ai || linked.Contains(ai * 100 + bj) || linked.Contains(bj * 100 + ai)) continue;
                     var B = order[bj];
                     float gap = RectGap(A, B);
-                    if (gap < 5 || gap > bd) continue;
-                    bd = gap; bestJ = bj;
+                    if (gap < 5 || gap > 45 || (B.Max - B.Min).X * (B.Max - B.Min).Y < 40) continue;
+                    cand.Add(bj);
                 }
-                if (bestJ < 0) continue;
-                var Bb = order[bestJ];
-                var route = PipeRoute(A, Bb, rng);
+                cand.Sort((x, y) => RectGap(A, order[x]).CompareTo(RectGap(A, order[y])));
+                int bestJ = -1;
+                List<Vector2> route = null;
+                foreach (int bj in cand) { route = PipeRoute(A, order[bj], rng); if (route != null) { bestJ = bj; break; } }
                 if (route == null) continue;
                 linked.Add(ai * 100 + bestJ);
                 // высоты: 1,1 м, П-подъём 4,2 м над входами и в середине длинных прямых
@@ -1594,37 +1881,59 @@ namespace Rastvordd.Sim
             float oy0 = MathF.Max(A.Min.Y, B.Min.Y) + 1, oy1 = MathF.Min(A.Max.Y, B.Max.Y) - 1;
             if (oy1 > oy0)
             {
-                float y = (oy0 + oy1) / 2;
                 bool right = cb.X > ca.X;
-                cands.Add(new List<Vector2> { new(right ? A.Max.X + 0.4f : A.Min.X - 0.4f, y), new(right ? B.Min.X - 0.4f : B.Max.X + 0.4f, y) });
+                foreach (float k in new[] { 0.5f, 0.2f, 0.8f })
+                {
+                    float y = oy0 + (oy1 - oy0) * k;
+                    cands.Add(new List<Vector2> { new(right ? A.Max.X + 0.4f : A.Min.X - 0.4f, y), new(right ? B.Min.X - 0.4f : B.Max.X + 0.4f, y) });
+                }
             }
             float ox0 = MathF.Max(A.Min.X, B.Min.X) + 1, ox1 = MathF.Min(A.Max.X, B.Max.X) - 1;
             if (ox1 > ox0)
             {
-                float x = (ox0 + ox1) / 2;
                 bool down = cb.Y > ca.Y;
-                cands.Add(new List<Vector2> { new(x, down ? A.Max.Y + 0.4f : A.Min.Y - 0.4f), new(x, down ? B.Min.Y - 0.4f : B.Max.Y + 0.4f) });
-            }
-            // Г: из A по x, в B по y
-            {
-                bool right = cb.X > A.Max.X, down = ca.Y < B.Min.Y;
-                if ((right || cb.X < A.Min.X) && (down || ca.Y > B.Max.Y))
+                foreach (float k in new[] { 0.5f, 0.2f, 0.8f })
                 {
-                    var s = new Vector2(right ? A.Max.X + 0.4f : A.Min.X - 0.4f, yA);
-                    var corner = new Vector2(xB, yA);
-                    var e = new Vector2(xB, down ? B.Min.Y - 0.4f : B.Max.Y + 0.4f);
-                    cands.Add(new List<Vector2> { s, corner, e });
+                    float x = ox0 + (ox1 - ox0) * k;
+                    cands.Add(new List<Vector2> { new(x, down ? A.Max.Y + 0.4f : A.Min.Y - 0.4f), new(x, down ? B.Min.Y - 0.4f : B.Max.Y + 0.4f) });
                 }
             }
+            // Г: из A по x, в B по y (и наоборот); угол — в нескольких местах вдоль стен, чтобы обойти пристройки и оборудование
+            foreach (float k in new[] { 0.5f, 0.2f, 0.8f })
             {
-                bool down = cb.Y > A.Max.Y, right = ca.X < B.Min.X;
-                if ((down || cb.Y < A.Min.Y) && (right || ca.X > B.Max.X))
+                float ya = A.Min.Y + 1 + (A.Max.Y - A.Min.Y - 2) * k, xb = B.Min.X + 1 + (B.Max.X - B.Min.X - 2) * k;
+                float xa = A.Min.X + 1 + (A.Max.X - A.Min.X - 2) * k, yb = B.Min.Y + 1 + (B.Max.Y - B.Min.Y - 2) * k;
                 {
-                    var s = new Vector2(xA, down ? A.Max.Y + 0.4f : A.Min.Y - 0.4f);
-                    var corner = new Vector2(xA, yB);
-                    var e = new Vector2(right ? B.Min.X - 0.4f : B.Max.X + 0.4f, yB);
-                    cands.Add(new List<Vector2> { s, corner, e });
+                    bool right = cb.X > A.Max.X, down = ca.Y < B.Min.Y;
+                    if ((right || cb.X < A.Min.X) && (down || ca.Y > B.Max.Y))
+                        cands.Add(new List<Vector2> { new(right ? A.Max.X + 0.4f : A.Min.X - 0.4f, ya), new(xb, ya), new(xb, down ? B.Min.Y - 0.4f : B.Max.Y + 0.4f) });
                 }
+                {
+                    bool down = cb.Y > A.Max.Y, right = ca.X < B.Min.X;
+                    if ((down || cb.Y < A.Min.Y) && (right || ca.X > B.Max.X))
+                        cands.Add(new List<Vector2> { new(xa, down ? A.Max.Y + 0.4f : A.Min.Y - 0.4f), new(xa, yb), new(right ? B.Min.X - 0.4f : B.Max.X + 0.4f, yb) });
+                }
+            }
+            // запретные зоны: крупное оборудование с запасом и площадки, где его много (ОРУ подстанции)
+            var bans = new List<(Vector2 min, Vector2 max)>();
+            var lo = Vector2.Min(A.Min, B.Min) - new Vector2(40); var hi = Vector2.Max(A.Max, B.Max) + new Vector2(40);
+            var equip = new List<Vector2>();
+            foreach (var d in Decors)
+            {
+                if (d.Flat || d.Batch || d.Pos.X < lo.X || d.Pos.X > hi.X || d.Pos.Y < lo.Y || d.Pos.Y > hi.Y) continue;
+                var f = FootOf(d.Sprite);
+                if (f == null || f.Value.w < 3f) continue;
+                string id = d.Sprite;
+                if (!(id.Contains("subst_") || id.Contains("transformer") || id.Contains("diesel") || id.Contains("ktp") || id.Contains("tank") || id.Contains("dish") || id.Contains("mast") || id.Contains("generator"))) continue;   // энергооборудование, баки, антенны
+                equip.Add(d.Pos);
+                bans.Add((d.Pos - new Vector2(f.Value.w / 2 + 0.5f, f.Value.d + 0.5f), d.Pos + new Vector2(f.Value.w / 2 + 0.5f, 0.5f)));
+            }
+            foreach (var pt in Patches)
+            {
+                if (pt.Tile == null || !pt.Tile.Contains("gravel")) continue;
+                Vector2 mn = pt.Min, mx = pt.Max;
+                if (pt.Poly != null) { mn = new Vector2(float.MaxValue); mx = new Vector2(float.MinValue); foreach (var q in pt.Poly) { mn = Vector2.Min(mn, q); mx = Vector2.Max(mx, q); } }
+                if (equip.FindAll(e => e.X > mn.X && e.X < mx.X && e.Y > mn.Y && e.Y < mx.Y).Count >= 4) bans.Add((mn, mx));   // ОРУ: много аппаратов на гравии
             }
             foreach (var c in cands)
             {
@@ -1638,6 +1947,7 @@ namespace Rastvordd.Sim
                     {
                         var p = Vector2.Lerp(a, b, t / len);
                         foreach (var r in Roofs) if (p.X > r.Min.X - 0.3f && p.X < r.Max.X + 0.3f && p.Y > r.Min.Y - 0.3f && p.Y < r.Max.Y + 0.3f) { ok = false; break; }
+                        if (ok) foreach (var (bm, bx) in bans) if (p.X > bm.X && p.X < bx.X && p.Y > bm.Y && p.Y < bx.Y) { ok = false; break; }
                         if (ok) foreach (var w in WallsNear(p, 0.6f)) if (!w.Hidden && w.Wall.Height > 1.2f && Geo.CircleBox(p, 0.25f, w.Wall.Min, w.Wall.Max)) { ok = false; break; }
                     }
                 }

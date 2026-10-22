@@ -108,10 +108,10 @@ namespace Rastvordd.Client
                     var n = side switch { 0 => new SVec(0, 1), 1 => new SVec(0, -1), 2 => new SVec(1, 0), _ => new SVec(-1, 0) };
                     float half = side < 2 ? (w.Max.Y - w.Min.Y) / 2 : (w.Max.X - w.Min.X) / 2;
                     bool inside = Inside(c + n * (half + 0.4f));
-                    float width = inside ? 0.75f : 1.1f;
+                    float width = inside ? 1.0f : 1.1f;
                     var col = inside ? new Color(0.02f, 0.02f, 0.015f) : new Color(0.1f, 0.075f, 0.04f);
-                    float a0 = inside ? 0.3f : 0.32f;
-                    const int steps = 6;
+                    float a0 = inside ? 0.36f : 0.32f;
+                    const int steps = 10;
                     for (int i = 0; i < steps; i++)
                     {
                         float d0 = width * i / steps, d1 = width * (i + 1) / steps;

@@ -249,7 +249,7 @@
    "desc": "an old dark brown water stain with dried ring edges, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
    "h": 0.6,
    "w": 1.0,
-   "soft": 0.75
+   "soft": 0.5
   },
   {
    "id": "floor_lino_patch",
@@ -269,7 +269,7 @@
    "id": "floor_rug_runner",
    "cat": "decals",
    "desc": "a long narrow worn red and green carpet runner with a frayed end, dusty, viewed straight down from above, lying flat on the floor, no floor around it, transparent background, no text, no letters, no numbers",
-   "h": 2.9,
+   "h": 2.6,
    "w": 0.8
   },
   {
@@ -487,6 +487,27 @@
    "anchor": "bottom",
    "alpha": "soft",
    "colors": 12
+  },
+  {
+   "id": "chair_kitchen_back",
+   "cat": "furniture",
+   "view": "front",
+   "w": 0.45,
+   "desc": "a simple Soviet wooden kitchen chair seen from directly BEHIND: we see the back of the backrest with its vertical slats and the rear legs, the seat visible behind the backrest, the chair faces away from the viewer; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "chair_office_back",
+   "cat": "furniture",
+   "view": "front",
+   "w": 0.55,
+   "desc": "a Soviet office swivel chair with brown vinyl upholstery seen from directly BEHIND: the back of the padded backrest, the chair faces away from the viewer, five-star base with castors; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "chair_office_side",
+   "cat": "furniture",
+   "view": "side",
+   "w": 0.55,
+   "desc": "a Soviet office swivel chair with brown vinyl upholstery seen exactly from the side in profile, facing right, five-star base with castors; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
   }
  ],
  "fx_framing": "A sprite sheet of ONE short visual-effect animation for a 2D top-down pixel-art survival game: a grid of {cols} columns and {rows} rows of equally sized square cells holding {n} frames in reading order (left to right, then the next row). Fully transparent background. Each frame sits in the middle of its own cell with a wide empty margin; nothing touches or crosses the cell borders; the effect has the same scale and the same anchor point in every frame, and consecutive frames change smoothly so they play as a fluid animation. Bold, simple, readable shapes with clear stepped cel shading (3 to 5 tones) and crisp edges, so it still reads when shrunk to a tiny pixel sprite. No text, no numbers, no labels, no grid lines, no cell borders, no background colour, no ground, no cast shadow.",

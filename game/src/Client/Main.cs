@@ -203,6 +203,19 @@ namespace Rastvordd.Client
             }
         }
 
+        public override void _EnterTree()
+        {
+            // отладочные скриншоты (--shot/--frames): окно за краем экрана и без фокуса — не мешает пользователю
+            foreach (var arg in OS.GetCmdlineUserArgs())
+                if (arg.StartsWith("--shot=") || arg.StartsWith("--frames="))
+                {
+                    var w = GetWindow();
+                    w.Unfocusable = true;
+                    w.Position = new Vector2I(-32000, -32000);
+                    break;
+                }
+        }
+
         public override void _Ready()
         {
             DisplayServer.WindowSetTitle("Раствордд — прототип 0 (2D 3/4)");

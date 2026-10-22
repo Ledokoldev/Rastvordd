@@ -385,6 +385,7 @@ namespace Rastvordd.Client
         void SandboxScript(string a)
         {
             if (a == "panel") _sbPanel?.SetExpanded(!_sbPanel.Expanded);
+            else if (a == "liftrestart") SandboxKey(Key.F3);
             else if (a == "quiz") QuizNext();
             else if (a == "replay") QuizReplay();
             else if (a.StartsWith("anstrue")) { if (_quiz != null) QuizAnswer((AzOf(_quiz.Src - SnMe()) + float.Parse(a[7..], System.Globalization.CultureInfo.InvariantCulture) + 360) % 360); }

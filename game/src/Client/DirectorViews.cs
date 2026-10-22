@@ -19,9 +19,13 @@ namespace Rastvordd.Client
             Material = new CanvasItemMaterial { BlendMode = CanvasItemMaterial.BlendModeEnum.Mix };
         }
 
+        float _smokeAcc;
+        int _smokeTick;
+
         public void Sync(List<DirectorMarker> markers, float time)
         {
             _markers = markers;
+            EmitSmoke(time - _time);
             _time = time;
             QueueRedraw();
         }
@@ -72,12 +76,35 @@ namespace Rastvordd.Client
                     new Color(col, 0.18f * pulse));
                 DrawColoredPolygon(new[] { at + new Vector2(-2, 0), at + new Vector2(2, 0), at + new Vector2(4, -hh), at + new Vector2(-4, -hh) },
                     new Color(col, 0.35f * pulse));
-                if (m.Kind == "airdrop" && m.Started && !m.Open)
-                    for (int i = 0; i < 6; i++)   // сигнальный дым
+            }
+        }
+
+        /// <summary>
+        /// Дым-маркеры (Vfx): у приземлившегося закрытого груза — густой красный сигнальный дым столбом,
+        /// у закрытого ящика — редкий жёлтый, у открытого — слабый зелёный (видно, что уже взяли).
+        /// </summary>
+        void EmitSmoke(float dt)
+        {
+            if (dt <= 0 || dt > 1) return;
+            _smokeAcc += dt;
+            int ticks = (int)(_smokeAcc / 0.1f);
+            if (ticks == 0) return;
+            _smokeAcc -= ticks * 0.1f;
+            for (int t = 0; t < ticks; t++)
+            {
+                _smokeTick++;
+                foreach (var m in _markers)
+                {
+                    if (m.Kind == "airdrop" && !m.Started) continue;
+                    var at = Iso.Px(m.Pos);
+                    if (m.Kind == "airdrop" && !m.Open)
                     {
-                        float s = (_time * 0.4f + i / 6f) % 1f;
-                        DrawCircle(at + new Vector2(Mathf.Sin(i * 1.7f + _time) * 6 + s * 20, -s * Iso.H(14)), 6 + s * 14, new Color(0.9f, 0.3f, 0.2f, 0.35f * (1 - s)));
+                        // 5 клубов в секунду, поднимаются высоко и сносятся ветром
+                        if (_smokeTick % 2 == 0) Vfx.Puff("smoke_red", at + new Vector2(4, 2), Iso.H(0.4f), 42, 0.9f, 2.2f, 5, new Vector2(4, 0), 500);
                     }
+                    else if (!m.Open) { if (_smokeTick % 8 == 0) Vfx.Puff("smoke_yellow", at, Iso.H(0.6f), 30, 0.75f, 2.6f, 5, default, 400); }
+                    else if (_smokeTick % 15 == 0) Vfx.Puff("smoke_green", at, Iso.H(0.5f), 24, 0.55f, 3f, 5, default, 400);
+                }
             }
         }
 

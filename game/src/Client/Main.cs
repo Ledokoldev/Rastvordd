@@ -96,7 +96,6 @@ namespace Rastvordd.Client
         readonly Dictionary<int, DeployView2D> _deployViews = new();
         readonly Dictionary<int, ThrownView2D> _thrownViews = new();
         readonly Dictionary<int, FireView2D> _fireViews = new();
-        readonly List<FlashView2D> _fx = new();
         readonly List<FloatText2D> _texts = new();
         GhostView2D _ghost;
 
@@ -178,6 +177,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("invsel")) _inv.DebugSelect(a.Substring(6));   // отладка: invsel<pack|belt>~<i> — карточка этой ячейки
                 else if (a == "admin") _hud.ToggleAdmin();
                 else if (a.StartsWith("drop")) { var w0 = _server.World; (w0.Director ??= new Director(w0.Seed)).DebugAirdrop(w0, w0.Find(_myId).Pos + new SVec(3, 5), a.Length > 4 ? float.Parse(a[4..]) : 30); }   // отладка: сброс груза рядом
+                else if (a.StartsWith("vfx")) DebugVfx(a[3..]);   // отладка эффектов: vfxall, vfxflare, vfxboom, vfxfire…
                 else if (a == "code") _hud.ShowCode(0);
                 else if (a == "die") _server.World.DebugKill(_server.World.Find(_myId));
                 else if (a == "steps") GD.Print("steps: " + string.Join(", ", System.Linq.Enumerable.Select(System.Linq.Enumerable.Where(Sfx.Played, kv => kv.Key.StartsWith("steps/")), kv => kv.Key[6..] + "×" + kv.Value)));   // отладка: какие шаги звучали
@@ -290,6 +290,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             var flatDecals = new Node2D { ZIndex = -9 };
             AddChild(flatDecals);
             _decals = new DecalLayer(_map, flatDecals, _world);
+            Vfx.Init(_world, flatDecals);
             Sfx.Init(_world);
             Acoustics.Init(this, _map);
             SteamHrtf.Init(this, _map);
@@ -877,7 +878,8 @@ else if (arg == "--atcrate")
                 switch (e.Kind)
                 {
                     case SimEventKind.Shot:
-                        if (e.Text != "weapon_bow") Flash(e.Pos + e.Dir * 0.3f, new Color(1, 0.8f, 0.4f), 7, 0.06f, true);
+                        // вспышка у дула по типу ствола (ПБС — без вспышки, D46), свет выдаёт стрелка ночью
+                        if (e.Text is not ("weapon_bow" or "weapon_crossbow")) Vfx.Muzzle(Iso.Px(e.Pos + e.Dir * 0.15f), new Vector2(e.Dir.X, e.Dir.Y), e.Text, e.Value > 0);
                         if (_actorViews.TryGetValue(e.ActorId, out var shooter)) shooter.Kick();
                         if (e.ActorId == _myId && e.Text != "weapon_bow") _shake = Mathf.Min(1.5f, _shake + 0.6f);
                         if (e.Text != "weapon_bow") SpawnCasing(e.Pos, e.Dir);
@@ -904,6 +906,7 @@ else if (arg == "--atcrate")
                         if (_nodeViews.TryGetValue(e.OtherId, out var nv)) nv.Hit();
                         Sfx.Play(NodeHitSound(e.OtherId), Iso.Px(e.Pos), -2, 30, 0.1f);
                         SpawnChips(e.OtherId, e.Pos, e.ActorId);
+                        Vfx.Hit(Iso.Px(e.Pos), Iso.H(0.9f), NodeHitMat(e.OtherId));
                         if (_actorViews.TryGetValue(e.ActorId, out var hitter)) hitter.HitStop(0.07f);   // стоп-кадр: инструмент «вязнет» в цели
                         if (e.ActorId == _myId) _shake = Mathf.Min(1.2f, _shake + 0.45f);
                         break;
@@ -921,11 +924,13 @@ else if (arg == "--atcrate")
                     case SimEventKind.Built:
                         Sfx.Play(e.Value >= 2 ? "hit_stone" : "hit_wood", Iso.Px(e.Pos), -3, 25, 0.1f);
                         SpawnChipsAt(e.Pos, TierChips[System.Math.Clamp((int)e.Value, 0, 4)], e.ActorId, 5);
+                        Vfx.Dust(Iso.Px(e.Pos), true);
                         if (e.ActorId == _myId && e.Value > 0) _hud.Toast($"{e.Text}: улучшено");
                         break;
                     case SimEventKind.Destroyed:
                         Sfx.Play((int)e.Value >= 2 ? "hit_stone" : "hit_wood", Iso.Px(e.Pos), 2, 40, 0.05f);
                         SpawnChipsAt(e.Pos, TierChips[System.Math.Clamp((int)e.Value, 0, 4)], -1, 18);
+                        Vfx.Collapse(Iso.Px(e.Pos), 7);   // обрушение: кольцо пыли и дым
                         _shake = Mathf.Min(1.2f, _shake + 0.3f);
                         break;
                     case SimEventKind.Revealed:
@@ -943,21 +948,22 @@ else if (arg == "--atcrate")
                         if (e.Text != null && e.Text.StartsWith("станок:")) { Sfx.Play(Sfx.Pick("lathe_done", "craft_done"), Iso.Px(e.Pos), -2, 30, 0.05f); break; }   // деталь готова (D46)
                         switch (e.Text)
                         {
-                            case "fuse": Sfx.Play("lock_click", Iso.Px(e.Pos), 0, 15, 0f); Flash(e.Pos, new Color(1f, 0.9f, 0.5f), 6, 0.15f, true); break;
-                            case "power": Sfx.Play("fuse_hiss", Iso.Px(e.Pos), 2, 60, 0f); Flash(e.Pos, new Color(0.6f, 0.8f, 1f), 18, 0.4f, true); _shake = Mathf.Min(1f, _shake + 0.3f); break;
-                            case "shutter": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), 0, 40, 0.1f); break;
-                            case "reader": Sfx.Play("c4_beep", Iso.Px(e.Pos), 0, 60, 0f); Flash(e.Pos, new Color(0.4f, 1f, 0.5f), 5, 0.2f, true); break;
-                            case "crate": Sfx.Play("craft_done", Iso.Px(e.Pos), 2, 40, 0f); Flash(e.Pos, new Color(0.4f, 1f, 0.5f), 14, 0.5f, true); break;
-                            case "pry": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), -2, 25, 0.15f); break;
-                            case "glass": Sfx.Play("glass_break", Iso.Px(e.Pos), -4, 30, 0.12f); break;
- 
-                            case "beep": Sfx.Play("c4_beep", Iso.Px(e.Pos), 4, 30, 0f); Flash(e.Pos, new Color(1f, 0.3f, 0.2f), 5, 0.2f, true); break;
-                            case "gate": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), 2, 40, 0.05f); break;
-                            case "alarm": Sfx.Play("c4_beep", Iso.Px(e.Pos), 8, 70, 0.3f); Flash(e.Pos, (int)(_server.World.Time * 2) % 2 == 0 ? new Color(1f, 0.6f, 0.1f) : new Color(1f, 0.2f, 0.1f), 10, 0.5f, true); break;
-                            case "pipe": Sfx.Play("fuse_hiss", Iso.Px(e.Pos), 0, 45, 0.15f); break;
-                            case "rail": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), 0, 55, 0.2f); break;
-                            case "crane": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), -6, 90, 0.3f, 0.6f); break;
-                            case "bang": Sfx.Play("hit_wood", Iso.Px(e.Pos), 2, 40, 0.1f); _shake = Mathf.Min(0.6f, _shake + 0.15f); break;
+                            case "fuse": Sfx.Play("lock_click", Iso.Px(e.Pos), 0, 15, 0f); Vfx.Electric(Iso.Px(e.Pos), Iso.H(1.3f), false); break;
+                            case "power": Sfx.Play("fuse_hiss", Iso.Px(e.Pos), 2, 60, 0f); Vfx.Electric(Iso.Px(e.Pos), Iso.H(1.3f), true); _shake = Mathf.Min(1f, _shake + 0.3f); break;
+                            case "shutter": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), 0, 40, 0.1f); Vfx.Dust(Iso.Px(e.Pos)); break;
+                            case "reader": Sfx.Play("c4_beep", Iso.Px(e.Pos), 0, 60, 0f); Vfx.Blink(Iso.Px(e.Pos), Iso.H(1.1f), new Color(0.4f, 1f, 0.5f), 2.5f, 0.25f); break;
+                            case "crate": Sfx.Play("craft_done", Iso.Px(e.Pos), 2, 40, 0f); Vfx.Blink(Iso.Px(e.Pos), Iso.H(0.8f), new Color(0.4f, 1f, 0.5f), 5f, 0.5f); Vfx.SmokeBurst("smoke_green", Iso.Px(e.Pos), 6); break;
+                            case "pry": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), -2, 25, 0.15f); Vfx.Hit(Iso.Px(e.Pos), Iso.H(1f), HitMat.Metal); break;
+                            case "glass": Sfx.Play("glass_break", Iso.Px(e.Pos), -4, 30, 0.12f); Vfx.Hit(Iso.Px(e.Pos), Iso.H(1.2f), HitMat.Glass); break;
+                            case "beep": Sfx.Play("c4_beep", Iso.Px(e.Pos), 4, 30, 0f); Vfx.Blink(Iso.Px(e.Pos), Iso.H(0.4f), new Color(1f, 0.3f, 0.2f), 2.5f, 0.2f); break;
+                            case "gate": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), 2, 40, 0.05f); Vfx.Dust(Iso.Px(e.Pos)); break;
+                            case "alarm": Sfx.Play("c4_beep", Iso.Px(e.Pos), 8, 70, 0.3f); Vfx.Blink(Iso.Px(e.Pos), Iso.H(2f), (int)(_server.World.Time * 2) % 2 == 0 ? new Color(1f, 0.6f, 0.1f) : new Color(1f, 0.2f, 0.1f), 6f, 0.5f); break;
+                            case "pipe": Sfx.Play("fuse_hiss", Iso.Px(e.Pos), 0, 45, 0.15f); Vfx.Steam(Iso.Px(e.Pos), Iso.H(0.8f)); break;
+                            case "rail": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), 0, 55, 0.2f); Vfx.Hit(Iso.Px(e.Pos), 4, HitMat.Metal); Vfx.Dust(Iso.Px(e.Pos)); break;
+                            case "crane": Sfx.Play("hit_metal_ore", Iso.Px(e.Pos), -6, 90, 0.3f, 0.6f); Vfx.Dust(Iso.Px(e.Pos)); break;
+                            case "bang": Sfx.Play("hit_wood", Iso.Px(e.Pos), 2, 40, 0.1f); Vfx.Hit(Iso.Px(e.Pos), Iso.H(1f), HitMat.Wood); Vfx.Dust(Iso.Px(e.Pos)); _shake = Mathf.Min(0.6f, _shake + 0.15f); break;
+                            case "drop": Vfx.Collapse(Iso.Px(e.Pos), 8); break;   // груз сброса приземлился: кольцо пыли
+                            case "flare": Sfx.Play(Sfx.Pick("flare_launch", "fire_whoosh"), Iso.Px(e.Pos), 0, 120, 0.05f); Vfx.Flare(Iso.Px(e.Pos)); break;   // сигнальная ракета «Маяка»
                         }
                         break;
                     case SimEventKind.Locked:
@@ -967,13 +973,12 @@ else if (arg == "--atcrate")
                     case SimEventKind.Explosion when e.Text == "expl_fire":
                         Sfx.Play("glass_break", Iso.Px(e.Pos), -2, 40, 0.08f);
                         Sfx.Play("fire_whoosh", Iso.Px(e.Pos), -4, 40, 0.08f);
-                        Flash(e.Pos, new Color(1f, 0.6f, 0.25f), 30, 0.35f, true);
+                        Vfx.Molotov(Iso.Px(e.Pos));
                         break;
                     case SimEventKind.Explosion:
                     {
                         bool big = e.Text == "expl_c4";
-                        Flash(e.Pos, new Color(1f, 0.75f, 0.4f), big ? 70 : 50, 0.3f, true);
-                        Flash(e.Pos, new Color(0.3f, 0.28f, 0.26f, 0.8f), big ? 55 : 40, 1.2f);
+                        Vfx.Explosion(Iso.Px(e.Pos), big);
                         Sfx.Play(big ? "explosion_big" : "explosion_small", Iso.Px(e.Pos), 4, 300, 0.06f);
                         float d = SVec.Distance(e.Pos, new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM));
                         _shake = Mathf.Min(2.5f, _shake + (big ? 2.2f : 1.4f) * Mathf.Clamp(1f - d / 40f, 0.15f, 1f));
@@ -986,6 +991,7 @@ else if (arg == "--atcrate")
                     case SimEventKind.HitStruct:
                         Sfx.Play(e.Text is "камень" or "металл" or "сталь" ? "hit_metal_ore" : "hit_wood", Iso.Px(e.Pos), -2, 30, 0.1f);
                         SpawnChipsAt(e.Pos, TierChips[e.Text == "каркас" ? 0 : e.Text == "дерево" ? 1 : e.Text == "камень" ? 2 : 3], e.ActorId, e.Value > 0 ? 6 : 3);
+                        Vfx.Hit(Iso.Px(e.Pos), Iso.H(1f), e.Text is "каркас" or "дерево" ? HitMat.Wood : e.Text == "камень" ? HitMat.Stone : HitMat.Metal);
                         if (_actorViews.TryGetValue(e.ActorId, out var sh)) sh.HitStop(0.07f);
                         if (e.ActorId == _myId) _shake = Mathf.Min(1.2f, _shake + 0.4f);
                         break;
@@ -994,7 +1000,9 @@ else if (arg == "--atcrate")
                         Sfx.Play("hit_wood", Iso.Px(e.Pos), -4, 20);
                         break;
                     case SimEventKind.HitActor:
-                        Flash(e.Pos, e.Text is "helmet" or "plate" ? new Color(1f, 0.85f, 0.5f) : new Color(0.85f, 0.1f, 0.08f), 5, 0.15f);
+                        // шлем/пластина — искры, тело — стилизованные капли
+                        Vfx.Hit(Iso.Px(e.Pos), Iso.H(e.Text == "head" || e.Text == "helmet" ? 1.5f : 1.05f), e.Text is "helmet" or "plate" ? HitMat.Armor : HitMat.Flesh,
+                            _actorViews.TryGetValue(e.OtherId, out var shooterV) && _actorViews.TryGetValue(e.ActorId, out var hitV) ? hitV.Position - shooterV.Position : Vector2.Zero);
                         // зона попадания (D47): хедшот — щелчок, шлем — «дзынь», пластина — тупой удар, конечность — глуше
                         Sfx.Play(e.Text switch
                         {
@@ -1015,7 +1023,7 @@ else if (arg == "--atcrate")
                         }
                         break;
                     case SimEventKind.HitWall:
-                        Flash(e.Pos, new Color(1, 0.85f, 0.5f), 3, 0.1f);
+                        Vfx.Hit(Iso.Px(e.Pos), Iso.GunH, HitMaterialAt(e.Pos), new Vector2(-e.Dir.X, -e.Dir.Y));
                         break;
                     case SimEventKind.Death:
                         GD.Print($"death: {e.ActorId} by {e.OtherId} at {e.Pos}");
@@ -1030,6 +1038,77 @@ else if (arg == "--atcrate")
                         break;
                 }
             }
+        }
+
+        /// <summary>Отладка: эффекты рядом с игроком (только клиентские, мир не меняется).</summary>
+        void DebugVfx(string what)
+        {
+            var me = _selfPx;
+            var right = new Vector2(1, 0);
+            switch (what)
+            {
+                case "all":
+                    // ряд эффектов слева направо в 2 м друг от друга, второй ряд — ниже
+                    Vfx.Muzzle(me + new Vector2(-160, -40), right, "weapon_nagant", false);
+                    Vfx.Muzzle(me + new Vector2(-110, -40), right, "weapon_akm", false);
+                    Vfx.Muzzle(me + new Vector2(-50, -40), right, "weapon_mp133", false);
+                    Vfx.Muzzle(me + new Vector2(20, -40), right, "weapon_akm", true);
+                    Vfx.Hit(me + new Vector2(60, -40), Iso.GunH, HitMat.Metal);
+                    Vfx.Hit(me + new Vector2(100, -40), Iso.GunH, HitMat.Wood);
+                    Vfx.Hit(me + new Vector2(140, -40), Iso.GunH, HitMat.Stone);
+                    Vfx.Hit(me + new Vector2(180, -40), Iso.GunH, HitMat.Flesh);
+                    Vfx.Hit(me + new Vector2(220, -40), Iso.GunH, HitMat.Glass);
+                    Vfx.Splash(me + new Vector2(-160, 60));
+                    Vfx.Dust(me + new Vector2(-110, 60));
+                    Vfx.Electric(me + new Vector2(-60, 60), Iso.H(1.2f), true);
+                    Vfx.Steam(me + new Vector2(-10, 60), Iso.H(0.6f));
+                    Vfx.SmokeBurst("smoke_green", me + new Vector2(50, 60), 4);
+                    Vfx.SmokeBurst("smoke_yellow", me + new Vector2(110, 60), 4);
+                    Vfx.Collapse(me + new Vector2(180, 60), 6);
+                    break;
+                case "boom": Vfx.Explosion(me + new Vector2(90, 0), false); Vfx.Explosion(me + new Vector2(-110, 10), true); break;
+                case "molotov": Vfx.Molotov(me + new Vector2(80, 0)); break;
+                case "flare": Vfx.Flare(me + new Vector2(60, 40)); break;
+                case "fire":
+                {
+                    var fv = new FireView2D(1.5f, 7) { Position = me + new Vector2(70, 10), Left = 20 };
+                    _world.AddChild(fv);
+                    _debugFires.Add(fv);
+                    break;
+                }
+            }
+        }
+
+        readonly List<FireView2D> _debugFires = new();
+
+        HitMat NodeHitMat(int nodeId)
+        {
+            foreach (var n in _cur.Nodes)
+                if (n.Id == nodeId)
+                    return n.Kind switch
+                    {
+                        NodeKind.Tree => HitMat.Wood, NodeKind.Metal or NodeKind.Barrel or NodeKind.Junk => HitMat.Metal,
+                        NodeKind.Tire or NodeKind.TireStack => HitMat.Dust, _ => HitMat.Stone,
+                    };
+            return HitMat.Stone;
+        }
+
+        /// <summary>Во что попала пуля: ресурс рядом (дерево — щепки, руда — крошка), стена карты по виду, иначе бетон.</summary>
+        HitMat HitMaterialAt(SVec p)
+        {
+            foreach (var n in _cur.Nodes)
+                if (SVec.DistanceSquared(n.Pos, p) < 1.2f) return NodeHitMat(n.Id);
+            foreach (var w in _map.Walls)
+            {
+                if (p.X < w.Min.X - 0.12f || p.X > w.Max.X + 0.12f || p.Y < w.Min.Y - 0.12f || p.Y > w.Max.Y + 0.12f) continue;
+                return w.Kind switch
+                {
+                    WallKind.Crate or WallKind.WoodCrate => HitMat.Wood,
+                    WallKind.Car or WallKind.Barrel or WallKind.Barrier or WallKind.Junk => HitMat.Metal,
+                    _ => HitMat.Stone,
+                };
+            }
+            return HitMat.Stone;
         }
 
         string NodeHitSound(int nodeId)
@@ -1051,7 +1130,11 @@ else if (arg == "--atcrate")
             {
                 bool sprint = speed > Sim.World.WalkSpeed * 1.3f;
                 float vol = (id == _myId ? Tuning.StepsVolumeDb : -4) + (sprint ? 3 : 0) - (crouch ? 10 : 0);
-                Footsteps.Play(SurfaceAt(pos), Iso.Px(pos), vol, crouch ? 7 : sprint ? 24 : 18);
+                var surf = SurfaceAt(pos);
+                Footsteps.Play(surf, Iso.Px(pos), vol, crouch ? 7 : sprint ? 24 : 18);
+                // пыль из-под ног: только песок/грунт и снег, едва заметно; в приседе не пылит
+                if (!crouch && surf is Surface.Sand or Surface.Snow && (sprint || (_frame + id) % 2 == 0))
+                    Vfx.Dust(Iso.Px(pos), true, sprint ? 0.55f : 0.35f);
                 if (_gaitLog && id == _myId)
                 {
                     float t = Time.GetTicksMsec() / 1000f;
@@ -1201,20 +1284,6 @@ else if (arg == "--atcrate")
             _texts.Add(t);
         }
 
-        void Flash(SVec pos, Color c, float radius, float life, bool light = false)
-        {
-            var f = new FlashView2D { Position = Iso.Px(pos), Color = c, Radius = radius, Life = life, Max = life };
-            if (light)
-            {
-                // вспышка выстрела освещает округу — ночью это выдаёт стрелка
-                var l = Art.FireLight(7f, 1.8f);
-                l.Position = new Vector2(0, -Iso.GunH);
-                f.AddChild(l);
-            }
-            _world.AddChild(f);
-            _fx.Add(f);
-        }
-
         void Render(float alpha, float dt)
         {
             var seen = new HashSet<int>();
@@ -1297,12 +1366,12 @@ else if (arg == "--atcrate")
 
             for (int i = _debris.Count - 1; i >= 0; i--)
                 if (!_debris[i].Tick(dt)) { _debris[i].QueueFree(); _debris.RemoveAt(i); }
-            for (int i = _fx.Count - 1; i >= 0; i--)
             {
-                var f = _fx[i];
-                f.Life -= dt;
-                if (f.Life <= 0) { f.QueueFree(); _fx.RemoveAt(i); continue; }
-                f.QueueRedraw();
+                // эффекты (Vfx.cs): живут и анимируются, короткие вне кадра не создаются
+                var halfV = GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X;
+                Vfx.Night = _overview ? 0 : World.NightFactorAt(_forcedDay ?? _cur.DayTime);
+                Vfx.Update(dt, new Rect2(_cam.Position - halfV, halfV * 2));
+                foreach (var df in _debugFires) df.Tick(dt);
             }
         }
 

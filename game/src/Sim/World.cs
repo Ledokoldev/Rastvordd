@@ -36,7 +36,8 @@ namespace Rastvordd.Sim
         public const float SprintSpeed = 6.8f;
         public const float Accel = 40f;
         public const float NpcRespawnTime = 45f;
-        public const float NpcDamageScale = 0.75f;
+        public const float NpcDamageScale = 0.45f;     // охрана РТ бьёт слабее игрока (≈ в 1,7 раза), чтобы двое-трое не стирали за секунду
+        public const float NpcSpreadDeg = 4.5f;         // и стреляет менее кучно: свой разброс поверх ствола
         public const float InteractRange = 1.9f;
         public const float PlaceRange = 3.5f;
         public const float BenchRange = 4f;
@@ -1169,7 +1170,7 @@ namespace Rastvordd.Sim
                     Info(a, $"{Items.Name(w.Att[k])} развалился");
                     w.Att[k] = null;
                 }
-            float spreadDeg = CurrentSpreadDeg(a);
+            float spreadDeg = CurrentSpreadDeg(a) + (a.Team == Team.Npc ? NpcSpreadDeg : 0f);
             w.Bloom = MathF.Min(wd.MaxBloomDeg, w.Bloom + wd.BloomPerShotDeg);
             // разброс: сумма двух случайных — чаще ближе к центру
             float r = ((float)Rng.NextDouble() + (float)Rng.NextDouble() - 1f) * 0.5f;

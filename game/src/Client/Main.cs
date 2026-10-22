@@ -45,6 +45,8 @@ namespace Rastvordd.Client
         Ambient _ambient;
         bool _overview, _perf, _timeEdge, _forceCrouch, _forceSprint;
         SVec _forceWalk;
+        SVec _autoRun;       // «=» — закрепить текущее направление бега до следующего нажатия WASD
+        bool _autoSprint;
         int _pressNAt = -1;
         double _perfTime, _simTime;
         int _perfFrames;
@@ -175,6 +177,15 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("open:")) { _server.World.DebugOpenUi(_server.World.Find(_myId), a[5..]); _invOpen = true; }   // отладка: окна для скриншотов
                 else if (a.StartsWith("ui")) _uiReq = ((UiOp)int.Parse(a.Substring(2).Split('_')[0]), a.Contains('_') ? a.Substring(a.IndexOf('_') + 1).Replace('~', '#').Replace('^', '>') : null, 0);   // отладка: ui<op>_<арг> (# → ~, > → ^)
                 else if (a == "inv") _invOpen = !_invOpen;
+                else if (a.StartsWith("key+:") || a.StartsWith("key-:"))   // отладка: key+:W / key-:W — нажать/отпустить клавишу
+                    Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = OS.FindKeycodeFromString(a[5..]), Keycode = OS.FindKeycodeFromString(a[5..]), Pressed = a[3] == '+' });
+                else if (a.StartsWith("click:"))   // отладка: click:x;y — нажать и отпустить ЛКМ в точке экрана
+                {
+                    var xy = a[6..].Split(';'); var at = new Vector2(float.Parse(xy[0]), float.Parse(xy[1]));
+                    GetViewport().WarpMouse(at);
+                    Input.ParseInputEvent(new InputEventMouseButton { ButtonIndex = MouseButton.Left, Pressed = true, Position = at, GlobalPosition = at });
+                    Input.ParseInputEvent(new InputEventMouseButton { ButtonIndex = MouseButton.Left, Pressed = false, Position = at, GlobalPosition = at });
+                }
                 else if (a.StartsWith("invsel")) _inv.DebugSelect(a.Substring(6));   // отладка: invsel<pack|belt>~<i> — карточка этой ячейки
                 else if (a == "admin") _hud.ToggleAdmin();
                 else if (a.StartsWith("drop")) { var w0 = _server.World; (w0.Director ??= new Director(w0.Seed)).DebugAirdrop(w0, w0.Find(_myId).Pos + new SVec(3, 5), a.Length > 4 ? float.Parse(a[4..]) : 30); }   // отладка: сброс груза рядом
@@ -348,6 +359,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _hud.AddChild(_miniMap);
             _inv = new InventoryWindow();
             _inv.Op += (op, arg) => _uiReq = (op, arg, 0);
+            _inv.ClickedOutside += () => { _invOpen = false; if (_cur?.Self.Ui != null) _uiReq = (UiOp.Close, null, 0); };
             _hud.AddChild(_inv);
             _buildMenu = new BuildMenu();
             _buildMenu.Picked += k => _setPiece = k;
@@ -370,6 +382,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _hud.CraftRequested += (i, n) => { _craftPendIdx = i; _craftPendLeft = n; };
             _hud.ResearchRequested += id => _researchReq = id;
             _hud.CodeEntered += (door, code) => _codeReq = (door, code);
+            _hud.MenuClosed += () => Input.MouseMode = UiShown || _hud.CraftOpen || _hud.AdminOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
             _hud.WipeRequested += () =>
             {
                 // игрок сам попросил новый вайп: стираем сохранение и перезапускаем сцену
@@ -641,6 +654,13 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         Input.MouseMode = _hud.AdminOpen || _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
                         break;
                     case Key.F9: _debugEdge = true; break;
+                    case Key.Equal: case Key.KpAdd:
+                        if (_autoRun != SVec.Zero) { _autoRun = SVec.Zero; _hud.Toast("Автобег выключен"); break; }
+                        _autoRun = WasdVector();
+                        _autoSprint = Input.IsPhysicalKeyPressed(Key.Shift);
+                        _hud.Toast(_autoRun != SVec.Zero ? "Автобег: любая из WASD — стоп" : "Автобег: зажми направление и нажми «=»");
+                        break;
+                    case Key.W: case Key.A: case Key.S: case Key.D: _autoRun = SVec.Zero; break;
                     case Key.Q:
                         _hud.ToggleCraft();
                         Input.MouseMode = _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
@@ -720,14 +740,30 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _cur.Markers.ConvertAll(m => (m.Name, m.Open)), _cur.Hot.Count > 0 ? _cur.Hot[0].heat : 0, _server.World.Milestones);
         }
 
+        static SVec WasdVector()
+        {
+            var v = SVec.Zero;
+            if (Input.IsPhysicalKeyPressed(Key.W)) v.Y -= 1;
+            if (Input.IsPhysicalKeyPressed(Key.S)) v.Y += 1;
+            if (Input.IsPhysicalKeyPressed(Key.A)) v.X -= 1;
+            if (Input.IsPhysicalKeyPressed(Key.D)) v.X += 1;
+            return v;
+        }
+
+        /// <summary>Клик мимо админки закрывает её (окна на весь экран ловят клик сами).</summary>
+        public override void _Input(InputEvent e)
+        {
+            if (e is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex is MouseButton.Left or MouseButton.Right && _hud != null && _hud.CloseAdminIfOutside(mb.GlobalPosition))
+                GetViewport().SetInputAsHandled();
+        }
+
         InputCmd BuildCmd()
         {
-            var move = SVec.Zero;
             bool typing = _hud.CodeOpen;
-            if (!typing && Input.IsPhysicalKeyPressed(Key.W)) move.Y -= 1;
-            if (!typing && Input.IsPhysicalKeyPressed(Key.S)) move.Y += 1;
-            if (!typing && Input.IsPhysicalKeyPressed(Key.A)) move.X -= 1;
-            if (!typing && Input.IsPhysicalKeyPressed(Key.D)) move.X += 1;
+            var move = typing ? SVec.Zero : WasdVector();
+            if (_cur?.Self != null && _cur.Self.Dead) _autoRun = SVec.Zero;
+            bool auto = move == SVec.Zero && _autoRun != SVec.Zero;
+            if (auto) move = _autoRun;
             move += _forceWalk;
             return new InputCmd
             {
@@ -745,7 +781,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 UiItem = _uiReq?.item,
                 UiIndex = _uiReq?.index ?? 0,
                 CodeDoor = _codeReq?.door ?? 0,
-                Sprint = _forceSprint || Input.IsPhysicalKeyPressed(Key.Shift),
+                Sprint = _forceSprint || Input.IsPhysicalKeyPressed(Key.Shift) || (auto && _autoSprint),
                 Reload = _reloadEdge,
                 Interact = _interactEdge,
                 Heal = _healEdge,

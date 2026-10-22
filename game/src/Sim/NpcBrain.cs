@@ -25,6 +25,8 @@ namespace Rastvordd.Sim
         float _patrolWait, _stuckTime, _avoidAngle, _avoidTimer;
         float _notice;       // 0..1: насколько NPC уверен, что видит врага. В бой — только при 1
         float _trackTime;    // сколько секунд ведёт цель: первые выстрелы неточные
+        float _errTimer;     // через сколько сменить, куда «плывёт» прицел
+        Vector2 _errTarget;
         bool _provoked;      // в него стреляли — реагирует сразу
 
         const float SightRange = 26f, SightCone = 110f, MaxFireRange = 30f;
@@ -181,8 +183,15 @@ namespace Rastvordd.Sim
             // ошибка прицела «плывёт»: тем меньше, чем выше скилл и чем дольше NPC ведёт цель
             _trackTime += World.Dt;
             float warmup = 1f + 2.5f * MathF.Exp(-_trackTime / 1.2f);
-            var errTarget = new Vector2(R(-1, 1), R(-1, 1)) * (1.8f - _skill) * warmup * Math.Clamp(dist / 10f, 0.6f, 1.8f);
-            _aimError = Vector2.Lerp(_aimError, errTarget, 0.08f);
+            // цель ошибки держится 0,3–0,7 с (раньше менялась каждый тик и усреднялась в ноль — был «аимбот»)
+            _errTimer -= World.Dt;
+            if (_errTimer <= 0)
+            {
+                _errTimer = R(0.3f, 0.7f);
+                float moving = 1f + MathF.Min(1f, target.Vel.Length() / 6f) * 0.6f;   // по бегущему мажет сильнее
+                _errTarget = new Vector2(R(-1, 1), R(-1, 1)) * (1.5f - _skill) * 1.0f * moving * Math.Clamp(dist / 12f, 0.5f, 1.8f);
+            }
+            _aimError = Vector2.Lerp(_aimError, _errTarget * warmup, 0.12f);
             var lead = _skill > 0.6f ? target.Vel * (dist / 150f) : Vector2.Zero;
             cmd.Aim = target.Pos + lead + _aimError;
 

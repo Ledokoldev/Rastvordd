@@ -310,6 +310,18 @@ namespace Rastvordd.Client
             return b;
         }
 
+        /// <summary>Клик попал в какую-нибудь видимую панель окна (или пояс)? Иначе — «мимо», окно закрывается.</summary>
+        public static bool HitsPanel(Node root, Vector2 globalPos)
+        {
+            foreach (var n in root.FindChildren("*", "", true, false))
+                if (n is Control c && (c is PanelContainer || c is Hotbar) && c.IsVisibleInTree() && c.GetGlobalRect().HasPoint(globalPos)) return true;
+            return false;
+        }
+
+        /// <summary>Окно на весь экран: нажатие мыши мимо его панелей.</summary>
+        public static bool ClickOutside(Control root, InputEvent e) =>
+            e is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex is MouseButton.Left or MouseButton.Right && !HitsPanel(root, mb.GlobalPosition);
+
         /// <summary>Клавиша-подсказка: серая плашка «ЛКМ — взять».</summary>
         public static Control KeyChip(string text)
         {

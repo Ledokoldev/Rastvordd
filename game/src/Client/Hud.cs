@@ -328,6 +328,8 @@ void fragment() {
             _techWin.Research += id => ResearchRequested?.Invoke(id);
             _techWin.OpenCraft += () => { _techWin.Visible = false; _craftWin.Visible = true; };
             AddChild(_techWin);
+            _craftWin.ClickedOutside += CloseCraftByClick;
+            _techWin.ClickedOutside += CloseCraftByClick;
         }
 
         ColorRect FullRect(Color c)
@@ -426,6 +428,19 @@ void fragment() {
         }
 
         public void OpenTech() { _craftWin.Visible = false; _techWin.Visible = true; }
+
+        /// <summary>Окно закрыли кликом мимо (крафт, изучение, админка) — Main прячет курсор.</summary>
+        public event Action MenuClosed;
+        void CloseCraftByClick() { _craftWin.Visible = false; _techWin.Visible = false; MenuClosed?.Invoke(); }
+
+        /// <summary>Админка открыта и клик мимо неё — закрыть. true, если закрыли.</summary>
+        public bool CloseAdminIfOutside(Vector2 globalPos)
+        {
+            if (!AdminOpen || _adminPanel.GetGlobalRect().HasPoint(globalPos)) return false;
+            _adminPanel.Visible = false;
+            MenuClosed?.Invoke();
+            return true;
+        }
 
         public void SetVision(Vector2 playerPx, Vector2 facing, float pxPerM, float rangeM, float cosHalf, Texture2D rays, bool enabled)
         {

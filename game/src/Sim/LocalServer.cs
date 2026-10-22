@@ -351,6 +351,7 @@ namespace Rastvordd.Sim
             }
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--weapontest") >= 0) World.WeaponSelfTest(log);   // самопроверка ветки оружия D46
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--weartest") >= 0) World.WearSelfTest(log);       // самопроверка одежды D47
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--guardtest") >= 0) World.GuardSelfTest(log);     // меткость охраны РТ
             int shown = World.Milestones.Count; int envShown = 0;
             var thoughtsShown = new Dictionary<int, int>();
             bool basedump = System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--basedump") >= 0;

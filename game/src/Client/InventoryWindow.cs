@@ -695,6 +695,13 @@ namespace Rastvordd.Client
         VBoxContainer _gauges;
         HFlowContainer _upkeep;
 
+        /// <summary>Клик мимо панелей — закрыть окно.</summary>
+        public event System.Action ClickedOutside;
+        public override void _GuiInput(InputEvent e)
+        {
+            if (UiTheme.ClickOutside(this, e)) { AcceptEvent(); ClickedOutside?.Invoke(); }
+        }
+
         public InventoryWindow()
         {
             Visible = false;

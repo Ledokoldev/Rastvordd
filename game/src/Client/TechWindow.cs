@@ -96,6 +96,13 @@ namespace Rastvordd.Client
             UiTheme.DrawRound(c, new Rect2(at + new Vector2(0, 4.5f), new Vector2(10, 7.5f)), col, 2);
         }
 
+        /// <summary>Клик мимо панелей — закрыть окно.</summary>
+        public event System.Action ClickedOutside;
+        public override void _GuiInput(InputEvent e)
+        {
+            if (UiTheme.ClickOutside(this, e)) { AcceptEvent(); ClickedOutside?.Invoke(); }
+        }
+
         public TechWindow()
         {
             Visible = false;

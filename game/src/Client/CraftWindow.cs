@@ -97,6 +97,13 @@ namespace Rastvordd.Client
         int _tab, _selected = -1, _amount = 1;
         string _gridSig, _costSig, _queueSig, _statSig;
 
+        /// <summary>Клик мимо панелей — закрыть окно.</summary>
+        public event System.Action ClickedOutside;
+        public override void _GuiInput(InputEvent e)
+        {
+            if (UiTheme.ClickOutside(this, e)) { AcceptEvent(); ClickedOutside?.Invoke(); }
+        }
+
         public CraftWindow()
         {
             Visible = false;

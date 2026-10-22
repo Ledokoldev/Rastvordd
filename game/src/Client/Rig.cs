@@ -141,6 +141,10 @@ namespace Rastvordd.Client
         const float Broad = 1.45f;
         /// <summary>Множитель толщины части: до целого числа пикселей, чтобы пиксели не «плясали».</summary>
         static float Thick(int px) => Mathf.Max(px + 1, Mathf.Round(px * Broad)) / px;
+        /// <summary>Руки толще остального тела (иначе на крепком торсе они выглядят тонкими и кривыми).</summary>
+        static float ArmThick(int px) => Mathf.Max(px + 2, Mathf.Round(px * 1.8f)) / px;
+        /// <summary>Голова чуть шире нарисованной — лицо и шлем читаются как человеческие.</summary>
+        static float HeadWide(int px) => Mathf.Max(px + 2, Mathf.Round(px * 1.2f)) / px;
 
         /// <summary>Двухзвенный IK: из плеча (бедра) к цели, сгиб в сторону bendSign. Возвращает углы звеньев.</summary>
         static (float a1, float a2, Vector2 joint) Ik(Vector2 root, Vector2 target, float l1, float l2, float bendSign)
@@ -352,8 +356,8 @@ namespace Rastvordd.Client
 
             void DrawArm((float a1, float a2, Vector2 joint) arm, Vector2 sh)
             {
-                Part(_set.UpperArm, sh, arm.a1, new Vector2(1, _set.UpperArm.GetHeight() / 2f), Thick(_set.UpperArm.GetHeight()));
-                Part(_set.ForeArm, arm.joint, arm.a2, new Vector2(1, _set.ForeArm.GetHeight() / 2f), Thick(_set.ForeArm.GetHeight()));
+                Part(_set.UpperArm, sh, arm.a1, new Vector2(1, _set.UpperArm.GetHeight() / 2f), ArmThick(_set.UpperArm.GetHeight()));
+                Part(_set.ForeArm, arm.joint, arm.a2, new Vector2(1, _set.ForeArm.GetHeight() / 2f), ArmThick(_set.ForeArm.GetHeight()));
             }
 
             void DrawLeg(Vector2 hip, Vector2 foot)
@@ -395,7 +399,7 @@ namespace Rastvordd.Client
                 Part(torso, waist, lean, new Vector2(torso.GetWidth() / 2f, torso.GetHeight()), 1, Thick(torso.GetWidth()));
                 var head = back ? _set.HeadB : _set.HeadF;
                 float headTilt = s.AimDown * 0.15f + lean * 0.5f - s.Flinch * 0.25f;   // в прицеле голова к прикладу; от удара голова дёргается
-                Part(head, neck, headTilt, new Vector2(head.GetWidth() / 2f, head.GetHeight()));
+                Part(head, neck, headTilt, new Vector2(head.GetWidth() / 2f, head.GetHeight()), 1, HeadWide(head.GetWidth()));
             }
 
             if (back)

@@ -76,6 +76,7 @@ namespace Rastvordd.Sim
         public int Id;
         public bool Dead;
         public float Hp, MaxHp, Food, Water;
+        public float Armor;             // 0..1: на сколько броня режет урон пулями в торс (World.ArmorReduction)
         public string WeaponName;
         public bool HoldingGun;
         public int Ammo, Magazine, Reserve;
@@ -805,6 +806,7 @@ namespace Rastvordd.Sim
                 });
             }
 
+            s.Armor = World.ArmorReduction(me);
             if (!me.Dead) s.InteractHint = Hint(World.NearestInteract(me));
             if (!me.Dead && held?.Def?.Build == true)
             {

@@ -25,6 +25,7 @@ namespace Rastvordd.Client
         public static readonly Color HpColor = Hex(0x7bd389);
         public static readonly Color FoodColor = Hex(0xf0b357);
         public static readonly Color WaterColor = Hex(0x6cb6ff);
+        public static readonly Color ArmorColor = Hex(0xa8a8a8);
 
         public static readonly Color PanelBg = new(20 / 255f, 20 / 255f, 22 / 255f, 0.72f);   // стекло
         public static readonly Color PanelBorder = new(1, 1, 1, 0.09f);
@@ -355,7 +356,7 @@ namespace Rastvordd.Client
 
         public static float TextWidth(string text, int size, Font font = null) => (font ?? Text).GetStringSize(text, HorizontalAlignment.Left, -1, size).X;
 
-        /// <summary>Значки шкал: здоровье — крест, еда — кружок, вода — капля-треугольник.</summary>
+        /// <summary>Значки шкал: здоровье — крест, еда — кружок, вода — капля-треугольник, броня — щит.</summary>
         public static void DrawVitalIcon(CanvasItem c, int kind, Vector2 center, Color col)
         {
             switch (kind)
@@ -365,6 +366,7 @@ namespace Rastvordd.Client
                     c.DrawRect(new Rect2(center + new Vector2(-1.5f, -5), new Vector2(3, 10)), col);
                     break;
                 case 1: c.DrawCircle(center, 4, col, true, -1, true); break;
+                case 3: c.DrawColoredPolygon(new[] { center + new Vector2(-5, -5), center + new Vector2(5, -5), center + new Vector2(5, 0), center + new Vector2(0, 6), center + new Vector2(-5, 0) }, col); break;
                 default: c.DrawColoredPolygon(new[] { center + new Vector2(0, -5), center + new Vector2(5, 4), center + new Vector2(-5, 4) }, col); break;
             }
         }

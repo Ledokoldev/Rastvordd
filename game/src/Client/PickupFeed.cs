@@ -5,13 +5,13 @@ using Rastvordd.Sim;
 namespace Rastvordd.Client
 {
     /// <summary>
-    /// Лента «что подобрал» справа внизу, как в Расте: иконка, +N и название. Считается по разнице содержимого
+    /// Лента «что подобрал» справа от пояса, низом по низу ячеек (новое — внизу, старое уезжает вверх), как в Расте: иконка, +N и название. Считается по разнице содержимого
     /// рюкзака и пояса между снапшотами — ловит добычу, лут, крафт и подборы одним способом.
     /// </summary>
     public partial class PickupFeed : Control
     {
         const float Life = 3.5f, RowH = 32, W = 280;
-        const int MaxRows = 6;
+        const int MaxRows = 4;   // 4 строки — не залезает на окна инвентаря
         sealed class Row { public string Id, Name; public int N; public float T; }
         readonly List<Row> _rows = new();
         Dictionary<string, int> _last;
@@ -77,8 +77,8 @@ namespace Rastvordd.Client
                 string plus = $"+{r.N}";
                 float pw = UiTheme.TextWidth(plus, UiTheme.FontBody, UiTheme.Semi);
                 float nw = Mathf.Min(UiTheme.TextWidth(r.Name, UiTheme.FontSmall), W - RowH - pw - 34);
-                float w = RowH + 10 + pw + 8 + nw + 14;                          // плашка по длине текста, прижата вправо
-                float x = Size.X - w + 40 * (1 - slide);
+                float w = RowH + 10 + pw + 8 + nw + 14;                          // плашка по длине текста
+                float x = 40 * (1 - slide);                                       // прижата влево — к поясу
                 var rect = new Rect2(x, y, w, RowH);
                 UiTheme.DrawRound(this, rect, new Color(UiTheme.PanelBg, 0.62f * a), 12, new Color(UiTheme.PanelBorder, UiTheme.PanelBorder.A * a));
                 UiTheme.DrawIcon(this, r.Id, new Rect2(x + 6, y + 3, RowH - 6, RowH - 6), new Color(1, 1, 1, a));

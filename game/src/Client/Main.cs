@@ -313,9 +313,10 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _structTip = new StructTip();
             _hud.AddChild(_structTip);
             _feed = new PickupFeed();
-            _feed.SetAnchorsPreset(Control.LayoutPreset.BottomRight);
-            _feed.OffsetRight = -20; _feed.OffsetLeft = -20 - _feed.CustomMinimumSize.X;
-            _feed.OffsetBottom = -96; _feed.OffsetTop = -96 - _feed.CustomMinimumSize.Y;   // над плашкой оружия
+            // лента подборов — справа от пояса, низом по низу ячеек (пояс ровно по центру, см. Hotbar)
+            _feed.SetAnchorsPreset(Control.LayoutPreset.CenterBottom);
+            _feed.OffsetLeft = Hotbar.BeltWidth / 2 + Hotbar.Gap; _feed.OffsetRight = _feed.OffsetLeft + _feed.CustomMinimumSize.X;
+            _feed.OffsetBottom = -28; _feed.OffsetTop = -28 - _feed.CustomMinimumSize.Y;
             _hud.AddChild(_feed);
             _guide = new BuildGuidePanel();
             _hud.AddChild(_guide);

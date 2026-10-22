@@ -166,57 +166,59 @@ namespace Rastvordd.Client
         }
     }
 
-    /// <summary>Здоровье, еда, вода: значок, полоска, число. Слева от пояса, всегда на экране.</summary>
+    /// <summary>Здоровье, еда, вода, броня: значок, полоска, число. Слева от пояса, всегда на экране.</summary>
     public partial class VitalsView : Control
     {
-        public const float W = 220, RowH = 26;
-        float _hp, _maxHp = 100, _food, _water;
+        public const float W = 220, RowH = 22;
+        float _hp, _maxHp = 100, _food, _water, _armor;
 
-        public VitalsView() { CustomMinimumSize = new Vector2(W, RowH * 3); MouseFilter = MouseFilterEnum.Ignore; }
+        public VitalsView() { CustomMinimumSize = new Vector2(W, RowH * 4); Size = CustomMinimumSize; MouseFilter = MouseFilterEnum.Ignore; }
 
-        public void Set(float hp, float maxHp, float food, float water)
+        public void Set(float hp, float maxHp, float food, float water, float armor)
         {
-            if (Mathf.IsEqualApprox(hp, _hp) && Mathf.IsEqualApprox(food, _food) && Mathf.IsEqualApprox(water, _water)) return;
-            _hp = hp; _maxHp = Mathf.Max(1, maxHp); _food = food; _water = water;
+            if (Mathf.IsEqualApprox(hp, _hp) && Mathf.IsEqualApprox(food, _food) && Mathf.IsEqualApprox(water, _water) && Mathf.IsEqualApprox(armor, _armor)) return;
+            _hp = hp; _maxHp = Mathf.Max(1, maxHp); _food = food; _water = water; _armor = armor;
             QueueRedraw();
         }
 
         public override void _Draw()
         {
-            float y0 = Size.Y - RowH * 3;
-            (float v, float max, Color c)[] rows =
+            float y0 = Size.Y - RowH * 4;
+            (float v, float max, Color c, string n)[] rows =
             {
-                (_hp, _maxHp, _hp / _maxHp > 0.25f ? UiTheme.HpColor : UiTheme.Bad),
-                (_food, 100, UiTheme.FoodColor),
-                (_water, 100, UiTheme.WaterColor),
+                (_hp, _maxHp, _hp / _maxHp > 0.25f ? UiTheme.HpColor : UiTheme.Bad, Mathf.CeilToInt(_hp).ToString()),
+                (_food, 100, UiTheme.FoodColor, Mathf.CeilToInt(_food).ToString()),
+                (_water, 100, UiTheme.WaterColor, Mathf.CeilToInt(_water).ToString()),
+                (_armor, 1, UiTheme.ArmorColor, $"{Mathf.RoundToInt(_armor * 100)}%"),   // броня: на сколько режет урон пулями в торс
             };
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < rows.Length; i++)
             {
                 float cy = y0 + i * RowH + RowH / 2;
                 UiTheme.DrawVitalIcon(this, i, new Vector2(9, cy), rows[i].c);
                 UiTheme.DrawBar(this, new Rect2(28, cy - 4, W - 28 - 46, 8), rows[i].v / rows[i].max, rows[i].c);
-                string n = Mathf.CeilToInt(rows[i].v).ToString();
-                float w = UiTheme.TextWidth(n, UiTheme.FontSmall, UiTheme.Semi);
-                UiTheme.DrawText(this, new Vector2(W - w, cy + 5), n, UiTheme.FontSmall, Hex(0xd6d6d6), UiTheme.Semi);
+                float w = UiTheme.TextWidth(rows[i].n, UiTheme.FontSmall, UiTheme.Semi);
+                UiTheme.DrawText(this, new Vector2(W - w, cy + 5), rows[i].n, UiTheme.FontSmall, Hex(0xd6d6d6), UiTheme.Semi);
             }
         }
 
         static Color Hex(uint c) => UiTheme.Hex(c);
     }
 
-    /// <summary>Низ экрана: шкалы и 6 ячеек пояса. В HUD — только показывает, в инвентаре — тащи и бросай.</summary>
-    public partial class Hotbar : HBoxContainer
+    /// <summary>
+    /// Низ экрана: 6 ячеек пояса ровно по центру экрана; шкалы висят СЛЕВА от пояса и на его положение не влияют
+    /// (размер контрола = только пояс). В HUD — только показывает, в инвентаре — тащи и бросай.
+    /// </summary>
+    public partial class Hotbar : Control
     {
+        public const float Gap = 22;                                   // от шкал / ленты подборов до пояса
+        public static float BeltWidth => Actor.BeltSize * UiTheme.CellSize + (Actor.BeltSize - 1) * UiTheme.CellGap;
         public readonly VitalsView Vitals = new();
         public readonly List<SlotCell> Cells = new();
 
         public Hotbar(bool interactive)
         {
-            AddThemeConstantOverride("separation", 22);
             MouseFilter = MouseFilterEnum.Ignore;
-            Alignment = AlignmentMode.Center;
-            Vitals.SizeFlagsVertical = SizeFlags.ShrinkEnd;
-            AddChild(Vitals);
+            CustomMinimumSize = new Vector2(BeltWidth, UiTheme.CellSize);
             var belt = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             belt.AddThemeConstantOverride("separation", (int)UiTheme.CellGap);
             AddChild(belt);
@@ -227,11 +229,14 @@ namespace Rastvordd.Client
                 belt.AddChild(c);
                 Cells.Add(c);
             }
+            // шкалы — за левым краем пояса, низом по низу ячеек
+            Vitals.Position = new Vector2(-VitalsView.W - Gap, UiTheme.CellSize - VitalsView.RowH * 4);
+            AddChild(Vitals);
         }
 
         public void Refresh(SelfInfo self)
         {
-            Vitals.Set(self.Hp, self.MaxHp, self.Food, self.Water);
+            Vitals.Set(self.Hp, self.MaxHp, self.Food, self.Water, self.Armor);
             for (int i = 0; i < Cells.Count && i < self.BeltCells.Count; i++)
             {
                 bool sel = i == self.Current;

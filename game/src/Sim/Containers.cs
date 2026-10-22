@@ -321,7 +321,7 @@ namespace Rastvordd.Sim
                     if (f.On && !f.Burning) Info(a, f.Fuel <= 0 ? "Нужно дерево" : "Нужна руда");
                     break;
             }
-            if (a.OpenTarget is LootBag lb && lb.IsCrate && lb.Empty && lb.RespawnLeft <= 0) lb.RespawnLeft = 90f;
+            if (a.OpenTarget is LootBag lb && lb.IsCrate && lb.Empty && lb.RespawnLeft <= 0) lb.RespawnLeft = CrateRespawnTime(lb);
         }
 
         static (string inv, int i) ParseCell(string s)

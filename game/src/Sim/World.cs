@@ -297,6 +297,12 @@ namespace Rastvordd.Sim
 
         void AddPickup(PickupKind kind, Vector2 p) => Pickups.Add(new Pickup { Id = NextId(), Kind = kind, Pos = p });
 
+        /// <summary>
+        /// Через сколько секунд пустой ящик РТ наполнится снова: тир 0 — 10–14 мин, тир 1 — 15–21, тир 2 — 20–30.
+        /// Было 90 с — пользователь: «ящики откатываются очень быстро», лутать РТ без риска можно было по кругу.
+        /// </summary>
+        public float CrateRespawnTime(LootBag bag) => bag.Tier switch { 0 => Range(600, 840), 1 => Range(900, 1260), _ => Range(1200, 1800) };
+
         void AddCrate(Vector2 pos, int tier = 2)
         {
             var bag = new LootBag { Id = NextId(), Pos = pos, IsCrate = true, Tier = tier };
@@ -1306,7 +1312,7 @@ namespace Rastvordd.Sim
                 }
                 bag.Items.RemoveAt(i);
             }
-            if (bag.IsCrate && bag.Empty) bag.RespawnLeft = 90f;
+            if (bag.IsCrate && bag.Empty) bag.RespawnLeft = CrateRespawnTime(bag);
             Events.Add(new SimEvent { Kind = SimEventKind.Loot, ActorId = a.Id, Pos = bag.Pos, Text = parts.Count > 0 ? string.Join(", ", parts) : "пояс полон" });
         }
 

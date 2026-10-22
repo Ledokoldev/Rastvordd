@@ -213,7 +213,7 @@ namespace Rastvordd.Sim
             var dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
             var ev = new DirectorEvent
             {
-                Id = ++_eventId, Kind = "airdrop", Name = "Сброс груза", Pos = p.Value, StartsAt = w.Time + 45, EndsAt = w.Time + 45 + 60,
+                Id = ++_eventId, Kind = "airdrop", Name = "Сброс груза", Pos = p.Value, StartsAt = w.Time + 45, EndsAt = w.Time + 45 + 600,
                 PlaneFrom = p.Value - dir * 700, PlaneTo = p.Value + dir * 700,
             };
             Events.Add(ev);
@@ -265,6 +265,7 @@ namespace Rastvordd.Sim
                         w.Noises.Add(new Noise { Pos = ev.Pos, Radius = 150, SourceId = -1, Time = w.Time });
                         w.Events.Add(new SimEvent { Kind = SimEventKind.Machine, Pos = ev.Pos, Text = "drop" });
                         ev.StartsAt = w.Time + ev.LockSecs;
+                        ev.EndsAt = MathF.Max(ev.EndsAt, ev.StartsAt + 10 * 60);   // не исчезать, пока заперт: раньше сброс жил 60 с после посадки при замке 90 с — пропадал
                         AddRumor(w, "airdrop", ev.Pos, 25, 600, ev.LockSecs >= 60 ? "груз приземлился — контейнер заперт, через полторы минуты можно вскрывать"
                             : $"груз приземлился — контейнер заперт, через {ev.LockSecs:0} секунд можно вскрывать");
                     }

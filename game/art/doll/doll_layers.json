@@ -1,0 +1,350 @@
+[
+ {
+  "id": "wear_rags_bandana",
+  "slot": "face",
+  "file": "doll_wear_rags_bandana.png",
+  "z": 7
+ },
+ {
+  "id": "wear_rags_shirt",
+  "slot": "kofta",
+  "file": "doll_wear_rags_shirt.png",
+  "z": 3
+ },
+ {
+  "id": "wear_rags_pants",
+  "slot": "legs",
+  "file": "doll_wear_rags_pants.png",
+  "z": 1
+ },
+ {
+  "id": "wear_rags_wraps",
+  "slot": "feet",
+  "file": "doll_wear_rags_wraps.png",
+  "z": 0
+ },
+ {
+  "id": "wear_rags_mittens",
+  "slot": "gloves",
+  "file": "doll_wear_rags_mittens.png",
+  "z": 4
+ },
+ {
+  "id": "wear_vatnik_ushanka",
+  "slot": "head",
+  "file": "doll_wear_vatnik_ushanka.png",
+  "z": 8
+ },
+ {
+  "id": "wear_vatnik_scarf",
+  "slot": "face",
+  "file": "doll_wear_vatnik_scarf.png",
+  "z": 7
+ },
+ {
+  "id": "wear_vatnik_telogreika",
+  "slot": "kofta",
+  "file": "doll_wear_vatnik_telogreika.png",
+  "z": 3
+ },
+ {
+  "id": "wear_vatnik_pants",
+  "slot": "legs",
+  "file": "doll_wear_vatnik_pants.png",
+  "z": 1
+ },
+ {
+  "id": "wear_vatnik_valenki",
+  "slot": "feet",
+  "file": "doll_wear_vatnik_valenki.png",
+  "z": 0
+ },
+ {
+  "id": "wear_vatnik_mittens",
+  "slot": "gloves",
+  "file": "doll_wear_vatnik_mittens.png",
+  "z": 4
+ },
+ {
+  "id": "wear_leather_helmet",
+  "slot": "head",
+  "file": "doll_wear_leather_helmet.png",
+  "z": 8
+ },
+ {
+  "id": "wear_leather_chestplate",
+  "slot": "armor",
+  "file": "doll_wear_leather_chestplate.png",
+  "z": 6
+ },
+ {
+  "id": "wear_leather_bracers",
+  "slot": "arms",
+  "file": "doll_wear_leather_bracers.png",
+  "z": 5
+ },
+ {
+  "id": "wear_leather_pants",
+  "slot": "legs",
+  "file": "doll_wear_leather_pants.png",
+  "z": 1
+ },
+ {
+  "id": "wear_leather_shinguards",
+  "slot": "knees",
+  "file": "doll_wear_leather_shinguards.png",
+  "z": 2
+ },
+ {
+  "id": "wear_spec_hood",
+  "slot": "head",
+  "file": "doll_wear_spec_hood.png",
+  "z": 8
+ },
+ {
+  "id": "wear_spec_r2",
+  "slot": "face",
+  "file": "doll_wear_spec_r2.png",
+  "z": 7
+ },
+ {
+  "id": "wear_spec_robe",
+  "slot": "kofta",
+  "file": "doll_wear_spec_robe.png",
+  "z": 3
+ },
+ {
+  "id": "wear_spec_pants",
+  "slot": "legs",
+  "file": "doll_wear_spec_pants.png",
+  "z": 1
+ },
+ {
+  "id": "wear_spec_boots",
+  "slot": "feet",
+  "file": "doll_wear_spec_boots.png",
+  "z": 0
+ },
+ {
+  "id": "wear_spec_gloves",
+  "slot": "gloves",
+  "file": "doll_wear_spec_gloves.png",
+  "z": 4
+ },
+ {
+  "id": "wear_scrap_pot",
+  "slot": "head",
+  "file": "doll_wear_scrap_pot.png",
+  "z": 8
+ },
+ {
+  "id": "wear_scrap_balaclava",
+  "slot": "face",
+  "file": "doll_wear_scrap_balaclava.png",
+  "z": 7
+ },
+ {
+  "id": "wear_scrap_signvest",
+  "slot": "armor",
+  "file": "doll_wear_scrap_signvest.png",
+  "z": 6
+ },
+ {
+  "id": "wear_scrap_bracers",
+  "slot": "arms",
+  "file": "doll_wear_scrap_bracers.png",
+  "z": 5
+ },
+ {
+  "id": "wear_scrap_kneepads",
+  "slot": "knees",
+  "file": "doll_wear_scrap_kneepads.png",
+  "z": 2
+ },
+ {
+  "id": "wear_scrap_kirza",
+  "slot": "feet",
+  "file": "doll_wear_scrap_kirza.png",
+  "z": 0
+ },
+ {
+  "id": "wear_ozk_hood",
+  "slot": "head",
+  "file": "doll_wear_ozk_hood.png",
+  "z": 8
+ },
+ {
+  "id": "wear_ozk_gp5",
+  "slot": "face",
+  "file": "doll_wear_ozk_gp5.png",
+  "z": 7
+ },
+ {
+  "id": "wear_ozk_cape",
+  "slot": "armor",
+  "file": "doll_wear_ozk_cape.png",
+  "z": 6
+ },
+ {
+  "id": "wear_ozk_gloves",
+  "slot": "gloves",
+  "file": "doll_wear_ozk_gloves.png",
+  "z": 4
+ },
+ {
+  "id": "wear_ozk_stockings",
+  "slot": "feet",
+  "file": "doll_wear_ozk_stockings.png",
+  "z": 0
+ },
+ {
+  "id": "wear_army_ssh68",
+  "slot": "head",
+  "file": "doll_wear_army_ssh68.png",
+  "z": 8
+ },
+ {
+  "id": "wear_army_bushlat",
+  "slot": "kofta",
+  "file": "doll_wear_army_bushlat.png",
+  "z": 3
+ },
+ {
+  "id": "wear_army_6b2",
+  "slot": "armor",
+  "file": "doll_wear_army_6b2.png",
+  "z": 6
+ },
+ {
+  "id": "wear_army_elbowpads",
+  "slot": "arms",
+  "file": "doll_wear_army_elbowpads.png",
+  "z": 5
+ },
+ {
+  "id": "wear_army_kneepads",
+  "slot": "knees",
+  "file": "doll_wear_army_kneepads.png",
+  "z": 2
+ },
+ {
+  "id": "wear_army_pants",
+  "slot": "legs",
+  "file": "doll_wear_army_pants.png",
+  "z": 1
+ },
+ {
+  "id": "wear_army_bertsy",
+  "slot": "feet",
+  "file": "doll_wear_army_bertsy.png",
+  "z": 0
+ },
+ {
+  "id": "wear_army_gloves",
+  "slot": "gloves",
+  "file": "doll_wear_army_gloves.png",
+  "z": 4
+ },
+ {
+  "id": "wear_likvidator_helmet",
+  "slot": "head",
+  "file": "doll_wear_likvidator_helmet.png",
+  "z": 8
+ },
+ {
+  "id": "wear_likvidator_pmk",
+  "slot": "face",
+  "file": "doll_wear_likvidator_pmk.png",
+  "z": 7
+ },
+ {
+  "id": "wear_likvidator_apron",
+  "slot": "armor",
+  "file": "doll_wear_likvidator_apron.png",
+  "z": 6
+ },
+ {
+  "id": "wear_likvidator_suit",
+  "slot": "kofta",
+  "file": "doll_wear_likvidator_suit.png",
+  "z": 3
+ },
+ {
+  "id": "wear_likvidator_pants",
+  "slot": "legs",
+  "file": "doll_wear_likvidator_pants.png",
+  "z": 1
+ },
+ {
+  "id": "wear_likvidator_overboots",
+  "slot": "feet",
+  "file": "doll_wear_likvidator_overboots.png",
+  "z": 0
+ },
+ {
+  "id": "wear_likvidator_gloves",
+  "slot": "gloves",
+  "file": "doll_wear_likvidator_gloves.png",
+  "z": 4
+ },
+ {
+  "id": "wear_sobr_sfera",
+  "slot": "head",
+  "file": "doll_wear_sobr_sfera.png",
+  "z": 8
+ },
+ {
+  "id": "wear_sobr_balaclava",
+  "slot": "face",
+  "file": "doll_wear_sobr_balaclava.png",
+  "z": 7
+ },
+ {
+  "id": "wear_sobr_kora",
+  "slot": "armor",
+  "file": "doll_wear_sobr_kora.png",
+  "z": 6
+ },
+ {
+  "id": "wear_sobr_suit",
+  "slot": "kofta",
+  "file": "doll_wear_sobr_suit.png",
+  "z": 3
+ },
+ {
+  "id": "wear_sobr_elbowpads",
+  "slot": "arms",
+  "file": "doll_wear_sobr_elbowpads.png",
+  "z": 5
+ },
+ {
+  "id": "wear_sobr_kneepads",
+  "slot": "knees",
+  "file": "doll_wear_sobr_kneepads.png",
+  "z": 2
+ },
+ {
+  "id": "wear_sobr_pants",
+  "slot": "legs",
+  "file": "doll_wear_sobr_pants.png",
+  "z": 1
+ },
+ {
+  "id": "wear_sobr_boots",
+  "slot": "feet",
+  "file": "doll_wear_sobr_boots.png",
+  "z": 0
+ },
+ {
+  "id": "wear_sobr_gloves",
+  "slot": "gloves",
+  "file": "doll_wear_sobr_gloves.png",
+  "z": 4
+ },
+ {
+  "id": "wear_watch",
+  "slot": "wrist",
+  "file": "doll_wear_watch.png",
+  "z": 9
+ }
+]

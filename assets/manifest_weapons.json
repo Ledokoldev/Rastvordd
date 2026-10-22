@@ -1,0 +1,1039 @@
+{
+ "assets": [
+  {
+   "id": "icon_weapon_pipeshotgun",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a video game survival weapon item: a crude rustic single-shot shotgun (samopal) put together from a thick dark steel water pipe as the barrel, a rough hand-cut wooden stock, steel hose clamps and wraps of blue electrical tape, rust and weld spatter, junkyard look. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The gun is seen from its right side, rotated diagonally so it runs from the bottom-left corner (stock) to the top-right corner (muzzle), viewed slightly from above, filling the square corner to corner. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_pipeshotgun",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a video game survival weapon item: a crude rustic single-shot shotgun (samopal) put together from a thick dark steel water pipe as the barrel, a rough hand-cut wooden stock, steel hose clamps and wraps of blue electrical tape, rust and weld spatter, junkyard look. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_sawnoff",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a sawn-off Soviet IZh-58 side-by-side double barrel 12-gauge shotgun: two short blued barrels cut off just past the fore-end, case-hardened colour receiver with exposed external hammers, the walnut stock cut down to a pistol grip wrapped with black tape. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The pistol is seen from its right side, muzzle pointing to the right and slightly up, viewed slightly from above, filling most of the square. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_sawnoff",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a sawn-off Soviet IZh-58 side-by-side double barrel 12-gauge shotgun: two short blued barrels cut off just past the fore-end, case-hardened colour receiver with exposed external hammers, the walnut stock cut down to a pistol grip wrapped with black tape. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. Flat orthographic right-side profile like a technical drawing: no perspective, no 3/4 rotation, the top of the slide or barrel perfectly horizontal, only the right side of the gun visible, the grip pointing straight down. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_nagant",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Nagant M1895 revolver: long thin round barrel with blade front sight, the cylinder, slender frame, external hammer, checkered dark walnut grip with a lanyard ring, worn blued steel. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The pistol is seen from its right side, muzzle pointing to the right and slightly up, viewed slightly from above, filling most of the square. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_nagant",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a Nagant M1895 revolver: long thin round barrel with blade front sight, the cylinder, slender frame, external hammer, checkered dark walnut grip with a lanyard ring, worn blued steel. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. Flat orthographic right-side profile like a technical drawing: no perspective, no 3/4 rotation, the top of the slide or barrel perfectly horizontal, only the right side of the gun visible, the grip pointing straight down. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_homesmg",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a video game survival weapon item: a crude junkyard submachine gun styled like a Sten, with a round steel tube body, a perforated barrel shroud, a straight stick magazine sticking out horizontally from the LEFT side, a simple wire skeleton stock, a wooden grip wrapped in blue electrical tape, rough weld seams, raw grey and rusty steel. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The gun is seen from its right side, rotated diagonally so it runs from the bottom-left corner (stock) to the top-right corner (muzzle), viewed slightly from above, filling the square corner to corner. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_homesmg",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a video game survival weapon item: a crude junkyard submachine gun styled like a Sten, with a round steel tube body, a perforated barrel shroud, a straight stick magazine sticking out horizontally from the LEFT side, a simple wire skeleton stock, a wooden grip wrapped in blue electrical tape, rough weld seams, raw grey and rusty steel. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_grach",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Russian MP-443 Grach (Yarygin PYa) 9mm service pistol: angular black steel slide with rear serrations, large trigger guard, black ribbed polymer grip panels, external hammer, worn black finish with bare steel showing on edges. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The pistol is seen from its right side, muzzle pointing to the right and slightly up, viewed slightly from above, filling most of the square. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_grach",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a Russian MP-443 Grach (Yarygin PYa) 9mm service pistol: angular black steel slide with rear serrations, large trigger guard, black ribbed polymer grip panels, external hammer, worn black finish with bare steel showing on edges. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. Flat orthographic right-side profile like a technical drawing: no perspective, no 3/4 rotation, the top of the slide or barrel perfectly horizontal, only the right side of the gun visible, the grip pointing straight down. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_pps43",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet PPS-43 Sudayev submachine gun: stamped sheet-steel receiver, perforated barrel jacket ending in a muzzle brake, curved 35-round box magazine, small black pistol grip, folding steel stock unfolded (extended) behind, worn blued steel. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The gun is seen from its right side, rotated diagonally so it runs from the bottom-left corner (stock) to the top-right corner (muzzle), viewed slightly from above, filling the square corner to corner. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_pps43",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a Soviet PPS-43 Sudayev submachine gun: stamped sheet-steel receiver, perforated barrel jacket ending in a muzzle brake, curved 35-round box magazine, small black pistol grip, folding steel stock unfolded (extended) behind, worn blued steel. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_svt40",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet SVT-40 Tokarev semi-automatic rifle: long one-piece warm walnut stock and wooden handguard, gas tube over the barrel, multi-slotted six-port muzzle brake, detachable 10-round box magazine, cleaning rod under the barrel, blued steel. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The gun is seen from its right side, rotated diagonally so it runs from the bottom-left corner (stock) to the top-right corner (muzzle), viewed slightly from above, filling the square corner to corner. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_svt40",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a Soviet SVT-40 Tokarev semi-automatic rifle: long one-piece warm walnut stock and wooden handguard, gas tube over the barrel, multi-slotted six-port muzzle brake, detachable 10-round box magazine, cleaning rod under the barrel, blued steel. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_mp133",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Russian Baikal MP-133 pump-action 12-gauge shotgun: long barrel with a ventilated rib, tube magazine under the barrel, matte black steel receiver, warm walnut pump fore-end and walnut stock with a black rubber butt pad. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The gun is seen from its right side, rotated diagonally so it runs from the bottom-left corner (stock) to the top-right corner (muzzle), viewed slightly from above, filling the square corner to corner. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_mp133",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a Russian Baikal MP-133 pump-action 12-gauge shotgun: long barrel with a ventilated rib, tube magazine under the barrel, matte black steel receiver, warm walnut pump fore-end and walnut stock with a black rubber butt pad. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_akm",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet AKM Kalashnikov assault rifle 7.62: stamped steel receiver, slanted muzzle compensator, plum-reddish laminated wood stock and handguard, brown bakelite pistol grip, curved 30-round orange-brown bakelite magazine, gas tube, worn blued steel with bright worn edges. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The gun is seen from its right side, rotated diagonally so it runs from the bottom-left corner (stock) to the top-right corner (muzzle), viewed slightly from above, filling the square corner to corner. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_akm",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a Soviet AKM Kalashnikov assault rifle 7.62: stamped steel receiver, slanted muzzle compensator, plum-reddish laminated wood stock and handguard, brown bakelite pistol grip, curved 30-round orange-brown bakelite magazine, gas tube, worn blued steel with bright worn edges. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_an94",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Russian AN-94 Abakan assault rifle 5.45: black polymer furniture, long dark receiver, distinctive large round muzzle device, a curved plum-brown 5.45 magazine canted slightly forward, black polymer side-folding skeleton stock extended, rear diopter sight, matte black steel with wear. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The gun is seen from its right side, rotated diagonally so it runs from the bottom-left corner (stock) to the top-right corner (muzzle), viewed slightly from above, filling the square corner to corner. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_an94",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a Russian AN-94 Abakan assault rifle 5.45: black polymer furniture, long dark receiver, distinctive large round muzzle device, a curved plum-brown 5.45 magazine canted slightly forward, black polymer side-folding skeleton stock extended, rear diopter sight, matte black steel with wear. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_ppsh",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet PPSh-41 submachine gun: full warm birch-wood stock, round perforated steel barrel jacket with a slanted front muzzle brake, a big round 71-round drum magazine under the receiver, blued steel, worn and oiled. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The gun is seen from its right side, rotated diagonally so it runs from the bottom-left corner (stock) to the top-right corner (muzzle), viewed slightly from above, filling the square corner to corner. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_ppsh",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a Soviet PPSh-41 submachine gun: full warm birch-wood stock, round perforated steel barrel jacket with a slanted front muzzle brake, a big round 71-round drum magazine under the receiver, blued steel, worn and oiled. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_svd",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet SVD Dragunov sniper rifle: long slim barrel with a slotted flash hider, skeletonized thumbhole wooden stock with a cheek rest, ventilated wooden handguard, PSO-1 telescopic scope with a rubber eyecup mounted on the left side rail, 10-round box magazine, worn blued steel and warm wood. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The gun is seen from its right side, rotated diagonally so it runs from the bottom-left corner (stock) to the top-right corner (muzzle), viewed slightly from above, filling the square corner to corner. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_svd",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a Soviet SVD Dragunov sniper rifle: long slim barrel with a slotted flash hider, skeletonized thumbhole wooden stock with a cheek rest, ventilated wooden handguard, PSO-1 telescopic scope with a rubber eyecup mounted on the left side rail, 10-round box magazine, worn blued steel and warm wood. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_saiga12",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Russian Saiga-12 semi-automatic 12-gauge shotgun in Kalashnikov style: AK-pattern stamped receiver, thick barrel, black polymer handguard, black polymer folding stock extended, pistol grip, a wide boxy straight 8-round shotgun magazine, matte black steel with worn edges, mean and heavy. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The gun is seen from its right side, rotated diagonally so it runs from the bottom-left corner (stock) to the top-right corner (muzzle), viewed slightly from above, filling the square corner to corner. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_saiga12",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a Russian Saiga-12 semi-automatic 12-gauge shotgun in Kalashnikov style: AK-pattern stamped receiver, thick barrel, black polymer handguard, black polymer folding stock extended, pistol grip, a wide boxy straight 8-round shotgun magazine, matte black steel with worn edges, mean and heavy. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_mosin",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet Mosin-Nagant 1891/30 sniper rifle with a PU telescopic scope on a side mount, bent-down bolt handle, long warm wood stock and handguard, blued steel barrel with hooded front sight, worn and oiled. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The gun is seen from its right side, rotated diagonally so it runs from the bottom-left corner (stock) to the top-right corner (muzzle), viewed slightly from above, filling the square corner to corner. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_mosin",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a Soviet Mosin-Nagant 1891/30 sniper rifle with a PU telescopic scope on a side mount, bent-down bolt handle, long warm wood stock and handguard, blued steel barrel with hooded front sight, worn and oiled. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_aps",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet APS Stechkin 9mm automatic pistol: long blued steel slide, external hammer, big grip with dark brown bakelite grip panels, fire selector lever on the slide, worn blued finish with bright edges. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. The pistol is seen from its right side, muzzle pointing to the right and slightly up, viewed slightly from above, filling most of the square. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "weapon_aps",
+   "cat": "weapons",
+   "weapon": 128,
+   "desc": "a Soviet APS Stechkin 9mm automatic pistol: long blued steel slide, external hammer, big grip with dark brown bakelite grip panels, fire selector lever on the slide, worn blued finish with bright edges. Gritty masculine realism that makes you want to hold it: worn blued and oiled gunmetal with an oily sheen and bright scuffed edge highlights, warm reddish-brown hardwood with visible grain, dents and scratches, finely detailed mechanical parts, honest field wear; accurate real-world silhouette and proportions of this exact model; rich natural colours, not washed out. Flat orthographic right-side profile like a technical drawing: no perspective, no 3/4 rotation, the top of the slide or barrel perfectly horizontal, only the right side of the gun visible, the grip pointing straight down. The complete gun visible from muzzle to stock. Bold readable silhouette with strong value contrast so it still reads when shrunk to a tiny 64-pixel-wide sprite; no text, no markings"
+  },
+  {
+   "id": "icon_weapon_crossbow",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a homemade wooden crossbow with a steel bow made from a car leaf spring, a taut steel cable string and a loaded bolt, worn wooden stock with tape and screws. Gritty masculine realism, warm wood and oiled steel. The gun is seen from its right side, rotated diagonally so it runs from the bottom-left corner (stock) to the top-right corner (muzzle), viewed slightly from above, filling the square corner to corner. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no hands, no text, no markings"
+  },
+  {
+   "id": "icon_ammo_9mm",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a handful of 9x18 Makarov pistol cartridges: short bright brass cases with copper-jacketed bullets, a few lying in a pile, one standing upright. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_ammo_545",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a few Soviet 5.45x39 rifle cartridges: slim lacquered greenish-steel cases with long pointed copper-washed bullets, lying fanned out, one on a steel stripper clip. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_ammo_762",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a few Soviet 7.62x39 rifle cartridges: lacquered steel and brass cases with bullets, lying fanned out, plus one longer 7.62x54R rimmed cartridge. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_ammo_12g",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "three 12-gauge shotgun shells: BRIGHT RED glossy plastic hulls with star-crimped tops and shiny polished brass heads with a primer, one standing upright, two lying, vivid red clearly visible. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_ammo_bolt",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "two short crossbow bolts: steel broadhead tips, dark wooden shafts, stiff plastic vanes, lying crossed. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_tape",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a roll of blue Soviet PVC electrical insulating tape (izolenta) with a loose torn end, slightly dirty. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_circuit",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet radio circuit board: dull green fibreglass board with through-hole resistors, capacitors, a couple of black chips, copper traces and solder blobs, a few cut wires. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_lens",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a single thick coated optical glass lens in a black-ringed brass mount, purple-blue anti-reflective coating reflection, very clean glass among the grime. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_trigger",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a firearm trigger group assembly (fire control group): trigger, hammer, sear and springs on their pins, blued and oiled steel parts held together. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_bolt_carrier",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Kalashnikov-style bolt carrier group: the bolt carrier with its long gas piston rod, the rotating bolt in front, oiled bare steel and blued parts. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_barrel_rifled",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a short rifled gun barrel: blued steel tube with a threaded muzzle and chamber end, visible spiral rifling inside the bore at the muzzle. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_frame_pistol",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a stripped pistol frame: an empty blued steel pistol frame with grip and trigger guard, bakelite grip panels, no slide. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_body_smg",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a museum display part: the empty stamped sheet-steel housing of a WWII-era Soviet submachine gun, with an ejection port and magazine well, no barrel and no stock. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_body_rifle",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a rifle stock with its receiver: a warm walnut rifle stock with the empty steel action/receiver fitted, no barrel. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_receiver_ak",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a stripped Kalashnikov AK receiver: an empty stamped steel AK receiver box with the dimple above the magazine well, rivets, rails inside, no stock and no barrel, oiled and worn. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_barrel_chrome",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a chrome-lined rifle barrel: a long blued steel barrel with the bore gleaming bright chrome at the muzzle end, front sight base, a factory-new oily shine. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_gas_block",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a museum display part: a steel gas block with its gas tube and short piston from a Kalashnikov rifle, blued and oiled. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_comp_oil",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet gun oil can (maslenka): a small dented olive-green steel oil can with a long thin brass spout, oily drips, slightly rusty. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_reddot",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Russian Kobra-style red dot collimator sight: a boxy black steel housing with a slanted round window, a faint red dot reflection on the glass, side-rail mount. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_scope2x",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a compact 2x magnification rifle scope: a short black steel tube with a rubber eyecup and side mount. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_scope4x",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet PSO-1 4x sniper scope: a black steel tube with elevation and windage turrets, a long black rubber eyecup, a sun shade and a left side rail mount. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_suppressor_can",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an old dented cylindrical tin can wrapped around the middle with blue electrical tape and two steel hose clamps, scrap crafting part. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_suppressor",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a factory-made cylindrical black steel gun suppressor with a threaded mount, matte finish with worn edges. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_suppressor_pbs",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet PBS-1 military silencer: a long cylindrical blued steel silencer with a clamping mount, worn military finish. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_compensator",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Kalashnikov-style muzzle brake compensator: short blued steel muzzle device with several cut ports and slots. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_grip_wood",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an improvised vertical foregrip: a short chunk of wooden broom handle strapped to a metal clamp with blue electrical tape. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_grip",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a factory black polymer vertical foregrip with finger grooves and a rail clamp. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_torch",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an old Soviet plastic flashlight taped onto a short metal clamp with lots of blue electrical tape. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_flashlight",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a compact black tactical weapon flashlight with a rail mount and a pressure switch cable, bright lens. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_laser",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a compact military laser aiming module: a small dark box with a red laser emitter lens and a rail mount, a faint red glint. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_mag_ext",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an extended curved 45-round Kalashnikov magazine, longer than standard, plum-brown bakelite with worn edges. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_mag_twin",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "two curved Kalashnikov magazines taped together side by side in jungle style, opposite directions, wrapped with blue electrical tape. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_att_stock_tac",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a modern tactical adjustable rifle stock: black polymer telescoping buttstock with a cheek riser on a buffer tube adapter. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "airdrop_crate",
+   "cat": "containers",
+   "view": "front",
+   "w": 1.5,
+   "h": 1.4,
+   "foot": [
+    1.2,
+    1.2,
+    1.0
+   ],
+   "desc": "a landed military airdrop supply container: a big olive-green wooden crate with steel corner braces and cargo straps, a deflated crumpled khaki parachute canopy with tangled lines draped over its back and spilling onto the ground behind it; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "airdrop_descending",
+   "cat": "containers",
+   "view": "front",
+   "w": 4.0,
+   "h": 5.0,
+   "foot": [
+    1.2,
+    1.2,
+    1.0
+   ],
+   "desc": "a military airdrop supply crate falling under an open round khaki-and-white parachute canopy: the olive-green crate hangs on four straps below the canopy, a small red smoke flare on the crate; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "uaz_cash_crashed",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 4.5,
+   "h": 2.1,
+   "foot": [
+    3.6,
+    3.0,
+    2.1
+   ],
+   "desc": "a crashed Soviet UAZ-452 armored cash-in-transit van (inkassatsiya): loaf-shaped van body painted faded grey with a dark blue stripe, steel grilles on the small windows, front end smashed and crumpled, one headlight hanging, flat tyres, the rear door bent ajar with a heavy steel safe inside, broken glass; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "heli_mi8_wreck",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 18.0,
+   "h": 4.5,
+   "foot": [
+    18.0,
+    3.0,
+    4.5
+   ],
+   "desc": "the burnt wreck of a crashed Soviet Mi-8 military transport helicopter lying on the ground on its side-tilted belly, landing gear collapsed: the fuselage charred black with scorched olive-green patches, torn metal skin, the tail boom snapped in two with the rear half lying on the ground, main rotor blades broken off and lying bent on the ground around it, cockpit glass smashed, small flames and glowing embers inside, soot everywhere; exact side profile, nose to the right; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "crate_army_green",
+   "cat": "containers",
+   "view": "front",
+   "w": 1.2,
+   "h": 0.6,
+   "foot": [
+    1.2,
+    0.6,
+    0.5
+   ],
+   "desc": "a long Soviet military wooden crate painted dark army green with rope handles, metal latches and corner plates, a faded white stencilled star and stencil stripes, scuffed paint; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "wagon_freight",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 14.0,
+   "h": 4.3,
+   "foot": [
+    14.0,
+    3.0,
+    4.3
+   ],
+   "desc": "a Soviet four-axle covered railway freight boxcar: rusty brown-red planked and steel body, closed sliding door in the middle, two bogies on rails, rivets, rust streaks; exact side profile, long axis horizontal; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "wagon_freight_open",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 14.0,
+   "h": 4.3,
+   "foot": [
+    14.0,
+    3.0,
+    4.3
+   ],
+   "desc": "a Soviet four-axle covered railway freight boxcar with its big sliding door pried open, dark interior visible with stacked green military crates and sacks, rusty brown-red planked and steel body, two bogies, rivets, rust streaks; exact side profile, long axis horizontal; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "stash_buried",
+   "cat": "props",
+   "view": "front",
+   "w": 1.4,
+   "h": 0.6,
+   "foot": [
+    1.2,
+    1.0,
+    0.3
+   ],
+   "desc": "a freshly dug hidden stash in a forest: a small pit of dark loose soil and roots with a mound of dug earth beside it, the weathered green wooden lid of a buried crate showing in the pit, a few fallen leaves and pine needles; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "humanitarian_box",
+   "cat": "containers",
+   "view": "front",
+   "w": 0.8,
+   "h": 0.6,
+   "foot": [
+    0.8,
+    0.6,
+    0.5
+   ],
+   "desc": "a humanitarian aid drop box: a sturdy white-painted cardboard and plywood box wrapped with blue cargo straps, a faded red cross symbol on the side, a small crumpled white parachute lying on top; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "plane_an2_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 12.7,
+   "h": 18.0,
+   "desc": "(generated with a custom strict top-down prompt, not via gen-assets framing) a Soviet An-2 kukuruznik biplane seen from directly above, nose to the right (image width = 12.7 m fuselage length, wingspan 18 m vertical), faded olive-green paint, for the airdrop overflight and its shadow"
+  },
+  {
+   "id": "icon_wear_rags_bandana",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a dirty faded red-and-black patterned cotton bandana tied as a face mask. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_rags_shirt",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a crude shirt sewn from coarse burlap potato sacks with rough twine stitches. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_rags_pants",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "crude trousers sewn from coarse burlap sacks tied with a rope belt. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_rags_wraps",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "foot wrappings: dirty rag strips and cloth footwraps (portyanki) wound and tied with string. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_rags_mittens",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of crude mittens sewn from burlap and rags with rough stitches. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_vatnik_ushanka",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet ushanka fur hat with ear flaps tied up, dark grey faux fur and black cloth top. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_vatnik_scarf",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a long thick knitted grey-brown wool scarf, worn and a bit unravelled. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_vatnik_telogreika",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet telogreika quilted padded work jacket (vatnik), dark grey-blue cotton with vertical quilted stitching, patched and stained. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_vatnik_pants",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "Soviet quilted padded cotton work trousers, dark grey with vertical quilted stitching, worn knees. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_vatnik_valenki",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of Russian valenki: tall grey felt winter boots with rubber galoshes on the soles. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_vatnik_mittens",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of thick quilted padded cotton work mittens, dark grey, worn. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_leather_helmet",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a crude hand-stitched brown leather cap helmet with thick layered leather panels and a chin strap. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_leather_chestplate",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an improvised chest armour of thick wooden planks bound together with leather straps and buckles. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_leather_bracers",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of thick brown leather forearm bracers with laces and buckles. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_leather_pants",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of rough hand-stitched brown leather trousers with patches. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_leather_shinguards",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of improvised shin and knee guards made of wooden slats laced onto leather straps. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_spec_hood",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a rubberised dark green protective work hood with a neck cape. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_spec_r2",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet R-2 respirator half mask: grey-green rubberised dome cup with two round exhale valves and an elastic strap. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_spec_robe",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet factory work overall jacket (roba), dark blue-grey heavy canvas with pockets, oil stains. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_spec_pants",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "rubberised dark green protective work trousers with suspenders. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_spec_boots",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of tall black rubber work boots, muddy. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_spec_gloves",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of thick industrial rubber gloves, dirty yellow-orange. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_scrap_pot",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an improvised helmet made from a dented aluminium cooking pot with a leather chin strap and riveted rim. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_scrap_balaclava",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a knitted black wool balaclava with an eye slit, worn and darned. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_scrap_signvest",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an improvised armour vest made of rusty road sign plates riveted onto a canvas vest, faded red and blue sign paint showing, no text. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_scrap_bracers",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of improvised forearm guards cut from rusty tin sheet, riveted onto leather straps. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_scrap_kneepads",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of improvised knee guards cut from old car tyres, strapped with belts and buckles. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_scrap_kirza",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of Soviet kirza tall black boots of artificial leather with creased shafts, muddy. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_ozk_hood",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet OZK chemical protection hood of rubberised olive-green fabric with a drawstring face opening. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_ozk_gp5",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet GP-5 gas mask: grey-green rubber full hood with two round glass eyepieces and a round olive filter canister attached. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_ozk_cape",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet OZK chemical protection cape of rubberised olive-green fabric with sleeves, folded loops and straps. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_ozk_gloves",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of Soviet OZK black rubber chemical protection gloves with long cuffs. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_ozk_stockings",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of Soviet OZK olive-green rubberised protective stockings (chulki) with tie straps and thick soles. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_army_ssh68",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet SSh-68 steel combat helmet painted dark olive green with a chin strap, chipped paint. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_army_bushlat",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet army padded winter field jacket (bushlat), olive-khaki with a fur collar, buttons and pockets. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_army_6b2",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet 6B2 military body armour vest: olive-green canvas cover with plate pockets front and back, side buckles, worn. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_army_elbowpads",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of army olive-green padded elbow pads with hard caps and straps. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_army_kneepads",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of army olive-green padded knee pads with hard caps and straps. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_army_pants",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "Soviet army camouflage field trousers in faded green Butan camo with cargo pockets. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_army_bertsy",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of black leather Russian army lace-up boots (bertsy), scuffed. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_army_gloves",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of olive-green tactical gloves with knuckle padding. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_likvidator_helmet",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Chernobyl liquidator protective helmet with a clear plastic face visor, scratched off-white shell. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_likvidator_pmk",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Russian PMK military gas mask: black rubber face piece with a big panoramic visor and a side-mounted filter canister. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_likvidator_apron",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heavy lead-lined protective apron, dark grey rubberised cover with straps, stiff and thick. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_likvidator_suit",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "an L-1 protective suit jacket of rubberised grey-green fabric with a hood and sealed cuffs. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_likvidator_pants",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "L-1 protective suit trousers of rubberised grey-green fabric with sealed ankles and straps. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_likvidator_overboots",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of grey-green rubberised protective overboots with tie straps. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_likvidator_gloves",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of long grey-green rubberised Chernobyl liquidator protective gloves with sealed elastic cuffs. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_sobr_sfera",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Russian Sfera spherical steel police helmet with a raised transparent armoured visor, matte dark green-black cover. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_sobr_balaclava",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a black Nomex fire-resistant tactical balaclava with an eye opening. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_sobr_kora",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Russian Kora-Kulon heavy police body armour vest with collar, shoulder and groin protection, black-olive cover with pouches. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_sobr_suit",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a black special forces tactical combat shirt-jacket with sleeve pockets and velcro patches without text. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_sobr_elbowpads",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of black tactical hard-shell elbow pads with straps. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_sobr_kneepads",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of black tactical hard-shell knee pads with straps. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_sobr_pants",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "black special forces tactical trousers with cargo pockets and reinforced knees. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_sobr_boots",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of black high tactical assault boots with thick lug soles. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_wear_sobr_gloves",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a pair of black tactical assault gloves with hard knuckle protection. A single clothing or armour item laid out alone, no person, no mannequin. Gritty detailed realism: worn fabric, stitches, patches, dirt, Soviet/post-Soviet look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "icon_plate_homemade",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a homemade armour plate cut from a rusty road sign and tin sheet, layered and riveted, rough edges, faded red sign paint, no text. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_plate_steel",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a military steel body armour plate: rectangular with cut top corners, dull dark grey steel, scratched, a couple of bullet dents. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_plate_ceramic",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a ceramic composite body armour plate: curved rectangle with cut corners, black fabric-wrapped front, cracked ceramic edge showing pale grey. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_rubber",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a coiled old black bicycle inner tube and a couple of folded black rubber sheets, crafting material. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_leather",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a folded piece of rough tanned brown leather hide with uneven edges. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_wear_watch",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet Elektronika digital LCD wristwatch: rectangular brushed steel case, grey-green LCD screen with abstract segment digits, four small side buttons, a linked metal bracelet, worn, no readable text. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_antirad",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small Soviet blister pack of white anti-radiation pills next to a small orange plastic pill case from a military first aid kit. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_ammo_23mm",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a heavy dark green Soviet military wooden crate for 23 mm anti-aircraft cannon shells, open lid, a belt of big brass shells with grey and red tips inside, rope handles. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "zu23_aa_gun",
+   "cat": "props",
+   "view": "angled",
+   "w": 4.6,
+   "h": 1.9,
+   "foot": [
+    4.6,
+    2.9,
+    1.9
+   ],
+   "desc": "a Soviet ZU-23-2 twin-barrel 23 mm anti-aircraft autocannon on its two-wheeled ground mount with the wheels removed, two long barrels with flash hiders raised at about 20 degrees pointing to the right, two seats for the crew, ammo boxes on both sides, olive-green paint; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "radar_p18",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7.0,
+   "h": 6.0,
+   "foot": [
+    7.0,
+    2.5,
+    6.0
+   ],
+   "desc": "a Soviet P-18 style early warning radar station on a wheeled trailer: a tall mast with a wide antenna array of many yagi rods, a small cabin box, olive-green paint; exact side profile, long axis horizontal; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "sandbag_wall",
+   "cat": "props",
+   "view": "front",
+   "w": 3.0,
+   "h": 1.1,
+   "foot": [
+    3.0,
+    0.8,
+    1.1
+   ],
+   "desc": "a straight low wall of stacked khaki burlap sandbags, three rows high, slightly sagging, dirty and torn in places; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "sandbag_corner",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.4,
+   "h": 1.1,
+   "foot": [
+    2.0,
+    2.0,
+    1.1
+   ],
+   "desc": "an L-shaped corner section of stacked khaki burlap sandbags, three rows high, dirty and torn in places; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "sandbag_revetment",
+   "cat": "props",
+   "view": "front",
+   "w": 7.0,
+   "h": 1.6,
+   "foot": [
+    7.0,
+    6.0,
+    1.6
+   ],
+   "desc": "a U-shaped earth and sandbag revetment (gun emplacement pit) seen from its open south side: earth berm walls faced with stacked khaki sandbags, open toward the viewer, empty inside; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "army_tent",
+   "cat": "props",
+   "view": "front",
+   "w": 5.0,
+   "h": 3.0,
+   "foot": [
+    5.0,
+    5.0,
+    3.0
+   ],
+   "desc": "a Soviet military USB-56 canvas army tent, faded olive-green tarpaulin with a pitched roof, the entrance flap rolled up showing a dark inside, guy ropes and pegs, a stove pipe through the roof; Soviet / post-Soviet Russian, weathered, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos"
+  },
+  {
+   "id": "heli_mi8_top",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 18.3,
+   "h": 5.0,
+   "desc": "(custom strict top-down prompt) a flying Soviet Mi-8 helicopter seen from directly above, nose to the right, WITHOUT main rotor blades (rotor is a separate sprite), olive camouflage; image width = 18.3 m fuselage length"
+  },
+  {
+   "id": "heli_mi8_rotor",
+   "cat": "vehicles",
+   "view": "top",
+   "w": 21.3,
+   "h": 21.3,
+   "desc": "(custom strict top-down prompt) the five-blade main rotor of a Mi-8 seen from directly above, blades only with the hub, to be rotated in game; image width = 21.3 m rotor diameter"
+  },
+  {
+   "id": "icon_val_copper_wire",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a thick coil of bare shiny copper wire with a few strands of old insulated cable, reddish-orange copper gleam. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_val_radio_parts",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a handful of Soviet radio components: resistors, ceramic and electrolytic capacitors, a couple of transistors with metal caps, small coils, tangled leads. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_val_battery",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a Soviet 6ST car battery: black plastic case with lead terminals, cell caps on top, dirty and dusty. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_val_motor",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a small Soviet electric motor: cast grey-blue housing with cooling fins, a shaft with a pulley, wires sticking out. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_val_radio_tubes",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "several Soviet glass radio vacuum tubes standing in a worn cardboard box, metal bases, glowing silver getter tops. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_val_gold_contacts",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a few old Soviet electrical connectors and edge connector strips with shiny gold-plated contacts. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  },
+  {
+   "id": "icon_val_computer_block",
+   "cat": "icons",
+   "icon": 128,
+   "desc": "a removable plug-in module block from an old Soviet mainframe computer (ES EVM): grey metal frame with a circuit board, a row of chips and a front handle. Gritty detailed realism: worn steel, brass, oil, grime, Soviet/Russian military look. Bold readable silhouette and strong value contrast so it reads instantly on a dark inventory background even when shrunk to 64 pixels; no text, no letters, no numbers"
+  }
+ ]
+}

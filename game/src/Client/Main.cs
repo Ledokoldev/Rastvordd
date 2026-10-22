@@ -128,7 +128,8 @@ namespace Rastvordd.Client
             if (!_script.TryGetValue(_frame, out var actions)) return;
             foreach (var a in actions)
             {
-                if (a == "kit") _debugEdge = true;
+                if (a.StartsWith("sb:")) SandboxScript(a[3..]);   // полигон (SandboxSound.cs)
+                else if (a == "kit") _debugEdge = true;
                 else if (a == "interact") _interactEdge = true;
                 else if (a == "eat") _eatEdge = true;
                 else if (a == "reload") _reloadEdge = true;
@@ -309,6 +310,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             }
             if (loaded) CallDeferred(nameof(ToastLoaded));
             ParseArgs();
+            SandboxSetup();   // полигон (--sandbox=aim|sound|build): площадка и укрытия — до того, как клиент возьмёт карту
 
             VisionFx.Register();
             _map = _server.GetMap();
@@ -406,6 +408,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _hud.Toast("Вайп начался. Ты голый на пляже с булыжником. Бей деревья и камни, Q — крафт.");
             if (OS.GetCmdlineUserArgs().Contains("--kit")) _debugEdge = true;
             if (OS.GetCmdlineUserArgs().Contains("--craft")) _hud.ToggleCraft();
+            SandboxReady();
         }
 
         void ParseArgs()
@@ -414,6 +417,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             foreach (var arg in OS.GetCmdlineUserArgs())
             {
                 if (arg.StartsWith("--shot=")) _shotPath = arg.Substring(7);
+                else if (arg.StartsWith("--sandbox=")) _sbMode = arg[10..];   // полигон: aim, sound, build (SandboxMode.cs)
                 else if (arg.StartsWith("--frames=")) _shotFrame = int.Parse(arg.Substring(9));
                 else if (arg.StartsWith("--burst="))
                 {
@@ -638,6 +642,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             if (e is InputEventKey k && k.Pressed && !k.Echo)
             {
                 if (_buildMenu.PickByKey(k.PhysicalKeycode)) return;
+                if (SandboxKey(k.PhysicalKeycode)) return;
                 if (_spectate && SpectatorKey(k.PhysicalKeycode)) return;
                 switch (k.PhysicalKeycode)
                 {
@@ -786,6 +791,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         /// <summary>Клик мимо админки закрывает её (окна на весь экран ловят клик сами).</summary>
         public override void _Input(InputEvent e)
         {
+            if (e is InputEventMouseButton sbm && sbm.Pressed && SandboxClick(sbm)) { GetViewport().SetInputAsHandled(); return; }   // полигон: свернуть панель / ответ викторины
             if (e is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex is MouseButton.Left or MouseButton.Right && _hud != null && _hud.CloseAdminIfOutside(mb.GlobalPosition))
                 GetViewport().SetInputAsHandled();
         }
@@ -803,7 +809,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 Follow = _followId,
                 Move = move,
                 Aim = _aim,
-                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
+                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && !SbBlocksFire && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
                 Eat = _eatEdge,
                 DebugKit = _debugEdge,
                 Craft = _craftReq,
@@ -898,6 +904,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 if (fast)
                 {
                     if (_craftReq < 0 && _craftPendLeft > 0) { _craftReq = _craftPendIdx; _craftPendLeft--; }
+                    SandboxPreTick();
                     _server.Submit(_myId, BuildCmd());
                     var tf = Time.GetTicksUsec();
                     _server.Tick();
@@ -912,6 +919,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 foreach (var p in _cur.Projectiles) _prevProjs[p.Id] = p;
 
                 if (_craftReq < 0 && _craftPendLeft > 0) { _craftReq = _craftPendIdx; _craftPendLeft--; }
+                SandboxPreTick();
                 _server.Submit(_myId, BuildCmd());
                 var t0 = Time.GetTicksUsec();
                 _server.Tick();
@@ -969,6 +977,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _lighting.Update(_overview ? 0 : World.NightFactorAt(_forcedDay ?? _cur.DayTime), powered, new Rect2(_cam.Position - halfV, halfV * 2), dt, _cur.RadioPower);
             }
             UpdateHud(dt);
+            SandboxFrame(dt);
 
             if (_hud.AdminOpen && _frame % 15 == 0) _hud.SetAdminSounds(PlayingSounds());
             if (_perf)
@@ -1005,6 +1014,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         {
             foreach (var e in _cur.Events)
             {
+                SandboxEvent(e);
                 switch (e.Kind)
                 {
                     case SimEventKind.Shot:
@@ -1013,19 +1023,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         if (_actorViews.TryGetValue(e.ActorId, out var shooter)) shooter.Kick();
                         if (e.ActorId == _myId && e.Text != "weapon_bow") _shake = Mathf.Min(1.5f, _shake + 0.6f);
                         if (e.Text != "weapon_bow") SpawnCasing(e.Pos, e.Dir);
-                        // настоящий сэмпл выстрела для всего огнестрела (самопал — чуть выше и тише); каждый доигрывает до конца
-                        if (e.Text == "weapon_bow") Sfx.Play("shot_bow", Iso.Px(e.Pos), -4, 25, 0.06f);
-                        else
-                        {
-                            // D46: свой звук shot_<ствол> (shot_akm, shot_nagant…), пока файла нет — сэмпл калаша (громкие — как есть, тихие — выше и тише).
-                            // Дальность слышимости — по типу ствола (Weaponry.ShotHearM), глушитель сокращает её и громкость.
-                            string own = "shot_" + (e.Text ?? "").Replace("weapon_", "");
-                            bool loud = (Items.Get(e.Text)?.Weapon?.NoiseRadius ?? 0) >= 70;
-                            float muf = e.OtherId > 0 ? Mathf.Clamp(e.OtherId / 100f, 0.2f, 1f) : 1f;
-                            float hear = Weaponry.ShotHearM(e.Text) * muf, supDb = muf < 0.95f ? -8f : 0f;
-                            if (Sfx.Get(own) != null) Sfx.Play(own, Iso.Px(e.Pos), supDb, hear, 0.03f);
-                            else Sfx.Play("shot_ak", Iso.Px(e.Pos), (loud ? 0 : -3) + supDb, hear, 0.03f, loud ? 1f : 1.12f);
-                        }
+                        PlayShotSound(e.Text, e.Pos, e.OtherId > 0 ? Mathf.Clamp(e.OtherId / 100f, 0.2f, 1f) : 1f);
                         break;
                     case SimEventKind.Reload:
                         if (_actorViews.TryGetValue(e.ActorId, out var reloader)) reloader.StartReload(Items.Get(e.Text)?.Weapon?.ReloadTime ?? 2f);
@@ -1174,6 +1172,24 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Звук выстрела (и полигон звука — тот же путь): настоящий сэмпл для всего огнестрела (самопал — чуть выше и тише),
+        /// каждый доигрывает до конца. D46: свой звук shot_<ствол> (shot_akm, shot_nagant…), пока файла нет — сэмпл калаша
+        /// (громкие — как есть, тихие — выше и тише). Дальность слышимости — по типу ствола (Weaponry.ShotHearM),
+        /// глушитель (muf &lt; 1) сокращает её и громкость.
+        /// </summary>
+        /// <returns>id звука, который сыграл.</returns>
+        static string PlayShotSound(string weapon, SVec pos, float muf = 1f)
+        {
+            if (weapon == "weapon_bow") { Sfx.Play("shot_bow", Iso.Px(pos), -4, 25, 0.06f); return "shot_bow"; }
+            string own = "shot_" + (weapon ?? "").Replace("weapon_", "");
+            bool loud = (Items.Get(weapon)?.Weapon?.NoiseRadius ?? 0) >= 70;
+            float hear = Weaponry.ShotHearM(weapon) * muf, supDb = muf < 0.95f ? -8f : 0f;
+            if (Sfx.Get(own) != null) { Sfx.Play(own, Iso.Px(pos), supDb, hear, 0.03f); return own; }
+            Sfx.Play("shot_ak", Iso.Px(pos), (loud ? 0 : -3) + supDb, hear, 0.03f, loud ? 1f : 1.12f);
+            return "shot_ak";
         }
 
         /// <summary>Отладка: эффекты рядом с игроком (только клиентские, мир не меняется).</summary>

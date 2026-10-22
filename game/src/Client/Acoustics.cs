@@ -43,6 +43,12 @@ namespace Rastvordd.Client
         static readonly RandomNumberGenerator Rng = new();
         public static bool Ready => _parent != null;
 
+        /// <summary>Что посчитано для последнего звука (полигон звука): расстояние, громкость, окклюзия, сектор, задержка.</summary>
+        public struct PlayInfo { public float Dist, Db, HearM, FarMix, DelayS; public bool Heard, Occluded, Hrtf; public int Sector; }
+        public static PlayInfo Last;
+        /// <summary>Полигон звука: «за стеной» — считать источник заслонённым, даже если стены нет.</summary>
+        public static bool ForceOcclusion;
+
         public static void Init(Node parent, MapInfo map)
         {
             _parent = parent;
@@ -132,13 +138,14 @@ namespace Rastvordd.Client
             if (stream == null || _parent == null) return;
             var d = posM - _listener;
             float dist = d.Length();
+            Last = new PlayInfo { Dist = dist, HearM = hearM, Db = -999 };
             if (dist > hearM) return;
 
             // затухание линейное: вплотную (≤ 1 м) — полная громкость, на краю слышимости — EdgeGain
             float near = Mathf.Clamp((dist - 1f) / Mathf.Max(1f, hearM - 1f), 0f, 1f);
             float db = volumeDb + Mathf.LinearToDb(Mathf.Lerp(1f, EdgeGain, near));
 
-            bool occluded = dist > 1.5f && Occluded(_listener, posM);
+            bool occluded = dist > 1.5f && (ForceOcclusion || Occluded(_listener, posM));
             if (occluded) db -= 7f;
 
             // направление относительно экрана: 0 — вверх (перед), по часовой
@@ -148,6 +155,7 @@ namespace Rastvordd.Client
 
             float farMix = Mathf.SmoothStep(40f, 220f, dist) * 0.6f;   // доля «дальнего» слоя
             double delay = dist / SpeedOfSound;
+            Last = new PlayInfo { Dist = dist, HearM = hearM, Db = db, FarMix = farMix, DelayS = (float)delay, Heard = true, Occluded = occluded, Sector = sector, Hrtf = Tuning.SteamHrtf && SteamHrtf.Ready };
 
             void Start()
             {

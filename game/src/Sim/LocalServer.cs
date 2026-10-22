@@ -615,6 +615,10 @@ namespace Rastvordd.Sim
 
         public void Submit(int clientId, InputCmd cmd) => _pending[clientId] = cmd;
 
+        /// <summary>Полигон: подключить/отключить мозг персонажа (боты арены, охрана на арене).</summary>
+        public void AddBrain(IBrain b) => _brains.Add(b);
+        public void RemoveBrain(int actorId) => _brains.RemoveAll(b => b.Me.Id == actorId);
+
         static readonly bool PerfLog = System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--perflog") >= 0;
 
         public void Tick()

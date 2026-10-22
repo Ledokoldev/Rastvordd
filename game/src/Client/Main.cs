@@ -284,7 +284,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _hud.AddChild(_mapView);
             _miniMap = new MiniMap(_mapView);
             _miniMap.SetAnchorsPreset(Control.LayoutPreset.TopRight);
-            _miniMap.OffsetLeft = -MiniMap.Side - 14; _miniMap.OffsetRight = -14; _miniMap.OffsetTop = 12; _miniMap.OffsetBottom = 12 + MiniMap.Side + 18;
+            _miniMap.OffsetLeft = -MiniMap.Side - 16; _miniMap.OffsetRight = -16; _miniMap.OffsetTop = 14; _miniMap.OffsetBottom = 14 + MiniMap.Side + 34;
             _hud.AddChild(_miniMap);
             _inv = new InventoryWindow();
             _inv.Op += (op, arg) => _uiReq = (op, arg, 0);
@@ -301,8 +301,8 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _hud.AddChild(_structTip);
             _feed = new PickupFeed();
             _feed.SetAnchorsPreset(Control.LayoutPreset.BottomRight);
-            _feed.OffsetRight = -16; _feed.OffsetLeft = -16 - _feed.CustomMinimumSize.X;
-            _feed.OffsetBottom = -62; _feed.OffsetTop = -62 - _feed.CustomMinimumSize.Y;
+            _feed.OffsetRight = -20; _feed.OffsetLeft = -20 - _feed.CustomMinimumSize.X;
+            _feed.OffsetBottom = -96; _feed.OffsetTop = -96 - _feed.CustomMinimumSize.Y;   // над плашкой оружия
             _hud.AddChild(_feed);
             _guide = new Label { Position = new Vector2(0, 120), MouseFilter = Control.MouseFilterEnum.Ignore };
             _guide.AddThemeFontSizeOverride("font_size", 15);
@@ -1394,6 +1394,7 @@ else if (arg == "--atcrate")
             // окно по E (ящик, печь, столб) и крафт у верстака
             bool showInv = !_cur.Self.Dead && (_invOpen || _cur.Self.Ui != null);
             _inv.Visible = showInv;
+            _hud.InventoryOpen = showInv;
             if (showInv) _inv.Refresh(_cur.Self, _cur.Self.Ui, dt);
             if (_inv.Visible != _uiWasOpen)
             {
@@ -1498,10 +1499,8 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             var s = _cur.Self;
             float day = _forcedDay ?? _cur.DayTime;
             int mins = (int)(day * 24 * 60);
-            string clock = $"{mins / 60:00}:{mins % 60:00}" + (World.NightFactorAt(day) > 0.5f ? " · ночь, обзор короче" : "");
-            _hud.UpdateHud(s, dt, _peek > 0.05f
-                ? $"{clock} · прицеливание: обзор уже, видно дальше, разброс меньше"
-                : $"{clock} · ПКМ — прицелиться");
+            string clock = $"{mins / 60:00}:{mins % 60:00}" + (World.NightFactorAt(day) > 0.5f ? " · ночь" : "");
+            _hud.UpdateHud(s, dt, _peek > 0.05f ? $"{clock} · прицел" : clock);
 
             var canvas = GetViewport().GetCanvasTransform();
             float zoom = _cam.Zoom.X;

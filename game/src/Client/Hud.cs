@@ -1,50 +1,67 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 using Rastvordd.Sim;
 
 namespace Rastvordd.Client
 {
-    /// <summary>Интерфейс поверх мира: HP, еда, вода, пояс, крафт, подсказки, инвентарь, смерть, затемнение вне обзора.</summary>
+    /// <summary>
+    /// Интерфейс поверх мира в стиле «стекло»: снизу по центру — шкалы и пояс, над ними — подсказка действия [E],
+    /// сверху слева — часы и короткие подсказки клавиш (гаснут, F1 — показать снова), сверху по центру — сообщения,
+    /// справа снизу — оружие и патроны. Плюс окна: крафт, изучение, админка, код замка, экран смерти.
+    /// </summary>
     public partial class Hud : CanvasLayer
     {
-        const int BarW = 260;
+        const float HintsShowTime = 25;   // сколько секунд видны подсказки клавиш после старта
 
-        Label _buildLabel;
-        Label _hpLabel, _foodLabel, _waterLabel, _ammoLabel, _hintLabel, _toastLabel, _promptLabel, _invLabel, _deathLabel, _modeLabel;
-        ColorRect _hpFill, _foodFill, _waterFill, _damageRect, _deathRect, _vision;
-        PanelContainer _invPanel;
+        Label _toastLabel, _buildLabel, _clockLabel, _deathText, _deathBag;
+        PanelContainer _toastPanel, _promptPanel, _clockPanel, _ammoPanel, _hintsPanel, _deathCard;
+        Label _promptKey, _promptText, _ammoName, _ammoCount, _ammoReserve;
+        PanelContainer _promptKeyCap;
+        ColorRect _damageRect, _deathRect, _vision;
         CraftWindow _craftWin;
         TechWindow _techWin;
-        HBoxContainer _belt;
-        readonly List<(PanelContainer panel, Label label, StyleBoxFlat style, TextureRect icon)> _beltSlots = new();
+        Hotbar _hotbar;
         ShaderMaterial _visionMat;
-        float _toastTime, _damageFlash;
+        float _toastTime, _damageFlash, _hintsTime = HintsShowTime;
 
         public Crosshair Crosshair { get; private set; }
         public bool CraftOpen => _craftWin.Visible || _techWin.Visible;   // любое окно крафта/изучения: мышь видна, не стреляем
+        /// <summary>Открыт инвентарь — у него свой пояс (с перетаскиванием), HUD-пояс прячем.</summary>
+        public bool InventoryOpen;
+        bool _spectator;
         PanelContainer _adminPanel;
         public bool AdminOpen => _adminPanel != null && _adminPanel.Visible;
 
         /// <summary>Админка (F1): подстройки, которые нужно подбирать на слух/глаз. Сохраняются сразу.</summary>
         void BuildAdmin()
         {
-            _adminPanel = new PanelContainer { Visible = false };
+            _adminPanel = UiTheme.GlassPanel(24, 0.86f);
+            _adminPanel.Visible = false;
+            _adminPanel.Theme = UiTheme.Theme;
             AddChild(_adminPanel);
-            var box = new VBoxContainer();
-            box.AddThemeConstantOverride("separation", 6);
+            var box = UiTheme.VBox(10);
             _adminPanel.AddChild(box);
-            var title = new Label { Text = "АДМИНКА  (F1 — закрыть)" };
-            title.AddThemeFontSizeOverride("font_size", 18);
-            box.AddChild(title);
+            var head = UiTheme.HBox(12);
+            var title = UiTheme.Title("Админка");
+            title.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+            head.AddChild(title);
+            var close = UiTheme.KeyChip("F1 — закрыть");
+            close.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
+            head.AddChild(close);
+            box.AddChild(head);
+            box.AddChild(UiTheme.Caption("Звук шагов и фона"));
 
             void Slider(string name, float min, float max, float step, System.Func<float> get, System.Action<float> set, string fmt)
             {
-                var row = new HBoxContainer();
-                row.AddThemeConstantOverride("separation", 10);
-                var label = new Label { Text = name, CustomMinimumSize = new Vector2(230, 0) };
-                var value = new Label { CustomMinimumSize = new Vector2(70, 0), Text = get().ToString(fmt) };
-                var s = new HSlider { MinValue = min, MaxValue = max, Step = step, Value = get(), CustomMinimumSize = new Vector2(260, 24), FocusMode = Control.FocusModeEnum.None };
+                var row = UiTheme.HBox(14);
+                var label = UiTheme.Small(name, UiTheme.Body, UiTheme.FontSmall);
+                label.AutowrapMode = TextServer.AutowrapMode.Off;
+                label.CustomMinimumSize = new Vector2(230, 0);
+                var value = UiTheme.Strong(get().ToString(fmt), UiTheme.FontSmall);
+                value.CustomMinimumSize = new Vector2(56, 0);
+                value.HorizontalAlignment = HorizontalAlignment.Right;
+                var s = new HSlider { MinValue = min, MaxValue = max, Step = step, Value = get(), CustomMinimumSize = new Vector2(280, 24), FocusMode = Control.FocusModeEnum.None, SizeFlagsVertical = Control.SizeFlags.ShrinkCenter };
                 s.ValueChanged += v => { set((float)v); value.Text = ((float)v).ToString(fmt); Tuning.Save(); };
                 row.AddChild(label);
                 row.AddChild(s);
@@ -63,23 +80,22 @@ namespace Rastvordd.Client
             var hrtf = new CheckBox { Text = SteamHrtf.Ready ? "Направление звука: Steam Audio HRTF" : "Steam Audio не загрузился — наш бинаурал", ButtonPressed = Tuning.SteamHrtf && SteamHrtf.Ready, Disabled = !SteamHrtf.Ready, FocusMode = Control.FocusModeEnum.None };
             hrtf.Toggled += on => { Tuning.SteamHrtf = on; Tuning.Save(); };
             box.AddChild(hrtf);
+            box.AddChild(UiTheme.Small("1.00 = как записано при обычном шаге. Присед и спринт меняют темп сами.", UiTheme.Dim, UiTheme.FontCaption));
             // проверка РТ: телепорт к южному краю любой РТ
+            box.AddChild(UiTheme.Sep());
+            box.AddChild(UiTheme.Caption("Телепорт к РТ (для проверки)"));
             _tpBox = new HFlowContainer { CustomMinimumSize = new Vector2(620, 0) };
             _tpBox.AddThemeConstantOverride("h_separation", 6);
             _tpBox.AddThemeConstantOverride("v_separation", 6);
-            box.AddChild(new Label { Text = "Телепорт к РТ (для проверки):" });
             box.AddChild(_tpBox);
-            var wipe = new Button { Text = "Новый вайп (стереть сохранение и начать заново)", FocusMode = Control.FocusModeEnum.None };
+            box.AddChild(UiTheme.Sep());
+            var wipe = UiTheme.Btn("Новый вайп — стереть сохранение и начать заново");
+            wipe.AddThemeColorOverride("font_color", UiTheme.Bad);
             wipe.Pressed += () => WipeRequested?.Invoke();
             box.AddChild(wipe);
-            _adminSounds = new Label();
-            _adminSounds.AddThemeFontSizeOverride("font_size", 13);
-            _adminSounds.AddThemeColorOverride("font_color", new Color(0.8f, 1f, 0.8f));
+            _adminSounds = UiTheme.Small("", UiTheme.Good, UiTheme.FontCaption);
+            _adminSounds.CustomMinimumSize = new Vector2(620, 0);
             box.AddChild(_adminSounds);
-            var hint = new Label { Text = "1.00 = как записано при обычном шаге. Присед и спринт меняют темп сами." };
-            hint.AddThemeFontSizeOverride("font_size", 13);
-            hint.AddThemeColorOverride("font_color", new Color(1, 1, 1, 0.6f));
-            box.AddChild(hint);
         }
 
         public void ToggleAdmin() => _adminPanel.Visible = !_adminPanel.Visible;
@@ -91,7 +107,7 @@ namespace Rastvordd.Client
             foreach (var c in _tpBox.GetChildren()) c.QueueFree();
             foreach (var (name, go) in list)
             {
-                var b = new Button { Text = name, FocusMode = Control.FocusModeEnum.None };
+                var b = UiTheme.Btn(name, false, 0, 32);
                 b.Pressed += () => go();
                 _tpBox.AddChild(b);
             }
@@ -133,6 +149,7 @@ void fragment() {
 
         public override void _Ready()
         {
+            GetTree().Root.Theme = UiTheme.Theme;   // всплывающие подсказки и всё, что без своей темы
             _visionMat = new ShaderMaterial { Shader = new Shader { Code = VisionShader } };
             _vision = FullRect(new Color(0, 0, 0, 0));
             _vision.Material = _visionMat;
@@ -140,93 +157,141 @@ void fragment() {
 
             _damageRect = FullRect(new Color(0.8f, 0, 0, 0));
 
-            _hintLabel = MakeLabel(this, new Vector2(16, 12), 15, new Color(1, 1, 1, 0.75f));
-            _hintLabel.Text = "WASD — ходьба · Shift — бег · Alt — присед · ЛКМ — удар/выстрел/поставить · ПКМ — прицелиться (с Планом — держи: колесо стройки) · R — перезарядка\nE — открыть / взаимодействие · 1–6 — пояс · Q — крафт · Tab — инвентарь · G — карта · F — съесть · H — бинт · N — день/ночь · F9 — отладочный набор (ещё раз — рейд)";
-            _modeLabel = MakeLabel(this, new Vector2(16, 58), 15, new Color(1, 0.9f, 0.6f, 0.85f));
+            // часы и режим — маленькая плашка слева вверху
+            _clockPanel = Pill();
+            _clockLabel = UiTheme.Strong("", UiTheme.FontSmall);
+            _clockPanel.AddChild(_clockLabel);
 
-            (_hpFill, _hpLabel) = MakeBar(-50, 26, new Color(0.45f, 0.75f, 0.3f), 16);
-            (_foodFill, _foodLabel) = MakeBar(-76, 18, new Color(0.85f, 0.55f, 0.2f), 13);
-            (_waterFill, _waterLabel) = MakeBar(-98, 18, new Color(0.3f, 0.55f, 0.85f), 13);
+            // подсказки клавиш — одна строка «клавиш-таблеток», гаснет через полминуты, F1 — показать
+            _hintsPanel = Pill(0.5f);
+            var hints = UiTheme.HBox(6);
+            _hintsPanel.AddChild(hints);
+            foreach (var (key, what) in new[] { ("WASD", "ходьба"), ("Shift", "бег"), ("Alt", "присед"), ("ПКМ", "прицел"), ("R", "перезарядка"), ("E", "действие"), ("Tab", "инвентарь"), ("Q", "крафт"), ("G", "карта"), ("F", "есть"), ("H", "бинт"), ("N", "день/ночь"), ("F9", "набор"), ("F1", "админка") })
+                hints.AddChild(KeyHint(key, what));
 
-            _ammoLabel = MakeLabel(this, Vector2.Zero, 22, Colors.White);
-            _ammoLabel.HorizontalAlignment = HorizontalAlignment.Right;
-            _promptLabel = MakeLabel(this, Vector2.Zero, 20, new Color(1, 0.9f, 0.5f));
-            _promptLabel.HorizontalAlignment = HorizontalAlignment.Center;
-            _buildLabel = MakeLabel(this, Vector2.Zero, 15, new Color(0.75f, 0.88f, 1f));
-            _buildLabel.HorizontalAlignment = HorizontalAlignment.Center;
-            _toastLabel = MakeLabel(this, Vector2.Zero, 20, Colors.White);
-            _toastLabel.HorizontalAlignment = HorizontalAlignment.Center;
+            // сообщения — сверху по центру
+            _toastPanel = Pill(0.7f);
+            _toastLabel = UiTheme.Strong("", UiTheme.FontBody + 1);
+            _toastPanel.AddChild(_toastLabel);
 
-            BuildBelt();
+            // подсказка действия: [E] + текст, над поясом
+            _promptPanel = Pill(0.7f);
+            var prow = UiTheme.HBox(10);
+            _promptPanel.AddChild(prow);
+            _promptKeyCap = new PanelContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+            _promptKeyCap.AddThemeStyleboxOverride("panel", UiTheme.Box(new Color(1, 1, 1, 0.92f), 6, null, 0, 7, 1));
+            _promptKey = UiTheme.Strong("E", UiTheme.FontSmall, UiTheme.Dark);
+            _promptKey.HorizontalAlignment = HorizontalAlignment.Center;
+            _promptKeyCap.AddChild(_promptKey);
+            _promptKeyCap.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
+            prow.AddChild(_promptKeyCap);
+            _promptText = UiTheme.Strong("", UiTheme.FontBody);
+            prow.AddChild(_promptText);
+            _buildLabel = UiTheme.Small("", UiTheme.Body, UiTheme.FontSmall);
+            _buildLabel.AutowrapMode = TextServer.AutowrapMode.Off;
+            _buildLabel.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.8f));
+            _buildLabel.AddThemeConstantOverride("outline_size", 4);
+            _buildLabel.MouseFilter = Control.MouseFilterEnum.Ignore;
+            Add(_buildLabel);
+
+            // оружие и патроны — справа внизу
+            _ammoPanel = Pill(0.62f);
+            var arow = UiTheme.HBox(10);
+            _ammoPanel.AddChild(arow);
+            _ammoName = UiTheme.Small("", UiTheme.Dim, UiTheme.FontSmall);
+            _ammoName.AutowrapMode = TextServer.AutowrapMode.Off;
+            _ammoName.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
+            arow.AddChild(_ammoName);
+            _ammoCount = UiTheme.Strong("", 22);
+            arow.AddChild(_ammoCount);
+            _ammoReserve = UiTheme.Small("", UiTheme.Dim, UiTheme.FontSmall);
+            _ammoReserve.AutowrapMode = TextServer.AutowrapMode.Off;
+            _ammoReserve.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
+            arow.AddChild(_ammoReserve);
+
+            _hotbar = new Hotbar(false) { Theme = UiTheme.Theme, TextureFilter = CanvasItem.TextureFilterEnum.Linear };
+            AddChild(_hotbar);
             BuildAdmin();
-
-            _invPanel = new PanelContainer { Visible = false, MouseFilter = Control.MouseFilterEnum.Ignore };
-            AddChild(_invPanel);
-            _invLabel = new Label();
-            _invLabel.AddThemeFontSizeOverride("font_size", 17);
-            _invPanel.AddChild(_invLabel);
-
             BuildCraftPanel();
-
-            _deathRect = FullRect(new Color(0.25f, 0, 0, 0.55f));
-            _deathRect.Visible = false;
-            _deathLabel = MakeLabel(_deathRect, Vector2.Zero, 30, Colors.White);
-            _deathLabel.HorizontalAlignment = HorizontalAlignment.Center;
-            _deathLabel.Text = "ТЕБЯ УБИЛИ\nвесь лут остался на трупе\n\nEnter — проснуться на пляже";
+            BuildDeath();
 
             Crosshair = new Crosshair { MouseFilter = Control.MouseFilterEnum.Ignore };
             AddChild(Crosshair);
         }
 
-        /// <summary>Наблюдатель: прячем всё «своё» — пояс, полоски, подсказки управления, прицел.</summary>
+        void BuildDeath()
+        {
+            _deathRect = FullRect(new Color(0.05f, 0, 0, 0.6f));
+            _deathRect.Visible = false;
+            var center = new CenterContainer { MouseFilter = Control.MouseFilterEnum.Ignore, Theme = UiTheme.Theme };
+            center.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+            _deathRect.AddChild(center);
+            _deathCard = UiTheme.GlassPanel(32, 0.8f);
+            _deathCard.CustomMinimumSize = new Vector2(420, 0);
+            center.AddChild(_deathCard);
+            var box = UiTheme.VBox(10);
+            _deathCard.AddChild(box);
+            var t = UiTheme.Title("Тебя убили", 30);
+            t.AddThemeColorOverride("font_color", UiTheme.Bad);
+            t.HorizontalAlignment = HorizontalAlignment.Center;
+            box.AddChild(t);
+            _deathText = UiTheme.Small("Весь лут остался на трупе — успей вернуться за ним.", UiTheme.Body, UiTheme.FontBody);
+            _deathText.HorizontalAlignment = HorizontalAlignment.Center;
+            box.AddChild(_deathText);
+            box.AddChild(new Control { CustomMinimumSize = new Vector2(0, 8) });
+            var keys = UiTheme.HBox(10);
+            keys.Alignment = BoxContainer.AlignmentMode.Center;
+            keys.AddChild(BigKey("Enter", "проснуться на пляже"));
+            box.AddChild(keys);
+            _deathBag = UiTheme.Small("", UiTheme.Dim, UiTheme.FontSmall);
+            _deathBag.HorizontalAlignment = HorizontalAlignment.Center;
+            box.AddChild(_deathBag);
+        }
+
+        static Control BigKey(string key, string what)
+        {
+            var row = UiTheme.HBox(8);
+            var cap = new PanelContainer();
+            cap.AddThemeStyleboxOverride("panel", UiTheme.Box(new Color(1, 1, 1, 0.92f), 8, null, 0, 10, 4));
+            cap.AddChild(UiTheme.Strong(key, UiTheme.FontSmall, UiTheme.Dark));
+            row.AddChild(cap);
+            var l = UiTheme.Small(what, UiTheme.Ink, UiTheme.FontBody);
+            l.AutowrapMode = TextServer.AutowrapMode.Off;
+            l.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
+            row.AddChild(l);
+            return row;
+        }
+
+        static Control KeyHint(string key, string what)
+        {
+            var row = UiTheme.HBox(5);
+            var cap = new PanelContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+            cap.AddThemeStyleboxOverride("panel", UiTheme.Box(new Color(1, 1, 1, 0.14f), 5, null, 0, 6, 1));
+            cap.AddChild(UiTheme.Strong(key, UiTheme.FontCaption));
+            row.AddChild(cap);
+            var l = UiTheme.Small(what, UiTheme.Dim, UiTheme.FontCaption);
+            l.AutowrapMode = TextServer.AutowrapMode.Off;
+            l.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
+            row.AddChild(l);
+            return row;
+        }
+
+        PanelContainer Pill(float alpha = 0.62f)
+        {
+            var p = new PanelContainer { MouseFilter = Control.MouseFilterEnum.Ignore, Theme = UiTheme.Theme };
+            p.AddThemeStyleboxOverride("panel", UiTheme.Pill(alpha));
+            AddChild(p);
+            return p;
+        }
+
+        void Add(Control c) { c.Theme = UiTheme.Theme; AddChild(c); }
+
+        /// <summary>Наблюдатель: прячем всё «своё» — пояс, шкалы, подсказки управления, прицел.</summary>
         public void SpectatorMode()
         {
-            foreach (var c in new CanvasItem[] { _belt, _hintLabel, _hpFill.GetParent<CanvasItem>(), _foodFill.GetParent<CanvasItem>(), _waterFill.GetParent<CanvasItem>(), _promptLabel, _modeLabel, _ammoLabel, _buildLabel, Crosshair, _vision })
+            _spectator = true;
+            foreach (var c in new CanvasItem[] { _hotbar, _hintsPanel, _clockPanel, _promptPanel, _ammoPanel, _buildLabel, Crosshair, _vision })
                 if (c != null) c.Visible = false;
-            _hintLabel.Text = "";
-        }
-
-        (ColorRect fill, Label label) MakeBar(float y, float h, Color color, int font)
-        {
-            var back = new ColorRect { Color = new Color(0, 0, 0, 0.55f), Size = new Vector2(BarW, h), MouseFilter = Control.MouseFilterEnum.Ignore };
-            back.SetAnchorsPreset(Control.LayoutPreset.BottomLeft);
-            back.Position = new Vector2(20, y);
-            AddChild(back);
-            var fill = new ColorRect { Color = color, Size = new Vector2(BarW, h), MouseFilter = Control.MouseFilterEnum.Ignore };
-            back.AddChild(fill);
-            var label = MakeLabel(back, new Vector2(8, h > 20 ? 2 : -1), font, Colors.White);
-            return (fill, label);
-        }
-
-        void BuildBelt()
-        {
-            _belt = new HBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
-            _belt.AddThemeConstantOverride("separation", 6);
-            AddChild(_belt);
-            for (int i = 0; i < Actor.BeltSize; i++)
-            {
-                var style = new StyleBoxFlat { BgColor = new Color(0, 0, 0, 0.55f), BorderColor = new Color(1, 1, 1, 0.25f) };
-                style.SetBorderWidthAll(2);
-                style.SetCornerRadiusAll(4);
-                style.ContentMarginLeft = style.ContentMarginRight = 6;
-                style.ContentMarginTop = style.ContentMarginBottom = 4;
-                var panel = new PanelContainer { CustomMinimumSize = new Vector2(104, 54), MouseFilter = Control.MouseFilterEnum.Ignore };
-                panel.AddThemeStyleboxOverride("panel", style);
-                var icon = new TextureRect
-                {
-                    ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
-                    TextureFilter = CanvasItem.TextureFilterEnum.Nearest, MouseFilter = Control.MouseFilterEnum.Ignore,
-                    Modulate = new Color(1, 1, 1, 0.9f),
-                };
-                panel.AddChild(icon);
-                var label = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart, MouseFilter = Control.MouseFilterEnum.Ignore };
-                label.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.9f));
-                label.AddThemeConstantOverride("outline_size", 4);
-                label.AddThemeFontSizeOverride("font_size", 12);
-                panel.AddChild(label);
-                _belt.AddChild(panel);
-                _beltSlots.Add((panel, label, style, icon));
-            }
         }
 
         void BuildCraftPanel()
@@ -249,17 +314,6 @@ void fragment() {
             return r;
         }
 
-        static Label MakeLabel(Node parent, Vector2 pos, int size, Color color)
-        {
-            var l = new Label { Position = pos, MouseFilter = Control.MouseFilterEnum.Ignore };
-            l.AddThemeFontSizeOverride("font_size", size);
-            l.AddThemeColorOverride("font_color", color);
-            l.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.85f));
-            l.AddThemeConstantOverride("outline_size", 5);
-            parent.AddChild(l);
-            return l;
-        }
-
         /// <summary>Ставит элемент по долям экрана (0 — лево/верх, 1 — право/низ) с отступом.</summary>
         static void Place(Control c, Vector2 screen, float ax, float ay, Vector2 offset)
         {
@@ -279,14 +333,29 @@ void fragment() {
         {
             if (_codePanel == null)
             {
-                _codePanel = new PanelContainer { Visible = false };
+                _codePanel = UiTheme.GlassPanel(26, 0.86f);
+                _codePanel.Theme = UiTheme.Theme;
+                _codePanel.Visible = false;
                 AddChild(_codePanel);
-                var box = new VBoxContainer();
+                var box = UiTheme.VBox(12);
+                box.CustomMinimumSize = new Vector2(320, 0);
                 _codePanel.AddChild(box);
-                box.AddChild(new Label { Text = "Заперто. Код (4 цифры), Enter — ввести, Esc — отмена" });
-                _codeEdit = new LineEdit { MaxLength = 4, PlaceholderText = "____", Alignment = HorizontalAlignment.Center };
-                _codeEdit.AddThemeFontSizeOverride("font_size", 28);
+                var head = UiTheme.HBox(12);
+                head.AddChild(UiTheme.IconBox("lock_code", 44));
+                var tt = UiTheme.VBox(0);
+                tt.AddChild(UiTheme.Title("Заперто", 22));
+                tt.AddChild(UiTheme.Small("Кодовый замок · 4 цифры", UiTheme.Dim, UiTheme.FontSmall));
+                head.AddChild(tt);
+                box.AddChild(head);
+                _codeEdit = new LineEdit { MaxLength = 4, PlaceholderText = "• • • •", Alignment = HorizontalAlignment.Center, CustomMinimumSize = new Vector2(0, 58) };
+                _codeEdit.AddThemeFontOverride("font", UiTheme.Semi);
+                _codeEdit.AddThemeFontSizeOverride("font_size", 30);
+                _codeEdit.AddThemeConstantOverride("minimum_character_width", 6);
                 box.AddChild(_codeEdit);
+                var keys = UiTheme.HBox(6);
+                keys.AddChild(UiTheme.KeyChip("Enter — ввести"));
+                keys.AddChild(UiTheme.KeyChip("Esc — отмена"));
+                box.AddChild(keys);
                 _codeEdit.TextSubmitted += txt =>
                 {
                     if (int.TryParse(txt, out int code)) CodeEntered?.Invoke(_codeDoor, code);
@@ -318,7 +387,6 @@ void fragment() {
         }
 
         public void FlashDamage() => _damageFlash = 0.45f;
-        public void ToggleInventory() => _invPanel.Visible = !_invPanel.Visible;
         /// <summary>Q: открыть крафт; если открыто любое из окон — закрыть.</summary>
         public void ToggleCraft()
         {
@@ -340,73 +408,69 @@ void fragment() {
             _visionMat.SetShaderParameter("strength", enabled ? 1f : 0f);
         }
 
-        static void SetBar(ColorRect fill, float value, float max)
-        {
-            fill.Size = new Vector2(BarW * Mathf.Clamp(value / max, 0, 1), fill.Size.Y);
-        }
-
         public void UpdateHud(SelfInfo s, float dt, string modeText)
         {
-            SetBar(_hpFill, s.Hp, s.MaxHp);
-            _hpFill.Color = s.Hp > 50 ? new Color(0.45f, 0.75f, 0.3f) : s.Hp > 25 ? new Color(0.85f, 0.65f, 0.2f) : new Color(0.85f, 0.2f, 0.15f);
-            _hpLabel.Text = $"HP {Mathf.CeilToInt(s.Hp)}   · бинты: {s.Bandages}" + (s.Fuses > 0 ? $"   · пробки: {s.Fuses}" : "");
-            SetBar(_foodFill, s.Food, 100);
-            _foodLabel.Text = $"Еда {Mathf.CeilToInt(s.Food)}";
-            SetBar(_waterFill, s.Water, 100);
-            _waterLabel.Text = $"Вода {Mathf.CeilToInt(s.Water)}";
+            var vs = GetViewport().GetVisibleRect().Size;
+            bool bigWindow = InventoryOpen || CraftOpen;
 
-            _ammoLabel.Text = s.HoldingGun ? $"{s.WeaponName}   {s.Ammo} / {s.Magazine}   ·  запас {s.Reserve}" : s.WeaponName;
+            // низ: шкалы и пояс
+            _hotbar.Visible = !_spectator && !bigWindow && !s.Dead;
+            _hotbar.Refresh(s);
+            Place(_hotbar, vs, 0.5f, 1, new Vector2(0, -28));
 
-            for (int i = 0; i < _beltSlots.Count; i++)
-            {
-                var (_, label, style, icon) = _beltSlots[i];
-                var slot = s.Belt[i];
-                string text = $"{i + 1}";
-                icon.Texture = slot.HasValue ? Art.Icon(slot.Value.Id) : null;
-                if (slot.HasValue)
-                {
-                    var b = slot.Value;
-                    if (icon.Texture == null) text += $"  {b.Name}";
-                    if (b.IsGun) text += $"\n{b.Ammo}/{b.Magazine}";
-                    else if (b.Count > 1) text += $"\n×{b.Count}";
-                }
-                label.Text = text;
-                bool sel = i == s.Current;
-                style.BorderColor = sel ? new Color(1, 0.85f, 0.4f) : new Color(1, 1, 1, 0.25f);
-                style.BgColor = sel ? new Color(0.25f, 0.2f, 0.08f, 0.75f) : new Color(0, 0, 0, 0.55f);
-            }
+            // часы и подсказки клавиш
+            _clockLabel.Text = modeText;
+            Place(_clockPanel, vs, 0, 0, new Vector2(16, 14));
+            _hintsTime -= dt;
+            float ha = AdminOpen ? 1 : Mathf.Clamp(_hintsTime / 2f, 0, 1);
+            _hintsPanel.Visible = !_spectator && ha > 0.01f && !bigWindow;
+            _hintsPanel.Modulate = new Color(1, 1, 1, ha);
+            Place(_hintsPanel, vs, 0, 0, new Vector2(16 + _clockPanel.Size.X + 8, 14));
+            _clockPanel.Visible = !_spectator && !bigWindow;
 
-            _modeLabel.Text = modeText;
-            _promptLabel.Text = s.InteractHint ?? "";
-            _buildLabel.Text = s.Dead ? "" : s.BuildStatus ?? "";
+            // оружие
+            _ammoPanel.Visible = !_spectator && !s.Dead && !InventoryOpen && !string.IsNullOrEmpty(s.WeaponName);
+            _ammoName.Text = s.WeaponName ?? "";
+            _ammoCount.Visible = _ammoReserve.Visible = s.HoldingGun;
+            _ammoCount.Text = s.HoldingGun ? $"{s.Ammo} / {s.Magazine}" : "";
+            _ammoReserve.Text = s.HoldingGun ? $"запас {s.Reserve}" : "";
+            _ammoCount.AddThemeColorOverride("font_color", s.HoldingGun && s.Ammo == 0 ? UiTheme.Bad : UiTheme.Ink);
+            Place(_ammoPanel, vs, 1, 1, new Vector2(-20, -28));
 
-
+            // подсказка действия
+            string hint = s.Dead ? "" : s.InteractHint ?? "";
+            string key = null;
+            if (hint.StartsWith("[E] ")) { key = "E"; hint = hint.Substring(4); }
+            else if (hint.EndsWith(" [E]")) { key = "E"; hint = hint.Substring(0, hint.Length - 4); }
+            else if (hint.StartsWith("ЛКМ — ")) { key = "ЛКМ"; hint = hint.Substring(6); }
+            _promptKeyCap.Visible = key != null;
+            _promptKey.Text = key ?? "";
+            _promptText.Text = hint;
+            _promptPanel.Visible = !_spectator && hint != "" && !InventoryOpen;
+            float promptY = -(28 + UiTheme.CellSize + 18);
+            Place(_promptPanel, vs, 0.5f, 1, new Vector2(0, promptY));
+            _buildLabel.Text = s.Dead || InventoryOpen ? "" : s.BuildStatus ?? "";
+            Place(_buildLabel, vs, 0.5f, 1, new Vector2(0, promptY - (_promptPanel.Visible ? _promptPanel.Size.Y + 8 : 0)));
 
             if (_craftWin.Visible) _craftWin.Refresh(s);
             if (_techWin.Visible) _techWin.Refresh(s);
 
             _deathRect.Visible = s.Dead;
             if (s.Dead)
-                _deathLabel.Text = "ТЕБЯ УБИЛИ\nвесь лут остался на трупе\n\nEnter — проснуться на пляже" + (s.HasBag ? (s.BagReadyIn > 0 ? $"\nспальник будет готов через {s.BagReadyIn:0} с" : "\nB — проснуться в спальнике") : "");
+                _deathBag.Text = s.HasBag ? (s.BagReadyIn > 0 ? $"Спальник будет готов через {s.BagReadyIn:0} с" : "B — проснуться в спальнике") : "Спальника нет — поставь его на базе, чтобы возрождаться дома";
 
             _toastTime -= dt;
-            _toastLabel.Modulate = new Color(1, 1, 1, Mathf.Clamp(_toastTime, 0, 1));
+            _toastPanel.Modulate = new Color(1, 1, 1, Mathf.Clamp(_toastTime, 0, 1));
+            _toastPanel.Visible = _toastTime > 0 && _toastLabel.Text != "" && !bigWindow;
+            Place(_toastPanel, vs, 0.5f, 0, new Vector2(0, 70));
             _damageFlash = Mathf.Max(0, _damageFlash - dt);
             _damageRect.Color = new Color(0.8f, 0, 0, _damageFlash * 0.5f);
 
-            var vs = GetViewport().GetVisibleRect().Size;
-            Place(_ammoLabel, vs, 1, 1, new Vector2(-20, -20));
-            if (_adminPanel.Visible) Place(_adminPanel, vs, 0.5f, 0.3f, Vector2.Zero);
-            Place(_belt, vs, 0.5f, 1, new Vector2(0, -16));
-            Place(_promptLabel, vs, 0.5f, 1, new Vector2(0, -90));
-            Place(_buildLabel, vs, 0.5f, 1, new Vector2(0, -118));
-            Place(_toastLabel, vs, 0.5f, 0, new Vector2(0, 90));
-            Place(_invPanel, vs, 1, 0.5f, new Vector2(-30, 0));
-            Place(_deathLabel, vs, 0.5f, 0.5f, Vector2.Zero);
+            if (_adminPanel.Visible) Place(_adminPanel, vs, 0.5f, 0.45f, Vector2.Zero);
 
             Crosshair.HitFlash = Mathf.Max(0, Crosshair.HitFlash - dt);
             Crosshair.ReloadProgress = s.ReloadProgress;
-            Crosshair.Visible = !CraftOpen;
+            Crosshair.Visible = !CraftOpen && !_spectator;
             Crosshair.QueueRedraw();
         }
     }

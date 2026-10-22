@@ -5,16 +5,16 @@ using Rastvordd.Sim;
 
 namespace Rastvordd.Client
 {
-    /// <summary>Узел дерева: иконка; изучен — зелёная полоска, доступен — жёлтая рамка, закрыт — тусклый с замком.</summary>
+    /// <summary>Узел дерева: иконка; изучен — зелёная точка, доступен — янтарная рамка и замок, закрыт — тусклый с замком.</summary>
     public partial class TechCell : Control
     {
-        public const float Side = 64;
+        public const float Side = 68;
         public TechInfo T;
         public bool Selected;
         public event Action<TechCell> Clicked;
         bool _hover;
 
-        public TechCell() { CustomMinimumSize = new Vector2(Side, Side); Size = new Vector2(Side, Side); MouseFilter = MouseFilterEnum.Stop; }
+        public TechCell() { CustomMinimumSize = new Vector2(Side, Side); Size = new Vector2(Side, Side); MouseFilter = MouseFilterEnum.Stop; TextureFilter = TextureFilterEnum.Linear; }
 
         public override void _Ready()
         {
@@ -25,17 +25,13 @@ namespace Rastvordd.Client
         public override void _Draw()
         {
             var r = new Rect2(0, 0, Side, Side);
-            UiTheme.DrawSlot(this, r, _hover);
-            var icon = Art.Icon(T.Id);
             bool open = T.Known || T.CanResearch;
-            if (icon != null) DrawTextureRect(icon, r.Grow(-9), false, T.Known ? Colors.White : open ? new Color(1, 1, 1, 0.8f) : new Color(1, 1, 1, 0.3f));
-            if (T.Known) DrawRect(new Rect2(0, Side - 3, Side, 3), new Color(0.45f, 0.8f, 0.4f));
-            else
-            {
-                TechWindow.DrawLock(this, new Vector2(Side - 14, 6), T.CanResearch ? UiTheme.Accent : UiTheme.Dim);
-                if (T.CanResearch) DrawRect(r.Grow(-1), new Color(UiTheme.Accent, 0.6f), false, 1);
-            }
-            if (Selected) DrawRect(r.Grow(-1), UiTheme.Accent, false, 2);
+            UiTheme.DrawSlot(this, r, _hover, !open, Selected);
+            if (T.CanResearch && !T.Known && !Selected) UiTheme.DrawRound(this, r, Colors.Transparent, UiTheme.CellRadius, new Color(UiTheme.Accent, 0.7f), 1);
+            float isz = Side * UiTheme.IconFill;
+            UiTheme.DrawIcon(this, T.Id, new Rect2((Side - isz) / 2, (Side - isz) / 2, isz, isz), T.Known ? Colors.White : open ? new Color(1, 1, 1, 0.8f) : new Color(1, 1, 1, 0.3f));
+            if (T.Known) UiTheme.DrawDot(this, new Vector2(Side - 12.5f, 12.5f), 3.5f, UiTheme.Good);
+            else TechWindow.DrawLock(this, new Vector2(Side - 18, 8), T.CanResearch ? UiTheme.Accent : UiTheme.Dim);
         }
 
         public override void _GuiInput(InputEvent e)
@@ -45,16 +41,15 @@ namespace Rastvordd.Client
     }
 
     /// <summary>
-    /// Дерево изучения (E у верстака): три столбца — верстак 1, 2, 3; узлы квадратами, линии от предков к потомкам;
-    /// справа карточка: что это, характеристики, рецепт, цена в металлоломе, что нужно, кнопка «Изучить».
-    /// Внизу — что известно с самого начала.
+    /// Дерево изучения (E у верстака): три столбца — верстак 1, 2, 3; узлы скруглёнными ячейками, линии от предков к потомкам;
+    /// справа карточка: картинка, что это, характеристики, что нужно, белая кнопка «Изучить». Внизу — что известно с начала.
     /// </summary>
     public partial class TechWindow : Control
     {
         public event Action<string> Research;
         public event Action OpenCraft;
 
-        const float ColW = 190, RowH = 92, Top = 64;
+        const float ColW = 200, RowH = 96, Top = 64;
         // раскладка: (столбец = верстак − 1, строка) — потомки на строке предка
         static readonly Dictionary<string, (int col, int row)> Layout = new()
         {
@@ -67,7 +62,7 @@ namespace Rastvordd.Client
         readonly Control _tree;
         readonly Dictionary<string, TechCell> _cells = new();
         readonly Label _scrap, _bench, _name, _desc, _cost, _why;
-        readonly TextureRect _icon;
+        readonly BigIcon _icon;
         readonly VBoxContainer _stats, _reqs;
         readonly Button _learn;
         List<TechInfo> _tech = new();
@@ -77,45 +72,50 @@ namespace Rastvordd.Client
 
         public static void DrawLock(CanvasItem c, Vector2 at, Color col)
         {
-            c.DrawArc(at + new Vector2(4, 4), 3, Mathf.Pi, Mathf.Tau, 8, col, 1.5f);
-            c.DrawRect(new Rect2(at + new Vector2(0, 4), new Vector2(8, 6)), col);
+            c.DrawArc(at + new Vector2(5, 4.5f), 3.2f, Mathf.Pi, Mathf.Tau, 10, col, 1.5f, true);
+            UiTheme.DrawRound(c, new Rect2(at + new Vector2(0, 4.5f), new Vector2(10, 7.5f)), col, 2);
         }
 
         public TechWindow()
         {
             Visible = false;
             Theme = UiTheme.Theme;
+            TextureFilter = TextureFilterEnum.Linear;
             SetAnchorsPreset(LayoutPreset.FullRect);
             MouseFilter = MouseFilterEnum.Stop;
-            var dim = new ColorRect { Color = new Color(0, 0, 0, 0.6f), MouseFilter = MouseFilterEnum.Ignore };
+            var dim = new ColorRect { Color = UiTheme.Backdrop, MouseFilter = MouseFilterEnum.Ignore };
             dim.SetAnchorsPreset(LayoutPreset.FullRect);
             AddChild(dim);
             var center = new CenterContainer { MouseFilter = MouseFilterEnum.Ignore };
             center.SetAnchorsPreset(LayoutPreset.FullRect);
             AddChild(center);
-            var row = new HBoxContainer();
-            row.AddThemeConstantOverride("separation", 14);
+            var row = UiTheme.HBox(UiTheme.PanelGap);
             center.AddChild(row);
 
             // ---- дерево ----
-            var left = new PanelContainer();
+            var left = UiTheme.GlassPanel();
             row.AddChild(left);
-            var lbox = new VBoxContainer();
-            lbox.AddThemeConstantOverride("separation", 8);
+            var lbox = UiTheme.VBox(10);
             left.AddChild(lbox);
-            var head = new HBoxContainer();
-            head.AddThemeConstantOverride("separation", 16);
+            var head = UiTheme.HBox(12);
             lbox.AddChild(head);
-            var h = UiTheme.Header("ДЕРЕВО ИЗУЧЕНИЯ", out _);
+            var h = UiTheme.Title("Дерево изучения");
             h.SizeFlagsHorizontal = SizeFlags.ExpandFill;
             head.AddChild(h);
-            _scrap = UiTheme.Small("", UiTheme.Ink, 13);
-            _scrap.AutowrapMode = TextServer.AutowrapMode.Off;
-            head.AddChild(_scrap);
-            var craft = new Button { Text = "КРАФТ (Q)", FocusMode = FocusModeEnum.None };
+            var scrapChip = new PanelContainer { SizeFlagsVertical = SizeFlags.ShrinkCenter, TooltipText = "Металлолом" };
+            scrapChip.AddThemeStyleboxOverride("panel", UiTheme.Box(UiTheme.RowBg, UiTheme.RowRadius, null, 0, 10, 4));
+            var sc = UiTheme.HBox(6);
+            scrapChip.AddChild(sc);
+            sc.AddChild(UiTheme.IconBox("scrap", 26, 0));
+            _scrap = UiTheme.Strong("", UiTheme.FontBody);
+            _scrap.VerticalAlignment = VerticalAlignment.Center;
+            sc.AddChild(_scrap);
+            head.AddChild(scrapChip);
+            var craft = UiTheme.Btn("Крафт (Q)", false, 0, 34);
+            craft.SizeFlagsVertical = SizeFlags.ShrinkCenter;
             craft.Pressed += () => OpenCraft?.Invoke();
             head.AddChild(craft);
-            _bench = UiTheme.Small("", UiTheme.Dim, 12);
+            _bench = UiTheme.Small("", UiTheme.Dim, UiTheme.FontSmall);
             lbox.AddChild(_bench);
 
             _tree = new Control { CustomMinimumSize = new Vector2(3 * ColW, Top + 5 * RowH), MouseFilter = MouseFilterEnum.Pass };
@@ -129,48 +129,45 @@ namespace Rastvordd.Client
                 _cells[id] = c;
             }
 
-            lbox.AddChild(UiTheme.Header("ИЗВЕСТНО С НАЧАЛА", out _));
-            var starter = new HBoxContainer();
-            starter.AddThemeConstantOverride("separation", 2);
+            lbox.AddChild(UiTheme.Caption("Известно с начала"));
+            var starter = UiTheme.HBox(4);
             lbox.AddChild(starter);
             foreach (var id in Starter)
-                starter.AddChild(new TextureRect { Texture = Art.Icon(id), CustomMinimumSize = new Vector2(34, 34), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered, TextureFilter = TextureFilterEnum.Nearest, TooltipText = Items.Name(id) });
+            {
+                var ic = (IconView)UiTheme.IconBox(id, 36);
+                ic.TooltipText = Items.Name(id);
+                ic.MouseFilter = MouseFilterEnum.Stop;
+                starter.AddChild(ic);
+            }
 
             // ---- карточка ----
-            var right = new PanelContainer { CustomMinimumSize = new Vector2(320, 0) };
+            var right = UiTheme.GlassPanel();
+            right.CustomMinimumSize = new Vector2(ItemCard.W, 0);
             row.AddChild(right);
-            var rbox = new VBoxContainer();
-            rbox.AddThemeConstantOverride("separation", 8);
+            var rbox = UiTheme.VBox(8);
             right.AddChild(rbox);
-            var top = new HBoxContainer();
-            top.AddThemeConstantOverride("separation", 10);
-            rbox.AddChild(top);
-            _icon = new TextureRect { CustomMinimumSize = new Vector2(72, 72), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered, TextureFilter = TextureFilterEnum.Nearest };
-            top.AddChild(_icon);
-            var titles = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill };
-            top.AddChild(titles);
-            _name = new Label();
-            _name.AddThemeFontSizeOverride("font_size", 16);
-            _name.AddThemeColorOverride("font_color", UiTheme.Accent);
-            titles.AddChild(_name);
-            _desc = UiTheme.Small("", UiTheme.Dim, 12);
-            _desc.CustomMinimumSize = new Vector2(220, 0);
-            titles.AddChild(_desc);
-            rbox.AddChild(UiTheme.Header("ХАРАКТЕРИСТИКИ", out _));
-            _stats = new VBoxContainer();
-            _stats.AddThemeConstantOverride("separation", 2);
+            _icon = new BigIcon { CustomMinimumSize = new Vector2(0, 120) };
+            rbox.AddChild(_icon);
+            _name = UiTheme.Title("", 22);
+            rbox.AddChild(_name);
+            _desc = UiTheme.Small("", UiTheme.Body, UiTheme.FontBody);
+            _desc.CustomMinimumSize = new Vector2(ItemCard.W - 2 * UiTheme.PanelPad, 0);
+            rbox.AddChild(_desc);
+            rbox.AddChild(UiTheme.Caption("Характеристики"));
+            _stats = UiTheme.VBox(3);
             rbox.AddChild(_stats);
-            rbox.AddChild(UiTheme.Header("ЧТОБЫ ИЗУЧИТЬ", out _));
-            _reqs = new VBoxContainer();
-            _reqs.AddThemeConstantOverride("separation", 2);
+            rbox.AddChild(UiTheme.Caption("Чтобы изучить"));
+            _reqs = UiTheme.VBox(3);
             rbox.AddChild(_reqs);
-            _cost = UiTheme.Small("", UiTheme.Ink, 13);
+            rbox.AddChild(new Control { SizeFlagsVertical = SizeFlags.ExpandFill });
+            _cost = UiTheme.Small("", UiTheme.Dim, UiTheme.FontSmall);
             rbox.AddChild(_cost);
-            _learn = new Button { Text = "ИЗУЧИТЬ", FocusMode = FocusModeEnum.None, CustomMinimumSize = new Vector2(0, 40) };
-            _learn.AddThemeFontSizeOverride("font_size", 14);
+            _learn = UiTheme.Btn("Изучить", true, 0, 44);
+            _learn.AddThemeFontSizeOverride("font_size", UiTheme.FontBody);
             _learn.Pressed += () => Research?.Invoke(_selected);
             rbox.AddChild(_learn);
-            _why = UiTheme.Small("", new Color(0.9f, 0.42f, 0.38f), 12);
+            _why = UiTheme.Small("", UiTheme.Bad, UiTheme.FontCaption);
+            _why.CustomMinimumSize = new Vector2(ItemCard.W - 2 * UiTheme.PanelPad, 0);
             rbox.AddChild(_why);
         }
 
@@ -180,12 +177,12 @@ namespace Rastvordd.Client
             var font = UiTheme.Text;
             for (int col = 0; col < 3; col++)
             {
-                string title = $"ВЕРСТАК {col + 1}";
+                string title = $"Верстак {col + 1}";
                 bool here = _benchLevel >= col + 1;
-                var icon = Art.Icon(col == 0 ? "deploy_workbench" : $"deploy_workbench{col + 1}");
-                if (icon != null) _tree.DrawTextureRect(icon, new Rect2(col * ColW + 20, 4, 36, 36), false, here ? Colors.White : new Color(1, 1, 1, 0.45f));
-                _tree.DrawString(font, new Vector2(col * ColW + 62, 20), title, HorizontalAlignment.Left, -1, 13, here ? UiTheme.Accent : UiTheme.Ink);
-                _tree.DrawString(font, new Vector2(col * ColW + 62, 36), here ? "рядом" : col == 0 ? "крафт: дерево, металл, лом" : $"крафт у верстака {col}", HorizontalAlignment.Left, -1, 11, UiTheme.Dim);
+                UiTheme.DrawRound(_tree, new Rect2(col * ColW + 16, 2, 40, 40), new Color(1, 1, 1, here ? 0.1f : 0.05f), 10);
+                UiTheme.DrawIcon(_tree, col == 0 ? "deploy_workbench" : $"deploy_workbench{col + 1}", new Rect2(col * ColW + 20, 6, 32, 32), here ? Colors.White : new Color(1, 1, 1, 0.45f));
+                UiTheme.DrawText(_tree, new Vector2(col * ColW + 64, 20), title, 14, here ? UiTheme.Ink : UiTheme.Body, UiTheme.Semi);
+                UiTheme.DrawText(_tree, new Vector2(col * ColW + 64, 37), here ? "рядом ✓" : col == 0 ? "дерево, металл, лом" : $"крафт у верстака {col}", 12, here ? UiTheme.Good : UiTheme.Dim);
             }
             foreach (var t in _tech)
             {
@@ -194,20 +191,20 @@ namespace Rastvordd.Client
                 {
                     if (!_cells.TryGetValue(req, out var parent)) continue;
                     bool done = parent.T.Known;
-                    var col = done ? new Color(0.45f, 0.8f, 0.4f, 0.8f) : new Color(1, 1, 1, 0.2f);
+                    var col = done ? new Color(UiTheme.Good, 0.7f) : new Color(1, 1, 1, 0.16f);
                     Vector2 a, b;
                     if (Mathf.IsEqualApprox(parent.Position.X, child.Position.X))
                     {
                         a = parent.Position + new Vector2(TechCell.Side / 2, TechCell.Side);
                         b = child.Position + new Vector2(TechCell.Side / 2, 0);
-                        _tree.DrawLine(a, b, col, 2);
+                        _tree.DrawLine(a, b, col, 2, true);
                     }
                     else
                     {
                         a = parent.Position + new Vector2(TechCell.Side, TechCell.Side / 2);
                         b = child.Position + new Vector2(0, TechCell.Side / 2);
                         float mx = b.X - 18;   // поворот у самого потомка — линия не идёт через чужие узлы
-                        _tree.DrawPolyline(new[] { a, new Vector2(mx, a.Y), new Vector2(mx, b.Y), b }, col, 2);
+                        _tree.DrawPolyline(new[] { a, new Vector2(mx, a.Y), new Vector2(mx, b.Y), b }, col, 2, true);
                     }
                 }
             }
@@ -215,8 +212,8 @@ namespace Rastvordd.Client
             foreach (var c in _cells.Values)
             {
                 string n = c.T.Name ?? "";
-                var sz = font.GetStringSize(n, HorizontalAlignment.Left, -1, 11);
-                _tree.DrawString(font, c.Position + new Vector2(TechCell.Side / 2 - sz.X / 2, TechCell.Side + 13), n, HorizontalAlignment.Left, -1, 11, c.T.Known ? UiTheme.Ink : UiTheme.Dim);
+                var sz = font.GetStringSize(n, HorizontalAlignment.Left, -1, 12);
+                _tree.DrawString(font, c.Position + new Vector2(TechCell.Side / 2 - sz.X / 2, TechCell.Side + 16), n, HorizontalAlignment.Left, -1, 12, c.T.Known ? UiTheme.Ink : UiTheme.Dim);
             }
         }
 
@@ -225,7 +222,7 @@ namespace Rastvordd.Client
             _tech = s.Tech;
             _recipes = s.Recipes;
             _benchLevel = s.BenchLevel;
-            _scrap.Text = $"Металлолом: {s.Scrap}";
+            _scrap.Text = $"{s.Scrap}";
             _bench.Text = s.BenchLevel > 0 ? $"Рядом верстак {s.BenchLevel} — можно изучать узлы уровня до {s.BenchLevel}" : "Верстака рядом нет — смотреть можно, изучать — только у верстака";
             foreach (var t in _tech)
                 if (_cells.TryGetValue(t.Id, out var c)) { c.T = t; c.Selected = t.Id == _selected; c.QueueRedraw(); }
@@ -233,7 +230,7 @@ namespace Rastvordd.Client
 
             var sel = _tech.Find(t => t.Id == _selected);
             if (sel.Id == null) return;
-            _icon.Texture = Art.Icon(sel.Id);
+            if (_icon.Id != sel.Id) { _icon.Id = sel.Id; _icon.Rarity = Items.Rarity(sel.Id); _icon.QueueRedraw(); }
             _name.Text = sel.Name;
             _desc.Text = Items.Desc(sel.Id);
             string sig = sel.Id + sel.Known + sel.CanResearch + s.Scrap + s.BenchLevel;
@@ -247,7 +244,7 @@ namespace Rastvordd.Client
                 if (_stats.GetChildCount() == 0) _stats.AddChild(UiTheme.Small("—", UiTheme.Dim, 12));
 
                 foreach (var c in _reqs.GetChildren()) c.QueueFree();
-                var green = new Color(0.55f, 0.85f, 0.5f); var red = new Color(0.9f, 0.42f, 0.38f);
+                var green = UiTheme.Good; var red = UiTheme.Bad;
                 _reqs.AddChild(Line($"Верстак {sel.Bench}", s.BenchLevel >= sel.Bench ? "рядом ✓" : "нет рядом", s.BenchLevel >= sel.Bench ? green : red));
                 foreach (var r in sel.Requires)
                 {
@@ -258,19 +255,22 @@ namespace Rastvordd.Client
             }
             _cost.Text = sel.Known ? "Изучено — рецепт есть в крафте (Q)" : $"Цена: {sel.Scrap} металлолома";
             _learn.Disabled = !sel.CanResearch;
-            _learn.Text = sel.Known ? "ИЗУЧЕНО" : $"ИЗУЧИТЬ — {sel.Scrap} ЛОМА";
+            _learn.Text = sel.Known ? "Изучено ✓" : $"Изучить — {sel.Scrap} лома";
             _why.Text = sel.Known || sel.CanResearch ? "" : sel.Why;
         }
 
-        static Control Line(string label, string value, Color col)
+        /// <summary>Строка «подпись … значение» для карточек.</summary>
+        public static Control Line(string label, string value, Color col)
         {
-            var l = new HBoxContainer();
-            var a = UiTheme.Small(label, UiTheme.Dim, 13);
+            var l = UiTheme.HBox(12);
+            var a = UiTheme.Small(label, UiTheme.Dim, UiTheme.FontSmall);
             a.AutowrapMode = TextServer.AutowrapMode.Off;
             a.SizeFlagsHorizontal = SizeFlags.ExpandFill;
             l.AddChild(a);
-            var b = UiTheme.Small(value, col, 13);
-            b.AutowrapMode = TextServer.AutowrapMode.Off;
+            var b = UiTheme.Strong(value, UiTheme.FontSmall, col);
+            b.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+            b.HorizontalAlignment = HorizontalAlignment.Right;
+            b.CustomMinimumSize = new Vector2(Math.Min(180, UiTheme.TextWidth(value, UiTheme.FontSmall, UiTheme.Semi) + 2), 0);
             l.AddChild(b);
             return l;
         }

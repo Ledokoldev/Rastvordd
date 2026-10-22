@@ -34,6 +34,11 @@ namespace Rastvordd.Sim
         public bool Searching;
         public bool On, Burning;               // печь
         public string Info;                    // пояснение (печь, шкаф)
+        // для наглядного окна (вход → выход, шкалы)
+        public float FuelSeconds = -1, OreSeconds = -1;              // печь: на сколько хватит дерева и руды
+        public float Hours = -1, Grace;                              // шкаф: запас содержания, часов; отсрочка гниения, с
+        public List<(string label, float value, float max)> Gauges = new();   // шкаф: нагрузка, фундаменты, двери
+        public List<(string id, float perHour)> Upkeep = new();               // шкаф: расход в час
     }
 
     public sealed partial class World
@@ -414,6 +419,8 @@ namespace Rastvordd.Sim
                     string[] labels = { "руда", "сера", "топливо", "металл", "сера", "уголь" };
                     for (int i = 0; i < 6; i++) v.Cells.Add(Cell(GetCell(a, "fur", i), labels[i]));
                     v.On = f.On; v.Burning = f.Burning;
+                    v.FuelSeconds = f.Fuel * 0.8f;                        // 0.5 дерева за 0.4 с (StepFurnaces)
+                    v.OreSeconds = (f.Ore + f.SulfurOre) * 0.4f;
                     v.Info = f.Burning ? "Горит: руда плавится, дерево горит, копится уголь" : f.On ? "Зажжена, но не хватает руды или дерева" : "Потушена: положи руду и дерево, нажми «Зажечь»";
                     break;
                 case UiKind.Recycler when a.OpenTarget is Deployable rc:
@@ -430,7 +437,11 @@ namespace Rastvordd.Sim
                     var (load, found, doors) = ClaimLoad(c);
                     float h = ClaimHoursLeft(c);
                     var parts = new List<string>();
-                    foreach (var (id, per) in UpkeepPerHourOf(c)) parts.Add($"{Items.Name(id)} {per:0.#}/ч");
+                    foreach (var (id, per) in UpkeepPerHourOf(c)) { parts.Add($"{Items.Name(id)} {per:0.#}/ч"); v.Upkeep.Add((id, per)); }
+                    v.Hours = load <= 0 ? -1 : h; v.Grace = c.Grace;
+                    v.Gauges.Add(("Нагрузка", load, BudgetMax));
+                    v.Gauges.Add(("Фундаменты", found, FoundMax));
+                    v.Gauges.Add(("Двери", doors, DoorMax));
                     v.Info = $"Нагрузка {load:0}/{BudgetMax} · фундаменты {found}/{FoundMax} · двери {doors}/{DoorMax}\n" +
                              (load <= 0 ? "Базы ещё нет — содержать нечего" :
                               $"Содержание: {string.Join(", ", parts)} · запаса на {h:0.0} ч" + (h <= 0 ? (c.Grace > 0 ? $" — гниение через {c.Grace / 60:0} мин" : " — ГНИЁТ") : ""));

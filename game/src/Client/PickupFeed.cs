@@ -10,7 +10,7 @@ namespace Rastvordd.Client
     /// </summary>
     public partial class PickupFeed : Control
     {
-        const float Life = 3.5f, RowH = 30, W = 260;
+        const float Life = 3.5f, RowH = 32, W = 280;
         const int MaxRows = 6;
         sealed class Row { public string Id, Name; public int N; public float T; }
         readonly List<Row> _rows = new();
@@ -20,7 +20,8 @@ namespace Rastvordd.Client
         public PickupFeed()
         {
             MouseFilter = MouseFilterEnum.Ignore;
-            CustomMinimumSize = new Vector2(W, RowH * MaxRows);
+            TextureFilter = TextureFilterEnum.Linear;
+            CustomMinimumSize = new Vector2(W, (RowH + 6) * MaxRows);
         }
 
         /// <summary>Сбросить базу (смерть, загрузка): следующая разница не считается подбором.</summary>
@@ -67,23 +68,22 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            var font = UiTheme.Text;
             float y = Size.Y - RowH;
-            for (int i = _rows.Count - 1; i >= 0; i--, y -= RowH + 2)
+            for (int i = _rows.Count - 1; i >= 0; i--, y -= RowH + 6)
             {
                 var r = _rows[i];
                 float a = Mathf.Clamp(r.T / 0.5f, 0, 1);                       // гаснет последние полсекунды
-                float slide = Mathf.Clamp((Life - r.T) / 0.12f, 0, 1);          // въезжает справа
-                float x = W * (1 - slide) * 0.3f;
-                var rect = new Rect2(x, y, W, RowH);
-                DrawRect(rect, new Color(UiTheme.PanelBg, UiTheme.PanelBg.A * a));
-                DrawRect(new Rect2(x, y, 2, RowH), new Color(0.45f, 0.8f, 0.4f, a));
-                var icon = Art.Icon(r.Id);
-                if (icon != null) DrawTextureRect(icon, new Rect2(x + 6, y + 2, RowH - 4, RowH - 4), false, new Color(1, 1, 1, a));
+                float slide = Mathf.Clamp((Life - r.T) / 0.15f, 0, 1);          // въезжает справа
                 string plus = $"+{r.N}";
-                DrawString(font, new Vector2(x + RowH + 8, y + 20), plus, HorizontalAlignment.Left, -1, 14, new Color(0.55f, 0.9f, 0.5f, a));
-                float px = font.GetStringSize(plus, HorizontalAlignment.Left, -1, 14).X;
-                DrawString(font, new Vector2(x + RowH + 14 + px, y + 20), r.Name, HorizontalAlignment.Left, W - RowH - 24 - px, 14, new Color(UiTheme.Ink, a));
+                float pw = UiTheme.TextWidth(plus, UiTheme.FontBody, UiTheme.Semi);
+                float nw = Mathf.Min(UiTheme.TextWidth(r.Name, UiTheme.FontSmall), W - RowH - pw - 34);
+                float w = RowH + 10 + pw + 8 + nw + 14;                          // плашка по длине текста, прижата вправо
+                float x = Size.X - w + 40 * (1 - slide);
+                var rect = new Rect2(x, y, w, RowH);
+                UiTheme.DrawRound(this, rect, new Color(UiTheme.PanelBg, 0.62f * a), 12, new Color(UiTheme.PanelBorder, UiTheme.PanelBorder.A * a));
+                UiTheme.DrawIcon(this, r.Id, new Rect2(x + 6, y + 3, RowH - 6, RowH - 6), new Color(1, 1, 1, a));
+                UiTheme.DrawText(this, new Vector2(x + RowH + 10, y + RowH / 2 + 5), plus, UiTheme.FontBody, new Color(UiTheme.Good, a), UiTheme.Semi);
+                UiTheme.DrawText(this, new Vector2(x + RowH + 18 + pw, y + RowH / 2 + 5), r.Name, UiTheme.FontSmall, new Color(UiTheme.Body, a), null, HorizontalAlignment.Left, nw);
             }
         }
     }

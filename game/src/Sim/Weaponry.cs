@@ -130,6 +130,7 @@ namespace Rastvordd.Sim
                 Id = id, AmmoId = ammo, Tier = tier, Mode = mode, Damage = dmg, FireInterval = interval, Magazine = mag, ReloadTime = reload,
                 Range = range, Auto = mode is FireMode.Auto or FireMode.Burst, MaxDurability = dur, Slots = slots, Pellets = pellets,
             };
+            w.EffRange = Gunplay.DefaultEff(kind);
             switch (kind)
             {
                 case "pistol":
@@ -210,21 +211,29 @@ namespace Rastvordd.Sim
             G("weapon_pipeshotgun", "Самопал", Gun("weapon_pipeshotgun", "ammo_12g", 1, FireMode.Single, 12, 0.5f, 1, 2.2f, 14, "shotgun", 120, F, 8), 2, 50, "Труба на 12 калибр: один выстрел дробью в упор. Не крафтится");
             G("weapon_sawnoff", "Обрез", Gun("weapon_sawnoff", "ammo_12g", 1, FireMode.Semi, 12, 0.25f, 2, 2.6f, 15, "shotgun", 250, F, 8), 3, 90, "Двустволка: два выстрела дробью в упор. Только найти");
             G("weapon_nagant", "Наган", Gun("weapon_nagant", "ammo_9mm", 1, FireMode.Semi, 36, 0.38f, 7, 2.4f, 35, "pistol", 400, S | Mz | F), 2, 60, "Револьвер: средняя дистанция, 4 попадания");
-            G("weapon_homesmg", "Самоделка", Gun("weapon_homesmg", "ammo_9mm", 1, FireMode.Auto, 14, 0.11f, 20, 2.4f, 25, "smg", 500, All), 3, 90, "Кустарный ПП: лучший ствол тира 1, вблизи");
+            G("weapon_homesmg", "Самоделка", Gun("weapon_homesmg", "ammo_9mm", 1, FireMode.Auto, 20, 0.11f, 20, 2.4f, 25, "smg", 500, All), 3, 90, "Кустарный ПП: лучший ствол тира 1, вблизи");
             G("weapon_grach", "Грач", Gun("weapon_grach", "ammo_9mm", 2, FireMode.Semi, 20, 0.18f, 17, 1.6f, 35, "pistol", 700, S | Mz | F | Mg), 3, 120, "МР-443: запасной пистолет, быстрая перезарядка");
-            G("weapon_pps43", "ППС-43", Gun("weapon_pps43", "ammo_9mm", 2, FireMode.Auto, 17, 0.10f, 35, 2.3f, 35, "smg", 800, All), 3, 150, "Пистолет-пулемёт: близко, большой магазин");
+            G("weapon_pps43", "ППС-43", Gun("weapon_pps43", "ammo_9mm", 2, FireMode.Auto, 26, 0.10f, 35, 2.3f, 35, "smg", 800, All), 3, 150, "Пистолет-пулемёт: близко, большой магазин");
             G("weapon_svt40", "СВТ-40", Gun("weapon_svt40", "ammo_762", 2, FireMode.Semi, 40, 0.30f, 10, 2.8f, 70, "rifle", 800, All), 3, 160, "Самозарядная винтовка: далеко, 3 попадания");
             G("weapon_mp133", "МР-133", Gun("weapon_mp133", "ammo_12g", 2, FireMode.Pump, 14, 0.85f, 6, 3.5f, 18, "shotgun", 700, Mz | F | St, 8), 3, 160, "Помповое ружьё: в упор убивает с выстрела. Не крафтится");
             G("weapon_akm", "АКМ", Gun("weapon_akm", "ammo_762", 3, FireMode.Auto, 34, 0.11f, 30, 2.5f, 65, "ar", 1000, All), 4, 250, "Автомат Калашникова 7,62: универсал, 3 попадания");
-            var an = Gun("weapon_an94", "ammo_545", 3, FireMode.Burst, 30, 0.2f, 30, 2.4f, 75, "ar", 1000, All);
-            an.Burst = 2; an.BurstInterval = 0.03f; an.RecoilDeg = 1.0f; an.RecoilGrowDeg = 0.08f; an.BloomPerShotDeg = 0.8f; an.BaseSpreadDeg = 1f;   // «Абакан» славится кучностью
+            var an = Gun("weapon_an94", "ammo_545", 3, FireMode.Burst, 32, 0.2f, 30, 2.4f, 75, "ar", 1000, All);
+            an.EffRange = 45; an.Burst = 2; an.BurstInterval = 0.03f; an.RecoilDeg = 1.0f; an.RecoilGrowDeg = 0.08f; an.BloomPerShotDeg = 0.8f; an.BaseSpreadDeg = 1f;   // «Абакан» славится кучностью
             G("weapon_an94", "АН-94 «Абакан»", an, 4, 260, "Автомат с отсечкой: очередь по 2 почти в одну точку (60 урона за раз)");
-            G("weapon_ppsh", "ППШ", Gun("weapon_ppsh", "ammo_9mm", 3, FireMode.Auto, 18, 0.07f, 71, 4.0f, 40, "smg", 1000, All), 4, 230, "Барабан на 71 патрон: близко, огромный темп. Долгая перезарядка");
+            var ppsh = Gun("weapon_ppsh", "ammo_9mm", 3, FireMode.Auto, 24, 0.065f, 71, 4.0f, 40, "smg", 1000, All);
+            ppsh.RecoilDeg = 2.0f; ppsh.RecoilGrowDeg = 0.3f; ppsh.RecoilMaxDeg = 24f;   // ППШ: огромная плотность огня и злая отдача — зажал и не даёшь высунуться
+            G("weapon_ppsh", "ППШ", ppsh, 4, 230, "Барабан на 71 патрон: близко, огромный темп. Долгая перезарядка");
             G("weapon_svd", "СВД", Gun("weapon_svd", "ammo_762", 3, FireMode.Semi, 60, 0.35f, 10, 2.8f, 100, "sniper", 1000, All), 4, 250, "Снайперская винтовка Драгунова: 2 попадания, 100 м");
             G("weapon_saiga12", "Сайга-12", Gun("weapon_saiga12", "ammo_12g", 4, FireMode.Semi, 14, 0.25f, 8, 3.0f, 18, "shotgun", 900, All, 8), 4, 320, "Элита: самозарядный дробовик, «лютая имба» в упор. Только редкие ивенты");
             var mosin = Gun("weapon_mosin", "ammo_762", 4, FireMode.Bolt, 110, 1.2f, 5, 3.5f, 120, "sniper", 900, S | Mz | St);
             G("weapon_mosin", "Мосинка с ПУ", mosin, 4, 300, "Элита: снайперская винтовка с затвором, 120 м. Только редкие ивенты");
-            G("weapon_aps", "АПС", Gun("weapon_aps", "ammo_9mm", 4, FireMode.Auto, 18, 0.07f, 20, 1.8f, 30, "smg", 900, S | Mz | F | Mg), 4, 220, "Элита: автоматический пистолет Стечкина. Только редкие ивенты");
+            G("weapon_aps", "АПС", Gun("weapon_aps", "ammo_9mm", 4, FireMode.Auto, 22, 0.07f, 20, 1.8f, 30, "smg", 900, S | Mz | F | Mg), 4, 220, "Элита: автоматический пистолет Стечкина. Только редкие ивенты");
+
+            // D57: рабочие дистанции и характер стволов (остальное — по классу, Data/Gunplay.cs)
+            void Eff(string id, float eff) => Items.Get(id).Weapon.EffRange = eff;
+            Eff("weapon_svt40", 55); Eff("weapon_svd", 80); Eff("weapon_mosin", 100); Eff("weapon_saiga12", 10); Eff("weapon_mp133", 10);
+            var akm = Items.Get("weapon_akm").Weapon;
+            akm.RecoilDeg = 2.2f; akm.RecoilGrowDeg = 0.3f;   // АКМ: злая отдача — оружие средней дистанции; дальше — АН-94
 
             // обвесы
             void A(string id, string name, AttachmentDef a, float value, string desc)
@@ -245,6 +254,7 @@ namespace Rastvordd.Sim
             A("att_grip", "Рукоять", new AttachmentDef { Slot = AttSlot.Foregrip, Quality = 1, RecoilMul = 0.8f }, 45, "−20% отдачи");
             A("att_torch", "Факел на изоленте", new AttachmentDef { Slot = AttSlot.Foregrip, Quality = 0, Flashlight = true }, 10, "Светит ночью");
             A("att_flashlight", "Тактический фонарь", new AttachmentDef { Slot = AttSlot.Foregrip, Quality = 1, Flashlight = true }, 40, "Светит ночью ярко и далеко");
+            A("att_hip_module", "Модуль стрельбы от бедра", new AttachmentDef { Slot = AttSlot.Foregrip, Quality = 1, HipSpreadMul = 0.7f, AdsSpreadMul = 1.3f }, 70, "Для бегунов: −30% разброса от бедра, но +30% в прицеливании");
             A("att_laser", "ЛЦУ", new AttachmentDef { Slot = AttSlot.Foregrip, Quality = 1, HipSpreadMul = 0.75f }, 70, "Лазер: −25% разброса от бедра");
             A("att_mag_ext", "Увеличенный магазин", new AttachmentDef { Slot = AttSlot.Magazine, Quality = 1, MagMul = 1.5f }, 70, "+50% патронов");
             A("att_mag_ext_army", "Увеличенный магазин армейский", new AttachmentDef { Slot = AttSlot.Magazine, Quality = 2, MagMul = 1.75f }, 120, "+75% патронов");

@@ -53,6 +53,7 @@ namespace Rastvordd.Sim
         public float BloomRecoverDeg;   // градусов в секунду
         public float BulletSpeed;
         public float Range;
+        public float EffRange;             // рабочая дистанция (D57, Data/Gunplay.cs): дальше урон падает
         public bool Auto;
         public float NoiseRadius;
 
@@ -868,6 +869,7 @@ namespace Rastvordd.Sim
         public Vector2 Dir;
         public float Speed;
         public float RangeLeft;
+        public float EffRange, MaxRange;   // для падения урона с дистанцией (D57)
         public float Damage;
         public bool Arrow;
     }

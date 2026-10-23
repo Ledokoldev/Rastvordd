@@ -37,7 +37,7 @@ namespace Rastvordd.Sim
         public const float Accel = 40f;
         public const float NpcRespawnTime = 45f;
         public const float NpcDamageScale = 0.45f;     // охрана РТ бьёт слабее игрока (≈ в 1,7 раза), чтобы двое-трое не стирали за секунду
-        public const float NpcSpreadDeg = 4.5f;         // и стреляет менее кучно: свой разброс поверх ствола
+        public const float NpcSpreadDeg = 7f;          // и стреляет менее кучно: свой разброс поверх ствола
         public const float InteractRange = 1.9f;
         public const float PlaceRange = 3.5f;
         public const float BenchRange = 4f;
@@ -1237,7 +1237,8 @@ namespace Rastvordd.Sim
                 {
                     Id = NextId(), OwnerId = a.Id, Pos = muzzle, Dir = dir,
                     Speed = wd.BulletSpeed * (wd.Pellets > 1 ? 0.92f + 0.16f * (float)Rng.NextDouble() : 1f),
-                    RangeLeft = wd.Range, Arrow = arrow,
+                    RangeLeft = wd.Range, Arrow = arrow, MaxRange = wd.Range,
+                    EffRange = wd.EffRange * (a.Peek > 0.5f ? Gunplay.SightEffMul(w.SightZoom) : 1f),
                     Damage = wd.Damage * (a.Team == Team.Npc ? NpcDamageScale : 1f),
                 });
             }
@@ -1471,7 +1472,8 @@ namespace Rastvordd.Sim
             float hip = 1f + (w.HipSpreadMul - 1f) * (1f - a.Peek), ads = 1f + (w.AdsSpreadMul - 1f) * a.Peek;
             float spread = (w.Def.BaseSpreadDeg + w.Bloom) * hip + MathF.Min(1.5f, moving) * 5f * w.MoveSpreadMul;   // на ходу заметно хуже
             if (w.Def.MaxDurability > 0 && w.Durability < w.Def.MaxDurability * 0.2f) spread *= 1.25f;   // изношенный ствол бьёт хуже
-            return spread * (1f - 0.35f * a.Peek) * ads * (a.Crouching ? 0.75f : 1f);   // в приседе точнее
+            // D57: стойка решает — от бедра стоя сильно хуже, в прицеле точно, в приседе ещё точнее (Data/Gunplay.cs)
+            return spread * (Gunplay.HipK + (Gunplay.AdsK - Gunplay.HipK) * a.Peek) * ads * (a.Crouching ? Gunplay.CrouchK : 1f);
         }
 
         // ---------- взаимодействие (E) ----------
@@ -1893,7 +1895,7 @@ namespace Rastvordd.Sim
                 if (bestT <= 1)
                 {
                     var hitPos = a + (b - a) * bestT;
-                    if (hitActor != null) BulletHit(hitActor, p.Pos, p.Dir, p.Damage, p.OwnerId, hitPos);   // зоны и броня (D47, Armor.cs)
+                    if (hitActor != null) BulletHit(hitActor, p.Pos, p.Dir, p.Damage * Gunplay.Falloff(p.EffRange, p.MaxRange, p.MaxRange - p.RangeLeft + stepLen * bestT), p.OwnerId, hitPos);   // + падение урона с дистанцией (D57)   // зоны и броня (D47, Armor.cs)
                     else
                     {
                         // пули ломают двери и разметку (D22), стены — нет

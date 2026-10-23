@@ -56,7 +56,7 @@ namespace Rastvordd.Sim
             {
                 var wd = Items.Get(g).Weapon;
                 foreach (var (tname, ttier, dress) in targets)
-                    foreach (float dist in TtkDists.Where(d => !TtkQuick || d == ClassDist(wd)))
+                    foreach (float dist in TtkDists)
                         foreach (float head in TtkHeads)
                         {
                             var ttks = new List<float>(); var shotsL = new List<float>(); var hitsL = new List<float>(); int inMag = 0, sumHeads = 0, row2 = 0, row3 = 0;
@@ -104,7 +104,7 @@ namespace Rastvordd.Sim
             {
                 if (ammo <= 0) { time += wd.ReloadTime; ammo = wd.Magazine; bloom = 0; recoil = 0; streak = 0; inMag = false; }
                 // выстрел: разброс в прицеле (как CurrentSpreadDeg: ×0,65 в прицеле), блум, отдача
-                float spread = (wd.BaseSpreadDeg + bloom) * 0.65f;
+                float spread = (wd.BaseSpreadDeg + bloom) * Gunplay.AdsK;
                 float rr = ((float)rng.NextDouble() + (float)rng.NextDouble() - 1f) * 0.5f;
                 float baseAng = recoil + rr * spread;
                 int pellets = Math.Max(1, wd.Pellets);
@@ -118,7 +118,7 @@ namespace Rastvordd.Sim
                     float rz = (float)rng.NextDouble() * 100f;
                     var zone = rz < headPct ? HitZone.Head : rz < headPct + Headshots.LimbsBase + Headshots.LimbsAim ? HitZone.Limbs : HitZone.Torso;
                     if (zone == HitZone.Head) { heads++; run++; headRun = Math.Max(headRun, run); } else run = 0;
-                    float raw = wd.Damage * Armor_ZoneMul(zone);
+                    float raw = wd.Damage * Gunplay.Falloff(wd.EffRange, wd.Range, dist) * Armor_ZoneMul(zone);
                     float prot = Clothing.Zone(target, zone, 0);
                     if (zone == HitZone.Torso && Clothing.ActivePlate(target, 0) is ItemSlot plate)
                     {

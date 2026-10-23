@@ -519,6 +519,31 @@ namespace Rastvordd.Client
             var guns = new List<(string, System.Action)>();
             foreach (var g in Weaponry.GunsByPower) { var id = g; guns.Add((Items.Name(id), () => SbRack(id))); }
             p.Buttons(guns.ToArray());
+            // пресеты: ствол + обвесы под рабочую дистанцию (D57) — быстро сравнить характер стволов
+            p.Caption("Пресеты (ствол + обвесы)");
+            var presets = new (string name, string gun, string[] atts)[]
+            {
+                ("ППШ — штурм в упор", "weapon_ppsh", new[] { "att_grip" }),
+                ("ППС-43 + модуль бедра", "weapon_pps43", new[] { "att_hip_module" }),
+                ("АКМ — средняя, коллиматор", "weapon_akm", new[] { "att_reddot", "att_compensator_army", "att_stock_tac" }),
+                ("АН-94 — дальняя, 2×", "weapon_an94", new[] { "att_scope2x", "att_grip", "att_stock_tac" }),
+                ("СВД — 4×", "weapon_svd", new[] { "att_scope4x", "att_compensator_army" }),
+                ("Мосинка — 4×", "weapon_mosin", new[] { "att_scope4x" }),
+                ("Сайга — в упор", "weapon_saiga12", new[] { "att_reddot" }),
+            };
+            var pb = new List<(string, System.Action)>();
+            foreach (var pr in presets) { var x = pr; pb.Add((x.name, () => SbPreset(x.gun, x.atts))); }
+            p.Buttons(pb.ToArray());
+        }
+
+        void SbPreset(string gun, string[] atts)
+        {
+            SbRack(gun);
+            var me = _server.World.Find(_myId);
+            if (me?.Belt[me.Current]?.State is not WeaponState st) return;
+            for (int k = 0; k < st.Att.Length; k++) st.Att[k] = null;
+            foreach (var at in atts) _server.World.Attach(me, st, at, out _);
+            st.Ammo = st.MagSize;
         }
 
         void SbFillBuild()

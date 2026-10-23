@@ -587,8 +587,11 @@ namespace Rastvordd.Sim
                 else
                 {
                     fire = true;
-                    if (st.Cooldown <= 0 && st.ReloadLeft <= 0 && ++_burstShots >= (d > 25 ? 3 : d > 12 ? 4 : 6) + _rng.Next(2))
-                    { _burstShots = 0; _burstPause = 0.18f + (float)_rng.NextDouble() * (d > 25 ? 0.3f : 0.15f); }
+                    // экономно, как человек: вплотную 4–5, средне 3, далеко (за рабочей дальностью) — по 2; пауза растёт с дистанцией
+                    float eff = st.Def.EffRange > 0 ? st.Def.EffRange : 25f;
+                    int len = d < 10 ? 4 + _rng.Next(2) : d < eff ? 3 : 2;
+                    if (st.Cooldown <= 0 && st.ReloadLeft <= 0 && ++_burstShots >= len)
+                    { _burstShots = 0; _burstPause = 0.22f + d * 0.008f + (float)_rng.NextDouble() * 0.2f; }
                 }
             }
             else fire = _trig = !_trig;

@@ -421,14 +421,13 @@ namespace Rastvordd.Sim
 
         /// <summary>
         /// Что на самом деле поставит План (людям): курсор на пустом дверном проёме — дверь;
-        /// выбран фундамент (любой), а курсор на уже стоящем полу — стена на ближайшем краю.
+        /// остальное — ровно то, что выбрано (стена вместо фундамента больше не подставляется).
         /// </summary>
         public StructKind EffectivePiece(Actor a, Vector2 at)
         {
             var k = a.BuildPiece;
             if (a.IsBot) return k;
             if (NearestFloorEdge(at, 1.0f, out _, out _, out long key, out _) && _edges.TryGetValue(key, out var e) && e.Kind == StructKind.Doorway && !_doors.ContainsKey(key)) return StructKind.Door;
-            if (Building.IsFloor(k) && FloorAt(at) != null) return StructKind.Wall;
             return k;
         }
 

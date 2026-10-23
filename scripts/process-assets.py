@@ -21,6 +21,10 @@ PIXEL_ICON = 64     # размер иконок и оружия в пиксел�
 PALETTE = 48        # цветов на спрайт (если нет общей палитры)
 GLOBAL_COLORS = 128 # общая палитра мира: всё приводится к одному набору цветов
 _global_palette = None
+import importlib.util as _ilu
+_rs = _ilu.spec_from_file_location("restyle", str(pathlib.Path(__file__).with_name("restyle-assets.py")))
+_restyle = _ilu.module_from_spec(_rs); _rs.loader.exec_module(_restyle)
+_RESTYLE_SKIP = _restyle.SKIP_DIRS
 
 
 def clean(im: Image.Image) -> Image.Image:
@@ -322,6 +326,8 @@ def main() -> None:
         if a.get("soft"):
             # полупрозрачная декаль (пыль, грязь, пятна): ложится на пол, а не клеится сверху
             px.putalpha(px.getchannel("A").point(lambda v, k=a["soft"]: int(v * k)))
+        if a["cat"] not in _RESTYLE_SKIP:
+            px = _restyle.cool(px, "B")   # общий холодный цвет мира (scripts/restyle-assets.py, вариант B): без желтизны
         for base, im in ((ROOT / "assets" / "hd", hd), (ROOT / "game" / "art", px)):
             dst = base / a["cat"] / f"{a['id']}.png"
             dst.parent.mkdir(parents=True, exist_ok=True)

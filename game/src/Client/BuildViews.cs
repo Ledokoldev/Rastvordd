@@ -461,3 +461,48 @@ namespace Rastvordd.Client
         }
     }
 }
+
+namespace Rastvordd.Client
+{
+    /// <summary>Полигон, F4: хитбоксы как их видит пуля. Красное — останавливает пулю, жёлтое — низкое (пуля проходит поверх), голубое — тела.</summary>
+    public partial class HitboxOverlay : Node2D
+    {
+        public World W;
+        public int MeId;
+
+        public override void _Process(double delta) => QueueRedraw();
+
+        public override void _Draw()
+        {
+            if (W?.Find(MeId) is not Actor me) return;
+            const float R = 45f;
+            // пуля летит на высоте ствола — рамки там же, где её видно на экране
+            DrawSetTransform(new Vector2(0, -Iso.H(Hitbox.GunH)), 0, Vector2.One);
+            var stop = new Color(1f, 0.25f, 0.2f, 0.9f); var low = new Color(1f, 0.85f, 0.2f, 0.9f); var body = new Color(0.35f, 0.85f, 1f, 0.9f);
+            void Box(System.Numerics.Vector2 min, System.Numerics.Vector2 max, Color c)
+            {
+                var r = new Rect2(Iso.Px(min), Iso.Px(max) - Iso.Px(min));
+                DrawRect(r, new Color(c, 0.12f));
+                DrawRect(r, c, false, 1.5f);
+            }
+            foreach (var w in W.Walls)
+            {
+                if (w.PassBullets || System.Numerics.Vector2.Distance(System.Numerics.Vector2.Clamp(me.Pos, w.Wall.Min, w.Wall.Max), me.Pos) > R) continue;
+                Box(w.Wall.Min, w.Wall.Max, w.Wall.Height >= Hitbox.GunH ? stop : low);
+            }
+            foreach (var n in W.NodesInRadius(me.Pos, R, new System.Collections.Generic.List<ResourceNode>()))
+            {
+                var c = n.Kind is NodeKind.Tree or NodeKind.Barrel ? stop : low;
+                DrawArc(Iso.Px(n.Pos), n.Radius * Iso.PPM, 0, Mathf.Tau, 24, c, 1.5f, true);
+            }
+            foreach (var d in W.Deployables)
+                if (d.Solid && System.Numerics.Vector2.Distance(d.Pos, me.Pos) < R) Box(d.Min, d.Max, low);
+            foreach (var a in W.Actors)
+            {
+                if (a.Dead || a.Spectator || System.Numerics.Vector2.Distance(a.Pos, me.Pos) > R) continue;
+                var (min, max) = Hitbox.Body(a);
+                Box(min, max, body);
+            }
+        }
+    }
+}

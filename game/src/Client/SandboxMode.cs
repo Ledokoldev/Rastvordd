@@ -63,6 +63,7 @@ namespace Rastvordd.Client
         bool _sbInstantCraft = true;
         Deployable _sbClaim;
         SVec _sbBuildC;               // стрельбище: центр стройплощадки
+        HitboxOverlay _sbBoxes;       // F4: хитбоксы
         bool _sbAimBuild; float _sbBuildT;             // стрельбище: сейчас набор строителя (F3)
 
         /// <summary>До того, как клиент возьмёт карту: место, укрытия (стены карты), мишени. Ботов-игроков вайпа нет.</summary>
@@ -678,6 +679,14 @@ namespace Rastvordd.Client
             if (_sbMode == "lift" && k == Key.F3) { _sbLift.Start(15); return true; }
             if (_sbMode == "aim" && k == Key.F3) { SbAimToggleBuild(); return true; }
             if (k == Key.F2) { _sbPanel.SetExpanded(!_sbPanel.Expanded); return true; }
+            if (k == Key.F4)
+            {
+                // хитбоксы, как их видит пуля
+                if (_sbBoxes == null) { _sbBoxes = new HitboxOverlay { W = _server.World, MeId = _myId, ZIndex = 50 }; _world.AddChild(_sbBoxes); }
+                else _sbBoxes.Visible = !_sbBoxes.Visible;
+                _hud.Toast(_sbBoxes.Visible ? "Хитбоксы: красное — стоп пуле, жёлтое — пуля поверх, голубое — тела (F4 — скрыть)" : "Хитбоксы скрыты");
+                return true;
+            }
             if (_sbMode == "sound") return SoundKey(k);
             return false;
         }

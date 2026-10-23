@@ -1139,7 +1139,7 @@ namespace Rastvordd.Sim
             if (World.CanSeeActor(viewer, target, World.ViewRange(viewer), World.ViewCone(viewer))) return true;
             // выстрел выдаёт стрелка, если между нами нет стен
             bool shotRecently = World.Time - target.LastShotTime < 0.6f;
-            return shotRecently && Vector2.Distance(viewer.Pos, target.Pos) < 60 && World.HasLineOfSight(viewer.Pos, target.Pos);
+            return shotRecently && Vector2.Distance(viewer.Pos, target.Pos) < 60 && World.HasLineOfSight(viewer.Pos, target.Pos) && !World.LowCoverBetween(viewer, target);
         }
 
         // память тумана войны: что каждый игрок видел из построек и установленного

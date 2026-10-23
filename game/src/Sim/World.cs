@@ -756,11 +756,27 @@ namespace Rastvordd.Sim
         public bool CanSeeActor(Actor viewer, Actor target, float range, float coneDeg)
         {
             if (!CanSee(viewer, target.Pos, range, coneDeg)) return false;
-            if (!target.Crouching || Vector2.Distance(viewer.Pos, target.Pos) < 2.5f) return true;
-            foreach (var w in WallsAlong(viewer.Pos, target.Pos))
-                if (!w.Wall.BlocksVision && Geo.SegmentAabb(viewer.Pos, target.Pos, w.Wall.Min, w.Wall.Max, out _)) return false;
-            return true;
+            if (Vector2.Distance(viewer.Pos, target.Pos) < 2.5f) return true;
+            return !LowCoverBetween(viewer, target);
         }
+
+        /// <summary>
+        /// Низкое укрытие (блок, ящик, мешки) вплотную (≤ 2,5 м) от точки from на линии к to. Единое правило D56:
+        /// присевший за таким укрытием — как за стеной: не видит, не виден, его пули бьют в укрытие и чужие тоже. Стоя — открыт.
+        /// </summary>
+        public bool LowCoverNear(Vector2 from, Vector2 to)
+        {
+            foreach (var w in WallsAlong(from, to))
+            {
+                if (w.Wall.BlocksVision || w.PassBullets) continue;
+                if (Geo.SegmentAabb(from, to, w.Wall.Min, w.Wall.Max, out _) && Vector2.Distance(Vector2.Clamp(from, w.Wall.Min, w.Wall.Max), from) <= Hitbox.CoverReach)
+                    return true;
+            }
+            return false;
+        }
+
+        public bool LowCoverBetween(Actor a, Actor b) =>
+            (a.Crouching && LowCoverNear(a.Pos, b.Pos)) || (b.Crouching && LowCoverNear(b.Pos, a.Pos));
 
         /// <summary>Видит ли наблюдатель цель: конус обзора, дальность, стены. Вплотную чувствуется всегда.</summary>
         public bool CanSee(Actor viewer, Vector2 target, float range = 45f, float coneDeg = 120f)

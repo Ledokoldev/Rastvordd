@@ -509,7 +509,7 @@ namespace Rastvordd.Sim
                 _phaseTime += World.Dt;
                 var step = _peekPos - _me.Pos;
                 cmd.Move = step.Length() > 0.2f ? Vector2.Normalize(step) : Vector2.Zero;
-                cmd.Crouch = st.Def.Auto;   // калаш — из приседа, точнее
+                cmd.Crouch = st.Def.Auto && !_w.LowCoverNear(_me.Pos, t.Pos);   // калаш — из приседа, точнее; но не из-за низкого укрытия — оттуда не видно
                 int before = st.Ammo;
                 if (step.Length() < 0.6f) Shoot(t, gun, st, d, sees, ref cmd, "из укрытия");
                 else { cmd.Aim = known; cmd.Peek = 1; }

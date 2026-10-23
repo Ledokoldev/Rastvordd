@@ -1924,7 +1924,8 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             var dir = new Vector2(_aim.X - selfM.X, _aim.Y - selfM.Y);
             float range = (50 + 30 * _peek) * (1f - 0.4f * World.NightFactorAt(_forcedDay ?? _cur.DayTime));
             if (_rays == null) { _rays = new VisionRays(_map); if (_build != null) _rays.Dynamic.AddRange(_build.Occluders); }
-            _rays.Update(selfM, range, _cur.Nodes);
+            bool crouched = _cur.Actors.Find(x => x.Id == _myId).Crouching;
+            _rays.Update(selfM, range, _cur.Nodes, crouched);   // в приседе низкое укрытие вплотную закрывает обзор
             VisionFx.Update(_selfPx, dir.LengthSquared() > 0.01f ? dir.Normalized() : Vector2.Right,
                             Mathf.Cos(Mathf.DegToRad((130 - 70 * _peek) * 0.5f)), range, _rays.Texture, !s.Dead && !_spectate);   // наблюдатель видит всё
 

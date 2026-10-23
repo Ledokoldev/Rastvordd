@@ -19,6 +19,7 @@ namespace Rastvordd.Client
         public readonly ImageTexture Texture;
         readonly List<WallInfo> _walls = new();
         readonly List<(SVec c, float r)> _circles = new();
+        readonly List<WallInfo> _low = new();   // низкие укрытия: в приседе вплотную (≤ 2,5 м) закрывают обзор
         /// <summary>Стены построек (меняются по ходу игры).</summary>
         public readonly List<WallInfo> Dynamic = new();
 
@@ -26,10 +27,11 @@ namespace Rastvordd.Client
         {
             foreach (var w in map.Walls)
                 if (w.Height >= 2f) _walls.Add(w);
+                else if (w.Height > 0.3f) _low.Add(w);
             Texture = ImageTexture.CreateFromImage(_img);
         }
 
-        public void Update(SVec origin, float range, List<NodeSnap> nodes)
+        public void Update(SVec origin, float range, List<NodeSnap> nodes, bool crouch = false)
         {
             // только то, что может попасть в радиус
             var nearWalls = new List<WallInfo>();
@@ -39,6 +41,10 @@ namespace Rastvordd.Client
                     var c = SVec.Clamp(origin, w.Min, w.Max);
                     if (w.Height >= 2f && SVec.Distance(c, origin) < range) nearWalls.Add(w);
                 }
+            var nearLow = new List<WallInfo>();
+            if (crouch)
+                foreach (var w in _low)
+                    if (SVec.Distance(SVec.Clamp(origin, w.Min, w.Max), origin) <= Hitbox.CoverReach) nearLow.Add(w);
             _circles.Clear();
             foreach (var n in nodes)
                 if (n.Kind == NodeKind.Tree && SVec.Distance(n.Pos, origin) < range + 1) _circles.Add((n.Pos, n.Radius * 0.9f));
@@ -53,6 +59,8 @@ namespace Rastvordd.Client
                     if (RayAabb(origin, dir, w.Min, w.Max, out float t) && t < best) { best = t; lift = WallLift; }
                 foreach (var (c, r) in _circles)
                     if (RayCircle(origin, dir, c, r, out float t) && t < best) { best = t; lift = TreeLift; }
+                foreach (var w in nearLow)
+                    if (RayAabb(origin, dir, w.Min, w.Max, out float t) && t < best) { best = t; lift = WallLift; }
                 _img.SetPixel(i, 0, new Color(best + lift, 0, 0));
             }
             Texture.Update(_img);

@@ -1908,8 +1908,7 @@ namespace Rastvordd.Sim
                 {
                     if (act.Dead || act.Spectator || act.Id == p.OwnerId) continue;
                     if (owner != null && owner.Team == Team.Npc && act.Team == Team.Npc) continue;
-                    var (bmin, bmax) = Hitbox.Body(act);
-                    if (Geo.SegmentAabb(a, b, bmin, bmax, out float t) && t < bestT)
+                    if (Hitbox.Hit(act, a, b, out float t) && t < bestT)   // по силуэту: голова, корпус с руками, ноги
                     {
                         // присел сразу за низким укрытием (≤ 2,5 м) — пулю ловит укрытие
                         var at = a + (b - a) * t;

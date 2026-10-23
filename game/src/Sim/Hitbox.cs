@@ -15,6 +15,31 @@ namespace Rastvordd.Sim
         public const float HalfWidth = 0.32f;     // полуширина фигуры, м
         public const float CoverReach = 2.5f;     // присевший в пределах 2,5 м за низким укрытием — защищён
 
+        // силуэт (D56+): голова, корпус с руками, ноги — доли роста снизу вверх и полуширины, м (по фигуре рига)
+        static readonly (float z0, float z1, float half)[] Parts = { (0f, 0.46f, 0.2f), (0.46f, 0.84f, 0.32f), (0.84f, 1.04f, 0.15f) };   // голова с каской чуть выше роста
+
+        /// <summary>Пуля a→b задевает силуэт человека: доля пути t до первой части. Мёртвый — одна плоская коробка.</summary>
+        public static bool Hit(Actor a, Vector2 p0, Vector2 p1, out float t)
+        {
+            t = 2;
+            if (a.Dead) { var (mn, mx) = Body(a); return Geo.SegmentAabb(p0, p1, mn, mx, out t); }
+            bool any = false;
+            foreach (var (min, max) in Silhouette(a))
+                if (Geo.SegmentAabb(p0, p1, min, max, out float tt) && tt < t) { t = tt; any = true; }
+            return any;
+        }
+
+        /// <summary>Части силуэта на земле (как их видит пуля на высоте ствола).</summary>
+        public static System.Collections.Generic.IEnumerable<(Vector2 min, Vector2 max)> Silhouette(Actor a)
+        {
+            float h = a.Crouching ? CrouchH : StandH;
+            foreach (var (z0, z1, half) in Parts)
+            {
+                float yTop = a.Pos.Y + (GunH - z1 * h) * HS, yBot = a.Pos.Y + (GunH - z0 * h) * HS;
+                yield return (new Vector2(a.Pos.X - half, yTop), new Vector2(a.Pos.X + half, yBot));
+            }
+        }
+
         public static (Vector2 min, Vector2 max) Body(Actor a)
         {
             float h = a.Dead ? DeadH : a.Crouching ? CrouchH : StandH;

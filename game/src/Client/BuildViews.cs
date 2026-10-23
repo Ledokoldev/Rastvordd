@@ -519,8 +519,7 @@ namespace Rastvordd.Client
             foreach (var a in W.Actors)
             {
                 if (a.Dead || a.Spectator || System.Numerics.Vector2.Distance(a.Pos, me.Pos) > R) continue;
-                var (min, max) = Hitbox.Body(a);
-                Box(min, max, body);
+                foreach (var (min, max) in Hitbox.Silhouette(a)) Box(min, max, body);
             }
         }
     }

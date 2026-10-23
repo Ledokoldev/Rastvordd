@@ -359,7 +359,9 @@ namespace Rastvordd.Client
             else
             {
                 float aimUp = s.AimDown;
-                grip = shNear + new Vector2(2, 7 - 6 * aimUp) + fwd * (3 + 2 * aimUp);   // у пояса → у щеки
+                // хват перед грудью: анфас/спиной — ближе к середине корпуса, в профиль — у плеча; у пояса → у щеки
+                float face = Mathf.Abs(fwd.Y);
+                grip = shNear + new Vector2(2 - 8 * face, 7 - 6 * aimUp - 2 * face) + new Vector2(fwd.X, fwd.Y * 0.5f) * (3 + 2 * aimUp);
                 if (s.Sprint) { down = 0.9f; grip += new Vector2(-1, 3); }              // бег: ствол опущен
                 if (s.Reload >= 0)
                 {
@@ -378,12 +380,22 @@ namespace Rastvordd.Client
                     wAng = Mathf.Atan2(td.Y, td.X) + Mathf.Sin(s.Breath * 1.3f) * 0.04f;
                 }
             }
+            // ствол лежит горизонтально: в виде 3/4 глубина сжата вдвое — к камере/от камеры он смотрит не прямо вниз
+            float proj = 1f;
+            if (hasItem && !(s.Swing >= 0 && IsTool(held)) && held != "weapon_torch")
+            {
+                // к камере ствол чуть наискось через корпус (как «на грудь»), а не отвесно вдоль ноги
+                float cant = Mathf.Max(0, fwd.Y) * Mathf.Max(0, Mathf.Abs(fwd.Y) - Mathf.Abs(fwd.X)) * 0.6f;
+                var g = new Vector2(Mathf.Cos(wAng + cant), Mathf.Sin(wAng + cant) * 0.5f);
+                wAng = Mathf.Atan2(g.Y, g.X);   // картинка ствола одна на все ракурсы: только поворот, без сжатия
+            }
+            float lenP = len * proj;
             var wDir = new Vector2(Mathf.Cos(wAng), Mathf.Sin(wAng));
             bool toolGrip = hasItem && IsTool(held) && held != "weapon_spear";
             float supportAt = toolGrip ? (toolSlide >= 0 ? Mathf.Lerp(0.1f, 0.38f, toolSlide) : 0.25f) : 0.5f;
-            Vector2 support = TwoHanded(held ?? "") ? grip + wDir * len * supportAt : shFar + new Vector2(1, 12) + fwd * 1.5f;
+            Vector2 support = TwoHanded(held ?? "") ? grip + wDir * lenP * (toolGrip ? supportAt : 0.62f) : shFar + new Vector2(1, 12) + fwd * 1.5f;
             if (s.Reload >= 0 && s.Reload > 0.3f && s.Reload < 0.7f)
-                support = grip + wDir * len * 0.25f + new Vector2(0, 6);     // вторая кисть за магазином
+                support = grip + wDir * lenP * 0.25f + new Vector2(0, 6);     // вторая кисть за магазином
             if (!hasItem) { grip = shNear + new Vector2(1, 12) + fwd * 1.5f; support = shFar + new Vector2(1, 12) - fwd * 1.5f; }
             if (s.Dead) { grip = shNear + new Vector2(9, -7); support = shFar + new Vector2(-9, -5); }   // руки раскинуты
 
@@ -397,7 +409,7 @@ namespace Rastvordd.Client
                 var tex = Art.HeldSprite(held);
                 if (tex == null) return;
                 float sc = len / (tex.GetWidth() * 0.9f);
-                var center = grip + wDir * len * (toolGrip ? 0.42f : 0.3f);   // инструмент держат за конец рукояти
+                var center = grip + wDir * lenP * (toolGrip ? 0.42f : 0.3f);   // инструмент держат за конец рукояти
                 var p = center + RigView.Feet;
                 float rot = wAng;
                 if (_mirror) { p.X = RigView.VW - p.X; rot = -rot; }
@@ -405,7 +417,7 @@ namespace Rastvordd.Client
                 DrawSetTransform(p.Round(), _mirror ? Mathf.Pi - wAng : wAng, new Vector2(sc, _mirror ? -sc : sc));
                 DrawTexture(tex, -tex.GetSize() / 2);
 
-                var tip = center + wDir * len * 0.47f + RigView.Feet;
+                var tip = center + wDir * lenP * 0.47f + RigView.Feet;
                 if (_mirror) tip.X = RigView.VW - tip.X;
                 TipPx = tip;
                 if (held == "weapon_torch") DrawFlame(tip.Round());
@@ -496,6 +508,14 @@ namespace Rastvordd.Client
                 DrawWeapon();
                 DrawArm(armNear, shNear);
                 DrawBody();
+            }
+            else if (fwd.Y > 0.35f && hasItem && TwoHanded(held))
+            {
+                // к камере: оружие перед грудью, обе руки на нём — поверх корпуса
+                DrawBody();
+                DrawWeapon();
+                DrawArm(armFar, shFar);
+                DrawArm(armNear, shNear);
             }
             else
             {

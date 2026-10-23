@@ -209,7 +209,7 @@ namespace Rastvordd.Client
 
         static void SbTopUpAmmo(Actor me)
         {
-            foreach (var (id, n) in SbAmmo) { int have = me.Count(id); if (have < n) me.Add(id, n - have); }
+            foreach (var (id, n) in SbAmmo) { int have = me.Count(id); if (have < n) me.AddUpTo(id, n - have); }
         }
 
         /// <summary>Ствол со стойки — в текущую ячейку пояса (старый — убрать), полный магазин.</summary>
@@ -290,7 +290,7 @@ namespace Rastvordd.Client
         void AimTick(World w, Actor me)
         {
             if (_sbAimBuild && (_sbBuildT -= World.Dt) <= 0) { _sbBuildT = 2f; SbRefillBuild(); }
-            if ((_sbRefillT -= World.Dt) <= 0) { _sbRefillT = 1f; if (_sbInfAmmo && !me.Dead) SbTopUpAmmo(me); }
+            if ((_sbRefillT -= World.Dt) <= 0) { _sbRefillT = 1f; if (_sbInfAmmo && !me.Dead && !_sbAimBuild) SbTopUpAmmo(me); }
             // смерть — сразу снова на рубеже (через 1,5 с, чтобы увидеть)
             if (me.Dead)
             {
@@ -423,7 +423,7 @@ namespace Rastvordd.Client
             foreach (var (id, n) in new[] { ("wood", 3000), ("stone", 3000), ("metal_fragments", 2000), ("scrap", 500), ("cloth", 100), ("lock_code", 4) })
             {
                 int have = me.Count(id);
-                if (have < n) me.Add(id, n - have);
+                if (have < n) me.AddUpTo(id, n - have);   // только сколько влезет: без сумок на землю
             }
             foreach (var d in w.Deployables)
                 if (d.Kind == DeployKind.Claim && d.Auth.Contains(_myId))

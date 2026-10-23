@@ -619,7 +619,7 @@ namespace Rastvordd.Sim
             Deployable claim = null;
             foreach (var d in Deployables) if (d.Kind == DeployKind.Claim && d.Id == s.ClaimId) { claim = d; break; }
             claim ??= ClaimAt(s.IsFloor ? Building.CellOf(s.Center) : EdgeOwnerCell(s.A, s.B));
-            return claim != null && claim.Auth.Contains(a.Id);
+            return claim == null || claim.Auth.Contains(a.Id);   // без шкафа — может любой (как в Расте)
         }
 
         /// <summary>Возврат за снос: половина цены текущего уровня (минимум 1 каждого ресурса).</summary>
@@ -635,7 +635,7 @@ namespace Rastvordd.Sim
         {
             if (s == null || !Structures.Contains(s)) return "постройки нет";
             if (Vector2.Distance(a.Pos, s.Center) > HammerWheelRange) return "далеко";
-            if (!HasBuildPrivilege(a, s)) return "нет права стройки — впишись в шкаф";
+            if (!HasBuildPrivilege(a, s)) return "чужой шкаф — впишись в него";
             if (op >= 1 && op <= Building.MaxTier)
             {
                 if (op <= s.Tier) return op == s.Tier ? "уже этот уровень" : "ниже текущего уровня";
@@ -782,7 +782,7 @@ namespace Rastvordd.Sim
 
         // ---------- межевой столб: зона, бюджет, содержание (комбинация Астры, docs/gpt/05-stability.md) ----------
 
-        public const int ClaimRadius = 8;        // клеток по d∞
+        public const int ClaimRadius = 8;        // клеток: зона — круг (по центрам клеток, di²+dj² ≤ R²+R)
         public const int ClaimGap = 21;          // минимум между столбами
         public const float BudgetMax = 360, FoundMax = 160, DoorMax = 48;
         const float UpkeepPerHour = 0.04f;       // доля цены текущих элементов
@@ -792,11 +792,14 @@ namespace Rastvordd.Sim
 
         static int CellDist((int i, int j) a, (int i, int j) b) => Math.Max(Math.Abs(a.i - b.i), Math.Abs(a.j - b.j));
 
+        /// <summary>Клетка в круглой зоне шкафа (смещение от клетки шкафа в клетках).</summary>
+        public static bool InClaimZone(int di, int dj) => di * di + dj * dj <= ClaimRadius * ClaimRadius + ClaimRadius;
+
         /// <summary>Столб, в зону которого попадает клетка (зоны не пересекаются).</summary>
         public Deployable ClaimAt((int i, int j) cell)
         {
             foreach (var d in Deployables)
-                if (d.Kind == DeployKind.Claim && CellDist(ClaimCell(d), cell) <= ClaimRadius) return d;
+                if (d.Kind == DeployKind.Claim && ClaimCell(d) is var c && InClaimZone(cell.i - c.Item1, cell.j - c.Item2)) return d;
             return null;
         }
 
@@ -859,7 +862,7 @@ namespace Rastvordd.Sim
         {
             why = "";
             claim = ClaimAt(cell);
-            if (claim == null) { why = "нужен шкаф рядом (зона 8 клеток)"; return false; }
+            if (claim == null) return true;   // шкаф не обязателен: без него строить можно, он — приват (чужим нельзя, лимиты базы)
             if (!claim.Auth.Contains(a.Id)) { why = "чужая зона"; return false; }
             var (b, found, doors) = ClaimLoad(claim);
             float add = kind == StructKind.Foundation ? 1 : kind == StructKind.Door ? 3.5f : 0.5f;   // дверь заменяет 0,5 проёма на 4; треугольник — полфундамента

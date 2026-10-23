@@ -255,10 +255,24 @@ namespace Rastvordd.Client
             if (_zone)
             {
                 float c = Building.Cell * Iso.PPM;
-                var z = new Rect2((_zoneCell.i - World.ClaimRadius) * c, (_zoneCell.j - World.ClaimRadius) * c, (2 * World.ClaimRadius + 1) * c, (2 * World.ClaimRadius + 1) * c);
                 var zc = new Color(1f, 0.85f, 0.4f, 0.55f);
-                for (float x = z.Position.X; x < z.End.X; x += 12) { DrawLine(new Vector2(x, z.Position.Y), new Vector2(Mathf.Min(x + 6, z.End.X), z.Position.Y), zc, 1); DrawLine(new Vector2(x, z.End.Y), new Vector2(Mathf.Min(x + 6, z.End.X), z.End.Y), zc, 1); }
-                for (float y = z.Position.Y; y < z.End.Y; y += 12) { DrawLine(new Vector2(z.Position.X, y), new Vector2(z.Position.X, Mathf.Min(y + 6, z.End.Y)), zc, 1); DrawLine(new Vector2(z.End.X, y), new Vector2(z.End.X, Mathf.Min(y + 6, z.End.Y)), zc, 1); }
+                // зона шкафа — круг по клеткам: пунктир по внешним краям клеток зоны
+                void Dash(Vector2 p0, Vector2 p1)
+                {
+                    float len = p0.DistanceTo(p1);
+                    for (float t = 0; t < len; t += 12) DrawLine(p0.Lerp(p1, t / len), p0.Lerp(p1, Mathf.Min(t + 6, len) / len), zc, 1);
+                }
+                int R = World.ClaimRadius;
+                for (int di = -R - 1; di <= R + 1; di++)
+                    for (int dj = -R - 1; dj <= R + 1; dj++)
+                    {
+                        if (!World.InClaimZone(di, dj)) continue;
+                        float x0 = (_zoneCell.i + di) * c, y0 = (_zoneCell.j + dj) * c;
+                        if (!World.InClaimZone(di, dj - 1)) Dash(new Vector2(x0, y0), new Vector2(x0 + c, y0));
+                        if (!World.InClaimZone(di, dj + 1)) Dash(new Vector2(x0, y0 + c), new Vector2(x0 + c, y0 + c));
+                        if (!World.InClaimZone(di - 1, dj)) Dash(new Vector2(x0, y0), new Vector2(x0, y0 + c));
+                        if (!World.InClaimZone(di + 1, dj)) Dash(new Vector2(x0 + c, y0), new Vector2(x0 + c, y0 + c));
+                    }
             }
             if (Building.IsFloor(_kind))
             {

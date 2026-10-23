@@ -847,13 +847,13 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _recoilLastShot = now;
             var me = _cur?.Self; if (me == null) return;
             bool crouch = Input.IsPhysicalKeyPressed(Key.Alt);
-            float deg = (wd.RecoilDeg + wd.RecoilGrowDeg * _recoilStreak) * (crouch ? 0.7f : 1f) * RecoilFeel;
+            float deg = Mathf.Min(wd.RecoilDeg + wd.RecoilGrowDeg * _recoilStreak, wd.RecoilDeg * 1.6f) * (crouch ? 0.7f : 1f) * RecoilFeel;   // рост за очередь ограничен
             _recoilStreak++;
             _recoilDebt += deg;
             RotateCursor(-deg);
         }
 
-        const float RecoilFeel = 0.8f;   // общая сила увода курсора (подкрутить по ощущениям)
+        const float RecoilFeel = 0.45f;   // общая сила увода курсора (подкрутить по ощущениям)
 
         /// <summary>Повернуть курсор вокруг своего персонажа: «+» — вниз по экрану, «−» — вверх.</summary>
         void RotateCursor(float upDeg)
@@ -874,7 +874,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             if (Time.GetTicksMsec() / 1000.0 - _recoilLastShot < 0.2) return;
             float step = Mathf.Min(_recoilDebt, (float)delta * 25f);
             _recoilDebt -= step;
-            RotateCursor(step * 0.5f);   // возвращаем только половину — остальное тянешь сам
+            RotateCursor(step * 0.7f);   // возвращаем 70% — остальное тянешь сам
             if (_recoilDebt < 0.05f) _recoilDebt = 0;
         }
 

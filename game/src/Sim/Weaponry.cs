@@ -209,20 +209,20 @@ namespace Rastvordd.Sim
             G("weapon_crossbow", "Арбалет", Gun("weapon_crossbow", "ammo_bolt", 0, FireMode.Single, 65, 0.5f, 1, 2.2f, 45, "crossbow", 400, S | F), 3, 45, "Тихий и мощный: болт с двух попаданий. Долго взводится");
             G("weapon_pipeshotgun", "Самопал", Gun("weapon_pipeshotgun", "ammo_12g", 1, FireMode.Single, 12, 0.5f, 1, 2.2f, 14, "shotgun", 120, F, 8), 2, 50, "Труба на 12 калибр: один выстрел дробью в упор. Не крафтится");
             G("weapon_sawnoff", "Обрез", Gun("weapon_sawnoff", "ammo_12g", 1, FireMode.Semi, 12, 0.25f, 2, 2.6f, 15, "shotgun", 250, F, 8), 3, 90, "Двустволка: два выстрела дробью в упор. Только найти");
-            G("weapon_nagant", "Наган", Gun("weapon_nagant", "ammo_9mm", 1, FireMode.Semi, 30, 0.45f, 7, 3.2f, 35, "pistol", 400, S | Mz | F), 2, 60, "Револьвер: средняя дистанция, 4 попадания");
+            G("weapon_nagant", "Наган", Gun("weapon_nagant", "ammo_9mm", 1, FireMode.Semi, 36, 0.38f, 7, 2.4f, 35, "pistol", 400, S | Mz | F), 2, 60, "Револьвер: средняя дистанция, 4 попадания");
             G("weapon_homesmg", "Самоделка", Gun("weapon_homesmg", "ammo_9mm", 1, FireMode.Auto, 14, 0.11f, 20, 2.4f, 25, "smg", 500, All), 3, 90, "Кустарный ПП: лучший ствол тира 1, вблизи");
             G("weapon_grach", "Грач", Gun("weapon_grach", "ammo_9mm", 2, FireMode.Semi, 20, 0.18f, 17, 1.6f, 35, "pistol", 700, S | Mz | F | Mg), 3, 120, "МР-443: запасной пистолет, быстрая перезарядка");
             G("weapon_pps43", "ППС-43", Gun("weapon_pps43", "ammo_9mm", 2, FireMode.Auto, 17, 0.10f, 35, 2.3f, 35, "smg", 800, All), 3, 150, "Пистолет-пулемёт: близко, большой магазин");
             G("weapon_svt40", "СВТ-40", Gun("weapon_svt40", "ammo_762", 2, FireMode.Semi, 40, 0.30f, 10, 2.8f, 70, "rifle", 800, All), 3, 160, "Самозарядная винтовка: далеко, 3 попадания");
             G("weapon_mp133", "МР-133", Gun("weapon_mp133", "ammo_12g", 2, FireMode.Pump, 14, 0.85f, 6, 3.5f, 18, "shotgun", 700, Mz | F | St, 8), 3, 160, "Помповое ружьё: в упор убивает с выстрела. Не крафтится");
             G("weapon_akm", "АКМ", Gun("weapon_akm", "ammo_762", 3, FireMode.Auto, 34, 0.11f, 30, 2.5f, 65, "ar", 1000, All), 4, 250, "Автомат Калашникова 7,62: универсал, 3 попадания");
-            var an = Gun("weapon_an94", "ammo_545", 3, FireMode.Burst, 27, 0.25f, 30, 2.4f, 75, "ar", 1000, All);
-            an.Burst = 2; an.BurstInterval = 0.03f; an.RecoilDeg = 1.3f; an.BaseSpreadDeg = 1f;
-            G("weapon_an94", "АН-94 «Абакан»", an, 4, 260, "Автомат с отсечкой: очередь по 2 почти в одну точку (54 урона за раз)");
+            var an = Gun("weapon_an94", "ammo_545", 3, FireMode.Burst, 30, 0.2f, 30, 2.4f, 75, "ar", 1000, All);
+            an.Burst = 2; an.BurstInterval = 0.03f; an.RecoilDeg = 1.0f; an.RecoilGrowDeg = 0.08f; an.BloomPerShotDeg = 0.8f; an.BaseSpreadDeg = 1f;   // «Абакан» славится кучностью
+            G("weapon_an94", "АН-94 «Абакан»", an, 4, 260, "Автомат с отсечкой: очередь по 2 почти в одну точку (60 урона за раз)");
             G("weapon_ppsh", "ППШ", Gun("weapon_ppsh", "ammo_9mm", 3, FireMode.Auto, 18, 0.07f, 71, 4.0f, 40, "smg", 1000, All), 4, 230, "Барабан на 71 патрон: близко, огромный темп. Долгая перезарядка");
             G("weapon_svd", "СВД", Gun("weapon_svd", "ammo_762", 3, FireMode.Semi, 60, 0.35f, 10, 2.8f, 100, "sniper", 1000, All), 4, 250, "Снайперская винтовка Драгунова: 2 попадания, 100 м");
             G("weapon_saiga12", "Сайга-12", Gun("weapon_saiga12", "ammo_12g", 4, FireMode.Semi, 14, 0.25f, 8, 3.0f, 18, "shotgun", 900, All, 8), 4, 320, "Элита: самозарядный дробовик, «лютая имба» в упор. Только редкие ивенты");
-            var mosin = Gun("weapon_mosin", "ammo_762", 4, FireMode.Bolt, 95, 1.4f, 5, 3.5f, 120, "sniper", 900, S | Mz | St);
+            var mosin = Gun("weapon_mosin", "ammo_762", 4, FireMode.Bolt, 110, 1.2f, 5, 3.5f, 120, "sniper", 900, S | Mz | St);
             G("weapon_mosin", "Мосинка с ПУ", mosin, 4, 300, "Элита: снайперская винтовка с затвором, 120 м. Только редкие ивенты");
             G("weapon_aps", "АПС", Gun("weapon_aps", "ammo_9mm", 4, FireMode.Auto, 18, 0.07f, 20, 1.8f, 30, "smg", 900, S | Mz | F | Mg), 4, 220, "Элита: автоматический пистолет Стечкина. Только редкие ивенты");
 

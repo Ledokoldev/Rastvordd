@@ -26,6 +26,8 @@ namespace Rastvordd.Sim
         // ---------- зоны попадания ----------
 
         /// <summary>Зона по расстоянию линии пули от центра (пороги 0,12/0,28/0,40 м для тела 0,40 м, масштаб по радиусу).</summary>
+        readonly System.Collections.Generic.Dictionary<int, (float t, HitZone z)> _pelletZone = new();
+
         public static HitZone ZoneOf(float offset, float radius)
         {
             float k = radius / Clothing.DocBodyRadius;
@@ -48,7 +50,14 @@ namespace Rastvordd.Sim
             float offset = MathF.Abs(rel.X * d.Y - rel.Y * d.X);
             // зона — шансом (D55, Data/Headshots.cs): прицел, присед, тир ствола, обвесы, марксманки; без стрелка (тесты) — по смещению
             var shooter = ownerId >= 0 ? Find(ownerId) : null;
-            var zone = shooter?.Weapon is WeaponState sw ? Headshots.Roll(Rng, shooter, sw, Vector2.Distance(shooter.Pos, hitPos)) : ZoneOf(offset, t.Radius);
+            HitZone zone;
+            if (shooter?.Weapon is WeaponState sw)
+            {
+                // дробь: зона одна на весь выстрел (раньше каждая дробина кидала голову отдельно — дробовики «хедшотили» серийно)
+                if (sw.Def.Pellets > 1 && _pelletZone.TryGetValue(shooter.Id, out var pz) && Time - pz.t < 0.05f) zone = pz.z;
+                else { zone = Headshots.Roll(Rng, shooter, sw, Vector2.Distance(shooter.Pos, hitPos)); if (sw.Def.Pellets > 1) _pelletZone[shooter.Id] = (Time, zone); }
+            }
+            else zone = ZoneOf(offset, t.Radius);
             float raw = damage * ZoneMul(zone);
             int side = SideOf(t, d);
             float prot = Clothing.Zone(t, zone, side);

@@ -374,6 +374,7 @@ namespace Rastvordd.Sim
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--weartest") >= 0) World.WearSelfTest(log);       // самопроверка одежды D47
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--guardtest") >= 0) World.GuardSelfTest(log);     // меткость охраны РТ
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--headtest") >= 0) World.HeadshotSelfTest(log);   // шансы в голову (D55)
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--ttktest") >= 0 || System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--ttkquick") >= 0) World.TtkSelfTest(log);       // ТТК: стволы × сеты
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--progtest") >= 0) World.ProgSelfTest(log);       // прогрессия D54: станции, ток, ёмкости, вода
             int shown = World.Milestones.Count; int envShown = 0;
             var thoughtsShown = new Dictionary<int, int>();

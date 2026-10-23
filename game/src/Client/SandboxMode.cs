@@ -567,6 +567,9 @@ namespace Rastvordd.Client
                     _sbPanel.Buttons(("Начать заново (F3)", () => _sbLift.Start(15)));
                     break;
             }
+            // погода — на любом полигоне
+            _sbPanel.Caption("Погода");
+            _sbPanel.Choice(SkyInfo.Names, (int)_server.World.Sky, k => { _server.World.SetSky((Rastvordd.Sim.Sky)k); _hud.Toast("Погода: " + SkyInfo.Names[k]); });
         }
 
         void SbFillAim()

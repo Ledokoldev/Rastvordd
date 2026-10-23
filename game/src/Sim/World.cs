@@ -707,7 +707,7 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Обзор персонажа: прицеливание увеличивает дальность и сужает конус.</summary>
-        public float ViewRange(Actor a) => (50f + 30f * a.Peek) * (1f - 0.4f * NightFactorAt(TimeOfDay) * (a.Held?.Id == "weapon_torch" || a.Weapon?.Flashlight == true ? 0.35f : 1f));   // факел (и фонарь на стволе) почти снимает ночной штраф
+        public float ViewRange(Actor a) => SkyInfo.ViewMul(Sky) * (50f + 30f * a.Peek) * (1f - 0.4f * NightFactorAt(TimeOfDay) * (a.Held?.Id == "weapon_torch" || a.Weapon?.Flashlight == true ? 0.35f : 1f));   // + погода: ливень, снегопад, буран   // факел (и фонарь на стволе) почти снимает ночной штраф
 
         // ---------- время суток ----------
         public const float DayLength = 1500f;   // сутки 25 минут: день ~20, ночь ~5 (по просьбе пользователя)

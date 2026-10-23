@@ -1,5 +1,6 @@
 using Godot;
 using Rastvordd.Sim;
+using Sky = Rastvordd.Sim.Sky;
 
 namespace Rastvordd.Client
 {
@@ -10,12 +11,40 @@ namespace Rastvordd.Client
     public sealed class Weather
     {
         readonly GpuParticles2D _leaves, _snow, _dust, _fireflies;
+        // погода (Sky): осадки, брызги, полосы ветра, сорванные листья; экран — тонировка/дымка и вспышки молний
+        readonly GpuParticles2D _rain, _splash, _flakes, _streaks, _debris;
+        readonly ColorRect _tint, _flash;
+        float _flashA, _nextBolt = 6f, _boltT = -1;
+        Sky _sky = (Sky)(-1);
+        readonly RandomNumberGenerator _rng = new();
 
         public Weather(Node world, Node root)
         {
             _leaves = Make(world, 28, 7f, new Color(0.78f, 0.68f, 0.3f), new Vector3(10, 16, 0), new Vector3(1, 1, 0), 12, 22, 1f, 1.6f, 0.9f);
             _snow = Make(world, 260, 6f, new Color(0.93f, 0.95f, 1f), new Vector3(5, 26, 0), new Vector3(0.3f, 1, 0), 18, 32, 1f, 1.5f, 0.9f);
             _dust = Make(world, 70, 4f, new Color(0.78f, 0.68f, 0.5f), new Vector3(26, 2, 0), new Vector3(1, 0.1f, 0), 25, 45, 1f, 2f, 0.45f);
+
+            _rain = Make(world, 1, 0.55f, new Color(0.78f, 0.84f, 0.95f), Vector3.Zero, new Vector3(0, 1, 0), 480, 560, 1f, 1f, 0.55f, new Vector2I(1, 7));
+            _splash = Make(world, 1, 0.22f, new Color(0.85f, 0.9f, 1f), Vector3.Zero, new Vector3(0, -1, 0), 4, 10, 1f, 1.5f, 0.6f);
+            _flakes = Make(world, 1, 7f, new Color(0.95f, 0.97f, 1f), Vector3.Zero, new Vector3(0, 1, 0), 30, 50, 1f, 2f, 0.9f);
+            _streaks = Make(world, 1, 0.9f, new Color(0.9f, 0.92f, 0.95f), Vector3.Zero, new Vector3(1, 0, 0), 520, 720, 1f, 1f, 0.4f, new Vector2I(1, 18));   // полоса вдоль скорости (AlignY)
+            _debris = Make(world, 1, 2.2f, new Color(0.55f, 0.5f, 0.32f), new Vector3(0, 30, 0), new Vector3(1, 0.15f, 0), 260, 380, 1f, 2f, 0.85f);
+            ((ParticleProcessMaterial)_rain.ProcessMaterial).ParticleFlagAlignY = true;
+            ((ParticleProcessMaterial)_streaks.ProcessMaterial).ParticleFlagAlignY = true;
+            ((ParticleProcessMaterial)_rain.ProcessMaterial).Spread = 3;
+            ((ParticleProcessMaterial)_streaks.ProcessMaterial).Spread = 4;
+            ((ParticleProcessMaterial)_debris.ProcessMaterial).TurbulenceEnabled = true;
+            ((ParticleProcessMaterial)_flakes.ProcessMaterial).TurbulenceEnabled = true;
+            ((ParticleProcessMaterial)_flakes.ProcessMaterial).TurbulenceNoiseStrength = 2f;
+            _splash.ZIndex = 5;
+            // экран: тонировка (сумрак дождя / белая мгла снега) и вспышка молнии — между миром и HUD
+            var scr = new CanvasLayer { Layer = 0 };
+            root.AddChild(scr);
+            _tint = new ColorRect { MouseFilter = Control.MouseFilterEnum.Ignore, Color = new Color(0, 0, 0, 0) };
+            _tint.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+            _flash = new ColorRect { MouseFilter = Control.MouseFilterEnum.Ignore, Color = new Color(0.9f, 0.93f, 1f, 0) };
+            _flash.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+            scr.AddChild(_tint); scr.AddChild(_flash);
 
             // светлячки: свой слой поверх мира (ночная тонировка мира их не гасит), мигают
             var layer = new CanvasLayer { Layer = 0, FollowViewportEnabled = true };
@@ -36,9 +65,10 @@ namespace Rastvordd.Client
             };
         }
 
-        static GpuParticles2D Make(Node parent, int amount, float life, Color color, Vector3 gravity, Vector3 dir, float vMin, float vMax, float sMin, float sMax, float alpha)
+        static GpuParticles2D Make(Node parent, int amount, float life, Color color, Vector3 gravity, Vector3 dir, float vMin, float vMax, float sMin, float sMax, float alpha, Vector2I? size = null)
         {
-            var img = Image.CreateEmpty(2, 2, false, Image.Format.Rgba8);
+            var sz = size ?? new Vector2I(2, 2);
+            var img = Image.CreateEmpty(sz.X, sz.Y, false, Image.Format.Rgba8);
             img.Fill(Colors.White);
             var pm = new ParticleProcessMaterial
             {
@@ -62,19 +92,75 @@ namespace Rastvordd.Client
         }
 
         /// <param name="viewHalfPx">Половина видимой области в пикселях мира.</param>
-        public void Update(Vector2 cameraPx, Vector2 viewHalfPx, Biome biome, float night)
+        public void Update(Vector2 cameraPx, Vector2 viewHalfPx, Biome biome, float night, Sky sky = Sky.Clear, float dt = 0.016f)
         {
             var ext = new Vector3(viewHalfPx.X + 60, viewHalfPx.Y + 60, 0);
-            foreach (var p in new[] { _leaves, _snow, _dust, _fireflies })
+            SetSky(sky);
+            UpdateSky(dt);
+            foreach (var p in new[] { _leaves, _snow, _dust, _fireflies, _rain, _splash, _flakes, _streaks, _debris })
             {
                 p.GlobalPosition = cameraPx;
                 ((ParticleProcessMaterial)p.ProcessMaterial).EmissionBoxExtents = ext;
                 p.VisibilityRect = new Rect2(-ext.X - 200, -ext.Y - 200, ext.X * 2 + 400, ext.Y * 2 + 400);
             }
             Set(_leaves, biome is Biome.Forest or Biome.Grassland or Biome.Swamp);
-            Set(_snow, biome == Biome.Tundra);
+            Set(_snow, biome == Biome.Tundra && !SkyInfo.Snowy(sky));
             Set(_dust, biome is Biome.Arid or Biome.Beach);
             Set(_fireflies, night > 0.6f && biome is Biome.Grassland or Biome.Swamp or Biome.Forest);
+        }
+
+        /// <summary>Смена погоды: количество и скорость частиц, тонировка (Amount перезапускает систему — только при смене).</summary>
+        void SetSky(Sky sky)
+        {
+            if (sky == _sky) return;
+            _sky = sky;
+            float wind = SkyInfo.Wind(sky);
+            int rain = sky switch { Sky.Rain => 500, Sky.Downpour => 1400, Sky.Storm => 1700, _ => 0 };
+            int snow = sky switch { Sky.Snow => 380, Sky.HeavySnow => 1100, Sky.Blizzard => 2200, _ => 0 };
+            int streaks = sky switch { Sky.Wind => 220, Sky.Storm => 120, Sky.HeavySnow => 60, Sky.Blizzard => 260, _ => 0 };
+            int debris = sky switch { Sky.Wind => 160, Sky.Storm => 90, _ => 0 };
+            Conf(_rain, rain, new Vector3(wind * 0.45f, 1, 0), 480 + 120 * wind, 600 + 160 * wind);
+            Conf(_splash, rain / 3, new Vector3(0, -1, 0), 4, 10);
+            _flakes.Lifetime = sky == Sky.Blizzard ? 2.5f : 7f;
+            ((ParticleProcessMaterial)_flakes.ProcessMaterial).ScaleMax = sky == Sky.Snow ? 1.6f : 2.4f;
+            Conf(_flakes, snow, new Vector3(wind * (sky == Sky.Blizzard ? 4f : 1.2f), 1, 0),
+                 sky == Sky.Blizzard ? 260 : sky == Sky.HeavySnow ? 60 : 30, sky == Sky.Blizzard ? 380 : sky == Sky.HeavySnow ? 95 : 55);
+            Conf(_streaks, streaks, new Vector3(1, 0.05f, 0), 520 + 200 * wind, 720 + 260 * wind);
+            Conf(_debris, debris, new Vector3(1, 0.15f, 0), 260, 380);
+            _tint.Color = sky switch
+            {
+                Sky.Rain => new Color(0.08f, 0.1f, 0.16f, 0.12f), Sky.Downpour => new Color(0.06f, 0.08f, 0.13f, 0.26f),
+                Sky.Storm => new Color(0.04f, 0.05f, 0.1f, 0.34f), Sky.HeavySnow => new Color(0.86f, 0.9f, 0.96f, 0.16f),
+                Sky.Blizzard => new Color(0.88f, 0.91f, 0.96f, 0.42f), Sky.Snow => new Color(0.86f, 0.9f, 0.96f, 0.06f),
+                Sky.Wind => new Color(0.5f, 0.48f, 0.4f, 0.05f), _ => new Color(0, 0, 0, 0),
+            };
+        }
+
+        static void Conf(GpuParticles2D p, int amount, Vector3 dir, float vMin, float vMax)
+        {
+            var pm = (ParticleProcessMaterial)p.ProcessMaterial;
+            pm.Direction = dir.Normalized(); pm.InitialVelocityMin = vMin; pm.InitialVelocityMax = vMax;
+            if (amount <= 0) { p.Emitting = false; return; }
+            if (p.Amount != amount) p.Amount = amount;
+            p.Preprocess = p.Lifetime;
+            p.Emitting = true;
+        }
+
+        /// <summary>Гроза: молния раз в 5–14 с — двойная вспышка экрана.</summary>
+        void UpdateSky(float dt)
+        {
+            _flashA = 0;
+            if (_sky == Sky.Storm)
+            {
+                if ((_nextBolt -= dt) <= 0) { _nextBolt = _rng.RandfRange(5f, 14f); _boltT = 0; }
+                if (_boltT >= 0)
+                {
+                    _boltT += dt;
+                    _flashA = _boltT < 0.06f ? 0.75f : _boltT < 0.14f ? 0.1f : _boltT < 0.22f ? 0.55f : Mathf.Max(0, 0.55f - (_boltT - 0.22f) * 1.6f);
+                    if (_boltT > 0.6f) _boltT = -1;
+                }
+            }
+            _flash.Color = new Color(_flash.Color, _flashA);
         }
 
         static void Set(GpuParticles2D p, bool on)

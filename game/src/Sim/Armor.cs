@@ -22,6 +22,9 @@ namespace Rastvordd.Sim
         public float RadWarehouse = 0;
         /// <summary>Хуки погоды: дождь (−4 °C, мокрый) и зима (−15 °C). Дождя в игре пока нет — выключено.</summary>
         public bool Raining, Winter;
+        /// <summary>Погода сейчас (Data/Sky.cs): дождь/ливень/гроза — мокро и −4 °C, снег/буран — как зима.</summary>
+        public Sky Sky { get; private set; }
+        public void SetSky(Sky s) { Sky = s; Raining = SkyInfo.Wet(s); Winter = SkyInfo.Snowy(s); }
 
         // ---------- зоны попадания ----------
 

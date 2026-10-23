@@ -183,6 +183,7 @@ namespace Rastvordd.Client
                     if (best != null) { me.Pos = best.Center + (best.IsFloor ? new SVec(-1.6f, 0.4f) : new SVec(0.2f, 1.1f)); _autoAim = best.Center; }
                 }
                 else if (a == "hdone") _hammerMenu.Release();
+                else if (a.StartsWith("sky")) _server.World.SetSky((Rastvordd.Sim.Sky)int.Parse(a.Substring(3)));   // отладка: погода 0–7
                 else if (a.StartsWith("sbsub")) SbSetSub(int.Parse(a.Substring(5)));   // отладка: полигон — мишени/боты/дуэль
                 else if (a.StartsWith("hmode")) _hammerMode = int.Parse(a.Substring(5));   // отладка: режим киянки (1–5, 9 — снос)
                 else if (a.StartsWith("hpick")) _hammerMenu.PointAt(int.Parse(a.Substring(5)));
@@ -1118,7 +1119,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 Acoustics.Update(me, _cur.Nodes, TerrainView.BiomeAt(_map, me), yard, delta);
                 if (!_overview)
                     _weather.Update(_cam.Position, GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X, TerrainView.BiomeAt(_map, me),
-                                    World.NightFactorAt(_forcedDay ?? _cur.DayTime));
+                                    World.NightFactorAt(_forcedDay ?? _cur.DayTime), _cur.Sky, dt);
             }
             _ambient.Update(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _forcedDay ?? _cur.DayTime, dt);
             _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime);

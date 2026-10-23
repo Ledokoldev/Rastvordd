@@ -217,11 +217,11 @@ namespace Rastvordd.Sim
             G("weapon_svt40", "СВТ-40", Gun("weapon_svt40", "ammo_762", 2, FireMode.Semi, 40, 0.30f, 10, 2.8f, 70, "rifle", 800, All), 3, 160, "Самозарядная винтовка: далеко, 3 попадания");
             G("weapon_mp133", "МР-133", Gun("weapon_mp133", "ammo_12g", 2, FireMode.Pump, 14, 0.85f, 6, 3.5f, 18, "shotgun", 700, Mz | F | St, 8), 3, 160, "Помповое ружьё: в упор убивает с выстрела. Не крафтится");
             G("weapon_akm", "АКМ", Gun("weapon_akm", "ammo_762", 3, FireMode.Auto, 34, 0.11f, 30, 2.5f, 65, "ar", 1000, All), 4, 250, "Автомат Калашникова 7,62: универсал, 3 попадания");
-            var an = Gun("weapon_an94", "ammo_545", 3, FireMode.Burst, 32, 0.2f, 30, 2.4f, 75, "ar", 1000, All);
+            var an = Gun("weapon_an94", "ammo_545", 3, FireMode.Burst, 29, 0.2f, 30, 2.4f, 75, "ar", 1000, All);
             an.EffRange = 45; an.Burst = 2; an.BurstInterval = 0.03f; an.RecoilDeg = 1.0f; an.RecoilGrowDeg = 0.08f; an.BloomPerShotDeg = 0.8f; an.BaseSpreadDeg = 1f;   // «Абакан» славится кучностью
-            G("weapon_an94", "АН-94 «Абакан»", an, 4, 260, "Автомат с отсечкой: очередь по 2 почти в одну точку (60 урона за раз)");
-            var ppsh = Gun("weapon_ppsh", "ammo_9mm", 3, FireMode.Auto, 24, 0.065f, 71, 4.0f, 40, "smg", 1000, All);
-            ppsh.RecoilDeg = 2.0f; ppsh.RecoilGrowDeg = 0.3f; ppsh.RecoilMaxDeg = 24f;   // ППШ: огромная плотность огня и злая отдача — зажал и не даёшь высунуться
+            G("weapon_an94", "АН-94 «Абакан»", an, 4, 260, "Автомат с отсечкой: очередь по 2 почти в одну точку (58 урона за раз)");
+            var ppsh = Gun("weapon_ppsh", "ammo_9mm", 3, FireMode.Auto, 27, 0.065f, 71, 4.0f, 40, "smg", 1000, All);
+            ppsh.RecoilDeg = 1.6f; ppsh.RecoilGrowDeg = 0.18f; ppsh.RecoilMaxDeg = 24f;   // ППШ: огромная плотность огня и злая отдача — зажал и не даёшь высунуться
             G("weapon_ppsh", "ППШ", ppsh, 4, 230, "Барабан на 71 патрон: близко, огромный темп. Долгая перезарядка");
             G("weapon_svd", "СВД", Gun("weapon_svd", "ammo_762", 3, FireMode.Semi, 60, 0.35f, 10, 2.8f, 100, "sniper", 1000, All), 4, 250, "Снайперская винтовка Драгунова: 2 попадания, 100 м");
             G("weapon_saiga12", "Сайга-12", Gun("weapon_saiga12", "ammo_12g", 4, FireMode.Semi, 14, 0.25f, 8, 3.0f, 18, "shotgun", 900, All, 8), 4, 320, "Элита: самозарядный дробовик, «лютая имба» в упор. Только редкие ивенты");

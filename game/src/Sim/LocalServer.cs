@@ -995,8 +995,8 @@ namespace Rastvordd.Sim
         static List<(string id, int n, int have)> CostRows(Actor me, (string id, int n)[] cost) =>
             new(System.Array.ConvertAll(cost, c => (c.id, c.n, me.Count(c.id))));
 
-        static readonly string[] TierIcons = { "", "item:wood", "item:stone", "item:metal_fragments", "item:hqm" };
-        static readonly string[] TierHints = { "", "Дешёвый, горит и рубится", "Пулей не взять, нужна взрывчатка", "Вдвое крепче камня", "Самый прочный уровень" };
+        static readonly string[] TierIcons = { "", "item:wood", "item:stone", "item:metal_fragments", "item:hqm", "item:hqm" };   // 5 — броня (D54)
+        static readonly string[] TierHints = { "", "Дешёвый, горит и рубится", "Пулей не взять, нужна взрывчатка", "Вдвое крепче камня", "Прочнее камня втрое", "Легированная сталь поверх стали — самый прочный уровень" };
 
         /// <summary>Колесо киянки: постройка, над которой оно открыто (или под прицелом), — уровни и снос.</summary>
         void FillHammerWheel(SelfInfo s, Actor me)

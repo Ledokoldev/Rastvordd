@@ -56,7 +56,10 @@ namespace Rastvordd.Client
         public event Action<int> Picked;
         public event Action<string> Rejected;   // выбран недоступный пункт — почему
         public string Title = "";               // подпись над колесом (киянка: что улучшаем)
-        const float Outer = 196, Inner = 92, IconR = 144, IconSize = 54, OpenTime = 0.13f;
+        const float OpenTime = 0.13f;
+        // масштаб от высоты экрана: колесо на полэкрана (диаметр ≈ ½ высоты), вместе с текстом
+        float K => Mathf.Max(1f, GetViewportRect().Size.Y * 0.25f / 196f);
+        const float Outer = 196, Inner = 92, IconR = 144, IconSize = 54;
         List<WheelItem> _items = new();
         int _hover = -1;
         float _open;                             // 0..1 — анимация появления
@@ -140,7 +143,7 @@ namespace Rastvordd.Client
             int n = Math.Max(1, _items.Count);
             var d = (_debugMouse ?? GetViewport().GetMousePosition()) - Center;
             int h = -1;
-            if (d.Length() > Inner * 0.55f && _items.Count > 0)
+            if (d.Length() > Inner * K * 0.55f && _items.Count > 0)
             {
                 float a = Mathf.PosMod(d.Angle() + Mathf.Pi / 2 + Mathf.Pi / n, Mathf.Tau);
                 h = (int)(a / (Mathf.Tau / n)) % n;
@@ -201,7 +204,7 @@ namespace Rastvordd.Client
             int n = _items.Count;
             if (n == 0) return;
             float e = 1 - Mathf.Pow(1 - _open, 3);
-            DrawSetTransform(Center, 0, Vector2.One * (0.86f + 0.14f * e));
+            DrawSetTransform(Center, 0, Vector2.One * K * (0.86f + 0.14f * e));
             Modulate = new Color(1, 1, 1, e);
             var c = Vector2.Zero;
             float step = Mathf.Tau / n, gap = 0.018f;

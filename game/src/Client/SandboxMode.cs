@@ -554,12 +554,10 @@ namespace Rastvordd.Client
                 World.SandboxLearnAll(me);
                 me.ClearAll();
                 w.GiveBuilderKit(me);
-                for (int k = 0; k < 9 && _sbClaim == null; k++)
-                    _sbClaim = w.SandboxClaim(me, _sbBuildC + new SVec(1.5f + (k % 3) * 2, 0.5f + (k / 3) * 2), out _);
                 SbRefillBuild();
                 w.SandboxDress(me, 1);
                 me.Pos = _sbBuildC + new SVec(0, 3);
-                _hud.Toast("Стройка: набор строителя, шкаф стоит, ресурсы пополняются. F3 — обратно к стрельбе");
+                _hud.Toast("Стройка: набор строителя, ресурсы пополняются, шкаф — по желанию. F3 — обратно к стрельбе");
             }
             else
             {

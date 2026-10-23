@@ -783,7 +783,7 @@ namespace Rastvordd.Sim
         // ---------- межевой столб: зона, бюджет, содержание (комбинация Астры, docs/gpt/05-stability.md) ----------
 
         public const int ClaimRadius = 8;        // клеток: зона — круг (по центрам клеток, di²+dj² ≤ R²+R)
-        public const int ClaimGap = 21;          // минимум между столбами
+        public const int ClaimGap = 2 * ClaimRadius + 1;   // минимум между шкафами (клеток, по кругу): зоны не пересекаются
         public const float BudgetMax = 360, FoundMax = 160, DoorMax = 48;
         const float UpkeepPerHour = 0.04f;       // доля цены текущих элементов
         const float DecayPerMinute = 0.01f;      // доля максимального HP
@@ -809,7 +809,8 @@ namespace Rastvordd.Sim
             why = "";
             var c = Building.CellOf(at);
             foreach (var d in Deployables)
-                if (d.Kind == DeployKind.Claim && CellDist(ClaimCell(d), c) < ClaimGap) { why = "рядом другая база"; return false; }
+                if (d.Kind == DeployKind.Claim && ClaimCell(d) is var o && (c.Item1 - o.Item1) * (c.Item1 - o.Item1) + (c.Item2 - o.Item2) * (c.Item2 - o.Item2) < ClaimGap * ClaimGap)
+                { why = "рядом чужая зона — отойди дальше"; return false; }
             return true;
         }
 

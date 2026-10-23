@@ -35,6 +35,7 @@ namespace Rastvordd.Sim
         float _adT, _adSign = 1, _crT;   // открытый бой: смена стрейфа (A-D) и присед-встал — неровный ритм, как у людей
         bool _crOn;
         int _burstShots; float _burstPause;
+        float _lastSeeT = -100, _visSince, _react;   // реакция: когда увидел цель и сколько ему нужно до первого выстрела
         public float RecoilControl = 0.7f;   // доля отдачи, которую бот гасит прицелом (человек мышью гасит почти всю)
 
         /// <summary>В разгаре перестрелки: недавно стрелял или по мне попали, он рядом и на виду — дерусь до конца, не бегу спиной.</summary>
@@ -575,7 +576,22 @@ namespace Rastvordd.Sim
                 cmd.Aim = _me.Pos + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rel.Length();
             }
             cmd.Peek = 1;
+            // реакция, как у человека: увидел → первый выстрел не сразу. Внезапно — 0,35–0,5 с; ждал (укрытие, пик) — 0,2–0,28;
+            // потерял на миг и снова увидел — 0,15–0,25 (уже в бою)
+            if (sees)
+            {
+                float gap = _w.Time - _lastSeeT;
+                if (gap > 0.25f)
+                {
+                    _visSince = _w.Time;
+                    _react = gap < 2f ? 0.15f + 0.1f * (float)_rng.NextDouble()
+                           : _fight is Fight.InCover or Fight.Peek ? 0.2f + 0.08f * (float)_rng.NextDouble()
+                           : 0.35f + 0.15f * (float)_rng.NextDouble();
+                }
+                _lastSeeT = _w.Time;
+            }
             if (!sees || d > st.Def.Range * 0.95f) return;
+            if (_w.Time - _visSince < _react) return;   // ещё доводит прицел
             var muzzle = _me.Pos + dir * (_me.Radius + 0.35f);
             if (!_w.ShotClear(muzzle, t.Pos, _me.Crouching, t.Crouching)) return;   // пуля не долетит (стена, или присели за низким) — не стрелять в камень
             if (st.Ammo <= 0) { if (st.ReloadLeft <= 0) { cmd.Reload = true; if (st.MagSize > 1) { Stat(where == "из укрытия" ? "перезарядка в укрытии" : "перезарядка в открытую"); } } return; }

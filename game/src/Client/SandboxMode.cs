@@ -24,7 +24,7 @@ namespace Rastvordd.Client
         float _sbClearT, _sbRefillT;
         bool SbOn => _sbMode != null;
         /// <summary>ЛКМ не стреляет: панель развёрнута (клики по кнопкам) или звуковой полигон (там ЛКМ — ответ викторины).</summary>
-        bool SbBlocksFire => _sbPanel != null && (_sbPanel.Expanded || _sbMode == "sound");
+        bool SbBlocksFire => _sbPanel != null && (_sbPanel.Expanded || _sbMode == "sound" || (_sbSub == 2 && _sbDuelGo > 0));   // дуэль: во время отсчёта не стрелять
         readonly System.Random _sbRng = new(4242);
 
         // ---------- стрельбище ----------
@@ -360,6 +360,7 @@ namespace Rastvordd.Client
         {
             var w = _server.World; var me = w.Find(_myId);
             if (_sbDuelist != null) { SbRemoveBot(_sbDuelist); _sbBots.Remove(_sbDuelist); _sbDuelist = null; }
+            _sbDuelGo = -1;
             var guns = SbTierGuns[_sbDuelTier - 1];
             string gun = _sbDuelGun >= 0 && _sbDuelGun < guns.Length ? guns[_sbDuelGun] : guns[_sbRng.Next(guns.Length)];
             var wd = Items.Get(gun).Weapon;
@@ -374,15 +375,17 @@ namespace Rastvordd.Client
                 a.Dead = false; a.Hp = a.MaxHp; a.Vel = SVec.Zero;
             }
             Arm(me);
-            me.Pos = _sbSquare + new SVec(0, 14); me.Facing = -Mathf.Pi / 2;
+            // противоположные углы квадрата, случайная диагональ: я ↘ — бот ↖ и т. п.
+            float sx = _sbRng.Next(2) == 0 ? -1 : 1, sy = _sbRng.Next(2) == 0 ? -1 : 1;
+            SVec Free(SVec p) { for (int tries = 0; tries < 24 && !w.IsFree(p, 0.6f); tries++) p += new SVec(-sx * 0.9f, -sy * 0.6f); return p; }
+            me.Pos = Free(_sbSquare + new SVec(sx * 16, sy * 16));
+            var at = Free(_sbSquare + new SVec(-sx * 16, -sy * 16));
+            me.Facing = Mathf.Atan2(at.Y - me.Pos.Y, at.X - me.Pos.X);
             _slot = 0;
-            var at = _sbSquare + new SVec(0, -14);
-            for (int tries = 0; tries < 20 && !w.IsFree(at, 0.6f); tries++) at += new SVec(1.3f, 0.7f);
             var bot = w.SandboxActor(SbBotNames[(_sbDuelWins + _sbDuelLosses) % SbBotNames.Length] + " (бот)", Team.Player, at);
             Arm(bot);
-            bot.Facing = Mathf.Pi / 2;
-            IBrain brain = new ArenaBrain(bot, w, _sbRng.Next(), () => w.Find(_myId));
-            _server.AddBrain(brain);
+            bot.Facing = Mathf.Atan2(me.Pos.Y - bot.Pos.Y, me.Pos.X - bot.Pos.X);
+            IBrain brain = new ArenaBrain(bot, w, _sbRng.Next(), () => w.Find(_myId));   // мозг включится на «Бой!»
             _sbDuelist = new SbBot { A = bot, Brain = brain, Gun = gun };
             _sbBots.Add(_sbDuelist);
             _sbGod = false;
@@ -408,6 +411,7 @@ namespace Rastvordd.Client
                     return;
                 }
                 _sbDuelGo = -1;
+                _server.AddBrain(_sbDuelist.Brain);
                 foreach (var a in new[] { me, bot })
                     foreach (var sl in a.Belt) if (sl?.State is WeaponState ws && !ws.Def.Melee) { ws.Ammo = ws.MagSize; ws.ReloadLeft = 0; ws.Recoil = 0; }
                 _hud.Toast("Бой!");

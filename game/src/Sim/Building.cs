@@ -975,6 +975,35 @@ namespace Rastvordd.Sim
             return ClaimAt(Building.CellOf(dp.Pos)) is Deployable c && c.Auth.Contains(a.Id);
         }
 
+        public const float DoorReach = 1.25f;   // дверь по взгляду: до полотна не дальше ~половины клетки
+
+        /// <summary>
+        /// Дверь, на которую смотрит игрок: полотно в пределах DoorReach, в полуплоскости взгляда; ближе всего к линии взгляда.
+        /// Сначала те, что можешь открыть (не заперта, вписан в кодовый замок, есть ключ). Буфер 2:1 — две двери в треугольнике:
+        /// смотришь на внутреннюю — открывается она, развернулся — наружная.
+        /// </summary>
+        public Structure AimedDoor(Actor a)
+        {
+            Structure best = null;
+            float bestScore = float.MinValue;
+            var face = a.FacingDir;
+            foreach (var d in _doors.Values)
+            {
+                float dist = Building.SegDist(a.Pos, d.A, d.B);
+                if (dist > DoorReach) continue;
+                var to = d.Center - a.Pos;
+                float len = to.Length();
+                float dot = len < 0.05f ? 1f : Vector2.Dot(face, to / len);
+                if (dot < 0.1f && dist > 0.35f) continue;   // за спиной — нет (вплотную в проёме — можно)
+                float score = dot + (CanOpenDoor(a, d) ? 10f : 0f) - dist * 0.2f;
+                if (score > bestScore) { bestScore = score; best = d; }
+            }
+            return best;
+        }
+
+        public bool CanOpenDoor(Actor a, Structure door) =>
+            !door.Locked || (door.KeyLock ? a.Count("key_" + door.Id) > 0 : door.LockAuth.Contains(a.Id));
+
         Structure NearestDoor(Vector2 p, float range)
         {
             Structure best = null;

@@ -1516,7 +1516,9 @@ namespace Rastvordd.Sim
                 if (d < bestD && ClearLine(a.Pos, s.PanelPos, null, true)) { bestD = d; best = (InteractKind.Panel, s); }
             }
             if (NearestShutter(a.Pos, best.Item1 == InteractKind.None ? InteractRange + 0.4f : bestD) is Structure sh) best = (InteractKind.Shutter, sh);   // ставни окна (D54)
-            var door = NearestDoor(a.Pos, best.Item1 == InteractKind.None ? InteractRange + 0.4f : bestD);   // дверь — если ближе остального
+            // игрок — дверь по взгляду (AimedDoor), бот — ближайшая
+            var door = a.IsBot ? NearestDoor(a.Pos, best.Item1 == InteractKind.None ? InteractRange + 0.4f : bestD) : AimedDoor(a);
+            if (door != null && !a.IsBot && best.Item1 != InteractKind.None && Building.SegDist(a.Pos, door.A, door.B) > bestD) door = null;   // остальное ближе
             if (door != null && ClearLine(a.Pos, door.Center, door, true)) best = (InteractKind.Door, door);
             return best;
         }

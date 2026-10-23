@@ -26,9 +26,10 @@ namespace Rastvordd.Client
         bool _invOpen;
         BuildMenu _buildMenu, _hammerMenu;   // колёса Плана и киянки (ПКМ)
         BuildGhost2D _hammerMark;            // подсветка постройки, над которой открыто колесо киянки
+        BuildGhost2D _doorMark;              // мягкая подсветка двери, которую откроет E
         int _hammerFocus, _hammerOp, _hammerTarget;
         int _hammerMode = 1;                 // режим киянки (колёсико): индекс в HammerModes
-        static readonly int[] HammerModes = { 1, 2, 3, 4, 5, World.HammerDemolish };   // дерево, камень, металл, сталь, броня, снос
+        static readonly int[] HammerModes = { 1, 2, 3, 4, World.HammerDemolish };   // дерево, камень, металл, сталь, снос
         static string HammerModeName(int m) => m == World.HammerDemolish ? "снос" : Building.TierNames[m];
         BuildBar _buildBar;
         StructTip _structTip;
@@ -733,7 +734,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 bool hammer = _cur?.Self != null && _cur.Self.HoldingHammer && !mb.CtrlPressed;
                 if (hammer && mb.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown)
                 {
-                    // колёсико с киянкой — режим: дерево → камень → металл → сталь → броня → снос
+                    // колёсико с киянкой — режим: дерево → камень → металл → сталь → снос
                     int i = System.Array.IndexOf(HammerModes, _hammerMode), n = HammerModes.Length;
                     _hammerMode = HammerModes[((i + (mb.ButtonIndex == MouseButton.WheelDown ? 1 : -1)) % n + n) % n];
                     _hud.Toast($"Киянка: {HammerModeName(_hammerMode)}");
@@ -773,6 +774,12 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             Color tint = _hammerMode == World.HammerDemolish ? UiTheme.Bad : self.HammerActionOk ? UiTheme.Accent : UiTheme.Dim;   // снос — красным
             if (_hammerMark.Tint != tint) { _hammerMark.Tint = tint; _hammerMark.QueueRedraw(); }
             _hammerMark.Modulate = new Color(1, 1, 1, 0.65f + 0.35f * Mathf.Sin(Time.GetTicksMsec() / 1000f * 6f));   // пульсирует
+            // дверь под E — чуть заметная подсветка (слабее киянки)
+            if (_doorMark == null) { _doorMark = new BuildGhost2D { Tint = new Color(1f, 0.95f, 0.8f), Modulate = new Color(1, 1, 1, 0.4f) }; _world.AddChild(_doorMark); }
+            StructSnap? door = null;
+            if (self.InteractDoor != 0 && !self.Dead && !UiShown) foreach (var st in _cur.Structures) if (st.Id == self.InteractDoor) { door = st; break; }
+            _doorMark.Visible = door != null && target == null;
+            if (door is StructSnap ds) _doorMark.Set(ds.Kind, null, ds.A, ds.B, true);
             if (target is StructSnap ts) _hammerMark.Set(ts.Kind, Building.IsFloor(ts.Kind) ? ts.Poly : null, ts.A, ts.B, true);
         }
 

@@ -126,6 +126,7 @@ namespace Rastvordd.Sim
         public bool HoldingHammer;      // киянка в руках
         public int HammerTarget;        // постройка под киянкой (или та, над которой открыто колесо), 0 — нет
         public List<WheelItem> HammerWheel = new();   // колесо киянки для HammerTarget
+        public int InteractDoor;        // дверь, которую откроет/закроет E (можешь открыть), 0 — нет
         public string HammerAction = "";  // что сделает ЛКМ киянкой в текущем режиме по HammerTarget
         public bool HammerActionOk;
         public bool OpenCraft;          // открыть крафт (E у верстака)
@@ -939,7 +940,12 @@ namespace Rastvordd.Sim
 
             s.Armor = World.ArmorReduction(me);
             FillWear(s, me);
-            if (!me.Dead) s.InteractHint = Hint(World.NearestInteract(me), me);
+            if (!me.Dead)
+            {
+                var ni = World.NearestInteract(me);
+                s.InteractHint = Hint(ni, me);
+                if (ni.kind == World.InteractKind.Door && ni.target is Structure door && World.CanOpenDoor(me, door)) s.InteractDoor = door.Id;   // мягкая подсветка у клиента
+            }
             if (!me.Dead && held?.Def != null && held.Def.Deploy != DeployKind.None)
             {
                 var fit = World.FitDeploy(me, held.Def.Deploy, me.LastAim, me.DeployRot);

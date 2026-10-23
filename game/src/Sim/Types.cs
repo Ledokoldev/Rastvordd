@@ -864,6 +864,7 @@ namespace Rastvordd.Sim
 
     public sealed class Projectile
     {
+        public Vector2 Origin; public bool FromCrouch;   // откуда и вприсядку ли выстрелили: присевший за низким укрытием стреляет в него
         public Vector2 LowCover; public bool PassedLowCover;   // пролетела над низким укрытием (D56): присевший сразу за ним — защищён
         public int Id;
         public int OwnerId;

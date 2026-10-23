@@ -1249,7 +1249,7 @@ namespace Rastvordd.Sim
                 var dir = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
                 Projectiles.Add(new Projectile
                 {
-                    Id = NextId(), OwnerId = a.Id, Pos = muzzle, Dir = dir,
+                    Id = NextId(), OwnerId = a.Id, Pos = muzzle, Dir = dir, Origin = a.Pos, FromCrouch = a.Crouching,
                     Speed = wd.BulletSpeed * (wd.Pellets > 1 ? 0.92f + 0.16f * (float)Rng.NextDouble() : 1f),
                     RangeLeft = wd.Range, Arrow = arrow, MaxRange = wd.Range,
                     EffRange = wd.EffRange * (a.Peek > 0.5f ? Gunplay.SightEffMul(w.SightZoom) : 1f),
@@ -1921,7 +1921,12 @@ namespace Rastvordd.Sim
                         _legsCovered = !act.Crouching && ((lowT < t && Vector2.Distance(lowAt, at) <= Hitbox.CoverReach) || (p.PassedLowCover && Vector2.Distance(p.LowCover, at) <= Hitbox.CoverReach));
                     }
                 }
-                if (lowT <= 1 && lowT < bestT) { p.LowCover = lowAt; p.PassedLowCover = true; }
+                // симметрично укрытию цели: присевший сразу за низким укрытием (≤ 2,5 м) стреляет в него — чтобы стрелять, привстань
+                if (p.FromCrouch && lowT <= 1 && lowT < bestT && Vector2.Distance(p.Origin, lowAt) <= Hitbox.CoverReach)
+                {
+                    bestT = lowT; hitActor = null; hitWall = null; hitNode = null;
+                }
+                else if (lowT <= 1 && lowT < bestT) { p.LowCover = lowAt; p.PassedLowCover = true; }
 
                 if (bestT <= 1)
                 {

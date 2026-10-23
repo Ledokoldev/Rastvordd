@@ -18,6 +18,27 @@ global uniform float vis_range;
 global uniform float vis_ppm;
 global uniform float vis_strength;
 global uniform sampler2D vis_rays : filter_linear, repeat_enable;
+global uniform float wx_snow;   // 0..1 — снег лежит (оседает шапками на объекты и на землю)
+global uniform float wx_wet;    // 0..1 — мокро (темнее, лужи)
+
+float wx_hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+
+// снег и сырость на спрайте: шапка снега на верхних кромках силуэта (толщина растёт с wx_snow), лёгкий иней; мокрое — темнее
+vec3 wx_object(vec3 col, sampler2D tex, vec2 uv, vec2 tps, vec2 wpx) {
+    if (wx_snow > 0.02) {
+        float capPx = 1.0 + floor(wx_snow * 3.0);
+        float cap = 0.0;
+        for (int i = 1; i <= 4; i++) {
+            if (float(i) <= capPx && texture(tex, uv - vec2(0.0, tps.y * float(i))).a < 0.5) cap = 1.0;
+        }
+        float patchy = step(0.35 - wx_snow * 0.35, wx_hash(floor(wpx / 3.0)));
+        float l = dot(col, vec3(0.3, 0.59, 0.11));
+        col = mix(col, vec3(l) * 1.05 + vec3(0.03, 0.04, 0.06), wx_snow * 0.22);   // иней
+        col = mix(col, vec3(0.88, 0.91, 0.96), cap * patchy * (0.55 + 0.45 * wx_snow));
+    }
+    col *= 1.0 - wx_wet * 0.14;
+    return col;
+}
 
 float vis_at(vec2 world_px) {
     vec2 d = (world_px - vis_player) / vis_ppm;
@@ -39,8 +60,9 @@ vec3 vis_apply(vec3 col, float v) {
 
         const string ObjectShader = "shader_type canvas_item;\n" + Lib + @"
 varying vec2 base_px;
-void vertex() { base_px = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xy; }
-void fragment() { COLOR.rgb = vis_apply(COLOR.rgb, vis_at(base_px)); }
+varying vec2 local_px;
+void vertex() { base_px = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xy; local_px = VERTEX; }
+void fragment() { COLOR.rgb = vis_apply(wx_object(COLOR.rgb, TEXTURE, UV, TEXTURE_PIXEL_SIZE, base_px + local_px), vis_at(base_px)); }
 ";
 
         // земля и плоские слои (участки РТ, декали, входы, провода): видимость по каждому пикселю, а не по точке узла —
@@ -63,7 +85,7 @@ void vertex() {
     float off = (sin(TIME * 1.3 + ph) * 0.7 + sin(TIME * 2.9 + ph * 1.7) * 0.3) * sway_amp * h * h;
     VERTEX.x += round(off);
 }
-void fragment() { COLOR.rgb = vis_apply(COLOR.rgb, vis_at(base_px)); }
+void fragment() { COLOR.rgb = vis_apply(wx_object(COLOR.rgb, TEXTURE, UV, TEXTURE_PIXEL_SIZE, base_px + UV * 64.0), vis_at(base_px)); }
 ";
 
         static ShaderMaterial _treeMat, _grassMat;
@@ -121,6 +143,15 @@ void fragment() {
             Add("vis_ppm", RenderingServer.GlobalShaderParameterType.Float, Iso.PPM);
             Add("vis_strength", RenderingServer.GlobalShaderParameterType.Float, 1f);
             Add("vis_rays", RenderingServer.GlobalShaderParameterType.Sampler2D, new Variant());
+            Add("wx_snow", RenderingServer.GlobalShaderParameterType.Float, 0f);
+            Add("wx_wet", RenderingServer.GlobalShaderParameterType.Float, 0f);
+        }
+
+        /// <summary>Погода в шейдерах: сколько снега лежит и насколько мокро.</summary>
+        public static void SetWeather(float snow, float wet)
+        {
+            RenderingServer.GlobalShaderParameterSet("wx_snow", snow);
+            RenderingServer.GlobalShaderParameterSet("wx_wet", wet);
         }
 
         public static void Update(Vector2 playerWorldPx, Vector2 facing, float cosHalf, float rangeM, Texture2D rays, bool enabled)

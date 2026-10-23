@@ -570,6 +570,8 @@ namespace Rastvordd.Client
             // погода — на любом полигоне
             _sbPanel.Caption("Погода");
             _sbPanel.Choice(SkyInfo.Names, (int)_server.World.Sky, k => { _server.World.SetSky((Rastvordd.Sim.Sky)k); _hud.Toast("Погода: " + SkyInfo.Names[k]); });
+            _sbPanel.Buttons(("Снег лёг", () => _server.World.SnowCover = 1f), ("Растаял", () => _server.World.SnowCover = 0f),
+                             ("Лужи", () => _server.World.Wetness = 1f), ("Сухо", () => _server.World.Wetness = 0f));
         }
 
         void SbFillAim()

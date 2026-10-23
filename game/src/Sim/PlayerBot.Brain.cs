@@ -198,6 +198,15 @@ namespace Rastvordd.Sim
         {
             if (_goals == null) BuildGoals();
             CountHealth();
+            // непогода (буран, гроза): не в бою и не на РТ/рейде — домой, переждать у шкафа (обзор мал, ходьба тяжёлая, холодно)
+            if (_w.Sky is Sky.Blizzard or Sky.Storm && _w.Time - _foeSeenAt > 10 && _w.Time - _me.LastDamagedTime > 10
+                && _rtPhase == RtPhase.None && _raid == null && MyClaim() is Deployable home && Vector2.Distance(home.Pos, _me.Pos) > 6)
+            {
+                if (Doing != "пережидает непогоду дома") Say("непогода", _w.Sky == Sky.Blizzard ? "буран — иду домой пережидать" : "гроза — иду домой", 60);
+                Doing = "пережидает непогоду дома";
+                GoTo(home.Pos + new Vector2(0.6f, 0.6f), 3f, ref cmd);
+                return;
+            }
             // цели пересчитываются раз в 0,2 с (вразнобой у разных ботов), действие — каждый тик;
             // сразу — если по мне попали или появилась/сменилась угроза
             bool urgent = _w.Time - _me.LastDamagedTime < 0.05f || _threat != _lastThreatDecided || _redecide;

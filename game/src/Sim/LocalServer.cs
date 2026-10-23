@@ -164,6 +164,7 @@ namespace Rastvordd.Sim
         public float Time;
         public float DayTime;      // 0..1, см. World.TimeOfDay
         public Sky Sky;            // погода
+        public float WindAngle, WindStrength, SnowCover, Wetness;
         public SelfInfo Self;
         public List<ActorSnap> Actors = new();
         public List<ProjSnap> Projectiles = new();
@@ -707,7 +708,7 @@ namespace Rastvordd.Sim
         public Snapshot BuildSnapshot(int clientId)
         {
             var me = World.Find(clientId);
-            var snap = new Snapshot { Tick = World.Tick, Time = World.Time, DayTime = World.TimeOfDay, Sky = World.Sky };
+            var snap = new Snapshot { Tick = World.Tick, Time = World.Time, DayTime = World.TimeOfDay, Sky = World.Sky, WindAngle = World.WindAngle, WindStrength = World.WindStrength, SnowCover = World.SnowCover, Wetness = World.Wetness };
             snap.Self = BuildSelf(me);
             snap.Self.Place = World.MonumentAt(me.Pos)?.Name;
             snap.Self.Ui = World.BuildUi(me);

@@ -822,6 +822,7 @@ namespace Rastvordd.Sim
             Events.Clear();
             Time += Dt;
             Tick++;
+            StepWeather();
             Noises.RemoveAll(n => Time - n.Time > 3f);
             long t0 = SimPerf.Begin();
 
@@ -894,7 +895,7 @@ namespace Rastvordd.Sim
                 speed = WalkSpeed + (SprintSpeed - WalkSpeed) * k;
                 sprint = k > 0.5f;
             }
-            speed *= SpeedMul(a);   // тяжёлая броня: до −15% (D47)
+            speed *= SpeedMul(a) * WeatherSpeedMul(a, move);   // тяжёлая броня: до −15% (D47); снег, буран, ветер
             a.Vel = Geo.MoveToward(a.Vel, move * speed, Accel * Dt);
             var before = a.Pos;
             a.Pos += a.Vel * Dt;

@@ -98,6 +98,19 @@ void fragment() {
         col *= mix(0.8, 1.14, clamp(lit, 0.0, 1.0));
 
         if (best - second < 0.03) col *= 0.86;   // кромка на стыке поверхностей
+
+        // погода: сырость темнит землю, в низинах собираются лужи; снег ложится пятнами, растущими до сплошного покрова
+        if (id != 3) {
+            col *= 1.0 - wx_wet * 0.1;
+            float pn = texture(macro_noise, m / 9.0 + vec2(0.71, 0.29)).r * 0.7 + texture(detail_noise, m / 2.5).r * 0.3;
+            float puddle = smoothstep(0.86 - wx_wet * 0.12, 0.88 - wx_wet * 0.12, pn) * step(0.05, wx_wet) * (1.0 - step(0.5, wx_snow));
+            float glint = step(0.9, texture(detail_noise, m / 1.3 + vec2(TIME * 0.02, 0.0)).r);
+            vec3 water = mix(col * 0.6, vec3(0.42, 0.48, 0.56), 0.6) + glint * 0.12;   // отражение неба, блики
+            col = mix(col, water, puddle);
+            float sn = texture(macro_noise, m / 14.0 + vec2(0.13, 0.57)).r * 0.6 + texture(detail_noise, m / 3.0).r * 0.4;
+            float cover = smoothstep(1.02 - wx_snow * 1.15, 1.06 - wx_snow * 1.15, sn);
+            col = mix(col, texture(t_snow, tuv).rgb * 1.03, cover);
+        }
         COLOR = vec4(vis_apply(col, vis_at((m - vec2(map_size * 0.5)) * px_per_m)), 1.0);
     }
 }";

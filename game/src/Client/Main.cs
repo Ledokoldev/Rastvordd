@@ -183,6 +183,8 @@ namespace Rastvordd.Client
                     if (best != null) { me.Pos = best.Center + (best.IsFloor ? new SVec(-1.6f, 0.4f) : new SVec(0.2f, 1.1f)); _autoAim = best.Center; }
                 }
                 else if (a == "hdone") _hammerMenu.Release();
+                else if (a.StartsWith("snowc")) _server.World.SnowCover = float.Parse(a.Substring(5), System.Globalization.CultureInfo.InvariantCulture);   // отладка: сколько снега лежит
+                else if (a.StartsWith("wetc")) _server.World.Wetness = float.Parse(a.Substring(4), System.Globalization.CultureInfo.InvariantCulture);
                 else if (a.StartsWith("sky")) _server.World.SetSky((Rastvordd.Sim.Sky)int.Parse(a.Substring(3)));   // отладка: погода 0–7
                 else if (a.StartsWith("sbsub")) SbSetSub(int.Parse(a.Substring(5)));   // отладка: полигон — мишени/боты/дуэль
                 else if (a.StartsWith("hmode")) _hammerMode = int.Parse(a.Substring(5));   // отладка: режим киянки (1–5, 9 — снос)
@@ -1119,10 +1121,11 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 Acoustics.Update(me, _cur.Nodes, TerrainView.BiomeAt(_map, me), yard, delta);
                 if (!_overview)
                     _weather.Update(_cam.Position, GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X, TerrainView.BiomeAt(_map, me),
-                                    World.NightFactorAt(_forcedDay ?? _cur.DayTime), _cur.Sky, dt);
+                                    World.NightFactorAt(_forcedDay ?? _cur.DayTime), _cur.Sky, dt, _cur.WindAngle, _cur.WindStrength);
+                VisionFx.SetWeather(_cur.SnowCover, _cur.Wetness);
             }
             _ambient.Update(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _forcedDay ?? _cur.DayTime, dt);
-            _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime);
+            _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime) * Weather.Grade(_cur.Sky);   // + цветокор погоды
             {
                 // свет РТ: фонари ночью, лампы корпуса Подстанции — при включённом щитке
                 bool powered = _cur.DecorSprites.Exists(d => d.sprite == "props/subst_main_panel_on");
@@ -1938,7 +1941,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             var feetPx = canvas * _selfPx;
             var selfM = new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
             var dir = new Vector2(_aim.X - selfM.X, _aim.Y - selfM.Y);
-            float range = (50 + 30 * _peek) * (1f - 0.4f * World.NightFactorAt(_forcedDay ?? _cur.DayTime));
+            float range = (50 + 30 * _peek) * (1f - 0.4f * World.NightFactorAt(_forcedDay ?? _cur.DayTime)) * SkyInfo.ViewMul(_cur.Sky);   // ливень, снегопад, буран — ближе
             if (_rays == null) { _rays = new VisionRays(_map); if (_build != null) _rays.Dynamic.AddRange(_build.Occluders); }
             bool crouched = _cur.Actors.Find(x => x.Id == _myId).Crouching;
             _rays.Update(selfM, range, _cur.Nodes, crouched);   // в приседе низкое укрытие вплотную закрывает обзор

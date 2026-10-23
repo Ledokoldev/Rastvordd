@@ -1,0 +1,257 @@
+<title>Конструктор заставки «Объект 42»</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Sans+Narrow:wght@400;700&family=PT+Sans:wght@400;700&family=PT+Mono&display=swap">
+<style>
+/* Пульт бункера: тёмный бетон, жёлто-чёрная разметка, красная аварийка. Слева — блоки сцены, справа — готовый промт (липкий). */
+:root {
+  --bg: #141518; --panel: #1d1f23; --line: #2e3137; --ink: #dcd8cf; --dim: #8f8c85;
+  --amber: #e2a72e; --red: #d4402f; --chip: #25282d; --chip-on: #3a2d12;
+  --display: "PT Sans Narrow", "Arial Narrow", sans-serif; --body: "PT Sans", "Segoe UI", sans-serif; --mono: "PT Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+.wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 18px }
+header { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 24px; border-bottom: 4px solid; border-image: repeating-linear-gradient(-45deg, var(--amber) 0 10px, #111 10px 20px) 4; padding-bottom: 12px }
+h1 { font: 700 34px/1 var(--display); letter-spacing: .04em; text-transform: uppercase; margin: 0; text-wrap: balance }
+h1 b { color: var(--red) }
+.sub { color: var(--dim); margin: 0; max-width: 62ch }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); gap: 18px; align-items: start }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr) } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0 }
+.lbl { font: 700 13px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--amber) }
+.chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chip { font: 14px/1.2 var(--body); color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 3px; padding: 6px 10px; cursor: pointer }
+.chip:hover { border-color: var(--dim) }
+.chip[aria-pressed="true"] { background: var(--chip-on); border-color: var(--amber); color: #f4d48c }
+.chip:focus-visible, button:focus-visible, textarea:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px }
+.shot { text-align: left; background: var(--chip); border: 1px solid var(--line); border-radius: 3px; padding: 10px 12px; color: var(--ink); cursor: pointer; display: grid; gap: 2px }
+.shot b { font: 700 16px/1.1 var(--display); letter-spacing: .05em; text-transform: uppercase }
+.shot span { color: var(--dim); font-size: 13px }
+.shot[aria-pressed="true"] { border-color: var(--red); box-shadow: inset 3px 0 0 var(--red) }
+textarea { width: 100%; min-height: 64px; resize: vertical; background: #111214; color: var(--ink); border: 1px solid var(--line); border-radius: 3px; padding: 8px 10px; font: 14px/1.45 var(--body) }
+.row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center }
+.out { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px) }
+.prompt { font: 13.5px/1.55 var(--mono); white-space: pre-wrap; word-break: break-word; background: #0e0f11; border: 1px solid var(--line); border-left: 3px solid var(--red); border-radius: 3px; padding: 12px; max-height: 58vh; overflow: auto; margin: 0 }
+.btns { display: flex; flex-wrap: wrap; gap: 8px }
+button.act { font: 700 15px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; border: 0; border-radius: 3px; padding: 11px 16px; cursor: pointer; background: var(--amber); color: #15120a }
+button.sec { background: var(--chip); color: var(--ink); border: 1px solid var(--line) }
+.meta { color: var(--dim); font: 12px var(--mono); font-variant-numeric: tabular-nums }
+.toast { color: #9fd18b; font-size: 13px; min-height: 1.2em }
+.saved { display: grid; gap: 6px }
+.saved .it { display: flex; gap: 8px; align-items: center; justify-content: space-between; background: var(--chip); border: 1px solid var(--line); border-radius: 3px; padding: 6px 8px; font-size: 13px; min-width: 0 }
+.saved .it span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0 }
+.saved .it button { background: none; border: 0; color: var(--amber); cursor: pointer; font: 13px var(--body) }
+.hint { color: var(--dim); font-size: 13px; margin: 0 }
+@media (prefers-reduced-motion: no-preference) { .chip, .shot { transition: border-color .12s, background .12s } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Объект 42 · <b>спуск</b></h1>
+    <p class="sub">Конструктор промтов для заставки: выбери кадр-шаблон, поменяй блоки, скопируй английский промт в Veo, Kling, Runway или ChatGPT.</p>
+  </header>
+
+  <div class="grid">
+    <div class="panel" style="gap:16px">
+      <div class="lbl">Кадр-шаблон</div>
+      <div class="shots" id="shots"></div>
+
+      <div class="lbl">Что делаем</div>
+      <div class="row">
+        <div class="chips" id="mode"></div>
+        <div class="chips" id="flags"></div>
+      </div>
+
+      <div class="lbl">Персонажи</div>
+      <div class="chips" id="cast"></div>
+
+      <div class="lbl">Место</div>
+      <div class="chips" id="place"></div>
+
+      <div class="lbl">Действие</div>
+      <textarea id="action" aria-label="Действие в кадре (по-английски)"></textarea>
+
+      <div class="lbl">Камера — план</div>
+      <div class="chips" id="framing"></div>
+      <div class="lbl">Камера — ракурс</div>
+      <div class="chips" id="angle"></div>
+      <div class="lbl">Камера — движение</div>
+      <div class="chips" id="move"></div>
+
+      <div class="lbl">Свет</div>
+      <div class="chips" id="light"></div>
+
+      <div class="lbl">Стиль</div>
+      <div class="chips" id="style"></div>
+
+      <div class="lbl">Звук (только Veo)</div>
+      <textarea id="sound" aria-label="Звук" style="min-height:44px"></textarea>
+
+      <div class="lbl">Своё дополнение</div>
+      <textarea id="extra" aria-label="Дополнение к промту" placeholder="Например: Soldier A has a scar on the left cheek…" style="min-height:44px"></textarea>
+    </div>
+
+    <div class="panel out">
+      <div class="row" style="justify-content:space-between">
+        <div class="lbl">Промт</div>
+        <div class="meta" id="meta"></div>
+      </div>
+      <pre class="prompt" id="out" tabindex="0"></pre>
+      <div class="btns">
+        <button class="act" id="copy">Копировать</button>
+        <button class="act sec" id="save">Запомнить</button>
+      </div>
+      <div class="toast" id="toast" role="status"></div>
+      <p class="hint">Для видео: загрузи стартовый кадр из <code>docs/cinematic</code> (image-to-video) и вставь промт. Опорные <code>ref_sobr</code>, <code>ref_ozk</code> прикладывай как референсы персонажей, если сервис умеет.</p>
+      <div class="lbl">Запомненные (в этом браузере)</div>
+      <div class="saved" id="saved"><p class="hint" id="empty">Пока пусто: нажми «Запомнить», и промт останется здесь.</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CAST = {
+  A: "Soldier A: Russian SOBR special forces operator in full heavy armor — dark grey-black uniform, black plate carrier with ceramic plates and magazine pouches, black balaclava, titanium Altyn ballistic helmet with the armored visor raised, knee pads, gloves; AK-74M with a suppressor and an underbarrel flashlight.",
+  B: "Soldier B: olive-green rubberized OZK L-1 hazmat suit with hood, GP-5 gas mask with round glass eyepieces and a side filter canister, rubber gloves and boots, canvas chest rig over the suit, dosimeter on the chest; AKM with an underbarrel flashlight."
+};
+const OPT = {
+  mode: [["img", "Стартовая картинка"], ["vid", "Видео-клип"]],
+  flags: [["sound", "Звук (Veo)"], ["nomusic", "Без музыки и текста"]],
+  cast: [["AB", "Оба"], ["A", "Только СОБР"], ["B", "Только ОЗК"]],
+  place: [
+    ["cage", "Огромная клеть лифта", "Inside a HUGE industrial Soviet freight elevator cage, like a mine-shaft cage, about 6 m wide, 5 m deep and 4 m high, the soldiers look small inside it: riveted steel girders with diagonal bracing, steel mesh walls with the rough concrete shaft sliding past, yellow-black hazard stripes on beams and floor edge, caged red emergency lamps on the high ceiling beams, thick cables above, a big control panel with round buttons and a dial, massive double sliding steel doors."],
+    ["exit", "Выход из клети", "At the exit of the huge freight elevator cage (6 m wide, 4 m high, steel girders, mesh walls, hazard stripes, red lamps), its massive sliding doors wide open, leading into a dark concrete corridor."],
+    ["corr", "Коридор бункера", "A long concrete corridor of the abandoned Soviet top-secret command bunker 'Object 42', 1980s: raw concrete, peeling green-grey paint, rust, cable trays along the ceiling, pipes, hazard stripes, wet floor."],
+    ["booth", "Будка лифта снаружи", "The surface elevator head-house of a secret Soviet bunker: a monumental two-storey reinforced concrete blockhouse about 12 m wide and 8 m tall, thick sloped walls, a steel headframe with a large cable winch and pulley wheel on top, a big faded red star on the facade, loudspeaker horns and amber warning lamps on the corners, hazard stripes, huge steel blast doors with yellow-black jambs, a concrete ramp. Overcast dusk, wet ground, birch forest behind."]
+  ],
+  framing: [["wide", "Общий", "wide shot"], ["med", "Средний", "medium shot"], ["close", "Крупный", "close-up"], ["ots", "Через плечо", "over-the-shoulder shot"]],
+  angle: [["front", "Спереди", "from the front"], ["behind", "Сзади", "from behind, at shoulder height"], ["side", "Строго сбоку", "strict side profile, camera perpendicular"], ["low", "Снизу", "low angle"], ["level", "Ровно, без искажений", "eye-level, strictly level horizon, straight verticals, no lens distortion"]],
+  move: [["static", "Статика", "static camera"], ["push", "Медленный наезд", "slow push-in"], ["follow", "Следует за ними", "camera slowly follows them"], ["shake", "Лёгкая тряска", "subtle handheld vibration"]],
+  light: [
+    ["red", "Красная аварийка", "dim red emergency lights"],
+    ["flash", "Лучи фонарей", "white flashlight beams cutting through the dust"],
+    ["dark", "Почти кромешная тьма", "almost pitch-black, 80 percent of the frame is black, only small dim red lamps far away and the flashlight beams"],
+    ["dust", "Пыль в воздухе", "dust particles hanging in the air"],
+    ["dusk", "Пасмурные сумерки", "overcast dusk light"]
+  ],
+  style: [
+    ["film", "Кино 35 мм", "photorealistic cinematic film still, 35mm anamorphic lens, film grain"],
+    ["grade", "Холодная гамма", "desaturated cold color grade with deep blacks"],
+    ["gritty", "Грязь и ржавчина", "gritty, realistic worn materials"],
+    ["arc", "Как трейлер Arc Raiders", "high-end game trailer look, dramatic composition"]
+  ]
+};
+const SHOTS = [
+  { id: "s1", name: "1 · Спуск", note: "в клети, осматривают оружие", mode: "vid", cast: "AB", place: "cage", framing: "med", angle: "front", move: "shake", light: ["red", "dust"], style: ["film", "grade", "gritty"],
+    action: "Both soldiers stand side by side and silently check their rifles: Soldier A racks the charging handle and glances into the chamber, Soldier B pulls the magazine, looks at it and slaps it back in. Shadows of the shaft slide upward through the mesh. At the end the cage jolts to a hard stop, dust falls from above, both look up.",
+    sound: "elevator cable hum, metal rattling, rifle clicks, breathing through the gas mask, heavy clunk on stop" },
+  { id: "s2", name: "2 · Двери", note: "вид сзади, двери в темноту", mode: "vid", cast: "AB", place: "cage", framing: "ots", angle: "behind", move: "follow", light: ["red", "dust"], style: ["film", "grade", "gritty"],
+    action: "The massive sliding doors grind open in front of them revealing a pitch-black concrete corridor. They raise their rifles to the shoulder and slowly step forward out of the cage, aiming into the darkness.",
+    sound: "grinding steel doors, distant dripping water, low ventilation drone" },
+  { id: "s3", name: "3 · Сигнал", note: "сбоку, фонари и жест «вперёд»", mode: "vid", cast: "AB", place: "exit", framing: "wide", angle: "side", move: "static", light: ["red", "flash", "dust"], style: ["film", "grade", "gritty"],
+    action: "They step out of the cage into the dark corridor and click on their underbarrel flashlights. They exchange a glance. Soldier A raises his left arm, elbow bent at 90 degrees, hand shaped like a finger-gun pointing forward, and pumps the forearm forward twice — the military 'move forward' hand signal. Soldier B nods.",
+    sound: "flashlight clicks, muffled breathing, distant metallic creak" },
+  { id: "s4", name: "4 · Во тьму", note: "сзади, растворяются в темноте", mode: "vid", cast: "AB", place: "corr", framing: "wide", angle: "behind", move: "static", light: ["dark", "flash"], style: ["film", "grade", "gritty"],
+    action: "The two soldiers advance in tactical formation, flashlight beams sweeping the walls and pipes, getting smaller until they dissolve into the darkness and only two faint beams remain, then the beams turn the corner and everything goes black.",
+    sound: "footsteps fading, ventilation drone, a far-away metallic bang at the very end" },
+  { id: "b", name: "Будка лифта", note: "поверхность, экстерьер", mode: "img", cast: "", place: "booth", framing: "wide", angle: "level", move: "static", light: ["dusk"], style: ["film", "grade", "gritty"],
+    action: "No people. Three-quarter view of the building from about 25 m.", sound: "" }
+];
+
+const st = { shot: "s1", mode: "vid", flags: new Set(["nomusic"]), cast: "AB", place: "cage", framing: "med", angle: "front", move: "shake", light: new Set(), style: new Set() };
+const $ = id => document.getElementById(id);
+
+function chips(id, list, multi) {
+  const box = $(id); box.innerHTML = "";
+  for (const [key, label] of list) {
+    const b = document.createElement("button");
+    b.className = "chip"; b.type = "button"; b.textContent = label; b.dataset.k = key;
+    b.addEventListener("click", () => {
+      if (multi) { st[id].has(key) ? st[id].delete(key) : st[id].add(key); } else st[id] = key;
+      sync(); build();
+    });
+    box.appendChild(b);
+  }
+}
+function sync() {
+  for (const id of ["mode", "flags", "cast", "place", "framing", "angle", "move", "light", "style"])
+    for (const b of $(id).children) b.setAttribute("aria-pressed", st[id] instanceof Set ? st[id].has(b.dataset.k) : st[id] === b.dataset.k);
+  for (const b of $("shots").children) b.setAttribute("aria-pressed", b.dataset.k === st.shot);
+}
+function applyShot(s) {
+  Object.assign(st, { shot: s.id, mode: s.mode, cast: s.cast, place: s.place, framing: s.framing, angle: s.angle, move: s.move, light: new Set(s.light), style: new Set(s.style) });
+  if (s.mode === "vid") st.flags.add("sound"); else st.flags.delete("sound");
+  $("action").value = s.action; $("sound").value = s.sound;
+  sync(); build();
+}
+const pick = (list, key) => (list.find(o => o[0] === key) || [])[2] || "";
+
+function build() {
+  const parts = [];
+  if (st.mode === "img") parts.push("Landscape 3:2 frame, a single still image.");
+  const cast = st.cast === "AB" ? "Two soldiers." : st.cast ? "One soldier." : "";
+  if (cast) parts.push(cast);
+  parts.push(pick(OPT.place, st.place));
+  const act = $("action").value.trim(); if (act) parts.push(act);
+  const cam = [pick(OPT.framing, st.framing), pick(OPT.angle, st.angle), st.mode === "vid" ? pick(OPT.move, st.move) : ""].filter(Boolean).join(", ");
+  parts.push("Camera: " + cam + ".");
+  if (st.cast.includes("A")) parts.push(CAST.A);
+  if (st.cast.includes("B")) parts.push(CAST.B);
+  const light = [...st.light].map(k => pick(OPT.light, k)).filter(Boolean);
+  if (light.length) parts.push("Lighting: " + light.join(", ") + ".");
+  const style = [...st.style].map(k => pick(OPT.style, k)).filter(Boolean);
+  if (style.length) parts.push(style.join(", ").replace(/^./, c => c.toUpperCase()) + ".");
+  const extra = $("extra").value.trim(); if (extra) parts.push(extra);
+  if (st.flags.has("nomusic")) parts.push("No music, no text, no logos, no watermark.");
+  const snd = $("sound").value.trim();
+  if (st.mode === "vid" && st.flags.has("sound") && snd) parts.push("Sound: " + snd + ".");
+  const text = parts.join(" ");
+  $("out").textContent = text;
+  $("meta").textContent = text.length + " симв. · " + text.split(/\s+/).length + " слов";
+  return text;
+}
+
+function toast(t) { $("toast").textContent = t; clearTimeout(toast.t); toast.t = setTimeout(() => $("toast").textContent = "", 2200); }
+$("copy").addEventListener("click", () => {
+  const text = build();
+  navigator.clipboard.writeText(text).then(() => toast("Скопировано"), () => {
+    const r = document.createRange(); r.selectNodeContents($("out"));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Выделено — нажми Ctrl+C");
+  });
+});
+
+const KEY = "o42-prompts";
+function loadSaved() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch { return []; } }
+function renderSaved() {
+  const list = loadSaved(), box = $("saved");
+  box.querySelectorAll(".it").forEach(n => n.remove());
+  $("empty").hidden = list.length > 0;
+  list.forEach((p, i) => {
+    const it = document.createElement("div"); it.className = "it";
+    const sp = document.createElement("span"); sp.textContent = p.name + " — " + p.text; it.appendChild(sp);
+    const c = document.createElement("button"); c.textContent = "копия"; c.addEventListener("click", () => navigator.clipboard.writeText(p.text).then(() => toast("Скопировано"), () => toast("Не скопировалось")));
+    const d = document.createElement("button"); d.textContent = "удалить"; d.addEventListener("click", () => { const l = loadSaved(); l.splice(i, 1); try { localStorage.setItem(KEY, JSON.stringify(l)); } catch {} renderSaved(); });
+    it.append(c, d); box.appendChild(it);
+  });
+}
+$("save").addEventListener("click", () => {
+  const l = loadSaved(); const s = SHOTS.find(x => x.id === st.shot);
+  l.unshift({ name: (s ? s.name : "Свой") + (st.mode === "img" ? " · картинка" : " · видео"), text: build() });
+  try { localStorage.setItem(KEY, JSON.stringify(l.slice(0, 30))); toast("Запомнено"); } catch { toast("Браузер не даёт сохранить"); }
+  renderSaved();
+});
+
+for (const s of SHOTS) {
+  const b = document.createElement("button"); b.className = "shot"; b.type = "button"; b.dataset.k = s.id;
+  b.innerHTML = "<b></b><span></span>"; b.querySelector("b").textContent = s.name; b.querySelector("span").textContent = s.note;
+  b.addEventListener("click", () => applyShot(s)); $("shots").appendChild(b);
+}
+chips("mode", OPT.mode); chips("flags", OPT.flags, true); chips("cast", OPT.cast); chips("place", OPT.place);
+chips("framing", OPT.framing); chips("angle", OPT.angle); chips("move", OPT.move); chips("light", OPT.light, true); chips("style", OPT.style, true);
+for (const id of ["action", "sound", "extra"]) $(id).addEventListener("input", build);
+applyShot(SHOTS[0]); renderSaved();
+</script>

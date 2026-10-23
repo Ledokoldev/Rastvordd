@@ -1,7 +1,7 @@
 # Референсы для заставки спуска в «Объект 42» (видео по кадрам): реалистичные картинки через Codex (gpt-image), не пиксель-арт.
 # Этап 1 — опорные (бойцы, будка лифта), этап 2 — стартовые кадры 4 сцен с опорными как образцом.
 # Запуск: powershell -File scripts/gen-cinematic.ps1 [-Stage 1|2|0] (0 — оба)   → docs/cinematic/*.png
-param([int]$Stage = 0, [int]$Parallel = 4)
+param([int]$Stage = 0, [int]$Parallel = 4, [string[]]$Only = @(), [int]$Variants = 1)   # -Only id1,id2 -Variants 2 → id_v1, id_v2
 
 $root = Split-Path -Parent $PSScriptRoot
 $codex = Get-ChildItem "C:\Program Files\WindowsApps" -Directory -Filter "OpenAI.Codex_*" -ErrorAction SilentlyContinue |
@@ -20,19 +20,25 @@ $CAB = "The elevator cabin interior: a heavy enclosed Soviet freight lift for 4 
 $jobs = @(
     @{ id = 'ref_sobr'; stage = 1; ref = @(); img = "Character reference sheet on a plain neutral grey studio background, full body, two views side by side: front view and back view, even soft studio light. $SOBR $STYLE" },
     @{ id = 'ref_ozk'; stage = 1; ref = @(); img = "Character reference sheet on a plain neutral grey studio background, full body, two views side by side: front view and back view, even soft studio light. $OZK $STYLE" },
-    @{ id = 'ref_lift_booth'; stage = 1; ref = @('game\art\concept\o42_lift_n2.png'); img = "Realistic photo of the surface elevator head-house of a secret Soviet bunker, matching the attached concept: a squat reinforced concrete block booth, a big faded red star painted on the flat roof, a cable winch on the roof, loudspeaker horns and amber warning lamps on the four corners, hazard-striped white bands on the roof, heavy double steel doors with yellow-black striped jambs. Overcast dusk, wet ground, birch forest behind, three-quarter view. $STYLE" },
+    @{ id = 'ref_lift_booth'; stage = 1; ref = @('game\art\concept\o42_lift_n2.png'); img = "Realistic architectural photo of the surface elevator head-house of a secret Soviet bunker, design based on the attached concept but MUCH bigger and more massive: a monumental two-storey reinforced concrete blockhouse about 12 m wide and 8 m tall, thick sloped concrete walls with deep recesses, a heavy steel headframe with a large cable winch and pulley wheel on top, a big faded red star on the facade above the entrance, loudspeaker horns and amber warning lamps on all four corners, hazard stripes, huge double steel blast doors with yellow-black striped jambs, ventilation grilles, stairs and a concrete ramp to the doors. Strictly level horizon, straight vertical lines, no lens distortion, eye-level three-quarter view from 25 m. Overcast dusk, wet ground, birch forest behind. $STYLE" },
     @{ id = 'shot1_lift_descent'; stage = 2; ref = @('ref_sobr', 'ref_ozk'); img = "Landscape 3:2 frame. Inside the elevator cabin descending. Both soldiers stand side by side facing the camera, checking their rifles: Soldier A pulls the charging handle and looks into the chamber, Soldier B checks the magazine. Medium shot from the front, red emergency lamp light from above, moving shadows of the shaft through the door gap. $CAB $SOBR $OZK $STYLE" },
     @{ id = 'shot2_doors_back'; stage = 2; ref = @('ref_sobr', 'ref_ozk'); img = "Landscape 3:2 frame. Camera behind the two soldiers at shoulder height inside the elevator cabin, looking past their backs at the double steel doors sliding open onto a pitch-black concrete corridor; both raise their rifles. Over-the-shoulder composition, red light behind them, darkness ahead. $CAB $SOBR $OZK $PLACE $STYLE" },
     @{ id = 'shot3_side_signal'; stage = 2; ref = @('ref_sobr', 'ref_ozk'); img = "Landscape 3:2 frame. Strict side profile view, camera perpendicular to the soldiers, as they step out of the elevator into a dark corridor; both underbarrel flashlights are on, two bright white beams cutting through the dust. Soldier A raises his left arm with the elbow bent at 90 degrees, hand forming a finger-gun pointing forward - the military 'move forward' hand signal; Soldier B looks at him. $SOBR $OZK $PLACE $STYLE" },
-    @{ id = 'shot4_into_dark'; stage = 2; ref = @('ref_sobr', 'ref_ozk'); img = "Landscape 3:2 frame. Wide shot from behind: a long dark concrete corridor of the bunker, distant red emergency lamps, the two soldiers walking away in tactical formation with flashlight beams sweeping the walls, already small figures fading into the darkness. $SOBR $OZK $PLACE $STYLE" }
+    @{ id = 'shot4_into_dark'; stage = 2; ref = @('ref_sobr', 'ref_ozk'); img = "Landscape 3:2 frame. Wide shot from behind, almost pitch-black: a long concrete corridor of the bunker lost in near total darkness, only a few small dim red emergency lamps glowing far away along the ceiling, and the two flashlight beams of the soldiers. The two soldiers walk away in tactical formation, seen mostly as dark silhouettes lit from the back by a faint red glow, already small figures dissolving into the blackness. 80 percent of the frame is black. $SOBR $OZK $STYLE" }
 )
 
 $running = @()
+$all = @()
 foreach ($j in $jobs) {
+    if ($Only.Count -gt 0 -and $Only -notcontains $j.id) { continue }
+    if ($Variants -le 1) { $all += $j; continue }
+    for ($v = 1; $v -le $Variants; $v++) { $c = $j.Clone(); $c.id = "$($j.id)_v$v"; $all += $c }
+}
+foreach ($j in $all) {
     if ($Stage -ne 0 -and $j.stage -ne $Stage) { continue }
     $rel = "docs/cinematic/$($j.id).png"
     if (Test-Path (Join-Path $root $rel)) { Write-Host "есть: $($j.id)"; continue }
-    if ($Stage -eq 0 -and $j.stage -eq 2) { $running | ForEach-Object { $_.WaitForExit() }; $running = @() }   # этап 2 — после опорных
+    if ($Stage -eq 0 -and $j.stage -eq 2 -and $Only.Count -eq 0) { $running | ForEach-Object { $_.WaitForExit() }; $running = @() }   # этап 2 — после опорных
     while (($running | Where-Object { -not $_.HasExited }).Count -ge $Parallel) { Start-Sleep -Milliseconds 500 }
     $refs = @()
     foreach ($r in $j.ref) { $p = if ($r -like '*\*') { Join-Path $root $r } else { Join-Path $out "$r.png" }; if (Test-Path $p) { $refs += $p } }

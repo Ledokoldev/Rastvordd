@@ -9,7 +9,6 @@ namespace Rastvordd.Client
     /// </summary>
     public static class Sfx
     {
-        static readonly Dictionary<string, AudioStream> Cache = new();
         static Node _parent;
         static readonly RandomNumberGenerator Rng = new();
         /// <summary>Сколько раз звучал каждый звук (отладка: --sfxlog печатает при выходе).</summary>
@@ -17,15 +16,37 @@ namespace Rastvordd.Client
 
         public static void Init(Node parent) => _parent = parent;
 
+        static readonly Dictionary<string, AudioStream[]> Variants = new();
+
+        /// <summary>
+        /// Звук по id. Варианты: audio/w|b/{id}_01…_08.wav (оружие, стройка — пользовательские записи) — каждый раз случайный;
+        /// одиночный файл: audio/w|b/{id}.wav, потом audio/real/{id}.mp3, потом синтезированная заглушка audio/{id}.wav.
+        /// </summary>
         public static AudioStream Get(string name)
         {
-            if (Cache.TryGetValue(name, out var s)) return s;
-            // сначала настоящие сэмплы (audio/real/*.mp3), потом синтезированные заглушки
-            var real = $"res://audio/real/{name}.mp3";
-            var res = $"res://audio/{name}.wav";
-            s = ResourceLoader.Exists(real) ? GD.Load<AudioStream>(real) : ResourceLoader.Exists(res) ? GD.Load<AudioStream>(res) : null;
-            Cache[name] = s;
-            return s;
+            if (!Variants.TryGetValue(name, out var list))
+            {
+                var found = new List<AudioStream>();
+                foreach (var dir in new[] { "w", "b" })
+                {
+                    for (int i = 1; i <= 8; i++)
+                    {
+                        var p = $"res://audio/{dir}/{name}_{i:00}.wav";
+                        if (ResourceLoader.Exists(p)) found.Add(GD.Load<AudioStream>(p));
+                    }
+                    var one = $"res://audio/{dir}/{name}.wav";
+                    if (found.Count == 0 && ResourceLoader.Exists(one)) found.Add(GD.Load<AudioStream>(one));
+                }
+                if (found.Count == 0)
+                {
+                    var real = $"res://audio/real/{name}.mp3";
+                    var res = $"res://audio/{name}.wav";
+                    var s = ResourceLoader.Exists(real) ? GD.Load<AudioStream>(real) : ResourceLoader.Exists(res) ? GD.Load<AudioStream>(res) : null;
+                    if (s != null) found.Add(s);
+                }
+                Variants[name] = list = found.ToArray();
+            }
+            return list.Length == 0 ? null : list[list.Length == 1 ? 0 : (int)Rng.RandiRange(0, list.Length - 1)];
         }
 
         /// <summary>Звук по id, а если файла ещё нет — заглушка (D46: свои звуки кладутся потом по имени файла).</summary>

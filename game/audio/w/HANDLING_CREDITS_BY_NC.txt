@@ -1,0 +1,12 @@
+TEST HANDLING ASSETS — CC BY-NC 4.0
+Author: PNMCarrieRailfan; library credited by uploader: Feli Ignite's Sound Effects Library Guns & Weapons.
+FAL magazine removal: https://freesound.org/people/PNMCarrieRailfan/sounds/682037/
+FAL magazine insertion: https://freesound.org/people/PNMCarrieRailfan/sounds/682035/
+SVD bolt source: https://freesound.org/people/PNMCarrieRailfan/sounds/681496/
+License: https://creativecommons.org/licenses/by-nc/4.0/
+Obtained from public HQ preview MP3s, not the downloaded originals. Decoded to WAV.
+Edits: trimmed FAL cues, 0.3s pause between cues, gentle Heavy/Metal EQ and peak balancing.
+SVD bolt takes: 0.78-1.85s, 2.93-4.40s, 5.65-6.55s. No added reverb or synthesized metal.
+These are adapted FAL magazine sounds combined with SVD-labeled bolt recordings.
+Noncommercial test use; do not treat as cleared for commercial release.
+Shots retain their separate SuperPhat CC0 provenance, see ../CREDITS.txt.

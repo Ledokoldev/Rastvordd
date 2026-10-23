@@ -1084,7 +1084,16 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         break;
                     case SimEventKind.Reload:
                         if (_actorViews.TryGetValue(e.ActorId, out var reloader)) reloader.StartReload(Items.Get(e.Text)?.Weapon?.ReloadTime ?? 2f);
-                        Sfx.Play(Sfx.Pick("reload_" + (e.Text ?? "").Replace("weapon_", ""), "reload_ak"), Iso.Px(e.Pos), -2, 25, 0.02f);   // reload_akm… → заглушка reload_ak
+                        {
+                            string wn = (e.Text ?? "").Replace("weapon_", "");
+                            Sfx.Play(Sfx.Pick("reload_" + wn, "reload_ak"), Iso.Px(e.Pos), -2, 25, 0.02f);   // reload_akm… → заглушка reload_ak
+                            // затвор в конце перезарядки (свои записи: bolt_akm, bolt_svd)
+                            if (Sfx.Get("bolt_" + wn) != null)
+                            {
+                                var bp = Iso.Px(e.Pos); float rt = Items.Get(e.Text)?.Weapon?.ReloadTime ?? 2f;
+                                GetTree().CreateTimer(rt * 0.85f).Timeout += () => Sfx.Play("bolt_" + wn, bp, -2, 25, 0.02f);
+                            }
+                        }
                         break;
                     case SimEventKind.Swing:
                         if (_actorViews.TryGetValue(e.ActorId, out var swinger)) swinger.StartSwing();
@@ -1110,20 +1119,22 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         Sfx.Play("craft_done", _selfPx, -6, 10, 0f);
                         break;
                     case SimEventKind.Built:
-                        Sfx.Play(e.Value >= 2 ? "hit_stone" : "hit_wood", Iso.Px(e.Pos), -3, 25, 0.1f);
+                        // свои записи стройки: установка каркаса (тир 0) и улучшение до дерева/камня/металла/стали (броня — как сталь)
+                        if (e.Text == "ремонт") Sfx.Play(e.Value >= 2 ? "hit_stone" : "hit_wood", Iso.Px(e.Pos), -3, 25, 0.1f);
+                        else Sfx.Play(Sfx.Pick(e.Value <= 0 ? "build_place_0" : $"build_upgrade_{System.Math.Clamp((int)e.Value, 1, 4)}", e.Value >= 2 ? "hit_stone" : "hit_wood"), Iso.Px(e.Pos), -2, 30, 0.04f);
                         SpawnChipsAt(e.Pos, TierChips[System.Math.Clamp((int)e.Value, 0, 4)], e.ActorId, 5);
                         Vfx.Dust(Iso.Px(e.Pos), true);
                         if (e.ActorId == _myId && e.Value > 0) _hud.Toast($"{e.Text}: улучшено");
                         break;
                     case SimEventKind.Destroyed:
-                        Sfx.Play((int)e.Value >= 2 ? "hit_stone" : "hit_wood", Iso.Px(e.Pos), 2, 40, 0.05f);
+                        Sfx.Play(Sfx.Pick($"build_destroy_{System.Math.Clamp((int)e.Value, 0, 4)}", (int)e.Value >= 2 ? "hit_stone" : "hit_wood"), Iso.Px(e.Pos), 2, 40, 0.05f);
                         SpawnChipsAt(e.Pos, TierChips[System.Math.Clamp((int)e.Value, 0, 4)], -1, 18);
                         Vfx.Collapse(Iso.Px(e.Pos), 7);   // обрушение: кольцо пыли и дым
                         _shake = Mathf.Min(1.2f, _shake + 0.3f);
                         break;
                     case SimEventKind.Demolished:
                         // снос киянкой: разбор, а не обрушение — пыль, щепа/крошка, глухой стук (своего звука нет — заглушки)
-                        Sfx.Play(Sfx.Pick("build_demolish", (int)e.Value >= 2 ? "hit_stone" : "hit_wood"), Iso.Px(e.Pos), 0, 30, 0.08f);
+                        Sfx.Play(Sfx.Pick($"build_destroy_{System.Math.Clamp((int)e.Value, 0, 4)}", (int)e.Value >= 2 ? "hit_stone" : "hit_wood"), Iso.Px(e.Pos), 0, 30, 0.08f);
                         SpawnChipsAt(e.Pos, TierChips[System.Math.Clamp((int)e.Value, 0, 4)], e.ActorId, 12);
                         Vfx.Dust(Iso.Px(e.Pos));
                         Vfx.Collapse(Iso.Px(e.Pos), 4);

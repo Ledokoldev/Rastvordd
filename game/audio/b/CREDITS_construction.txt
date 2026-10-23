@@ -1,0 +1,48 @@
+35 wooden cracks/hits/destructions by Independent.nu, submitted by qubodup. CC0.
+https://opengameart.org/content/35-wooden-crackshitsdestructions
+
+destroy_wall_wood.wav: #13 overall, third in group 11-18, impactwood03.mp3.flac.
+upgrade_wall_wood.wav: #24 overall, impactwood14.mp3.flac.
+Original FLAC files decoded to WAV; no EQ, trimming, pitch changes or layers.
+Wood placement is already handled separately; not changed here.
+
+destroy_placement_wood.wav: #33 overall, starts at 25.72s in preview 27-35, impactwood23.mp3.flac. Original decoded WAV, no additional processing.
+
+
+destroy_wall_stone.wav
+Smashed/demolished brick wall crumbling/caving in by Squirrel_404, CC0.
+https://freesound.org/people/Squirrel_404/sounds/829103/
+Public HQ MP3 preview decoded to WAV, no further processing. Approved for stone wall destruction.
+
+upgrade_wall_stone.wav: dropping big heavy rocks 1.wav by Halleck, CC BY 4.0.
+https://freesound.org/people/Halleck/sounds/121630/
+Input: public HQ MP3 preview. Adapted: 2x tempo with pitch retained (WSOLA), pauses removed, 1ms fade-in and 9ms fade-out at edits. Credit Halleck.
+
+
+upgrade_wall_metal.wav
+Source: Anvil - Lokomo A 100 kg - Forging very hot steel 1 time short, by ldezem, CC0.
+https://freesound.org/people/ldezem/sounds/386120/
+Public HQ preview decoded to WAV. Adapted: -2 semitones, three hits at 0, .43, .86s, EQ, second hit brighter, bass/low mids boost, dark echoes, saturation, fades. Duration 1.5s.
+
+
+Mix of Fall debris (crash) by xkeril https://freesound.org/people/xkeril/sounds/703248/ and final (sixth) event from Scrap metal dropping / crashing by SamsterBirdies https://freesound.org/people/SamsterBirdies/sounds/587443/ . Both CC0.
+Inputs public HQ previews decoded to WAV. Sixth event extracted from 15.15s onwards, padding trimmed, fades, layered at +110ms relative to debris onset, gain scaled for headroom. No pitch changes. Stereo PCM24 48kHz.
+
+
+https://freesound.org/people/sevenbsb/sounds/349398/
+sevenbsb
+CC0
+Public HQ preview decoded to WAV, no processing.
+
+
+Three-layer mix, duration 1.5s, new layers trimmed to audible onset with 1ms opening fade and 1.25-1.5s cosine fade. Original layer already processed similarly. No pitch changes.
+1. metal crash 4 heavy.wav by Halleck, CC BY 4.0 https://freesound.org/people/Halleck/sounds/121658/
+2. crash.wav by moxobna, CC0 https://freesound.org/people/moxobna/sounds/40158/
+3. custom_transformers_scifi_designed_mechanical_metal_impact_sound by Artninja, CC BY 4.0 https://freesound.org/people/Artninja/sounds/815082/
+Credit Artninja, Halleck, itinerantmonk108, sangnamsa per third layer source.
+Inputs: public HQ MP3 previews decoded to WAV. Output stereo PCM24 48kHz; peak -1.11dBFS.
+
+
+https://freesound.org/people/Lukeo135/sounds/673083/
+CC0
+Public HQ MP3 preview; unprocessed.

@@ -1,0 +1,17 @@
+AK-47 test assets
+Author: seroutonin//deprived (Freesound: serøutōnin--deprivəd)
+Source license: CC0. Sources are designed/layered sounds; reload and bolt use airsoft recordings.
+Shot: https://freesound.org/s/855842/
+Magazine removal/insertion: https://freesound.org/s/674742/
+Three distinct bolt takes: https://freesound.org/s/675008/
+
+Edits: 8 shots at 600 RPM, preceding tail fades over 3ms at next shot;
+last shot retains full source tail. Bolt takes trimmed separately, short edge fades.
+No extra reverb, saturation or pitch shift. Source clipping, if any, is retained.
+Individual event assets: PCM 24-bit WAV, 44100Hz; mechanics mono, shot stereo.
+Three test sequences differ only by bolt take. Reload clip is magazine manipulation,
+the bolt is a separate event. Preview order: burst, magazine change, bolt.
+
+Processed derivatives: Heavy and Metal rifle EQ, short pressure/contact accents on shots only, parallel soft saturation and smooth HF shelf. Mechanics retain their timing, no synthetic impact or resonant layer added. No added echo or reverb. Bolt files represent the three distinct source takes. Shot peak -1dBFS, mechanics peak <=-2.5dBFS.
+
+Natural variation set: eight close DSP derivatives per tone, not independent recordings. Pitch +/-0.32 semitones via resampling, broad EQ +/-1.25dB, subtle attack/decay contours; one common gain. Random sequence excludes previous two takes, gain -0.65 to +0.15dB, fixed 450RPM. 8ms cosine tail choke before next report; final full tail retained. No added reverb, noise or stereo widening. Recipe and sequence stored in recipe.json.

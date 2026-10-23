@@ -1,0 +1,11 @@
+SVD game sound adaptation
+Source: SuperPhat, semiautorifleshot.wav, https://freesound.org/people/SuperPhat/sounds/421710/
+License: CC0 https://creativecommons.org/publicdomain/zero/1.0/
+This is a game interpretation based on a designed layered semi-auto rifle sound,
+not a recording of a real SVD. Based on previously approved Heavy/Metal treatments,
+source starts at 0.185s. Lower-mid body, slight downward resampling, attack shaping,
+gentle parallel saturation; 8 close variations per tone, not independent recordings.
+No new reverb or noise layers. Full single tails retained. WAV PCM24 stereo 44100Hz.
+Preview uses five manually spaced shots and chokes previous tail over 8ms at next shot;
+the last shot has its full tail. Previews are outside the game asset folder.
+Only shots included. SVD reload and bolt sounds have not yet been prepared.

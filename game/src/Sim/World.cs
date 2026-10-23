@@ -1213,8 +1213,10 @@ namespace Rastvordd.Sim
             // увод ствола следующим выстрелам: по узору ствола, с нарастанием; в приседе меньше, на ходу больше; обвесы гасят
             if (wd.RecoilDeg > 0)
             {
-                int sign = wd.RecoilPattern != null ? wd.RecoilPattern[w.Streak % wd.RecoilPattern.Length] : (Rng.Next(2) == 0 ? -1 : 1);
-                float step = (wd.RecoilDeg + wd.RecoilGrowDeg * w.Streak) * sign + ((float)Rng.NextDouble() - 0.5f) * 0.8f;
+                // отдача просто уводит ствол ВВЕРХ по экрану: смотришь вправо — против часовой, влево — по часовой.
+                // Сила — у каждого ствола своя (RecoilDeg, RecoilGrowDeg, RecoilMaxDeg), чуть-чуть случайного дрожания.
+                int sign = MathF.Cos(a.Facing) >= 0 ? -1 : 1;
+                float step = (wd.RecoilDeg + wd.RecoilGrowDeg * w.Streak) * sign + ((float)Rng.NextDouble() - 0.5f) * 0.3f;
                 step *= (a.Crouching ? 0.7f : 1f) * (a.Vel.Length() > 0.5f ? 1.3f : 1f) * w.RecoilMul;
                 w.Recoil = Math.Clamp(w.Recoil + step, -wd.RecoilMaxDeg, wd.RecoilMaxDeg);
             }

@@ -1853,23 +1853,42 @@ namespace Rastvordd.Sim
                 Actor hitActor = null;
                 MapWall hitWall = null;
                 ResourceNode hitNode = null;
+                // D56: пуля летит на высоте ствола (Hitbox.GunH). Высокое (стены, деревья, бочка-цель) ловит её; низкое
+                // (блоки, мешки, камни, ящики, хлам) — пуля проходит поверх, но запоминает: присевший сразу за укрытием защищён
+                float lowT = 2; Vector2 lowAt = default;
                 foreach (var w in WallsAlong(a, b))
-                    if (!w.PassBullets && Geo.SegmentAabb(a, b, w.Wall.Min, w.Wall.Max, out float t) && t < bestT) { bestT = t; hitWall = w; }
+                    if (!w.PassBullets && Geo.SegmentAabb(a, b, w.Wall.Min, w.Wall.Max, out float t))
+                    {
+                        if (w.Wall.Height >= Hitbox.GunH) { if (t < bestT) { bestT = t; hitWall = w; } }
+                        else if (t < lowT) { lowT = t; lowAt = a + (b - a) * t; }
+                    }
                 foreach (var n in NodesAlong(a, b))
-                    if (Geo.SegmentCircle(a, b, n.Pos, n.Radius, out float t) && t < bestT) { bestT = t; hitWall = null; hitNode = n; }
+                    if (Geo.SegmentCircle(a, b, n.Pos, n.Radius, out float t))
+                    {
+                        if (n.Kind is NodeKind.Tree or NodeKind.Barrel) { if (t < bestT) { bestT = t; hitWall = null; hitNode = n; } }
+                        else if (t < lowT) { lowT = t; lowAt = a + (b - a) * t; }
+                    }
                 foreach (var d in DeploysAlong(a, b))
-                    if (d.Solid && Geo.SegmentAabb(a, b, d.Min, d.Max, out float t) && t < bestT) { bestT = t; hitWall = null; hitNode = null; }
+                    if (d.Solid && Geo.SegmentAabb(a, b, d.Min, d.Max, out float t) && t < lowT) { lowT = t; lowAt = a + (b - a) * t; }
                 foreach (var act in Actors)
                 {
                     if (act.Dead || act.Spectator || act.Id == p.OwnerId) continue;
                     if (owner != null && owner.Team == Team.Npc && act.Team == Team.Npc) continue;
-                    if (Geo.SegmentCircle(a, b, act.Pos, act.Radius, out float t) && t < bestT)
+                    var (bmin, bmax) = Hitbox.Body(act);
+                    if (Geo.SegmentAabb(a, b, bmin, bmax, out float t) && t < bestT)
                     {
+                        // присел сразу за низким укрытием (≤ 2,5 м) — пулю ловит укрытие
+                        var at = a + (b - a) * t;
+                        bool covered = act.Crouching && ((lowT < t) ? Vector2.Distance(lowAt, at) <= Hitbox.CoverReach
+                                                     : p.PassedLowCover && Vector2.Distance(p.LowCover, at) <= Hitbox.CoverReach);
+                        if (covered) { if (t < bestT) { bestT = t; hitWall = null; hitNode = null; } continue; }
                         bestT = t;
                         hitActor = act;
                         hitNode = null;
+                        _legsCovered = !act.Crouching && ((lowT < t && Vector2.Distance(lowAt, at) <= Hitbox.CoverReach) || (p.PassedLowCover && Vector2.Distance(p.LowCover, at) <= Hitbox.CoverReach));
                     }
                 }
+                if (lowT <= 1 && lowT < bestT) { p.LowCover = lowAt; p.PassedLowCover = true; }
 
                 if (bestT <= 1)
                 {

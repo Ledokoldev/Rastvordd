@@ -27,6 +27,7 @@ namespace Rastvordd.Sim
 
         /// <summary>Зона по расстоянию линии пули от центра (пороги 0,12/0,28/0,40 м для тела 0,40 м, масштаб по радиусу).</summary>
         readonly System.Collections.Generic.Dictionary<int, (float t, HitZone z)> _pelletZone = new();
+        bool _legsCovered;
 
         public static HitZone ZoneOf(float offset, float radius)
         {
@@ -58,6 +59,8 @@ namespace Rastvordd.Sim
                 else { zone = Headshots.Roll(Rng, shooter, sw, Vector2.Distance(shooter.Pos, hitPos)); if (sw.Def.Pellets > 1) _pelletZone[shooter.Id] = (Time, zone); }
             }
             else zone = ZoneOf(offset, t.Radius);
+            if (_legsCovered && zone == HitZone.Limbs) zone = HitZone.Torso;   // стоит за низким укрытием — ноги закрыты
+            _legsCovered = false;
             float raw = damage * ZoneMul(zone);
             int side = SideOf(t, d);
             float prot = Clothing.Zone(t, zone, side);

@@ -158,6 +158,7 @@ namespace Rastvordd.Sim
             // установленное: ящик рассыпается лутом, столб падает
             foreach (var d in new List<Deployable>(Deployables))
             {
+                if (d.Kind == DeployKind.Claim) continue;   // шкаф не ломается: приват базы не сносят
                 float dist = Vector2.Distance(d.Pos, t.Pos);
                 if (dist > r + d.Radius || !HasLineOfSight(t.Pos, d.Pos)) continue;
                 d.Hp -= ex.Damage * (1f - 0.5f * dist / (r + d.Radius));

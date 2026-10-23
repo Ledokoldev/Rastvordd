@@ -234,6 +234,8 @@ namespace Rastvordd.Sim
         {
             var size = SizeOfDeploy(kind);
             rot &= 3;
+            // шкаф на голой земле — тоже по сетке: в центр четверти клетки (клетка 2 м → четверть 1 м)
+            if (kind == DeployKind.Claim && FloorAt(at) == null) at = new Vector2(MathF.Floor(at.X) + 0.5f, MathF.Floor(at.Y) + 0.5f);
             var fit = new DeployFit { Rot = rot, Pos = at, Half = Footprints.HalfOf(kind, rot) };
             var floor = FloorAt(at);
             if (StationDefs.Get(kind)?.OnNode == true)

@@ -62,6 +62,8 @@ namespace Rastvordd.Client
         // ---------- стройка ----------
         bool _sbInstantCraft = true;
         Deployable _sbClaim;
+        SVec _sbBuildC;               // стрельбище: центр стройплощадки
+        bool _sbAimBuild; float _sbBuildT;             // стрельбище: сейчас набор строителя (F3)
 
         /// <summary>До того, как клиент возьмёт карту: место, укрытия (стены карты), мишени. Ботов-игроков вайпа нет.</summary>
         void SandboxSetup()
@@ -76,10 +78,13 @@ namespace Rastvordd.Client
                 case "aim":
                 {
                     // квадрат боя 60×60 и справа от него дорожка стрельбища на 100+ м к северу (вверх по экрану)
-                    _sbC = w.FindSandboxSpot(new SVec(-34, -112), new SVec(66, 34));
+                    _sbC = w.FindSandboxSpot(new SVec(-94, -112), new SVec(66, 34));
                     _sbSquare = _sbC;
                     _sbLane = _sbC + new SVec(50, 26);
                     w.SandboxClear(_sbC + new SVec(-34, -112), _sbC + new SVec(66, 34), true);
+                    // стройплощадка 52×60 слева от квадрата боя (F3 — набор строителя и туда)
+                    _sbBuildC = _sbC + new SVec(-66, 0);
+                    w.SandboxClear(_sbBuildC + new SVec(-26, -30), _sbBuildC + new SVec(26, 30), true);
                     BuildArenaCover();
                     SpawnTargets();
                     _sbSpawn = _sbLane;
@@ -284,6 +289,7 @@ namespace Rastvordd.Client
 
         void AimTick(World w, Actor me)
         {
+            if (_sbAimBuild && (_sbBuildT -= World.Dt) <= 0) { _sbBuildT = 2f; SbRefillBuild(); }
             if ((_sbRefillT -= World.Dt) <= 0) { _sbRefillT = 1f; if (_sbInfAmmo && !me.Dead) SbTopUpAmmo(me); }
             // смерть — сразу снова на рубеже (через 1,5 с, чтобы увидеть)
             if (me.Dead)
@@ -292,7 +298,7 @@ namespace Rastvordd.Client
                 else if (w.Time - _sbDeadAt > 1.5f)
                 {
                     me.Dead = false; me.Hp = me.MaxHp; me.Pos = _sbSub == 1 ? _sbSquare + new SVec(0, 26) : _sbLane; me.Vel = SVec.Zero;
-                    SbGiveKit();
+                    SbGiveKit(); _sbAimBuild = false;
                     _sbDeadAt = -1;
                     _hud.Toast("Снова на полигоне");
                 }
@@ -484,6 +490,7 @@ namespace Rastvordd.Client
         {
             var p = _sbPanel;
             p.Caption("Режим");
+            p.Buttons((_sbAimBuild ? "К стрельбе (F3)" : "На стройплощадку (F3)", () => { SbAimToggleBuild(); SbFillPanel(); }));
             p.Choice(new[] { "Мишени", "Боты" }, _sbSub, SbSetSub);
             if (_sbSub == 0)
             {
@@ -534,6 +541,34 @@ namespace Rastvordd.Client
             var pb = new List<(string, System.Action)>();
             foreach (var pr in presets) { var x = pr; pb.Add((x.name, () => SbPreset(x.gun, x.atts))); }
             p.Buttons(pb.ToArray());
+        }
+
+        /// <summary>F3 на стрельбище: стрелковый набор ↔ набор строителя (шкаф на стройплощадке, ресурсы пополняются).</summary>
+        void SbAimToggleBuild()
+        {
+            var w = _server.World; var me = w.Find(_myId);
+            if (me == null) return;
+            _sbAimBuild = !_sbAimBuild;
+            if (_sbAimBuild)
+            {
+                World.SandboxLearnAll(me);
+                me.ClearAll();
+                w.GiveBuilderKit(me);
+                for (int k = 0; k < 9 && _sbClaim == null; k++)
+                    _sbClaim = w.SandboxClaim(me, _sbBuildC + new SVec(1.5f + (k % 3) * 2, 0.5f + (k / 3) * 2), out _);
+                SbRefillBuild();
+                w.SandboxDress(me, 1);
+                me.Pos = _sbBuildC + new SVec(0, 3);
+                _hud.Toast("Стройка: набор строителя, шкаф стоит, ресурсы пополняются. F3 — обратно к стрельбе");
+            }
+            else
+            {
+                SbGiveKit();
+                me.Pos = _sbLane;
+                _hud.Toast("Стрельба: стрелковый набор. F3 — на стройплощадку");
+            }
+            me.Vel = SVec.Zero;
+            _slot = 0;
         }
 
         void SbPreset(string gun, string[] atts)
@@ -643,6 +678,7 @@ namespace Rastvordd.Client
         {
             if (_sbMode == null) return false;
             if (_sbMode == "lift" && k == Key.F3) { _sbLift.Start(15); return true; }
+            if (_sbMode == "aim" && k == Key.F3) { SbAimToggleBuild(); return true; }
             if (k == Key.F2) { _sbPanel.SetExpanded(!_sbPanel.Expanded); return true; }
             if (_sbMode == "sound") return SoundKey(k);
             return false;

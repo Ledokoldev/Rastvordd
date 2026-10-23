@@ -14,6 +14,8 @@ namespace Rastvordd.Sim
         public Structure Owner;        // часть постройки игрока (иначе — карта)
         public bool PassBullets;       // проём окна: пули и взгляд проходят
         public int Id;                 // номер стены карты (для клиента: какие убраны)
+        public PropMask.Mask Mask;     // проп-укрытие: пиксели картинки для пули (null — коробка)
+        public bool MaskChecked;
         public string Tex;             // текстура лица (стены готовых РТ), иначе по виду
         public bool Hidden;            // только хитбокс пропса: не рисуется
         public bool Prefab;            // часть готовой РТ
@@ -76,6 +78,17 @@ namespace Rastvordd.Sim
         List<ResourceNode> NodesNear(Vector2 c, float r) => _nodeGrid.QueryCircle(c, r + 1f, _qNodes);
         List<Deployable> DeploysNear(Vector2 c, float r) => _deployGrid.QueryCircle(c, r + 1f, _qDeploys);
         List<MapWall> WallsAlong(Vector2 a, Vector2 b) => _wallGrid.QuerySegment(a, b, _qWalls);
+        readonly List<MapWall> _bulletWalls = new();
+
+        /// <summary>Пиксельная маска пропа-укрытия (картинка того же биома, что рисует клиент); null — не проп или нет картинки.</summary>
+        public PropMask.Mask PropMaskOf(MapWall w)
+        {
+            if (w.MaskChecked) return w.Mask;
+            w.MaskChecked = true;
+            if (w.Owner == null && PropMask.Prop(w.Kind) is string prop)
+                w.Mask = PropMask.Get(PropMask.Styled(prop, Terrain.BiomeAt((w.Wall.Min + w.Wall.Max) * 0.5f)));
+            return w.Mask;
+        }
         List<ResourceNode> NodesAlong(Vector2 a, Vector2 b) => _nodeGrid.QuerySegment(a, b, _qNodes);
         List<Deployable> DeploysAlong(Vector2 a, Vector2 b) => _deployGrid.QuerySegment(a, b, _qDeploys);
 
@@ -1861,12 +1874,28 @@ namespace Rastvordd.Sim
                 // D56: пуля летит на высоте ствола (Hitbox.GunH). Высокое (стены, деревья, бочка-цель) ловит её; низкое
                 // (блоки, мешки, камни, ящики, хлам) — пуля проходит поверх, но запоминает: присевший сразу за укрытием защищён
                 float lowT = 2; Vector2 lowAt = default;
-                foreach (var w in WallsAlong(a, b))
-                    if (!w.PassBullets && Geo.SegmentAabb(a, b, w.Wall.Min, w.Wall.Max, out float t))
+                // высокий проп (ящик, машина, хлам) — по пикселям картинки: картинка ниже «следа» на экране, поэтому
+                // кандидатов ищем и по пути, сдвинутому вверх на высоту ствола
+                _bulletWalls.Clear();
+                _bulletWalls.AddRange(WallsAlong(a, b));
+                foreach (var w in WallsAlong(a - new Vector2(0, PropMask.Lift), b - new Vector2(0, PropMask.Lift))) if (!_bulletWalls.Contains(w)) _bulletWalls.Add(w);
+                foreach (var w in _bulletWalls)
+                {
+                    if (w.PassBullets) continue;
+                    if (PropMaskOf(w) is PropMask.Mask pm)
                     {
-                        if (w.Wall.Height >= Hitbox.GunH) { if (t < bestT) { bestT = t; hitWall = w; } }
-                        else if (t < lowT) { lowT = t; lowAt = a + (b - a) * t; }
+                        // проп: высокий ловит пулю по пикселям, низкий (блок) — пуля проходит, но «пересекла укрытие» тоже по пикселям
+                        if (PropMask.Hit(w.Wall.Min, w.Wall.Max, pm, a, b, out float tm))
+                        {
+                            if (w.Wall.Height >= Hitbox.GunH) { if (tm < bestT) { bestT = tm; hitWall = w; } }
+                            else if (tm < lowT) { lowT = tm; lowAt = a + (b - a) * tm; }
+                        }
+                        continue;
                     }
+                    if (!Geo.SegmentAabb(a, b, w.Wall.Min, w.Wall.Max, out float t)) continue;
+                    if (w.Wall.Height >= Hitbox.GunH) { if (t < bestT) { bestT = t; hitWall = w; } }
+                    else if (t < lowT) { lowT = t; lowAt = a + (b - a) * t; }
+                }
                 foreach (var n in NodesAlong(a, b))
                     if (Geo.SegmentCircle(a, b, n.Pos, n.Radius, out float t))
                     {

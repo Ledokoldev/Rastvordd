@@ -488,6 +488,25 @@ namespace Rastvordd.Client
             foreach (var w in W.Walls)
             {
                 if (w.PassBullets || System.Numerics.Vector2.Distance(System.Numerics.Vector2.Clamp(me.Pos, w.Wall.Min, w.Wall.Max), me.Pos) > R) continue;
+                if (W.PropMaskOf(w) is PropMask.Mask m)
+                {
+                    var col = w.Wall.Height >= Hitbox.GunH ? stop : low;
+                    // проп — контур по пикселям картинки (в плоскости пули он ложится ровно на спрайт)
+                    var (rmin, _) = PropMask.Region(w.Wall.Min, w.Wall.Max, m);
+                    var o = Iso.Px(rmin);
+                    bool A(int x, int y) => x >= 0 && y >= 0 && x < m.W && y < m.H && m.A[y * m.W + x];
+                    for (int y = 0; y < m.H; y++)
+                        for (int x = 0; x < m.W; x++)
+                        {
+                            if (!A(x, y)) continue;
+                            var p = o + new Vector2(x, y) * m.S;
+                            if (!A(x, y - 1)) DrawLine(p, p + new Vector2(m.S, 0), col, 1);
+                            if (!A(x, y + 1)) DrawLine(p + new Vector2(0, m.S), p + new Vector2(m.S, m.S), col, 1);
+                            if (!A(x - 1, y)) DrawLine(p, p + new Vector2(0, m.S), col, 1);
+                            if (!A(x + 1, y)) DrawLine(p + new Vector2(m.S, 0), p + new Vector2(m.S, m.S), col, 1);
+                        }
+                    continue;
+                }
                 Box(w.Wall.Min, w.Wall.Max, w.Wall.Height >= Hitbox.GunH ? stop : low);
             }
             foreach (var n in W.NodesInRadius(me.Pos, R, new System.Collections.Generic.List<ResourceNode>()))

@@ -534,17 +534,6 @@ namespace Rastvordd.Client
             };
         }
 
-        static readonly System.Collections.Generic.Dictionary<Texture2D, Rect2> _opaque = new();
-
-        /// <summary>Непрозрачная часть картинки (кэш): под неё подгоняется размер пропа.</summary>
-        static Rect2 OpaqueRect(Texture2D tex)
-        {
-            if (_opaque.TryGetValue(tex, out var r)) return r;
-            r = new Rect2(0, 0, tex.GetWidth(), tex.GetHeight());
-            try { var img = tex.GetImage(); if (img != null) { if (img.IsCompressed()) img.Decompress(); var u = img.GetUsedRect(); if (u.Size.X > 0) r = u; } } catch { }
-            return _opaque[tex] = r;
-        }
-
         public override void _Draw()
         {
             // пропсы-укрытия — спрайтом, по центру «следа», основанием на передний край
@@ -562,15 +551,11 @@ namespace Rastvordd.Client
                 var tex = Art.Styled(prop, _biome);
                 if (tex != null)
                 {
-                    // спрайт — по размеру хитбокса: непрозрачная часть картинки во всю ширину «следа», низом на передний край
-                    var used = OpaqueRect(tex);
-                    // ширина — по «следу», высота — по объёму коробки (верх + лицо), как у обычных стен: пуля упирается ровно в картинку
-                    float s = _top.Size.X / Mathf.Max(1f, used.Size.X);
-                    float sy = (_top.Size.Y + _front.Size.Y) / Mathf.Max(1f, used.Size.Y);
-                    var off = new Vector2(tex.GetWidth() / 2f - used.GetCenter().X, tex.GetHeight() - used.End.Y);   // сдвиг картинки, px текстуры
-                    Shade.Sprite(this, tex, s, 0.32f * _alpha, 2f, new Vector2(off.X * s, off.Y * sy * Shade.Flat));
-                    DrawSetTransform(new Vector2(off.X * s, off.Y * sy), 0, new Vector2(s, sy));
-                    DrawTexture(tex, new Vector2(-tex.GetWidth() / 2f, -tex.GetHeight()), new Color(1, 1, 1, _alpha));
+                    float s = _kind == WallKind.Car ? 1.4f : 1f;
+                    float depth = _top.Size.Y;
+                    Shade.Sprite(this, tex, s, 0.32f * _alpha);
+                    DrawSetTransform(Vector2.Zero, 0, new Vector2(s, s));
+                    DrawTexture(tex, new Vector2(-tex.GetWidth() / 2, -tex.GetHeight() + 2), new Color(1, 1, 1, _alpha));
                     DrawSetTransform(Vector2.Zero, 0, Vector2.One);
                     return;
                 }
@@ -779,9 +764,8 @@ namespace Rastvordd.Client
                 var tex = prop != null ? Art.Styled(prop, _biome) : null;
                 if (tex != null)
                 {
-                    var used = OpaqueRect(tex);   // как в _Draw: картинка по ширине хитбокса
-                    float s = _top.Size.X / Mathf.Max(1f, used.Size.X), hgt = _top.Size.Y + _front.Size.Y;
-                    r = new Rect2(-used.Size.X / 2f * s, -hgt, used.Size.X * s, hgt);
+                    float s = _kind == WallKind.Car ? 1.4f : 1f;
+                    r = new Rect2(-tex.GetWidth() / 2f * s, (-tex.GetHeight() + 2) * s, tex.GetWidth() * s, tex.GetHeight() * s);
                 }
                 _screen = new Rect2(r.Position + Position, r.Size);
                 return _screen.Value;

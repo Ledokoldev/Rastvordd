@@ -185,7 +185,7 @@ namespace Rastvordd.Sim
         /// <summary>Повод бросить бой немедленно (не ждать конца решения): при смерти, без патронов.</summary>
         string Critical()
         {
-            if (_me.Hp < 30) return $"мало HP ({_me.Hp:0})";
+            if (_me.Hp < (Committed() ? 18 : 30)) return $"мало HP ({_me.Hp:0})";   // в разгаре боя — держусь до последнего
             if (Ranged() is string g && AmmoLeft(g) < (g == "weapon_bow" ? 2 : 4)) return "кончаются патроны";
             return null;
         }

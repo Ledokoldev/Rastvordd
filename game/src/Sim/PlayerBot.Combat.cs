@@ -32,6 +32,12 @@ namespace Rastvordd.Sim
         float _coverCheck, _phaseTime, _phaseLen, _peekUnseen;
         int _peekShots;
         float _lastShotAt = -100, _coverSince, _pushUntil = -100, _chaseStart, _chaseTick = -99;
+        float _adT, _adSign = 1, _crT;   // открытый бой: смена стрейфа (A-D) и присед-встал — неровный ритм, как у людей
+        bool _crOn;
+
+        /// <summary>В разгаре перестрелки: недавно стрелял или по мне попали, он рядом и на виду — дерусь до конца, не бегу спиной.</summary>
+        bool Committed() => _w.Time - _foeSeenAt < 3f && (_w.Time - _lastShotAt < 3f || _w.Time - _me.LastDamagedTime < 3f)
+                            && _foe != null && Vector2.Distance(KnownPos(_foe), _me.Pos) < 28f;
         Vector2 _chaseFrom;
         Vector2 _flankFrom;
         Actor _chaseFoe;
@@ -152,6 +158,13 @@ namespace Rastvordd.Sim
                 if (foeKit < 0.5f && edge > -0.08f && _me.Hp >= 40) return null;
                 if (foeKit < 0.5f && hitMe && edge > -0.2f && _me.Hp >= 30) return null;   // напал — отмахиваюсь
                 return foeKit >= 0.6f ? $"у него {Items.Name(_foeKitId)}, а мне нечем стрелять" : "нечем драться";
+            }
+            if (AmmoLeft(gun) < (gun == "weapon_bow" ? 2 : 4)) return "кончаются патроны";
+            if (Committed() && t == _foe)
+            {
+                // уже сцепились: бежать спиной под огнём — верная смерть; отход только почти мёртвым против целого
+                if (_me.Hp < 18 && foeHp > _me.Hp + 25) return $"почти мёртв ({_me.Hp:0} HP)";
+                return null;
             }
             if (_me.Hp < 30 && foeHp > _me.Hp) return $"мало HP ({_me.Hp:0})";
             if (_me.Hp < 45 && foeKit > MyPower) return $"ранен ({_me.Hp:0} HP), а у него {Items.Name(_foeKitId)}";
@@ -454,7 +467,8 @@ namespace Rastvordd.Sim
                 {
                     _fight = Fight.ToCover;
                     MoveTo(_coverPos, 0.4f, ref cmd);
-                    bool run = hitRecently || dc > 4f || st.Ammo == 0;
+                    // бегом (спиной) — только если укрытие далеко и он меня не видит, или стрелять нечем; иначе — к укрытию с огнём
+                    bool run = (dc > 6f && !sees) || (dc > 3f && st.Ammo == 0 && st.ReloadLeft <= 0 && _me.Count(WeaponAmmo(gun)) == 0) || dc > 14f;
                     if (run) { cmd.Sprint = true; cmd.Aim = _me.Pos + (cmd.Move.LengthSquared() > 0.01f ? cmd.Move : Vector2.UnitX) * 3; }
                     else Shoot(t, gun, st, d, sees, ref cmd, "в открытую");
                     return;
@@ -557,8 +571,13 @@ namespace Rastvordd.Sim
         {
             var known = KnownPos(t);
             var dir = d > 0.01f ? (known - _me.Pos) / d : Vector2.UnitX;
-            var side = new Vector2(-dir.Y, dir.X) * (MathF.Sin(_w.Time * 0.9f + _me.Id) > 0 ? 1 : -1);
+            // A-D стрейф неровным ритмом (0,35–0,9 с), как у людей: так сложнее попасть
+            if ((_adT -= World.Dt) <= 0) { _adT = 0.35f + (float)_rng.NextDouble() * 0.55f; if (_rng.NextDouble() < 0.75) _adSign = -_adSign; }
+            var side = new Vector2(-dir.Y, dir.X) * _adSign;
             bool reloading = st.ReloadLeft > 0 || st.Ammo == 0;
+            // присел-встал: в приседе точнее и ниже голова; но не за низким укрытием — оттуда не видно и пули в него
+            if ((_crT -= World.Dt) <= 0) { _crOn = !_crOn && _rng.NextDouble() < 0.6; _crT = _crOn ? 0.4f + (float)_rng.NextDouble() * 0.6f : 0.5f + (float)_rng.NextDouble() * 0.9f; }
+            cmd.Crouch = _crOn && !reloading && sees && !_w.LowCoverNear(_me.Pos, known);
             var move = side * 0.7f + (reloading ? -dir * 0.6f : d > pref + 4 ? dir : d < pref - 4 ? -dir * 0.7f : Vector2.Zero);
             if (!sees && _w.Time - _foeSeenAt > 2f) move = dir;   // пропал — подойти к месту, где видел
             cmd.Move = move.LengthSquared() > 0.01f ? Avoid(Vector2.Normalize(move)) : Vector2.Zero;

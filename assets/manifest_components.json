@@ -1,0 +1,94 @@
+﻿{
+    "assets":  [
+                   {
+                       "id":  "icon_comp_fasteners",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "a handful of mismatched rusty steel bolts, nuts and washers; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_comp_canvas",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "a folded square of heavy olive canvas with frayed stitched edges; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_comp_seal",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "black rubber gaskets and thick sealing rings; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_comp_bearing",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "an oily steel ball bearing with exposed balls and a chipped outer race; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_comp_winding",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "copper wire coiled around a laminated iron core; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_comp_sterile",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "plain waxed paper wrapping around clean gauze and cotton pads; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_comp_optics",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "two aligned glass lens assemblies in scratched black metal tubes; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_comp_handtools",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "a small hand plane and steel awl tied to a wooden handle; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_comp_resin",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "a dented open tin of thick dark amber sealing resin; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_comp_outboard",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "a small Soviet outboard petrol engine with blue cowling, long shaft and propeller; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_item_boat",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "a patched wooden rowboat with two oars and faded olive paint; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_item_anchor",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "a crude iron grapnel anchor attached to a coiled hemp rope; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_item_patchkit",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "a rolled canvas repair kit containing resin, rubber strips, leather patches and wrapped gauze; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_item_dynamo",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "a portable hand cranked generator with exposed copper winding and a scratched metal terminal box; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   },
+                   {
+                       "id":  "icon_item_binoculars",
+                       "cat":  "icons",
+                       "icon":  128,
+                       "desc":  "Soviet field binoculars with worn black enamel and a frayed leather strap; Soviet / post-Soviet Russian, 1970s-1990s, worn, weathered, scuffs, dust and dirt; isolated readable inventory object; no text, no letters, no numbers, no logos"
+                   }
+               ]
+}

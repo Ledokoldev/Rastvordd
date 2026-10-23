@@ -1,0 +1,2959 @@
+﻿{
+    "components":  [
+                       {
+                           "id":  "comp_spring",
+                           "name":  "Пружина",
+                           "tier":  0,
+                           "sources":  [
+                                           "Бочки, ящики РТ0–3",
+                                           "только лут"
+                                       ],
+                           "used_in":  [
+                                           "comp_trigger",
+                                           "comp_bolt_carrier",
+                                           "weapon_akm"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_pipe",
+                           "name":  "Труба",
+                           "tier":  0,
+                           "sources":  [
+                                           "Бочки",
+                                           "токарный: металл 40"
+                                       ],
+                           "used_in":  [
+                                           "comp_barrel_rifled",
+                                           "deploy_still"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_tape",
+                           "name":  "Изолента",
+                           "tier":  0,
+                           "sources":  [
+                                           "Бочки",
+                                           "токарный: ткань 15"
+                                       ],
+                           "used_in":  [
+                                           "plate_lead",
+                                           "wear_army_6b2"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_gears",
+                           "name":  "Шестерни",
+                           "tier":  0,
+                           "sources":  [
+                                           "Ящики РТ0–3",
+                                           "токарный: металл 60, лом 10"
+                                       ],
+                           "used_in":  [
+                                           "comp_bolt_carrier",
+                                           "deploy_generator"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_circuit",
+                           "name":  "Плата",
+                           "tier":  1,
+                           "sources":  [
+                                           "АТС, Подстанция",
+                                           "только лут"
+                                       ],
+                           "used_in":  [
+                                           "deploy_workbench3",
+                                           "att_reddot",
+                                           "item_dynamo"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_lens",
+                           "name":  "Линза",
+                           "tier":  1,
+                           "sources":  [
+                                           "Крейты РТ1–3, редко бочки",
+                                           "только лут"
+                                       ],
+                           "used_in":  [
+                                           "att_scope2x",
+                                           "wear_ozk_gp5",
+                                           "comp_optics"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_trigger",
+                           "name":  "УСМ",
+                           "tier":  2,
+                           "sources":  [
+                                           "Крейты РТ1–3",
+                                           "токарный"
+                                       ],
+                           "used_in":  [
+                                           "weapon_grach",
+                                           "comp_gas_block"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_bolt_carrier",
+                           "name":  "Затворная группа",
+                           "tier":  2,
+                           "sources":  [
+                                           "Крейты РТ1–3",
+                                           "токарный"
+                                       ],
+                           "used_in":  [
+                                           "weapon_pps43",
+                                           "weapon_akm"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_barrel_rifled",
+                           "name":  "Нарезной ствол",
+                           "tier":  2,
+                           "sources":  [
+                                           "Крейты РТ1–3",
+                                           "токарный"
+                                       ],
+                           "used_in":  [
+                                           "weapon_svt40",
+                                           "comp_barrel_chrome"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_frame_pistol",
+                           "name":  "Корпус пистолета",
+                           "tier":  2,
+                           "sources":  [
+                                           "Закрытые крейты РТ1–3",
+                                           "только лут"
+                                       ],
+                           "used_in":  [
+                                           "weapon_grach"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_body_smg",
+                           "name":  "Корпус ПП",
+                           "tier":  2,
+                           "sources":  [
+                                           "Закрытые крейты РТ1–3",
+                                           "только лут"
+                                       ],
+                           "used_in":  [
+                                           "weapon_pps43",
+                                           "weapon_ppsh"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_body_rifle",
+                           "name":  "Корпус винтовки",
+                           "tier":  2,
+                           "sources":  [
+                                           "Закрытые крейты РТ1–3",
+                                           "только лут"
+                                       ],
+                           "used_in":  [
+                                           "weapon_svt40",
+                                           "weapon_svd"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_receiver_ak",
+                           "name":  "Ствольная коробка АК",
+                           "tier":  3,
+                           "sources":  [
+                                           "РТ2–3, сброс, Объект 42",
+                                           "только лут, квота D49"
+                                       ],
+                           "used_in":  [
+                                           "weapon_akm",
+                                           "weapon_an94"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_barrel_chrome",
+                           "name":  "Хромированный ствол",
+                           "tier":  3,
+                           "sources":  [
+                                           "РТ2–3, сброс",
+                                           "токарный рядом с В3"
+                                       ],
+                           "used_in":  [
+                                           "weapon_an94",
+                                           "weapon_svd"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_gas_block",
+                           "name":  "Газоотводный узел",
+                           "tier":  3,
+                           "sources":  [
+                                           "РТ2–3, сброс",
+                                           "токарный рядом с В3"
+                                       ],
+                           "used_in":  [
+                                           "weapon_akm",
+                                           "weapon_svd"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_oil",
+                           "name":  "Оружейное масло",
+                           "tier":  0,
+                           "sources":  [
+                                           "Бочки",
+                                           "токарный: уголь 20, действующий рецепт"
+                                       ],
+                           "used_in":  [
+                                           "Ремонт оружия"
+                                       ]
+                       },
+                       {
+                           "id":  "alloy",
+                           "name":  "Легированная сталь",
+                           "tier":  3,
+                           "sources":  [
+                                           "Лут РТ1–3",
+                                           "переработка УСМ 2, коробки АК 4, блока ЭВМ 8 сверх обычного выхода"
+                                       ],
+                           "used_in":  [
+                                           "deploy_workbench3",
+                                           "deploy_guntable",
+                                           "weapon_akm",
+                                           "expl_c4"
+                                       ]
+                       },
+                       {
+                           "id":  "rubber",
+                           "name":  "Резина",
+                           "tier":  0,
+                           "sources":  [
+                                           "Покрышки мира и РТ",
+                                           "бочки и ящики"
+                                       ],
+                           "used_in":  [
+                                           "wear_spec_robe",
+                                           "wear_ozk_cape",
+                                           "comp_seal"
+                                       ]
+                       },
+                       {
+                           "id":  "leather",
+                           "name":  "Кожа",
+                           "tier":  1,
+                           "sources":  [
+                                           "Ремни и старые куртки в луте",
+                                           "животных нет"
+                                       ],
+                           "used_in":  [
+                                           "wear_army_ssh68",
+                                           "item_patchkit"
+                                       ]
+                       },
+                       {
+                           "id":  "medspirt",
+                           "name":  "Медспирт",
+                           "tier":  1,
+                           "sources":  [
+                                           "Аппарат: ягоды 10",
+                                           "медицинский лут"
+                                       ],
+                           "used_in":  [
+                                           "antirad",
+                                           "medkit",
+                                           "syringe",
+                                           "comp_sterile"
+                                       ]
+                       },
+                       {
+                           "id":  "fuel",
+                           "name":  "Топляк",
+                           "tier":  1,
+                           "sources":  [
+                                           "Аппарат: нефть 2 л",
+                                           "насос Заправки 20–40 л"
+                                       ],
+                           "used_in":  [
+                                           "diesel",
+                                           "expl_fire",
+                                           "deploy_generator"
+                                       ]
+                       },
+                       {
+                           "id":  "diesel",
+                           "name":  "Дизель",
+                           "tier":  3,
+                           "sources":  [
+                                           "Колонна: топляк 2 л",
+                                           "высокие крейты"
+                                       ],
+                           "used_in":  [
+                                           "tool_jackhammer",
+                                           "deploy_drill"
+                                       ]
+                       },
+                       {
+                           "id":  "val_motor",
+                           "name":  "Электромотор",
+                           "tier":  2,
+                           "sources":  [
+                                           "Гаражи, Депо",
+                                           "только лут, разбор 20 лома +2 стали"
+                                       ],
+                           "used_in":  [
+                                           "tool_chainsaw",
+                                           "tool_jackhammer",
+                                           "deploy_efurnace"
+                                       ]
+                       },
+                       {
+                           "id":  "val_copper_wire",
+                           "name":  "Медный провод",
+                           "tier":  1,
+                           "sources":  [
+                                           "АТС, Подстанция",
+                                           "только лут, разбор 4 лома"
+                                       ],
+                           "used_in":  [
+                                           "deploy_lamp",
+                                           "comp_winding"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_fasteners",
+                           "name":  "Крепёж",
+                           "tier":  0,
+                           "sources":  [
+                                           "Мусор, бочки",
+                                           "В1: металл 15 даёт 4 крепежа"
+                                       ],
+                           "used_in":  [
+                                           "comp_handtools",
+                                           "item_anchor"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_canvas",
+                           "name":  "Парусина",
+                           "tier":  1,
+                           "sources":  [
+                                           "Хозяйственные ящики",
+                                           "швейный стол"
+                                       ],
+                           "used_in":  [
+                                           "item_boat",
+                                           "item_patchkit"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_seal",
+                           "name":  "Уплотнения",
+                           "tier":  1,
+                           "sources":  [
+                                           "Гаражи, бочки",
+                                           "В1"
+                                       ],
+                           "used_in":  [
+                                           "comp_outboard",
+                                           "item_patchkit"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_bearing",
+                           "name":  "Подшипник",
+                           "tier":  2,
+                           "sources":  [
+                                           "Депо, Гаражи",
+                                           "только лут"
+                                       ],
+                           "used_in":  [
+                                           "comp_outboard"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_winding",
+                           "name":  "Обмотка",
+                           "tier":  2,
+                           "sources":  [
+                                           "АТС, Подстанция",
+                                           "В2"
+                                       ],
+                           "used_in":  [
+                                           "item_dynamo"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_sterile",
+                           "name":  "Стерильная укладка",
+                           "tier":  2,
+                           "sources":  [
+                                           "Медшкаф",
+                                           "химстол"
+                                       ],
+                           "used_in":  [
+                                           "item_patchkit"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_optics",
+                           "name":  "Юстированная оптика",
+                           "tier":  3,
+                           "sources":  [
+                                           "Командный ящик Объекта 42",
+                                           "оружейный стол"
+                                       ],
+                           "used_in":  [
+                                           "item_binoculars"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_handtools",
+                           "name":  "Столярный набор",
+                           "tier":  1,
+                           "sources":  [
+                                           "Гаражи, ПТУ",
+                                           "В1"
+                                       ],
+                           "used_in":  [
+                                           "item_boat",
+                                           "item_anchor"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_resin",
+                           "name":  "Смола",
+                           "tier":  1,
+                           "sources":  [
+                                           "Хозяйственный ящик",
+                                           "аппарат"
+                                       ],
+                           "used_in":  [
+                                           "item_boat",
+                                           "item_patchkit"
+                                       ]
+                       },
+                       {
+                           "id":  "comp_outboard",
+                           "name":  "Лодочный мотор",
+                           "tier":  2,
+                           "sources":  [
+                                           "Прибрежный ящик",
+                                           "В2 с лутовыми подшипниками"
+                                       ],
+                           "used_in":  [
+                                           "item_boat"
+                                       ]
+                       }
+                   ],
+    "recipes":  [
+                    {
+                        "out":  "comp_pipe",
+                        "n":  1,
+                        "station":  "lathe",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         40
+                                     ]
+                                 ],
+                        "time":  10
+                    },
+                    {
+                        "out":  "comp_tape",
+                        "n":  1,
+                        "station":  "lathe",
+                        "cost":  [
+                                     [
+                                         "cloth",
+                                         15
+                                     ]
+                                 ],
+                        "time":  6
+                    },
+                    {
+                        "out":  "comp_gears",
+                        "n":  1,
+                        "station":  "lathe",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         60
+                                     ],
+                                     [
+                                         "scrap",
+                                         10
+                                     ]
+                                 ],
+                        "time":  15
+                    },
+                    {
+                        "out":  "comp_oil",
+                        "n":  1,
+                        "station":  "lathe",
+                        "cost":  [
+                                     [
+                                         "charcoal",
+                                         20
+                                     ]
+                                 ],
+                        "time":  8
+                    },
+                    {
+                        "out":  "comp_trigger",
+                        "n":  1,
+                        "station":  "lathe",
+                        "cost":  [
+                                     [
+                                         "comp_spring",
+                                         2
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         1
+                                     ],
+                                     [
+                                         "metal_fragments",
+                                         50
+                                     ]
+                                 ],
+                        "time":  30
+                    },
+                    {
+                        "out":  "comp_bolt_carrier",
+                        "n":  1,
+                        "station":  "lathe",
+                        "cost":  [
+                                     [
+                                         "comp_spring",
+                                         3
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         2
+                                     ],
+                                     [
+                                         "metal_fragments",
+                                         80
+                                     ]
+                                 ],
+                        "time":  40
+                    },
+                    {
+                        "out":  "comp_barrel_rifled",
+                        "n":  1,
+                        "station":  "lathe",
+                        "cost":  [
+                                     [
+                                         "comp_pipe",
+                                         2
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         1
+                                     ],
+                                     [
+                                         "metal_fragments",
+                                         100
+                                     ]
+                                 ],
+                        "time":  45
+                    },
+                    {
+                        "out":  "comp_barrel_chrome",
+                        "n":  1,
+                        "station":  "lathe+bench3",
+                        "cost":  [
+                                     [
+                                         "comp_barrel_rifled",
+                                         2
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         2
+                                     ],
+                                     [
+                                         "metal_fragments",
+                                         200
+                                     ]
+                                 ],
+                        "time":  90
+                    },
+                    {
+                        "out":  "comp_gas_block",
+                        "n":  1,
+                        "station":  "lathe+bench3",
+                        "cost":  [
+                                     [
+                                         "comp_trigger",
+                                         1
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         3
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         2
+                                     ],
+                                     [
+                                         "metal_fragments",
+                                         150
+                                     ]
+                                 ],
+                        "time":  75
+                    },
+                    {
+                        "out":  "tool_hatchet",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         100
+                                     ],
+                                     [
+                                         "stone",
+                                         50
+                                     ]
+                                 ],
+                        "time":  6
+                    },
+                    {
+                        "out":  "tool_pickaxe",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         100
+                                     ],
+                                     [
+                                         "stone",
+                                         50
+                                     ]
+                                 ],
+                        "time":  6
+                    },
+                    {
+                        "out":  "weapon_spear",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         150
+                                     ]
+                                 ],
+                        "time":  5
+                    },
+                    {
+                        "out":  "deploy_sleepbag",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "cloth",
+                                         30
+                                     ]
+                                 ],
+                        "time":  3
+                    },
+                    {
+                        "out":  "deploy_box",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         75
+                                     ]
+                                 ],
+                        "time":  3
+                    },
+                    {
+                        "out":  "deploy_claim",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         50
+                                     ]
+                                 ],
+                        "time":  3
+                    },
+                    {
+                        "out":  "expl_satchel",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "cloth",
+                                         10
+                                     ],
+                                     [
+                                         "gunpowder",
+                                         30
+                                     ],
+                                     [
+                                         "metal_fragments",
+                                         20
+                                     ]
+                                 ],
+                        "time":  4
+                    },
+                    {
+                        "out":  "expl_c4",
+                        "n":  1,
+                        "station":  "bench3",
+                        "cost":  [
+                                     [
+                                         "gunpowder",
+                                         200
+                                     ],
+                                     [
+                                         "metal_fragments",
+                                         100
+                                     ],
+                                     [
+                                         "scrap",
+                                         20
+                                     ],
+                                     [
+                                         "cloth",
+                                         5
+                                     ],
+                                     [
+                                         "alloy",
+                                         5
+                                     ]
+                                 ],
+                        "time":  15
+                    },
+                    {
+                        "out":  "lock_key",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         75
+                                     ]
+                                 ],
+                        "time":  2
+                    },
+                    {
+                        "out":  "lock_code",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         100
+                                     ]
+                                 ],
+                        "time":  4
+                    },
+                    {
+                        "out":  "expl_fire",
+                        "n":  1,
+                        "station":  "bench0",
+                        "cost":  [
+                                     [
+                                         "cloth",
+                                         10
+                                     ],
+                                     [
+                                         "fuel",
+                                         5
+                                     ]
+                                 ],
+                        "time":  3
+                    },
+                    {
+                        "out":  "build_plan",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         20
+                                     ]
+                                 ],
+                        "time":  1
+                    },
+                    {
+                        "out":  "tool_hammer",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         50
+                                     ]
+                                 ],
+                        "time":  3
+                    },
+                    {
+                        "out":  "weapon_torch",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         30
+                                     ],
+                                     [
+                                         "cloth",
+                                         5
+                                     ]
+                                 ],
+                        "time":  2
+                    },
+                    {
+                        "out":  "weapon_bow",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         100
+                                     ],
+                                     [
+                                         "cloth",
+                                         30
+                                     ]
+                                 ],
+                        "time":  8
+                    },
+                    {
+                        "out":  "arrow",
+                        "n":  2,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         25
+                                     ],
+                                     [
+                                         "stone",
+                                         10
+                                     ]
+                                 ],
+                        "time":  2
+                    },
+                    {
+                        "out":  "bandage",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "cloth",
+                                         4
+                                     ]
+                                 ],
+                        "time":  2
+                    },
+                    {
+                        "out":  "deploy_furnace",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "stone",
+                                         100
+                                     ],
+                                     [
+                                         "wood",
+                                         50
+                                     ]
+                                 ],
+                        "time":  8
+                    },
+                    {
+                        "out":  "deploy_workbench",
+                        "n":  1,
+                        "station":  "hand",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         150
+                                     ],
+                                     [
+                                         "metal_fragments",
+                                         50
+                                     ],
+                                     [
+                                         "scrap",
+                                         50
+                                     ]
+                                 ],
+                        "time":  10
+                    },
+                    {
+                        "out":  "gunpowder",
+                        "n":  5,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "charcoal",
+                                         15
+                                     ],
+                                     [
+                                         "sulfur",
+                                         10
+                                     ]
+                                 ],
+                        "time":  3
+                    },
+                    {
+                        "out":  "deploy_workbench2",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         300
+                                     ],
+                                     [
+                                         "scrap",
+                                         150
+                                     ]
+                                 ],
+                        "time":  15
+                    },
+                    {
+                        "out":  "deploy_workbench3",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         600
+                                     ],
+                                     [
+                                         "scrap",
+                                         400
+                                     ],
+                                     [
+                                         "comp_circuit",
+                                         3
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         5
+                                     ],
+                                     [
+                                         "alloy",
+                                         10
+                                     ]
+                                 ],
+                        "time":  25
+                    },
+                    {
+                        "out":  "ammo_9mm",
+                        "n":  5,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         10
+                                     ],
+                                     [
+                                         "gunpowder",
+                                         5
+                                     ]
+                                 ],
+                        "time":  3
+                    },
+                    {
+                        "out":  "ammo_12g",
+                        "n":  5,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         15
+                                     ],
+                                     [
+                                         "gunpowder",
+                                         10
+                                     ]
+                                 ],
+                        "time":  3
+                    },
+                    {
+                        "out":  "ammo_762",
+                        "n":  5,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         15
+                                     ],
+                                     [
+                                         "gunpowder",
+                                         15
+                                     ]
+                                 ],
+                        "time":  4
+                    },
+                    {
+                        "out":  "ammo_545",
+                        "n":  5,
+                        "station":  "bench3",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         10
+                                     ],
+                                     [
+                                         "gunpowder",
+                                         10
+                                     ]
+                                 ],
+                        "time":  4
+                    },
+                    {
+                        "out":  "ammo_bolt",
+                        "n":  2,
+                        "station":  "bench0",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         25
+                                     ],
+                                     [
+                                         "metal_fragments",
+                                         5
+                                     ]
+                                 ],
+                        "time":  2
+                    },
+                    {
+                        "out":  "weapon_crossbow",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         150
+                                     ],
+                                     [
+                                         "cloth",
+                                         20
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         1
+                                     ]
+                                 ],
+                        "time":  10
+                    },
+                    {
+                        "out":  "weapon_nagant",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         100
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         2
+                                     ],
+                                     [
+                                         "comp_pipe",
+                                         1
+                                     ]
+                                 ],
+                        "time":  10
+                    },
+                    {
+                        "out":  "weapon_homesmg",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         125
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         2
+                                     ],
+                                     [
+                                         "comp_pipe",
+                                         2
+                                     ],
+                                     [
+                                         "comp_tape",
+                                         2
+                                     ]
+                                 ],
+                        "time":  14
+                    },
+                    {
+                        "out":  "weapon_grach",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         150
+                                     ],
+                                     [
+                                         "comp_frame_pistol",
+                                         1
+                                     ],
+                                     [
+                                         "comp_trigger",
+                                         1
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         2
+                                     ]
+                                 ],
+                        "time":  16
+                    },
+                    {
+                        "out":  "weapon_pps43",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         175
+                                     ],
+                                     [
+                                         "comp_body_smg",
+                                         1
+                                     ],
+                                     [
+                                         "comp_bolt_carrier",
+                                         1
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         3
+                                     ]
+                                 ],
+                        "time":  18
+                    },
+                    {
+                        "out":  "weapon_svt40",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         200
+                                     ],
+                                     [
+                                         "wood",
+                                         100
+                                     ],
+                                     [
+                                         "comp_body_rifle",
+                                         1
+                                     ],
+                                     [
+                                         "comp_barrel_rifled",
+                                         1
+                                     ],
+                                     [
+                                         "comp_trigger",
+                                         1
+                                     ]
+                                 ],
+                        "time":  18
+                    },
+                    {
+                        "out":  "weapon_akm",
+                        "n":  1,
+                        "station":  "guntable",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         250
+                                     ],
+                                     [
+                                         "wood",
+                                         100
+                                     ],
+                                     [
+                                         "comp_receiver_ak",
+                                         1
+                                     ],
+                                     [
+                                         "comp_bolt_carrier",
+                                         1
+                                     ],
+                                     [
+                                         "comp_gas_block",
+                                         1
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         4
+                                     ],
+                                     [
+                                         "alloy",
+                                         25
+                                     ]
+                                 ],
+                        "time":  25
+                    },
+                    {
+                        "out":  "weapon_an94",
+                        "n":  1,
+                        "station":  "guntable",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         300
+                                     ],
+                                     [
+                                         "comp_receiver_ak",
+                                         1
+                                     ],
+                                     [
+                                         "comp_barrel_chrome",
+                                         1
+                                     ],
+                                     [
+                                         "comp_bolt_carrier",
+                                         1
+                                     ],
+                                     [
+                                         "comp_gas_block",
+                                         1
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         3
+                                     ],
+                                     [
+                                         "alloy",
+                                         30
+                                     ]
+                                 ],
+                        "time":  25
+                    },
+                    {
+                        "out":  "weapon_ppsh",
+                        "n":  1,
+                        "station":  "guntable",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         200
+                                     ],
+                                     [
+                                         "wood",
+                                         150
+                                     ],
+                                     [
+                                         "comp_body_smg",
+                                         1
+                                     ],
+                                     [
+                                         "comp_barrel_chrome",
+                                         1
+                                     ],
+                                     [
+                                         "comp_bolt_carrier",
+                                         1
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         4
+                                     ],
+                                     [
+                                         "alloy",
+                                         20
+                                     ]
+                                 ],
+                        "time":  25
+                    },
+                    {
+                        "out":  "weapon_svd",
+                        "n":  1,
+                        "station":  "guntable",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         250
+                                     ],
+                                     [
+                                         "wood",
+                                         100
+                                     ],
+                                     [
+                                         "comp_body_rifle",
+                                         1
+                                     ],
+                                     [
+                                         "comp_barrel_chrome",
+                                         1
+                                     ],
+                                     [
+                                         "comp_gas_block",
+                                         1
+                                     ],
+                                     [
+                                         "comp_trigger",
+                                         1
+                                     ],
+                                     [
+                                         "alloy",
+                                         25
+                                     ]
+                                 ],
+                        "time":  25
+                    },
+                    {
+                        "out":  "deploy_lathe",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         250
+                                     ],
+                                     [
+                                         "scrap",
+                                         50
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         2
+                                     ]
+                                 ],
+                        "time":  20
+                    },
+                    {
+                        "out":  "att_suppressor_can",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         50
+                                     ],
+                                     [
+                                         "comp_tape",
+                                         1
+                                     ]
+                                 ],
+                        "time":  5
+                    },
+                    {
+                        "out":  "att_grip_wood",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         50
+                                     ],
+                                     [
+                                         "comp_tape",
+                                         1
+                                     ],
+                                     [
+                                         "rubber",
+                                         2
+                                     ]
+                                 ],
+                        "time":  4
+                    },
+                    {
+                        "out":  "att_torch",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         30
+                                     ],
+                                     [
+                                         "cloth",
+                                         5
+                                     ],
+                                     [
+                                         "comp_tape",
+                                         1
+                                     ]
+                                 ],
+                        "time":  4
+                    },
+                    {
+                        "out":  "att_mag_twin_crude",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "comp_tape",
+                                         2
+                                     ]
+                                 ],
+                        "time":  4
+                    },
+                    {
+                        "out":  "att_reddot",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         75
+                                     ],
+                                     [
+                                         "comp_lens",
+                                         1
+                                     ],
+                                     [
+                                         "comp_circuit",
+                                         1
+                                     ]
+                                 ],
+                        "time":  10
+                    },
+                    {
+                        "out":  "att_scope2x",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         100
+                                     ],
+                                     [
+                                         "comp_lens",
+                                         2
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         1
+                                     ]
+                                 ],
+                        "time":  12
+                    },
+                    {
+                        "out":  "att_suppressor",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         150
+                                     ],
+                                     [
+                                         "comp_barrel_rifled",
+                                         1
+                                     ],
+                                     [
+                                         "comp_tape",
+                                         1
+                                     ]
+                                 ],
+                        "time":  10
+                    },
+                    {
+                        "out":  "att_compensator",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         100
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         2
+                                     ]
+                                 ],
+                        "time":  8
+                    },
+                    {
+                        "out":  "att_grip",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         75
+                                     ],
+                                     [
+                                         "rubber",
+                                         4
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         1
+                                     ]
+                                 ],
+                        "time":  6
+                    },
+                    {
+                        "out":  "att_flashlight",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         50
+                                     ],
+                                     [
+                                         "comp_circuit",
+                                         1
+                                     ]
+                                 ],
+                        "time":  6
+                    },
+                    {
+                        "out":  "att_laser",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         50
+                                     ],
+                                     [
+                                         "comp_circuit",
+                                         1
+                                     ],
+                                     [
+                                         "comp_lens",
+                                         1
+                                     ]
+                                 ],
+                        "time":  8
+                    },
+                    {
+                        "out":  "att_mag_ext",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         100
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         2
+                                     ]
+                                 ],
+                        "time":  8
+                    },
+                    {
+                        "out":  "att_mag_twin",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         75
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         1
+                                     ]
+                                 ],
+                        "time":  6
+                    },
+                    {
+                        "out":  "att_stock_tac",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         100
+                                     ],
+                                     [
+                                         "wood",
+                                         50
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         1
+                                     ]
+                                 ],
+                        "time":  8
+                    },
+                    {
+                        "out":  "medkit",
+                        "n":  1,
+                        "station":  "medtable",
+                        "cost":  [
+                                     [
+                                         "medspirt",
+                                         4
+                                     ],
+                                     [
+                                         "cloth",
+                                         10
+                                     ],
+                                     [
+                                         "fuel",
+                                         2
+                                     ]
+                                 ],
+                        "time":  8
+                    },
+                    {
+                        "out":  "syringe",
+                        "n":  1,
+                        "station":  "medtable",
+                        "cost":  [
+                                     [
+                                         "medspirt",
+                                         2
+                                     ],
+                                     [
+                                         "fuel",
+                                         1
+                                     ]
+                                 ],
+                        "time":  5
+                    },
+                    {
+                        "out":  "bars",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         50
+                                     ]
+                                 ],
+                        "time":  5
+                    },
+                    {
+                        "out":  "att_scope4x",
+                        "n":  1,
+                        "station":  "guntable",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         150
+                                     ],
+                                     [
+                                         "comp_lens",
+                                         3
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         2
+                                     ],
+                                     [
+                                         "alloy",
+                                         5
+                                     ]
+                                 ],
+                        "time":  15
+                    },
+                    {
+                        "out":  "att_suppressor_pbs",
+                        "n":  1,
+                        "station":  "guntable",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         150
+                                     ],
+                                     [
+                                         "comp_barrel_rifled",
+                                         1
+                                     ],
+                                     [
+                                         "comp_tape",
+                                         2
+                                     ],
+                                     [
+                                         "alloy",
+                                         8
+                                     ]
+                                 ],
+                        "time":  15
+                    },
+                    {
+                        "out":  "att_compensator_army",
+                        "n":  1,
+                        "station":  "guntable",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         120
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         2
+                                     ],
+                                     [
+                                         "alloy",
+                                         5
+                                     ]
+                                 ],
+                        "time":  10
+                    },
+                    {
+                        "out":  "att_mag_ext_army",
+                        "n":  1,
+                        "station":  "guntable",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         120
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         3
+                                     ],
+                                     [
+                                         "alloy",
+                                         5
+                                     ]
+                                 ],
+                        "time":  10
+                    },
+                    {
+                        "out":  "fuel",
+                        "n":  1,
+                        "station":  "still",
+                        "cost":  [
+                                     [
+                                         "crude",
+                                         2
+                                     ]
+                                 ],
+                        "time":  15.0
+                    },
+                    {
+                        "out":  "medspirt",
+                        "n":  1,
+                        "station":  "still",
+                        "cost":  [
+                                     [
+                                         "berries",
+                                         10
+                                     ]
+                                 ],
+                        "time":  20.0
+                    },
+                    {
+                        "out":  "water_boiled",
+                        "n":  1,
+                        "station":  "still",
+                        "cost":  [
+                                     [
+                                         "water_raw",
+                                         1
+                                     ]
+                                 ],
+                        "time":  6.0
+                    },
+                    {
+                        "out":  "water_boiled",
+                        "n":  1,
+                        "station":  "campfire",
+                        "cost":  [
+                                     [
+                                         "water_raw",
+                                         1
+                                     ]
+                                 ],
+                        "time":  10.0
+                    },
+                    {
+                        "out":  "metal_fragments",
+                        "n":  1,
+                        "station":  "efurnace",
+                        "cost":  [
+                                     [
+                                         "metal_ore",
+                                         1
+                                     ]
+                                 ],
+                        "time":  0.2
+                    },
+                    {
+                        "out":  "sulfur",
+                        "n":  1,
+                        "station":  "efurnace",
+                        "cost":  [
+                                     [
+                                         "sulfur_ore",
+                                         1
+                                     ]
+                                 ],
+                        "time":  0.2
+                    },
+                    {
+                        "out":  "diesel",
+                        "n":  1,
+                        "station":  "rectifier",
+                        "cost":  [
+                                     [
+                                         "fuel",
+                                         2
+                                     ]
+                                 ],
+                        "time":  25.0
+                    },
+                    {
+                        "out":  "antirad",
+                        "n":  1,
+                        "station":  "chem",
+                        "cost":  [
+                                     [
+                                         "medspirt",
+                                         2
+                                     ],
+                                     [
+                                         "charcoal",
+                                         10
+                                     ]
+                                 ],
+                        "time":  4
+                    },
+                    {
+                        "out":  "deploy_still",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         50
+                                     ],
+                                     [
+                                         "comp_pipe",
+                                         2
+                                     ]
+                                 ],
+                        "time":  12
+                    },
+                    {
+                        "out":  "deploy_guntable",
+                        "n":  1,
+                        "station":  "bench3",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         300
+                                     ],
+                                     [
+                                         "alloy",
+                                         15
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         4
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         4
+                                     ]
+                                 ],
+                        "time":  25
+                    },
+                    {
+                        "out":  "deploy_generator",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         200
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         3
+                                     ],
+                                     [
+                                         "comp_pipe",
+                                         2
+                                     ]
+                                 ],
+                        "time":  20
+                    },
+                    {
+                        "out":  "deploy_rectifier",
+                        "n":  1,
+                        "station":  "bench3",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         250
+                                     ],
+                                     [
+                                         "comp_pipe",
+                                         4
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         2
+                                     ],
+                                     [
+                                         "val_motor",
+                                         1
+                                     ]
+                                 ],
+                        "time":  25
+                    },
+                    {
+                        "out":  "wear_army_6b2",
+                        "n":  1,
+                        "station":  "bench3",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         250
+                                     ],
+                                     [
+                                         "cloth",
+                                         30
+                                     ],
+                                     [
+                                         "comp_tape",
+                                         3
+                                     ],
+                                     [
+                                         "alloy",
+                                         10
+                                     ]
+                                 ],
+                        "time":  15
+                    },
+                    {
+                        "out":  "wear_spec_robe",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "cloth",
+                                         35
+                                     ],
+                                     [
+                                         "rubber",
+                                         6
+                                     ]
+                                 ],
+                        "time":  8
+                    },
+                    {
+                        "out":  "plate_lead",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         150
+                                     ],
+                                     [
+                                         "comp_tape",
+                                         1
+                                     ]
+                                 ],
+                        "time":  10
+                    },
+                    {
+                        "out":  "tool_chainsaw",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         150
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         2
+                                     ],
+                                     [
+                                         "comp_spring",
+                                         1
+                                     ],
+                                     [
+                                         "val_motor",
+                                         1
+                                     ]
+                                 ],
+                        "time":  15
+                    },
+                    {
+                        "out":  "tool_jackhammer",
+                        "n":  1,
+                        "station":  "bench3",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         200
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         3
+                                     ],
+                                     [
+                                         "val_motor",
+                                         1
+                                     ]
+                                 ],
+                        "time":  20
+                    },
+                    {
+                        "out":  "comp_fasteners",
+                        "n":  4,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         15
+                                     ]
+                                 ],
+                        "time":  4
+                    },
+                    {
+                        "out":  "comp_canvas",
+                        "n":  1,
+                        "station":  "sewing",
+                        "cost":  [
+                                     [
+                                         "cloth",
+                                         20
+                                     ],
+                                     [
+                                         "comp_tape",
+                                         1
+                                     ]
+                                 ],
+                        "time":  8
+                    },
+                    {
+                        "out":  "comp_seal",
+                        "n":  2,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "rubber",
+                                         8
+                                     ],
+                                     [
+                                         "comp_tape",
+                                         1
+                                     ]
+                                 ],
+                        "time":  6
+                    },
+                    {
+                        "out":  "comp_winding",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "val_copper_wire",
+                                         6
+                                     ],
+                                     [
+                                         "comp_tape",
+                                         2
+                                     ]
+                                 ],
+                        "time":  20
+                    },
+                    {
+                        "out":  "comp_sterile",
+                        "n":  2,
+                        "station":  "chem",
+                        "cost":  [
+                                     [
+                                         "cloth",
+                                         12
+                                     ],
+                                     [
+                                         "medspirt",
+                                         2
+                                     ]
+                                 ],
+                        "time":  10
+                    },
+                    {
+                        "out":  "comp_optics",
+                        "n":  1,
+                        "station":  "guntable",
+                        "cost":  [
+                                     [
+                                         "comp_lens",
+                                         4
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         2
+                                     ],
+                                     [
+                                         "alloy",
+                                         5
+                                     ]
+                                 ],
+                        "time":  30
+                    },
+                    {
+                        "out":  "comp_handtools",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         50
+                                     ],
+                                     [
+                                         "wood",
+                                         30
+                                     ],
+                                     [
+                                         "comp_fasteners",
+                                         2
+                                     ]
+                                 ],
+                        "time":  12
+                    },
+                    {
+                        "out":  "comp_resin",
+                        "n":  2,
+                        "station":  "still",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         60
+                                     ],
+                                     [
+                                         "fuel",
+                                         1
+                                     ]
+                                 ],
+                        "time":  20
+                    },
+                    {
+                        "out":  "comp_outboard",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         120
+                                     ],
+                                     [
+                                         "comp_bearing",
+                                         2
+                                     ],
+                                     [
+                                         "comp_gears",
+                                         3
+                                     ],
+                                     [
+                                         "comp_seal",
+                                         2
+                                     ],
+                                     [
+                                         "comp_pipe",
+                                         1
+                                     ]
+                                 ],
+                        "time":  40
+                    },
+                    {
+                        "out":  "item_boat",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "wood",
+                                         400
+                                     ],
+                                     [
+                                         "comp_canvas",
+                                         3
+                                     ],
+                                     [
+                                         "comp_resin",
+                                         4
+                                     ],
+                                     [
+                                         "comp_handtools",
+                                         1
+                                     ]
+                                 ],
+                        "time":  60
+                    },
+                    {
+                        "out":  "item_anchor",
+                        "n":  1,
+                        "station":  "bench1",
+                        "cost":  [
+                                     [
+                                         "metal_fragments",
+                                         60
+                                     ],
+                                     [
+                                         "cloth",
+                                         25
+                                     ],
+                                     [
+                                         "comp_fasteners",
+                                         4
+                                     ],
+                                     [
+                                         "comp_handtools",
+                                         1
+                                     ]
+                                 ],
+                        "time":  15
+                    },
+                    {
+                        "out":  "item_patchkit",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "comp_canvas",
+                                         1
+                                     ],
+                                     [
+                                         "leather",
+                                         4
+                                     ],
+                                     [
+                                         "comp_resin",
+                                         1
+                                     ],
+                                     [
+                                         "comp_seal",
+                                         1
+                                     ],
+                                     [
+                                         "comp_sterile",
+                                         1
+                                     ]
+                                 ],
+                        "time":  12
+                    },
+                    {
+                        "out":  "item_dynamo",
+                        "n":  1,
+                        "station":  "bench2",
+                        "cost":  [
+                                     [
+                                         "comp_winding",
+                                         2
+                                     ],
+                                     [
+                                         "comp_circuit",
+                                         1
+                                     ],
+                                     [
+                                         "metal_fragments",
+                                         100
+                                     ]
+                                 ],
+                        "time":  30
+                    },
+                    {
+                        "out":  "item_binoculars",
+                        "n":  1,
+                        "station":  "guntable",
+                        "cost":  [
+                                     [
+                                         "comp_optics",
+                                         1
+                                     ],
+                                     [
+                                         "metal_fragments",
+                                         50
+                                     ],
+                                     [
+                                         "leather",
+                                         3
+                                     ]
+                                 ],
+                        "time":  20
+                    }
+                ],
+    "loot":  {
+                 "trash":  [
+                               [
+                                   "scrap",
+                                   1,
+                                   1,
+                                   2
+                               ],
+                               [
+                                   "comp_fasteners",
+                                   0.18,
+                                   1,
+                                   3
+                               ],
+                               [
+                                   "cloth",
+                                   0.2,
+                                   2,
+                                   6
+                               ]
+                           ],
+                 "barrel":  [
+                                [
+                                    "scrap",
+                                    1,
+                                    1,
+                                    2
+                                ],
+                                [
+                                    "comp_spring",
+                                    0.12,
+                                    1,
+                                    1
+                                ],
+                                [
+                                    "comp_pipe",
+                                    0.1,
+                                    1,
+                                    1
+                                ],
+                                [
+                                    "comp_tape",
+                                    0.08,
+                                    1,
+                                    1
+                                ],
+                                [
+                                    "comp_gears",
+                                    0.05,
+                                    1,
+                                    1
+                                ],
+                                [
+                                    "rubber",
+                                    0.08,
+                                    1,
+                                    3
+                                ],
+                                [
+                                    "leather",
+                                    0.06,
+                                    1,
+                                    3
+                                ],
+                                [
+                                    "comp_lens",
+                                    0.005,
+                                    1,
+                                    1
+                                ],
+                                [
+                                    "comp_seal",
+                                    0.05,
+                                    1,
+                                    2
+                                ]
+                            ],
+                 "rt0_crate":  [
+                                   [
+                                       "scrap",
+                                       1,
+                                       2,
+                                       4
+                                   ],
+                                   [
+                                       "cloth",
+                                       0.5,
+                                       5,
+                                       12
+                                   ],
+                                   [
+                                       "comp_spring",
+                                       0.3,
+                                       1,
+                                       2
+                                   ],
+                                   [
+                                       "comp_pipe",
+                                       0.3,
+                                       1,
+                                       2
+                                   ],
+                                   [
+                                       "comp_tape",
+                                       0.3,
+                                       1,
+                                       2
+                                   ],
+                                   [
+                                       "comp_canvas",
+                                       0.2,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "leather",
+                                       0.25,
+                                       2,
+                                       4
+                                   ],
+                                   [
+                                       "punchcard_1",
+                                       0.25,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "weapon_pipeshotgun",
+                                       0.015,
+                                       1,
+                                       1
+                                   ]
+                               ],
+                 "rt1_crate":  [
+                                   [
+                                       "alloy",
+                                       0.5,
+                                       2,
+                                       4
+                                   ],
+                                   [
+                                       "comp_spring",
+                                       0.4,
+                                       1,
+                                       3
+                                   ],
+                                   [
+                                       "comp_circuit",
+                                       0.2,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_lens",
+                                       0.15,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_trigger",
+                                       0.12,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_frame_pistol",
+                                       0.12,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_body_smg",
+                                       0.1,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_body_rifle",
+                                       0.1,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_bearing",
+                                       0.18,
+                                       1,
+                                       2
+                                   ],
+                                   [
+                                       "val_copper_wire",
+                                       0.3,
+                                       1,
+                                       2
+                                   ],
+                                   [
+                                       "comp_handtools",
+                                       0.15,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "medspirt",
+                                       0.15,
+                                       1,
+                                       3
+                                   ],
+                                   [
+                                       "weapon_sawnoff",
+                                       0.025,
+                                       1,
+                                       1
+                                   ]
+                               ],
+                 "rt1_punch":  [
+                                   [
+                                       "punchcard_2",
+                                       1,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "alloy",
+                                       1,
+                                       3,
+                                       6
+                                   ],
+                                   [
+                                       "comp_frame_pistol",
+                                       0.25,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_body_smg",
+                                       0.25,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_body_rifle",
+                                       0.25,
+                                       1,
+                                       1
+                                   ]
+                               ],
+                 "rt2_crate":  [
+                                   [
+                                       "alloy",
+                                       0.5,
+                                       4,
+                                       8
+                                   ],
+                                   [
+                                       "comp_bolt_carrier",
+                                       0.25,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_barrel_rifled",
+                                       0.25,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_circuit",
+                                       0.35,
+                                       1,
+                                       2
+                                   ],
+                                   [
+                                       "comp_receiver_ak",
+                                       0.12,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_barrel_chrome",
+                                       0.08,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_gas_block",
+                                       0.05,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "val_motor",
+                                       0.2,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_bearing",
+                                       0.3,
+                                       1,
+                                       2
+                                   ],
+                                   [
+                                       "comp_sterile",
+                                       0.25,
+                                       1,
+                                       2
+                                   ],
+                                   [
+                                       "medkit",
+                                       0.08,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "tool_jackhammer",
+                                       0.03,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "weapon_mp133",
+                                       0.035,
+                                       1,
+                                       1
+                                   ]
+                               ],
+                 "rt2_punch":  [
+                                   [
+                                       "punchcard_3",
+                                       1,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "alloy",
+                                       1,
+                                       3,
+                                       6
+                                   ],
+                                   [
+                                       "comp_receiver_ak",
+                                       0.2,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_gas_block",
+                                       0.15,
+                                       1,
+                                       1
+                                   ]
+                               ],
+                 "rt3_crate":  [
+                                   [
+                                       "alloy",
+                                       1,
+                                       6,
+                                       10
+                                   ],
+                                   [
+                                       "comp_receiver_ak",
+                                       0.2,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_barrel_chrome",
+                                       0.15,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_gas_block",
+                                       0.15,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "comp_optics",
+                                       0.12,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "att_scope4x",
+                                       0.08,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "plate_ceramic",
+                                       0.025,
+                                       1,
+                                       1
+                                   ],
+                                   [
+                                       "weapon_akm",
+                                       0.015,
+                                       1,
+                                       1
+                                   ]
+                               ],
+                 "o42_lab":  [
+                                 [
+                                     "comp_sterile",
+                                     1,
+                                     2,
+                                     4
+                                 ],
+                                 [
+                                     "medspirt",
+                                     1,
+                                     2,
+                                     5
+                                 ],
+                                 [
+                                     "syringe",
+                                     0.5,
+                                     1,
+                                     2
+                                 ],
+                                 [
+                                     "antirad",
+                                     0.5,
+                                     1,
+                                     2
+                                 ],
+                                 [
+                                     "comp_optics",
+                                     0.25,
+                                     1,
+                                     1
+                                 ]
+                             ],
+                 "o42_diesel":  [
+                                    [
+                                        "val_motor",
+                                        0.5,
+                                        1,
+                                        2
+                                    ],
+                                    [
+                                        "comp_bearing",
+                                        0.6,
+                                        1,
+                                        3
+                                    ],
+                                    [
+                                        "comp_winding",
+                                        0.4,
+                                        1,
+                                        2
+                                    ],
+                                    [
+                                        "comp_seal",
+                                        0.7,
+                                        2,
+                                        4
+                                    ]
+                                ],
+                 "o42_command":  [
+                                     [
+                                         "alloy",
+                                         1,
+                                         10,
+                                         15
+                                     ],
+                                     [
+                                         "comp_receiver_ak",
+                                         0.3,
+                                         1,
+                                         1
+                                     ],
+                                     [
+                                         "comp_barrel_chrome",
+                                         0.3,
+                                         1,
+                                         1
+                                     ],
+                                     [
+                                         "comp_gas_block",
+                                         0.3,
+                                         1,
+                                         1
+                                     ],
+                                     [
+                                         "comp_optics",
+                                         0.4,
+                                         1,
+                                         1
+                                     ],
+                                     [
+                                         "weapon_saiga12",
+                                         0.03,
+                                         1,
+                                         1
+                                     ],
+                                     [
+                                         "weapon_mosin",
+                                         0.03,
+                                         1,
+                                         1
+                                     ],
+                                     [
+                                         "weapon_aps",
+                                         0.03,
+                                         1,
+                                         1
+                                     ]
+                                 ],
+                 "airdrop":  [
+                                 [
+                                     "alloy",
+                                     1,
+                                     8,
+                                     15
+                                 ],
+                                 [
+                                     "comp_receiver_ak",
+                                     0.35,
+                                     1,
+                                     1
+                                 ],
+                                 [
+                                     "comp_barrel_chrome",
+                                     0.25,
+                                     1,
+                                     1
+                                 ],
+                                 [
+                                     "comp_gas_block",
+                                     0.25,
+                                     1,
+                                     1
+                                 ],
+                                 [
+                                     "medkit",
+                                     0.3,
+                                     1,
+                                     2
+                                 ],
+                                 [
+                                     "att_scope4x",
+                                     0.2,
+                                     1,
+                                     1
+                                 ],
+                                 [
+                                     "plate_lead",
+                                     0.15,
+                                     1,
+                                     1
+                                 ],
+                                 [
+                                     "weapon_saiga12",
+                                     0.01,
+                                     1,
+                                     1
+                                 ]
+                             ],
+                 "guard1":  [
+                                [
+                                    "bandage",
+                                    0.4,
+                                    1,
+                                    2
+                                ],
+                                [
+                                    "ammo_9mm",
+                                    0.35,
+                                    5,
+                                    10
+                                ],
+                                [
+                                    "weapon_nagant",
+                                    0.08,
+                                    1,
+                                    1
+                                ]
+                            ],
+                 "guard2":  [
+                                [
+                                    "ammo_762",
+                                    0.6,
+                                    5,
+                                    15
+                                ],
+                                [
+                                    "comp_spring",
+                                    0.25,
+                                    1,
+                                    2
+                                ],
+                                [
+                                    "syringe",
+                                    0.2,
+                                    1,
+                                    1
+                                ],
+                                [
+                                    "weapon_svt40",
+                                    0.04,
+                                    1,
+                                    1
+                                ]
+                            ],
+                 "guard2_clothes":  [
+                                        [
+                                            "wear_army_ssh68",
+                                            0.25,
+                                            1,
+                                            1
+                                        ],
+                                        [
+                                            "wear_army_6b2",
+                                            0.25,
+                                            1,
+                                            1
+                                        ]
+                                    ],
+                 "guard3":  [
+                                [
+                                    "ammo_762",
+                                    0.7,
+                                    10,
+                                    20
+                                ],
+                                [
+                                    "medkit",
+                                    0.2,
+                                    1,
+                                    1
+                                ],
+                                [
+                                    "comp_bolt_carrier",
+                                    0.2,
+                                    1,
+                                    1
+                                ],
+                                [
+                                    "weapon_akm",
+                                    0.03,
+                                    1,
+                                    1
+                                ]
+                            ],
+                 "coast_boat_crate":  [
+                                          [
+                                              "comp_outboard",
+                                              0.12,
+                                              1,
+                                              1
+                                          ],
+                                          [
+                                              "comp_seal",
+                                              0.5,
+                                              1,
+                                              2
+                                          ],
+                                          [
+                                              "comp_resin",
+                                              0.4,
+                                              1,
+                                              2
+                                          ],
+                                          [
+                                              "comp_canvas",
+                                              0.4,
+                                              1,
+                                              2
+                                          ]
+                                      ]
+             }
+}

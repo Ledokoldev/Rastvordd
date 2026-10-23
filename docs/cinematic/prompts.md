@@ -26,12 +26,11 @@ Sound: elevator cable hum, metal rattling, rifle clicks, breathing through the g
 Sound: grinding doors, distant dripping water, low ventilation drone.
 ```
 
-## Клип 3 — сбоку: фонари и жест (старт: `shot3_side_signal.png`, 8 с)
+## Клип 3 — со спины: фонари, вскинули, пошли (старт: `shot3_side_signal_r*.png`, 8 с)
 ```
-[общий блок] Strict side profile shot, static camera perpendicular to them. The two soldiers step out of the elevator into the dark corridor and click on their underbarrel flashlights — two white beams cut through the dust. They exchange a glance. Soldier A raises his left arm, elbow bent at 90 degrees, hand shaped like a finger-gun pointing forward, and pumps the forearm forward twice — the military "move forward" hand signal. Soldier B nods.
-Sound: flashlight clicks, muffled breathing, distant metallic creak.
+[общий блок] Camera behind the two soldiers at shoulder height in the open doorway of the elevator cabin, a pitch-black concrete corridor ahead. They click on their underbarrel flashlights — two white beams cut through the dust — then snap their rifles up to the shoulder and start slowly advancing forward into the corridor, aiming, in step with each other. Camera follows slowly behind them.
+Sound: two flashlight clicks, rifle slings rustling, boots on wet concrete, muffled breathing through the gas mask.
 ```
-Если жест ломается (пальцы, рука) — сгенерировать 3–5 вариантов или разделить на два клипа: «фонари и взгляд» + крупно «жест».
 
 ## Клип 4 — уходят в темноту (старт: `shot4_into_dark.png`, 6 с)
 ```

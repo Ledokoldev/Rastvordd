@@ -124,7 +124,7 @@ const OPT = {
   cast: [["AB", "Оба"], ["A", "Только СОБР"], ["B", "Только ОЗК"]],
   place: [
     ["cage", "Огромная клеть лифта", "Inside a HUGE industrial Soviet freight elevator cage, like a mine-shaft cage, about 6 m wide, 5 m deep and 4 m high, the soldiers look small inside it: riveted steel girders with diagonal bracing, steel mesh walls with the rough concrete shaft sliding past, yellow-black hazard stripes on beams and floor edge, caged red emergency lamps on the high ceiling beams, thick cables above, a big control panel with round buttons and a dial, massive double sliding steel doors."],
-    ["exit", "Выход из клети", "At the exit of the huge freight elevator cage (6 m wide, 4 m high, steel girders, mesh walls, hazard stripes, red lamps), its massive sliding doors wide open, leading into a dark concrete corridor."],
+    ["exit", "Двери кабины открыты", "In the open doorway of a large Soviet freight elevator cabin (3.5 m wide, 3 m high, riveted steel walls, mesh panels, hazard stripes, caged red lamps), its steel doors fully slid open onto a pitch-black concrete corridor."],
     ["corr", "Коридор бункера", "A long concrete corridor of the abandoned Soviet top-secret command bunker 'Object 42', 1980s: raw concrete, peeling green-grey paint, rust, cable trays along the ceiling, pipes, hazard stripes, wet floor."],
     ["booth", "Будка лифта снаружи", "The surface elevator head-house of a secret Soviet bunker: a monumental two-storey reinforced concrete blockhouse about 12 m wide and 8 m tall, thick sloped walls, a steel headframe with a large cable winch and pulley wheel on top, a big faded red star on the facade, loudspeaker horns and amber warning lamps on the corners, hazard stripes, huge steel blast doors with yellow-black jambs, a concrete ramp. Overcast dusk, wet ground, birch forest behind."]
   ],
@@ -152,9 +152,9 @@ const SHOTS = [
   { id: "s2", name: "2 · Двери", note: "вид сзади, двери в темноту", mode: "vid", cast: "AB", place: "cage", framing: "ots", angle: "behind", move: "follow", light: ["red", "dust"], style: ["film", "grade", "gritty"],
     action: "The massive sliding doors grind open in front of them revealing a pitch-black concrete corridor. They raise their rifles to the shoulder and slowly step forward out of the cage, aiming into the darkness.",
     sound: "grinding steel doors, distant dripping water, low ventilation drone" },
-  { id: "s3", name: "3 · Сигнал", note: "сбоку, фонари и жест «вперёд»", mode: "vid", cast: "AB", place: "exit", framing: "wide", angle: "side", move: "static", light: ["red", "flash", "dust"], style: ["film", "grade", "gritty"],
-    action: "They step out of the cage into the dark corridor and click on their underbarrel flashlights. They exchange a glance. Soldier A raises his left arm, elbow bent at 90 degrees, hand shaped like a finger-gun pointing forward, and pumps the forearm forward twice — the military 'move forward' hand signal. Soldier B nods.",
-    sound: "flashlight clicks, muffled breathing, distant metallic creak" },
+  { id: "s3", name: "3 · Пошли", note: "со спины: фонари, вскинули, вперёд", mode: "vid", cast: "AB", place: "exit", framing: "ots", angle: "behind", move: "follow", light: ["red", "flash", "dust"], style: ["film", "grade", "gritty"],
+    action: "They click on their underbarrel flashlights, snap their rifles up to the shoulder and start slowly advancing forward into the dark corridor, aiming, in step with each other.",
+    sound: "two flashlight clicks, rifle slings rustling, boots on wet concrete, muffled breathing through the gas mask" },
   { id: "s4", name: "4 · Во тьму", note: "сзади, растворяются в темноте", mode: "vid", cast: "AB", place: "corr", framing: "wide", angle: "behind", move: "static", light: ["dark", "flash"], style: ["film", "grade", "gritty"],
     action: "The two soldiers advance in tactical formation, flashlight beams sweeping the walls and pipes, getting smaller until they dissolve into the darkness and only two faint beams remain, then the beams turn the corner and everything goes black.",
     sound: "footsteps fading, ventilation drone, a far-away metallic bang at the very end" },

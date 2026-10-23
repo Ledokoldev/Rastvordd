@@ -848,6 +848,11 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             var me = _cur?.Self; if (me == null) return;
             bool crouch = Input.IsPhysicalKeyPressed(Key.Alt);
             float deg = Mathf.Min(wd.RecoilDeg + wd.RecoilGrowDeg * _recoilStreak, wd.RecoilDeg * 1.6f) * (crouch ? 0.7f : 1f) * RecoilFeel;   // рост за очередь ограничен
+            // целишься вверх или вниз — «вверх по экрану» превращается в увод вбок, его неудобно ловить мышью:
+            // там увод слабее (до 30%), точность держит разброс
+            var vp = GetViewport();
+            var aimV = vp.GetMousePosition() - vp.GetCanvasTransform() * _selfPx;
+            if (aimV.LengthSquared() > 4) deg *= 0.3f + 0.7f * Mathf.Abs(aimV.X) / aimV.Length();
             _recoilStreak++;
             _recoilDebt += deg;
             RotateCursor(-deg);

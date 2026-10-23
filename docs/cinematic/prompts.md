@@ -15,33 +15,45 @@
 Two soldiers in an abandoned Soviet top-secret underground bunker "Object 42", 1980s. Soldier A: Russian SOBR special forces operator in full heavy armor — dark grey-black uniform, black plate carrier, black balaclava, ballistic helmet, AK-74M with suppressor and underbarrel flashlight. Soldier B: olive-green rubber OZK hazmat suit with hood, GP-5 gas mask with round glass eyepieces and side filter, dosimeter on the chest, AKM with underbarrel flashlight. Raw concrete, rust, cable trays, hazard stripes, dim red emergency lights, dust in the air. Photorealistic, cinematic, 35mm anamorphic, desaturated cold grade, film grain. No music, no text.
 ```
 
-## Клип 0 — пролог, будка лифта (старт: `ref_lift_booth_*.png`, 3 с)
+## Выбранные кадры (2026-10-23)
+| Клип | Стартовый кадр |
+|---|---|
+| 0 · Пролог | `ref_lift_booth_n4.png` |
+| 1 · Спуск | `shot1_lift_descent_n4.png` |
+| 2 · Двери | `shot2_doors_back_n3.png` |
+| 3 · Сбоку: фонари и жест | `shot3_side_signal_n4.png` |
+| 4 · Во тьму | `shot4_into_dark_n4.png` |
+Референсы бойцов: `ref_sobr_n4.png`, `ref_ozk_n4.png`.
+
+## Клип 0 — пролог, будка лифта (`ref_lift_booth_n4.png`, 3 с)
 ```
-Surface elevator head-house of a secret Soviet bunker at overcast dusk: a massive concrete blockhouse with a faded red star, a steel headframe with a cable winch, loudspeaker horns and amber lamps on the corners. The amber lamps start flashing, a siren wails, the winch wheel begins to turn and the cable jerks downward. Slow push-in, slight drizzle. Photorealistic, cinematic, 35mm, desaturated cold grade, film grain. No music, no text.
-Sound: siren wail, wind, heavy winch clank.
+Cinematic shot. The surface elevator head-house of a secret Soviet bunker at overcast dusk: a massive concrete blockhouse with a faded red star, a steel headframe with a cable winch, loudspeaker horns and amber warning lamps on the corners, wet ground, birch forest behind. The amber lamps start flashing, a siren wails, the big winch wheel begins to turn and the steel cable jerks downward. Slow push-in toward the building, light drizzle. Photorealistic, 35mm anamorphic, desaturated cold color grade, film grain. No music, no text.
+Sound: rising siren wail, wind, heavy clank of the winch starting.
 ```
 
-## Клип 1 — спуск (старт: `shot1_lift_descent_n*.png`, 5 с)
+## Клип 1 — спуск (`shot1_lift_descent_n4.png`, 5 с)
+Полный промт — в чате (проверка оружия и экипировки, остановка с ударом). Коротко:
 ```
-[общий блок] Inside a huge Soviet freight elevator cage descending, the concrete shaft wall sliding upward past the mesh walls, red lamps swaying slightly. Soldier A racks the charging handle of his rifle, Soldier B slaps the magazine into his rifle. Then the cage jolts to a hard stop, dust falls from above, both look up. Static medium shot from the front with subtle vibration.
-Sound: elevator cable hum, metal rattling, rifle clicks, gas-mask breathing, heavy clunk on stop.
-```
-
-## Клип 2 — двери (старт: `shot2_doors_back_w*.png`, 3 с)
-```
-[общий блок] Wide shot from the back of a big Soviet freight elevator cabin, both soldiers full body facing the closed double steel doors. The doors grind open, revealing a pitch-black concrete corridor. The soldiers stand still, slightly raising their rifles. Static camera.
-Sound: grinding steel doors, low ventilation drone.
+[общий блок] Inside a huge Soviet freight elevator cage descending, concrete shaft sliding upward past the mesh walls, red lamps swaying. Both soldiers run silent pre-combat checks: Soldier A press-checks his rifle chamber and tugs his plate carrier strap tight, Soldier B presses his palm over the gas mask filter to check the seal and taps the dosimeter. The cage jolts to a hard stop, dust falls, both look up. Static medium-wide shot from the front, subtle vibration.
+Sound: cable hum, metal rattling, rifle clicks, gas-mask breathing, heavy clunk on stop.
 ```
 
-## Клип 3 — фонари, вскинули, пошли (старт: `shot3_side_signal_w*.png`, 4 с)
+## Клип 2 — двери (`shot2_doors_back_n3.png`, 3 с)
 ```
-[общий блок] Wide shot from behind, both soldiers full body in the open doorway of the elevator cabin, a pitch-black corridor ahead. They click on their underbarrel flashlights — two white beams cut through the dust — snap their rifles up to the shoulder and step forward out of the cabin, aiming. Camera follows slowly behind.
-Sound: two flashlight clicks, boots on wet concrete, gas-mask breathing.
+[общий блок] Over-the-shoulder shot from behind the two soldiers inside the elevator cabin, red light from the ceiling lamps. The closed double steel doors in front of them grind open, revealing a pitch-black concrete corridor. Both soldiers slightly raise their rifles toward the darkness. Static camera, very slight push-in.
+Sound: grinding steel doors, a hiss of air, low ventilation drone.
 ```
 
-## Клип 4 — во тьму (старт: `shot4_into_dark_n*.png`, 4 с)
+## Клип 3 — сбоку: фонари и жест (`shot3_side_signal_n4.png`, 4 с)
 ```
-[общий блок] Almost pitch-black long concrete corridor, a few dim red emergency lamps far away. The two soldiers walk away from the camera in tactical formation, flashlight beams sweeping the walls, quickly getting smaller and dissolving into the darkness until only two faint beams remain, then black.
+[общий блок] Strict side profile, static camera perpendicular to the soldiers standing on the threshold of the huge freight elevator cage, a dark corridor ahead. They click on their underbarrel flashlights — two white beams cut through the dust — and exchange a quick glance. Soldier A raises his left hand with the elbow bent at 90 degrees, fingers forming a finger-gun pointing forward, and pumps the forearm forward once — the military "move forward" signal — then both raise their rifles and step forward out of the cage, aiming.
+Sound: two flashlight clicks, rubber suit squeak, boots stepping onto wet concrete.
+```
+Если жест ломается — убрать фразу про жест: «включили фонари → переглянулись → вскинули → шагнули».
+
+## Клип 4 — во тьму (`shot4_into_dark_n4.png`, 4 с)
+```
+[общий блок] Almost pitch-black long concrete corridor, a few dim red emergency lamps far away. The two soldiers, seen from behind as dark silhouettes, walk away from the camera in tactical formation, flashlight beams sweeping the walls and pipes, quickly getting smaller and dissolving into the darkness until only two faint beams remain, then black.
 Sound: footsteps fading, ventilation drone, a far-away metallic bang at the very end.
 ```
 

@@ -1,4 +1,4 @@
 @echo off
 rem Полигон: стрельба. Мишени на 10/25/50/100 м, бегущие и выглядывающие; квадрат с укрытиями и боты для боя.
 rem F2 - панель (мишени/боты, стойка оружия, броня, бессмертие), 1-6 - ячейки пояса. Свой мир не трогается.
-start "" "%~dp0tools\godot\Godot_v4.7.2-stable_mono_win64\Godot_v4.7.2-stable_mono_win64.exe" --path "%~dp0game" -- --sandbox=aim
+start "" "%~dp0tools\godot\Godot_v4.7.2-stable_mono_win64\Godot_v4.7.2-stable_mono_win64.exe" --fullscreen --path "%~dp0game" -- --sandbox=aim

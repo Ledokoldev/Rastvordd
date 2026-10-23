@@ -126,6 +126,8 @@ namespace Rastvordd.Sim
         public bool HoldingHammer;      // киянка в руках
         public int HammerTarget;        // постройка под киянкой (или та, над которой открыто колесо), 0 — нет
         public List<WheelItem> HammerWheel = new();   // колесо киянки для HammerTarget
+        public string HammerAction = "";  // что сделает ЛКМ киянкой в текущем режиме по HammerTarget
+        public bool HammerActionOk;
         public bool OpenCraft;          // открыть крафт (E у верстака)
         public bool OpenCraftList;      // …у станции (D54) — сразу список рецептов
         public bool Poisoned;           // отравление сырой водой (D54)
@@ -965,13 +967,13 @@ namespace Rastvordd.Sim
             else if (!me.Dead && held?.Id == "tool_hammer" && World.TargetStructure(me, 2f) is Structure t && string.IsNullOrEmpty(s.InteractHint))
             {
                 string state = $"{Building.KindName(t.Kind)} ({Building.TierNames[t.Tier]}) {(int)t.Hp}/{(int)t.MaxHp}";
-                if (t.Tier < Building.MaxTier)
+                if (me.HammerMode != 0) s.InteractHint = state + " · " + World.HammerModeText(me, t, me.HammerMode) + " · колёсико — режим";
+                else if (t.Tier < Building.MaxTier)
                 {
                     var up = Building.Cost(t.Kind, t.Tier + 1);
                     s.InteractHint = $"{state} · ЛКМ — {Building.TierNames[t.Tier + 1]}: " + string.Join(", ", System.Array.ConvertAll(up, c => $"{Items.Name(c.id)} {c.n}"));
                 }
                 else s.InteractHint = state + (t.Hp < t.MaxHp ? " · ЛКМ — починить" : "");
-                s.InteractHint += " · ПКМ — колесо";
             }
             return s;
         }
@@ -1005,6 +1007,7 @@ namespace Rastvordd.Sim
             var t = me.HammerFocus != 0 ? World.StructById(me.HammerFocus) : World.TargetStructure(me, 2f);
             if (t == null) return;
             s.HammerTarget = t.Id;
+            if (me.HammerMode != 0) (s.HammerAction, s.HammerActionOk) = World.HammerModeInfo(me, t, me.HammerMode);
             for (int tier = 1; tier <= Building.MaxTier; tier++)
             {
                 string tn = Building.TierNames[tier];

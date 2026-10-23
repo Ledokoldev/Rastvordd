@@ -905,6 +905,7 @@ namespace Rastvordd.Sim
             DropOverflow(a);
             if (cmd.SetPiece >= 0 && cmd.SetPiece <= (int)StructKind.TriFoundation) a.BuildPiece = (StructKind)cmd.SetPiece;
             a.HammerFocus = a.Held?.Id == "tool_hammer" ? cmd.HammerFocus : 0;
+            a.HammerMode = a.Held?.Id == "tool_hammer" ? cmd.HammerMode : 0;
             if (cmd.HammerOp != 0 && !a.Dead) HammerWheel(a, cmd.HammerTarget, cmd.HammerOp);
         }
 

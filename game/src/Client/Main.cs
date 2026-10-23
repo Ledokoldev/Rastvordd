@@ -27,6 +27,9 @@ namespace Rastvordd.Client
         BuildMenu _buildMenu, _hammerMenu;   // колёса Плана и киянки (ПКМ)
         BuildGhost2D _hammerMark;            // подсветка постройки, над которой открыто колесо киянки
         int _hammerFocus, _hammerOp, _hammerTarget;
+        int _hammerMode = 1;                 // режим киянки (колёсико): индекс в HammerModes
+        static readonly int[] HammerModes = { 1, 2, 3, 4, 5, World.HammerDemolish };   // дерево, камень, металл, сталь, броня, снос
+        static string HammerModeName(int m) => m == World.HammerDemolish ? "снос" : Building.TierNames[m];
         BuildBar _buildBar;
         StructTip _structTip;
         PickupFeed _feed;
@@ -178,6 +181,7 @@ namespace Rastvordd.Client
                     if (best != null) { me.Pos = best.Center + (best.IsFloor ? new SVec(-1.6f, 0.4f) : new SVec(0.2f, 1.1f)); _autoAim = best.Center; }
                 }
                 else if (a == "hdone") _hammerMenu.Release();
+                else if (a.StartsWith("hmode")) _hammerMode = int.Parse(a.Substring(5));   // отладка: режим киянки (1–5, 9 — снос)
                 else if (a.StartsWith("hpick")) _hammerMenu.PointAt(int.Parse(a.Substring(5)));
                 else if (a.StartsWith("dose")) _server.World.Find(_myId).RadDose = float.Parse(a.Substring(4));   // отладка (D47): dose<n> — доза радиации
                 else if (a.StartsWith("dress:"))
@@ -724,10 +728,17 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 // ПКМ с Планом — колесо элементов (держишь, наводишь, отпускаешь) вместо прицела
                 if (mb.ButtonIndex == MouseButton.Right && _cur?.Self != null && _cur.Self.HoldingPlan && !UiShown) _buildMenu.Open();
                 // ПКМ с киянкой по своей постройке — колесо: уровни и снос
-                if (mb.ButtonIndex == MouseButton.Right && _cur?.Self != null && _cur.Self.HoldingHammer && !UiShown) OpenHammerWheel();
                 // с Планом колесо листает элементы стройки (Ctrl+колесо — зум), иначе — зум
                 bool plan = _cur?.Self != null && _cur.Self.HoldingPlan && !mb.CtrlPressed;
-                if (plan && mb.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown)
+                bool hammer = _cur?.Self != null && _cur.Self.HoldingHammer && !mb.CtrlPressed;
+                if (hammer && mb.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown)
+                {
+                    // колёсико с киянкой — режим: дерево → камень → металл → сталь → броня → снос
+                    int i = System.Array.IndexOf(HammerModes, _hammerMode), n = HammerModes.Length;
+                    _hammerMode = HammerModes[((i + (mb.ButtonIndex == MouseButton.WheelDown ? 1 : -1)) % n + n) % n];
+                    _hud.Toast($"Киянка: {HammerModeName(_hammerMode)}");
+                }
+                else if (plan && mb.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown)
                     _setPiece = (int)Building.NextPiece(_cur.Self.BuildPiece, mb.ButtonIndex == MouseButton.WheelDown ? 1 : -1);
                 else if (mb.ButtonIndex == MouseButton.WheelUp) _zoom = Mathf.Min(2.6f, _zoom * 1.1f);
                 else if (mb.ButtonIndex == MouseButton.WheelDown) _zoom = Mathf.Max(0.9f, _zoom / 1.1f);
@@ -750,7 +761,8 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             bool open = _hammerMenu.Visible && self.HoldingHammer && !self.Dead && self.HammerTarget == _hammerFocus;
             if (_hammerMenu.Visible && !open) _hammerMenu.Close();
             StructSnap? target = null;
-            if (open) foreach (var st in _cur.Structures) if (st.Id == _hammerFocus) { target = st; break; }
+            int focus = open ? _hammerFocus : self.HoldingHammer && !self.Dead && !UiShown ? self.HammerTarget : 0;   // киянка в руках — цель под ней видна всегда
+            if (focus != 0) foreach (var st in _cur.Structures) if (st.Id == focus) { target = st; break; }
             if (open)
             {
                 _hammerMenu.Fill(self.HammerWheel);
@@ -758,6 +770,8 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             }
             if (_hammerMark == null) { _hammerMark = new BuildGhost2D { Tint = UiTheme.Accent }; _world.AddChild(_hammerMark); }
             _hammerMark.Visible = target != null;
+            Color tint = _hammerMode == World.HammerDemolish ? UiTheme.Bad : self.HammerActionOk ? UiTheme.Accent : UiTheme.Dim;   // снос — красным
+            if (_hammerMark.Tint != tint) { _hammerMark.Tint = tint; _hammerMark.QueueRedraw(); }
             _hammerMark.Modulate = new Color(1, 1, 1, 0.65f + 0.35f * Mathf.Sin(Time.GetTicksMsec() / 1000f * 6f));   // пульсирует
             if (target is StructSnap ts) _hammerMark.Set(ts.Kind, Building.IsFloor(ts.Kind) ? ts.Poly : null, ts.A, ts.B, true);
         }
@@ -924,6 +938,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 HammerFocus = _hammerMenu.Visible ? _hammerFocus : 0,
                 HammerOp = _hammerOp,
                 HammerTarget = _hammerTarget,
+                HammerMode = _cur?.Self?.HoldingHammer == true ? _hammerMode : 0,
                 Research = _researchReq,
                 UiItem = _uiReq?.item,
                 UiIndex = _uiReq?.index ?? 0,
@@ -1767,7 +1782,12 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             // меню плана и шпаргалка стройки
             _feed.Update(_cur.Self, dt);
             _feed.Visible = !_hud.CraftOpen && !_mapView.Visible;   // лента у пояса; пояс спрятан под крафтом и картой
-            _structTip.Set(_cur.Self.Dead || UiShown || _buildMenu.Visible || _hammerMenu.Visible || _mapView.Visible ? null : StructTip.Pick(_cur.Structures, _aim));
+            bool hammerTip = _cur.Self.HoldingHammer && _cur.Self.HammerTarget != 0;
+            _structTip.Action = _cur.Self.HoldingHammer ? $"Режим: {HammerModeName(_hammerMode)} · " + (hammerTip ? _cur.Self.HammerAction : "наведи на постройку") : null;
+            _structTip.ActionOk = _cur.Self.HammerActionOk;
+            StructSnap? tipFor = hammerTip ? _cur.Structures.Find(st => st.Id == _cur.Self.HammerTarget) : StructTip.Pick(_cur.Structures, _aim);
+            if (hammerTip && tipFor?.Id != _cur.Self.HammerTarget) tipFor = null;
+            _structTip.Set(_cur.Self.Dead || UiShown || _buildMenu.Visible || _hammerMenu.Visible || _mapView.Visible ? null : tipFor);
             _buildBar.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_buildMenu.Visible && !UiShown;
             if (_buildBar.Visible) _buildBar.Set((int)_cur.Self.BuildPiece, (int)_cur.Self.GhostPiece);
             if (_cur.Self.HoldingPlan) _buildMenu.Fill(_cur.Self.BuildPieces);

@@ -33,6 +33,7 @@ namespace Rastvordd.Sim
         public int HammerFocus;   // колесо киянки открыто над этой постройкой (id; 0 — нет): сервер считает пункты колеса для неё
         public int HammerOp;      // выбор в колесе киянки: 1–4 — улучшить до уровня, World.HammerDemolish — снести (0 — нет)
         public int HammerTarget;  // над какой постройкой выбран пункт колеса киянки
+        public int HammerMode;    // режим киянки (колёсико мыши): 1–5 — улучшать до уровня, World.HammerDemolish — сносить; 0 — по-старому (боты)
 
         public static InputCmd Empty => new InputCmd { SelectSlot = -1, Craft = -1, Code = -1, SetPiece = -1 };
     }
@@ -646,6 +647,7 @@ namespace Rastvordd.Sim
         public float PendingSwingAt = -1;   // удар инструментом засчитывается с задержкой — когда он опускается на цель
         public WeaponState PendingSwing;
         public int HammerFocus;         // колесо киянки открыто над этой постройкой (не сохраняется)
+        public int HammerMode;          // режим киянки от клиента (0 — улучшить на ступень/починить)
         public StructKind BuildPiece = StructKind.Foundation;   // что ставит план постройки (R — сменить)
         public int DeployRot;           // поворот установленного в руках (R), 0..3
         public Vector2 LastAim;

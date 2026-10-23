@@ -9,6 +9,8 @@ namespace Rastvordd.Client
     public partial class StructTip : Control
     {
         StructSnap? _s;
+        public string Action;      // киянка: режим и что сделает ЛКМ (null — нет строки)
+        public bool ActionOk;
 
         public StructTip() { MouseFilter = MouseFilterEnum.Ignore; SetAnchorsPreset(LayoutPreset.FullRect); }
 
@@ -47,7 +49,8 @@ namespace Rastvordd.Client
             string title = $"{Building.KindName(s.Kind)} · {Building.TierNames[s.Tier]}{(s.Locked ? " · замок" : "")}";
             string hp = $"{Mathf.CeilToInt(s.Hp * max)} / {(int)max}";
             float tw = UiTheme.TextWidth(title, UiTheme.FontSmall, UiTheme.Semi);
-            float w = Mathf.Max(tw, 140) + 28, h = 62;
+            if (!string.IsNullOrEmpty(Action)) tw = Mathf.Max(tw, UiTheme.TextWidth(Action, UiTheme.FontCaption));
+            float w = Mathf.Max(tw, 140) + 28, h = string.IsNullOrEmpty(Action) ? 62 : 82;
             var at = GetViewport().GetMousePosition() + new Vector2(22, 20);
             var vs = GetViewportRect().Size;
             at.X = Mathf.Min(at.X, vs.X - w - 4); at.Y = Mathf.Min(at.Y, vs.Y - h - 4);
@@ -56,6 +59,7 @@ namespace Rastvordd.Client
             var col = UiTheme.Bad.Lerp(UiTheme.Good, k);
             UiTheme.DrawBar(this, new Rect2(at + new Vector2(14, 32), new Vector2(w - 28, 6)), k, col);
             UiTheme.DrawText(this, at + new Vector2(14, 54), hp, UiTheme.FontCaption, UiTheme.Dim);
+            if (!string.IsNullOrEmpty(Action)) UiTheme.DrawText(this, at + new Vector2(14, 74), Action, UiTheme.FontCaption, ActionOk ? UiTheme.Good : UiTheme.Bad);
         }
     }
 }

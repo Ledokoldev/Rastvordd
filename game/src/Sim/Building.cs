@@ -572,7 +572,16 @@ namespace Rastvordd.Sim
         /// <summary>Молоток: улучшить на уровень или починить.</summary>
         void HammerHit(Actor a, Structure s)
         {
-            if (s.Hp < s.MaxHp - 0.5f && (s.Tier >= Building.MaxTier || !CanPay(a, Building.Cost(s.Kind, s.Tier + 1))))
+            // режим киянки: улучшить сразу до выбранного уровня или снести; уже на этом уровне (или выше) — починить
+            bool modeRepair = false;
+            if (a.HammerMode != 0)
+            {
+                int m = a.HammerMode;
+                modeRepair = m != HammerDemolish && s.Tier >= m;
+                if (!modeRepair) { HammerWheel(a, s.Id, m); return; }
+                if (s.Hp >= s.MaxHp - 0.5f) { Info(a, $"{Building.KindName(s.Kind)}: уже {Building.TierNames[s.Tier]}, цел"); return; }
+            }
+            if (s.Hp < s.MaxHp - 0.5f && (modeRepair || s.Tier >= Building.MaxTier || !CanPay(a, Building.Cost(s.Kind, s.Tier + 1))))
             {
                 // ремонт: пятая часть цены текущего уровня за 20% прочности
                 var full = Building.Cost(s.Kind, s.Tier);
@@ -650,6 +659,28 @@ namespace Rastvordd.Sim
             }
             return "";
         }
+
+        /// <summary>Что сделает ЛКМ киянкой в этом режиме по этой постройке: подпись и можно ли.</summary>
+        public (string text, bool ok) HammerModeInfo(Actor a, Structure s, int mode)
+        {
+            if (mode == HammerDemolish)
+            {
+                string w = HammerWhy(a, s, mode);
+                return w == "" ? ($"ЛКМ — снести (вернёт {CostText(DemolishRefund(s))})", true) : ($"снести нельзя: {w}", false);
+            }
+            if (s.Tier >= mode)
+            {
+                if (s.Hp >= s.MaxHp - 0.5f) return ($"уже {Building.TierNames[s.Tier]}", false);
+                var full = Building.Cost(s.Kind, s.Tier);
+                var cost = Array.ConvertAll(full, c => (c.id, Math.Max(1, c.n / 5)));
+                return CanPay(a, cost) ? ($"ЛКМ — починить ({CostText(cost)})", true) : ($"на ремонт не хватает: {CostText(cost)}", false);
+            }
+            string why = HammerWhy(a, s, mode);
+            return why == "" ? ($"ЛКМ — в {Building.TierNames[mode]} ({CostText(Building.Cost(s.Kind, mode))})", true)
+                             : ($"в {Building.TierNames[mode]} нельзя: {why}", false);
+        }
+
+        public string HammerModeText(Actor a, Structure s, int mode) => HammerModeInfo(a, s, mode).text;
 
         /// <summary>Пункт колеса киянки выбран: улучшить постройку сразу до уровня или снести с возвратом половины цены.</summary>
         void HammerWheel(Actor a, int structId, int op)

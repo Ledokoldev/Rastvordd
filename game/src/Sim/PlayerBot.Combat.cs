@@ -503,6 +503,16 @@ namespace Rastvordd.Sim
                     Say("бинт", $"бинтуюсь за {_coverName} ({_me.Hp:0} HP)", 6);
                     return;
                 }
+                // низкое укрытие (блок, ящик): «пик» — просто привстать. Стоя — стреляет, присел — неуязвим, но и сам не стреляет
+                if (_w.LowCoverNear(_me.Pos, known))
+                {
+                    if ((_crT -= World.Dt) <= 0) { _crOn = !_crOn; _crT = _crOn ? 0.35f + (float)_rng.NextDouble() * 0.5f : 0.9f + (float)_rng.NextDouble() * 0.9f; }
+                    bool down = _crOn || hitRecently && _rng.NextDouble() < 0.02;
+                    cmd.Crouch = down;
+                    if (!down) Shoot(t, gun, st, d, SeesFoe(t), ref cmd, "из-за укрытия");
+                    else cmd.Aim = known;
+                    return;
+                }
                 if (!_hasPeek)
                 {
                     // пикнуть неоткуда — укрытие глухое: подождать и поискать другое
@@ -567,7 +577,7 @@ namespace Rastvordd.Sim
             cmd.Peek = 1;
             if (!sees || d > st.Def.Range * 0.95f) return;
             var muzzle = _me.Pos + dir * (_me.Radius + 0.35f);
-            if (!_w.BulletClear(muzzle, t.Pos)) return;   // своё укрытие на линии — не стрелять в камень
+            if (!_w.ShotClear(muzzle, t.Pos, _me.Crouching, t.Crouching)) return;   // пуля не долетит (стена, или присели за низким) — не стрелять в камень
             if (st.Ammo <= 0) { if (st.ReloadLeft <= 0) { cmd.Reload = true; if (st.MagSize > 1) { Stat(where == "из укрытия" ? "перезарядка в укрытии" : "перезарядка в открытую"); } } return; }
             // автомат — короткими очередями (3–6 выстрелов, дальше короче) с паузой, чтобы ствол вернулся
             bool fire;

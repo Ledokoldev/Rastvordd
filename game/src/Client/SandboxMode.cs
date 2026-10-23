@@ -52,6 +52,8 @@ namespace Rastvordd.Client
         int _sbDuelTier = 3, _sbDuelGun = -1, _sbDuelWins, _sbDuelLosses;   // _sbDuelGun: −1 — случайно, иначе номер в списке тира
         float _sbDuelNext = -1;       // время следующего раунда (после чьей-то смерти)
         SbBot _sbDuelist;
+        float _sbDuelGo = -1; int _sbDuelShown;   // отсчёт 3-2-1: до _sbDuelGo оба стоят на местах, урона нет
+        SVec _sbDuelMePos, _sbDuelBotPos;
 
         static readonly string[][] SbTierGuns =
         {
@@ -264,6 +266,7 @@ namespace Rastvordd.Client
                 return true;
             }
             if (target.Id == _myId && _sbGod) return true;
+            if (_sbSub == 2 && _sbDuelGo > 0) return true;   // дуэль: во время отсчёта урона нет
             // боты арены друг друга не ранят: все против тебя
             if (_sbBots.Exists(b => b.A == target) && _sbBots.Exists(b => b.A.Id == attackerId)) return true;
             return false;
@@ -384,12 +387,31 @@ namespace Rastvordd.Client
             _sbBots.Add(_sbDuelist);
             _sbGod = false;
             _sbDuelNext = -1;
+            _sbDuelGo = w.Time + 3f; _sbDuelShown = 4;
+            _sbDuelMePos = me.Pos; _sbDuelBotPos = bot.Pos;
             _hud.Toast($"Дуэль, тир {_sbDuelTier}: {Items.Name(gun)} у обоих · счёт {_sbDuelWins}:{_sbDuelLosses}");
         }
 
         void DuelTick(World w, Actor me)
         {
             if (_sbDuelist == null) { DuelStart(); return; }
+            if (_sbDuelGo > 0)
+            {
+                // отсчёт: оба на местах, стрелять можно, но урона нет; на «Бой!» — полные магазины
+                float left = _sbDuelGo - w.Time;
+                var bot = _sbDuelist.A;
+                if (left > 0)
+                {
+                    me.Pos = _sbDuelMePos; me.Vel = SVec.Zero; bot.Pos = _sbDuelBotPos; bot.Vel = SVec.Zero;
+                    int n = (int)Mathf.Ceil(left);
+                    if (n != _sbDuelShown) { _sbDuelShown = n; _hud.Toast($"Дуэль · {n}"); }
+                    return;
+                }
+                _sbDuelGo = -1;
+                foreach (var a in new[] { me, bot })
+                    foreach (var sl in a.Belt) if (sl?.State is WeaponState ws && !ws.Def.Melee) { ws.Ammo = ws.MagSize; ws.ReloadLeft = 0; ws.Recoil = 0; }
+                _hud.Toast("Бой!");
+            }
             if (_sbDuelNext < 0 && (me.Dead || _sbDuelist.A.Dead))
             {
                 if (me.Dead) _sbDuelLosses++; else _sbDuelWins++;

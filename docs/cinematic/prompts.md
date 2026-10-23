@@ -1,46 +1,54 @@
 # Заставка спуска в «Объект 42» — промты для видео
 
-Схема: 4 клипа по 5–8 с → склейка (~25–30 с). Каждый клип — **image-to-video**: стартовый кадр из этой папки + промт ниже.
-Опорные картинки (`ref_sobr.png`, `ref_ozk.png`, `ref_lift_booth.png`) — прикладывать, если сервис принимает референсы персонажей
+Схема: 5 клипов, ~19 с: пролог 3 с → спуск 5 с → двери 3 с → «пошли» 4 с → во тьму 4 с. Каждый клип — **image-to-video**:
+стартовый кадр (это первый кадр клипа) + промт ниже. Генерировать по 5 с (минимум у большинства сервисов) и обрезать при склейке.
+Опорные картинки (`ref_sobr.png`, `ref_ozk.png`, `ref_lift_booth*.png`) — прикладывать, если сервис принимает референсы
 (Kling «Elements», Runway «References», Veo «Ingredients»).
 
 Сеттинг: постсоветский остров, 1980-е, секретный запасной командный пункт «Объект 42» под землёй; лифт с поверхности —
-бетонная будка с красной звездой, лебёдкой, рупорами и янтарными лампами; внизу — сырой бетон, ржавчина, кабели,
-красный аварийный свет, пыль. Боец А — СОБР в тяжёлой броне (шлем «Алтын», плитник, АК-74М с глушителем и фонарём).
+бетонный блокгауз с красной звездой, копром с лебёдкой, рупорами и янтарными лампами; внизу — сырой бетон, ржавчина, кабели,
+красный аварийный свет, пыль. Боец А — СОБР в тяжёлой броне (шлем, плитник, АК-74М с глушителем и фонарём).
 Боец Б — в химзащите ОЗК и противогазе ГП-5 (АКМ с фонарём, дозиметр на груди).
 
-## Общий блок (вставлять в каждый промт)
+## Общий блок (вставлять в каждый промт с бойцами)
 ```
-Two soldiers in an abandoned Soviet top-secret underground bunker "Object 42", 1980s. Soldier A: Russian SOBR special forces operator in full heavy armor — dark grey-black uniform, black plate carrier, black balaclava, titanium Altyn helmet with the visor raised, AK-74M with suppressor and underbarrel flashlight. Soldier B: olive-green rubber OZK hazmat suit with hood, GP-5 gas mask with round glass eyepieces and side filter, dosimeter on the chest, AKM with underbarrel flashlight. Raw concrete, rust, cable trays, hazard stripes, dim red emergency lights, dust in the air. Photorealistic, cinematic, 35mm anamorphic, desaturated cold grade, film grain. No music, no text.
-```
-
-## Клип 1 — спуск в лифте (старт: `shot1_lift_descent.png`, 8 с)
-```
-[общий блок] Inside a heavy enclosed Soviet freight elevator cabin descending: riveted steel walls, yellow-black hazard stripes, caged red lamp on the ceiling swaying slightly. Both soldiers stand side by side and silently check their rifles — Soldier A racks the charging handle and glances into the chamber, Soldier B pulls the magazine, looks at it, slaps it back in. Shadows of the shaft slide upward through the door gap. Static medium shot from the front with subtle vibration. At the end the cabin jolts to a hard stop, dust falls from the ceiling, both look up.
-Sound: elevator cable hum, metal rattling, rifle clicks, breathing through the gas mask, heavy clunk on stop.
+Two soldiers in an abandoned Soviet top-secret underground bunker "Object 42", 1980s. Soldier A: Russian SOBR special forces operator in full heavy armor — dark grey-black uniform, black plate carrier, black balaclava, ballistic helmet, AK-74M with suppressor and underbarrel flashlight. Soldier B: olive-green rubber OZK hazmat suit with hood, GP-5 gas mask with round glass eyepieces and side filter, dosimeter on the chest, AKM with underbarrel flashlight. Raw concrete, rust, cable trays, hazard stripes, dim red emergency lights, dust in the air. Photorealistic, cinematic, 35mm anamorphic, desaturated cold grade, film grain. No music, no text.
 ```
 
-## Клип 2 — двери, вид сзади (старт: `shot2_doors_back.png`, 6 с)
+## Клип 0 — пролог, будка лифта (старт: `ref_lift_booth_*.png`, 3 с)
 ```
-[общий блок] Over-the-shoulder shot from behind both soldiers inside the elevator. The double steel doors grind open in front of them revealing a pitch-black concrete corridor. They raise their rifles to the shoulder and slowly step forward out of the cabin, aiming into the darkness. Camera follows slowly behind at shoulder height.
-Sound: grinding doors, distant dripping water, low ventilation drone.
-```
-
-## Клип 3 — со спины: фонари, вскинули, пошли (старт: `shot3_side_signal_r*.png`, 8 с)
-```
-[общий блок] Camera behind the two soldiers at shoulder height in the open doorway of the elevator cabin, a pitch-black concrete corridor ahead. They click on their underbarrel flashlights — two white beams cut through the dust — then snap their rifles up to the shoulder and start slowly advancing forward into the corridor, aiming, in step with each other. Camera follows slowly behind them.
-Sound: two flashlight clicks, rifle slings rustling, boots on wet concrete, muffled breathing through the gas mask.
+Surface elevator head-house of a secret Soviet bunker at overcast dusk: a massive concrete blockhouse with a faded red star, a steel headframe with a cable winch, loudspeaker horns and amber lamps on the corners. The amber lamps start flashing, a siren wails, the winch wheel begins to turn and the cable jerks downward. Slow push-in, slight drizzle. Photorealistic, cinematic, 35mm, desaturated cold grade, film grain. No music, no text.
+Sound: siren wail, wind, heavy winch clank.
 ```
 
-## Клип 4 — уходят в темноту (старт: `shot4_into_dark.png`, 6 с)
+## Клип 1 — спуск (старт: `shot1_lift_descent_n*.png`, 5 с)
 ```
-[общий блок] Wide shot from behind down a long dark concrete corridor with faint red emergency lamps far away. The two soldiers advance in tactical formation, flashlight beams sweeping across the walls and pipes, getting smaller and smaller until they dissolve into the darkness and only two faint beams remain, then the beams turn the corner and everything goes black.
+[общий блок] Inside a huge Soviet freight elevator cage descending, the concrete shaft wall sliding upward past the mesh walls, red lamps swaying slightly. Soldier A racks the charging handle of his rifle, Soldier B slaps the magazine into his rifle. Then the cage jolts to a hard stop, dust falls from above, both look up. Static medium shot from the front with subtle vibration.
+Sound: elevator cable hum, metal rattling, rifle clicks, gas-mask breathing, heavy clunk on stop.
+```
+
+## Клип 2 — двери (старт: `shot2_doors_back_w*.png`, 3 с)
+```
+[общий блок] Wide shot from the back of a big Soviet freight elevator cabin, both soldiers full body facing the closed double steel doors. The doors grind open, revealing a pitch-black concrete corridor. The soldiers stand still, slightly raising their rifles. Static camera.
+Sound: grinding steel doors, low ventilation drone.
+```
+
+## Клип 3 — фонари, вскинули, пошли (старт: `shot3_side_signal_w*.png`, 4 с)
+```
+[общий блок] Wide shot from behind, both soldiers full body in the open doorway of the elevator cabin, a pitch-black corridor ahead. They click on their underbarrel flashlights — two white beams cut through the dust — snap their rifles up to the shoulder and step forward out of the cabin, aiming. Camera follows slowly behind.
+Sound: two flashlight clicks, boots on wet concrete, gas-mask breathing.
+```
+
+## Клип 4 — во тьму (старт: `shot4_into_dark_n*.png`, 4 с)
+```
+[общий блок] Almost pitch-black long concrete corridor, a few dim red emergency lamps far away. The two soldiers walk away from the camera in tactical formation, flashlight beams sweeping the walls, quickly getting smaller and dissolving into the darkness until only two faint beams remain, then black.
 Sound: footsteps fading, ventilation drone, a far-away metallic bang at the very end.
 ```
 
-## Склейка
-1 → (резкий стык на остановке лифта) → 2 → 3 → 4 → затемнение. Между 1 и 2 можно 0,3 с чёрного кадра. Звук: если сервис
-не делает звук (не Veo) — наложить отдельно: гул троса, лязг, дыхание в противогаз, щелчки фонарей.
+## Склейка (~19 с)
+0 (3 с) → резкий стык в темноту → 1 (5 с) → стык на ударе остановки → 2 (3 с) → 3 (4 с) → 4 (4 с) → чёрный экран / название.
+Сервисы обычно дают 5 с — обрезать лишнее с конца клипа (у клипа 2 оставить момент, когда двери раскрылись).
+Звук: если сервис не делает звук (не Veo) — наложить отдельно.
 
 ## Где генерировать
 - Veo 3.1 (Gemini Pro/Ultra, Google Flow) — лучший реализм и сразу со звуком.

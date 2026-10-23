@@ -183,6 +183,7 @@ namespace Rastvordd.Client
                     if (best != null) { me.Pos = best.Center + (best.IsFloor ? new SVec(-1.6f, 0.4f) : new SVec(0.2f, 1.1f)); _autoAim = best.Center; }
                 }
                 else if (a == "hdone") _hammerMenu.Release();
+                else if (a.StartsWith("sbsub")) SbSetSub(int.Parse(a.Substring(5)));   // отладка: полигон — мишени/боты/дуэль
                 else if (a.StartsWith("hmode")) _hammerMode = int.Parse(a.Substring(5));   // отладка: режим киянки (1–5, 9 — снос)
                 else if (a.StartsWith("hpick")) _hammerMenu.PointAt(int.Parse(a.Substring(5)));
                 else if (a.StartsWith("dose")) _server.World.Find(_myId).RadDose = float.Parse(a.Substring(4));   // отладка (D47): dose<n> — доза радиации
@@ -921,10 +922,24 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         /// <summary>Клик мимо админки закрывает её (окна на весь экран ловят клик сами).</summary>
         public override void _Input(InputEvent e)
         {
+            // ноутбук: Ctrl+1…Ctrl+0 = F1…F10, Ctrl+− = F11, Ctrl+= = F12 (у многих F-ряд только через Fn)
+            if (e is InputEventKey ck && ck.CtrlPressed && !ck.Echo && LaptopF(ck.PhysicalKeycode) is Key fk)
+            {
+                GetViewport().SetInputAsHandled();
+                Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = fk, Keycode = fk, Pressed = ck.Pressed });
+                return;
+            }
             if (e is InputEventMouseButton sbm && sbm.Pressed && SandboxClick(sbm)) { GetViewport().SetInputAsHandled(); return; }   // полигон: свернуть панель / ответ викторины
             if (e is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex is MouseButton.Left or MouseButton.Right && _hud != null && _hud.CloseAdminIfOutside(mb.GlobalPosition))
                 GetViewport().SetInputAsHandled();
         }
+
+        static Key? LaptopF(Key k) => k switch
+        {
+            Key.Key1 => Key.F1, Key.Key2 => Key.F2, Key.Key3 => Key.F3, Key.Key4 => Key.F4, Key.Key5 => Key.F5,
+            Key.Key6 => Key.F6, Key.Key7 => Key.F7, Key.Key8 => Key.F8, Key.Key9 => Key.F9, Key.Key0 => Key.F10,
+            Key.Minus => Key.F11, Key.Equal => Key.F12, _ => null,
+        };
 
         InputCmd BuildCmd()
         {

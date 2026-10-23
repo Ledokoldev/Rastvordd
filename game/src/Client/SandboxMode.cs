@@ -48,6 +48,10 @@ namespace Rastvordd.Client
         readonly List<SbBot> _sbBots = new();
         int _sbBotKind;               // 0 — боты-игроки, 1 — охрана РТ
         int _sbBotTier = 2;           // 1..4, 0 — случайно
+        // дуэль: я против одного бота-игрока, одинаковые тир, броня и ствол
+        int _sbDuelTier = 3, _sbDuelGun = -1, _sbDuelWins, _sbDuelLosses;   // _sbDuelGun: −1 — случайно, иначе номер в списке тира
+        float _sbDuelNext = -1;       // время следующего раунда (после чьей-то смерти)
+        SbBot _sbDuelist;
 
         static readonly string[][] SbTierGuns =
         {
@@ -292,6 +296,7 @@ namespace Rastvordd.Client
         {
             if (_sbAimBuild && (_sbBuildT -= World.Dt) <= 0) { _sbBuildT = 2f; SbRefillBuild(); }
             if ((_sbRefillT -= World.Dt) <= 0) { _sbRefillT = 1f; if (_sbInfAmmo && !me.Dead && !_sbAimBuild) SbTopUpAmmo(me); }
+            if (_sbSub == 2) { DuelTick(w, me); return; }
             // смерть — сразу снова на рубеже (через 1,5 с, чтобы увидеть)
             if (me.Dead)
             {
@@ -347,6 +352,55 @@ namespace Rastvordd.Client
             }
         }
 
+        /// <summary>Раунд дуэли: я на юге квадрата, бот на севере, 28 м; одинаковые броня и ствол.</summary>
+        void DuelStart()
+        {
+            var w = _server.World; var me = w.Find(_myId);
+            if (_sbDuelist != null) { SbRemoveBot(_sbDuelist); _sbBots.Remove(_sbDuelist); _sbDuelist = null; }
+            var guns = SbTierGuns[_sbDuelTier - 1];
+            string gun = _sbDuelGun >= 0 && _sbDuelGun < guns.Length ? guns[_sbDuelGun] : guns[_sbRng.Next(guns.Length)];
+            var wd = Items.Get(gun).Weapon;
+            void Arm(Actor a)
+            {
+                a.ClearAll();
+                a.Belt[0] = Items.NewSlot(gun, wd.Magazine); a.Current = 0;
+                if (a.Belt[0].State != null) a.Belt[0].State.Ammo = a.Belt[0].State.MagSize;
+                a.Add(wd.AmmoId, 400);
+                a.Add("bandage", 2);
+                w.SandboxDress(a, _sbDuelTier);
+                a.Dead = false; a.Hp = a.MaxHp; a.Vel = SVec.Zero;
+            }
+            Arm(me);
+            me.Pos = _sbSquare + new SVec(0, 14); me.Facing = -Mathf.Pi / 2;
+            _slot = 0;
+            var at = _sbSquare + new SVec(0, -14);
+            for (int tries = 0; tries < 20 && !w.IsFree(at, 0.6f); tries++) at += new SVec(1.3f, 0.7f);
+            var bot = w.SandboxActor(SbBotNames[(_sbDuelWins + _sbDuelLosses) % SbBotNames.Length] + " (бот)", Team.Player, at);
+            Arm(bot);
+            bot.Facing = Mathf.Pi / 2;
+            IBrain brain = new ArenaBrain(bot, w, _sbRng.Next(), () => w.Find(_myId));
+            _server.AddBrain(brain);
+            _sbDuelist = new SbBot { A = bot, Brain = brain, Gun = gun };
+            _sbBots.Add(_sbDuelist);
+            _sbGod = false;
+            _sbDuelNext = -1;
+            _hud.Toast($"Дуэль, тир {_sbDuelTier}: {Items.Name(gun)} у обоих · счёт {_sbDuelWins}:{_sbDuelLosses}");
+        }
+
+        void DuelTick(World w, Actor me)
+        {
+            if (_sbDuelist == null) { DuelStart(); return; }
+            if (_sbDuelNext < 0 && (me.Dead || _sbDuelist.A.Dead))
+            {
+                if (me.Dead) _sbDuelLosses++; else _sbDuelWins++;
+                GD.Print($"duel: {(me.Dead ? "бот" : "я")} · {_sbDuelWins}:{_sbDuelLosses} · t={w.Time:0.0}");
+                _hud.Toast((me.Dead ? "Поражение" : "Победа") + $" · счёт {_sbDuelWins}:{_sbDuelLosses} · новый раунд через 3 с");
+                _sbDuelNext = w.Time + 3f;
+                SbFillPanel();
+            }
+            if (_sbDuelNext > 0 && w.Time >= _sbDuelNext) DuelStart();
+        }
+
         void SbRemoveBot(SbBot b)
         {
             _server.RemoveBrain(b.A.Id);
@@ -385,6 +439,7 @@ namespace Rastvordd.Client
         {
             foreach (var b in _sbBots) SbRemoveBot(b);
             _sbBots.Clear();
+            _sbDuelist = null;
         }
 
         /// <summary>Мишени ↔ боты: телепорт на рубеж / в квадрат.</summary>
@@ -393,7 +448,8 @@ namespace Rastvordd.Client
             _sbSub = sub;
             var me = _server.World.Find(_myId);
             if (sub == 0) { SbClearBots(); if (_sbTargets.Count == 0) SpawnTargets(); me.Pos = _sbLane; }
-            else { SbClearTargets(); me.Pos = _sbSquare + new SVec(0, 26); }
+            else if (sub == 2) { SbClearBots(); SbClearTargets(); DuelStart(); }
+            else { SbClearTargets(); me.Pos = _sbSquare + new SVec(0, 26); if (me.Dead) { me.Dead = false; me.Hp = me.MaxHp; } SbGiveKit(); }
             me.Vel = SVec.Zero;
             SbFillPanel();
         }
@@ -492,8 +548,18 @@ namespace Rastvordd.Client
             var p = _sbPanel;
             p.Caption("Режим");
             p.Buttons((_sbAimBuild ? "К стрельбе (F3)" : "На стройплощадку (F3)", () => { SbAimToggleBuild(); SbFillPanel(); }));
-            p.Choice(new[] { "Мишени", "Боты" }, _sbSub, SbSetSub);
-            if (_sbSub == 0)
+            p.Choice(new[] { "Мишени", "Боты", "Дуэль" }, _sbSub, SbSetSub);
+            if (_sbSub == 2)
+            {
+                p.Caption($"Дуэль · я {_sbDuelWins} : {_sbDuelLosses} бот");
+                p.Note("Один бот-игрок против тебя: тот же тир брони и тот же ствол. Раунд — до смерти, новый начнётся сам.");
+                p.Choice(new[] { "Тир 1", "Тир 2", "Тир 3" }, _sbDuelTier - 1, k => { _sbDuelTier = k + 1; _sbDuelGun = -1; DuelStart(); SbFillPanel(); });
+                var gl = new List<string> { "Случайно" };
+                foreach (var g in SbTierGuns[_sbDuelTier - 1]) gl.Add(Items.Name(g));
+                p.Choice(gl.ToArray(), _sbDuelGun + 1, k => { _sbDuelGun = k - 1; DuelStart(); });
+                p.Buttons(("Новый раунд", DuelStart), ("Сбросить счёт", () => { _sbDuelWins = _sbDuelLosses = 0; SbFillPanel(); }));
+            }
+            else if (_sbSub == 0)
             {
                 p.Caption("Мишени");
                 p.Note("Стоят на 10, 25, 50 и 100 м (слева), бегают боком на 20 и 40 м, выглядывают из-за стены на 30 м. Мишени не умирают: 100 урона — «убит», время до убийства.");

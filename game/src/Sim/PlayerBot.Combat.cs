@@ -34,6 +34,8 @@ namespace Rastvordd.Sim
         float _lastShotAt = -100, _coverSince, _pushUntil = -100, _chaseStart, _chaseTick = -99;
         float _adT, _adSign = 1, _crT;   // открытый бой: смена стрейфа (A-D) и присед-встал — неровный ритм, как у людей
         bool _crOn;
+        int _burstShots; float _burstPause;
+        public float RecoilControl = 0.7f;   // доля отдачи, которую бот гасит прицелом (человек мышью гасит почти всю)
 
         /// <summary>В разгаре перестрелки: недавно стрелял или по мне попали, он рядом и на виду — дерусь до конца, не бегу спиной.</summary>
         bool Committed() => _w.Time - _foeSeenAt < 3f && (_w.Time - _lastShotAt < 3f || _w.Time - _me.LastDamagedTime < 3f)
@@ -555,12 +557,31 @@ namespace Rastvordd.Sim
             _aimDrift = _aimDrift * 0.95f + ((float)_rng.NextDouble() - 0.5f) * 0.25f;
             float lead = d / MathF.Max(40f, Items.Get(gun)?.Weapon?.BulletSpeed ?? 110f);
             cmd.Aim = sees ? t.Pos + t.Vel * lead + new Vector2(-dir.Y, dir.X) * _aimDrift * d * 0.06f : known;
+            // гасит отдачу, как человек мышью: прицел против увода ствола (не полностью)
+            if (sees && st.Recoil != 0)
+            {
+                var rel = cmd.Aim - _me.Pos;
+                float ang = MathF.Atan2(rel.Y, rel.X) - st.Recoil * RecoilControl * MathF.PI / 180f;
+                cmd.Aim = _me.Pos + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * rel.Length();
+            }
             cmd.Peek = 1;
             if (!sees || d > st.Def.Range * 0.95f) return;
             var muzzle = _me.Pos + dir * (_me.Radius + 0.35f);
             if (!_w.BulletClear(muzzle, t.Pos)) return;   // своё укрытие на линии — не стрелять в камень
             if (st.Ammo <= 0) { if (st.ReloadLeft <= 0) { cmd.Reload = true; if (st.MagSize > 1) { Stat(where == "из укрытия" ? "перезарядка в укрытии" : "перезарядка в открытую"); } } return; }
-            bool fire = st.Def.Auto ? MathF.Sin(_w.Time * 3f + _me.Id) > -0.3f : (_trig = !_trig);
+            // автомат — короткими очередями (3–6 выстрелов, дальше короче) с паузой, чтобы ствол вернулся
+            bool fire;
+            if (st.Def.Auto)
+            {
+                if (_burstPause > 0) { _burstPause -= World.Dt; fire = false; }
+                else
+                {
+                    fire = true;
+                    if (st.Cooldown <= 0 && st.ReloadLeft <= 0 && ++_burstShots >= (d > 25 ? 3 : d > 12 ? 4 : 6) + _rng.Next(2))
+                    { _burstShots = 0; _burstPause = 0.18f + (float)_rng.NextDouble() * (d > 25 ? 0.3f : 0.15f); }
+                }
+            }
+            else fire = _trig = !_trig;
             if (fire && st.Cooldown <= 0 && st.ReloadLeft <= 0) _lastShotAt = _w.Time;
             if (fire && st.Cooldown <= 0 && st.ReloadLeft <= 0) Stat(where == "из укрытия" ? "выстрел из укрытия" : "выстрел в открытую");
             cmd.Fire = fire;

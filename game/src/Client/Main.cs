@@ -27,6 +27,7 @@ namespace Rastvordd.Client
         BuildMenu _buildMenu, _hammerMenu;   // колёса Плана и киянки (ПКМ)
         BuildGhost2D _hammerMark;            // подсветка постройки, над которой открыто колесо киянки
         BuildGhost2D _doorMark;              // мягкая подсветка двери, которую откроет E
+        InteractMark _useMark;               // мягкая рамка остальной цели E (верстак, ящик, печь…)
         int _hammerFocus, _hammerOp, _hammerTarget;
         int _hammerMode = 1;                 // режим киянки (колёсико): индекс в HammerModes
         static readonly int[] HammerModes = { 1, 2, 3, 4, World.HammerDemolish };   // дерево, камень, металл, сталь, снос
@@ -780,6 +781,9 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             if (self.InteractDoor != 0 && !self.Dead && !UiShown) foreach (var st in _cur.Structures) if (st.Id == self.InteractDoor) { door = st; break; }
             _doorMark.Visible = door != null && target == null;
             if (door is StructSnap ds) _doorMark.Set(ds.Kind, null, ds.A, ds.B, true);
+            if (_useMark == null) { _useMark = new InteractMark(); _world.AddChild(_useMark); }
+            _useMark.Visible = door == null && target == null && !self.Dead && !UiShown && self.InteractHalf != default;
+            if (_useMark.Visible) _useMark.Set(self.InteractAt, self.InteractHalf);
             if (target is StructSnap ts) _hammerMark.Set(ts.Kind, Building.IsFloor(ts.Kind) ? ts.Poly : null, ts.A, ts.B, true);
         }
 

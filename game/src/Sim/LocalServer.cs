@@ -126,7 +126,8 @@ namespace Rastvordd.Sim
         public bool HoldingHammer;      // киянка в руках
         public int HammerTarget;        // постройка под киянкой (или та, над которой открыто колесо), 0 — нет
         public List<WheelItem> HammerWheel = new();   // колесо киянки для HammerTarget
-        public int InteractDoor;        // дверь, которую откроет/закроет E (можешь открыть), 0 — нет
+        public int InteractDoor;        // дверь/ставни, которые откроет/закроет E (можешь открыть), 0 — нет
+        public System.Numerics.Vector2 InteractAt, InteractHalf;   // остальная цель E: центр и полуразмер рамки (Half = 0 — нет)
         public string HammerAction = "";  // что сделает ЛКМ киянкой в текущем режиме по HammerTarget
         public bool HammerActionOk;
         public bool OpenCraft;          // открыть крафт (E у верстака)
@@ -944,7 +945,17 @@ namespace Rastvordd.Sim
             {
                 var ni = World.NearestInteract(me);
                 s.InteractHint = Hint(ni, me);
-                if (ni.kind == World.InteractKind.Door && ni.target is Structure door && World.CanOpenDoor(me, door)) s.InteractDoor = door.Id;   // мягкая подсветка у клиента
+                // мягкая подсветка у клиента: постройка (дверь, ставни) — по ребру, остальное — рамкой по месту
+                if (ni.target is Structure door && (ni.kind != World.InteractKind.Door || World.CanOpenDoor(me, door))) s.InteractDoor = door.Id;
+                (s.InteractAt, s.InteractHalf) = ni.target switch
+                {
+                    Deployable d => (d.Pos, d.Half + new System.Numerics.Vector2(0.08f, 0.08f)),
+                    LootBag b => (b.Pos, new System.Numerics.Vector2(0.35f, 0.3f)),
+                    Pickup p => (p.Pos, new System.Numerics.Vector2(0.35f, 0.3f)),
+                    Stash st => (st.Pos, new System.Numerics.Vector2(0.45f, 0.4f)),
+                    Substation sub => (sub.PanelPos, new System.Numerics.Vector2(0.45f, 0.3f)),
+                    _ => (default, default),
+                };
             }
             if (!me.Dead && held?.Def != null && held.Def.Deploy != DeployKind.None)
             {

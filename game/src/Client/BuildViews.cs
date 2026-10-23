@@ -411,3 +411,39 @@ namespace Rastvordd.Client
         }
     }
 }
+
+namespace Rastvordd.Client
+{
+    /// <summary>Мягкая рамка цели E на земле (верстак, ящик, печь, шкаф, сумка, находка): видно, с чем сработает кнопка.</summary>
+    public partial class InteractMark : Node2D
+    {
+        System.Numerics.Vector2 _at, _half;
+
+        public void Set(System.Numerics.Vector2 at, System.Numerics.Vector2 half)
+        {
+            if (at == _at && half == _half) return;
+            _at = at; _half = half;
+            QueueRedraw();
+        }
+
+        public override void _Draw()
+        {
+            if (_half == default) return;
+            var c = new System.Numerics.Vector2[]
+            {
+                _at + new System.Numerics.Vector2(-_half.X, -_half.Y), _at + new System.Numerics.Vector2(_half.X, -_half.Y),
+                _at + new System.Numerics.Vector2(_half.X, _half.Y), _at + new System.Numerics.Vector2(-_half.X, _half.Y),
+            };
+            var pts = System.Array.ConvertAll(c, p => Iso.Px(p));
+            DrawColoredPolygon(pts, new Color(1f, 0.95f, 0.8f, 0.08f));
+            // уголки, а не сплошная рамка — аккуратнее и не спорит с подсветкой киянки
+            var line = new Color(1f, 0.95f, 0.8f, 0.55f);
+            for (int i = 0; i < 4; i++)
+            {
+                Vector2 p = pts[i], prev = pts[(i + 3) % 4], next = pts[(i + 1) % 4];
+                DrawLine(p, p + (next - p) * 0.3f, line, 1.5f, true);
+                DrawLine(p, p + (prev - p) * 0.3f, line, 1.5f, true);
+            }
+        }
+    }
+}

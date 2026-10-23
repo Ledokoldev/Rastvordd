@@ -1209,7 +1209,9 @@ namespace Rastvordd.Sim
             w.Bloom = MathF.Min(wd.MaxBloomDeg, w.Bloom + wd.BloomPerShotDeg);
             // разброс: сумма двух случайных — чаще ближе к центру
             float r = ((float)Rng.NextDouble() + (float)Rng.NextDouble() - 1f) * 0.5f;
-            float baseAng = a.Facing + (w.Recoil + r * spreadDeg) * MathF.PI / 180f;
+            // живому игроку отдача тянет сам курсор (клиент, Main.RecoilKick) — здесь не уводим, иначе увод двойной; ботам — как раньше
+            bool human = a.Team == Team.Player && !a.IsBot;
+            float baseAng = a.Facing + ((human ? 0f : w.Recoil) + r * spreadDeg) * MathF.PI / 180f;
             // увод ствола следующим выстрелам: по узору ствола, с нарастанием; в приседе меньше, на ходу больше; обвесы гасят
             if (wd.RecoilDeg > 0)
             {

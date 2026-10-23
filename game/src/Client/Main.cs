@@ -830,6 +830,54 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _cur.Markers.ConvertAll(m => (m.Name, m.Open)), _cur.Hot.Count > 0 ? _cur.Hot[0].heat : 0, _server.World.Milestones);
         }
 
+        // ---------- отдача: тянет сам курсор вверх по экрану ----------
+        int _recoilStreak; double _recoilLastShot; float _recoilDebt;   // сколько градусов «утянуло» за очередь — часть вернётся сама
+
+        /// <summary>
+        /// Выстрел своим стволом: курсор поворачивается вокруг персонажа вверх по экрану (смотришь вправо — против часовой,
+        /// влево — по часовой) на RecoilDeg + RecoilGrowDeg × номер в очереди. Компенсируется мышью. Автоматы тянут по ходу
+        /// очереди; одиночные — короткий рывок. Пауза > 0,35 с — новая очередь, половина увода плавно возвращается.
+        /// </summary>
+        void RecoilKick(string weaponId)
+        {
+            var wd = Items.Get(weaponId)?.Weapon;
+            if (wd == null || wd.RecoilDeg <= 0 || Input.MouseMode == Input.MouseModeEnum.Visible && UiShown) return;
+            double now = Time.GetTicksMsec() / 1000.0;
+            if (now - _recoilLastShot > 0.35) _recoilStreak = 0;
+            _recoilLastShot = now;
+            var me = _cur?.Self; if (me == null) return;
+            bool crouch = Input.IsPhysicalKeyPressed(Key.Alt);
+            float deg = (wd.RecoilDeg + wd.RecoilGrowDeg * _recoilStreak) * (crouch ? 0.7f : 1f) * RecoilFeel;
+            _recoilStreak++;
+            _recoilDebt += deg;
+            RotateCursor(-deg);
+        }
+
+        const float RecoilFeel = 0.8f;   // общая сила увода курсора (подкрутить по ощущениям)
+
+        /// <summary>Повернуть курсор вокруг своего персонажа: «+» — вниз по экрану, «−» — вверх.</summary>
+        void RotateCursor(float upDeg)
+        {
+            var vp = GetViewport();
+            var mouse = vp.GetMousePosition();
+            var center = vp.GetCanvasTransform() * _selfPx;
+            var v = mouse - center;
+            if (v.LengthSquared() < 4) return;
+            float sign = v.X >= 0 ? 1f : -1f;   // вправо: вверх = против часовой (угол уменьшается); влево — наоборот
+            vp.WarpMouse(center + v.Rotated(Mathf.DegToRad(upDeg) * sign));
+        }
+
+        /// <summary>Каждый кадр: после паузы в стрельбе прицел сам опускается на половину увода.</summary>
+        void RecoilRecover(double delta)
+        {
+            if (_recoilDebt <= 0.01f) { _recoilDebt = 0; return; }
+            if (Time.GetTicksMsec() / 1000.0 - _recoilLastShot < 0.2) return;
+            float step = Mathf.Min(_recoilDebt, (float)delta * 25f);
+            _recoilDebt -= step;
+            RotateCursor(step * 0.5f);   // возвращаем только половину — остальное тянешь сам
+            if (_recoilDebt < 0.05f) _recoilDebt = 0;
+        }
+
         static SVec WasdVector()
         {
             var v = SVec.Zero;
@@ -942,6 +990,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         public override void _Process(double delta)
         {
             _frame++;
+            RecoilRecover(delta);
             if (_frame == _pressNAt) _timeEdge = true;
             _saveTimer += delta;
             if (_saveTimer >= 60) { _saveTimer = 0; SaveWorld(); }   // автосохранение раз в минуту
@@ -1078,6 +1127,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         // вспышка у дула по типу ствола (ПБС — без вспышки, D46), свет выдаёт стрелка ночью
                         if (e.Text is not ("weapon_bow" or "weapon_crossbow")) Vfx.Muzzle(Iso.Px(e.Pos + e.Dir * 0.15f), new Vector2(e.Dir.X, e.Dir.Y), e.Text, e.Value > 0);
                         if (_actorViews.TryGetValue(e.ActorId, out var shooter)) shooter.Kick();
+                        if (e.ActorId == _myId && !_spectate) RecoilKick(e.Text);
                         if (e.ActorId == _myId && e.Text != "weapon_bow") _shake = Mathf.Min(1.5f, _shake + 0.6f);
                         if (e.Text != "weapon_bow") SpawnCasing(e.Pos, e.Dir);
                         PlayShotSound(e.Text, e.Pos, e.OtherId > 0 ? Mathf.Clamp(e.OtherId / 100f, 0.2f, 1f) : 1f);

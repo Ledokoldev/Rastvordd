@@ -848,34 +848,36 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             var me = _cur?.Self; if (me == null) return;
             bool crouch = Input.IsPhysicalKeyPressed(Key.Alt);
             float deg = Mathf.Min(wd.RecoilDeg + wd.RecoilGrowDeg * _recoilStreak, wd.RecoilDeg * 1.6f) * (crouch ? 0.7f : 1f) * RecoilFeel;   // рост за очередь ограничен
+            // увод в обе стороны, независимо от того, куда смотришь: в начале очереди случайное направление,
+            // дальше иногда меняется — ствол «гуляет» влево-вправо (по часовой / против часовой)
+            if (_recoilStreak == 0 || GD.Randf() < 0.25f) _recoilDir = GD.Randf() < 0.5f ? -1 : 1;
             _recoilStreak++;
-            _recoilDebt += deg;
-            RotateCursor(-deg);
+            _recoilDebt += deg * _recoilDir;
+            RotateCursor(deg * _recoilDir);
         }
+        int _recoilDir = 1;
 
         const float RecoilFeel = 0.45f;   // общая сила увода курсора (подкрутить по ощущениям)
 
-        /// <summary>Повернуть курсор вокруг своего персонажа: «+» — вниз по экрану, «−» — вверх.</summary>
-        void RotateCursor(float upDeg)
+        /// <summary>Повернуть курсор вокруг своего персонажа на deg градусов: «+» — по часовой, «−» — против.</summary>
+        void RotateCursor(float deg)
         {
             var vp = GetViewport();
             var mouse = vp.GetMousePosition();
             var center = vp.GetCanvasTransform() * _selfPx;
             var v = mouse - center;
             if (v.LengthSquared() < 4) return;
-            float sign = v.X >= 0 ? 1f : -1f;   // вправо: вверх = против часовой (угол уменьшается); влево — наоборот
-            vp.WarpMouse(center + v.Rotated(Mathf.DegToRad(upDeg) * sign));
+            vp.WarpMouse(center + v.Rotated(Mathf.DegToRad(deg)));
         }
 
-        /// <summary>Каждый кадр: после паузы в стрельбе прицел сам опускается на половину увода.</summary>
+        /// <summary>Каждый кадр: после паузы в стрельбе прицел сам возвращается на 70% увода.</summary>
         void RecoilRecover(double delta)
         {
-            if (_recoilDebt <= 0.01f) { _recoilDebt = 0; return; }
+            if (Mathf.Abs(_recoilDebt) <= 0.05f) { _recoilDebt = 0; return; }
             if (Time.GetTicksMsec() / 1000.0 - _recoilLastShot < 0.2) return;
-            float step = Mathf.Min(_recoilDebt, (float)delta * 25f);
+            float step = Mathf.Min(Mathf.Abs(_recoilDebt), (float)delta * 25f) * Mathf.Sign(_recoilDebt);
             _recoilDebt -= step;
-            RotateCursor(step * 0.7f);   // возвращаем 70% — остальное тянешь сам
-            if (_recoilDebt < 0.05f) _recoilDebt = 0;
+            RotateCursor(-step * 0.7f);   // назад, к месту до очереди
         }
 
         static SVec WasdVector()

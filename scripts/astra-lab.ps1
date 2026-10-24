@@ -27,8 +27,9 @@ function Step([string]$name, [string]$effort) {
     $p.WaitForExit()
     $tail = (Get-Content $log -Tail 3 -ErrorAction SilentlyContinue) -join " "
     Add-Content (Join-Path $logs "cycle.log") "$(Get-Date -Format s) конец $name (код $($p.ExitCode)): $tail"
-    $all = (Get-Content $log, "$log.err" -Raw -ErrorAction SilentlyContinue) -join " "
-    return ($all -match "usage limit|rate limit|quota|You've hit|try again (at|in)")
+    # лимит — только по последним строкам ошибок (в теле лога Астра сама ищет слова вроде Quota в коде — ложные срабатывания)
+    $errTail = (Get-Content "$log.err" -Tail 15 -ErrorAction SilentlyContinue) -join " "
+    return ($p.ExitCode -ne 0 -and $errTail -match "usage limit|You've hit your|rate limit reached|429 Too Many|insufficient_quota")
 }
 
 if (-not (Test-Path (Join-Path $wt "docs\astra\ROADMAP.md"))) { if (Step "setup" "medium") { Add-Content (Join-Path $logs "cycle.log") "ЛИМИТ — стоп"; exit } }

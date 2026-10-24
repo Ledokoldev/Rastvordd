@@ -2,7 +2,7 @@
 # Круг: работа по роадмапу → охота на баги; каждый 3-й круг ещё и ассеты. Первый запуск — исследование и роадмап.
 # Стоп: файл STOP в каталоге логов, исчерпан лимит (сообщение о лимите в выводе) или прошло -Hours часов.
 # Запуск: powershell -File scripts/astra-lab.ps1 [-Hours 24]
-param([double]$Hours = 0, [string]$Track = "main", [string]$Model = "gpt-6.1-sol")   # 0 — вечно (стоп только файлом STOP); дорожки: main (роадмап+баги), bots (ИИ ботов, своя копия), art (ассеты)
+param([double]$Hours = 0, [string]$Track = "main", [string]$Model = "gpt-6-astra")   # 0 — вечно (стоп только файлом STOP); дорожки: main (роадмап+баги), bots (ИИ ботов, своя копия), art (ассеты)
 
 $wt = if ($Track -eq "bots") { "C:\Users\Xbaza\Rastvordd-wt\astra-bots" } else { "C:\Users\Xbaza\Rastvordd-wt\astra" }
 $pdir = Join-Path $PSScriptRoot "astra-lab"

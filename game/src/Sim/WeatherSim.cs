@@ -38,18 +38,22 @@ namespace Rastvordd.Sim
             Wetness = wetRate > 0 ? MathF.Min(1f, Wetness + wetRate * Dt) : MathF.Max(0f, Wetness - Dt / 240f);
         }
 
-        /// <summary>Ходьба по погоде (на улице): снегопад и сугробы медленнее, буран — тяжело, против ветра — ещё тяжелее.</summary>
+        /// <summary>Против ветра медленнее на этот процент (× сила ветра), по ветру — быстрее на половину его.</summary>
+        public const float WindHeadPenalty = 0.2f;
+
+        /// <summary>
+        /// Ходьба по погоде (на улице): общее замедление — только в ливень, грозу и буран; ветер (в любой погоде, где он есть) —
+        /// против ветра медленнее до WindHeadPenalty × сила, по ветру быстрее на вдвое меньший процент, боком — без изменений.
+        /// </summary>
         public float WeatherSpeedMul(Actor a, Vector2 move)
         {
             if (a.Indoors || a.Swimming) return 1f;
-            float k = 1f - 0.08f * SnowCover;                                            // по сугробам
-            if (Sky == Sky.HeavySnow) k *= 0.94f;
-            if (Sky == Sky.Blizzard) k *= 0.82f;
-            if (move.LengthSquared() > 0.01f && WindStrength > 0.3f)
+            float k = Sky switch { Sky.Downpour => 0.95f, Sky.Storm => 0.92f, Sky.Blizzard => 0.85f, _ => 1f };
+            if (move.LengthSquared() > 0.01f && WindStrength > 0.05f)
             {
                 var wind = new Vector2(MathF.Cos(WindAngle), MathF.Sin(WindAngle));
-                float against = -Vector2.Dot(Vector2.Normalize(move), wind);             // 1 — прямо против ветра
-                k *= 1f - 0.22f * MathF.Max(0, against) * WindStrength + 0.06f * MathF.Max(0, -against) * WindStrength;
+                float along = Vector2.Dot(Vector2.Normalize(move), wind);                  // +1 — по ветру, −1 — против
+                k *= along < 0 ? 1f + WindHeadPenalty * WindStrength * along : 1f + WindHeadPenalty * 0.5f * WindStrength * along;
             }
             return k;
         }

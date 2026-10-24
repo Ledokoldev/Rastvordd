@@ -2,9 +2,9 @@
 # Круг: работа по роадмапу → охота на баги; каждый 3-й круг ещё и ассеты. Первый запуск — исследование и роадмап.
 # Стоп: файл STOP в каталоге логов, исчерпан лимит (сообщение о лимите в выводе) или прошло -Hours часов.
 # Запуск: powershell -File scripts/astra-lab.ps1 [-Hours 24]
-param([double]$Hours = 0)   # 0 — вечно (стоп только файлом STOP)
+param([double]$Hours = 0, [string]$Track = "main", [string]$Model = "gpt-6.1-sol")   # 0 — вечно (стоп только файлом STOP); дорожки: main (роадмап+баги), bots (ИИ ботов, своя копия), art (ассеты)
 
-$wt = "C:\Users\Xbaza\Rastvordd-wt\astra"
+$wt = if ($Track -eq "bots") { "C:\Users\Xbaza\Rastvordd-wt\astra-bots" } else { "C:\Users\Xbaza\Rastvordd-wt\astra" }
 $pdir = Join-Path $PSScriptRoot "astra-lab"
 $logs = "C:\Temp\claude\astra-lab"
 New-Item -ItemType Directory -Force $logs | Out-Null
@@ -16,17 +16,17 @@ $common = Get-Content -Raw -Encoding UTF8 (Join-Path $pdir "common.md")
 $deadline = if ($Hours -gt 0) { (Get-Date).AddHours($Hours) } else { [datetime]::MaxValue }
 
 function Step([string]$name, [string]$effort) {
-    $stamp = Get-Date -Format "MMdd-HHmm"
+    $stamp = (Get-Date -Format "MMdd-HHmm") + "-$Track"
     $prompt = $common + "`n`n" + (Get-Content -Raw -Encoding UTF8 (Join-Path $pdir "$name.md"))
     $pf = Join-Path $logs "$stamp-$name.prompt.txt"
     Set-Content -Path $pf -Value $prompt -Encoding UTF8
     $log = Join-Path $logs "$stamp-$name.log"
-    Add-Content (Join-Path $logs "cycle.log") "$(Get-Date -Format s) старт $name"
-    $p = Start-Process -FilePath $codex -ArgumentList @("exec", "-C", "`"$wt`"", "-s", "workspace-write", "-c", "model_reasoning_effort=`"$effort`"", "--skip-git-repo-check", "-") `
+    Add-Content (Join-Path $logs "cycle.log") "$(Get-Date -Format s) [$Track] старт $name"
+    $p = Start-Process -FilePath $codex -ArgumentList @("exec", "-m", $Model, "-C", "`"$wt`"", "-s", "workspace-write", "-c", "model_reasoning_effort=`"$effort`"", "--skip-git-repo-check", "-") `
         -RedirectStandardInput $pf -RedirectStandardOutput $log -RedirectStandardError "$log.err" -NoNewWindow -PassThru
     $p.WaitForExit()
     $tail = (Get-Content $log -Tail 3 -ErrorAction SilentlyContinue) -join " "
-    Add-Content (Join-Path $logs "cycle.log") "$(Get-Date -Format s) конец $name (код $($p.ExitCode)): $tail"
+    Add-Content (Join-Path $logs "cycle.log") "$(Get-Date -Format s) [$Track] конец $name (код $($p.ExitCode)): $tail"
     # лимит — только по последним строкам ошибок (в теле лога Астра сама ищет слова вроде Quota в коде — ложные срабатывания)
     $errTail = (Get-Content "$log.err" -Tail 15 -ErrorAction SilentlyContinue) -join " "
     return ($p.ExitCode -ne 0 -and $errTail -match "usage limit|You've hit your|rate limit reached|429 Too Many|insufficient_quota")
@@ -43,12 +43,14 @@ function Run([string]$name, [string]$effort) {
     }
 }
 
-if (-not (Test-Path (Join-Path $wt "docs\astra\ROADMAP.md"))) { Run "setup" "medium" }
+if ($Track -eq "main" -and -not (Test-Path (Join-Path $wt "docs\astra\ROADMAP.md"))) { Run "setup" "medium" }
 $n = 0
 while ((Get-Date) -lt $deadline -and -not (Test-Path (Join-Path $logs "STOP"))) {
     $n++
-    Run "work" "medium"
-    Run "bugs" "medium"
-    if ($n % 3 -eq 0) { Run "assets" "low" }
+    switch ($Track) {
+        "bots" { Run "bots" "medium"; if ($n % 3 -eq 0) { Run "bugs" "medium" } }
+        "art"  { Run "assets" "medium" }
+        default { Run "work" "medium"; if ($n % 2 -eq 0) { Run "bugs" "medium" } }
+    }
 }
 Add-Content (Join-Path $logs "cycle.log") "$(Get-Date -Format s) цикл остановлен после $n кругов"

@@ -28,8 +28,12 @@ namespace Rastvordd.Client
             if (Blocked == null) return;
             foreach (var list in _chunks.Values)
                 foreach (var n in list)
-                    n.Visible = !Blocked(new SVec(n.Position.X / Iso.PPM, n.Position.Y / Iso.PPM));
+                    n.Visible = !OnFloor(new SVec(n.Position.X / Iso.PPM, n.Position.Y / Iso.PPM), n.HasMeta("hw") ? (float)n.GetMeta("hw") : 0.3f);
         }
+
+        /// <summary>Декор задевает пол постройки: проверяем основание и края спрайта (раньше — только точку основания, края торчали на фундаменте).</summary>
+        bool OnFloor(SVec p, float halfW) =>
+            Blocked != null && (Blocked(p) || Blocked(p + new SVec(-halfW, 0)) || Blocked(p + new SVec(halfW, 0)) || Blocked(p + new SVec(0, -0.4f)) || Blocked(p + new SVec(0, 0.3f)));
 
         static readonly string[] Flat = { "decal_pebbles", "decal_leaves", "decal_puddle", "decal_debris" };
 
@@ -84,7 +88,12 @@ namespace Rastvordd.Client
             var center = new SVec((cx + 0.5f) * Chunk, (cy + 0.5f) * Chunk);
             var biome = TerrainView.BiomeAt(_map, center);
             if (!Fill.TryGetValue(biome, out var fill)) return list;
-            bool OnYard(SVec q) { foreach (var (mn, mx) in _map.Yards) if (q.X > mn.X + 1 && q.X < mx.X - 1 && q.Y > mn.Y + 1 && q.Y < mx.Y - 1) return true; return false; }
+            bool OnYard(SVec q)
+            {
+                foreach (var (mn, mx) in _map.Yards) if (q.X > mn.X + 1 && q.X < mx.X - 1 && q.Y > mn.Y + 1 && q.Y < mx.Y - 1) return true;
+                foreach (var r in _map.Rooms) if (q.X > r.Min.X - 0.6f && q.X < r.Max.X + 0.6f && q.Y > r.Min.Y - 0.6f && q.Y < r.Max.Y + 0.6f) return true;   // в зданиях РТ (и у стен)
+                return false;
+            }
 
             for (int i = 0; i < fill.count; i++)
             {
@@ -110,7 +119,9 @@ namespace Rastvordd.Client
                     Material = set == null ? VisionFx.ObjectMat : (texPath.StartsWith("grass/") || texPath.StartsWith("plants/") || texPath.Contains("flowers_") ? VisionFx.GrassMat : VisionFx.ObjectMat),
                     Modulate = new Color(1, 1, 1, flat ? 0.85f : 1f) * (0.9f + rng.Randf() * 0.15f),
                 };
-                if (Blocked != null && Blocked(p)) s.Visible = false;   // на полу постройки
+                float hw = tex.GetWidth() / 2f / Iso.PPM;
+                s.SetMeta("hw", hw);
+                if (OnFloor(p, hw)) s.Visible = false;   // на полу постройки (или краем на нём)
                 (flat ? _flatParent : _sortedParent).AddChild(s);
                 list.Add(s);
             }

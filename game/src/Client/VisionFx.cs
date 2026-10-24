@@ -35,6 +35,11 @@ vec3 wx_object(vec3 col, sampler2D tex, vec2 uv, vec2 tps, vec2 wpx) {
         float l = dot(col, vec3(0.3, 0.59, 0.11));
         col = mix(col, vec3(l) * 1.05 + vec3(0.03, 0.04, 0.06), wx_snow * 0.22);   // иней
         col = mix(col, vec3(0.88, 0.91, 0.96), cap * patchy * (0.55 + 0.45 * wx_snow));
+        // заметает и сам спрайт: пятна снега растут с покровом (крупные + мелкие), под снегом чуть видна светотень
+        float n = wx_hash(floor(wpx / 2.0)) * 0.45 + wx_hash(floor(wpx / 6.0)) * 0.55;
+        float body = smoothstep(1.0 - wx_snow * 0.9, 1.04 - wx_snow * 0.9, n);
+        vec3 snowc = vec3(0.86, 0.9, 0.96) * (0.78 + 0.3 * l);
+        col = mix(col, snowc, body * 0.92);
     }
     col *= 1.0 - wx_wet * 0.14;
     return col;

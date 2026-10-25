@@ -29,3 +29,4 @@
   (`--sandbox=aim|build|sound|lift`, `--bots=N --spectate`, `--do=кадр:действие,…` — см. `game/src/Client/Main.cs` RunScript), затем открой png.
   `<godot>.exe` — то же, что для тестов, но без `_console` в имени, если нужно окно.
 - Пиши кратко, по-русски. В конце ответа — одна строка: что сделано.
+

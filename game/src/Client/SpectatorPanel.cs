@@ -9,7 +9,7 @@ namespace Rastvordd.Client
     /// </summary>
     public partial class SpectatorPanel : PanelContainer
     {
-        public struct Row { public int Id; public string Name, Goal; public bool Roamer, Dead; public int Bench, Known; public float Stash; }
+        public struct Row { public int Id, Num; public string Name, Goal; public bool Roamer, Dead; public int Bench, Known; public float Stash; }
 
         readonly Label _head, _follow;
         readonly HBoxContainer _chips;
@@ -84,7 +84,7 @@ namespace Rastvordd.Client
                 var r = rows[i];
                 bool me = r.Id == followId;
                 var nameCol = r.Dead ? UiTheme.Bad : me ? Colors.White : i == 0 ? UiTheme.Accent : UiTheme.Ink;
-                _table.AddChild(Cell(me ? "▶" : (i + 1).ToString(), me ? Colors.White : UiTheme.Faint, me));
+                _table.AddChild(Cell((me ? "▶" : "") + r.Num, me ? Colors.White : UiTheme.Faint, me));   // постоянный номер бота (Tab, Ctrl+Shift+номер)
                 var n = Cell(r.Name, nameCol, me || i == 0);
                 n.CustomMinimumSize = new Vector2(140, 0); n.ClipText = true;
                 _table.AddChild(n);

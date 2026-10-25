@@ -797,11 +797,11 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             switch (key)
             {
                 case Key.Tab:
-                    var bots = _server.BotLines();
-                    if (bots.Count == 0) return true;
-                    int i = bots.FindIndex(b => b.id == _followId);
-                    _followId = bots[(i + 1) % bots.Count].id;
+                    var order = BotOrder();   // строго по постоянным номерам
+                    if (order.Count == 0) return true;
+                    _followId = order[(order.IndexOf(_followId) + 1) % order.Count];
                     _autoCam = false;
+                    _hud.Toast($"Бот №{BotNum(_followId)}");
                     return true;
                 case Key.F: _followId = 0; _autoCam = false; return true;
                 case Key.C: _autoCam = !_autoCam; _camTimer = 0; _hud.Toast(_autoCam ? "Автокамера: к перестрелкам" : "Автокамера выключена"); return true;
@@ -817,6 +817,18 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             }
             return false;
         }
+
+        /// <summary>Постоянные номера ботов: по порядку появления (id), 1..N — для Tab и Ctrl+Shift+номер.</summary>
+        System.Collections.Generic.List<int> BotOrder()
+        {
+            var ids = _server.BotLines().ConvertAll(b => b.id);
+            ids.Sort();
+            return ids;
+        }
+
+        int BotNum(int id) => BotOrder().IndexOf(id) + 1;
+
+        string _botTyped = ""; double _botTypedAt;
 
         static readonly int[] TimeSteps = { 1, 2, 3, 4, 6, 8, 10, 15, 20, 30, 40, 60 };
 
@@ -861,13 +873,20 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _specPanel = new SpectatorPanel { Position = new Vector2(16, 14) };
                 _hud.AddChild(_specPanel);
             }
+            if (_botTyped != "" && Time.GetTicksMsec() / 1000.0 - _botTypedAt > 0.7)
+            {
+                var order = BotOrder();
+                if (int.TryParse(_botTyped, out int n) && n >= 1 && n <= order.Count) { _followId = order[n - 1]; _autoCam = false; _hud.Toast($"Слежу за ботом №{n}"); }
+                else _hud.Toast($"Нет бота №{_botTyped} (всего {order.Count})");
+                _botTyped = "";
+            }
             if (_autoCam) AutoCam(dt);
             if ((_specRefresh -= dt) > 0) return;
             _specRefresh = 0.4f;
             string speed = $"×{_timeScale}{(_timeScale > 1 && _effSpeed < _timeScale * 0.85f ? $" (факт ×{_effSpeed:0.#})" : "")}";
             string time = $"{(int)(_server.World.Time / 60):00}:{(int)(_server.World.Time % 60):00}";
             var f = _server.BotLines().Find(l => l.id == _followId);
-            var rows = _server.BotRows().ConvertAll(r => new SpectatorPanel.Row { Id = r.id, Name = r.name, Roamer = r.roamer, Bench = r.bench, Known = r.known, Stash = r.stash, Dead = r.dead, Goal = r.goal });
+            var rows = _server.BotRows().ConvertAll(r => new SpectatorPanel.Row { Id = r.id, Num = BotNum(r.id), Name = r.name, Roamer = r.roamer, Bench = r.bench, Known = r.known, Stash = r.stash, Dead = r.dead, Goal = r.goal });
             string phase = _cur.Phase == 0 ? "ранняя" : _cur.Phase == 1 ? "средняя" : "поздняя";
             _specPanel.Set(speed, time, f.line != null ? "▶ " + f.line : null, rows, _followId, phase,
                 _cur.Markers.ConvertAll(m => (m.Name, m.Open)), _cur.Hot.Count > 0 ? _cur.Hot[0].heat : 0, _server.World.Milestones);
@@ -940,7 +959,17 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         public override void _Input(InputEvent e)
         {
             // ноутбук: Ctrl+1…Ctrl+0 = F1…F10, Ctrl+− = F11, Ctrl+= = F12 (у многих F-ряд только через Fn)
-            if (e is InputEventKey ck && ck.CtrlPressed && !ck.Echo && LaptopF(ck.PhysicalKeycode) is Key fk)
+            // наблюдатель: Ctrl+Shift+цифры — номер бота (можно двузначный), переход через 0,7 с после последней цифры
+            if (_spectate && e is InputEventKey nk && nk.Pressed && !nk.Echo && nk.CtrlPressed && nk.ShiftPressed
+                && nk.PhysicalKeycode >= Key.Key0 && nk.PhysicalKeycode <= Key.Key9)
+            {
+                _botTyped += (char)('0' + (nk.PhysicalKeycode - Key.Key0));
+                _botTypedAt = Time.GetTicksMsec() / 1000.0;
+                _hud.Toast($"Бот №{_botTyped}…");
+                GetViewport().SetInputAsHandled();
+                return;
+            }
+            if (e is InputEventKey ck && ck.CtrlPressed && !ck.ShiftPressed && !ck.Echo && LaptopF(ck.PhysicalKeycode) is Key fk)
             {
                 GetViewport().SetInputAsHandled();
                 Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = fk, Keycode = fk, Pressed = ck.Pressed });

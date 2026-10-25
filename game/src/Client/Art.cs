@@ -35,6 +35,11 @@ namespace Rastvordd.Client
             if (Cache.TryGetValue(path, out var t)) return t;
             var res = $"res://art/{path}.png";
             t = ResourceLoader.Exists(res) ? GD.Load<Texture2D>(res) : null;
+            // объём: есть карта нормалей <name>_n.png (scripts/gen-normals.py) — отдаём CanvasTexture, шейдеры мира
+            // берут NORMAL и сами светят солнцем (VisionFx: lit); фильтр наследуется от узла (nearest)
+            var nres = $"res://art/{path}_n.png";
+            if (t != null && ResourceLoader.Exists(nres))
+                t = new CanvasTexture { DiffuseTexture = t, NormalTexture = GD.Load<Texture2D>(nres) };
             Cache[path] = t;
             return t;
         }

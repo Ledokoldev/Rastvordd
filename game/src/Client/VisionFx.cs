@@ -20,6 +20,15 @@ global uniform float vis_strength;
 global uniform sampler2D vis_rays : filter_linear, repeat_enable;
 global uniform float wx_snow;   // 0..1 — снег лежит (оседает шапками на объекты и на землю)
 global uniform float wx_wet;    // 0..1 — мокро (темнее, лужи)
+global uniform vec3 vol_sun;    // солнце в экранных осях (x вправо, y вниз, z к камере), Shade.SetSun
+global uniform float vol_amp;   // сила светотени по нормалям (ночью почти 0)
+
+// объём от солнца по карте нормалей (Art: CanvasTexture с _n.png): плоская нормаль (0,0,1) — множитель ровно 1,
+// поэтому спрайты без карты выглядят как раньше; освещённая сторона до +18%, теневая до −28%
+vec3 sun_lit(vec3 col, vec3 n) {
+    float k = 1.0 + vol_amp * (dot(n, vol_sun) - vol_sun.z);
+    return col * clamp(k, 0.72, 1.18);
+}
 
 float wx_hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 
@@ -67,7 +76,7 @@ vec3 vis_apply(vec3 col, float v) {
 varying vec2 base_px;
 varying vec2 local_px;
 void vertex() { base_px = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xy; local_px = VERTEX; }
-void fragment() { COLOR.rgb = vis_apply(wx_object(COLOR.rgb, TEXTURE, UV, TEXTURE_PIXEL_SIZE, base_px + local_px), vis_at(base_px)); }
+void fragment() { COLOR.rgb = vis_apply(wx_object(sun_lit(COLOR.rgb, NORMAL), TEXTURE, UV, TEXTURE_PIXEL_SIZE, base_px + local_px), vis_at(base_px)); }
 ";
 
         // земля и плоские слои (участки РТ, декали, входы, провода): видимость по каждому пикселю, а не по точке узла —
@@ -93,7 +102,7 @@ void vertex() {
 uniform float root_dark = 0.0;
 uniform vec3 tint = vec3(1.0);
 void fragment() {
-    COLOR.rgb *= tint;   // трава под цвет земли (иначе светлые куртины «лежат» на ней)
+    COLOR.rgb = sun_lit(COLOR.rgb * tint, NORMAL);   // трава под цвет земли (иначе светлые куртины «лежат» на ней)
     COLOR.rgb *= 1.0 - root_dark * smoothstep(0.45, 1.0, UV.y);   // трава «врастает»: к земле темнее, как травинки в шейдере земли
     COLOR.rgb = vis_apply(wx_object(COLOR.rgb, TEXTURE, UV, TEXTURE_PIXEL_SIZE, base_px + UV * 64.0), vis_at(base_px));
 }
@@ -125,7 +134,7 @@ void fragment() {
     float ph = fract(TIME / 3.2 + base_px.x * 0.0071 + base_px.y * 0.0043);
     float band = (local_px.x + local_px.y * 0.6) * 0.035 - (ph * 6.0 - 2.5);
     float glint = exp(-band * band * 6.0) * step(ph, 0.55) * loot_on;
-    COLOR.rgb += vec3(1.0, 0.95, 0.75) * glint * 0.55 * COLOR.a;
+    COLOR.rgb = sun_lit(COLOR.rgb, NORMAL) + vec3(1.0, 0.95, 0.75) * glint * 0.55 * COLOR.a;
     COLOR.rgb = vis_apply(COLOR.rgb, vis_at(base_px));
 }
 ";
@@ -158,6 +167,16 @@ void fragment() {
             Add("vis_rays", RenderingServer.GlobalShaderParameterType.Sampler2D, new Variant());
             Add("wx_snow", RenderingServer.GlobalShaderParameterType.Float, 0f);
             Add("wx_wet", RenderingServer.GlobalShaderParameterType.Float, 0f);
+            Add("vol_sun", RenderingServer.GlobalShaderParameterType.Vec3, new Vector3(0, 0, 1));
+            Add("vol_amp", RenderingServer.GlobalShaderParameterType.Float, 0f);
+        }
+
+        /// <summary>Солнце для светотени по нормалям (Shade.SetSun): направление на солнце в экранных осях и сила.</summary>
+        public static void SetSun(Vector3 dir, float amp)
+        {
+            if (!_registered) return;
+            RenderingServer.GlobalShaderParameterSet("vol_sun", dir.Normalized());
+            RenderingServer.GlobalShaderParameterSet("vol_amp", amp);
         }
 
         /// <summary>Погода в шейдерах: сколько снега лежит и насколько мокро.</summary>

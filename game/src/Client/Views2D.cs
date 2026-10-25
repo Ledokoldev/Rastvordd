@@ -26,6 +26,7 @@ namespace Rastvordd.Client
         // солнце (D-тени): наклон и длина тени и её сила зависят от времени суток — Main.UpdateSun; узлы в группе «shadow» перерисовываются
         public static float Flat = 0.42f, Skew = 0.46f, Strength = 1f;
         public const string Group = "shadow";
+        static bool _lit;
 
         /// <summary>Солнце по времени суток t (0..1): утром тени длинные влево, в полдень короткие, вечером длинные вправо; ночью почти нет.</summary>
         public static bool SetSun(float t)
@@ -37,15 +38,73 @@ namespace Rastvordd.Client
             float str = 0.18f + 0.82f * day;
             bool changed = Mathf.Abs(skew - Skew) > 0.02f || Mathf.Abs(flat - Flat) > 0.02f || Mathf.Abs(str - Strength) > 0.03f;
             if (changed) { Skew = skew; Flat = flat; Strength = str; }
+            if (changed || !_lit)
+            {
+                // светотень по нормалям — с той же стороны, откуда падает тень: утром свет справа (восток), вечером слева;
+                // чуть сверху (верхние грани в 3/4 светлее), чем ниже солнце, тем сильнее боковой свет
+                _lit = true;
+                VisionFx.SetSun(new Vector3(-Skew * 0.9f, -0.12f, 0.45f + 0.25f * (1f - Mathf.Abs(Skew))), 0.9f * day);
+            }
             return changed;
         }
 
+        const int Layers = 3;
+
+        /// <summary>
+        /// Тень спрайта «как из трассировки»: несколько копий силуэта разной длины и чуть разного наклона (размер солнечного диска).
+        /// У основания копии совпадают — тень тёмная и резкая; к концу остаются только длинные — светлее и мягче (полутень).
+        /// Плюс контактное затенение (AO) — тёмное пятно ровно под основанием, от солнца не зависит.
+        /// </summary>
         public static void Sprite(CanvasItem ci, Texture2D tex, float scale = 1f, float alpha = 0.32f, float sink = 2f, Vector2 at = default)
         {
-            alpha *= Strength;
-            ci.DrawSetTransformMatrix(new Transform2D(new Vector2(scale, 0), new Vector2(-Skew * scale, Flat * scale), at));
-            ci.DrawTexture(tex, new Vector2(-tex.GetWidth() / 2f, -tex.GetHeight() + sink), new Color(0, 0, 0, alpha));
+            ContactAo(ci, tex, scale, alpha / 0.32f, sink, at);
+            float a = Mathf.Min(0.3f, alpha * 0.62f * Strength);                   // один слой: конец тени; у основания все три ≈ ×1.5 темнее
+            var col = new Color(0, 0, 0, a);
+            var pos = new Vector2(-tex.GetWidth() / 2f, -tex.GetHeight() + sink);
+            for (int i = 0; i < Layers; i++)
+            {
+                float len = 1f - 0.08f * i;                                        // 1, .92, .84 длины
+                float spread = (i == 1 ? 0.025f : i == 2 ? -0.025f : 0f);          // веер полутени
+                ci.DrawSetTransformMatrix(new Transform2D(new Vector2(scale, 0), new Vector2((-Skew * len + spread) * scale, Flat * len * scale), at));
+                ci.DrawTexture(tex, pos, col);
+            }
             ci.DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+        }
+
+        // ширина опоры спрайта (непрозрачные пиксели в нижних строках): центр и полуширина от центра текстуры, px
+        static readonly System.Collections.Generic.Dictionary<Texture2D, Vector2> Feet = new();
+
+        static Vector2 Foot(Texture2D tex)
+        {
+            if (Feet.TryGetValue(tex, out var f)) return f;
+            var img = (tex is CanvasTexture ct ? ct.DiffuseTexture : tex)?.GetImage();
+            f = new Vector2(0, tex.GetWidth() * 0.3f);
+            if (img != null)
+            {
+                if (img.IsCompressed()) img.Decompress();
+                int w = img.GetWidth(), h = img.GetHeight(), bottom = -1;
+                for (int y = h - 1; y >= 0 && bottom < 0; y--)
+                    for (int x = 0; x < w; x += 2) if (img.GetPixel(x, y).A > 0.5f) { bottom = y; break; }
+                if (bottom >= 0)
+                {
+                    int band = Mathf.Max(3, h / 14), x0 = w, x1 = -1;
+                    for (int y = bottom; y > bottom - band && y >= 0; y--)
+                        for (int x = 0; x < w; x++) if (img.GetPixel(x, y).A > 0.5f) { x0 = Mathf.Min(x0, x); x1 = Mathf.Max(x1, x); }
+                    if (x1 >= x0) f = new Vector2((x0 + x1 + 1) / 2f - w / 2f, (x1 - x0 + 1) / 2f);
+                }
+            }
+            Feet[tex] = f;
+            return f;
+        }
+
+        static void ContactAo(CanvasItem ci, Texture2D tex, float scale, float k, float sink, Vector2 at)
+        {
+            var f = Foot(tex);
+            float r = (f.Y * 1.1f + 2f) * scale;
+            ci.DrawSetTransformMatrix(new Transform2D(new Vector2(1, 0), new Vector2(0, 0.32f), at + new Vector2(f.X * scale, sink - 1f)));
+            ci.DrawCircle(Vector2.Zero, r, new Color(0, 0, 0, 0.10f * k));
+            ci.DrawCircle(Vector2.Zero, r * 0.78f, new Color(0, 0, 0, 0.12f * k));
+            ci.DrawCircle(Vector2.Zero, r * 0.52f, new Color(0, 0, 0, 0.14f * k));
         }
     }
 

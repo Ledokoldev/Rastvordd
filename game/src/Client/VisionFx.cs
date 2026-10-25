@@ -115,7 +115,7 @@ void vertex() {
     base_px = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xy;
     // ветер: верх качается, основание и тень на земле стоят; смещение целыми пикселями (пиксель-арт)
     float h = clamp(-VERTEX.y / sway_height, 0.0, 1.0);
-    float ph = base_px.x * 0.031 + base_px.y * 0.017;
+    float ph = (base_px.x + VERTEX.x) * 0.031 + base_px.y * 0.017;   // + VERTEX.x: в ряду травы (TuftRow) пучки качаются вразнобой
     float off = (sin(TIME * 1.3 + ph) * 0.7 + sin(TIME * 2.9 + ph * 1.7) * 0.3) * sway_amp * h * h;
     VERTEX.x += round(off);
 }

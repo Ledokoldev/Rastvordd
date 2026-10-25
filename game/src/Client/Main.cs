@@ -572,6 +572,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 else if (arg == "--dressreport") foreach (var line in _server.World.DressReport) GD.Print("DRESS " + line);   // обстановка РТ: плотность до/после
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
+                else if (arg == "--nocover") DecalLayer.CoverOn = false;   // без густой травы (замер)
                 else if (arg == "--nohrtf") Tuning.SteamHrtf = false;   // отладка: звук без Steam Audio (сравнить память)
                 else if (arg.StartsWith("--riggallery")) AddChild(new RigGallery(arg.Contains('=') ? arg.Split('=')[1] : "naked"));
                 else if (arg == "--crouch") _forceCrouch = true;

@@ -28,7 +28,8 @@ namespace Rastvordd.Client
             if (Blocked == null) return;
             foreach (var list in _chunks.Values)
                 foreach (var n in list)
-                    n.Visible = !OnFloor(new SVec(n.Position.X / Iso.PPM, n.Position.Y / Iso.PPM), n.HasMeta("hw") ? (float)n.GetMeta("hw") : 0.3f);
+                    if (n is TuftRow tr) tr.Refresh(OnFloor);
+                    else n.Visible = !OnFloor(new SVec(n.Position.X / Iso.PPM, n.Position.Y / Iso.PPM), n.HasMeta("hw") ? (float)n.GetMeta("hw") : 0.3f);
         }
 
         /// <summary>Декор задевает пол постройки: проверяем основание и края спрайта (раньше — только точку основания, края торчали на фундаменте).</summary>
@@ -124,6 +125,7 @@ namespace Rastvordd.Client
                         spots.Add((new SVec((cx + (sx + rng.Randf()) / 3f) * Chunk, (cy + (sy + rng.Randf()) / 3f) * Chunk), 2));
                 }
             spots.Sort((a, b) => a.p.Y.CompareTo(b.p.Y));
+            var rows = new Dictionary<int, TuftRow>();
             foreach (var (p, kind) in spots)
             {
                 if (TerrainView.BiomeAt(_map, p) == Biome.Water) continue;
@@ -137,6 +139,20 @@ namespace Rastvordd.Client
                 else if (kind == 1 && !texPath.StartsWith("grass/")) { var gs = System.Array.FindAll(set, t => t.StartsWith("grass/")); if (gs.Length > 0) texPath = gs[rng.RandiRange(0, gs.Length - 1)]; }
                 var tex = Art.Get(texPath);
                 if (tex == null) continue;
+
+                if (texPath.StartsWith("grass/tuft_"))
+                {
+                    // низкая трава: ряд по 0,5 м — один узел (раньше каждый пучок — свой Sprite2D, ~9 тыс. узлов, −20 fps)
+                    int row = Mathf.FloorToInt(p.Y * 2f);
+                    if (!rows.TryGetValue(row, out var tr))
+                    {
+                        tr = new TuftRow { Position = new Vector2(cx * Chunk * Iso.PPM, (row + 1) * 0.5f * Iso.PPM), Material = VisionFx.GrassMat, TextureFilter = CanvasItem.TextureFilterEnum.Nearest };
+                        rows[row] = tr;
+                    }
+                    float thw = tex.GetWidth() / 2f / Iso.PPM;
+                    tr.Add(tex, Iso.Px(p).Floor() - tr.Position, rng.Randf() < 0.5f, new Color(1, 1, 1) * (0.9f + rng.Randf() * 0.15f), p, thw, OnFloor(p, thw));
+                    continue;
+                }
 
                 bool flat = false;
                 var s = new Sprite2D
@@ -156,7 +172,41 @@ namespace Rastvordd.Client
                 (flat ? _flatParent : _sortedParent).AddChild(s);
                 list.Add(s);
             }
+            foreach (var tr in rows.Values) { _sortedParent.AddChild(tr); list.Add(tr); }
             return list;
+        }
+    }
+
+    /// <summary>Ряд низкой травы (полоса 0,5 м в клетке декора): все пучки рисуются одним узлом, сортировка по низу полосы.</summary>
+    public partial class TuftRow : Node2D
+    {
+        readonly List<(Texture2D tex, Vector2 at, bool flip, Color mod, SVec world, float hw, bool hidden)> _items = new();
+
+        public void Add(Texture2D tex, Vector2 at, bool flip, Color mod, SVec world, float hw, bool hidden) => _items.Add((tex, at, flip, mod, world, hw, hidden));
+
+        /// <summary>Постройки поменялись: пучки на полу прячем, где пол сломали — возвращаем.</summary>
+        public void Refresh(System.Func<SVec, float, bool> onFloor)
+        {
+            bool changed = false;
+            for (int i = 0; i < _items.Count; i++)
+            {
+                var it = _items[i];
+                bool h = onFloor(it.world, it.hw);
+                if (h != it.hidden) { it.hidden = h; _items[i] = it; changed = true; }
+            }
+            if (changed) QueueRedraw();
+        }
+
+        public override void _Draw()
+        {
+            foreach (var it in _items)
+            {
+                if (it.hidden) continue;
+                float w = it.tex.GetWidth(), h = it.tex.GetHeight();
+                var r = new Rect2(it.at.X - w / 2f, it.at.Y - h + 1, w, h);
+                if (it.flip) r = new Rect2(r.Position.X + w, r.Position.Y, -w, h);
+                DrawTextureRect(it.tex, r, false, it.mod);
+            }
         }
     }
 }

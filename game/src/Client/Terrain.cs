@@ -193,6 +193,7 @@ void fragment() {
             mc = Image.CreateEmpty(ms, ms, false, Image.Format.Rgba8);
             var path = new[] { new Vector2(0, 60), new Vector2(8, 30), new Vector2(18, 8), new Vector2(20, 2), new Vector2(20, -6) };
             const int R = 2;   // радиус размытия, клеток
+            _hard = new byte[ms * ms]; _hardN = ms; _hardStep = step; _hardHalf = map.HalfSize;
 
             for (int my = 0; my < ms; my++)
             for (int mx = 0; mx < ms; mx++)
@@ -230,6 +231,7 @@ void fragment() {
                 float k = 1 - Mathf.Max(pad, Mathf.Max(gravel, dirt));
                 ma.SetPixel(mx, my, new Color(acc[(int)Biome.Forest] * k, acc[(int)Biome.Arid] * k, acc[(int)Biome.Tundra] * k, acc[(int)Biome.Beach] * k));
                 mb.SetPixel(mx, my, new Color(acc[(int)Biome.Swamp] * k, dirt, gravel, pad));
+                _hard[my * ms + mx] = (byte)(Mathf.Clamp(dirt + gravel + pad, 0, 1) * 255);
                 float h = map.Heights[y * n + x];
                 mc.SetPixel(mx, my, new Color(acc[(int)Biome.Water], Mathf.Clamp(h * 0.5f + 0.5f, 0, 1), 0, 1));
             }
@@ -243,6 +245,19 @@ void fragment() {
             var ab = b - a;
             float t = Mathf.Clamp((p - a).Dot(ab) / ab.LengthSquared(), 0, 1);
             return p.DistanceTo(a + ab * t);
+        }
+
+        // твёрдая поверхность шейдера земли (тропа, гравий и бетон площадок) по маске, 0..255 — для декора (трава там не растёт)
+        static byte[] _hard;
+        static int _hardN;
+        static float _hardStep, _hardHalf;
+
+        /// <summary>Точка на тропе, гравии или бетоне земли (а не на биоме) — траве там не место.</summary>
+        public static bool HardAt(SVec p)
+        {
+            if (_hard == null) return false;
+            int x = (int)((p.X + _hardHalf) / _hardStep), y = (int)((p.Y + _hardHalf) / _hardStep);
+            return x >= 0 && y >= 0 && x < _hardN && y < _hardN && _hard[y * _hardN + x] > 110;
         }
 
         /// <summary>Биом в точке (для выбора вида деревьев и т. п.).</summary>

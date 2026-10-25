@@ -82,7 +82,54 @@ namespace Rastvordd.Client
             _map = map;
             _flatParent = flatParent;
             _sortedParent = sortedParent;
+            // участки РТ и дороги с твёрдым покрытием (асфальт, бетон, гравий, полы, плитка) — по клеткам, чтобы не перебирать все
+            for (int i = 0; i < map.Patches.Count; i++)
+            {
+                var pt = map.Patches[i];
+                if (!HardTile(pt.Tile) && pt.Road == 0) continue;
+                var (mn, mx) = (pt.Min, pt.Max);
+                if (pt.Poly != null && pt.Poly.Length > 0)
+                {
+                    mn = mx = pt.Poly[0];
+                    foreach (var v in pt.Poly) { mn = SVec.Min(mn, v); mx = SVec.Max(mx, v); }
+                }
+                _hardBox[i] = (mn, mx);
+                for (int y = Mathf.FloorToInt(mn.Y / Chunk); y <= Mathf.FloorToInt(mx.Y / Chunk); y++)
+                for (int x = Mathf.FloorToInt(mn.X / Chunk); x <= Mathf.FloorToInt(mx.X / Chunk); x++)
+                {
+                    if (!_hardCells.TryGetValue((x, y), out var l)) _hardCells[(x, y)] = l = new List<int>();
+                    l.Add(i);
+                }
+            }
         }
+
+        readonly Dictionary<(int, int), List<int>> _hardCells = new();
+        readonly Dictionary<int, (SVec min, SVec max)> _hardBox = new();
+
+        /// <summary>Мягкая земля (трава, лес, болото) — участок, где трава может расти; остальное твёрдое.</summary>
+        static bool HardTile(string tile) =>
+            tile != null && !(tile.Contains("grass") || tile.Contains("forest") || tile.Contains("swamp") || tile.Contains("moss") || tile.Contains("lawn") || tile.Contains("meadow"));
+
+        /// <summary>Точка на твёрдом участке РТ или дороги (асфальт, бетон, гравий, полы, плитка, плиты).</summary>
+        bool OnHardPatch(SVec q)
+        {
+            if (!_hardCells.TryGetValue((Mathf.FloorToInt(q.X / Chunk), Mathf.FloorToInt(q.Y / Chunk)), out var list)) return false;
+            foreach (int i in list)
+            {
+                var (mn, mx) = _hardBox[i];
+                if (q.X < mn.X - 0.3f || q.X > mx.X + 0.3f || q.Y < mn.Y - 0.3f || q.Y > mx.Y + 0.3f) continue;
+                var poly = _map.Patches[i].Poly;
+                if (poly == null || poly.Length < 3) return true;
+                bool inside = false;
+                for (int a = 0, b = poly.Length - 1; a < poly.Length; b = a++)
+                    if ((poly[a].Y > q.Y) != (poly[b].Y > q.Y) && q.X < (poly[b].X - poly[a].X) * (q.Y - poly[a].Y) / (poly[b].Y - poly[a].Y) + poly[a].X) inside = !inside;
+                if (inside) return true;
+            }
+            return false;
+        }
+
+        /// <summary>Густота низкой травы по биому (пучков на кусок 12×12 м): в пустыне — редкая сухая, на пляже и в снегу пустошей нет.</summary>
+        static int CoverOf(Biome b) => b switch { Biome.Grassland => 260, Biome.Swamp => 200, Biome.Forest => 120, Biome.Tundra => 50, Biome.Arid => 14, _ => 0 };
 
         /// <summary>Куски вокруг камеры: ближний круг (он на экране) строится сразу, остальные — не дольше budgetMs за кадр,
         /// ближние первыми (раньше все недостающие куски строились в одном кадре — рывок при входе в новые места).</summary>
@@ -133,7 +180,8 @@ namespace Rastvordd.Client
             bool OnYard(SVec q)
             {
                 foreach (var (mn, mx) in _map.Yards) if (q.X > mn.X + 1 && q.X < mx.X - 1 && q.Y > mn.Y + 1 && q.Y < mx.Y - 1) return true;
-                if (PatchLayer.OnRoad(_map.Patches, q)) return true;   // дороги мира (RoadNet.cs): полотно без травы и веток
+                if (OnHardPatch(q)) return true;   // дороги мира (RoadNet.cs) и твёрдые участки РТ: асфальт, бетон, гравий, полы
+                if (TerrainView.HardAt(q)) return true;   // тропа, гравий и бетон в шейдере земли
                 foreach (var r in _map.Rooms) if (q.X > r.Min.X - 0.6f && q.X < r.Max.X + 0.6f && q.Y > r.Min.Y - 0.6f && q.Y < r.Max.Y + 0.6f) return true;   // в зданиях РТ (и у стен)
                 return false;
             }
@@ -154,7 +202,7 @@ namespace Rastvordd.Client
             }
             for (int i = 0; i < fill.count; i++) spots.Add((new SVec(cx * Chunk + rng.Randf() * Chunk, cy * Chunk + rng.Randf() * Chunk), 0));
             // сплошной травяной покров (как в Project Zomboid): густые объёмные пучки по всей клетке, плотность по под-клеткам 3×3
-            int cover = biome switch { Biome.Grassland => 260, Biome.Swamp => 200, Biome.Forest => 120, Biome.Arid => 90, Biome.Tundra => 50, _ => 0 };
+            int cover = CoverOf(biome);
             if (CoverOn && cover > 0)
                 for (int sy = 0; sy < 3; sy++)
                 for (int sx = 0; sx < 3; sx++)
@@ -172,9 +220,12 @@ namespace Rastvordd.Client
                 if (OnYard(p)) continue;   // не на площадках РТ
                 // биом берём в самой точке: на границе биомов трава смешивается естественно
                 var here = TerrainView.BiomeAt(_map, p);
+                // низкая трава на границе биомов: густота по месту, а не по центру куска (луговая трава не заходит на пляж и в пустыню)
+                if (kind == 2 && here != biome && rng.Randf() * cover >= CoverOf(here)) continue;
                 var set = Fill.TryGetValue(here, out var f2) ? f2.ids : fill.ids;
                 string texPath = set[rng.RandiRange(0, set.Length - 1)];
                 if (kind == 2) { string tb = here switch { Biome.Forest => "forest", Biome.Arid or Biome.Tundra => "dry", Biome.Swamp => "swamp", _ => "meadow" }; texPath = $"grass/tuft_{tb}_{rng.RandiRange(1, 12)}"; }
+                else if (texPath.StartsWith("grass/grass_") && here == Biome.Beach) continue;   // на песке пляжа травы нет
                 else if (texPath.StartsWith("grass/grass_")) { string tb = here switch { Biome.Forest => "forest", Biome.Arid or Biome.Tundra => "dry", Biome.Swamp => "swamp", _ => "meadow" }; texPath = $"grass/tuft_{tb}_{rng.RandiRange(1, 12)}"; }   // старые куртины-кочки → пучки
                 else if (kind == 1 && !texPath.StartsWith("grass/")) { var gs = System.Array.FindAll(set, t => t.StartsWith("grass/")); if (gs.Length > 0) texPath = gs[rng.RandiRange(0, gs.Length - 1)]; }
                 var tex = Art.Get(texPath);

@@ -674,6 +674,15 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             {
                 if (_buildMenu.PickByKey(k.PhysicalKeycode) || _hammerMenu.PickByKey(k.PhysicalKeycode)) return;
                 if (k.PhysicalKeycode == Key.Escape && (_buildMenu.Visible || _hammerMenu.Visible)) { _buildMenu.Close(); _hammerMenu.Close(); return; }
+                if (k.PhysicalKeycode == Key.F7) { _artMode = !_artMode; _hud.Toast(_artMode ? "Масштаб ассетов: наведи на объект, [ / ] — меньше/больше, обратная косая — сброс, F7 — выход" : "Масштаб ассетов выключен"); return; }
+                if (_artMode && _artHover != null && k.PhysicalKeycode is Key.Bracketleft or Key.Bracketright or Key.Backslash)
+                {
+                    string key = ArtScale.KeyOf(_artHover);
+                    float v = k.PhysicalKeycode == Key.Backslash ? 1f : Mathf.Clamp(ArtScale.Get(key) * (k.PhysicalKeycode == Key.Bracketright ? 1.05f : 1f / 1.05f), 0.2f, 5f);
+                    ArtScale.Set(GetTree(), key, v);
+                    _hud.Toast($"{System.IO.Path.GetFileNameWithoutExtension(key)}: ×{v:0.00} (для всех таких)");
+                    return;
+                }
                 if (SandboxKey(k.PhysicalKeycode)) return;
                 if (_spectate && SpectatorKey(k.PhysicalKeycode)) return;
                 switch (k.PhysicalKeycode)
@@ -829,6 +838,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         int BotNum(int id) => BotOrder().IndexOf(id) + 1;
 
         string _botTyped = ""; double _botTypedAt;
+        bool _artMode; Node2D _artHover;   // дев-масштаб ассетов (F7)
 
         static readonly int[] TimeSteps = { 1, 2, 3, 4, 6, 8, 10, 15, 20, 30, 40, 60 };
 
@@ -1169,6 +1179,18 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             }
             _ambient.Update(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _forcedDay ?? _cur.DayTime, dt);
             _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime) * Weather.Grade(_cur.Sky);   // + цветокор погоды
+            if (Shade.SetSun(_forcedDay ?? _cur.DayTime)) GetTree().CallGroup(Shade.Group, CanvasItem.MethodName.QueueRedraw);   // тени по солнцу
+            if (_artMode)
+            {
+                // дев-масштаб: ближайший к курсору объект (по основанию), подсветка мерцанием
+                var mouse = _world.GetGlobalMousePosition(); Node2D best = null; float bd = 48f;
+                foreach (var n in GetTree().GetNodesInGroup(Shade.Group))
+                    if (n is Node2D n2 && n2.IsVisibleInTree() && n2.GlobalPosition.DistanceTo(mouse) is float dd && dd < bd) { bd = dd; best = n2; }
+                if (_artHover != best && _artHover != null && IsInstanceValid(_artHover)) _artHover.Modulate = Colors.White;
+                _artHover = best;
+                if (best != null) best.Modulate = new Color(1.3f, 1.3f, 1f) * (0.85f + 0.15f * Mathf.Sin(Time.GetTicksMsec() / 120f));
+            }
+            else if (_artHover != null) { if (IsInstanceValid(_artHover)) _artHover.Modulate = Colors.White; _artHover = null; }
             {
                 // свет РТ: фонари ночью, лампы корпуса Подстанции — при включённом щитке
                 bool powered = _cur.DecorSprites.Exists(d => d.sprite == "props/subst_main_panel_on");

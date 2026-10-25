@@ -11,6 +11,8 @@ namespace Rastvordd.Client
     /// </summary>
     public partial class DecorRow : Node2D
     {
+        public override void _EnterTree() { AddToGroup(Shade.Group); ArtScale.Apply(this); }   // тень по солнцу (Shade.SetSun), дев-масштаб (F7)
+
         readonly List<(Texture2D tex, Vector2 at, bool flip, float lift)> _items = new();
         WallView2D[] _walls;           // на какой стене висит (плакат растворяется вместе со стеной)
         float[] _lastA;

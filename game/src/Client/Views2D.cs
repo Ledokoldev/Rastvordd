@@ -23,10 +23,26 @@ namespace Rastvordd.Client
     /// </summary>
     public static class Shade
     {
-        public const float Flat = 0.42f, Skew = 0.46f;
+        // солнце (D-тени): наклон и длина тени и её сила зависят от времени суток — Main.UpdateSun; узлы в группе «shadow» перерисовываются
+        public static float Flat = 0.42f, Skew = 0.46f, Strength = 1f;
+        public const string Group = "shadow";
+
+        /// <summary>Солнце по времени суток t (0..1): утром тени длинные влево, в полдень короткие, вечером длинные вправо; ночью почти нет.</summary>
+        public static bool SetSun(float t)
+        {
+            float s = Mathf.Clamp((t - 0.25f) / 0.55f, 0f, 1f);            // 0 — восход, 1 — закат
+            float skew = Mathf.Lerp(-0.95f, 0.95f, s);
+            float flat = 0.22f + 0.55f * Mathf.Abs(2f * s - 1f);          // в полдень короче
+            float day = 1f - World.NightFactorAt(t);
+            float str = 0.18f + 0.82f * day;
+            bool changed = Mathf.Abs(skew - Skew) > 0.02f || Mathf.Abs(flat - Flat) > 0.02f || Mathf.Abs(str - Strength) > 0.03f;
+            if (changed) { Skew = skew; Flat = flat; Strength = str; }
+            return changed;
+        }
 
         public static void Sprite(CanvasItem ci, Texture2D tex, float scale = 1f, float alpha = 0.32f, float sink = 2f, Vector2 at = default)
         {
+            alpha *= Strength;
             ci.DrawSetTransformMatrix(new Transform2D(new Vector2(scale, 0), new Vector2(-Skew * scale, Flat * scale), at));
             ci.DrawTexture(tex, new Vector2(-tex.GetWidth() / 2f, -tex.GetHeight() + sink), new Color(0, 0, 0, alpha));
             ci.DrawSetTransform(Vector2.Zero, 0, Vector2.One);
@@ -499,6 +515,8 @@ namespace Rastvordd.Client
 
     public partial class WallView2D : Node2D
     {
+        public override void _EnterTree() { AddToGroup(Shade.Group); ArtScale.Apply(this); }   // тень по солнцу (Shade.SetSun), дев-масштаб (F7)
+
         readonly Rect2 _top, _front;
         readonly Color _topC, _frontC;
         readonly WallKind _kind;
@@ -793,6 +811,8 @@ namespace Rastvordd.Client
     /// <summary>Ресурс на карте; при ударе слегка трясётся.</summary>
     public abstract partial class NodeView2D : Node2D
     {
+        public override void _EnterTree() { AddToGroup(Shade.Group); ArtScale.Apply(this); }   // тень по солнцу (Shade.SetSun), дев-масштаб (F7)
+
         public Vector2 Base;
         public float Fill = 1;
         float _shake;
@@ -943,6 +963,8 @@ namespace Rastvordd.Client
 
     public partial class PickupView2D : Node2D
     {
+        public override void _EnterTree() { AddToGroup(Shade.Group); ArtScale.Apply(this); }   // тень по солнцу (Shade.SetSun), дев-масштаб (F7)
+
         public string Item;   // LocalItem: какой предмет РТ лежит
         public bool Available = true;
         readonly PickupKind _kind;
@@ -1027,6 +1049,8 @@ namespace Rastvordd.Client
 
     public partial class DeployView2D : Node2D
     {
+        public override void _EnterTree() { AddToGroup(Shade.Group); ArtScale.Apply(this); }   // тень по солнцу (Shade.SetSun), дев-масштаб (F7)
+
         public bool Burning;
         readonly DeployKind _kind;
         float _flicker, _smokeAcc;
@@ -1198,6 +1222,8 @@ namespace Rastvordd.Client
 
     public partial class BagView2D : Node2D
     {
+        public override void _EnterTree() { AddToGroup(Shade.Group); ArtScale.Apply(this); }   // тень по солнцу (Shade.SetSun), дев-масштаб (F7)
+
         public bool IsCrate, Empty, Safe, Punch, Unlocked;
         public int Id, Tier;
         public string Look;   // ивент-ящик: "airdrop" — контейнер сброса, "military" — военный ящик

@@ -8,6 +8,8 @@ namespace Rastvordd.Client
     /// <summary>Спрайт готовой РТ (трансформатор, портал, шкаф…): основанием в точке, тень от силуэта, прозрачность заслона.</summary>
     public partial class DecorView2D : Node2D
     {
+        public override void _EnterTree() { AddToGroup(Shade.Group); ArtScale.Apply(this); }   // тень по солнцу (Shade.SetSun), дев-масштаб (F7)
+
         string _sprite;
         readonly bool _flip, _pivot;
         readonly float _lift;
@@ -268,6 +270,8 @@ namespace Rastvordd.Client
     /// </summary>
     public partial class RoofView2D : Node2D
     {
+        public override void _EnterTree() { AddToGroup(Shade.Group); ArtScale.Apply(this); }   // тень по солнцу (Shade.SetSun), дев-масштаб (F7)
+
         readonly Rect2 _rect;          // след комнаты на земле, пиксели мира
         readonly float _h;
         readonly Texture2D _tex;

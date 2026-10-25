@@ -49,7 +49,7 @@ while ((Get-Date) -lt $deadline -and -not (Test-Path (Join-Path $logs "STOP"))) 
     $n++
     switch ($Track) {
         "bots" { Run "bots" "medium"; if ($n % 3 -eq 0) { Run "bugs" "medium" } }
-        "art"  { Run "assets" "medium" }
+        { $_ -like "art*" } { Run "assets" "medium" }
         default { Run "work" "medium"; if ($n % 2 -eq 0) { Run "bugs" "medium" } }
     }
 }

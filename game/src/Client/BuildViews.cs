@@ -126,6 +126,18 @@ namespace Rastvordd.Client
         }
 
         /// <summary>Точка на полу (фундаменте) постройки.</summary>
+        /// <summary>Полы построек прямоугольниками (клетка фундамента; у треугольного — его рамка): декор проверяет только то, что поменялось.</summary>
+        public IEnumerable<(SVec min, SVec max)> FloorRects()
+        {
+            foreach (var (i, j) in _floors) yield return (new SVec(i * Building.Cell, j * Building.Cell), new SVec((i + 1) * Building.Cell, (j + 1) * Building.Cell));
+            foreach (var t in _triFloors)
+            {
+                var mn = t[0]; var mx = t[0];
+                foreach (var v in t) { mn = SVec.Min(mn, v); mx = SVec.Max(mx, v); }
+                yield return (mn, mx);
+            }
+        }
+
         public bool OnFloor(SVec p)
         {
             if (_floors.Contains(Building.CellOf(p))) return true;

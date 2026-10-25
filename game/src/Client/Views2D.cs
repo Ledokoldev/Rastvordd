@@ -721,14 +721,34 @@ namespace Rastvordd.Client
         {
             float x0 = _front.Position.X, x1 = _front.End.X, d = _top.Size.Y, hh = _front.Size.Y;
             var o = new Vector2(Shade.Skew * hh, -Shade.Flat * hh);
-            var hull = new[]
+            // выпуклая оболочка основания и его сдвига: при тени влево (утро) или тонкой стене прежний шестиугольник
+            // самопересекался — Godot не мог его разбить на треугольники и на каждую перерисовку стены печатал ошибку
+            // со стеком .NET (~10 мс): тысяча стен — фриз в 13 с при загрузке и рывки при смене солнца
+            var hull = ConvexHull(stackalloc Vector2[]
             {
-                new Vector2(x0, 0), new Vector2(x1, 0), new Vector2(x1, 0) + o, new Vector2(x1, -d) + o,
-                new Vector2(x0, -d) + o, new Vector2(x0, -d),
-            };
-            DrawColoredPolygon(hull, new Color(0.03f, 0.04f, 0.03f, 0.3f * _alpha));
+                new Vector2(x0, 0), new Vector2(x1, 0), new Vector2(x1, -d), new Vector2(x0, -d),
+                new Vector2(x0, 0) + o, new Vector2(x1, 0) + o, new Vector2(x1, -d) + o, new Vector2(x0, -d) + o,
+            });
+            if (hull != null) DrawColoredPolygon(hull, new Color(0.03f, 0.04f, 0.03f, 0.3f * _alpha));
             for (int i = 0; i < 4; i++)
                 DrawRect(new Rect2(x0 - 1, i, x1 - x0 + 2, 1), new Color(0, 0, 0, (0.32f - i * 0.075f) * _alpha));
+        }
+
+        /// <summary>Выпуклая оболочка (монотонная цепь); вырожденная (нулевая площадь) — null, такой полигон не рисуем.</summary>
+        static Vector2[] ConvexHull(System.Span<Vector2> p)
+        {
+            for (int i = 1; i < p.Length; i++)
+                for (int j = i; j > 0 && (p[j].X < p[j - 1].X || p[j].X == p[j - 1].X && p[j].Y < p[j - 1].Y); j--) (p[j], p[j - 1]) = (p[j - 1], p[j]);
+            static float Cross(Vector2 o, Vector2 a, Vector2 b) => (a.X - o.X) * (b.Y - o.Y) - (a.Y - o.Y) * (b.X - o.X);
+            System.Span<Vector2> h = stackalloc Vector2[p.Length * 2];
+            int k = 0;
+            for (int i = 0; i < p.Length; i++) { while (k >= 2 && Cross(h[k - 2], h[k - 1], p[i]) <= 0.01f) k--; h[k++] = p[i]; }
+            for (int i = p.Length - 2, lo = k + 1; i >= 0; i--) { while (k >= lo && Cross(h[k - 2], h[k - 1], p[i]) <= 0.01f) k--; h[k++] = p[i]; }
+            k--;
+            if (k < 3) return null;
+            float area = 0;
+            for (int i = 0; i < k; i++) area += Cross(Vector2.Zero, h[i], h[(i + 1) % k]);
+            return Mathf.Abs(area) < 1f ? null : h[..k].ToArray();
         }
 
         /// <summary>Прозрачность (растворение перед персонажем) и края лица по x, px мира — для того, что висит на стене.</summary>

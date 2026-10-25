@@ -22,14 +22,32 @@ namespace Rastvordd.Client
         /// <summary>Где декору не место (пол построек). Проверяется при создании и в RefreshBlocked.</summary>
         public System.Func<SVec, bool> Blocked;
 
-        /// <summary>Постройки поменялись: прячем декор на полу, возвращаем там, где пол сломали.</summary>
-        public void RefreshBlocked()
+        // полы построек, по которым декор прятали в прошлый раз (прямоугольники клеток и рамки треугольных фундаментов)
+        HashSet<(float, float, float, float)> _floorRects = new();
+
+        /// <summary>Постройки поменялись: прячем декор на полу, возвращаем там, где пол сломали.
+        /// Проверяем только куски, которые задевает изменившийся пол: раньше на каждую стройку (20 ботов строят постоянно)
+        /// перебирались все пучки всех кусков — по 5 проверок пола на каждый, это давало рывки.</summary>
+        public void RefreshBlocked(IEnumerable<(SVec min, SVec max)> floors)
         {
             if (Blocked == null) return;
-            foreach (var list in _chunks.Values)
-                foreach (var n in list)
+            var now = new HashSet<(float, float, float, float)>();
+            foreach (var (mn, mx) in floors) now.Add((mn.X, mn.Y, mx.X, mx.Y));
+            var changed = new List<(float, float, float, float)>();
+            foreach (var r in now) if (!_floorRects.Contains(r)) changed.Add(r);
+            foreach (var r in _floorRects) if (!now.Contains(r)) changed.Add(r);
+            _floorRects = now;
+            if (changed.Count == 0) return;   // поменялись стены, двери и т. п. — пол тот же
+            foreach (var kv in _chunks)
+            {
+                float x0 = kv.Key.Item1 * Chunk - 1, y0 = kv.Key.Item2 * Chunk - 1, x1 = x0 + Chunk + 2, y1 = y0 + Chunk + 2;
+                bool hit = false;
+                foreach (var (a, b, c, d) in changed) if (a < x1 && c > x0 && b < y1 && d > y0) { hit = true; break; }
+                if (!hit) continue;
+                foreach (var n in kv.Value)
                     if (n is TuftRow tr) tr.Refresh(OnFloor);
                     else n.Visible = !OnFloor(new SVec(n.Position.X / Iso.PPM, n.Position.Y / Iso.PPM), n.HasMeta("hw") ? (float)n.GetMeta("hw") : 0.3f);
+            }
         }
 
         /// <summary>Декор задевает пол постройки: проверяем основание и края спрайта (раньше — только точку основания, края торчали на фундаменте).</summary>
@@ -66,12 +84,12 @@ namespace Rastvordd.Client
             _sortedParent = sortedParent;
         }
 
-        public void Update(Vector2 cameraPx)
+        /// <summary>Куски вокруг камеры: ближний круг (он на экране) строится сразу, остальные — не дольше budgetMs за кадр,
+        /// ближние первыми (раньше все недостающие куски строились в одном кадре — рывок при входе в новые места).</summary>
+        public void Update(Vector2 cameraPx, double budgetMs = 3)
         {
             int cx = Mathf.FloorToInt(cameraPx.X / Iso.PPM / Chunk), cy = Mathf.FloorToInt(cameraPx.Y / Iso.PPM / Chunk);
-            for (int y = cy - Radius; y <= cy + Radius; y++)
-            for (int x = cx - Radius; x <= cx + Radius; x++)
-                if (!_chunks.ContainsKey((x, y))) _chunks[(x, y)] = Build(x, y);
+            BuildAround(cx, cy, budgetMs, 1);
 
             var drop = new List<(int, int)>();
             foreach (var kv in _chunks)
@@ -81,6 +99,28 @@ namespace Rastvordd.Client
                 foreach (var n in _chunks[k]) n.QueueFree();
                 _chunks.Remove(k);
             }
+        }
+
+        /// <summary>Загрузка (LoadingScreen): достроить куски вокруг точки за budgetMs. true — всё готово.</summary>
+        public bool Prebuild(Vector2 cameraPx, double budgetMs) =>
+            BuildAround(Mathf.FloorToInt(cameraPx.X / Iso.PPM / Chunk), Mathf.FloorToInt(cameraPx.Y / Iso.PPM / Chunk), budgetMs, -1);
+
+        /// <summary>Строит недостающие куски кольцами от центра; кольца до forceRing — без ограничения по времени.</summary>
+        bool BuildAround(int cx, int cy, double budgetMs, int forceRing)
+        {
+            ulong t0 = Time.GetTicksUsec();
+            bool all = true;
+            int built = 0;
+            for (int r = 0; r <= Radius; r++)
+                for (int y = cy - r; y <= cy + r; y++)
+                for (int x = cx - r; x <= cx + r; x++)
+                {
+                    if (System.Math.Max(System.Math.Abs(x - cx), System.Math.Abs(y - cy)) != r || _chunks.ContainsKey((x, y))) continue;
+                    if (r > forceRing && built > 0 && (Time.GetTicksUsec() - t0) / 1000.0 >= budgetMs) { all = false; continue; }
+                    _chunks[(x, y)] = Build(x, y);
+                    built++;
+                }
+            return all;
         }
 
         List<Node2D> Build(int cx, int cy)

@@ -59,6 +59,11 @@ namespace Rastvordd.Client
         int _pressNAt = -1;
         double _perfTime, _simTime;
         int _perfFrames;
+        // --perf: рывки — по секундам худший кадр (реальное время между кадрами) и из чего он состоял
+        ulong _hitchLast, _hitchStart, _procT0, _procEnd, _drawUs, _renderUs, _preUs;
+        double _hitchWorst, _hitchAllWorst, _decalMs;
+        int _hitchFrames, _hitchBad, _hitchSec, _gc0, _gc2;
+        string _hitchWhat = "";
         float? _forcedDay;
         int _myId;
         Snapshot _cur;
@@ -68,6 +73,8 @@ namespace Rastvordd.Client
 
         Node2D _world;
         Camera2D _cam;
+        LoadingScreen _loading;
+        double _loadDoneMs = -1;   // короткая загрузка после _Ready: декор вокруг, текстуры, прогрев шейдеров
         /// <summary>Стены и пропсы карты (РТ) — для прозрачности заслонов.</summary>
         readonly List<WallView2D> _mapWalls = new();
         PrefabLayer _prefab;
@@ -298,6 +305,7 @@ namespace Rastvordd.Client
 
         public override void _Ready()
         {
+            ulong readyT0 = Time.GetTicksUsec();
             DisplayServer.WindowSetTitle("Раствордд — прототип 0 (2D 3/4)");
             // отладка: --seed=N — другой мир для прогонов ботов (обычная игра — 1337; сохранение держит свой)
             var seedArg = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--seed="));
@@ -465,6 +473,14 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             if (OS.GetCmdlineUserArgs().Contains("--kit")) _debugEdge = true;
             if (OS.GetCmdlineUserArgs().Contains("--craft")) _hud.ToggleCraft();
             SandboxReady();
+            StartLoading();
+            if (_perf)
+            {
+                // где кадр: _Draw узлов (между концом _Process и началом отрисовки) или сам рендер (шейдеры, текстуры)
+                RenderingServer.FramePreDraw += () => { _preUs = Time.GetTicksUsec(); _drawUs = _preUs - _procEnd; };
+                RenderingServer.FramePostDraw += () => _renderUs = Time.GetTicksUsec() - _preUs;
+            }
+            if (_perf) GD.Print($"hitch: загрузка сцены (_Ready) {(Time.GetTicksUsec() - readyT0) / 1000.0:F0} мс");
         }
 
         void ParseArgs()
@@ -1115,8 +1131,80 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
 
         // ---------- цикл ----------
 
+        /// <summary>Загрузка перед игрой: текстуры растительности, декор вокруг точки появления, прогрев шейдеров.
+        /// Раньше всё это происходило лениво в первые секунды — рывками, пока мир «подгружался».</summary>
+        void StartLoading()
+        {
+            int mi = _cur.Actors.FindIndex(a => a.Id == _myId);
+            var at = mi >= 0 ? Iso.Px(_cur.Actors[mi].Pos) : Vector2.Zero;
+            _loading = new LoadingScreen();
+            AddChild(_loading);
+            var warm = LoadingScreen.WarmUp(at);
+            _world.AddChild(warm);
+            foreach (var id in LoadingScreen.ArtIn("grass", "plants", "trees", "nodes", "clutter", "decals"))
+                _loading.Add(() => { Art.Get(id); });
+            for (int i = 0; i < 49; i++) _loading.Add(() => { _decals.Prebuild(at, 0); });
+            _loading.Add(() => _decals.Prebuild(at, 0));
+            for (int i = 0; i < 3; i++) _loading.NextFrame();   // прогрев и новый декор успевают отрисоваться под экраном
+            _loading.Add(() => { warm.QueueFree(); });
+        }
+
+        // солнце сдвинулось — перерисовать тени тысяч узлов. Разом это ~0,3 с одного кадра (регулярный фриз раз в несколько
+        // игровых минут), поэтому порциями: ближние к камере первыми, по ShadeBatch узлов за кадр (~5 мс _Draw)
+        const int ShadeBatch = 150;
+        readonly List<CanvasItem> _shadeQueue = new();
+        int _shadeAt;
+
+        void QueueShadeRedraw()
+        {
+            _shadeQueue.Clear(); _shadeAt = 0;
+            var cam = _cam.Position;
+            var keys = new List<float>();
+            foreach (var n in GetTree().GetNodesInGroup(Shade.Group))
+                if (n is CanvasItem ci) { _shadeQueue.Add(ci); keys.Add(ci is Node2D n2 ? n2.Position.DistanceSquaredTo(cam) : float.MaxValue); }
+            var ka = keys.ToArray(); var qa = _shadeQueue.ToArray();
+            System.Array.Sort(ka, qa);
+            _shadeQueue.Clear(); _shadeQueue.AddRange(qa);
+        }
+
+        void ShadeRedrawStep()
+        {
+            for (int k = 0; k < ShadeBatch && _shadeAt < _shadeQueue.Count; k++, _shadeAt++)
+                if (IsInstanceValid(_shadeQueue[_shadeAt])) _shadeQueue[_shadeAt].QueueRedraw();
+            if (_shadeAt >= _shadeQueue.Count && _shadeQueue.Count > 0) { _shadeQueue.Clear(); _shadeAt = 0; }
+        }
+
+        /// <summary>--perf: первые 30 с после загрузки — по секундам худший кадр (мс), сколько кадров дольше 50 мс, худшее время декора.</summary>
+        /// <summary>--perf: первые 30 с — каждую секунду худший кадр и его состав (логика, декор, _Draw узлов, рендер, сборки мусора);
+        /// дальше — только секунды с кадром дольше 40 мс.</summary>
+        void PerfHitches()
+        {
+            ulong now = Time.GetTicksUsec();
+            int g0 = System.GC.CollectionCount(0), g2 = System.GC.CollectionCount(2);
+            if (_hitchStart == 0) { _hitchStart = _hitchLast = now; _gc0 = g0; _gc2 = g2; GD.Print($"hitch: первый кадр, логика {(now - _procT0) / 1000.0:F0} мс"); return; }
+            double ms = (now - _hitchLast) / 1000.0;   // отрисовка прошлого кадра + логика этого
+            _hitchLast = now;
+            _hitchFrames++;
+            if (ms > 50) _hitchBad++;
+            if (ms > _hitchWorst)
+            {
+                _hitchWorst = ms;
+                _hitchWhat = (_loading is { Done: false } ? "под экраном загрузки: " : "") + $"логика {(now - _procT0) / 1000.0:F1}, декор {_decalMs:F1}, Draw {_drawUs / 1000.0:F1}, рендер {_renderUs / 1000.0:F1}, GC {g0 - _gc0}/{g2 - _gc2}";
+            }
+            _gc0 = g0; _gc2 = g2;
+            _hitchAllWorst = System.Math.Max(_hitchAllWorst, ms);
+            int sec = (int)((now - _hitchStart) / 1000000.0);
+            if (sec <= _hitchSec) return;
+            if (sec <= 30 || _hitchWorst > 40)
+                GD.Print($"hitch: {sec,3} с, кадров {_hitchFrames}, худший {_hitchWorst:F0} мс ({_hitchWhat}), >50 мс: {_hitchBad}");
+            if (_hitchSec < 10 && sec >= 10) GD.Print($"hitch: итог — худший кадр за первые 10 с {_hitchAllWorst:F0} мс");
+            _hitchSec = sec;
+            _hitchFrames = _hitchBad = 0; _hitchWorst = 0;
+        }
+
         public override void _Process(double delta)
         {
+            _procT0 = Time.GetTicksUsec();
             _frame++;
             RecoilRecover(delta);
             if (_frame == _pressNAt) _timeEdge = true;
@@ -1126,6 +1214,13 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             UpdateAim((float)delta);
 
             _acc += delta * _timeScale;
+            if (_loading != null)
+            {
+                _loading.Step(12, (float)delta);
+                if (!_loading.Done) _acc = 0;   // пока грузимся, мир стоит
+                else if (_perf && _loadDoneMs < 0) { _loadDoneMs = (Time.GetTicksUsec() - _hitchStart) / 1000.0; GD.Print($"hitch: экран загрузки снят через {_loadDoneMs:F0} мс после первого кадра"); }
+                else if (_loading.IsQueuedForDeletion()) _loading = null;
+            }
             int steps = 0, maxSteps = 5 * _timeScale;
             // ускорение (песочница): на шаги мира — не больше ~25 мс за кадр, снапшот — один раз за кадр;
             // не успеваем — честно отстаём (скорость «факт» в панели), а картинка остаётся плавной
@@ -1193,7 +1288,9 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             float dt = (float)delta;
             Render(alpha, dt);
             UpdateCamera(dt);
-            if (!_overview) _decals.Update(_cam.Position);
+            ulong decT0 = Time.GetTicksUsec();
+            if (!_overview && _loading is not { Done: false }) _decals.Update(_cam.Position);
+            _decalMs = (Time.GetTicksUsec() - decT0) / 1000.0;
             {
                 var me = new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
                 bool yard = InYard(me);
@@ -1213,7 +1310,8 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             }
             _ambient.Update(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _forcedDay ?? _cur.DayTime, dt);
             _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime) * Weather.Grade(_cur.Sky);   // + цветокор погоды
-            if (Shade.SetSun(_forcedDay ?? _cur.DayTime)) GetTree().CallGroup(Shade.Group, CanvasItem.MethodName.QueueRedraw);   // тени по солнцу
+            if (Shade.SetSun(_forcedDay ?? _cur.DayTime)) QueueShadeRedraw();   // тени по солнцу
+            ShadeRedrawStep();
             if (_artMode)
             {
                 // дев-масштаб: ближайший к курсору объект (по основанию), подсветка мерцанием
@@ -1235,6 +1333,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             SandboxFrame(dt);
 
             if (_hud.AdminOpen && _frame % 15 == 0) _hud.SetAdminSounds(PlayingSounds());
+            if (_perf) PerfHitches();
             if (_perf)
             {
                 _perfTime += delta; _perfFrames++;
@@ -1246,6 +1345,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     _perfTime = 0; _perfFrames = 0; _simTime = 0;
                 }
             }
+            _procEnd = Time.GetTicksUsec();   // --perf: отсюда до начала отрисовки — _Draw узлов (печать замеров выше в него не попадает)
             // серия кадров для разбора анимаций: --burst=начало,сколько,шаг → <shot>_N.png
             if (_shotPath != null && _burst.count > 0 && _frame >= _burst.start && (_frame - _burst.start) % _burst.step == 0
                 && (_frame - _burst.start) / _burst.step < _burst.count)
@@ -1948,7 +2048,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             {
                 if (_rays != null) { _rays.Dynamic.Clear(); _rays.Dynamic.AddRange(_build.Occluders); }
                 _decals.Blocked ??= _build.OnFloor;
-                _decals.RefreshBlocked();
+                _decals.RefreshBlocked(_build.FloorRects());
             }
             _build.UpdateFade(_selfPx, dt);
             foreach (var w in _mapWalls) w.UpdateOcclusion(dt);

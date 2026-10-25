@@ -119,6 +119,8 @@ namespace Rastvordd.Client
         bool _back = false, _dead;
         float _swing;
 
+        public static bool HeroSprites;
+
         public ActorView2D(bool isNpc, bool isSelf)
         {
             _body = new Body2D
@@ -130,6 +132,8 @@ namespace Rastvordd.Client
             };
             // спрайты персонажа, если сгенерированы; охрана — свой лист, игроки пока «голые»
             string sheet = isNpc ? "char_guard" : "char_naked";
+            bool hero = isSelf && HeroSprites;   // --hero: пробный нарисованный персонаж (кадры chars/char_hero_*), без рига
+            if (hero) sheet = "char_hero";
             _body.Front = Art.CharFrames(sheet, 'f');
             _body.BackFrames = Art.CharFrames(sheet, 'b');
             _body.WalkFront = Art.WalkFrames(sheet, 'f');
@@ -140,7 +144,7 @@ namespace Rastvordd.Client
             AddChild(_held);
             // управляемый персонаж из частей (если части сгенерированы): руки по IK к оружию, ноги шагают, позы
             _isNpc = isNpc;
-            var rigSet = RigSet.Load(isNpc ? "guard" : "naked");
+            var rigSet = hero ? null : RigSet.Load(isNpc ? "guard" : "naked");
             if (rigSet != null)
             {
                 _rig = new RigView(rigSet);
@@ -412,7 +416,7 @@ namespace Rastvordd.Client
             if (walk != null && Moving && !Dead)
             {
                 int wi = (int)(Phase / Mathf.Tau * walk.Length) % walk.Length;
-                DrawTexture(walk[wi], new Vector2(-32, -62));
+                DrawTexture(walk[wi], new Vector2(-walk[wi].GetWidth() / 2f, -walk[wi].GetHeight() + 2));   // 64 — старые кадры, 128 — новые (--hero)
                 return;
             }
             var frames = Back ? BackFrames : Front;
@@ -420,7 +424,7 @@ namespace Rastvordd.Client
             {
                 // цикл ходьбы ~7 кадров/с; стоя — первый кадр
                 int idx = Moving && !Dead ? (int)(Phase / (Mathf.Pi / 2)) % 4 : 0;
-                DrawTexture(frames[idx], new Vector2(-32, -62), Dead ? new Color(0.55f, 0.5f, 0.5f) : Colors.White);
+                DrawTexture(frames[idx], new Vector2(-frames[idx].GetWidth() / 2f, -frames[idx].GetHeight() + 2), Dead ? new Color(0.55f, 0.5f, 0.5f) : Colors.White);
                 return;
             }
             var shirt = Dead ? Shirt.Darkened(0.45f) : Shirt;

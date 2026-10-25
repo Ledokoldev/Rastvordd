@@ -589,6 +589,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
                 else if (arg == "--nocover") DecalLayer.CoverOn = false;   // без густой травы (замер)
+                else if (arg == "--hero") ActorView2D.HeroSprites = true;   // пробный нарисованный персонаж вместо рига
                 else if (arg == "--nohrtf") Tuning.SteamHrtf = false;   // отладка: звук без Steam Audio (сравнить память)
                 else if (arg.StartsWith("--riggallery")) AddChild(new RigGallery(arg.Contains('=') ? arg.Split('=')[1] : "naked"));
                 else if (arg == "--crouch") _forceCrouch = true;

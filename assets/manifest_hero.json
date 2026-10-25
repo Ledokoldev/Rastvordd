@@ -1,0 +1,24 @@
+{
+ "assets": [
+  {
+   "id": "hero_walk",
+   "cat": "charvar",
+   "sheet": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/walk_fr_br.png",
+   "desc": "the same muscular broad-shouldered man ('gigachad' build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket, dark grey work trousers and brown boots, walking. Use the attached image ONLY as a pose and camera reference: top row = facing the camera and to the right (front 3/4), bottom row = facing away from the camera and to the right (back 3/4); copy each frame's exact pose, leg and arm positions, body proportions and the high top-down camera angle, but paint a real person in our style instead of the grey mannequin. Every frame the same person, same size, feet on one baseline per row. Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_idle",
+   "cat": "charvar",
+   "sheet": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/idle_fr_br.png",
+   "desc": "the same muscular broad-shouldered man ('gigachad' build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket, dark grey work trousers and brown boots, standing relaxed and breathing (idle). Use the attached image ONLY as a pose and camera reference: top row = facing the camera and to the right (front 3/4), bottom row = facing away from the camera and to the right (back 3/4); copy each frame's exact pose, leg and arm positions, body proportions and the high top-down camera angle, but paint a real person in our style instead of the grey mannequin. Every frame the same person, same size, feet on one baseline per row. Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  }
+ ]
+}

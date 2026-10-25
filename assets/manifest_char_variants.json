@@ -1,0 +1,47 @@
+{
+ "assets": [
+  {
+   "id": "cv_b1_plain",
+   "cat": "charvar",
+   "sheet": [
+    4,
+    2
+   ],
+   "desc": "the same muscular broad-shouldered man ('gigachad' build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket, dark grey work trousers and brown boots. Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "cv_b2_from3d",
+   "cat": "charvar",
+   "sheet": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/walk3d_ref.png",
+   "desc": "the same muscular broad-shouldered man ('gigachad' build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket, dark grey work trousers and brown boots. Use the attached image ONLY as a pose and camera reference: copy each frame's exact pose, leg and arm positions, body proportions and camera angle, but paint a real person in our style instead of the grey mannequin. Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "cv_b3_fromblocky",
+   "cat": "charvar",
+   "sheet": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/blocky_ref.png",
+   "desc": "the same muscular broad-shouldered man ('gigachad' build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket, dark grey work trousers and brown boots. Use the attached image as a pose reference (copy poses and proportions exactly) and as a style hint: crisp pixel art with a clean 1-pixel dark outline, 3-4 shading tones per colour, no blur. Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "cv_b4_pixel",
+   "cat": "charvar",
+   "sheet": [
+    4,
+    2
+   ],
+   "desc": "the same muscular broad-shouldered man ('gigachad' build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket, dark grey work trousers and brown boots. Crisp hand-made pixel art at low resolution (about 48 pixels tall per figure), clean 1-pixel dark outline, 3-4 shades per colour, readable silhouette, like classic isometric RPG sprites. Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "cv_b5_rifle",
+   "cat": "charvar",
+   "desc": "A character sprite sheet for a 2D top-down survival game in 3/4 view like Project Zomboid: one row of 8 equally spaced frames on a transparent background showing the same muscular broad-shouldered man ('gigachad' build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket, dark grey work trousers and brown boots standing in a ready stance holding an AK assault rifle with BOTH hands correctly (right hand on the pistol grip, left hand on the handguard, stock at the shoulder), the same character turned to 8 directions: facing the camera, front-right, right, back-right, away from camera, back-left, left, front-left. Identical character, proportions and lighting in every frame, full body visible, feet on one baseline, no text, no frame. Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  }
+ ]
+}

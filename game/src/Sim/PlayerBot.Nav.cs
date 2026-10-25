@@ -294,6 +294,7 @@ namespace Rastvordd.Sim
                 for (int k = 0; k < RepOff.Length; k++)
                     if (!_w.WalkBlocked(c + RepOff[k], 1.0f)) { _rep[i] = (byte)(k + 1); break; }
                 float cost = _w.Terrain.IsLand(c) ? 1f : 6f;
+                if (_w.OnRoad(c)) cost *= 0.75f;   // по дорогам мира (RoadNet.cs) идти охотнее
                 foreach (var m in _w.Monuments)
                     if (m.Contains(c, 3))
                     {

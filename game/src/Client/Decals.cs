@@ -91,6 +91,7 @@ namespace Rastvordd.Client
             bool OnYard(SVec q)
             {
                 foreach (var (mn, mx) in _map.Yards) if (q.X > mn.X + 1 && q.X < mx.X - 1 && q.Y > mn.Y + 1 && q.Y < mx.Y - 1) return true;
+                if (PatchLayer.OnRoad(_map.Patches, q)) return true;   // дороги мира (RoadNet.cs): полотно без травы и веток
                 foreach (var r in _map.Rooms) if (q.X > r.Min.X - 0.6f && q.X < r.Max.X + 0.6f && q.Y > r.Min.Y - 0.6f && q.Y < r.Max.Y + 0.6f) return true;   // в зданиях РТ (и у стен)
                 return false;
             }

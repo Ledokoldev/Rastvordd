@@ -94,8 +94,10 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
+            DrawRoads();
             foreach (var p in _patches)
             {
+                if (p.Road != 0) continue;   // дороги мира — раньше, под участками РТ
                 var tex = Art.Get(p.Tile);
                 if (p.Poly != null)
                 {
@@ -117,6 +119,187 @@ namespace Rastvordd.Client
                 if (p.Slab > 0) { DrawSlabs(r, p.Slab == 2); continue; }
                 // мягкий край: тёмная кромка, чтобы участок не выглядел наклеенным
                 DrawRect(r, new Color(0, 0, 0, 0.12f), false, 2);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Дороги мира (RoadNet.cs): полосы-многоугольники «левый край вперёд, правый назад». Порядок: рваная тёмная
+    /// кромка в траву → гравийная обочина → грунтовки → асфальт с выкрошенным краем, редкой разметкой, трещинами и ямами.
+    /// Всё без размытия: пиксельные полосы и линии.
+    /// </summary>
+    public partial class PatchLayer
+    {
+        static float Hash(Vector2 v, int k)
+        {
+            uint h = (uint)((int)v.X * 73856093) ^ (uint)((int)v.Y * 19349663) ^ (uint)(k * 83492791);
+            h ^= h >> 13; h *= 0x5bd1e995; h ^= h >> 15;
+            return (h & 0xffff) / 65535f;
+        }
+
+        void DrawRoadPoly(MapPatch p)
+        {
+            // обочина чуть светлее (пыльный гравий), асфальт чуть темнее — края читаются
+            // по четырёхугольнику на сегмент: на крутом изгибе полоса может перехлестнуть сама себя — без триангуляции это не страшно
+            var tex = Art.Get(p.Tile);
+            var size = tex?.GetSize() ?? Vector2.One;
+            var col = tex == null ? new Color(0.35f, 0.34f, 0.3f) : p.Road == 3 ? new Color(1.14f, 1.11f, 1.04f) : p.Road == 1 ? new Color(0.88f, 0.88f, 0.9f) : Colors.White;
+            int n = p.Poly.Length, k = n / 2;
+            for (int j = 0; j < k - 1; j++)
+            {
+                var q = new[] { Iso.Px(p.Poly[j]), Iso.Px(p.Poly[j + 1]), Iso.Px(p.Poly[n - 2 - j]), Iso.Px(p.Poly[n - 1 - j]) };
+                DrawPrimitive(q, new[] { col, col, col, col }, new[] { q[0] / size, q[1] / size, q[2] / size, q[3] / size }, tex);
+            }
+        }
+
+        /// <summary>Лежит ли точка на дороге мира (с запасом ~0.4 м): мелочь-декали туда не кладутся.</summary>
+        public static bool OnRoad(List<MapPatch> patches, SVec q)
+        {
+            foreach (var pt in patches)
+            {
+                if (pt.Road == 0 || pt.Poly == null) continue;
+                if (q.X < pt.Min.X - 0.5f || q.X > pt.Max.X + 0.5f || q.Y < pt.Min.Y - 0.5f || q.Y > pt.Max.Y + 0.5f) continue;
+                bool inside = false;
+                for (int i = 0, j = pt.Poly.Length - 1; i < pt.Poly.Length; j = i++)
+                {
+                    var a = pt.Poly[i]; var b = pt.Poly[j];
+                    if ((a.Y > q.Y) != (b.Y > q.Y) && q.X < (b.X - a.X) * (q.Y - a.Y) / (b.Y - a.Y) + a.X) inside = !inside;
+                }
+                if (inside) return true;
+            }
+            return false;
+        }
+
+        void Quad(Vector2 a, Vector2 b, Vector2 c, Vector2 d, Color col) => DrawPrimitive(new[] { a, b, c, d }, new[] { col, col, col, col }, null);
+
+        // край полосы: точки стороны и нормаль наружу (пиксели)
+        static void Side(MapPatch p, bool right, List<Vector2> pts, List<Vector2> nrm)
+        {
+            pts.Clear(); nrm.Clear();
+            int k = p.Poly.Length / 2;
+            for (int j = 0; j < k; j++)
+            {
+                var l = Iso.Px(p.Poly[j]); var r = Iso.Px(p.Poly[p.Poly.Length - 1 - j]);
+                var n = (l - r).Normalized();
+                pts.Add(right ? r : l); nrm.Add(right ? -n : n);
+            }
+        }
+
+        readonly List<Vector2> _sp = new(), _sn = new();
+
+        /// <summary>Рваная полоса вдоль края: w0..w1 пикселей от кромки (отрицательные — внутрь).</summary>
+        void Band(MapPatch p, float w0, float w1, Color c, int salt)
+        {
+            for (int s = 0; s < 2; s++)
+            {
+                Side(p, s == 1, _sp, _sn);
+                for (int j = 0; j < _sp.Count - 1; j++)
+                {
+                    float a = w0 + (w1 - w0) * Hash(_sp[j], salt + s), b = w0 + (w1 - w0) * Hash(_sp[j + 1], salt + s);
+                    var mid = (_sp[j] + _sp[j + 1]) * 0.5f;
+                    float m = w0 + (w1 - w0) * Hash(mid, salt + 7 + s);
+                    var nm = ((_sn[j] + _sn[j + 1]) * 0.5f).Normalized();
+                    // два полу-четырёхугольника: середина отрезка тоже «рвёт» край
+                    Quad(_sp[j], mid, mid + nm * m, _sp[j] + _sn[j] * a, c);
+                    Quad(mid, _sp[j + 1], _sp[j + 1] + _sn[j + 1] * b, mid + nm * m, c);
+                }
+            }
+        }
+
+        void DrawRoads()
+        {
+            bool any = false;
+            foreach (var p in _patches) if (p.Road != 0 && p.Poly != null) { any = true; break; }
+            if (!any) return;
+            // 1. кромка в траве: вытоптано и темнее
+            foreach (var p in _patches)
+                if (p.Road is 2 or 3 && p.Poly != null)
+                {
+                    Band(p, 2, 9, new Color(0.13f, 0.11f, 0.06f, 0.16f), 11);
+                    Band(p, 0, 4, new Color(0.1f, 0.08f, 0.05f, 0.22f), 23);
+                }
+            // 2. обочина, 3. грунтовки
+            foreach (var p in _patches) if (p.Road == 3 && p.Poly != null) DrawRoadPoly(p);
+            foreach (var p in _patches)
+                if (p.Road == 2 && p.Poly != null)
+                {
+                    DrawRoadPoly(p);
+                    Band(p, -5, -1, new Color(0.08f, 0.06f, 0.03f, 0.14f), 31);
+                    DrawTrackMarks(p);
+                }
+            // 4. асфальт
+            foreach (var p in _patches)
+                if (p.Road == 1 && p.Poly != null)
+                {
+                    DrawRoadPoly(p);
+                    Band(p, -6, -2, new Color(0.06f, 0.06f, 0.05f, 0.22f), 41);    // выкрошенный край
+                    Band(p, -2, 0, new Color(0.32f, 0.29f, 0.22f, 0.35f), 43);     // гравий в щербинах
+                    DrawAsphaltMarks(p);
+                }
+        }
+
+        /// <summary>Колея: две тёмные полосы, между ними — травка.</summary>
+        void DrawTrackMarks(MapPatch p)
+        {
+            int k = p.Poly.Length / 2;
+            for (int j = 0; j < k - 1; j++)
+            {
+                var l0 = Iso.Px(p.Poly[j]); var r0 = Iso.Px(p.Poly[p.Poly.Length - 1 - j]);
+                var l1 = Iso.Px(p.Poly[j + 1]); var r1 = Iso.Px(p.Poly[p.Poly.Length - 2 - j]);
+                if ((l0 - r0).Length() > 5 * Iso.PPM) continue;   // широкий выезд у РТ — без колеи
+                foreach (float f in new[] { 0.3f, 0.7f })
+                    DrawLine(l0.Lerp(r0, f), l1.Lerp(r1, f), new Color(0.05f, 0.04f, 0.02f, 0.2f), 4);
+                if (Hash(l0, 5) < 0.7f) DrawLine(l0.Lerp(r0, 0.5f), l1.Lerp(r1, 0.5f), new Color(0.3f, 0.38f, 0.16f, 0.22f), 5);
+            }
+        }
+
+        /// <summary>Асфальт: блёклая прерывистая осевая (местами стёрта), трещины, редкие ямы.</summary>
+        void DrawAsphaltMarks(MapPatch p)
+        {
+            int k = p.Poly.Length / 2;
+            for (int j = 0; j < k - 1; j++)
+            {
+                var l0 = Iso.Px(p.Poly[j]); var r0 = Iso.Px(p.Poly[p.Poly.Length - 1 - j]);
+                var l1 = Iso.Px(p.Poly[j + 1]); var r1 = Iso.Px(p.Poly[p.Poly.Length - 2 - j]);
+                var c0 = (l0 + r0) * 0.5f; var c1 = (l1 + r1) * 0.5f;
+                float w = (l0 - r0).Length();
+                if (w > 7 * Iso.PPM) continue;
+                if (j % 3 == 0)
+                {
+                    float h = Hash(c0, 3);
+                    if (h > 0.22f) DrawLine(c0, c0.Lerp(c1, 0.75f), new Color(0.86f, 0.83f, 0.7f, 0.12f + 0.3f * (h - 0.22f)), 3);
+                }
+                float hc = Hash(c0, 9);
+                if (hc < 0.3f)
+                {
+                    // трещина: ломаная от случайной точки поперёк полосы
+                    var across = (l0 - r0) / w;
+                    var along = (c1 - c0).Normalized();
+                    var q = c0 + across * (Hash(c0, 10) - 0.5f) * w * 0.7f;
+                    var pts = new Vector2[4];
+                    pts[0] = q;
+                    for (int i = 1; i < 4; i++)
+                    {
+                        var d = along * (Hash(q, 20 + i) * 2 - 1) + across * (Hash(q, 30 + i) * 2 - 1);
+                        pts[i] = pts[i - 1] + d.Normalized() * (6 + 8 * Hash(q, 40 + i));
+                    }
+                    DrawPolyline(pts, new Color(0.03f, 0.03f, 0.03f, 0.4f), 1);
+                }
+                else if (hc > 0.965f)
+                {
+                    // яма: неровный тёмный многоугольник со светлой кромкой
+                    var across = (l0 - r0) / w;
+                    var cc = c0.Lerp(c1, 0.5f) + across * (Hash(c0, 11) - 0.5f) * w * 0.5f;
+                    float rad = 5 + 6 * Hash(c0, 12);
+                    var poly = new Vector2[7];
+                    for (int i = 0; i < 7; i++)
+                    {
+                        float ang = i * Mathf.Tau / 7;
+                        poly[i] = cc + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang) * 0.75f) * rad * (0.7f + 0.5f * Hash(cc, 50 + i));
+                    }
+                    DrawColoredPolygon(poly, new Color(0.05f, 0.05f, 0.04f, 0.5f));
+                    DrawPolyline(poly[..4], new Color(0.6f, 0.58f, 0.5f, 0.25f), 1);
+                }
             }
         }
     }

@@ -193,6 +193,7 @@ namespace Rastvordd.Sim
             PlaceWorldTires();   // покрышки — резина (после РТ, своим генератором)
             DressAllPrefabs();   // обстановка РТ (Dressing.cs): в самом конце, своим генератором на РТ
             PlaceFuelSpots();    // бочки с мазутом и ржавые канистры (D54): после всего, своим генератором — индексы старых находок не сдвигаются
+            BuildRoads();        // дорожная сеть между РТ (RoadNet.cs): последней, своим генератором
         }
 
         // площадь на один объект (м²) и веса: дерево, камень, металл, сера, конопля, ягоды, бочка воды, ящик-укрытие, руины
@@ -278,7 +279,7 @@ namespace Rastvordd.Sim
             for (int tries = 0; tries < 200; tries++)
             {
                 var p = new Vector2(Range(-HalfSize + 5, HalfSize - 5), Range(-HalfSize + 5, HalfSize - 5));
-                if (InMonument(p) || !BiomeFill.TryGetValue(Terrain.BiomeAt(p), out var fill)) continue;
+                if (InMonument(p) || OnRoad(p) || !BiomeFill.TryGetValue(Terrain.BiomeAt(p), out var fill)) continue;
                 if (kind.HasValue && fill.w[NodeCategory(kind.Value)] == 0) continue;
                 if (IsFree(p, clearance)) return p;
             }

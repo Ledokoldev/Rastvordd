@@ -49,6 +49,26 @@ namespace Rastvordd.Client
                     if (b != Biome.Water) c = c.Darkened(Mathf.Clamp(0.15f - h * 0.15f, 0, 0.15f));   // рельеф слегка
                     img.SetPixel(x, y, c);
                 }
+            // дороги мира (RoadNet.cs): асфальт тёмно-серым, грунтовки — бурым
+            foreach (var pt in map.Patches)
+            {
+                if (pt.Poly == null || pt.Road is not (1 or 2)) continue;
+                var col = pt.Road == 1 ? new Color(0.26f, 0.26f, 0.25f) : new Color(0.47f, 0.4f, 0.28f);
+                int x0 = Mathf.Max(0, (int)((pt.Min.X + map.HalfSize) / map.Cell)), x1 = Mathf.Min(map.N - 1, (int)((pt.Max.X + map.HalfSize) / map.Cell));
+                int y0 = Mathf.Max(0, (int)((pt.Min.Y + map.HalfSize) / map.Cell)), y1 = Mathf.Min(map.N - 1, (int)((pt.Max.Y + map.HalfSize) / map.Cell));
+                for (int y = y0; y <= y1; y++)
+                    for (int x = x0; x <= x1; x++)
+                    {
+                        float cx = (x + 0.5f) * map.Cell - map.HalfSize, cy = (y + 0.5f) * map.Cell - map.HalfSize;
+                        bool inside = false;
+                        for (int i = 0, j = pt.Poly.Length - 1; i < pt.Poly.Length; j = i++)
+                        {
+                            var a = pt.Poly[i]; var b = pt.Poly[j];
+                            if ((a.Y > cy) != (b.Y > cy) && cx < (b.X - a.X) * (cy - a.Y) / (b.Y - a.Y) + a.X) inside = !inside;
+                        }
+                        if (inside) img.SetPixel(x, y, col);
+                    }
+            }
             _tex = ImageTexture.CreateFromImage(img);
             Visible = false;
             MouseFilter = MouseFilterEnum.Ignore;

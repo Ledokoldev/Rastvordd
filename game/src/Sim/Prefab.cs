@@ -19,7 +19,7 @@ namespace Rastvordd.Sim
     }
 
     /// <summary>Участок земли другой текстурой (гравий ОРУ, асфальт, кафель в корпусе) — под всеми объектами.</summary>
-    public struct MapPatch { public string Tile; public Vector2 Min, Max; public Vector2[] Poly; public int Slab; }   // Slab: тропа из плит ПАГ (1 — вдоль x, 2 — вдоль y)   // Poly — неровный участок (иначе прямоугольник Min–Max)
+    public struct MapPatch { public string Tile; public Vector2 Min, Max; public Vector2[] Poly; public int Slab; public byte Road; }   // Road: дорога мира (RoadNet.cs) — 1 асфальт, 2 грунтовка, 3 обочина под асфальтом   // Slab: тропа из плит ПАГ (1 — вдоль x, 2 — вдоль y)   // Poly — неровный участок (иначе прямоугольник Min–Max)
 
     /// <summary>Крыша над комнатой: снаружи прячет, что внутри; клиент растворяет её, когда игрок внутри (D40).</summary>
     public struct MapRoof { public string Tile; public Vector2 Min, Max; public List<RoofItem> Items; }
@@ -230,6 +230,7 @@ namespace Rastvordd.Sim
                 ResetTier1(t);
             }
             foreach (var t in Tier2) ResetTier2(t);
+            ClearRoadsAfterLoad();   // узлы из сохранения на дорогах (RoadNet.cs)
         }
     }
 }

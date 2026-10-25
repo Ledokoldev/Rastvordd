@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 
 namespace Rastvordd.Client
 {
@@ -90,18 +90,26 @@ void vertex() {
     float off = (sin(TIME * 1.3 + ph) * 0.7 + sin(TIME * 2.9 + ph * 1.7) * 0.3) * sway_amp * h * h;
     VERTEX.x += round(off);
 }
-void fragment() { COLOR.rgb = vis_apply(wx_object(COLOR.rgb, TEXTURE, UV, TEXTURE_PIXEL_SIZE, base_px + UV * 64.0), vis_at(base_px)); }
+uniform float root_dark = 0.0;
+uniform vec3 tint = vec3(1.0);
+void fragment() {
+    COLOR.rgb *= tint;   // трава под цвет земли (иначе светлые куртины «лежат» на ней)
+    COLOR.rgb *= 1.0 - root_dark * smoothstep(0.45, 1.0, UV.y);   // трава «врастает»: к земле темнее, как травинки в шейдере земли
+    COLOR.rgb = vis_apply(wx_object(COLOR.rgb, TEXTURE, UV, TEXTURE_PIXEL_SIZE, base_px + UV * 64.0), vis_at(base_px));
+}
 ";
 
         static ShaderMaterial _treeMat, _grassMat;
         /// <summary>Деревья: видимость + покачивание кроны.</summary>
         public static ShaderMaterial TreeMat => _treeMat ??= Sway(2.2f, 170f);
         /// <summary>Трава, кусты, цветы: видимость + лёгкое покачивание.</summary>
-        public static ShaderMaterial GrassMat => _grassMat ??= Sway(1.3f, 40f);
+        public static ShaderMaterial GrassMat => _grassMat ??= Sway(1.3f, 40f, 0.4f);
 
-        static ShaderMaterial Sway(float amp, float height)
+        static ShaderMaterial Sway(float amp, float height, float rootDark = 0f)
         {
             var m = new ShaderMaterial { Shader = new Shader { Code = SwayShader } };
+            m.SetShaderParameter("root_dark", rootDark);
+            if (rootDark > 0) m.SetShaderParameter("tint", new Vector3(0.8f, 0.92f, 0.7f));
             m.SetShaderParameter("sway_amp", amp);
             m.SetShaderParameter("sway_height", height);
             return m;

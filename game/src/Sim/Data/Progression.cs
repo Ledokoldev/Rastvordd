@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Rastvordd.Sim
@@ -70,7 +70,7 @@ namespace Rastvordd.Sim
         /// <summary>Переписанные рецепты существующих вещей (весь рецепт целиком): выход → цена, верстак, станция.</summary>
         public static readonly (string output, int bench, DeployKind station, (string, int)[] cost)[] RecipeOverride =
         {
-            ("deploy_workbench3", 2, DeployKind.None, new[] { ("metal_fragments", 600), ("scrap", 400), ("comp_circuit", 3), ("comp_gears", 5), (Alloy, 10) }),   // D54: по плану 25 — снижено, чтобы боты держали темп (замер)
+            ("deploy_workbench3", 2, DeployKind.None, new[] { ("metal_fragments", 600), ("scrap", 400), ("comp_circuit", 3), ("comp_gears", 5), (Alloy, 10), ("bp_frag_adv", 1) }),   // D54: по плану 25 — снижено, чтобы боты держали темп (замер)
             // стволы тира 3 — только на оружейном столе, с легированной сталью
             ("weapon_akm", 3, DeployKind.GunTable, new[] { ("metal_fragments", 250), ("wood", 100), ("comp_receiver_ak", 1), ("comp_bolt_carrier", 1), ("comp_gas_block", 1), ("comp_spring", 4), (Alloy, 25) }),
             ("weapon_an94", 3, DeployKind.GunTable, new[] { ("metal_fragments", 300), ("comp_receiver_ak", 1), ("comp_barrel_chrome", 1), ("comp_bolt_carrier", 1), ("comp_gas_block", 1), ("comp_gears", 3), (Alloy, 30) }),
@@ -108,11 +108,11 @@ namespace Rastvordd.Sim
             ["barrel"] = new LootLine[] { new(0.03, "flask_05", 1, 1), new(0.03, "canister_5", 1, 3, "crude") },
             ["barrel_rt"] = new LootLine[] { new(0.04, "flask_1", 1, 1), new(0.06, "canister_5", 2, 4, "crude"), new(0.03, "medspirt", 1, 1) },
             ["crate0"] = new LootLine[] { new(0.08, "flask_05", 1, 1), new(0.04, "flask_1", 1, 1), new(0.06, "canister_5", 2, 5, "fuel"), new(0.08, "medspirt", 1, 2) },
-            ["crate1"] = new LootLine[] { new(0.5, Alloy, 2, 4), new(0.15, "canister_5", 3, 5, "fuel"), new(0.05, "canister_20", 6, 12, "fuel"), new(0.15, "medspirt", 1, 3), new(0.05, "syringe", 1, 1) },
-            ["crate2"] = new LootLine[] { new(0.5, Alloy, 4, 8), new(0.15, "canister_20", 10, 20, "fuel"), new(0.08, "canister_5", 3, 5, "diesel"), new(0.15, "syringe", 1, 2), new(0.08, "medkit", 1, 1), new(0.03, "tool_jackhammer", 1, 1) },
-            ["safe"] = new LootLine[] { new(0.6, Alloy, 3, 6), new(0.2, "syringe", 1, 2), new(0.1, "medkit", 1, 1), new(0.1, "canister_5", 3, 5, "diesel") },
-            ["punch"] = new LootLine[] { new(1.0, Alloy, 3, 6), new(0.2, "canister_5", 3, 5, "fuel"), new(0.1, "syringe", 1, 1) },
-            ["event"] = new LootLine[] { new(1.0, Alloy, 8, 15), new(0.3, "canister_20", 8, 15, "diesel"), new(0.3, "medkit", 1, 2), new(0.3, "syringe", 1, 2) },
+            ["crate1"] = new LootLine[] { new(0.5, Alloy, 2, 4), new(0.15, "canister_5", 3, 5, "fuel"), new(0.05, "canister_20", 6, 12, "fuel"), new(0.15, "medspirt", 1, 3), new(0.05, "syringe", 1, 1), new(0.12, "bp_frag_basic", 1, 1) },
+            ["crate2"] = new LootLine[] { new(0.5, Alloy, 4, 8), new(0.15, "canister_20", 10, 20, "fuel"), new(0.08, "canister_5", 3, 5, "diesel"), new(0.15, "syringe", 1, 2), new(0.08, "medkit", 1, 1), new(0.03, "tool_jackhammer", 1, 1), new(0.25, "bp_frag_basic", 1, 1), new(0.06, "bp_frag_adv", 1, 1) },
+            ["safe"] = new LootLine[] { new(0.6, Alloy, 3, 6), new(0.3, "bp_frag_basic", 1, 1), new(0.2, "syringe", 1, 2), new(0.1, "medkit", 1, 1), new(0.1, "canister_5", 3, 5, "diesel") },
+            ["punch"] = new LootLine[] { new(1.0, Alloy, 3, 6), new(0.6, "bp_frag_basic", 1, 1), new(0.25, "bp_frag_adv", 1, 1), new(0.2, "canister_5", 3, 5, "fuel"), new(0.1, "syringe", 1, 1) },
+            ["event"] = new LootLine[] { new(1.0, Alloy, 8, 15), new(0.7, "bp_frag_adv", 1, 1), new(0.3, "canister_20", 8, 15, "diesel"), new(0.3, "medkit", 1, 2), new(0.3, "syringe", 1, 2) },
         };
 
         // =====================================================================================================

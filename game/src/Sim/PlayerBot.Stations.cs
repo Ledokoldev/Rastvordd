@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Numerics;
 
 namespace Rastvordd.Sim
@@ -45,6 +45,6 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Лег. сталь и детали — «заказываются» (поход на РТ, переработчик), а не добываются.</summary>
-        static bool IsOrdered(string id) => id.StartsWith("comp_") || id == Prog.Alloy;
+        static bool IsOrdered(string id) => id.StartsWith("comp_") || id.StartsWith("bp_frag") || id == Prog.Alloy;
     }
 }

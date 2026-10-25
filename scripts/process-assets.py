@@ -86,7 +86,7 @@ def process(a: dict, src: pathlib.Path) -> tuple[Image.Image, Image.Image]:
     if a.get("tile"):
         hd = make_seamless(raw, round(a["tile"] * PX_HD))
         # земля — фон: мягче и спокойнее, чтобы после ужатия не было ряби; детали дают декали
-        soft = ImageEnhance.Contrast(hd.filter(ImageFilter.GaussianBlur(1.3))).enhance(0.78)
+        soft = hd if a.get("crisp") else ImageEnhance.Contrast(hd.filter(ImageFilter.GaussianBlur(1.3))).enhance(0.78)   # crisp: объёмная земля, рисунок травинок не размывать
         soft = ImageEnhance.Color(soft).enhance(1.15)
         keep, _global_palette = _global_palette, None   # у земли своя палитра: в общей мало зелёного
         px = pixelize(soft.convert("RGBA"), (round(a["tile"] * PX_PIXEL),) * 2, colors=64, opaque=True)
@@ -237,7 +237,7 @@ def sheet(items: list[tuple[str, Image.Image]], scale: int, path: pathlib.Path, 
     print(f"preview: {path}")
 
 
-OWN_PALETTE_CATS = ("grass", "plants", "clutter", "rig")
+OWN_PALETTE_CATS = ("grass", "plants", "trees", "clutter", "rig")   # деревья тоже: в общей палитре листва серела
 
 # части тела для управляемого персонажа (кат-аут риг): длина по главной оси в пикселях (рост ~58 px при 32 px/м)
 RIG_SIZE = {
@@ -327,7 +327,7 @@ def main() -> None:
             # полупрозрачная декаль (пыль, грязь, пятна): ложится на пол, а не клеится сверху
             px.putalpha(px.getchannel("A").point(lambda v, k=a["soft"]: int(v * k)))
         if a["cat"] not in _RESTYLE_SKIP:
-            px = _restyle.cool(px, "B")   # общий холодный цвет мира (scripts/restyle-assets.py, вариант B): без желтизны
+            px = _restyle.cool(px, "V" if a["cat"] in ("trees", "plants", "grass") or a.get("crisp") else "B")   # общий холодный цвет мира (scripts/restyle-assets.py, вариант B): без желтизны
         for base, im in ((ROOT / "assets" / "hd", hd), (ROOT / "game" / "art", px)):
             dst = base / a["cat"] / f"{a['id']}.png"
             dst.parent.mkdir(parents=True, exist_ok=True)

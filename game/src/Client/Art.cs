@@ -203,6 +203,7 @@ namespace Rastvordd.Client
             : id.StartsWith("comp_") ? "icons/icon_gears"
             : id == "val_copper_wire" ? "icons/icon_comp_tape"
             : id == "val_motor" || id == "val_battery" ? "icons/icon_gears"
+            : id.StartsWith("bp_frag") ? "icons/icon_doc_blueprint"
             : id.StartsWith("val_") ? "icons/icon_comp_circuit"
             : id.StartsWith("att_") ? "icons/icon_gears"
             : null;

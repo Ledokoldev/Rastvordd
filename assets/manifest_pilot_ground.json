@@ -1,0 +1,32 @@
+{
+ "assets": [
+  {
+   "id": "ground_grass_v",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "ground viewed from above at the 3/4 top-down game camera: dense short wild meadow grass covering the whole ground, olive and fresh green blades mixed with a few dry straw ones, tiny clover. Painted in the same style as hand-painted Project Zomboid-like sprites: visible individual grass blades and tufts with volume, every tuft lit from the top-left with lighter tips and darker roots, small shadow pockets between tufts, muted natural colors, no large objects, no stones bigger than a fist, uniform density so it tiles",
+   "crisp": true
+  },
+  {
+   "id": "ground_forest_v",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "ground viewed from above at the 3/4 top-down game camera: forest floor: moss, short shade grass, fallen pine needles and a few dead leaves, dark green and brown. Painted in the same style as hand-painted Project Zomboid-like sprites: visible individual grass blades and tufts with volume, every tuft lit from the top-left with lighter tips and darker roots, small shadow pockets between tufts, muted natural colors, no large objects, no stones bigger than a fist, uniform density so it tiles",
+   "crisp": true
+  },
+  {
+   "id": "ground_dry_v",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "ground viewed from above at the 3/4 top-down game camera: dry steppe ground: sparse straw-colored grass tufts on cracked dusty khaki soil. Painted in the same style as hand-painted Project Zomboid-like sprites: visible individual grass blades and tufts with volume, every tuft lit from the top-left with lighter tips and darker roots, small shadow pockets between tufts, muted natural colors, no large objects, no stones bigger than a fist, uniform density so it tiles",
+   "crisp": true
+  },
+  {
+   "id": "ground_dirt_v",
+   "cat": "tiles",
+   "tile": 4,
+   "desc": "ground viewed from above at the 3/4 top-down game camera: trampled dirt path ground with a few flattened grass blades at the edges, small pebbles, dark brown. Painted in the same style as hand-painted Project Zomboid-like sprites: visible individual grass blades and tufts with volume, every tuft lit from the top-left with lighter tips and darker roots, small shadow pockets between tufts, muted natural colors, no large objects, no stones bigger than a fist, uniform density so it tiles",
+   "crisp": true
+  }
+ ]
+}

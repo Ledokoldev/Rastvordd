@@ -235,6 +235,20 @@ namespace Rastvordd.Client
                     var p = a.Substring(2).Split(';');
                     _forceWalk = new SVec(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture));
                 }
+                else if (a.StartsWith("tpb"))
+                {
+                    // отладка: перенестись в глубину биома (tpbForest, tpbGrassland…): точка, где вокруг 12 м тот же биом
+                    var want = System.Enum.Parse<Biome>(a.Substring(3));
+                    var me = _server.World.Find(_myId);
+                    var rng = new System.Random(int.TryParse(_scriptCode.ToString(), out var sd) ? sd : 1);
+                    for (int t = 0; t < 20000; t++)
+                    {
+                        var q = new SVec(rng.Next(-400, 400), rng.Next(-400, 400));
+                        bool ok = true;
+                        for (int k = 0; k < 8 && ok; k++) ok = TerrainView.BiomeAt(_map, q + new SVec(Mathf.Cos(k * 0.785f) * 12, Mathf.Sin(k * 0.785f) * 12)) == want;
+                        if (ok && TerrainView.BiomeAt(_map, q) == want) { me.Pos = q; break; }
+                    }
+                }
                 else if (a.StartsWith("t2tp"))
                 {
                     // отладка: перенестись на РТ тира 2: t2tp<номер>;x;y от её угла
@@ -315,6 +329,17 @@ namespace Rastvordd.Client
                     _server.StartChronicle(custom?.Substring(12) ?? ProjectSettings.GlobalizePath($"user://chronicle/{(_spectate ? "sandbox" : "wipe")}_{System.DateTime.Now:yyyy-MM-dd_HH-mm}.jsonl"));
             }
             catch (System.Exception ex) { GD.PrintErr($"летопись не начата: {ex.Message}"); }
+            // отладка: --recipedump=путь — все рецепты (верстак|станция|выход|цена|изучение) в файл и выход
+            var rd = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--recipedump="));
+            if (rd != null)
+            {
+                var sb = new System.Text.StringBuilder();
+                foreach (var r in Rastvordd.Sim.Recipes.All)
+                    sb.AppendLine($"{r.Bench}|{r.Station}|{Rastvordd.Sim.Items.Name(r.Output)}{(r.Count > 1 ? " ×" + r.Count : "")}|{string.Join(", ", System.Linq.Enumerable.Select(r.Cost, c => $"{Rastvordd.Sim.Items.Name(c.id)} {c.count}"))}|{(Rastvordd.Sim.Tech.Get(r.Output) != null ? "изуч" : "")}");
+                System.IO.File.WriteAllText(rd.Substring(13), sb.ToString());
+                GetTree().Quit();
+                return;
+            }
             // отладка: --simtest=600[,бот] — прокрутить 600 с мира без отрисовки и встать рядом с ботом
             var st = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--simtest="));
             if (st != null)

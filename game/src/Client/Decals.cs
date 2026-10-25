@@ -57,6 +57,7 @@ namespace Rastvordd.Client
             [Biome.Tundra] = (5, new[] { T1, T1, T2, C("flowers_snowdrop"), C("clutter_log"), C("clutter_stump"), C("clutter_bones") }),
             [Biome.Beach] = (5, new[] { B1, B1, B2, C("clutter_planks"), C("clutter_tire"), C("clutter_canister"), C("clutter_pallet"), C("clutter_bones") }),
         };
+        public static bool CoverOn = true;   // густая трава-спрайты (можно выключить для слабых машин)
         public DecalLayer(MapInfo map, Node2D flatParent, Node2D sortedParent)
         {
             _map = map;
@@ -96,15 +97,44 @@ namespace Rastvordd.Client
                 return false;
             }
 
-            for (int i = 0; i < fill.count; i++)
+            // куртины: трава растёт пятнами (центр + 6–14 кустиков вокруг), между ними — просветы; плюс одиночный разброс
+            var spots = new List<(SVec p, int kind)>();   // 0 — разброс, 1 — куртина, 2 — низкая трава
+            int clumps = 0;   // круглые куртины-«кочки» убраны: траву даёт низкий покров из пучков (kind 2)
+            for (int c = 0; c < clumps; c++)
             {
-                var p = new SVec(cx * Chunk + rng.Randf() * Chunk, cy * Chunk + rng.Randf() * Chunk);
+                var cc = new SVec(cx * Chunk + rng.Randf() * Chunk, cy * Chunk + rng.Randf() * Chunk);
+                float rad = rng.RandfRange(1.2f, 3f);
+                int n = rng.RandiRange(6, 14);
+                for (int k = 0; k < n; k++)
+                {
+                    float a = rng.Randf() * Mathf.Tau, d = rad * Mathf.Sqrt(rng.Randf());
+                    spots.Add((cc + new SVec(Mathf.Cos(a) * d, Mathf.Sin(a) * d * 0.8f), 1));
+                }
+            }
+            for (int i = 0; i < fill.count; i++) spots.Add((new SVec(cx * Chunk + rng.Randf() * Chunk, cy * Chunk + rng.Randf() * Chunk), 0));
+            // сплошной травяной покров (как в Project Zomboid): густые объёмные пучки по всей клетке, плотность по под-клеткам 3×3
+            int cover = biome switch { Biome.Grassland => 260, Biome.Swamp => 200, Biome.Forest => 120, Biome.Arid => 90, Biome.Tundra => 50, _ => 0 };
+            if (CoverOn && cover > 0)
+                for (int sy = 0; sy < 3; sy++)
+                for (int sx = 0; sx < 3; sx++)
+                {
+                    float dens = rng.Randf();                       // поляна, редкая трава или проплешина
+                    int n = (int)(cover / 9f * (dens < 0.2f ? 0.15f : dens < 0.5f ? 0.7f : 1.4f));
+                    for (int k = 0; k < n; k++)
+                        spots.Add((new SVec((cx + (sx + rng.Randf()) / 3f) * Chunk, (cy + (sy + rng.Randf()) / 3f) * Chunk), 2));
+                }
+            spots.Sort((a, b) => a.p.Y.CompareTo(b.p.Y));
+            foreach (var (p, kind) in spots)
+            {
                 if (TerrainView.BiomeAt(_map, p) == Biome.Water) continue;
                 if (OnYard(p)) continue;   // не на площадках РТ
                 // биом берём в самой точке: на границе биомов трава смешивается естественно
                 var here = TerrainView.BiomeAt(_map, p);
                 var set = Fill.TryGetValue(here, out var f2) ? f2.ids : fill.ids;
                 string texPath = set[rng.RandiRange(0, set.Length - 1)];
+                if (kind == 2) { string tb = here switch { Biome.Forest => "forest", Biome.Arid or Biome.Tundra => "dry", Biome.Swamp => "swamp", _ => "meadow" }; texPath = $"grass/tuft_{tb}_{rng.RandiRange(1, 12)}"; }
+                else if (texPath.StartsWith("grass/grass_")) { string tb = here switch { Biome.Forest => "forest", Biome.Arid or Biome.Tundra => "dry", Biome.Swamp => "swamp", _ => "meadow" }; texPath = $"grass/tuft_{tb}_{rng.RandiRange(1, 12)}"; }   // старые куртины-кочки → пучки
+                else if (kind == 1 && !texPath.StartsWith("grass/")) { var gs = System.Array.FindAll(set, t => t.StartsWith("grass/")); if (gs.Length > 0) texPath = gs[rng.RandiRange(0, gs.Length - 1)]; }
                 var tex = Art.Get(texPath);
                 if (tex == null) continue;
 

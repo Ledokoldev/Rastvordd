@@ -207,6 +207,8 @@ namespace Rastvordd.Sim
             Add("punchcard_2", "Перфокарта II", ItemCategory.Component);
             Add("punchcard_3", "Перфокарта III", ItemCategory.Component);
             Add("fuse", "Пробка", ItemCategory.Component);
+            Add("bp_frag_basic", "Фрагменты чертежа", ItemCategory.Component);
+            Add("bp_frag_adv", "Продвинутые фрагменты", ItemCategory.Component);
             Add("rt_keyfob", "Брелок от ворот", ItemCategory.Component);
             Add("rt_cable", "Кабель-перемычка", ItemCategory.Component);
             Add("scrap", "Металлолом", ItemCategory.Component);
@@ -283,6 +285,8 @@ namespace Rastvordd.Sim
         {
             var list = RecycleBase(id);
             if (id != null && Prog.RecycleAlloy.TryGetValue(id, out int alloy)) list.Add((Prog.Alloy, alloy));   // легированная сталь (D54)
+            if (id == "val_motor") list.Add(("bp_frag_basic", 1));             // фрагменты чертежей верстаков — и без похода в крейт
+            else if (id == "val_computer_block") list.Add(("bp_frag_adv", 1));
             return list;
         }
 
@@ -414,6 +418,8 @@ namespace Rastvordd.Sim
             "punchcard_1" => 30f,
             "punchcard_2" => 80f,
             "punchcard_3" => 200f,
+            "bp_frag_basic" => 40f,
+            "bp_frag_adv" => 120f,
             "fuse" => 0f,
             "bandage" => 3f,
             "berries" or "canned" or "water_bottle" => 1f,
@@ -467,6 +473,8 @@ namespace Rastvordd.Sim
             "keycard" => "Открывает сейф на РТ с охраной (одна карта — один сейф)",
             "punchcard_1" => "Открывает крейт РТ тира 1 (Подстанция). Тратится",
             "punchcard_2" => "Открывает РТ тира 2 (пульт Радиоцентра «Маяк»). Тратится",
+            "bp_frag_basic" => "Нужны для Верстака 2. Крейты РТ тира 1–2, переработка моторов",
+            "bp_frag_adv" => "Нужны для Верстака 3. Главные крейты РТ, ивенты, переработка вычислительных блоков",
             "punchcard_3" => "Для РТ тира 3 (ещё не построены). Редкость с вызова «Маяка»",
             "fuse" => "Пробка Подстанции: вставь в главный щиток. За забор не вынести",
             "rt_keyfob" => "Брелок от гаражных ворот: жми у гаражей — нужные ворота запищат. Из Гаражей не вынести",
@@ -563,8 +571,8 @@ namespace Rastvordd.Sim
             new Recipe { Output = "deploy_workbench", Cost = new[] { ("wood", 150), ("metal_fragments", 50), ("scrap", 50) }, Time = 10 },
             new Recipe { Output = "gunpowder", Count = 5, Cost = new[] { ("charcoal", 15), ("sulfur", 10) }, Time = 3, Bench = 1 },
             // верстаки (D49): лом 50 / 150 / 400, третий — ещё платы ×3 и шестерни ×5
-            new Recipe { Output = "deploy_workbench2", Cost = new[] { ("metal_fragments", 300), ("scrap", 150) }, Time = 15, Bench = 1 },
-            new Recipe { Output = "deploy_workbench3", Cost = new[] { ("metal_fragments", 600), ("scrap", 400), ("comp_circuit", 3), ("comp_gears", 5) }, Time = 25, Bench = 2 },
+            new Recipe { Output = "deploy_workbench2", Cost = new[] { ("metal_fragments", 300), ("scrap", 150), ("bp_frag_basic", 1) }, Time = 15, Bench = 1 },
+            new Recipe { Output = "deploy_workbench3", Cost = new[] { ("metal_fragments", 600), ("scrap", 400), ("comp_circuit", 3), ("comp_gears", 5), ("bp_frag_adv", 1) }, Time = 25, Bench = 2 },
         };
 
         static Recipes() { Weaponry.AddRecipes(All); Clothing.AddRecipes(All); StationDefs.AddRecipes(All); }   // + D54: сталь, станции, ёмкости, инструменты   // стволы, патроны, обвесы, станок (D46); одежда (D47)

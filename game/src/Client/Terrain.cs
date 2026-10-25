@@ -64,7 +64,7 @@ void fragment() {
         if (best - second < 0.06) col = mix(col, vec3(0.62, 0.66, 0.6), 0.55);   // пена у кромки
         COLOR = vec4(vis_apply(col, vis_at((m - vec2(map_size * 0.5)) * px_per_m)), 1.0);
     } else {
-        if (id == 1) col = texture(t_forest, tuv).rgb;
+        if (id == 1) col = mix(texture(t_forest, tuv).rgb, texture(t_forest, vec2(tuv.y, -tuv.x) + vec2(0.53, 0.19)).rgb, smoothstep(0.35, 0.65, texture(macro_noise, m / 21.0 + vec2(0.6, 0.1)).r));
         else if (id == 2) col = texture(t_dry, tuv).rgb;
         else if (id == 3) col = texture(t_snow, tuv).rgb;
         else if (id == 4) col = texture(t_sand, tuv).rgb;
@@ -72,7 +72,12 @@ void fragment() {
         else if (id == 6) col = texture(t_dirt, tuv).rgb;
         else if (id == 7) col = texture(t_gravel, tuv).rgb;
         else if (id == 8) col = texture(t_concrete, tuv).rgb;
-        else col = texture(t_grass, tuv).rgb;
+        else {
+            // против повтора тайла: второй отсчёт со сдвигом и поворотом, смешение по крупному шуму
+            vec2 tuv2 = vec2(-tuv.y, tuv.x) * 1.0 + vec2(0.37, 0.61);
+            float bl = smoothstep(0.35, 0.65, texture(macro_noise, m / 23.0 + vec2(0.2, 0.8)).r);
+            col = mix(texture(t_grass, tuv).rgb, texture(t_grass, tuv2).rgb, bl);
+        }
 
         // крупные пятна: очень плавно, чтобы не рябило
         float mac = texture(macro_noise, m / 120.0).r;
@@ -96,6 +101,31 @@ void fragment() {
         float lit = dot(nrm, normalize(vec3(-sun_dir, 1.6)));
         lit = floor(lit * 6.0 + 0.5) / 6.0;
         col *= mix(0.8, 1.14, clamp(lit, 0.0, 1.0));
+
+        // травинки: в траве, лесу, пустоши и болоте земля не плоская — у каждого пикселя-корня может расти стебель 2–5 px
+        // со светлым кончиком и тёмным корнем (свет сверху-слева, как на спрайтах); между стеблями — тень
+        if (id == 0 || id == 1 || id == 2 || id == 5) {
+            vec2 pp = floor(m * px_per_m);
+            float dens = (id == 0 ? 0.2 : id == 1 ? 0.11 : id == 2 ? 0.08 : 0.15) * smoothstep(0.3, 0.65, texture(macro_noise, m / 7.0 + vec2(0.31, 0.77)).r);   // пятнами, между ними спокойная земля
+            float blade = 0.0;
+            // хеш без синуса (у sin на больших координатах — диагональные полосы); наклон у каждого стебля свой: влево, прямо, вправо
+            for (int k = 0; k < 5; k++) {
+                for (int dx = -1; dx <= 1; dx++) {
+                    vec2 root = pp + vec2(float(dx), float(k));
+                    vec3 q = fract(vec3(root.xyx) * vec3(0.1031, 0.1030, 0.0973));
+                    q += dot(q, q.yzx + 33.33);
+                    float hr = fract((q.x + q.y) * q.z);
+                    if (hr >= dens) continue;
+                    float hv = fract(hr * 57.31 + q.y);
+                    float lean = hv < 0.33 ? -1.0 : (hv < 0.66 ? 0.0 : 1.0);
+                    float hgt = 2.0 + floor(fract(hr * 91.7) * 4.0);
+                    // стебель от корня вверх: на высоте k он смещён на lean*k/3 пикселя
+                    if (float(k) < hgt && float(dx) + floor(lean * float(k) / 3.0 + 0.5) == 0.0) blade = max(blade, (float(k) + 1.0) / hgt);
+                }
+            }
+            vec3 tip = col * (id == 2 ? vec3(1.22, 1.17, 1.0) : vec3(1.15, 1.21, 1.0));
+            if (blade > 0.0) col = mix(col * 0.86, tip, blade);
+        }
 
         if (best - second < 0.03) col *= 0.86;   // кромка на стыке поверхностей
 

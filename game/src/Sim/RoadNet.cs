@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -581,7 +581,7 @@ namespace Rastvordd.Sim
                     var nrm = new Vector2(-t.Y, t.X) * sideSign;
                     var p = l.P[i] + nrm * (l.Half + 1.7f);
                     if (NearMonument(p, 4) || !Terrain.IsLand(p) || !IsFree(p, 0.8f) || NearRoad(p, 1.3f)) { prev = null; continue; }
-                    Decor("outdoor/power_pole_wood", p, rng.Next(2) == 0);
+                    Decor(NearMonument(p, 30) ? "outdoor/streetlight_concrete" : "outdoor/power_pole_wood", p, rng.Next(2) == 0);   // на подъезде к РТ — фонари (светят ночью)
                     AddHiddenWall(p.X - 0.2f, p.Y - 0.4f, p.X + 0.2f, p.Y, 8f);
                     if (prev is Vector2 q && Vector2.Distance(q, p) < 52) Wire(q, 7.3f, p, 7.3f, 0.7f);
                     prev = p;

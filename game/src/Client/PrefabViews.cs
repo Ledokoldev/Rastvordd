@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Godot;
 using Rastvordd.Sim;
 using SVec = System.Numerics.Vector2;
@@ -6,6 +6,50 @@ using SVec = System.Numerics.Vector2;
 namespace Rastvordd.Client
 {
     /// <summary>Спрайт готовой РТ (трансформатор, портал, шкаф…): основанием в точке, тень от силуэта, прозрачность заслона.</summary>
+    /// <summary>
+    /// Ночные огни: фонари, лампы, светильники среди декора светят в темноте (PointLight2D, тёплый или холодный свет),
+    /// яркость по ночи — из Main (Set). Карты нормалей (_n.png) дают объём и от этих огней.
+    /// </summary>
+    public static class NightLights
+    {
+        static readonly System.Collections.Generic.List<PointLight2D> All = new();
+        static float _k = -1;
+
+        /// <summary>Свет у спрайта: радиус, м (0 — нет), цвет, высота лампы (доля высоты спрайта).</summary>
+        public static (float size, Color col, float top) Kind(string sprite)
+        {
+            if (sprite == null) return (0, default, 0);
+            if (sprite.Contains("streetlight_concrete")) return (9f, new Color(1f, 0.78f, 0.5f), 0.92f);   // натриевый фонарь
+            if (sprite.Contains("streetlight")) return (6f, new Color(1f, 0.86f, 0.62f), 0.9f);
+            if (sprite.Contains("red_lamp")) return (4f, new Color(1f, 0.25f, 0.18f), 0.5f);           // аварийка
+            if (sprite.Contains("lamp_wall") || sprite.Contains("lantern")) return (5f, new Color(1f, 0.8f, 0.55f), 0.5f);
+            if (sprite.Contains("top_lamp")) return (3f, new Color(1f, 0.85f, 0.6f), 0.6f);
+            return (0, default, 0);
+        }
+
+        public static PointLight2D Make(float sizeM, Color col, Vector2 at)
+        {
+            var l = new PointLight2D
+            {
+                Texture = Art.LightTex, TextureScale = sizeM * Iso.PPM * 2 / 256f, Energy = 0f, Color = col, Position = at,
+                BlendMode = Light2D.BlendModeEnum.Add, Enabled = _k > 0.02f,
+            };
+            l.TreeExiting += () => All.Remove(l);
+            All.Add(l);
+            if (_k >= 0) l.Energy = _k;
+            return l;
+        }
+
+        /// <summary>Ночь 0..1 → яркость огней (днём выключены, чтобы не тратить кадр).</summary>
+        public static void Set(float night)
+        {
+            float k = Mathf.Clamp((night - 0.25f) / 0.5f, 0f, 1f) * 1.1f;
+            if (Mathf.Abs(k - _k) < 0.01f) return;
+            _k = k;
+            foreach (var l in All) { l.Energy = k; l.Enabled = k > 0.02f; }
+        }
+    }
+
     public partial class DecorView2D : Node2D
     {
         public override void _EnterTree() { AddToGroup(Shade.Group); ArtScale.Apply(this); }   // тень по солнцу (Shade.SetSun), дев-масштаб (F7)
@@ -28,6 +72,8 @@ namespace Rastvordd.Client
             TextureFilter = TextureFilterEnum.Nearest;
             Material = VisionFx.ObjectMat;
             SetSprite(d.Sprite);
+            if (NightLights.Kind(d.Sprite) is var (size, col, top) && size > 0 && _tex != null)
+                AddChild(NightLights.Make(size, col, new Vector2(0, -_tex.GetHeight() * top - d.Lift * Iso.PPM)));
         }
 
         public void SetSprite(string sprite)

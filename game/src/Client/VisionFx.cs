@@ -22,12 +22,30 @@ global uniform float wx_snow;   // 0..1 — снег лежит (оседает 
 global uniform float wx_wet;    // 0..1 — мокро (темнее, лужи)
 global uniform vec3 vol_sun;    // солнце в экранных осях (x вправо, y вниз, z к камере), Shade.SetSun
 global uniform float vol_amp;   // сила светотени по нормалям (ночью почти 0)
+global uniform float vol_warm;  // 0..1 — насколько тёплый свет (низкое солнце — золотой час)
+global uniform sampler2D wx_cloud_tex : filter_linear, repeat_enable;
+global uniform vec2 wx_cloud_off;  // сдвиг облаков, м (плывут по ветру)
+global uniform float wx_cloud_amt; // 0..1 — сила теней от облаков (ясно — заметные, пасмурно — нет)
 
 // объём от солнца по карте нормалей (Art: CanvasTexture с _n.png): плоская нормаль (0,0,1) — множитель ровно 1,
 // поэтому спрайты без карты выглядят как раньше; освещённая сторона до +18%, теневая до −28%
 vec3 sun_lit(vec3 col, vec3 n) {
     float k = 1.0 + vol_amp * (dot(n, vol_sun) - vol_sun.z);
-    return col * clamp(k, 0.72, 1.18);
+    k = clamp(k, 0.72, 1.18);
+    // свет тёплый, тень холодная (как в кино): освещённая сторона к жёлто-оранжевому, теневая — в синеву
+    vec3 warm = mix(vec3(1.0), vec3(1.07, 1.0, 0.86), vol_warm);
+    vec3 cool = vec3(0.9, 0.96, 1.1);
+    vec3 tint = k >= 1.0 ? mix(vec3(1.0), warm, clamp((k - 1.0) / 0.18, 0.0, 1.0)) : mix(vec3(1.0), cool, clamp((1.0 - k) / 0.28, 0.0, 1.0));
+    return col * k * mix(vec3(1.0), tint, min(1.0, vol_amp * 1.4));
+}
+
+// тени от облаков: крупные мягкие пятна плывут по ветру; в тени холоднее и темнее, на солнце — чуть теплее
+vec3 clouds(vec3 col, vec2 world_px) {
+    if (wx_cloud_amt < 0.01) return col;
+    vec2 m = world_px / vis_ppm + wx_cloud_off;
+    float n = texture(wx_cloud_tex, m / 140.0).r * 0.75 + texture(wx_cloud_tex, m / 47.0 + 0.37).r * 0.25;
+    float sh = smoothstep(0.48, 0.62, n) * wx_cloud_amt;
+    return mix(col * mix(vec3(1.0), vec3(1.03, 1.01, 0.96), wx_cloud_amt), col * vec3(0.74, 0.79, 0.9), sh);
 }
 
 float wx_hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -58,25 +76,27 @@ float vis_at(vec2 world_px) {
     vec2 d = (world_px - vis_player) / vis_ppm;
     float dist = length(d);
     float c = dot(d / max(dist, 0.0001), vis_facing);
-    float cone = smoothstep(vis_cos_half - 0.01, vis_cos_half + 0.01, c);
+    float cone = smoothstep(vis_cos_half - 0.12, vis_cos_half + 0.06, c);
     float rd = texture(vis_rays, vec2(atan(d.y, d.x) / 6.2831853 + 0.5, 0.5)).r;
-    float open = 1.0 - smoothstep(rd - 0.05, rd + 0.05, dist);
-    return cone * open * (1.0 - smoothstep(vis_range - 0.5, vis_range, dist));
+    float open = 1.0 - smoothstep(rd - 0.4, rd + 0.9, dist);
+    return cone * open * (1.0 - smoothstep(vis_range - 4.0, vis_range, dist));
 }
 
-vec3 vis_apply(vec3 col, float v) {
+vec3 vis_apply_raw(vec3 col, float v) {
     // приглушённо, а не темно: немного обесцветить и чуть притемнить
     float l = dot(col, vec3(0.3, 0.59, 0.11));
-    vec3 hidden = mix(col, vec3(l), 0.55) * 0.82 + vec3(0.004, 0.008, 0.016);
+    vec3 hidden = mix(col, vec3(l), 0.28) * vec3(0.8, 0.84, 0.92);   // вне обзора: приглушённо и холоднее, но мир живой
     return mix(col, hidden, (1.0 - v) * vis_strength);
 }
+
+vec3 vis_env(vec3 col, vec2 world_px) { return vis_apply_raw(clouds(col, world_px), vis_at(world_px)); }
 ";
 
         const string ObjectShader = "shader_type canvas_item;\n" + Lib + @"
 varying vec2 base_px;
 varying vec2 local_px;
 void vertex() { base_px = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xy; local_px = VERTEX; }
-void fragment() { COLOR.rgb = vis_apply(wx_object(sun_lit(COLOR.rgb, NORMAL), TEXTURE, UV, TEXTURE_PIXEL_SIZE, base_px + local_px), vis_at(base_px)); }
+void fragment() { COLOR.rgb = vis_env(wx_object(sun_lit(COLOR.rgb, NORMAL), TEXTURE, UV, TEXTURE_PIXEL_SIZE, base_px + local_px), base_px); }
 ";
 
         // земля и плоские слои (участки РТ, декали, входы, провода): видимость по каждому пикселю, а не по точке узла —
@@ -84,7 +104,7 @@ void fragment() { COLOR.rgb = vis_apply(wx_object(sun_lit(COLOR.rgb, NORMAL), TE
         const string GroundShader = "shader_type canvas_item;\n" + Lib + @"
 varying vec2 world_px;
 void vertex() { world_px = (MODEL_MATRIX * vec4(VERTEX, 0.0, 1.0)).xy; }
-void fragment() { COLOR.rgb = vis_apply(COLOR.rgb, vis_at(world_px)); }
+void fragment() { COLOR.rgb = vis_env(COLOR.rgb, world_px); }
 ";
 
         const string SwayShader = "shader_type canvas_item;\n" + Lib + @"
@@ -104,7 +124,7 @@ uniform vec3 tint = vec3(1.0);
 void fragment() {
     COLOR.rgb = sun_lit(COLOR.rgb * tint, NORMAL);   // трава под цвет земли (иначе светлые куртины «лежат» на ней)
     COLOR.rgb *= 1.0 - root_dark * smoothstep(0.45, 1.0, UV.y);   // трава «врастает»: к земле темнее, как травинки в шейдере земли
-    COLOR.rgb = vis_apply(wx_object(COLOR.rgb, TEXTURE, UV, TEXTURE_PIXEL_SIZE, base_px + UV * 64.0), vis_at(base_px));
+    COLOR.rgb = vis_env(wx_object(COLOR.rgb, TEXTURE, UV, TEXTURE_PIXEL_SIZE, base_px + UV * 64.0), base_px);
 }
 ";
 
@@ -135,7 +155,7 @@ void fragment() {
     float band = (local_px.x + local_px.y * 0.6) * 0.035 - (ph * 6.0 - 2.5);
     float glint = exp(-band * band * 6.0) * step(ph, 0.55) * loot_on;
     COLOR.rgb = sun_lit(COLOR.rgb, NORMAL) + vec3(1.0, 0.95, 0.75) * glint * 0.55 * COLOR.a;
-    COLOR.rgb = vis_apply(COLOR.rgb, vis_at(base_px));
+    COLOR.rgb = vis_env(COLOR.rgb, base_px);
 }
 ";
         static ShaderMaterial _lootMat;
@@ -169,12 +189,30 @@ void fragment() {
             Add("wx_wet", RenderingServer.GlobalShaderParameterType.Float, 0f);
             Add("vol_sun", RenderingServer.GlobalShaderParameterType.Vec3, new Vector3(0, 0, 1));
             Add("vol_amp", RenderingServer.GlobalShaderParameterType.Float, 0f);
+            Add("vol_warm", RenderingServer.GlobalShaderParameterType.Float, 0f);
+            // облака: бесшовный шум, крупные мягкие пятна
+            var cloud = new NoiseTexture2D { Width = 256, Height = 256, Seamless = true, Normalize = true,
+                Noise = new FastNoiseLite { NoiseType = FastNoiseLite.NoiseTypeEnum.Perlin, Frequency = 0.012f, FractalOctaves = 3 } };
+            Add("wx_cloud_tex", RenderingServer.GlobalShaderParameterType.Sampler2D, cloud);
+            Add("wx_cloud_off", RenderingServer.GlobalShaderParameterType.Vec2, Vector2.Zero);
+            Add("wx_cloud_amt", RenderingServer.GlobalShaderParameterType.Float, 0f);
+        }
+
+        static Vector2 _cloudOff;
+        /// <summary>Тени облаков: плывут по ветру (скорость м/с), сила по погоде и дню.</summary>
+        public static void SetClouds(Vector2 windMs, float amount, float dt)
+        {
+            if (!_registered) return;
+            _cloudOff -= windMs * dt;
+            RenderingServer.GlobalShaderParameterSet("wx_cloud_off", _cloudOff);
+            RenderingServer.GlobalShaderParameterSet("wx_cloud_amt", amount);
         }
 
         /// <summary>Солнце для светотени по нормалям (Shade.SetSun): направление на солнце в экранных осях и сила.</summary>
-        public static void SetSun(Vector3 dir, float amp)
+        public static void SetSun(Vector3 dir, float amp, float warm = 0f)
         {
             if (!_registered) return;
+            RenderingServer.GlobalShaderParameterSet("vol_warm", warm);
             RenderingServer.GlobalShaderParameterSet("vol_sun", dir.Normalized());
             RenderingServer.GlobalShaderParameterSet("vol_amp", amp);
         }

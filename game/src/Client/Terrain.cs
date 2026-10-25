@@ -62,7 +62,7 @@ void fragment() {
         float rip = texture(detail_noise, m / 3.0 + vec2(TIME * 0.05, TIME * 0.03)).r;
         col *= 0.92 + floor(rip * 4.0) / 4.0 * 0.14;
         if (best - second < 0.06) col = mix(col, vec3(0.62, 0.66, 0.6), 0.55);   // пена у кромки
-        COLOR = vec4(vis_apply(col, vis_at((m - vec2(map_size * 0.5)) * px_per_m)), 1.0);
+        COLOR = vec4(vis_env(col, (m - vec2(map_size * 0.5)) * px_per_m), 1.0);
     } else {
         if (id == 1) col = mix(texture(t_forest, tuv).rgb, texture(t_forest, vec2(tuv.y, -tuv.x) + vec2(0.53, 0.19)).rgb, smoothstep(0.35, 0.65, texture(macro_noise, m / 21.0 + vec2(0.6, 0.1)).r));
         else if (id == 2) col = texture(t_dry, tuv).rgb;
@@ -141,7 +141,7 @@ void fragment() {
             float cover = smoothstep(1.02 - wx_snow * 1.15, 1.06 - wx_snow * 1.15, sn);
             col = mix(col, texture(t_snow, tuv).rgb * 1.03, cover);
         }
-        COLOR = vec4(vis_apply(col, vis_at((m - vec2(map_size * 0.5)) * px_per_m)), 1.0);
+        COLOR = vec4(vis_env(col, (m - vec2(map_size * 0.5)) * px_per_m), 1.0);
     }
 }";
 

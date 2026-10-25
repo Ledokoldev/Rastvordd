@@ -43,7 +43,7 @@ namespace Rastvordd.Client
                 // светотень по нормалям — с той же стороны, откуда падает тень: утром свет справа (восток), вечером слева;
                 // чуть сверху (верхние грани в 3/4 светлее), чем ниже солнце, тем сильнее боковой свет
                 _lit = true;
-                VisionFx.SetSun(new Vector3(-Skew * 0.9f, -0.12f, 0.45f + 0.25f * (1f - Mathf.Abs(Skew))), 0.9f * day);
+                VisionFx.SetSun(new Vector3(-Skew * 0.9f, -0.12f, 0.45f + 0.25f * (1f - Mathf.Abs(Skew))), 1.15f * day, Mathf.Pow(Mathf.Abs(2f * s - 1f), 1.5f) * day);   // низкое солнце — тёплый свет
             }
             return changed;
         }
@@ -59,7 +59,7 @@ namespace Rastvordd.Client
         {
             ContactAo(ci, tex, scale, alpha / 0.32f, sink, at);
             float a = Mathf.Min(0.3f, alpha * 0.62f * Strength);                   // один слой: конец тени; у основания все три ≈ ×1.5 темнее
-            var col = new Color(0, 0, 0, a);
+            var col = new Color(0.04f, 0.06f, 0.14f, a);   // тень холодная (небо подсвечивает её синим)
             var pos = new Vector2(-tex.GetWidth() / 2f, -tex.GetHeight() + sink);
             for (int i = 0; i < Layers; i++)
             {

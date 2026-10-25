@@ -1201,6 +1201,14 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     _weather.Update(_cam.Position, GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X, TerrainView.BiomeAt(_map, me),
                                     World.NightFactorAt(_forcedDay ?? _cur.DayTime), _cur.Sky, dt, _cur.WindAngle, _cur.WindStrength);
                 VisionFx.SetWeather(_cur.SnowCover, _cur.Wetness);
+                {
+                    // тени облаков: ясно — заметные, в дождь и снег небо сплошное — почти нет; ночью не видно
+                    float ca = _cur.Sky switch { Rastvordd.Sim.Sky.Clear => 0.55f, Rastvordd.Sim.Sky.Wind => 0.6f, Rastvordd.Sim.Sky.Rain or Rastvordd.Sim.Sky.Snow => 0.22f, _ => 0.06f };
+                    ca *= 1f - World.NightFactorAt(_forcedDay ?? _cur.DayTime);
+                    var wv = new Vector2(Mathf.Cos(_cur.WindAngle), Mathf.Sin(_cur.WindAngle)) * (1.5f + 6f * _cur.WindStrength);
+                    VisionFx.SetClouds(wv, ca, dt);
+                    NightLights.Set(World.NightFactorAt(_forcedDay ?? _cur.DayTime));   // фонари и лампы ночью
+                }
             }
             _ambient.Update(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _forcedDay ?? _cur.DayTime, dt);
             _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime) * Weather.Grade(_cur.Sky);   // + цветокор погоды

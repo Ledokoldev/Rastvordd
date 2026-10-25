@@ -1,0 +1,488 @@
+{
+ "assets": [
+  {
+   "id": "berry_bush",
+   "cat": "plants",
+   "h": 1.0,
+   "desc": "a low wild berry bush with dark leaves and clusters of small red and dark-purple berries. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "berry_tundra",
+   "cat": "plants",
+   "h": 0.7,
+   "desc": "a low lingonberry bush with small dark leaves and bright red berries poking out of the snow. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "burdock",
+   "cat": "plants",
+   "h": 0.9,
+   "desc": "a large burdock plant with big leaves, in a fresh summer palette of saturated greens. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "bush_2",
+   "cat": "plants",
+   "h": 1.1,
+   "desc": "a dense round green hazel bush. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "bush_dry",
+   "cat": "plants",
+   "h": 1.0,
+   "desc": "a dry leafless thorny bush with grey twigs. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "bush_raspberry",
+   "cat": "plants",
+   "h": 1.1,
+   "desc": "a raspberry bush with red berries, in a murky swamp palette of olive, teal and dark brown. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "bush_snow",
+   "cat": "plants",
+   "h": 1.0,
+   "desc": "a low bush covered with snow. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "cattails",
+   "cat": "plants",
+   "h": 1.5,
+   "desc": "a clump of cattails with brown heads, in a cold winter palette of white, pale blue and dark green. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "coast_rock_waves_1",
+   "cat": "nodes",
+   "view": "top",
+   "w": 4,
+   "h": 4,
+   "desc": "a dark wet coastal rock boulder sticking out of the sea with white wave foam swirling around it, barnacles and seaweed; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "coast_rock_waves_2",
+   "cat": "nodes",
+   "view": "top",
+   "w": 6,
+   "h": 3,
+   "desc": "a cluster of jagged dark wet sea rocks in shallow water with white surf foam around them; seen strictly from directly above (orthographic top-down), on transparent background; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "flowers_dandelion",
+   "cat": "plants",
+   "h": 0.3,
+   "desc": "a few yellow dandelions, in a fresh summer palette of saturated greens. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "flowers_wild",
+   "cat": "plants",
+   "h": 0.5,
+   "desc": "a patch of wild flowers: chamomile and blue cornflowers. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "fly_agaric",
+   "cat": "plants",
+   "h": 0.35,
+   "desc": "two red fly agaric mushrooms with white spots. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "grass_tall_green",
+   "cat": "plants",
+   "h": 1,
+   "desc": "a clump of tall lush green grass, in a vivid autumn palette of orange, red and gold. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "grass_tall_snow",
+   "cat": "plants",
+   "h": 0.8,
+   "desc": "dry grass sticking out of snow. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "hemp_arid",
+   "cat": "plants",
+   "h": 1.2,
+   "desc": "a dried-out wild hemp plant with yellowed brittle leaves growing from cracked dry earth. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "hemp_plant",
+   "cat": "plants",
+   "h": 1.4,
+   "desc": "a wild hemp plant with tall stalks and characteristic serrated green leaves, slightly wilted, growing as a small clump. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "hemp_tundra",
+   "cat": "plants",
+   "h": 1.2,
+   "desc": "a frost-bitten wild hemp plant with dark wilted leaves dusted with snow, growing from a snowdrift. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "mushrooms_boletus",
+   "cat": "plants",
+   "h": 0.3,
+   "desc": "a pair of brown boletus mushrooms, in a murky swamp palette of olive, teal and dark brown. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "mushrooms_cluster",
+   "cat": "plants",
+   "h": 0.4,
+   "desc": "a small cluster of brown forest mushrooms growing on the ground. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "mushrooms_glowing",
+   "cat": "plants",
+   "h": 0.3,
+   "desc": "a cluster of pale mutated mushrooms with a faint green glow, in a dry steppe palette of ochre, straw yellow and sage. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_metal_1",
+   "cat": "nodes",
+   "h": 1.3,
+   "desc": "a dark grey boulder with thick veins of rusty orange-brown metal ore and metallic glints, a harvestable metal ore resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_metal_2",
+   "cat": "nodes",
+   "h": 1.1,
+   "desc": "a rounded dark rock streaked with reddish-brown iron ore and specks of shiny metal. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_metal_arid",
+   "cat": "nodes",
+   "h": 1.3,
+   "desc": "a sandy reddish boulder with dark rusty metal ore veins, dusty and wind-eroded, half buried in sand, a harvestable metal ore resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_metal_large",
+   "cat": "nodes",
+   "h": 1.8,
+   "desc": "a large rock outcrop with thick rusty iron ore veins. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_metal_mid",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a medium rock with rusty iron ore streaks, in a murky swamp palette of olive, teal and dark brown. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_metal_small",
+   "cat": "nodes",
+   "h": 0.6,
+   "desc": "a small rock with rusty orange-brown metal ore veins. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_metal_snow",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "an iron ore rock with snow on top. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_metal_swamp",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a dark wet boulder with rusty metal ore veins, patches of moss, muddy base, a harvestable metal ore resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_metal_tundra",
+   "cat": "nodes",
+   "h": 1.3,
+   "desc": "a dark boulder with rusty orange metal ore veins, half covered with snow and ice, a harvestable metal ore resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_scrap_pile",
+   "cat": "nodes",
+   "h": 1,
+   "desc": "a pile of rusty scrap metal pieces harvestable, in a fresh summer palette of saturated greens. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_stone_1",
+   "cat": "nodes",
+   "h": 1.3,
+   "desc": "a large grey granite boulder with cracks, chips and patches of lichen, a harvestable stone resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_stone_2",
+   "cat": "nodes",
+   "h": 1.1,
+   "desc": "a cluster of two or three grey weathered rocks with moss in the crevices, a harvestable stone resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_stone_arid",
+   "cat": "nodes",
+   "h": 1.3,
+   "desc": "a sun-bleached sandy beige boulder with wind-eroded cracks, half buried in dry sand, a harvestable stone resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_stone_large",
+   "cat": "nodes",
+   "h": 2.0,
+   "desc": "a huge grey granite boulder with moss and cracks. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_stone_mid",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a grey rock with flat facets, in a cold winter palette of white, pale blue and dark green. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_stone_small",
+   "cat": "nodes",
+   "h": 0.6,
+   "desc": "a small grey granite rock with lichen. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_stone_snow",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a grey boulder with snow on top. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_stone_swamp",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a dark wet boulder covered with thick green moss and lichen, sitting in mud, a harvestable stone resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_stone_tundra",
+   "cat": "nodes",
+   "h": 1.3,
+   "desc": "a large grey granite boulder with a thick cap of snow on top and frost in the cracks, a harvestable stone resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_sulfur_1",
+   "cat": "nodes",
+   "h": 1.3,
+   "desc": "a pale grey boulder crusted with bright yellow sulfur crystal deposits, a harvestable sulfur ore resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_sulfur_2",
+   "cat": "nodes",
+   "h": 1.1,
+   "desc": "a crumbly light rock with powdery and crystalline yellow sulfur patches. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_sulfur_arid",
+   "cat": "nodes",
+   "h": 1.3,
+   "desc": "a crumbly pale boulder covered with bright yellow sulfur crust, dusty, in dry sand, a harvestable sulfur ore resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_sulfur_large",
+   "cat": "nodes",
+   "h": 1.8,
+   "desc": "a large rock outcrop crusted with yellow sulfur crystals. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_sulfur_mid",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a medium rock with yellow sulfur crust, in a dry steppe palette of ochre, straw yellow and sage. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_sulfur_small",
+   "cat": "nodes",
+   "h": 0.6,
+   "desc": "a small rock with bright yellow sulfur crystals. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_sulfur_snow",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a sulfur rock with snow on top. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_sulfur_swamp",
+   "cat": "nodes",
+   "h": 1.2,
+   "desc": "a wet boulder with yellow sulfur deposits and green moss, muddy base, a harvestable sulfur ore resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "node_sulfur_tundra",
+   "cat": "nodes",
+   "h": 1.3,
+   "desc": "a pale boulder crusted with yellow sulfur crystals, snow cap on top and frost, a harvestable sulfur ore resource. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "reeds",
+   "cat": "plants",
+   "h": 1.6,
+   "desc": "a clump of tall marsh reeds and cattails. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "rock_flat",
+   "cat": "nodes",
+   "h": 0.5,
+   "desc": "a flat mossy rock slab. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "rock_pile",
+   "cat": "nodes",
+   "h": 0.7,
+   "desc": "a pile of small grey rocks, in a vivid autumn palette of orange, red and gold. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "sunflower",
+   "cat": "plants",
+   "h": 1.8,
+   "desc": "a tall wilted sunflower, in a dry steppe palette of ochre, straw yellow and sage. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_apple",
+   "cat": "trees",
+   "h": 3.5,
+   "desc": "an overgrown abandoned apple tree with small red apples, in a murky swamp palette of olive, teal and dark brown. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_aspen",
+   "cat": "trees",
+   "h": 5,
+   "desc": "an aspen tree with grey-green bark and yellow autumn leaves. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_birch_2",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a slender birch tree with white-black bark and light green summer leaves. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_birch_dead",
+   "cat": "trees",
+   "h": 4.5,
+   "desc": "a dead birch with peeling white bark and no leaves. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_birch_frozen",
+   "cat": "trees",
+   "h": 5.0,
+   "desc": "a leafless birch tree in winter, white bark, frost and snow on the thin branches. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_birch_snow",
+   "cat": "trees",
+   "h": 5,
+   "desc": "a leafless birch tree with snow on branches. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_burnt_1",
+   "cat": "trees",
+   "h": 5,
+   "desc": "a burnt dead tree, charred black trunk and broken branches, ash-grey. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_burnt_2",
+   "cat": "trees",
+   "h": 3.5,
+   "desc": "a charred broken tree trunk snapped in half, black and ash-grey. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_burnt_3",
+   "cat": "trees",
+   "h": 4.5,
+   "desc": "a charred pine with few blackened branches, in a dry steppe palette of ochre, straw yellow and sage. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_dead_dry_2",
+   "cat": "trees",
+   "h": 4.0,
+   "desc": "a gnarled dry tree with a few sparse dusty olive leaves, crooked trunk, arid wasteland. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_dead_snow",
+   "cat": "trees",
+   "h": 4.5,
+   "desc": "a dead leafless tree with snow on branches. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_leafy",
+   "cat": "trees",
+   "h": 5.0,
+   "desc": "a broad leafy deciduous tree with a full dusty dark-olive-green crown and a gnarled brown trunk. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_oak_dead",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a dead, leafless oak tree with grey-brown bark, dark moss, a few dry brown leaves and faint rust-orange lichen. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_pine_2",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a weathered pine tree with a few broken branches, dark muted green needles, thick bark trunk. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_pine_coastal",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a crooked coastal pine tree bent by the sea wind, sparse dark needles, twisted trunk. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_pine_snow",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a tall pine tree covered with heavy snow on its branches. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_poplar",
+   "cat": "trees",
+   "h": 7,
+   "desc": "a tall narrow poplar tree, in a cold winter palette of white, pale blue and dark green. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_rowan",
+   "cat": "trees",
+   "h": 4,
+   "desc": "a rowan tree with clusters of red berries, in a fresh summer palette of saturated greens. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_spruce_1",
+   "cat": "trees",
+   "h": 7,
+   "desc": "a tall dense dark-green spruce tree, conical shape, drooping branches. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_spruce_2",
+   "cat": "trees",
+   "h": 6,
+   "desc": "a medium spruce tree with a broken top, dark green. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_spruce_snow_1",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a tall dark spruce tree with branches heavily laden with snow, frosted needles. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_spruce_snow_2",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a narrow fir tree covered with snow and icicles, partly bare branches. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_swamp_dead",
+   "cat": "trees",
+   "h": 5.0,
+   "desc": "a rotting dead swamp tree with a split trunk, hanging moss and fungus, dark wet wood. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_swamp_willow",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a drooping swamp willow tree with long hanging dark green leaves and beards of grey moss. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_willow",
+   "cat": "trees",
+   "h": 5,
+   "desc": "a weeping willow with drooping green branches, in a vivid autumn palette of orange, red and gold. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_young_pine",
+   "cat": "trees",
+   "h": 2.5,
+   "desc": "a young small pine sapling. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "vine_dead",
+   "cat": "plants",
+   "h": 1,
+   "desc": "a tangle of dead brown vines and brambles, in a vivid autumn palette of orange, red and gold. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  }
+ ]
+}

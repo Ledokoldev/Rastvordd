@@ -304,7 +304,7 @@ namespace Rastvordd.Client
             _spectate = System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--spectate") >= 0;
             _autoCam = _spectate && System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--autocam") >= 0;
             var spd = System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--speed="));
-            if (spd != null && int.TryParse(spd[8..], out int ts)) _timeScale = System.Math.Clamp(ts, 1, 20);   // скорость мира с самого старта
+            if (spd != null && int.TryParse(spd[8..], out int ts)) _timeScale = System.Math.Clamp(ts, 1, 60);   // скорость мира с самого старта
             _myId = _spectate ? _server.ConnectSpectator() : _server.Connect("Игрок");
             // летопись вайпа — всегда: обычная игра и песочница пишут в user://chronicle, отладка — куда скажут (--chronicle=путь)
             try
@@ -811,8 +811,22 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 case Key.Key4: _timeScale = 8; return true;
                 case Key.Key5: _timeScale = 10; return true;
                 case Key.Key6: _timeScale = 20; return true;
+                // плюс/минус — шаг скорости по лестнице (×1 … ×60)
+                case Key.Equal: case Key.KpAdd: StepTimeScale(1); return true;
+                case Key.Minus: case Key.KpSubtract: StepTimeScale(-1); return true;
             }
             return false;
+        }
+
+        static readonly int[] TimeSteps = { 1, 2, 3, 4, 6, 8, 10, 15, 20, 30, 40, 60 };
+
+        void StepTimeScale(int dir)
+        {
+            int i = System.Array.FindIndex(TimeSteps, v => v >= _timeScale);
+            if (i < 0) i = TimeSteps.Length - 1;
+            i = System.Math.Clamp(i + dir, 0, TimeSteps.Length - 1);
+            _timeScale = TimeSteps[i];
+            _hud.Toast($"Скорость ×{_timeScale}");
         }
 
         /// <summary>

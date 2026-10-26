@@ -431,28 +431,22 @@ namespace Rastvordd.Client
                 Vfx.DrawFrame(this, "fire_torch", at + new Vector2(0, 2), s.Breath, 9f);
             }
 
-            // рука — цельная: плечо и предплечье капсулами в цвет рукава с тёмной обводкой, кисть — кружком (перчатка/кожа).
-            // Раньше это были крошечные текстуры, повёрнутые и растянутые ×1,8 — пиксели «рвались», в локте была щель.
+            // рука — нарисованные части (плечо, предплечье с кистью), повёрнутые по суставам IK; в локте — «шарнир» цвета рукава,
+            // чтобы на сгибе не было щели. Раньше руки были капсулами одного цвета («две палки»), текстура давала только цвет.
             void DrawArm((float a1, float a2, Vector2 joint) arm, Vector2 sh)
             {
                 var up = ArmPal(_set.UpperArm);
-                var fo = ArmPal(_set.ForeArm);
-                // звенья короткие (~9 px), поэтому рука тонкая: 3 px заливки + обводка — иначе выходит «трапеция»-обрубок
-                const float wu = 3, wf = 3;
-                var wrist = arm.joint + new Vector2(Mathf.Cos(arm.a2), Mathf.Sin(arm.a2)) * lFore;
-                Vector2 M(Vector2 q) { q += RigView.Feet; if (_mirror) q.X = RigView.VW - q.X; return q.Round(); }
-                Vector2 a = M(sh), j = M(arm.joint), h = M(wrist);
+                int hu = _set.UpperArm.GetHeight(), hf = _set.ForeArm.GetHeight();
+                float su = hu < 6 ? ArmThick(hu) : 1f, sf = hf < 5 ? ArmThick(hf) : 1f;   // старые крошечные части — толще
+                Part(_set.UpperArm, sh, arm.a1, new Vector2(0.5f, hu / 2f), su, (lUp + 1) / _set.UpperArm.GetWidth());
+                var j = arm.joint + RigView.Feet; if (_mirror) j.X = RigView.VW - j.X;
                 DrawSetTransform(Vector2.Zero, 0, Vector2.One);
-                Capsule(a, j, wu + 2, up.line);
-                Capsule(j, h, wf + 2, up.line);
-                Capsule(a, j, wu, up.fill);
-                Capsule(j, h, wf, up.fill);   // рукав одного цвета до запястья
-                const float r = 1.5f;
-                DrawCircle(h, r + 1, fo.line);
-                DrawCircle(h, r, fo.tip);
+                DrawCircle(j.Round(), Mathf.Max(1.5f, hu * su * 0.42f), up.fill);
+                Part(_set.ForeArm, arm.joint, arm.a2, new Vector2(1f, hf / 2f), sf, (lFore + 2) / _set.ForeArm.GetWidth());
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
             }
 
-            void Capsule(Vector2 a, Vector2 b, float w, Color c)
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("", "CS8321")] void Capsule(Vector2 a, Vector2 b, float w, Color c)
             {
                 DrawLine(a, b, c, w);
                 DrawCircle(a, w * 0.5f, c);

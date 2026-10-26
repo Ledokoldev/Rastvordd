@@ -946,19 +946,20 @@ namespace Rastvordd.Client
         readonly float _trunkW;
         readonly Texture2D _tex, _tuft;
         readonly int _seed;
+        readonly float _scale = 1f;   // возраст без своего спрайта: взрослый спрайт меньше (молодое, подрост) или больше (старое)
         public float CanopyR = Iso.PPM * 1.3f;
-        public Vector2 CanopyCenter => Base + new Vector2(0, _tex != null ? -_tex.GetHeight() * 0.62f : -Iso.H(3.1f));
+        public Vector2 CanopyCenter => Base + new Vector2(0, _tex != null ? -_tex.GetHeight() * _scale * 0.62f : -Iso.H(3.1f));
         float _alpha = 1;
 
-        public TreeView2D(Vector2 basePx, float radiusM, int seed = 0, Biome biome = Biome.Grassland)
+        public TreeView2D(Vector2 basePx, float radiusM, int seed = 0, Biome biome = Biome.Grassland, byte look = 0)
         {
             Base = Position = basePx;
             Material = VisionFx.TreeMat;
             _trunkW = radiusM * 2 * Iso.PPM * 0.7f;
-            _tex = Art.Tree(seed, biome);
+            (_tex, _scale) = Art.Tree(look, seed, biome);
             _tuft = Art.Get(biome is Biome.Arid or Biome.Tundra or Biome.Beach ? "decals/decal_grass_tuft_2" : "decals/decal_grass_tuft_1");
             _seed = seed;
-            if (_tex != null) CanopyR = _tex.GetWidth() * 0.42f;
+            if (_tex != null) CanopyR = _tex.GetWidth() * _scale * 0.42f;
             TextureFilter = TextureFilterEnum.Nearest;
         }
 
@@ -967,8 +968,8 @@ namespace Rastvordd.Client
         {
             get
             {
-                float halfW = _tex != null ? _tex.GetWidth() * 0.4f : CanopyR;
-                float top = Base.Y - (_tex != null ? _tex.GetHeight() * 0.95f : Iso.H(4.5f));
+                float halfW = _tex != null ? _tex.GetWidth() * _scale * 0.4f : CanopyR;
+                float top = Base.Y - (_tex != null ? _tex.GetHeight() * _scale * 0.95f : Iso.H(4.5f));
                 return new Rect2(Base.X - halfW, top, halfW * 2, Base.Y - 4 - top);
             }
         }
@@ -981,7 +982,7 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            if (_tex != null) Shade.Sprite(this, _tex, 1f, 0.26f);
+            if (_tex != null) Shade.Sprite(this, _tex, _scale, 0.26f);
             else
             {
                 DrawSetTransform(Vector2.Zero, 0, new Vector2(1, 0.45f));
@@ -990,7 +991,9 @@ namespace Rastvordd.Client
             }
             if (_tex != null)
             {
+                if (_scale != 1f) DrawSetTransform(Vector2.Zero, 0, new Vector2(_scale, _scale));
                 DrawTexture(_tex, new Vector2(-_tex.GetWidth() / 2, -_tex.GetHeight() + 2), new Color(1, 1, 1, _alpha));
+                if (_scale != 1f) DrawSetTransform(Vector2.Zero, 0, Vector2.One);
                 // пучки травы у корней — дерево «вросло» в землю
                 if (_tuft != null && false)   // пучки у корней отключены: в пикселе это кляксы
                     for (int i = 0; i < 2; i++)

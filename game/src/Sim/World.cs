@@ -174,7 +174,8 @@ namespace Rastvordd.Sim
             // малые РТ по острову
             // старые малые РТ-«коробки» убраны (пользователь: скучные «квадрат в квадрате») — их место заняли готовые РТ тира 0 и 1
 
-            // раскладка по биомам: плотность и что встречается
+            // деревья — по правилам места (World.Trees.cs, Ecology.cs), затем остальное по биомам
+            PlaceTrees();
             ScatterByBiome();
 
             // спавны — на пляжах
@@ -193,7 +194,8 @@ namespace Rastvordd.Sim
             PlaceWorldTires();   // покрышки — резина (после РТ, своим генератором)
             DressAllPrefabs();   // обстановка РТ (Dressing.cs): в самом конце, своим генератором на РТ
             PlaceFuelSpots();    // бочки с мазутом и ржавые канистры (D54): после всего, своим генератором — индексы старых находок не сдвигаются
-            BuildRoads();        // дорожная сеть между РТ (RoadNet.cs): последней, своим генератором
+            BuildRoads();        // дорожная сеть между РТ (RoadNet.cs): своим генератором
+            OvergrowMonuments(); // заросли молодых берёз у оград РТ (World.Trees.cs): после дорог, своим генератором
         }
 
         // площадь на один объект (м²) и веса: дерево, камень, металл, сера, конопля, ягоды, бочка воды, ящик-укрытие, руины
@@ -235,7 +237,7 @@ namespace Rastvordd.Sim
         {
             switch (cat)
             {
-                case 0: AddNode(NodeKind.Tree, p); break;
+                case 0: break;   // деревья ставит PlaceTrees (лес массивами, возраст, породы); вес в BiomeFill — только для доли прочего
                 case 1: AddNode(NodeKind.Stone, p); break;
                 case 2: AddNode(NodeKind.Metal, p); break;
                 case 3: AddNode(NodeKind.Sulfur, p); break;
@@ -1834,7 +1836,8 @@ namespace Rastvordd.Sim
                 left -= Dt;
                 if (left <= 0)
                 {
-                    AddNode(kind, RandomFreePoint(1.5f, kind));
+                    if (kind == NodeKind.Tree) RespawnTree();   // отрастает там, где деревьям место (лес, а не середина поля)
+                    else AddNode(kind, RandomFreePoint(1.5f, kind));
                     _nodeRespawns.RemoveAt(i);
                 }
                 else _nodeRespawns[i] = (kind, left);

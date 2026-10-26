@@ -66,12 +66,22 @@ namespace Rastvordd.Sim
                     float clim = _climate.Fbm(p / 210f, 3) + _climate.Fbm(p / 70f + new Vector2(31, 17), 2) * 0.25f;
                     if (clim < -0.13f) b = Biome.Tundra;
                     else if (clim > 0.15f) b = Biome.Arid;
-                    else if (_wet.Fbm(p / 60f, 3) > 0.2f && h < 0.6f) b = Biome.Swamp;
-                    else b = _forest.Fbm(p / 75f, 3) > 0.02f ? Biome.Forest : Biome.Grassland;
+                    // болота и леса — крупными массивами (сотни метров), края рваные мелкой «октавой»:
+                    // раньше шум /60–/75 резал остров на пятна по 50–80 м — ни леса, ни поля не чувствовалось
+                    else if (_wet.Fbm(p / 115f, 3) + _wet.Fbm(p / 35f + new Vector2(13, 71), 2) * 0.12f > 0.2f && h < 0.6f) b = Biome.Swamp;
+                    else if (ForestNoise(p) > 0.03f)
+                        // поляны в лесу: небольшие луговые окна (15–30 м) — в глубине леса
+                        b = _forest.Fbm(p / 26f + new Vector2(57, -23), 2) > 0.36f && ForestNoise(p) > 0.15f ? Biome.Grassland : Biome.Forest;
+                    else b = Biome.Grassland;
                 }
                 Biomes[y * N + x] = b;
             }
         }
+
+        float ForestNoise(Vector2 p) => _forest.Fbm(p / 150f, 3) + _forest.Fbm(p / 40f + new Vector2(-41, 9), 2) * 0.15f;
+
+        /// <summary>Хвойный (&gt;0) или лиственный (&lt;0) лес: свои массивы ельника/сосняка и березняка/осинника, примерно -1..1.</summary>
+        public float ConiferAt(Vector2 p) => _climate.Fbm(p / 120f + new Vector2(-77, 140), 3) * 1.6f - _climate.Fbm(p / 210f, 3) * 1.2f;
 
         int Index(Vector2 p)
         {

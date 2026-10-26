@@ -23,7 +23,7 @@ namespace Rastvordd.Sim
 
     public struct ProjSnap { public int Id; public Vector2 Pos; public Vector2 Dir; public bool Arrow; }
     public struct BagSnap { public int Id; public Vector2 Pos; public bool IsCrate; public bool Empty; public bool Safe; public bool Punch; public bool Unlocked; public int Tier; public string Look; }
-    public struct NodeSnap { public int Id; public NodeKind Kind; public Vector2 Pos; public float Radius; public float Fill; }
+    public struct NodeSnap { public int Id; public NodeKind Kind; public Vector2 Pos; public float Radius; public float Fill; public byte Look; }
     public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; public string Item; }
     public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; public int Level; public bool Seen; public int Rot; public Vector2 Half; }
 
@@ -764,7 +764,7 @@ namespace Rastvordd.Sim
 
             foreach (var n in World.NodesInRadius(me.Pos, WorldViewRadius, _snapNodes))
                 if (Vector2.DistanceSquared(n.Pos, me.Pos) < r2)
-                    snap.Nodes.Add(new NodeSnap { Id = n.Id, Kind = n.Kind, Pos = n.Pos, Radius = n.Radius, Fill = n.Amount / n.MaxAmount });
+                    snap.Nodes.Add(new NodeSnap { Id = n.Id, Kind = n.Kind, Pos = n.Pos, Radius = n.Radius, Fill = n.Amount / n.MaxAmount, Look = n.Look });
 
             foreach (var p in World.Pickups)
                 if (Vector2.DistanceSquared(p.Pos, me.Pos) < r2)

@@ -70,12 +70,110 @@ namespace Rastvordd.Client
             [Biome.Grassland] = (9, new[] { M1, M1, M1, M1, M1, M2, M2, M2, Bush, Bush, C("flowers_poppy"), C("flowers_poppy"), C("flowers_dandelion"), C("flowers_dandelion"),
                                             C("flowers_chamomile"), C("flowers_chamomile"), C("flowers_lupine"), M1, M2, C("clutter_tire"), C("clutter_planks"), C("clutter_bucket"),
                                             M1, M2, C("flowers_dandelion"), C("clutter_fence"), M1, M2, C("clutter_bicycle"), M1, C("clutter_sign"), M2 }),
-            [Biome.Forest] = (8, new[] { F1, F1, F2, F2, Bush, C("clutter_stump"), C("clutter_log"), C("clutter_mushrooms"), C("clutter_mushrooms"), C("flowers_heather"), C("clutter_bones") }),
+            [Biome.Forest] = (13, new[] { F1, F1, F2, F2, Bush, C("clutter_stump"), C("clutter_log"), C("clutter_mushrooms"), C("clutter_mushrooms"), C("flowers_heather"), C("clutter_bones") }),
             [Biome.Swamp] = (9, new[] { S1, S1, S2, S2, C("clutter_log"), C("clutter_mushrooms"), C("clutter_bones"), C("clutter_stump") }),
             [Biome.Arid] = (5, new[] { A1, A1, A2, C("clutter_bones"), C("clutter_tire"), C("clutter_canister"), C("clutter_mattress"), C("clutter_cone"), C("clutter_sign") }),
             [Biome.Tundra] = (5, new[] { T1, T1, T2, C("flowers_snowdrop"), C("clutter_log"), C("clutter_stump"), C("clutter_bones") }),
             [Biome.Beach] = (5, new[] { B1, B1, B2, C("clutter_planks"), C("clutter_tire"), C("clutter_canister"), C("clutter_pallet"), C("clutter_bones") }),
         };
+        // ---------- правила растительности: почему растение здесь (условия места — Sim.SiteMap: влажность, свет, рельеф, опушка) ----------
+        SiteMap _sites;
+        SiteMap Sites => _sites ??= new SiteMap(_map.N, _map.Cell, _map.HalfSize, _map.Biomes, _map.Heights);
+
+        /// <summary>Человек рядом: дорога или твёрдый участок РТ в пределах ~2,5 м (обочина).</summary>
+        bool NearRoad(SVec p)
+        {
+            for (int k = 0; k < 6; k++)
+            {
+                var q = p + new SVec(Mathf.Cos(k * 1.047f), Mathf.Sin(k * 1.047f)) * 2.5f;
+                if (OnHardPatch(q) || TerrainView.HardAt(q)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>У заброшенной РТ (до 10 м от площадки): бурьян, крапива, пни вырубки.</summary>
+        bool NearRt(SVec p)
+        {
+            foreach (var (mn, mx) in _map.Yards) if (p.X > mn.X - 10 && p.X < mx.X + 10 && p.Y > mn.Y - 10 && p.Y < mx.Y + 10) return true;
+            return false;
+        }
+
+        static string P(string id) => "plants/" + id;
+        static string D(string id) => "decals/" + id;
+
+        /// <summary>
+        /// Растение или мелочь для точки — взвешенный выбор: базовый набор биома (вес 1 на запись) плюс правила места.
+        /// 1 влажность: у воды и в низине — камыш, рогоз, осока, мох; на сухом и южном склоне — сухая трава, сухие кусты, камешки.
+        /// 2 свет: под пологом (глубь леса) — папоротник, мох, грибы, валежник, хвоя и листва; на опушке и поляне — кусты, цветы, высокая трава.
+        /// 4 опушка: со стороны луга кусты, малина, сирень — лес переходит в луг, а не обрывается стеной.
+        /// 5 человек: у дороги — бурьян (лопух, крапива, высокая трава), придорожные кусты; у РТ — крапива, лопух, сухая лоза, пни вырубки.
+        /// 6 рельеф: на круче — камешки, мох на камнях, низкий можжевельник; на пляже — плавник, водоросли, редкая трава.
+        /// </summary>
+        string DecorFor(SVec p, in Site s, string[] baseSet, RandomNumberGenerator rng)
+        {
+            var w = new List<(string id, float w)>();
+            float baseW = s.Biome == Biome.Forest ? 1f - s.Shade * 0.5f : 1f;   // под пологом базовой травы меньше
+            foreach (var id in baseSet) w.Add((id, baseW));
+            void Add(string id, float k) { if (k > 0.01f) w.Add((id, k)); }
+            bool snow = s.Biome == Biome.Tundra, sand = s.Biome is Biome.Beach or Biome.Arid;
+            // 1 — влажность
+            float wet = Mathf.Clamp((s.Wet - 0.6f) / 0.3f, 0, 1), dry = Mathf.Clamp((0.35f - s.Wet) / 0.25f, 0, 1);
+            if (!snow && !sand || s.Biome == Biome.Beach && s.WaterDist < 5)
+            {
+                Add(P("reeds"), wet * (s.WaterDist < 8 ? 4f : 1.5f));
+                Add(P("cattails"), wet * (s.WaterDist < 6 ? 3f : 1f));
+                Add(D("decal_moss_patch"), wet * 1.5f);
+                Add(D("decal_mud"), wet * (s.Biome == Biome.Swamp ? 1f : 0.3f));
+            }
+            Add(P("bush_dry"), dry * (snow ? 0 : 2f));
+            Add(D("decal_straw_scatter"), dry * (snow ? 0 : 1f));
+            // 2 — свет и тень
+            if (s.Biome == Biome.Forest)
+            {
+                float sh = s.Shade, lit = 1 - s.Shade;
+                Add(P("fern"), sh * 4f); Add(P("fern_v"), sh * 2f);
+                Add(D("decal_moss_patch"), sh * 1f); Add(D("decal_needles"), sh * 0.8f); Add(D("decal_leaves_scatter"), sh * 0.6f);
+                Add(P("mushrooms_boletus"), sh * 1.2f); Add(P("mushrooms_cluster"), sh * 1f); Add(P("fly_agaric"), sh * 0.6f);
+                Add(C("clutter_log"), sh * 1.5f); Add(C("clutter_stump"), sh * 1f);   // валежник и пни в чаще
+                Add(P("bush_1"), lit * 1.5f); Add(P("bush_raspberry"), lit * 1.5f); Add(P("berry_bush"), lit * 1f); Add(P("grass_tall_green"), lit * 1.5f);
+            }
+            // 4 — опушка со стороны луга, поляны: кусты, малина, сирень, высокая трава, цветы
+            if (s.Biome == Biome.Grassland)
+            {
+                float edge = s.ForestNear ? 1f : 0f;
+                Add(P("bush_1"), edge * 3f); Add(P("bush_2"), edge * 2f); Add(P("bush_raspberry"), edge * 2.5f); Add(P("bush_lilac"), edge * 1f);
+                Add(P("grass_tall"), 1.5f + edge); Add(P("grass_tall_green"), 1.5f); Add(P("flowers_wild"), 2f); Add(P("flowers_dandelion"), 1f);
+                Add(P("sunflower"), 0.15f);
+            }
+            if (snow) { Add(P("bush_snow"), 1.5f); Add(P("berry_tundra"), 1f); Add(P("grass_tall_snow"), 1.5f); Add(P("bush_juniper"), 0.8f); }
+            if (s.Biome == Biome.Swamp) { Add(P("reeds"), 2f); Add(P("cattails"), 1.5f); Add(C("clutter_log"), 0.8f); }
+            if (s.Biome == Biome.Beach) { Add(C("clutter_log"), 2f); Add(D("decal_seaweed_pile"), s.WaterDist < 8 ? 1.5f : 0.3f); Add(D("decal_beach_debris"), 0.5f); }   // плавник, водоросли
+            // 5 — человек
+            if (NearRoad(p) && !sand && !snow) { Add(P("burdock"), 3f); Add(P("nettle"), 2.5f); Add(P("grass_tall"), 3f); Add(P("bush_1"), 1f); }
+            if (NearRt(p))
+            {
+                if (!sand && !snow) { Add(P("nettle"), 2.5f); Add(P("nettle_v"), 1.5f); Add(P("burdock"), 2f); Add(P("vine_dead"), 1f); }
+                Add(C("clutter_stump"), 1.5f);   // вырубка у ограды
+            }
+            // 6 — рельеф
+            float steep = s.Steep;
+            Add(D("decal_pebbles"), steep * 3f); Add(D("decal_moss_rocks"), steep * (snow || sand ? 0.5f : 2f)); Add(P("bush_juniper"), steep * 1.5f);
+
+            float sum = 0;
+            foreach (var x in w) sum += x.w;
+            float r = rng.Randf() * sum;
+            foreach (var x in w) { if (r < x.w) return x.id; r -= x.w; }
+            return w[^1].id;
+        }
+
+        /// <summary>Густота низкой травы по месту: под сомкнутым пологом мало (свет), на сыром у воды гуще, у дороги — бурьян гуще.</summary>
+        static float CoverMul(in Site s) => s.Biome switch
+        {
+            Biome.Forest => 1.15f - s.Shade * 0.8f,
+            Biome.Grassland => s.ForestNear ? 1.2f : 1f,
+            _ => 1f,
+        } * (s.Wet > 0.7f && s.Biome != Biome.Arid ? 1.15f : 1f);
+
         public static bool CoverOn = true;   // густая трава-спрайты (можно выключить для слабых машин)
         public DecalLayer(MapInfo map, Node2D flatParent, Node2D sortedParent)
         {
@@ -188,6 +286,7 @@ namespace Rastvordd.Client
 
             // куртины: трава растёт пятнами (центр + 6–14 кустиков вокруг), между ними — просветы; плюс одиночный разброс
             var spots = new List<(SVec p, int kind)>();   // 0 — разброс, 1 — куртина, 2 — низкая трава
+            var picked = new Dictionary<int, string>();     // разброс: растение уже выбрано правилами места (индекс в spots)
             int clumps = 0;   // круглые куртины-«кочки» убраны: траву даёт низкий покров из пучков (kind 2)
             for (int c = 0; c < clumps; c++)
             {
@@ -200,7 +299,22 @@ namespace Rastvordd.Client
                     spots.Add((cc + new SVec(Mathf.Cos(a) * d, Mathf.Sin(a) * d * 0.8f), 1));
                 }
             }
-            for (int i = 0; i < fill.count; i++) spots.Add((new SVec(cx * Chunk + rng.Randf() * Chunk, cy * Chunk + rng.Randf() * Chunk), 0));
+            for (int i = 0; i < fill.count; i++)
+            {
+                var sp = new SVec(cx * Chunk + rng.Randf() * Chunk, cy * Chunk + rng.Randf() * Chunk);
+                var site = Sites.At(sp);
+                var set0 = Fill.TryGetValue(site.Biome, out var f0) ? f0.ids : fill.ids;
+                string id = DecorFor(sp, site, set0, rng);
+                picked[spots.Count] = id;
+                spots.Add((sp, 0));
+                // кусты и камыш — куртинками (семена и корневая поросль ложатся рядом)
+                if (id.StartsWith("plants/bush") || id.EndsWith("reeds") || id.EndsWith("cattails") || id.EndsWith("fern"))
+                    for (int k = rng.RandiRange(0, 2); k > 0; k--)
+                    {
+                        picked[spots.Count] = id;
+                        spots.Add((sp + new SVec(rng.RandfRange(-1.4f, 1.4f), rng.RandfRange(-1f, 1f)), 0));
+                    }
+            }
             // сплошной травяной покров (как в Project Zomboid): густые объёмные пучки по всей клетке, плотность по под-клеткам 3×3
             int cover = CoverOf(biome);
             if (CoverOn && cover > 0)
@@ -208,14 +322,18 @@ namespace Rastvordd.Client
                 for (int sx = 0; sx < 3; sx++)
                 {
                     float dens = rng.Randf();                       // поляна, редкая трава или проплешина
-                    int n = (int)(cover / 9f * (dens < 0.2f ? 0.15f : dens < 0.5f ? 0.7f : 1.4f));
+                    var subSite = Sites.At(new SVec((cx + (sx + 0.5f) / 3f) * Chunk, (cy + (sy + 0.5f) / 3f) * Chunk));
+                    int n = (int)(cover / 9f * (dens < 0.2f ? 0.15f : dens < 0.5f ? 0.7f : 1.4f) * CoverMul(subSite));
                     for (int k = 0; k < n; k++)
                         spots.Add((new SVec((cx + (sx + rng.Randf()) / 3f) * Chunk, (cy + (sy + rng.Randf()) / 3f) * Chunk), 2));
                 }
-            spots.Sort((a, b) => a.p.Y.CompareTo(b.p.Y));
+            var order = new List<int>(spots.Count);
+            for (int i = 0; i < spots.Count; i++) order.Add(i);
+            order.Sort((a, b) => spots[a].p.Y.CompareTo(spots[b].p.Y));
             var rows = new Dictionary<int, TuftRow>();
-            foreach (var (p, kind) in spots)
+            foreach (int si in order)
             {
+                var (p, kind) = spots[si];
                 if (TerrainView.BiomeAt(_map, p) == Biome.Water) continue;
                 if (OnYard(p)) continue;   // не на площадках РТ
                 // биом берём в самой точке: на границе биомов трава смешивается естественно
@@ -223,7 +341,7 @@ namespace Rastvordd.Client
                 // низкая трава на границе биомов: густота по месту, а не по центру куска (луговая трава не заходит на пляж и в пустыню)
                 if (kind == 2 && here != biome && rng.Randf() * cover >= CoverOf(here)) continue;
                 var set = Fill.TryGetValue(here, out var f2) ? f2.ids : fill.ids;
-                string texPath = set[rng.RandiRange(0, set.Length - 1)];
+                string texPath = picked.TryGetValue(si, out var pk) ? pk : set[rng.RandiRange(0, set.Length - 1)];
                 if (kind == 2) { string tb = here switch { Biome.Forest => "forest", Biome.Arid or Biome.Tundra => "dry", Biome.Swamp => "swamp", _ => "meadow" }; texPath = $"grass/tuft_{tb}_{rng.RandiRange(1, 12)}"; }
                 else if (texPath.StartsWith("grass/grass_") && here == Biome.Beach) continue;   // на песке пляжа травы нет
                 else if (texPath.StartsWith("grass/grass_")) { string tb = here switch { Biome.Forest => "forest", Biome.Arid or Biome.Tundra => "dry", Biome.Swamp => "swamp", _ => "meadow" }; texPath = $"grass/tuft_{tb}_{rng.RandiRange(1, 12)}"; }   // старые куртины-кочки → пучки
@@ -245,7 +363,7 @@ namespace Rastvordd.Client
                     continue;
                 }
 
-                bool flat = false;
+                bool flat = texPath.StartsWith("decals/");   // мох, хвоя, листва, камешки, водоросли — плоско на земле
                 var s = new Sprite2D
                 {
                     Texture = tex,

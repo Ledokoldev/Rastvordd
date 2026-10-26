@@ -24,7 +24,7 @@ namespace Rastvordd.Sim
         public List<float> PickupRespawn = new();
         public List<PlayerS> Players = new();
 
-        public sealed class NodeS { public int Id, Kind; public float X, Y, R, Amount, Max; }
+        public sealed class NodeS { public int Id, Kind, Look; public float X, Y, R, Amount, Max; }   // Look — порода и возраст дерева (в старых сейвах 0 — вид по биому)
         public sealed class SlotS { public string Id; public int Count, Ammo = -1; public float Dur = -1; public List<string> Att; public List<float> AttDur; public string Liquid; public float Liters; }   // v7: жидкость в ёмкости
         public sealed class StructS { public int Id, Kind, I, J, Dir, Tier, OwnerId, ClaimId, Code; public float Hp, Ax, Ay, Bx, By, Cx, Cy; public bool Open, Locked, KeyLock, Shutters; public List<int> LockAuth = new(); }   // v7: Shutters — ставни на окне
         public sealed class DeployS
@@ -101,7 +101,7 @@ namespace Rastvordd.Sim
         public WorldSave Save()
         {
             var w = new WorldSave { Seed = Seed, Time = Time, TimeOffset = TimeOffset, NextId = _nextId, SavedAtUtc = DateTime.UtcNow };
-            foreach (var n in Nodes) w.Nodes.Add(new WorldSave.NodeS { Id = n.Id, Kind = (int)n.Kind, X = n.Pos.X, Y = n.Pos.Y, R = n.Radius, Amount = n.Amount, Max = n.MaxAmount });
+            foreach (var n in Nodes) w.Nodes.Add(new WorldSave.NodeS { Id = n.Id, Kind = (int)n.Kind, X = n.Pos.X, Y = n.Pos.Y, R = n.Radius, Amount = n.Amount, Max = n.MaxAmount, Look = n.Look });
             foreach (var (k, left) in _nodeRespawns) w.NodeRespawns.Add(((int)k, left));
             foreach (var s in Structures)
             {
@@ -155,7 +155,7 @@ namespace Rastvordd.Sim
             Nodes.Clear();
             foreach (var n in w.Nodes)
             {
-                var node = new ResourceNode { Id = n.Id, Kind = (NodeKind)n.Kind, Pos = new Vector2(n.X, n.Y), Radius = n.R, Amount = n.Amount, MaxAmount = n.Max };
+                var node = new ResourceNode { Id = n.Id, Kind = (NodeKind)n.Kind, Pos = new Vector2(n.X, n.Y), Radius = n.R, Amount = n.Amount, MaxAmount = n.Max, Look = (byte)n.Look };
                 Nodes.Add(node);
                 _nodeGrid.Insert(node, node.Pos - new Vector2(node.Radius), node.Pos + new Vector2(node.Radius));
             }

@@ -540,7 +540,9 @@ namespace Rastvordd.Sim
                     var p = l.P[i];
                     if (MonumentAt(p) is Monument mm && Prefabs.Contains(mm)) continue;
                     float r = l.Half + 0.9f;
-                    foreach (var nd in NodesNear(p, r)) if (Vector2.Distance(nd.Pos, p) < r + nd.Radius * 0.5f && !InPrefab(nd.Pos)) nodes.Add(nd);
+                    // деревья — и с обочины (правило 5 «человек»: у дороги кусты и бурьян, без деревьев), прочее — только с полотна
+                    foreach (var nd in NodesNear(p, r + 1.8f))
+                        if (Vector2.Distance(nd.Pos, p) < r + (nd.Kind == NodeKind.Tree ? 1.8f : 0) + nd.Radius * 0.5f && !InPrefab(nd.Pos)) nodes.Add(nd);
                     if (!all) continue;
                     foreach (var w in WallsNear(p, r))
                         if (w.Owner == null && !w.Prefab && RoadsideClearKind(w.Kind) && Geo.CircleBox(p, r, w.Wall.Min, w.Wall.Max)) walls.Add(w);

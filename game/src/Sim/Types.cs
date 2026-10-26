@@ -803,7 +803,12 @@ namespace Rastvordd.Sim
         public Vector2 Pos;
         public float Radius;
         public float Amount, MaxAmount;
-        public bool BlocksVision => Kind == NodeKind.Tree;
+        /// <summary>Вид дерева: порода (младшие 4 бита) и возраст (старшие); 0 — по биому, как раньше (старые сохранения).</summary>
+        public byte Look;
+        public static byte TreeLook(TreeSpecies sp, TreeAge age) => (byte)((int)sp | (int)age << 4);
+        public static TreeSpecies SpeciesOf(byte look) => (TreeSpecies)(look & 15);
+        public static TreeAge AgeOf(byte look) => (TreeAge)(look >> 4);
+        public bool BlocksVision => Kind == NodeKind.Tree && AgeOf(Look) != TreeAge.Sapling;   // подрост ниже глаз — обзор не закрывает
 
         public string ResourceId => Kind switch
         {

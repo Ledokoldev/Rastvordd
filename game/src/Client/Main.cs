@@ -242,9 +242,11 @@ namespace Rastvordd.Client
                     var p = a.Substring(2).Split(';');
                     _forceWalk = new SVec(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture));
                 }
-                else if (a.StartsWith("tpb"))
+                else if (a.StartsWith("tpb") || a.StartsWith("tpe"))
                 {
-                    // отладка: перенестись в глубину биома (tpbForest, tpbGrassland…): точка, где вокруг 12 м тот же биом
+                    // отладка: перенестись в глубину биома (tpbForest, tpbGrassland…): точка, где вокруг 12 м тот же биом;
+                    // tpe<Биом> — на его край (опушку): в 6 м от точки начинается другой биом
+                    bool edge = a.StartsWith("tpe");
                     var want = System.Enum.Parse<Biome>(a.Substring(3));
                     var me = _server.World.Find(_myId);
                     var rng = new System.Random(int.TryParse(_scriptCode.ToString(), out var sd) ? sd : 1);
@@ -252,7 +254,8 @@ namespace Rastvordd.Client
                     {
                         var q = new SVec(rng.Next(-400, 400), rng.Next(-400, 400));
                         bool ok = true;
-                        for (int k = 0; k < 8 && ok; k++) ok = TerrainView.BiomeAt(_map, q + new SVec(Mathf.Cos(k * 0.785f) * 12, Mathf.Sin(k * 0.785f) * 12)) == want;
+                        if (edge) { ok = false; for (int k = 0; k < 8 && !ok; k++) ok = TerrainView.BiomeAt(_map, q + new SVec(Mathf.Cos(k * 0.785f) * 6, Mathf.Sin(k * 0.785f) * 6)) == Biome.Grassland; }
+                        else for (int k = 0; k < 8 && ok; k++) ok = TerrainView.BiomeAt(_map, q + new SVec(Mathf.Cos(k * 0.785f) * 12, Mathf.Sin(k * 0.785f) * 12)) == want;
                         if (ok && TerrainView.BiomeAt(_map, q) == want) { me.Pos = q; break; }
                     }
                 }
@@ -480,6 +483,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 RenderingServer.FramePreDraw += () => { _preUs = Time.GetTicksUsec(); _drawUs = _preUs - _procEnd; };
                 RenderingServer.FramePostDraw += () => _renderUs = Time.GetTicksUsec() - _preUs;
             }
+            if (_perf) GD.Print(_server.World.TreeStats());
             if (_perf) GD.Print($"hitch: загрузка сцены (_Ready) {(Time.GetTicksUsec() - readyT0) / 1000.0:F0} мс");
         }
 
@@ -1955,7 +1959,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 if (!_nodeViews.TryGetValue(n.Id, out var v))
                 {
                     v = n.Kind == NodeKind.Tree
-                        ? new TreeView2D(Iso.Px(n.Pos), n.Radius, n.Id, TerrainView.BiomeAt(_map, n.Pos))
+                        ? new TreeView2D(Iso.Px(n.Pos), n.Radius, n.Id, TerrainView.BiomeAt(_map, n.Pos), n.Look)
                         : new OreView2D(Iso.Px(n.Pos), n.Kind, n.Radius, n.Id, TerrainView.BiomeAt(_map, n.Pos));
                     _world.AddChild(v);
                     _nodeViews[n.Id] = v;

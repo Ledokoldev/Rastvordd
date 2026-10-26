@@ -98,6 +98,68 @@ namespace Rastvordd.Client
             _ => PickOr(seed, new[] { Leafy, Birch, Leafy, Birch, Pine1 }, Leafy),
         };
 
+        /// <summary>
+        /// Дерево по породе и возрасту (ResourceNode.Look). Возрастные спрайты trees/tree_&lt;порода&gt;_young / _old, подрост —
+        /// trees/tree_sapling_N; если файла ещё нет — взрослый спрайт той же породы в уменьшенном (молодое, подрост)
+        /// или увеличенном (старое) масштабе. look = 0 — старые сохранения: вид по биому, как раньше.
+        /// </summary>
+        public static (Texture2D tex, float scale) Tree(byte look, int seed, Biome biome)
+        {
+            if (look == 0) return (Tree(seed, biome), 1f);
+            var sp = ResourceNode.SpeciesOf(look);
+            var age = ResourceNode.AgeOf(look);
+            bool snow = biome == Biome.Tundra;
+            string[] mature = sp switch
+            {
+                TreeSpecies.Pine => snow ? new[] { "tree_pine_snow" } : new[] { "tree_pine_1", "tree_pine_2", "tree_pine_1_v" },
+                TreeSpecies.Spruce => snow ? new[] { "tree_spruce_snow_1", "tree_spruce_snow_1", "tree_spruce_snow_2" } : new[] { "tree_spruce_1", "tree_spruce_2" },
+                TreeSpecies.Birch => snow ? new[] { "tree_birch_frozen", "tree_birch_snow" } : new[] { "tree_birch", "tree_birch_2", "tree_birch_v" },
+                TreeSpecies.Oak => new[] { "tree_oak_1", "tree_oak_1_v", "tree_leafy" },
+                TreeSpecies.Aspen => new[] { "tree_aspen" },
+                TreeSpecies.Poplar => new[] { "tree_poplar" },
+                TreeSpecies.Rowan => new[] { "tree_rowan" },
+                TreeSpecies.Willow => biome == Biome.Swamp ? new[] { "tree_swamp_willow", "tree_willow" } : new[] { "tree_willow" },
+                TreeSpecies.Apple => new[] { "tree_apple" },
+                TreeSpecies.Dead => biome switch
+                {
+                    Biome.Swamp => new[] { "tree_swamp_dead", "tree_birch_dead" },
+                    Biome.Tundra => new[] { "tree_dead_snow" },
+                    Biome.Arid => new[] { "tree_dead_dry_1", "tree_dead_dry_2", "tree_dead_dry_1_v" },
+                    _ => new[] { "tree_birch_dead", "tree_oak_dead" },
+                },
+                TreeSpecies.Coastal => new[] { "tree_pine_coastal" },
+                _ => new[] { "tree_pine_1" },
+            };
+            string name = sp switch { TreeSpecies.Pine => "pine", TreeSpecies.Spruce => "spruce", TreeSpecies.Birch => "birch", TreeSpecies.Oak => "oak", TreeSpecies.Aspen => "aspen", _ => null };
+            bool deadOrSnow = sp == TreeSpecies.Dead || snow;
+            uint h = (uint)seed * 2654435761u;
+            Texture2D Any(string[] ids) { for (int i = 0; i < ids.Length; i++) { var t = Get("trees/" + ids[(int)((h + (uint)i) % (uint)ids.Length)]); if (t != null) return t; } return null; }
+            switch (age)
+            {
+                case TreeAge.Sapling when !deadOrSnow:
+                {
+                    var t = Any(new[] { "tree_sapling_1", "tree_sapling_2", "tree_sapling_3", "tree_sapling_4", "tree_sapling_5", "tree_sapling_6" });
+                    if (t != null) return (t, 1f);
+                    if (sp is TreeSpecies.Pine or TreeSpecies.Spruce && Get("trees/tree_young_pine") is Texture2D yp) return (yp, 0.75f);
+                    return (Any(mature), 0.45f);
+                }
+                case TreeAge.Sapling:
+                case TreeAge.Young:
+                {
+                    if (!deadOrSnow && name != null && Get($"trees/tree_{name}_young") is Texture2D t) return (t, 1f);
+                    if (sp == TreeSpecies.Pine && !snow && Get("trees/tree_young_pine") is Texture2D yp) return (yp, 1f);
+                    if (snow && sp == TreeSpecies.Spruce && Get("trees/tree_spruce_snow_2") is Texture2D ss) return (ss, age == TreeAge.Sapling ? 0.5f : 0.75f);   // карликовая ель
+                    return (Any(mature), age == TreeAge.Sapling ? 0.45f : 0.7f);
+                }
+                case TreeAge.Old:
+                {
+                    if (!deadOrSnow && name != null && Get($"trees/tree_{name}_old") is Texture2D t) return (t, 1f);
+                    return (Any(mature), 1.25f);
+                }
+                default: return (Any(mature), 1f);
+            }
+        }
+
         /// <summary>Вариант по seed; если файла нет — запасной (чтобы в тайге не вылезло лиственное дерево).</summary>
         static Texture2D PickOr(int seed, string[] paths, string fallback)
         {

@@ -369,7 +369,7 @@ namespace Rastvordd.Client
             var b = UiTheme.Strong(value, UiTheme.FontSmall, col);
             b.AutowrapMode = TextServer.AutowrapMode.WordSmart;
             b.HorizontalAlignment = HorizontalAlignment.Right;
-            b.CustomMinimumSize = new Vector2(Math.Min(180, UiTheme.TextWidth(value, UiTheme.FontSmall, UiTheme.Semi) + 2), 0);
+            b.CustomMinimumSize = new Vector2(Math.Min(150, UiTheme.TextWidth(value, UiTheme.FontSmall, UiTheme.Semi) + 2), 0);
             l.AddChild(b);
             return l;
         }

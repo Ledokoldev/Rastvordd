@@ -48,7 +48,26 @@ namespace Rastvordd.Client
         string _researchReq;      // изучить узел дерева (id)
         (UiOp op, string item, int index)? _uiReq;
         bool UiShown => _inv.Visible;
-        bool _uiWasOpen;
+        bool _uiWasOpen, _modalWas;
+
+        bool AnyModal => _inv.Visible || _hud.CraftOpen || _hud.AdminOpen || _hud.CodeOpen;
+        /// <summary>Курсор: виден, пока открыто любое окно; меняется только на переходе (Esc-«свободная мышь» не затирается).</summary>
+        void SyncMouse()
+        {
+            bool m = AnyModal;
+            if (m == _modalWas) return;
+            _modalWas = m;
+            Input.MouseMode = m ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
+        }
+        /// <summary>Закрыть инвентарь/контейнер (и сказать серверу).</summary>
+        void CloseInv() { _invOpen = false; if (_cur?.Self?.Ui != null) _uiReq = (UiOp.Close, null, 0); }
+        /// <summary>Окна на весь экран взаимоисключающи: открывая одно, закрываем остальные.</summary>
+        void CloseBigExcept(bool inv, bool craft, bool map)
+        {
+            if (!inv) CloseInv();
+            if (!craft && _hud.CraftOpen) _hud.ToggleCraft();
+            if (!map) _mapView.Visible = false;
+        }
         string _lastPlace;
         CanvasModulate _daylight;
         Ambient _ambient;
@@ -469,7 +488,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _hud.CraftRequested += (i, n) => { _craftPendIdx = i; _craftPendLeft = n; };
             _hud.ResearchRequested += id => _researchReq = id;
             _hud.CodeEntered += (door, code) => _codeReq = (door, code);
-            _hud.MenuClosed += () => Input.MouseMode = UiShown || _hud.CraftOpen || _hud.AdminOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
+            _hud.MenuClosed += SyncMouse;
             _hud.WipeRequested += () =>
             {
                 // игрок сам попросил новый вайп: стираем сохранение и перезапускаем сцену
@@ -773,7 +792,6 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     case Key.N: _timeEdge = true; break;
                     case Key.F1:
                         _hud.ToggleAdmin();
-                        Input.MouseMode = _hud.AdminOpen || _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
                         break;
                     case Key.F9: _debugEdge = true; break;
                     case Key.F8: _server.World.GiveBuilderKit(_server.World.Find(_myId)); break;   // набор строителя
@@ -785,24 +803,31 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         break;
                     case Key.W: case Key.A: case Key.S: case Key.D: _autoRun = SVec.Zero; break;
                     case Key.Q:
+                        if (!_hud.CraftOpen) CloseBigExcept(false, true, false);
                         _hud.ToggleCraft();
-                        Input.MouseMode = _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
                         break;
-                    case Key.Tab: _invOpen = !_invOpen; if (!_invOpen && _cur.Self.Ui != null) _uiReq = (UiOp.Close, null, 0); break;
-                    case Key.G: _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); break;
+                    case Key.Tab:
+                        if (_inv.Visible) CloseInv();
+                        else { CloseBigExcept(true, false, false); _invOpen = true; }
+                        break;
+                    case Key.G:
+                        if (!_mapView.Visible) CloseBigExcept(false, false, true);
+                        _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw();
+                        break;
                     case Key.F5: SaveWorld(); _hud.Toast("Мир сохранён"); break;
                     case Key.F6: ToggleRigTune(); break;   // ручная настройка рига (размеры и сдвиги частей)
                     case Key.F12: SaveScreenshot($"user://shot_{Time.GetTicksMsec()}.png"); break;
+                    case Key.Escape when _hud.AdminOpen:
+                        _hud.ToggleAdmin();
+                        break;
                     case Key.Escape when _mapView.Visible:
                         _mapView.Visible = false;
                         break;
                     case Key.Escape when _inv.Visible:
-                        _invOpen = false;
-                        if (_cur.Self.Ui != null) _uiReq = (UiOp.Close, null, 0);
+                        CloseInv();
                         break;
                     case Key.Escape when _hud.CraftOpen:
                         _hud.ToggleCraft();
-                        Input.MouseMode = Input.MouseModeEnum.Hidden;
                         break;
                     case Key.Escape:
                         Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Hidden ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
@@ -2057,7 +2082,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
 
             // меню плана и шпаргалка стройки
             _feed.Update(_cur.Self, dt);
-            _feed.Visible = !_hud.CraftOpen && !_mapView.Visible;   // лента у пояса; пояс спрятан под крафтом и картой
+            _feed.Visible = !_hud.CraftOpen && !_mapView.Visible && !_inv.Visible;   // лента у пояса; пояс спрятан под крафтом и картой
             bool hammerTip = _cur.Self.HoldingHammer && _cur.Self.HammerTarget != 0;
             _structTip.Action = _cur.Self.HoldingHammer ? $"Режим: {HammerModeName(_hammerMode)} · " + (hammerTip ? _cur.Self.HammerAction : "наведи на постройку") : null;
             _structTip.ActionOk = _cur.Self.HammerActionOk;
@@ -2075,6 +2100,9 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
 
             // окно по E (ящик, печь, столб) и крафт у верстака
             bool showInv = !_cur.Self.Dead && (_invOpen || _cur.Self.Ui != null);
+            if (_cur.Self.OpenCraft) CloseBigExcept(false, true, false);   // E у верстака: инвентарь/контейнер уходят
+            if (_cur.Self.Dead) { CloseBigExcept(false, false, false); _hud.CloseCraftAll(); }
+            showInv &= !_hud.CraftOpen;
             _inv.Visible = showInv;
             _hud.InventoryOpen = showInv;
             if (showInv) _inv.Refresh(_cur.Self, _cur.Self.Ui, dt);
@@ -2082,9 +2110,9 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             {
                 _uiWasOpen = _inv.Visible;
                 if (!_inv.Visible) _invOpen = false;
-                Input.MouseMode = _inv.Visible || _hud.CraftOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
             }
-            if (_cur.Self.OpenCraft) { if (_cur.Self.OpenCraftList) _hud.OpenCraftList(); else _hud.OpenTech(); Input.MouseMode = Input.MouseModeEnum.Visible; }   // у станции D54 — сразу список крафта   // E у верстака — дерево изучения
+            if (_cur.Self.OpenCraft) { if (_cur.Self.OpenCraftList) _hud.OpenCraftList(); else _hud.OpenTech(); }
+            SyncMouse();   // у станции D54 — сразу список крафта   // E у верстака — дерево изучения
 
             // вход на РТ — название
             if (_cur.Self.Place != _lastPlace) { _lastPlace = _cur.Self.Place; if (_lastPlace != null) _hud.Toast(_lastPlace); }

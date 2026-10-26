@@ -329,8 +329,9 @@ namespace Rastvordd.Client
             float gh = Size.Y * 1.1f;
             DrawTextureRect(_glow, new Rect2(r.GetCenter() - new Vector2(gh * 0.9f, gh / 2), new Vector2(gh * 1.8f, gh)), false, new Color(glowCol, Rarity > 0 ? 0.24f : 0.07f));
             if (Id == null) return;
-            float s = Mathf.Min(Size.Y - 30, 120);
-            UiTheme.DrawIcon(this, Id, new Rect2(r.GetCenter() - new Vector2(s, s) / 2, new Vector2(s, s)));
+            float s = Mathf.Clamp(Size.Y - 16, 1, 120);
+            var box = new Vector2(Mathf.Min(Size.X - 24, s * 2.6f), s);   // широкий бокс: длинные стволы вписываются по ширине, пропорции сохраняются
+            UiTheme.DrawIcon(this, Id, new Rect2(r.GetCenter() - box / 2, box));
         }
     }
 
@@ -373,7 +374,8 @@ namespace Rastvordd.Client
             box.AddChild(Gap(14));
             var nameRow = UiTheme.HBox(8);
             _name = UiTheme.Title("");
-            _name.SizeFlagsHorizontal = SizeFlags.ShrinkBegin;
+            _name.SizeFlagsHorizontal = SizeFlags.ExpandFill;   // длинное имя переносится, а не раздвигает карточку (окна не «плывут»)
+            _name.AutowrapMode = TextServer.AutowrapMode.WordSmart;
             nameRow.AddChild(_name);
             _count = UiTheme.Small("", UiTheme.Dim, 15);
             _count.AutowrapMode = TextServer.AutowrapMode.Off;
@@ -457,7 +459,8 @@ namespace Rastvordd.Client
                 var kb = UiTheme.VBox(6);
                 foreach (var line in lines)
                 {
-                    var keys = UiTheme.HBox(6);
+                    var keys = new HFlowContainer();   // переносится, не раздвигая карточку
+                    keys.AddThemeConstantOverride("h_separation", 6); keys.AddThemeConstantOverride("v_separation", 6);
                     foreach (var k in line) keys.AddChild(UiTheme.KeyChip(k));
                     kb.AddChild(keys);
                 }
@@ -525,7 +528,7 @@ namespace Rastvordd.Client
             foreach (var (yid, n) in yield) _rec.AddChild(YieldChip(yid, n));
             _rec.Visible = yield.Count > 0;
             _recBox.Visible = !gun;   // ствол на переработку не главное — экономим высоту под обвесы
-            _icon.CustomMinimumSize = new Vector2(0, gun ? 110 : 150);
+            _icon.CustomMinimumSize = new Vector2(0, gun ? 84 : 150);
             if (gun && Items.Get(id).Weapon.Tier > 0) _type.Text += Items.Get(id).Weapon.Tier >= 4 ? " · элита" : $" · тир {Items.Get(id).Weapon.Tier}";
             _where.Text = yield.Count > 0 ? "Переработчик на РТ · за 1 шт." : "Не перерабатывается";
         }
@@ -570,6 +573,9 @@ namespace Rastvordd.Client
                 row.AddChild(UiTheme.IconBox(att, 24, 0.06f, 6));
                 var an = UiTheme.Strong(Items.Name(att), UiTheme.FontSmall, UiTheme.RarityColor(Items.Rarity(att)));
                 an.VerticalAlignment = VerticalAlignment.Center;
+                an.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+                an.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;   // не раздвигает карточку
+                an.TooltipText = Items.Name(att);
                 row.AddChild(an);
                 _gunAtts.AddChild(row);
             }

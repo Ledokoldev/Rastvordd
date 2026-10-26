@@ -386,7 +386,6 @@ void fragment() {
             var vs = _codePanel.GetViewport().GetVisibleRect().Size;
             _codePanel.Size = _codePanel.GetCombinedMinimumSize();
             _codePanel.Position = (vs - _codePanel.Size) / 2;
-            Input.MouseMode = Input.MouseModeEnum.Visible;
         }
 
         /// <summary>Ответ сервера по двери: принят — окно закрывается, неверный — красная вспышка и сброс цифр.</summary>
@@ -511,7 +510,7 @@ void fragment() {
         {
             _codePanel.Visible = false;
             _codeFlash?.Kill();
-            Input.MouseMode = Input.MouseModeEnum.Hidden;
+            MenuClosed?.Invoke();
         }
 
         public void Toast(string text)
@@ -529,6 +528,7 @@ void fragment() {
             _techWin.Visible = false;
         }
 
+        public void CloseCraftAll() { _craftWin.Visible = false; _techWin.Visible = false; }
         public void OpenTech() { _craftWin.Visible = false; _techWin.Visible = true; }
         public void OpenCraftList() { _techWin.Visible = false; _craftWin.Visible = true; }   // E у станции (D54)
 
@@ -619,6 +619,7 @@ void fragment() {
             _damageFlash = Mathf.Max(0, _damageFlash - dt);
             _damageRect.Color = new Color(0.8f, 0, 0, _damageFlash * 0.5f);
 
+            if (CodeOpen) { _codePanel.Size = _codePanel.GetCombinedMinimumSize(); _codePanel.Position = ((vs - _codePanel.Size) / 2).Round(); }   // при ресайзе окно кода остаётся по центру
             if (_adminPanel.Visible) Place(_adminPanel, vs, 0.5f, 0.45f, Vector2.Zero);
 
             Crosshair.HitFlash = Mathf.Max(0, Crosshair.HitFlash - dt);

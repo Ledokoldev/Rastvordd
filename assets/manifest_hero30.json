@@ -1,0 +1,24 @@
+{
+ "assets": [
+  {
+   "id": "hero30_walk",
+   "cat": "charvar",
+   "sheet": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/walk30_ref.png",
+   "desc": "the same muscular broad-shouldered man ('gigachad' build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket, dark grey work trousers and brown boots, walking. POSTURE: confident upright stance — straight back, head held up looking forward, chest out, shoulders back, NOT hunched, NOT slouching, NOT looking down. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as pose and camera reference: top row = facing the camera and to the right (front 3/4), bottom row = facing away from the camera and to the right (back 3/4); copy each frame's exact pose, leg and arm positions, proportions and the camera angle (camera only moderately above, about 30 degrees down — NOT a high top-down view). RIGHT: the painted character — copy his face, hair, jacket, trousers, boots and colours exactly. Paint 8 frames of that same person; same size, feet on one baseline per row. Do not include the reference figure itself in the output. Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero30_idle",
+   "cat": "charvar",
+   "sheet": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/idle30_ref.png",
+   "desc": "the same muscular broad-shouldered man ('gigachad' build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket, dark grey work trousers and brown boots, standing relaxed (idle). POSTURE: confident upright stance — straight back, head held up looking forward, chest out, shoulders back, NOT hunched, NOT slouching, NOT looking down. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as pose and camera reference: top row = facing the camera and to the right (front 3/4), bottom row = facing away from the camera and to the right (back 3/4); copy each frame's exact pose, leg and arm positions, proportions and the camera angle (camera only moderately above, about 30 degrees down — NOT a high top-down view). RIGHT: the painted character — copy his face, hair, jacket, trousers, boots and colours exactly. Paint 8 frames of that same person; same size, feet on one baseline per row. Do not include the reference figure itself in the output. Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  }
+ ]
+}

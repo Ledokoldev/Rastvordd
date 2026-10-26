@@ -455,6 +455,24 @@ namespace Rastvordd.Client
             }
             else armNear = Ik(shNear, grip, lUp, lFore, 1);
             var armFar = Ik(shFar, swapGrip ? grip : support, lUp, lFore, 1);
+            // «магнит»: оружие лежит в кистях. Кисть не достала до точки хвата (в прицеле ствол у щеки выше плеч) —
+            // двигаем оружие к кисти, а не оставляем висеть в воздухе; две итерации — для обеих рук.
+            if (hasItem && TwoHanded(held) && !toolGrip && s.Swing < 0)
+            {
+                Vector2 Hand((float a1, float a2, Vector2 joint) arm) => arm.joint + new Vector2(Mathf.Cos(arm.a2), Mathf.Sin(arm.a2)) * lFore;
+                for (int it = 0; it < 2; it++)
+                {
+                    var nearT = swapGrip ? support + new Vector2(0, 1.5f) : grip;
+                    var miss = Hand(armNear) - nearT;
+                    grip += miss; support += miss;
+                    var farT = swapGrip ? grip : support;
+                    var farMiss = Hand(armFar) - farT;
+                    if (farMiss.LengthSquared() > 0.25f) { grip += farMiss * 0.5f; support += farMiss * 0.5f; }
+                    armNear = swapGrip ? PickDown(Ik(shNear, support + new Vector2(0, 1.5f), lUp, lFore, 1), Ik(shNear, support + new Vector2(0, 1.5f), lUp, lFore, -1)) : Ik(shNear, grip, lUp, lFore, 1);
+                    armFar = Ik(shFar, swapGrip ? grip : support, lUp, lFore, 1);
+                }
+            }
+            static (float a1, float a2, Vector2 joint) PickDown((float a1, float a2, Vector2 joint) x, (float a1, float a2, Vector2 joint) y) => x.joint.Y >= y.joint.Y ? x : y;
 
             void DrawWeapon()
             {

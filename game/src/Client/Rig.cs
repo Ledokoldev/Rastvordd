@@ -246,8 +246,10 @@ namespace Rastvordd.Client
         static (float a1, float a2, Vector2 joint) Ik(Vector2 root, Vector2 target, float l1, float l2, float bendSign)
         {
             var d = target - root;
-            float dist = Mathf.Clamp(d.Length(), 0.5f, l1 + l2 - 0.05f);
+            float dist = Mathf.Clamp(d.Length(), Mathf.Abs(l1 - l2) + 0.05f, l1 + l2 - 0.05f);
             float baseA = Mathf.Atan2(d.Y, d.X);
+            // Обе кости решаем до одной достижимой цели; иначе недостижимая кисть меняла угол предплечья.
+            target = root + new Vector2(Mathf.Cos(baseA), Mathf.Sin(baseA)) * dist;
             float cos = Mathf.Clamp((l1 * l1 + dist * dist - l2 * l2) / (2 * l1 * dist), -1, 1);
             float a1 = baseA + bendSign * Mathf.Acos(cos);
             var joint = root + new Vector2(Mathf.Cos(a1), Mathf.Sin(a1)) * l1;
@@ -283,7 +285,7 @@ namespace Rastvordd.Client
             // полуразмах шага без проскальзывания: за время опоры стопа проходит 2S = скорость × время опоры.
             // Скорость в игре выше человеческой, поэтому шаг ограничен длиной ноги — остаток «доезжает» скольжением.
             float noSlide = cad > 0 ? s.Speed * (Iso.PPM / RigView.BodyScale) * duty / cad : 0;
-            float strideMax = legL * (s.Crouch ? 0.26f : s.Sprint ? 0.44f : 0.36f);
+            float strideMax = legL * (s.Crouch ? 0.20f : s.Sprint ? 0.38f : 0.29f);
             float stride = Mathf.Min(noSlide, strideMax) * gait;
             float lift = (s.Crouch ? 1.5f : s.Sprint ? 4f : 2.2f) * gait;
             // таз: ниже всего при двойной опоре (обе ноги врозь), выше всего над опорной ногой; ноги в стойке прямые
@@ -334,15 +336,16 @@ namespace Rastvordd.Client
             float kneeBend = -1;   // колени сгибаются «вперёд» (к взгляду)
 
             // корпус: наклон вперёд на бегу
-            float lean = (s.Sprint ? 0.18f : 0.06f) * gait + crouch * 0.12f - s.Flinch * 0.3f;
+            float lean = ((s.Sprint ? 0.14f : 0.04f) * gait + crouch * 0.10f) * fwd.X - s.Flinch * 0.3f;
             lean += swingLean * Mathf.Clamp(Mathf.Abs(fwd.X) + 0.3f, 0, 1);   // в профиль наклон виден, анфас — меньше
             float upper = RigTune.Get(_set.Name, "upper").Oy;   // F6 «Верх тела ↕»: корпус, голова и руки выше/ниже относительно ног
             var waist = new Vector2(0, hipY - 2 + breath + upper);
             float torsoH = (back ? _set.TorsoB : _set.TorsoF).GetHeight() * RigTune.Get(_set.Name, "torso").Sy;
             var torsoTop = waist + new Vector2(Mathf.Sin(lean) * torsoH, -Mathf.Cos(lean) * torsoH);
             var shT = RigTune.Get(_set.Name, "shoulders");
-            var shNear = torsoTop + new Vector2(6 + shT.Ox, 3 + shT.Oy);   // плечи шире (телосложение крепче)
-            var shFar = torsoTop + new Vector2(-6 - shT.Ox, 3 + shT.Oy);
+            float shoulderWidth = Mathf.Lerp(4f, 6f, Mathf.Abs(fwd.Y)); // в профиль дальнее плечо ближе к оси корпуса
+            var shNear = torsoTop + new Vector2(shoulderWidth + shT.Ox, 3 + shT.Oy);
+            var shFar = torsoTop + new Vector2(-shoulderWidth - shT.Ox, 3 + shT.Oy);
             var neck = torsoTop + new Vector2(0, 1);   // шея над центром плеч (раньше +1 вперёд — голова «выезжала»)
 
             // ---------- оружие и кисти ----------
@@ -387,7 +390,10 @@ namespace Rastvordd.Client
                 // хват перед грудью: анфас/спиной — ближе к середине корпуса, в профиль — у плеча; у пояса → у щеки
                 float face = Mathf.Abs(fwd.Y);
                 grip = shNear + new Vector2(2 - 8 * face, 7 - 6 * aimUp - 2 * face) + new Vector2(fwd.X, fwd.Y * 0.5f) * (3 + 2 * aimUp);
-                if (s.Sprint) { down = 0.9f; grip += new Vector2(-1, 3); }              // бег: ствол опущен
+                // Со спины приклад у правого плеча: центральный хват заставлял руку обнимать затылок.
+                if (held is "weapon_ak" or "weapon_akm" && back)
+                    grip = shNear + new Vector2(2, 7 - 6 * aimUp) + fwdG * 3;
+                if (s.Sprint) { down = 0.55f * fwd.X; grip += new Vector2(-1, 3); } // анфас не разворачиваем ствол поперёк тела
                 if (s.Reload >= 0)
                 {
                     float r = s.Reload;
@@ -414,6 +420,9 @@ namespace Rastvordd.Client
                 var g = new Vector2(Mathf.Cos(wAng + cant), Mathf.Sin(wAng + cant) * 0.5f);
                 wAng = Mathf.Atan2(g.Y, g.X);   // картинка ствола одна на все ракурсы: только поворот, без сжатия
             }
+            bool ak = held is "weapon_ak" or "weapon_akm";   // weapon_ak — старое имя АКМ (Weaponry: weapon_ak → weapon_akm)
+            // АКМ в глубину короче в проекции. Части тела и длины рук при этом неизменны.
+            if (ak) proj = Mathf.Lerp(0.65f, 1f, Mathf.Abs(fwd.X));
             float lenP = len * proj;
             var wDir = new Vector2(Mathf.Cos(wAng), Mathf.Sin(wAng));
             bool toolGrip = hasItem && IsTool(held) && held != "weapon_spear";
@@ -421,6 +430,11 @@ namespace Rastvordd.Client
             // две точки хвата: рукоятка (grip) и цевьё перед магазином (support, 58% длины от рукоятки)
             if (hasItem && !toolGrip) grip += new Vector2(wT.Ox, wT.Oy);
             Vector2 support = TwoHanded(held ?? "") ? grip + wDir * lenP * (toolGrip ? supportAt : 0.58f * wT.Sy) : shFar + new Vector2(1, 12) + fwd * 1.5f;
+            // На исходнике АКМ 64×64: рукоятка (20,33), низ цевья (39,28).
+            // Раньше условные 58% ставили ладонь уже под голый ствол.
+            var gunSide = new Vector2(-wDir.Y, wDir.X);
+            float akScale = len / (64f * 0.9f);
+            if (ak) support = grip + wDir * (19 * akScale * proj * wT.Sy) - gunSide * (5 * akScale);
             if (s.Reload >= 0 && s.Reload > 0.3f && s.Reload < 0.7f)
                 support = grip + wDir * lenP * 0.25f + new Vector2(0, 6);     // вторая кисть за магазином
             if (!hasItem) { grip = shNear + new Vector2(1, 12) + fwd * 1.5f; support = shFar + new Vector2(1, 12) - fwd * 1.5f; }
@@ -433,43 +447,62 @@ namespace Rastvordd.Client
             // спиной — как было (ближняя у рукоятки). Инструменты и удар — без смены.
             bool swapGrip = hasItem && !back && TwoHanded(held) && !toolGrip && s.Swing < 0 && !(s.Reload > 0.3f && s.Reload < 0.7f);
             // вытянутая к цевью рука: почти прямая (локоть ~165°, не 180°), локоть ниже линии — кисть берёт цевьё снизу.
-            // Длины руки подгоняются под расстояние до цевья (±25%), иначе на коротком стволе рука сгибалась бы «гармошкой».
+            // Подвигаем оружие, а не растягиваем кости.
             float nearK = 1f;
             (float a1, float a2, Vector2 joint) armNear;
             if (swapGrip)
             {
                 // рука своей длины (как другая): не она тянется к цевью, а оружие придвигается к корпусу,
                 // пока цевьё не окажется на расстоянии почти прямой руки (локоть ~165°)
-                float want = (lUp + lFore) * 0.985f;
-                for (int it = 0; it < 3; it++)
+                float want = Mathf.Sqrt(lUp * lUp + lFore * lFore - 2 * lUp * lFore * Mathf.Cos(Mathf.DegToRad(165)));
+                var offset = support - shNear;
+                // Пересечение луча ствола с окружностью досягаемости: работает и при слишком близком цевье.
+                float along = offset.Dot(wDir);
+                float across2 = Mathf.Max(0, offset.LengthSquared() - along * along);
+                var pull = wDir * (Mathf.Sqrt(Mathf.Max(0, want * want - across2)) - along);
+                grip += pull; support += pull;
+                // Если дальняя кисть не достаёт рукоятку, берём пересечение двух окружностей.
+                // Так сохраняется почти прямой локоть у цевья, вместо поочерёдного перетягивания оружия руками.
+                var span = support - grip;
+                var centerNear = shNear - span;
+                var between = shFar - centerNear;
+                float distance = between.Length();
+                // Анфас рука у спуска согнута возле рёбер, а не вытянута поперёк груди.
+                float farReach = Mathf.Lerp(lUp + lFore - 0.15f, (lUp + lFore) * 0.75f, Mathf.Abs(fwd.Y));
+                if (grip.DistanceTo(shFar) > farReach && distance > 0.01f && distance < want + farReach && distance > Mathf.Abs(want - farReach))
                 {
-                    float excess = (support + new Vector2(0, 1.5f) - shNear).Length() - want;
-                    if (excess <= 0) break;
-                    var pull = -wDir * excess;
-                    grip += pull; support += pull;
+                    var dir = between / distance;
+                    float x = (want * want - farReach * farReach + distance * distance) / (2 * distance);
+                    float y = Mathf.Sqrt(Mathf.Max(0, want * want - x * x));
+                    var mid = centerNear + dir * x;
+                    var perp = new Vector2(-dir.Y, dir.X) * y;
+                    var a = mid + perp; var b = mid - perp;
+                    grip = a.DistanceSquaredTo(grip) < b.DistanceSquaredTo(grip) ? a : b;
+                    support = grip + span;
                 }
-                var tgt = support + new Vector2(0, 1.5f);   // ладонь под цевьём
+                var tgt = support;   // точка уже на нижней поверхности цевья
                 var e1 = Ik(shNear, tgt, lUp, lFore, 1);
                 var e2 = Ik(shNear, tgt, lUp, lFore, -1);
                 armNear = e1.joint.Y >= e2.joint.Y ? e1 : e2;   // локоть вниз
             }
             else armNear = Ik(shNear, grip, lUp, lFore, 1);
-            var armFar = Ik(shFar, swapGrip ? grip : support, lUp, lFore, 1);
+            var armFar = PickDown(Ik(shFar, swapGrip ? grip : support, lUp, lFore, 1), Ik(shFar, swapGrip ? grip : support, lUp, lFore, -1));
             // «магнит»: оружие лежит в кистях. Кисть не достала до точки хвата (в прицеле ствол у щеки выше плеч) —
             // двигаем оружие к кисти, а не оставляем висеть в воздухе; две итерации — для обеих рук.
             if (hasItem && TwoHanded(held) && !toolGrip && s.Swing < 0)
             {
                 Vector2 Hand((float a1, float a2, Vector2 joint) arm) => arm.joint + new Vector2(Mathf.Cos(arm.a2), Mathf.Sin(arm.a2)) * lFore;
-                for (int it = 0; it < 2; it++)
+                for (int it = 0; it < 12; it++)
                 {
-                    var nearT = swapGrip ? support + new Vector2(0, 1.5f) : grip;
+                    var nearT = swapGrip ? support : grip;
                     var miss = Hand(armNear) - nearT;
                     grip += miss; support += miss;
                     var farT = swapGrip ? grip : support;
+                    armFar = PickDown(Ik(shFar, farT, lUp, lFore, 1), Ik(shFar, farT, lUp, lFore, -1));
                     var farMiss = Hand(armFar) - farT;
-                    if (farMiss.LengthSquared() > 0.25f) { grip += farMiss * 0.5f; support += farMiss * 0.5f; }
-                    armNear = swapGrip ? PickDown(Ik(shNear, support + new Vector2(0, 1.5f), lUp, lFore, 1), Ik(shNear, support + new Vector2(0, 1.5f), lUp, lFore, -1)) : Ik(shNear, grip, lUp, lFore, 1);
-                    armFar = Ik(shFar, swapGrip ? grip : support, lUp, lFore, 1);
+                    grip += farMiss; support += farMiss;
+                    armNear = swapGrip ? PickDown(Ik(shNear, support, lUp, lFore, 1), Ik(shNear, support, lUp, lFore, -1)) : Ik(shNear, grip, lUp, lFore, 1);
+                    armFar = PickDown(Ik(shFar, swapGrip ? grip : support, lUp, lFore, 1), Ik(shFar, swapGrip ? grip : support, lUp, lFore, -1));
                 }
             }
             static (float a1, float a2, Vector2 joint) PickDown((float a1, float a2, Vector2 joint) x, (float a1, float a2, Vector2 joint) y) => x.joint.Y >= y.joint.Y ? x : y;
@@ -481,11 +514,12 @@ namespace Rastvordd.Client
                 if (tex == null) return;
                 float sc = len / (tex.GetWidth() * 0.9f);
                 var center = grip + wDir * lenP * (toolGrip ? 0.42f : 0.3f);   // инструмент держат за конец рукояти
+                if (ak) center = grip + wDir * (12 * akScale * proj) - gunSide * akScale;
                 var p = center + RigView.Feet;
                 float rot = wAng;
                 if (_mirror) { p.X = RigView.VW - p.X; rot = -rot; }
                 // оружие не переворачиваем вверх ногами: зеркалим по Y, а не по X
-                DrawSetTransform(p.Round(), _mirror ? Mathf.Pi - wAng : wAng, new Vector2(sc, _mirror ? -sc : sc));
+                DrawSetTransform(p.Round(), _mirror ? Mathf.Pi - wAng : wAng, new Vector2(sc * proj, _mirror ? -sc : sc));
                 DrawTexture(tex, -tex.GetSize() / 2);
 
                 var tip = center + wDir * lenP * 0.47f + RigView.Feet;
@@ -528,15 +562,23 @@ namespace Rastvordd.Client
             void DrawLeg(Vector2 hip, Vector2 foot)
             {
                 var leg = Ik(hip, foot, lThigh, lShin, kneeBend);
-                Part(_set.Thigh, hip, leg.a1 - Mathf.Pi / 2, new Vector2(_set.Thigh.GetWidth() / 2f, 1), 1, LegThick(_set.Thigh.GetWidth()), "thigh");
-                Part(_set.Shin, leg.joint, leg.a2 - Mathf.Pi / 2, new Vector2(_set.Shin.GetWidth() / 2f, 1), 1, LegThick(_set.Shin.GetWidth()), "shin");
+                // Сгиб в плоскости движения: анфас колено идёт в глубину, а не выворачивается вбок.
+                var axis = foot - hip;
+                float t = axis.LengthSquared() > 0.01f ? Mathf.Clamp((leg.joint - hip).Dot(axis) / axis.LengthSquared(), 0, 1) : 0.5f;
+                var onAxis = hip + axis * t;
+                var bend = leg.joint - onAxis;
+                var knee = onAxis + bend * Mathf.Abs(fwd.X) + new Vector2(0, fwd.Y * bend.Length() * 0.45f);
+                // Недостижимая стопа не удлиняет голень; контакт ограничен той же длиной костей.
+                var ankle = leg.joint + new Vector2(Mathf.Cos(leg.a2), Mathf.Sin(leg.a2)) * lShin;
+                Seg(_set.Thigh, hip, knee, lThigh);
+                Seg(_set.Shin, knee, ankle, lShin);
             }
 
             // звено ноги от a до b: текстура тянется/сжимается — так видно ракурсное сокращение (бедро к камере)
             void Seg(Texture2D t, Vector2 a, Vector2 b, float l)
             {
                 var d = b - a;
-                Part(t, a, Mathf.Atan2(d.Y, d.X) - Mathf.Pi / 2, new Vector2(t.GetWidth() / 2f, 1), Mathf.Max(0.25f, d.Length() / l) * (t == _set.Thigh ? RigTune.Get(_set.Name, "thigh").Sy : RigTune.Get(_set.Name, "shin").Sy), LegThick(t.GetWidth()), t == _set.Thigh ? "thigh" : "shin", false);
+                Part(t, a, Mathf.Atan2(d.Y, d.X) - Mathf.Pi / 2, new Vector2(t.GetWidth() / 2f, 1), Mathf.Clamp(d.Length() / l, 0.25f, 1f) * (t == _set.Thigh ? RigTune.Get(_set.Name, "thigh").Sy : RigTune.Get(_set.Name, "shin").Sy), LegThick(t.GetWidth()), t == _set.Thigh ? "thigh" : "shin", false);
             }
 
             void DrawBody()
@@ -563,7 +605,7 @@ namespace Rastvordd.Client
                 var torso = back ? _set.TorsoB : _set.TorsoF;
                 Part(torso, waist, lean, new Vector2(torso.GetWidth() / 2f, torso.GetHeight()), 1, TorsoThick(torso.GetWidth()), "torso");
                 var head = back ? _set.HeadB : _set.HeadF;
-                float headTilt = s.AimDown * 0.06f - s.Flinch * 0.25f;   // голова держится прямо (наклон корпуса не добавляем); в прицеле — чуть к прикладу
+                float headTilt = -s.Flinch * 0.25f;   // голова прямо над шеей, в прицеле не клюёт вперёд
                 Part(head, neck, headTilt, new Vector2(NeckX(head), head.GetHeight()), 1, HeadWide(head.GetWidth()), "head");
             }
 

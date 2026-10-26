@@ -46,6 +46,8 @@ namespace Rastvordd.Client
         public RigGallery(string who)
         {
             Layer = 100;
+            // Лист ревью: --riggallery=hero:review[:фаза]. Все 28 поз в одном кадре без заслонов мира.
+            if (who.Contains(":review")) { Review(who); return; }
             var set = RigSet.Load(who);
             var bg = new ColorRect { Color = new Color(0.23f, 0.26f, 0.22f), Size = new Vector2(4000, 3000) };
             AddChild(bg);
@@ -68,6 +70,36 @@ namespace Rastvordd.Client
                     s.Held = Columns[c].held;
                     Columns[c].set(s);
                     rv.Refresh(s.Dead);
+                }
+        }
+
+        void Review(string who)
+        {
+            var args = who.Split(':');
+            float phase = args.Length > 2 && float.TryParse(args[2], System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out var p) ? p : 0.8f;
+            var set = RigSet.Load(args[0]);
+            AddChild(new ColorRect { Color = new Color(0.16f, 0.18f, 0.17f), Size = new Vector2(1600, 900) });
+            if (set == null) return;
+            string[] states = { "стоит", "идёт", "бежит", "присед", "крадётся", "прицел", "прицел в приседе" };
+            string[] dirs = { "к камере", "вправо", "от камеры", "влево" };
+            float[] angles = { Mathf.Pi / 2, 0, -Mathf.Pi / 2, Mathf.Pi };
+            for (int row = 0; row < 7; row++)
+                for (int col = 0; col < 4; col++)
+                {
+                    var origin = new Vector2(col * 400, row * 128);
+                    var label = new Label { Text = states[row] + " · " + dirs[col], Position = origin + new Vector2(8, 2) };
+                    label.AddThemeFontSizeOverride("font_size", 14);
+                    AddChild(label);
+                    var rv = new RigView(set) { Position = origin + new Vector2(200, 122), Scale = new Vector2(2, 2) };
+                    AddChild(rv);
+                    var s = rv.S;
+                    s.Aim = angles[col]; s.Held = "weapon_ak"; s.Phase = phase;
+                    s.Crouch = row is 3 or 4 or 6;
+                    s.Sprint = row == 2;
+                    s.Speed = row == 1 ? 4.5f : row == 2 ? 6.8f : row == 4 ? 2.25f : 0;
+                    s.AimDown = row >= 5 ? 1 : 0;
+                    rv.Refresh(false);
                 }
         }
     }

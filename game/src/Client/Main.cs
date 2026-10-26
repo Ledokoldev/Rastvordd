@@ -1013,10 +1013,14 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         static SVec WasdVector()
         {
             var v = SVec.Zero;
-            if (Input.IsPhysicalKeyPressed(Key.W)) v.Y -= 1;
-            if (Input.IsPhysicalKeyPressed(Key.S)) v.Y += 1;
-            if (Input.IsPhysicalKeyPressed(Key.A)) v.X -= 1;
-            if (Input.IsPhysicalKeyPressed(Key.D)) v.X += 1;
+            // физические коды (русская раскладка не мешает); удалённый доступ часто шлёт нажатия без скан-кода —
+            // тогда по обычной клавише: латиница, кириллица (Ц Ф Ы В) и стрелки
+            static bool K(Key phys, Key alt1, Key alt2) => Input.IsPhysicalKeyPressed(phys) || Input.IsKeyPressed(phys) || Input.IsKeyPressed(alt1) || Input.IsKeyPressed(alt2);
+            if (K(Key.W, (Key)0x0426, Key.Up)) v.Y -= 1;      // Ц
+            if (K(Key.S, (Key)0x042B, Key.Down)) v.Y += 1;    // Ы
+            if (K(Key.A, (Key)0x0424, Key.Left)) v.X -= 1;    // Ф
+            if (K(Key.D, (Key)0x0412, Key.Right)) v.X += 1;   // В
+            v.X = Mathf.Clamp(v.X, -1, 1); v.Y = Mathf.Clamp(v.Y, -1, 1);
             return v;
         }
 

@@ -9,6 +9,7 @@ from PIL import Image, ImageFilter
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src, base = sys.argv[1], sys.argv[2]
 TALL = int(sys.argv[3]) if len(sys.argv) > 3 else 45
+N = int(sys.argv[4]) if len(sys.argv) > 4 else 4   # кадров в ряду
 CELL = 128
 
 
@@ -38,7 +39,7 @@ rows = blobs(im)
 print('ряды:', [len(r) for r in rows])
 out_dir = os.path.join(ROOT, 'game', 'art', 'chars')
 for r, tag in zip(rows[:2], 'fb'):
-    figs = [f.crop(f.getchannel('A').point(lambda v: 255 if v > 60 else 0).getbbox()) for f in r[:4]]
+    figs = [f.crop(f.getchannel('A').point(lambda v: 255 if v > 60 else 0).getbbox()) for f in r[:N]]
     hmax = max(f.height for f in figs)
     k = TALL / hmax
     for i, f in enumerate(figs):
@@ -49,5 +50,6 @@ for r, tag in zip(rows[:2], 'fb'):
         cell = Image.new('RGBA', (CELL, CELL), (0, 0, 0, 0))
         cell.alpha_composite(px, ((CELL - w) // 2, CELL - 2 - h))
         name = f'{base}_{tag}{i}.png' if '_walk' not in base else f'{base}_{tag}{i}.png'
+        os.makedirs(os.path.dirname(os.path.join(out_dir, name)), exist_ok=True)
         cell.save(os.path.join(out_dir, name))
 print('ok', base)

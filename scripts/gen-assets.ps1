@@ -23,6 +23,8 @@ if ($extraManifest) {
     # оформление листов эффектов (fx: [колонки, ряды]) — из того же отдельного манифеста
     if ($extra.fx_framing) { $manifest | Add-Member -NotePropertyName fx_framing -NotePropertyValue $extra.fx_framing -Force }
     if ($extra.fx_style) { $manifest | Add-Member -NotePropertyName fx_style -NotePropertyValue $extra.fx_style -Force }
+    # листы анимаций персонажа (anim: [колонки, ряды]) — своё оформление кадра из отдельного манифеста
+    if ($extra.anim_framing) { $manifest | Add-Member -NotePropertyName anim_framing -NotePropertyValue $extra.anim_framing -Force }
 }
 $todo = @()
 foreach ($a in $manifest.assets) {
@@ -34,7 +36,7 @@ foreach ($a in $manifest.assets) {
     $prompt = @"
 Generate ONE image with your image generation tool and save it as a PNG file at $rel (relative to the current directory), overwriting if it exists. Do not write any code or edit any other files.
 
-Image: $(if ($a.fx) { ($manifest.fx_framing -replace '\{cols\}', $a.fx[0] -replace '\{rows\}', $a.fx[1] -replace '\{n\}', ($a.fx[0] * $a.fx[1])) } elseif ($a.ui) { $manifest.ui_framing } elseif ($a.rig) { $manifest.rig_framing } elseif ($a.sheet) { $manifest.sheet_framing } elseif ($a.tile) { $manifest.tile_framing } elseif ($a.weapon) { $manifest.weapon_framing } elseif ($a.view -eq 'side') { $manifest.side_framing } elseif ($a.view -eq 'front') { $manifest.front_framing } elseif ($a.view -eq 'angled') { $manifest.angled_framing } elseif ($a.icon) { $manifest.icon_framing } else { $manifest.framing }) Subject: $($a.desc). $(if ($a.fx -and $manifest.fx_style) { $manifest.fx_style } else { $manifest.style })
+Image: $(if ($a.anim) { ($manifest.anim_framing -replace '\{cols\}', $a.anim[0] -replace '\{rows\}', $a.anim[1]) } elseif ($a.fx) { ($manifest.fx_framing -replace '\{cols\}', $a.fx[0] -replace '\{rows\}', $a.fx[1] -replace '\{n\}', ($a.fx[0] * $a.fx[1])) } elseif ($a.ui) { $manifest.ui_framing } elseif ($a.rig) { $manifest.rig_framing } elseif ($a.sheet) { $manifest.sheet_framing } elseif ($a.tile) { $manifest.tile_framing } elseif ($a.weapon) { $manifest.weapon_framing } elseif ($a.view -eq 'side') { $manifest.side_framing } elseif ($a.view -eq 'front') { $manifest.front_framing } elseif ($a.view -eq 'angled') { $manifest.angled_framing } elseif ($a.icon) { $manifest.icon_framing } else { $manifest.framing }) Subject: $($a.desc). $(if ($a.fx -and $manifest.fx_style) { $manifest.fx_style } else { $manifest.style })
 
 When done, reply with just the saved file path.
 "@

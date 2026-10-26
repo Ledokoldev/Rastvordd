@@ -120,6 +120,8 @@ namespace Rastvordd.Client
         float _swing;
 
         public static bool HeroSprites;
+        readonly bool _hero;
+        float _deadT, _idleT;
 
         public ActorView2D(bool isNpc, bool isSelf)
         {
@@ -132,8 +134,10 @@ namespace Rastvordd.Client
             };
             // спрайты персонажа, если сгенерированы; охрана — свой лист, игроки пока «голые»
             string sheet = isNpc ? "char_guard" : "char_naked";
-            bool hero = isSelf && HeroSprites;   // --hero: пробный нарисованный персонаж (кадры chars/char_hero_*), без рига
+            bool hero = isSelf && HeroSprites;   // --hero: нарисованный персонаж (кадры chars/hero/*, HeroAnims), без рига
             if (hero) sheet = "char_hero";
+            _hero = hero;
+            _body.HeroMode = hero;
             _body.Front = Art.CharFrames(sheet, 'f');
             _body.BackFrames = Art.CharFrames(sheet, 'b');
             _body.WalkFront = Art.WalkFrames(sheet, 'f');
@@ -277,16 +281,18 @@ namespace Rastvordd.Client
                 _dead = dead;
                 _body.Dead = dead;
                 _held.Visible = !dead && _rig == null;   // у скелетной модели оружие рисует сама модель
-                _body.Rotation = dead ? (right ? Mathf.Pi / 2 : -Mathf.Pi / 2) : 0;
+                _body.Rotation = dead && !_hero ? (right ? Mathf.Pi / 2 : -Mathf.Pi / 2) : 0;
+                _deadT = 0;
                 _body.Position = dead ? new Vector2(0, -4) : Vector2.Zero;
                 QueueRedraw();
             }
+            if (dead && _hero) { _deadT += dt; _body.HS.Dead = true; _body.HS.DeadT = _deadT; _body.HS.Back = back; _body.Scale = new Vector2(right ? 1 : -1, 1); }
             if (dead) { _torch.Visible = false; _body.QueueRedraw(); if (_rig != null) { _rig.S.Aim = facing; _rig.S.Dead = true; _rig.Refresh(true); } return; }
 
             if (_held.ItemId != heldId) { _held.ItemId = heldId; _held.QueueRedraw(); }
 
             // присед: тело ниже (пока сжатием спрайта; позже — свои кадры)
-            _body.Scale = new Vector2(right ? 1 : -1, crouch ? 0.8f : 1f);
+            _body.Scale = new Vector2(right ? 1 : -1, crouch && !_hero ? 0.8f : 1f);   // у героя присед — свои кадры
             if (back != _back)
             {
                 _back = back;
@@ -398,6 +404,18 @@ namespace Rastvordd.Client
             }
             _held.SwingT = _swing > 0 ? 1f - _swing / SwingTime : -1f;
             if (_swing > 0 || _held.SwingT >= 0) QueueRedraw();
+            if (_hero)
+            {
+                _idleT += dt;
+                _body.HS = new HeroAnims.State
+                {
+                    Back = back, Moving = moving, Crouch = crouch, Reloading = reloading, Speed = speed,
+                    Phase = moving ? _body.Phase : _idleT * 2.2f, Aim = AimDown, Kick = _kick,
+                    Swing01 = _swing > 0 ? 1f - _swing / SwingTime : 0, Reload01 = _reloadDur > 0 ? Mathf.Clamp(_reloadT / _reloadDur, 0, 1) : 0,
+                    Gun = HeroAnims.ClassOf(heldId),
+                };
+                _held.Visible = HeroAnims.Pick(_body.HS).showHeld;   // оружие уже в кадре — отдельную картинку прячем
+            }
         }
     }
 
@@ -408,9 +426,16 @@ namespace Rastvordd.Client
         public bool Back, Moving, Dead, Helmet;
         public float Phase;
         public Texture2D[] Front, BackFrames, WalkFront, WalkBack;
+        public bool HeroMode;
+        public HeroAnims.State HS;
 
         public override void _Draw()
         {
+            if (HeroMode && HeroAnims.Pick(HS).tex is Texture2D ht)
+            {
+                DrawTexture(ht, new Vector2(-ht.GetWidth() / 2f, -ht.GetHeight() + 2));
+                return;
+            }
             // ходьба из видео (если есть): цикл по фазе шага; стоя — первый кадр листа
             var walk = Back ? WalkBack : WalkFront;
             if (walk != null && Moving && !Dead)

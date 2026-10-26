@@ -1,0 +1,155 @@
+{
+ "anim_framing": "A character animation sprite sheet for a 2D top-down survival game: a grid of {cols} columns and {rows} rows of equally spaced frames on a transparent background. Top row: the character facing the camera and to the right (front 3/4 view); bottom row: the same character facing away from the camera and to the right (back 3/4 view). Camera moderately above, about 30 degrees down (not top-down). Identical character, proportions, clothing and lighting in every frame, full body visible in every frame, feet on one baseline per row, frames in time order left to right. No text, no frame, no border, no ground, no cast shadow.",
+ "assets": [
+  {
+   "id": "hero_idle",
+   "cat": "charvar",
+   "anim": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/anim_idle.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, standing still with both feet planted firmly on the ground about shoulder-width apart, arms relaxed, only subtle breathing between frames — NOT walking, NO stride. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_walk",
+   "cat": "charvar",
+   "anim": [
+    8,
+    2
+   ],
+   "ref": "assets/charref/anim_walk.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, walking at a calm natural pace, a full realistic walk cycle: heel strike, passing, push-off, arms swinging opposite to the legs. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_run",
+   "cat": "charvar",
+   "anim": [
+    8,
+    2
+   ],
+   "ref": "assets/charref/anim_run.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, running, a full realistic run cycle with a clear flight phase, forearms bent, torso slightly forward. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_crouch_idle",
+   "cat": "charvar",
+   "anim": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/anim_crouch_idle.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, crouching low and still on bent knees, weight on the balls of the feet, alert, subtle breathing. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_crouch_walk",
+   "cat": "charvar",
+   "anim": [
+    8,
+    2
+   ],
+   "ref": "assets/charref/anim_crouch_walk.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, sneaking forward in a low crouch, a full realistic crouched walk cycle. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_aim_pistol",
+   "cat": "charvar",
+   "anim": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/anim_aim_pistol.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, aiming a Makarov pistol forward with both hands at chest height, steady stance, tiny sway between frames. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The grey box in the mannequin's hand marks where the pistol is. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_shoot_pistol",
+   "cat": "charvar",
+   "anim": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/anim_shoot_pistol.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, firing a Makarov pistol held in both hands: recoil kick then return, small muzzle flash only in the 2nd frame. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The grey box in the mannequin's hand marks where the pistol is. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_reload_pistol",
+   "cat": "charvar",
+   "anim": [
+    8,
+    2
+   ],
+   "ref": "assets/charref/anim_reload_pistol.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, reloading a Makarov pistol: magazine out, new magazine in, rack the slide, back to ready. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The grey box in the mannequin's hand marks where the pistol is. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_aim_rifle",
+   "cat": "charvar",
+   "anim": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/anim_aim_rifle.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, aiming an AK assault rifle shouldered: right hand on the pistol grip, left hand on the handguard, stock tight to the right shoulder, cheek on the stock, steady stance, tiny sway. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The mannequin holds only a placeholder; paint a real AK held correctly with both hands as described. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_shoot_rifle",
+   "cat": "charvar",
+   "anim": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/anim_shoot_rifle.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, firing an AK assault rifle shouldered with both hands correctly placed: recoil pushes the shoulder back then returns, small muzzle flash only in the 2nd frame. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The mannequin holds only a placeholder; paint a real AK held correctly with both hands as described. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_reload_rifle",
+   "cat": "charvar",
+   "anim": [
+    8,
+    2
+   ],
+   "ref": "assets/charref/anim_reload_rifle.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, reloading an AK assault rifle: rifle tilted, left hand pulls the curved magazine out, inserts a new one, then racks the charging handle, back to ready. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The mannequin holds only a placeholder; paint a real AK held correctly with both hands as described. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_walk_rifle",
+   "cat": "charvar",
+   "anim": [
+    8,
+    2
+   ],
+   "ref": "assets/charref/anim_walk_rifle.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, walking while carrying an AK assault rifle at low ready with BOTH hands (right on the grip, left on the handguard, muzzle down-forward), a full realistic walk cycle. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The mannequin holds only a placeholder; paint a real AK held correctly with both hands as described. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_melee",
+   "cat": "charvar",
+   "anim": [
+    6,
+    2
+   ],
+   "ref": "assets/charref/anim_melee.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, throwing a hard realistic right cross punch: wind-up, strike, recovery. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_melee_tool",
+   "cat": "charvar",
+   "anim": [
+    8,
+    2
+   ],
+   "ref": "assets/charref/anim_melee_tool.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, swinging a heavy hatchet with the right hand in an overhead chop: raise, strike down, recover. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_death",
+   "cat": "charvar",
+   "anim": [
+    8,
+    2
+   ],
+   "ref": "assets/charref/anim_death.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, being shot and collapsing realistically to the ground, ending lying motionless. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  }
+ ]
+}

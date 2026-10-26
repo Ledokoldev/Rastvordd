@@ -183,6 +183,15 @@ namespace Rastvordd.Client
 
         public void StartSwing() => _swing = SwingTime;
 
+        /// <summary>Дуло оружия в руках (мировые пиксели) и направление ствола — у рига; нет рига — false.</summary>
+        public bool TryMuzzle(out Vector2 at, out Vector2 dir)
+        {
+            at = default; dir = default;
+            if (_rig == null || _dead) return false;
+            at = Position + _rig.Position + _rig.TipLocal * _rig.Scale; dir = _rig.TipDir;   // в координатах мира (как Iso.Px), не экрана
+            return true;
+        }
+
         /// <summary>Сколько раз стопа коснулась земли за последний SetState (по анимации шага) — столько звуков шага.</summary>
         public int StepContacts { get; private set; }
         float _gait, _gaitSpeed;
@@ -403,7 +412,7 @@ namespace Rastvordd.Client
             if (torch)
             {
                 _flicker = Mathf.Lerp(_flicker, (float)GD.RandRange(-1.0, 1.0), Mathf.Min(1, dt * 14));
-                _torch.Position = _rig != null ? _rig.TipLocal : new Vector2(side * 12, -Iso.H(1.5f));
+                _torch.Position = _rig != null ? _rig.Position + _rig.TipLocal * _rig.Scale : new Vector2(side * 12, -Iso.H(1.5f));   // с учётом масштаба рига
                 _torch.Energy = 1.15f + _flicker * 0.18f;
                 _torch.TextureScale = (7f + _flicker * 0.25f) * Iso.PPM * 2 / 256f;
             }

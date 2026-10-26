@@ -1398,7 +1398,12 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 {
                     case SimEventKind.Shot:
                         // вспышка у дула по типу ствола (ПБС — без вспышки, D46), свет выдаёт стрелка ночью
-                        if (e.Text is not ("weapon_bow" or "weapon_crossbow")) Vfx.Muzzle(Iso.Px(e.Pos + e.Dir * 0.15f), new Vector2(e.Dir.X, e.Dir.Y), e.Text, e.Value > 0);
+                        if (e.Text is not ("weapon_bow" or "weapon_crossbow"))
+                        {
+                            // вспышка — из дула нарисованного оружия (риг), иначе — из точки выстрела сервера
+                            if (_actorViews.TryGetValue(e.ActorId, out var sv) && sv.TryMuzzle(out var mAt, out var mDir)) Vfx.Muzzle(mAt + new Vector2(0, Iso.GunH), mDir, e.Text, e.Value > 0);   // Muzzle ждёт точку на земле и сам поднимает на высоту ствола
+                            else Vfx.Muzzle(Iso.Px(e.Pos + e.Dir * 0.15f), new Vector2(e.Dir.X, e.Dir.Y), e.Text, e.Value > 0);
+                        }
                         if (_actorViews.TryGetValue(e.ActorId, out var shooter)) shooter.Kick();
                         if (e.ActorId == _myId && !_spectate) RecoilKick(e.Text);
                         if (e.ActorId == _myId && e.Text != "weapon_bow") _shake = Mathf.Min(1.5f, _shake + 0.6f);

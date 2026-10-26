@@ -123,6 +123,9 @@ namespace Rastvordd.Client
 
         /// <summary>Конец предмета в руках относительно ног персонажа (пиксели мира).</summary>
         public Vector2 TipLocal => (_canvas.TipPx - Feet) * BodyScale;
+        /// <summary>Дуло в мировых пикселях и направление ствола — вспышка выстрела у нарисованного оружия, а не в фиксированной точке.</summary>
+        public Vector2 TipGlobal => ToGlobal(TipLocal);
+        public Vector2 TipDir => _canvas.TipDir;
 
         bool _swim;
         /// <summary>В воде: видно только выше пояса, тело опущено, срез — по воде.</summary>
@@ -158,6 +161,8 @@ namespace Rastvordd.Client
 
         /// <summary>Конец предмета в руках (пиксели буфера) — для пламени и света факела.</summary>
         public Vector2 TipPx;
+        /// <summary>Куда смотрит ствол на картинке (единичный вектор, с учётом зеркала) — для вспышки выстрела.</summary>
+        public Vector2 TipDir = Vector2.Right;
 
         static float HeldLength(string id) => Rastvordd.Sim.Weaponry.HeldLength(id) is float wl && wl > 0 ? wl : id switch
         {
@@ -522,9 +527,10 @@ namespace Rastvordd.Client
                 DrawSetTransform(p.Round(), _mirror ? Mathf.Pi - wAng : wAng, new Vector2(sc * proj, _mirror ? -sc : sc));
                 DrawTexture(tex, -tex.GetSize() / 2);
 
-                var tip = center + wDir * lenP * 0.47f + RigView.Feet;
+                var tip = center + wDir * lenP * 0.40f + RigView.Feet;   // срез ствола (вспышка выстрела, огонь факела)
                 if (_mirror) tip.X = RigView.VW - tip.X;
                 TipPx = tip;
+                TipDir = new Vector2(_mirror ? -wDir.X : wDir.X, wDir.Y).Normalized();
                 if (held == "weapon_torch") DrawFlame(tip.Round());
             }
 

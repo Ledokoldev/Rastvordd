@@ -182,6 +182,26 @@
    "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, sneaking forward in a low crouch holding a Makarov pistol in both hands lowered in front of the chest, a full crouched walk cycle. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The grey box in the mannequin's hand marks where the pistol is. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
   },
   {
+   "id": "hero_crouch_aim_rifle",
+   "cat": "charvar",
+   "anim": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/anim_crouch_aim_rifle.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, in a low kneeling sport-shooting stance at a range, a long wooden hunting carbine shouldered: right hand on the grip, left hand under the fore-end, stock against the right shoulder, cheek on the stock, looking along the barrel, tiny sway. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The mannequin holds only a placeholder; paint a real AK held correctly with both hands as described. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_crouch_aim_pistol",
+   "cat": "charvar",
+   "anim": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/anim_crouch_aim_pistol.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, in a low kneeling stance at a target range, a Makarov pistol held extended forward in both hands at eye level, looking along the sights, tiny sway. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The grey box in the mannequin's hand marks where the pistol is. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
    "id": "hero_melee",
    "cat": "charvar",
    "anim": [

@@ -65,6 +65,7 @@ namespace Rastvordd.Client
             if (s.Dead) c = new[] { ("death", false, Mathf.Clamp(s.DeadT / 1.1f, 0, 0.999f), false) };
             else if (s.Swing01 > 0) c = new[] { (s.Gun == Gun.Melee ? "melee_tool" : "melee", false, s.Swing01, false) };
             else if (s.Reloading && armed) c = new[] { ("reload_" + g, false, s.Reload01, false), ("idle_" + g, true, cyc * 0.25f, false) };
+            else if (s.Crouch && armed && (s.Aim > 0.3f || s.Kick > 0.05f)) c = new[] { ("crouch_aim_" + g, true, cyc * 0.25f, false), ("crouch_idle_" + g, true, cyc * 0.25f, false), ("aim_" + g, true, cyc * 0.25f, false) };   // прицел и выстрел из приседа
             else if (s.Crouch && armed) c = new[] { ((s.Moving ? "crouch_walk_" : "crouch_idle_") + g, true, s.Moving ? cyc : cyc * 0.25f, false), (s.Moving ? "crouch_walk" : "crouch_idle", true, cyc, true) };
             else if (s.Kick > 0.05f && armed) c = new[] { ("shoot_" + g, false, 1f - s.Kick, false) };
             else if (s.Aim > 0.3f && armed) c = new[] { ("aim_" + g, true, cyc * 0.25f, false) };   // к глазу — только по ПКМ

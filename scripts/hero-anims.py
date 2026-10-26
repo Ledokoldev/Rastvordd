@@ -31,6 +31,8 @@ ANIMS = {
     "crouch_walk_rifle": ("Crouch_Fwd_Loop", 8, "rifle", "sneaking forward in a low crouch holding a long hunting carbine with both hands, muzzle down-forward, a full crouched walk cycle"),
     "crouch_idle_pistol": ("Crouch_Idle_Loop", 4, "pistol", "crouching low and still on bent knees, holding a Makarov pistol in both hands lowered in front of the chest, alert"),
     "crouch_walk_pistol": ("Crouch_Fwd_Loop", 8, "pistol", "sneaking forward in a low crouch holding a Makarov pistol in both hands lowered in front of the chest, a full crouched walk cycle"),
+    "crouch_aim_rifle": ("Crouch_Idle_Loop", 4, "rifle", "in a low kneeling sport-shooting stance at a range, a long wooden hunting carbine shouldered: right hand on the grip, left hand under the fore-end, stock against the right shoulder, cheek on the stock, looking along the barrel, tiny sway"),
+    "crouch_aim_pistol": ("Crouch_Idle_Loop", 4, "pistol", "in a low kneeling stance at a target range, a Makarov pistol held extended forward in both hands at eye level, looking along the sights, tiny sway"),
     "melee":        ("Punch_Cross", 6, "", "throwing a hard realistic right cross punch: wind-up, strike, recovery"),
     "melee_tool":   ("Sword_Attack", 8, "", "swinging a heavy hatchet with the right hand in an overhead chop: raise, strike down, recover"),
     "death":        ("Death01", 8, "", "being shot and collapsing realistically to the ground, ending lying motionless"),

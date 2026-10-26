@@ -135,6 +135,7 @@ namespace Rastvordd.Client
         SVec? _autoAim;
         readonly Dictionary<int, List<string>> _script = new();
         int _autoFireFrames;
+        bool _scriptCodeUi;
         int _scriptCode = -1;   // отладка: код, который сценарий «вводит» у запертой двери
 
         void RunScript()
@@ -226,6 +227,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("drop")) { var w0 = _server.World; (w0.Director ??= new Director(w0.Seed)).DebugAirdrop(w0, w0.Find(_myId).Pos + new SVec(3, 5), a.Length > 4 ? float.Parse(a[4..]) : 30); }   // отладка: сброс груза рядом
                 else if (a.StartsWith("vfx")) DebugVfx(a[3..]);   // отладка эффектов: vfxall, vfxflare, vfxboom, vfxfire…
                 else if (a == "code") _hud.ShowCode(0);
+                else if (a == "codeui") _scriptCodeUi = true;   // отладка: у замка открывать окно, а не вводить --code сразу
                 else if (a == "die") _server.World.DebugKill(_server.World.Find(_myId));
                 else if (a == "steps") GD.Print("steps: " + string.Join(", ", System.Linq.Enumerable.Select(System.Linq.Enumerable.Where(Sfx.Played, kv => kv.Key.StartsWith("steps/")), kv => kv.Key[6..] + "×" + kv.Value)));   // отладка: какие шаги звучали
                 else if (a == "info") GD.Print($"info: {_server.World.LastInfo.GetValueOrDefault(_myId)} | structs {_server.World.Structures.Count} | aim {_autoAim} | me {_server.World.Find(_myId).Pos}" + string.Concat(_server.World.Tier2.ConvertAll(r => $" | тир2 {r.Key}: ток {r.PowerLeft:0} перезарядка {r.CooldownLeft:0} кодов {r.Codes.Count}")) + (_server.World.Substations.Count > 0 ? $" | тир1: {string.Join(", ", _server.World.Tier1.ConvertAll(r => $"{r.Key} готов={r.Ready} кабели={r.CablesIn} вагон={r.WagonT:0.00} кран={(r.Cabin != null ? r.Cabin.Progress : 0):0} крейт={(r.Crate.Unlocked ? "открыт" : "закрыт")}@{r.Crate.Pos.X:0};{r.Crate.Pos.Y:0}"))} | подстанция: питание {_server.World.Substations[0].Powered}, крейт открыт {_server.World.Substations[0].Crate.Unlocked}, таймер {_server.World.Substations[0].CrateTimer:0}" : ""));   // отладка: последнее сообщение
@@ -1031,6 +1033,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         /// <summary>Клик мимо админки закрывает её (окна на весь экран ловят клик сами).</summary>
         public override void _Input(InputEvent e)
         {
+            if (_hud.CodeKey(e)) { GetViewport().SetInputAsHandled(); return; }   // окно кодового замка — модальное
             // ноутбук: Ctrl+1…Ctrl+0 = F1…F10, Ctrl+− = F11, Ctrl+= = F12 (у многих F-ряд только через Fn)
             // наблюдатель: Ctrl+Shift+цифры — номер бота (можно двузначный), переход через 0,7 с после последней цифры
             if (_spectate && e is InputEventKey nk && nk.Pressed && !nk.Echo && nk.CtrlPressed && nk.ShiftPressed
@@ -1073,7 +1076,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 Follow = _followId,
                 Move = move,
                 Aim = _aim,
-                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && !_hammerMenu.Visible && !SbBlocksFire && _rigTuneLayer == null && Input.IsMouseButtonPressed(MouseButton.Left)),   // при настройке рига (F6) не стреляем   // клики по меню крафта не стреляют
+                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.CodeOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && !_hammerMenu.Visible && !SbBlocksFire && _rigTuneLayer == null && Input.IsMouseButtonPressed(MouseButton.Left)),   // при настройке рига (F6) не стреляем   // клики по меню крафта не стреляют
                 Eat = _eatEdge,
                 DebugKit = _debugEdge,
                 Craft = _craftReq,
@@ -1499,9 +1502,16 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         }
                         break;
                     case SimEventKind.Locked:
-                        Sfx.Play("lock_click", Iso.Px(e.Pos), -4, 10, 0f);
-                        if (e.ActorId == _myId) { if (_scriptCode >= 0) _codeReq = (e.OtherId, _scriptCode); else _hud.ShowCode(e.OtherId); }
+                    {
+                        // Value: 0 — ввести код, 1 — задать (владелец), 2 — принят, -2 — неверный (личное событие)
+                        int mode = (int)e.Value;
+                        Sfx.Play("lock_click", Iso.Px(e.Pos), mode == -2 ? 0 : -4, 10, 0f, mode == -2 ? 0.7f : mode == 2 ? 1.25f : 1f);
+                        if (e.ActorId != _myId) break;
+                        if (mode is 2 or -2) _hud.CodeResult(e.OtherId, mode == 2);
+                        else if (_scriptCode >= 0 && !_scriptCodeUi) _codeReq = (e.OtherId, _scriptCode);
+                        else _hud.ShowCode(e.OtherId, mode);
                         break;
+                    }
                     case SimEventKind.Explosion when e.Text == "expl_fire":
                         Sfx.Play("glass_break", Iso.Px(e.Pos), -2, 40, 0.08f);
                         Sfx.Play("fire_whoosh", Iso.Px(e.Pos), -4, 40, 0.08f);

@@ -347,68 +347,170 @@ void fragment() {
             c.Position = new Vector2((screen.X - c.Size.X) * ax, (screen.Y - c.Size.Y) * ay) + offset;
         }
 
-        // ---------- ввод кода замка ----------
+        // ---------- кодовый замок: окно с цифровой панелью ----------
+        const string CodeCfg = "user://settings.cfg";
         PanelContainer _codePanel;
-        LineEdit _codeEdit;
-        int _codeDoor;
+        int _codeDoor, _codeMode;   // режим: 0 — ввести код, 1 — задать (владелец замка)
+        string _codeText = "";
+        bool _codeWait;             // код отправлен — ждём ответа сервера (дверь); пульт закрывается сразу
         Label _codeTitle, _codeSub;
+        readonly Label[] _codeDigits = new Label[4];
+        readonly PanelContainer[] _codeBoxes = new PanelContainer[4];
+        Button _codePaste;
+        Tween _codeFlash;
         public bool CodeOpen => _codePanel != null && _codePanel.Visible;
         /// <summary>Игрок ввёл код: (id двери, код).</summary>
         public event System.Action<int, int> CodeEntered;
 
-        public void ShowCode(int doorId)
+        /// <summary>Последний введённый или заданный код — помнится между запусками (user://settings.cfg).</summary>
+        static string LastCode
         {
-            if (_codePanel == null)
-            {
-                _codePanel = UiTheme.GlassPanel(26, 0.86f);
-                _codePanel.Theme = UiTheme.Theme;
-                _codePanel.Visible = false;
-                AddChild(_codePanel);
-                var box = UiTheme.VBox(12);
-                box.CustomMinimumSize = new Vector2(320, 0);
-                _codePanel.AddChild(box);
-                var head = UiTheme.HBox(12);
-                head.AddChild(UiTheme.IconBox("lock_code", 44));
-                var tt = UiTheme.VBox(0);
-                tt.AddChild(_codeTitle = UiTheme.Title("Заперто", 22));
-                var sub = _codeSub = UiTheme.Small("Кодовый замок · 4 цифры", UiTheme.Dim, UiTheme.FontSmall);
-                sub.AutowrapMode = TextServer.AutowrapMode.Off;
-                tt.AddChild(sub);
-                head.AddChild(tt);
-                box.AddChild(head);
-                _codeEdit = new LineEdit { MaxLength = 4, PlaceholderText = "• • • •", Alignment = HorizontalAlignment.Center, CustomMinimumSize = new Vector2(0, 58) };
-                _codeEdit.AddThemeFontOverride("font", UiTheme.Semi);
-                _codeEdit.AddThemeFontSizeOverride("font_size", 30);
-                _codeEdit.AddThemeConstantOverride("minimum_character_width", 6);
-                box.AddChild(_codeEdit);
-                var keys = UiTheme.HBox(6);
-                keys.AddChild(UiTheme.KeyChip("Enter — ввести"));
-                keys.AddChild(UiTheme.KeyChip("Esc — отмена"));
-                box.AddChild(keys);
-                _codeEdit.TextSubmitted += txt =>
-                {
-                    if (int.TryParse(txt, out int code)) CodeEntered?.Invoke(_codeDoor, code);
-                    HideCode();
-                };
-                _codeEdit.GuiInput += e => { if (e is InputEventKey k && k.Pressed && k.Keycode == Key.Escape) HideCode(); };
-            }
+            get { var c = new ConfigFile(); return c.Load(CodeCfg) == Error.Ok ? (string)c.GetValue("lock", "last_code", "") : ""; }
+            set { var c = new ConfigFile(); c.Load(CodeCfg); c.SetValue("lock", "last_code", value); c.Save(CodeCfg); }
+        }
+
+        /// <summary>Окно кода: doorId &lt; 0 — пульт РТ тира 2; mode 1 — владелец задаёт код.</summary>
+        public void ShowCode(int doorId, int mode = 0)
+        {
+            if (_codePanel == null) BuildCodePanel();
             _codeDoor = doorId;
+            _codeMode = mode;
+            _codeWait = false;
             // отрицательный id — пульт вызова РТ тира 2 (Радиоцентр «Маяк»), иначе дверь с кодовым замком
-            _codeTitle.Text = doorId < 0 ? "Пульт вызова" : "Заперто";
-            _codeSub.Text = doorId < 0 ? "Код из журнала дежурного · 4 цифры" : "Кодовый замок · 4 цифры";
-            _codeEdit.Text = "";
+            _codeTitle.Text = doorId < 0 ? "Пульт вызова" : "Кодовый замок";
+            _codeSub.Text = doorId < 0 ? "Код из журнала дежурного" : mode == 1 ? "Задай код · доступ остальных сбросится" : "Введи код · 4 цифры";
+            _codeText = "";
+            _codePaste.Disabled = LastCode.Length != 4;
+            RefreshCode(false);
             _codePanel.Visible = true;
-            var vs = GetViewport().GetVisibleRect().Size;
+            var vs = _codePanel.GetViewport().GetVisibleRect().Size;
             _codePanel.Size = _codePanel.GetCombinedMinimumSize();
             _codePanel.Position = (vs - _codePanel.Size) / 2;
-            _codeEdit.GrabFocus();
             Input.MouseMode = Input.MouseModeEnum.Visible;
+        }
+
+        /// <summary>Ответ сервера по двери: принят — окно закрывается, неверный — красная вспышка и сброс цифр.</summary>
+        public void CodeResult(int doorId, bool ok)
+        {
+            if (!CodeOpen || doorId != _codeDoor) return;
+            if (ok) { HideCode(); return; }
+            _codeWait = false;
+            _codeText = "";
+            _codeFlash?.Kill();
+            RefreshCode(true);
+            _codeFlash = _codePanel.CreateTween();
+            _codeFlash.TweenInterval(0.45f);
+            _codeFlash.TweenCallback(Callable.From(() => RefreshCode(false)));
+        }
+
+        void BuildCodePanel()
+        {
+            _codePanel = UiTheme.GlassPanel(26, 0.86f);
+            _codePanel.Theme = UiTheme.Theme;
+            _codePanel.Visible = false;
+            AddChild(_codePanel);
+            var box = UiTheme.VBox(14);
+            box.CustomMinimumSize = new Vector2(300, 0);
+            _codePanel.AddChild(box);
+            var head = UiTheme.HBox(12);
+            head.AddChild(UiTheme.IconBox("lock_code", 44));
+            var tt = UiTheme.VBox(0);
+            tt.AddChild(_codeTitle = UiTheme.Title("Кодовый замок", 22));
+            _codeSub = UiTheme.Small("", UiTheme.Dim, UiTheme.FontSmall);
+            _codeSub.AutowrapMode = TextServer.AutowrapMode.Off;
+            tt.AddChild(_codeSub);
+            head.AddChild(tt);
+            box.AddChild(head);
+
+            // четыре ячейки цифр
+            var cells = UiTheme.HBox(10);
+            cells.Alignment = BoxContainer.AlignmentMode.Center;
+            for (int i = 0; i < 4; i++)
+            {
+                var cell = new PanelContainer { CustomMinimumSize = new Vector2(56, 64), MouseFilter = Control.MouseFilterEnum.Ignore };
+                var l = new Label { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+                l.AddThemeFontOverride("font", UiTheme.Semi);
+                l.AddThemeFontSizeOverride("font_size", 30);
+                l.AddThemeColorOverride("font_color", UiTheme.Ink);
+                cell.AddChild(l);
+                cells.AddChild(cell);
+                _codeBoxes[i] = cell;
+                _codeDigits[i] = l;
+            }
+            box.AddChild(cells);
+
+            // цифровая панель 3×4: 1–9, стереть, 0, OK
+            var pad = new GridContainer { Columns = 3 };
+            pad.AddThemeConstantOverride("h_separation", 8);
+            pad.AddThemeConstantOverride("v_separation", 8);
+            foreach (var k in new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "OK" })
+            {
+                var b = UiTheme.Btn(k, k == "OK", 0, 48);
+                b.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+                b.AddThemeFontSizeOverride("font_size", k.Length > 1 || k == "⌫" ? 18 : 22);
+                string key = k;
+                b.Pressed += () => CodeKeyPress(key);
+                pad.AddChild(b);
+            }
+            box.AddChild(pad);
+
+            _codePaste = UiTheme.Btn("Вставить последний код", false, 0, 38);
+            _codePaste.Pressed += () => { var last = LastCode; if (last.Length == 4 && !_codeWait) { _codeText = last; RefreshCode(false); } };
+            box.AddChild(_codePaste);
+            var keys = UiTheme.HBox(6);
+            keys.AddChild(UiTheme.KeyChip("0–9 · Enter"));
+            keys.AddChild(UiTheme.KeyChip("Esc — отмена"));
+            box.AddChild(keys);
+        }
+
+        /// <summary>Перерисовать ячейки: текущая — светлая рамка; bad — красная вспышка неверного кода.</summary>
+        void RefreshCode(bool bad)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                bool on = i < _codeText.Length, cur = i == _codeText.Length;
+                _codeDigits[i].Text = on ? _codeText[i].ToString() : "";
+                var bg = bad ? new Color(UiTheme.Bad, 0.18f) : on ? UiTheme.SlotSelBg : UiTheme.SlotBg;
+                var border = bad ? UiTheme.Bad : cur ? UiTheme.SlotSelBorder : UiTheme.SlotBorder;
+                _codeBoxes[i].AddThemeStyleboxOverride("panel", UiTheme.Box(bg, 8, border, bad || cur ? 2 : 1));
+            }
+        }
+
+        void CodeKeyPress(string k)
+        {
+            if (_codeWait) return;
+            if (k == "⌫") { if (_codeText.Length > 0) _codeText = _codeText[..^1]; }
+            else if (k == "OK")
+            {
+                if (_codeText.Length != 4) { CodeResult(_codeDoor, false); return; }
+                LastCode = _codeText;
+                CodeEntered?.Invoke(_codeDoor, int.Parse(_codeText));
+                if (_codeDoor < 0) { HideCode(); return; }   // пульт ответа не шлёт — закрываем
+                _codeWait = true;
+                return;
+            }
+            else if (_codeText.Length < 4) _codeText += k;
+            RefreshCode(false);
+        }
+
+        /// <summary>Клавиатура при открытом окне кода: цифры, Backspace, Enter, Esc. true — нажатие съедено.</summary>
+        public bool CodeKey(InputEvent e)
+        {
+            if (!CodeOpen || e is not InputEventKey k) return false;
+            if (!k.Pressed || k.Echo) return true;
+            var key = k.PhysicalKeycode;
+            if (key >= Key.Key0 && key <= Key.Key9) CodeKeyPress(((int)(key - Key.Key0)).ToString());
+            else if (key >= Key.Kp0 && key <= Key.Kp9) CodeKeyPress(((int)(key - Key.Kp0)).ToString());
+            else if (key == Key.Backspace) CodeKeyPress("⌫");
+            else if (key is Key.Enter or Key.KpEnter) CodeKeyPress("OK");
+            else if (key == Key.Escape) HideCode();
+            return true;   // окно модальное: остальные клавиши в игру не идут
         }
 
         void HideCode()
         {
             _codePanel.Visible = false;
-            _codeEdit.ReleaseFocus();
+            _codeFlash?.Kill();
             Input.MouseMode = Input.MouseModeEnum.Hidden;
         }
 

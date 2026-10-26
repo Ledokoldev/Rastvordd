@@ -331,7 +331,7 @@ namespace Rastvordd.Sim
 
         /// <summary>Своя дверь, которую я могу открыть: без замка, с моим ключом в кармане или с моим кодом.</summary>
         bool MineDoor(Structure s) => s.Kind == StructKind.Door && (s.OwnerId == _me.Id || (_w.ClaimAt(Building.CellOf(s.Center)) is Deployable c && c.Auth.Contains(_me.Id))) && CanUnlock(s);
-        bool CanUnlock(Structure s) => !s.Locked || (s.KeyLock ? _me.Count("key_" + s.Id) > 0 : s.LockAuth.Contains(_me.Id));
+        bool CanUnlock(Structure s) => _w.CanOpenDoor(_me, s);
         bool OwnDoor(MapWall w) => w.Owner is Structure s && MineDoor(s);
 
         // двери рядом: раньше каждый шаг перебирал все постройки мира (у 20 ботов — тысячи); теперь список дверей в 12 м,

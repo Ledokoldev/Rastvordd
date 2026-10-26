@@ -1319,7 +1319,7 @@ namespace Rastvordd.Sim
             {
                 if (o == a || o.Dead || o.Spectator || (a.Team == Team.Npc && o.Team == Team.Npc)) continue;
                 float d = Vector2.Distance(o.Pos, a.Pos);
-                if (d < best && InArc(o.Pos, o.Radius)) { best = d; victim = o; }
+                if (d < best && InArc(o.Pos, o.Radius) && ClearLine(a.Pos, o.Pos, null, true)) { best = d; victim = o; }   // сквозь стену, окно, закрытую дверь — не достать
             }
             if (victim != null)
             {
@@ -1332,7 +1332,7 @@ namespace Rastvordd.Sim
             foreach (var n in NodesNear(a.Pos, wd.Range + 1f))
             {
                 float d = Vector2.Distance(n.Pos, a.Pos) - n.Radius;
-                if (d < best && InArc(n.Pos, n.Radius)) { best = d; node = n; }
+                if (d < best && InArc(n.Pos, n.Radius) && ClearLine(a.Pos, n.Pos, null, true)) { best = d; node = n; }
             }
             if (node == null)
             {
@@ -1619,6 +1619,7 @@ namespace Rastvordd.Sim
                 case InteractKind.Bag: LootBagInto(a, (LootBag)target); break;
                 case InteractKind.Pickup: Collect(a, (Pickup)target); break;
                 case InteractKind.Furnace: UseFurnace(a, (Deployable)target); break;
+                case InteractKind.Door when a.Crouching && OwnerCodePrompt(a, (Structure)target): break;   // Alt+E владельца — сменить код
                 case InteractKind.Door: ToggleDoor(a, (Structure)target); break;
                 case InteractKind.Claim: UseClaim(a, (Deployable)target); break;
                 case InteractKind.Box: UseBox(a, (Deployable)target); break;

@@ -44,6 +44,7 @@ namespace Rastvordd.Sim
         Vector2 _chaseFrom;
         Vector2 _flankFrom;
         Actor _chaseFoe;
+        float _meleeBlocked;   // сколько секунд цель ближнего боя за стеной (обхожу через проём)
         readonly Dictionary<int, float> _preyIgnore = new();   // брошенная добыча: id → до какого времени не трогать
 
         Vector2 _escapePos;
@@ -670,6 +671,24 @@ namespace Rastvordd.Sim
             Doing = $"{(Archetype == BotArchetype.Roamer ? "охотится на" : "отбивается от")} {t.Name}";
             if (!Hold(melee, ref cmd)) return;
             cmd.Aim = t.Pos;
+            if (!_w.ClearLine(_me.Pos, t.Pos, null, true))
+            {
+                // между нами стена, окно или закрытая дверь: рукой не достать — обходить по пути (через проём), а не махать в стену
+                if (NoReach(t.Pos) || _meleeBlocked > 6f)
+                {
+                    Thought($"{t.Name} за стеной — не подойти, бросаю");
+                    Stat("ближний: цель за стеной");
+                    PartWith(t, "за стеной");
+                    _prey = null; _chaseFoe = null; _meleeBlocked = 0;
+                    ForgetFoe();
+                    return;
+                }
+                _meleeBlocked += World.Dt;
+                MoveTo(t.Pos, 1.2f, ref cmd);
+                cmd.Sprint = d > 6;
+                return;
+            }
+            _meleeBlocked = 0;
             if (d > 1.8f) { cmd.Move = Avoid(dir); cmd.Sprint = d > 6; }
             else cmd.Fire = true;
         }

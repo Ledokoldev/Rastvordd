@@ -26,7 +26,7 @@ namespace Rastvordd.Sim
 
         public sealed class NodeS { public int Id, Kind, Look; public float X, Y, R, Amount, Max; }   // Look — порода и возраст дерева (в старых сейвах 0 — вид по биому)
         public sealed class SlotS { public string Id; public int Count, Ammo = -1; public float Dur = -1; public List<string> Att; public List<float> AttDur; public string Liquid; public float Liters; }   // v7: жидкость в ёмкости
-        public sealed class StructS { public int Id, Kind, I, J, Dir, Tier, OwnerId, ClaimId, Code; public float Hp, Ax, Ay, Bx, By, Cx, Cy; public bool Open, Locked, KeyLock, Shutters; public List<int> LockAuth = new(); }   // v7: Shutters — ставни на окне
+        public sealed class StructS { public int Id, Kind, I, J, Dir, Tier, OwnerId, ClaimId, Code, LockOwner; public float Hp, Ax, Ay, Bx, By, Cx, Cy; public bool Open, Locked, KeyLock, Shutters; public List<int> LockAuth = new(); }   // v7: Shutters — ставни на окне
         public sealed class DeployS
         {
             public int Id, Kind, OwnerId, Ore, SulfurOre, OutMetal, OutSulfur, OutCharcoal, Level;
@@ -105,7 +105,7 @@ namespace Rastvordd.Sim
             foreach (var (k, left) in _nodeRespawns) w.NodeRespawns.Add(((int)k, left));
             foreach (var s in Structures)
             {
-                var ss = new WorldSave.StructS { Id = s.Id, Kind = (int)s.Kind, I = s.I, J = s.J, Dir = s.Dir, Tier = s.Tier, OwnerId = s.OwnerId, ClaimId = s.ClaimId, Hp = s.Hp, Open = s.Open, Locked = s.Locked, KeyLock = s.KeyLock, Shutters = s.Shutters, Code = s.Code, Ax = s.A.X, Ay = s.A.Y, Bx = s.B.X, By = s.B.Y, Cx = s.C.X, Cy = s.C.Y };
+                var ss = new WorldSave.StructS { Id = s.Id, Kind = (int)s.Kind, I = s.I, J = s.J, Dir = s.Dir, Tier = s.Tier, OwnerId = s.OwnerId, ClaimId = s.ClaimId, Hp = s.Hp, Open = s.Open, Locked = s.Locked, KeyLock = s.KeyLock, Shutters = s.Shutters, Code = s.Code, LockOwner = s.LockOwner, Ax = s.A.X, Ay = s.A.Y, Bx = s.B.X, By = s.B.Y, Cx = s.C.X, Cy = s.C.Y };
                 ss.LockAuth.AddRange(s.LockAuth);
                 w.Structures.Add(ss);
             }
@@ -192,6 +192,7 @@ namespace Rastvordd.Sim
                 {
                     Id = ss.Id, Kind = (StructKind)ss.Kind, I = ss.I, J = ss.J, Dir = ss.Dir, Tier = ss.Tier, OwnerId = ss.OwnerId, ClaimId = ss.ClaimId,
                     Hp = ss.Hp, Open = ss.Open, Locked = ss.Locked, KeyLock = ss.KeyLock, Code = ss.Code, Shutters = ss.Shutters,
+                    LockOwner = ss.LockOwner != 0 ? ss.LockOwner : ss.OwnerId,   // сейв до владельца замка — замок ставил строитель двери
                 };
                 foreach (var id in ss.LockAuth) s.LockAuth.Add(id);
                 (s.A, s.B, s.C) = (new Vector2(ss.Ax, ss.Ay), new Vector2(ss.Bx, ss.By), new Vector2(ss.Cx, ss.Cy));

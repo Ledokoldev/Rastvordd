@@ -23,8 +23,9 @@ namespace Rastvordd.Sim
         public bool Shutters;          // на окне решётка со ставнями (D54)
         public bool Locked;            // на двери замок
         public bool KeyLock;           // замок с ключом (иначе кодовый)
-        public int Code;
-        public readonly HashSet<int> LockAuth = new();
+        public int Code = -1;          // код кодового замка 0000–9999; -1 — владелец ещё не задал
+        public readonly HashSet<int> LockAuth = new();   // кто ввёл верный код (как в Rust): открывают без повторного ввода
+        public int LockOwner;          // кто поставил замок: ключевой открывает без ключа, кодовый — задаёт и меняет код
         public int OwnerId;
         public int ClaimId;            // к какому столбу привязан (бюджет и содержание)
         public readonly List<MapWall> Boxes = new();
@@ -705,7 +706,7 @@ namespace Rastvordd.Sim
             Events.Add(new SimEvent { Kind = SimEventKind.Built, ActorId = a.Id, OtherId = s.Id, Pos = s.Center, Text = Building.TierNames[s.Tier], Value = s.Tier });
         }
 
-        /// <summary>ЛКМ с замком в руках по двери: поставить кодовый замок, код — случайный, сообщается установщику.</summary>
+        /// <summary>ЛКМ с замком в руках по двери: поставить замок. Кодовый — владелец сразу задаёт код в окне (бот — сам себе).</summary>
         void InstallLock(Actor a)
         {
             var door = TargetStructure(a, 2f);
@@ -714,6 +715,8 @@ namespace Rastvordd.Sim
             door.Locked = true;
             var held = a.Held;
             door.KeyLock = held.Id == "lock_key";
+            door.LockOwner = a.Id;
+            door.LockAuth.Clear();
             held.Count--;
             if (held.Count <= 0) a.Belt[a.Current] = null;
             StructVersion++;
@@ -724,28 +727,58 @@ namespace Rastvordd.Sim
                 Info(a, $"Замок поставлен. {Items.Name("key_" + door.Id)} — в инвентаре");
                 return;
             }
-            door.Code = Rng.Next(1000, 10000);
             door.LockAuth.Add(a.Id);
-            Info(a, $"Кодовый замок поставлен. Код: {door.Code} — запомни");
+            if (a.IsBot) { door.Code = Rng.Next(0, 10000); return; }   // бот свой код «помнит»: он в LockAuth
+            door.Code = -1;
+            Info(a, "Кодовый замок поставлен — задай код");
+            LockPrompt(a, door, 1);
         }
 
-        /// <summary>Ввод кода у запертой двери: верный — доступ и дверь открывается; неверный — удар током.</summary>
+        /// <summary>Личное событие окну кода: 0 — ввести код, 1 — задать (владелец), 2 — код принят, -2 — неверный.</summary>
+        void LockPrompt(Actor a, Structure door, int mode) =>
+            Events.Add(new SimEvent { Kind = SimEventKind.Locked, ActorId = a.Id, OtherId = door.Id, Pos = door.Center, Value = mode });
+
+        /// <summary>Alt+E владельца по своей двери с кодовым замком — сменить код.</summary>
+        bool OwnerCodePrompt(Actor a, Structure door)
+        {
+            if (!door.Locked || door.KeyLock || door.LockOwner != a.Id) return false;
+            LockPrompt(a, door, 1);
+            return true;
+        }
+
+        /// <summary>
+        /// Ввод кода у двери. Владелец замка — задаёт/меняет код (список допущенных сбрасывается);
+        /// остальные: верный — доступ навсегда и дверь открывается; неверный — удар током.
+        /// </summary>
         void EnterCode(Actor a, int doorId, int code)
         {
             if (doorId < 0) { EnterConsoleCode(a, doorId, code); return; }   // пульт РТ тира 2 (Радиоцентр)
             Structure door = null;
             foreach (var s in Structures) if (s.Id == doorId) { door = s; break; }
-            if (door == null || !door.Locked || Vector2.Distance(door.Center, a.Pos) > 3f) return;
-            if (code == door.Code)
+            if (door == null || !door.Locked || door.KeyLock || code is < 0 or > 9999 || Vector2.Distance(door.Center, a.Pos) > 3f) return;
+            if (door.LockOwner == a.Id)
+            {
+                bool first = door.Code < 0;
+                door.Code = code;
+                door.LockAuth.Clear();
+                door.LockAuth.Add(a.Id);
+                StructVersion++;
+                Info(a, first ? "Код задан" : "Код сменён — доступ остальных сброшен");
+                LockPrompt(a, door, 2);
+                return;
+            }
+            if (door.Code >= 0 && code == door.Code)
             {
                 door.LockAuth.Add(a.Id);
                 Info(a, "Код принят");
+                LockPrompt(a, door, 2);
                 if (!door.Open) ToggleDoor(a, door);
             }
             else
             {
                 Damage(a, 5, -1, a.Pos);
                 Info(a, "Неверный код — бьёт током");
+                LockPrompt(a, door, -2);
             }
         }
 
@@ -763,11 +796,12 @@ namespace Rastvordd.Sim
         {
             if (door.Locked && door.KeyLock)
             {
-                if (a.Count("key_" + door.Id) <= 0) { Info(a, "Заперто на ключ"); Events.Add(new SimEvent { Kind = SimEventKind.Door, ActorId = a.Id, OtherId = door.Id, Pos = door.Center, Value = -1 }); return; }
+                if (door.LockOwner != a.Id && a.Count("key_" + door.Id) <= 0) { Info(a, "Заперто на ключ"); Events.Add(new SimEvent { Kind = SimEventKind.Door, ActorId = a.Id, OtherId = door.Id, Pos = door.Center, Value = -1 }); return; }
             }
+            else if (door.Locked && door.Code < 0 && door.LockOwner == a.Id && !a.IsBot) { LockPrompt(a, door, 1); return; }   // код ещё не задан — сначала задать
             else if (door.Locked && !door.LockAuth.Contains(a.Id))
             {
-                Events.Add(new SimEvent { Kind = SimEventKind.Locked, ActorId = a.Id, OtherId = door.Id, Pos = door.Center });
+                LockPrompt(a, door, 0);
                 return;
             }
             if (door.Open)
@@ -1005,7 +1039,7 @@ namespace Rastvordd.Sim
         }
 
         public bool CanOpenDoor(Actor a, Structure door) =>
-            !door.Locked || (door.KeyLock ? a.Count("key_" + door.Id) > 0 : door.LockAuth.Contains(a.Id));
+            !door.Locked || (door.KeyLock ? door.LockOwner == a.Id || a.Count("key_" + door.Id) > 0 : door.LockAuth.Contains(a.Id));
 
         Structure NearestDoor(Vector2 p, float range)
         {

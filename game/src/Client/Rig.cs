@@ -229,7 +229,18 @@ namespace Rastvordd.Client
         }
 
         /// <summary>Голова чуть шире нарисованной — лицо и шлем читаются как человеческие.</summary>
-        static float HeadWide(int px) => Mathf.Max(px + 2, Mathf.Round(px * 1.2f)) / px;
+        static float HeadWide(int px) => px < 7 ? Mathf.Max(px + 2, Mathf.Round(px * 1.2f)) / px : 1f;   // крупные головы — без расширения (иначе «сплющена»)
+
+        /// <summary>Основание шеи на картинке головы: центр непрозрачного в нижних строках (в 3/4 шея не по центру картинки).</summary>
+        static readonly System.Collections.Generic.Dictionary<Texture2D, float> _neckX = new();
+        static float NeckX(Texture2D t)
+        {
+            if (_neckX.TryGetValue(t, out var v)) return v;
+            var img = t.GetImage(); float sum = 0; int n = 0;
+            for (int y = img.GetHeight() - 3; y < img.GetHeight(); y++)
+                for (int x = 0; x < img.GetWidth(); x++) if (img.GetPixel(x, y).A > 0.5f) { sum += x + 0.5f; n++; }
+            return _neckX[t] = n > 0 ? sum / n : t.GetWidth() / 2f;
+        }
 
         /// <summary>Двухзвенный IK: из плеча (бедра) к цели, сгиб в сторону bendSign. Возвращает углы звеньев.</summary>
         static (float a1, float a2, Vector2 joint) Ik(Vector2 root, Vector2 target, float l1, float l2, float bendSign)
@@ -332,7 +343,7 @@ namespace Rastvordd.Client
             var shT = RigTune.Get(_set.Name, "shoulders");
             var shNear = torsoTop + new Vector2(6 + shT.Ox, 3 + shT.Oy);   // плечи шире (телосложение крепче)
             var shFar = torsoTop + new Vector2(-6 - shT.Ox, 3 + shT.Oy);
-            var neck = torsoTop + new Vector2(1, 1);
+            var neck = torsoTop + new Vector2(0, 1);   // шея над центром плеч (раньше +1 вперёд — голова «выезжала»)
 
             // ---------- оружие и кисти ----------
             string held = s.Held;
@@ -406,7 +417,8 @@ namespace Rastvordd.Client
             var wDir = new Vector2(Mathf.Cos(wAng), Mathf.Sin(wAng));
             bool toolGrip = hasItem && IsTool(held) && held != "weapon_spear";
             float supportAt = toolGrip ? (toolSlide >= 0 ? Mathf.Lerp(0.1f, 0.38f, toolSlide) : 0.25f) : 0.5f;
-            Vector2 support = TwoHanded(held ?? "") ? grip + wDir * lenP * (toolGrip ? supportAt : 0.62f) : shFar + new Vector2(1, 12) + fwd * 1.5f;
+            // две точки хвата: рукоятка (grip) и цевьё перед магазином (support, 58% длины от рукоятки)
+            Vector2 support = TwoHanded(held ?? "") ? grip + wDir * lenP * (toolGrip ? supportAt : 0.58f) : shFar + new Vector2(1, 12) + fwd * 1.5f;
             if (s.Reload >= 0 && s.Reload > 0.3f && s.Reload < 0.7f)
                 support = grip + wDir * lenP * 0.25f + new Vector2(0, 6);     // вторая кисть за магазином
             if (!hasItem) { grip = shNear + new Vector2(1, 12) + fwd * 1.5f; support = shFar + new Vector2(1, 12) - fwd * 1.5f; }
@@ -414,8 +426,11 @@ namespace Rastvordd.Client
 
             var upT = RigTune.Get(_set.Name, "upperarm"); var foT = RigTune.Get(_set.Name, "forearm");
             float lUp = (_set.UpperArm.GetWidth() - 1) * upT.Sy, lFore = (_set.ForeArm.GetWidth() - 2) * foT.Sy;
-            var armNear = Ik(shNear, grip, lUp, lFore, 1);
-            var armFar = Ik(shFar, support, lUp, lFore, 1);
+            // вниз/влево/вправо видимая (ближняя к камере) рука вытянута к цевью, дальняя держит рукоятку — хват читается;
+            // спиной — как было (ближняя у рукоятки). Инструменты и удар — без смены.
+            bool swapGrip = hasItem && !back && TwoHanded(held) && !toolGrip && s.Swing < 0 && !(s.Reload > 0.3f && s.Reload < 0.7f);
+            var armNear = Ik(shNear, swapGrip ? support : grip, lUp, lFore, 1);
+            var armFar = Ik(shFar, swapGrip ? grip : support, lUp, lFore, 1);
 
             void DrawWeapon()
             {
@@ -505,8 +520,8 @@ namespace Rastvordd.Client
                 var torso = back ? _set.TorsoB : _set.TorsoF;
                 Part(torso, waist, lean, new Vector2(torso.GetWidth() / 2f, torso.GetHeight()), 1, TorsoThick(torso.GetWidth()), "torso");
                 var head = back ? _set.HeadB : _set.HeadF;
-                float headTilt = s.AimDown * 0.15f + lean * 0.5f - s.Flinch * 0.25f;   // в прицеле голова к прикладу; от удара голова дёргается
-                Part(head, neck, headTilt, new Vector2(head.GetWidth() / 2f, head.GetHeight()), 1, HeadWide(head.GetWidth()), "head");
+                float headTilt = s.AimDown * 0.06f - s.Flinch * 0.25f;   // голова держится прямо (наклон корпуса не добавляем); в прицеле — чуть к прикладу
+                Part(head, neck, headTilt, new Vector2(NeckX(head), head.GetHeight()), 1, HeadWide(head.GetWidth()), "head");
             }
 
             if (back)

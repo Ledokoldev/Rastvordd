@@ -426,10 +426,24 @@ namespace Rastvordd.Client
 
             var upT = RigTune.Get(_set.Name, "upperarm"); var foT = RigTune.Get(_set.Name, "forearm");
             float lUp = (_set.UpperArm.GetWidth() - 1) * upT.Sy, lFore = (_set.ForeArm.GetWidth() - 2) * foT.Sy;
+            float lUpBase = lUp, lForeBase = lFore;
             // вниз/влево/вправо видимая (ближняя к камере) рука вытянута к цевью, дальняя держит рукоятку — хват читается;
             // спиной — как было (ближняя у рукоятки). Инструменты и удар — без смены.
             bool swapGrip = hasItem && !back && TwoHanded(held) && !toolGrip && s.Swing < 0 && !(s.Reload > 0.3f && s.Reload < 0.7f);
-            var armNear = Ik(shNear, swapGrip ? support : grip, lUp, lFore, 1);
+            // вытянутая к цевью рука: почти прямая (локоть ~165°, не 180°), локоть ниже линии — кисть берёт цевьё снизу.
+            // Длины руки подгоняются под расстояние до цевья (±25%), иначе на коротком стволе рука сгибалась бы «гармошкой».
+            float nearK = 1f;
+            (float a1, float a2, Vector2 joint) armNear;
+            if (swapGrip)
+            {
+                var tgt = support + new Vector2(0, 1.5f);   // ладонь под цевьём
+                float reach = (tgt - shNear).Length();
+                nearK = Mathf.Clamp(reach / ((lUp + lFore) * 0.991f), 0.75f, 1.35f);
+                var e1 = Ik(shNear, tgt, lUp * nearK, lFore * nearK, 1);
+                var e2 = Ik(shNear, tgt, lUp * nearK, lFore * nearK, -1);
+                armNear = e1.joint.Y >= e2.joint.Y ? e1 : e2;   // локоть вниз
+            }
+            else armNear = Ik(shNear, grip, lUp, lFore, 1);
             var armFar = Ik(shFar, swapGrip ? grip : support, lUp, lFore, 1);
 
             void DrawWeapon()
@@ -462,8 +476,9 @@ namespace Rastvordd.Client
 
             // рука — нарисованные части (плечо, предплечье с кистью), повёрнутые по суставам IK; в локте — «шарнир» цвета рукава,
             // чтобы на сгибе не было щели. Раньше руки были капсулами одного цвета («две палки»), текстура давала только цвет.
-            void DrawArm((float a1, float a2, Vector2 joint) arm, Vector2 sh)
+            void DrawArm((float a1, float a2, Vector2 joint) arm, Vector2 sh, float k = 1f)
             {
+                float lUp = lUpBase * k, lFore = lForeBase * k;
                 var up = ArmPal(_set.UpperArm);
                 int hu = _set.UpperArm.GetHeight(), hf = _set.ForeArm.GetHeight();
                 float su = hu < 6 ? ArmThick(hu) : 1f, sf = hf < 5 ? ArmThick(hf) : 1f;   // старые крошечные части — толще
@@ -529,7 +544,7 @@ namespace Rastvordd.Client
                 // спиной: оружие и руки дальше от камеры — за телом
                 DrawArm(armFar, shFar);
                 DrawWeapon();
-                DrawArm(armNear, shNear);
+                DrawArm(armNear, shNear, nearK);
                 DrawBody();
             }
             else if (fwd.Y > 0.35f && hasItem && TwoHanded(held))
@@ -538,14 +553,14 @@ namespace Rastvordd.Client
                 DrawBody();
                 DrawWeapon();
                 DrawArm(armFar, shFar);
-                DrawArm(armNear, shNear);
+                DrawArm(armNear, shNear, nearK);
             }
             else
             {
                 DrawArm(armFar, shFar);
                 DrawBody();
                 DrawWeapon();
-                DrawArm(armNear, shNear);
+                DrawArm(armNear, shNear, nearK);
             }
             DrawSetTransform(Vector2.Zero, 0, Vector2.One);
         }

@@ -336,7 +336,7 @@ namespace Rastvordd.Sim
         {
             report = null;
             var save = WorldSave.FromJson(json);
-            if (save == null || save.Version is < 3 or > 5 || save.Seed != World.Seed) return false;   // 3–5 совместимы: v4 переводит id стволов, v5 добавил одежду
+            if (save == null || save.Version < 3 || save.Version > new WorldSave().Version || save.Seed != World.Seed) return false;   // 3…текущая совместимы (v4 — id стволов, v5 — одежда, v6 — слоты, v7 — прогрессия D54); раньше было «3–5», и сейвы v6/v7 молча не грузились
             World.Load(save);
             // мир жил, пока игра была закрыта (не больше суток за раз)
             float away = (float)System.Math.Min(24 * 3600, (System.DateTime.UtcNow - save.SavedAtUtc).TotalSeconds);

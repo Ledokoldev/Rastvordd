@@ -333,6 +333,17 @@ namespace Rastvordd.Client
             var spd = System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--speed="));
             if (spd != null && int.TryParse(spd[8..], out int ts)) _timeScale = System.Math.Clamp(ts, 1, 60);   // скорость мира с самого старта
             _myId = _spectate ? _server.ConnectSpectator() : _server.Connect("Игрок");
+            if (!_spectate && System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--rtkit") >= 0 && _server.World.Find(_myId) is Rastvordd.Sim.Actor kit)
+            {
+                // отладка: набор для пробежки по РТ — АКМ и наган с патронами, перфокарты I/II, дизель для «Маяка», хил, карты доступа
+                kit.AddSlot(Rastvordd.Sim.Items.NewSlot("weapon_akm", 30));
+                kit.AddSlot(Rastvordd.Sim.Items.NewSlot("weapon_nagant", 7));
+                kit.Add("ammo_762", 240); kit.Add("ammo_9mm", 80);
+                kit.Add("punchcard_1", 4); kit.Add("punchcard_2", 2); kit.Add("keycard", 3);
+                kit.AddSlot(Rastvordd.Sim.Liquids.Make("canister_20", "diesel", 20));
+                kit.Add("medkit", 4); kit.Add("syringe", 4); kit.Add("bandage", 6);
+                kit.Add("expl_satchel", 4);
+            }
             // летопись вайпа — всегда: обычная игра и песочница пишут в user://chronicle, отладка — куда скажут (--chronicle=путь)
             try
             {

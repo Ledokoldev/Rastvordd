@@ -1,0 +1,76 @@
+{
+ "assets": [
+  {
+   "id": "rig_hero_head_f",
+   "cat": "rig",
+   "rig": true,
+   "ref": "assets/charref/hero_ref_f.png",
+   "h": 0.5,
+   "desc": "the head and a short thick neck of this man, 3/4 front view facing down-right, same short dark hair, stubble, square jaw and face, confident expression. Hand-painted like Project Zomboid, muted natural colours, soft light from the top-left, strong volume"
+  },
+  {
+   "id": "rig_hero_head_b",
+   "cat": "rig",
+   "rig": true,
+   "ref": "assets/charref/hero_ref_b.png",
+   "h": 0.5,
+   "desc": "the head and a short thick neck of this man seen from behind, 3/4 back view facing up-right, back of the short dark hair. Hand-painted like Project Zomboid, muted natural colours, soft light from the top-left, strong volume"
+  },
+  {
+   "id": "rig_hero_torso_f",
+   "cat": "rig",
+   "rig": true,
+   "ref": "assets/charref/hero_ref_f.png",
+   "h": 0.5,
+   "desc": "the torso of this man in his worn quilted khaki telogreika jacket over a dark t-shirt, from the base of the neck to the waist WITHOUT any arms (arms removed at the shoulders, clean rounded shoulder joints), broad chest, 3/4 front view facing down-right. Hand-painted like Project Zomboid, muted natural colours, soft light from the top-left, strong volume"
+  },
+  {
+   "id": "rig_hero_torso_b",
+   "cat": "rig",
+   "rig": true,
+   "ref": "assets/charref/hero_ref_b.png",
+   "h": 0.5,
+   "desc": "the back of this man in his worn quilted khaki telogreika jacket, from the base of the neck to the waist WITHOUT any arms (arms removed at the shoulders), broad back, 3/4 back view facing up-right. Hand-painted like Project Zomboid, muted natural colours, soft light from the top-left, strong volume"
+  },
+  {
+   "id": "rig_hero_pelvis",
+   "cat": "rig",
+   "rig": true,
+   "ref": "assets/charref/hero_ref_f.png",
+   "h": 0.5,
+   "desc": "only his hips in dark grey work trousers with a belt and the bottom hem of the khaki jacket, legs cut off at the top of the thighs, 3/4 front view. Hand-painted like Project Zomboid, muted natural colours, soft light from the top-left, strong volume"
+  },
+  {
+   "id": "rig_hero_upperarm",
+   "cat": "rig",
+   "rig": true,
+   "ref": "assets/charref/hero_ref_f.png",
+   "h": 0.5,
+   "desc": "only his thick upper arm in the quilted khaki telogreika sleeve from shoulder to elbow, perfectly straight and horizontal, shoulder end on the left, elbow end on the right. Hand-painted like Project Zomboid, muted natural colours, soft light from the top-left, strong volume"
+  },
+  {
+   "id": "rig_hero_forearm",
+   "cat": "rig",
+   "rig": true,
+   "ref": "assets/charref/hero_ref_f.png",
+   "h": 0.5,
+   "desc": "only his forearm in the khaki jacket sleeve rolled up to show a strong bare wrist, the hand clenched in a fist as if gripping a handle, perfectly straight and horizontal, elbow end on the left, fist on the right. Hand-painted like Project Zomboid, muted natural colours, soft light from the top-left, strong volume"
+  },
+  {
+   "id": "rig_hero_thigh",
+   "cat": "rig",
+   "rig": true,
+   "ref": "assets/charref/hero_ref_f.png",
+   "h": 0.5,
+   "desc": "only his thigh in dark grey work trousers from hip to knee, perfectly straight and vertical, hip end at the top, knee at the bottom. Hand-painted like Project Zomboid, muted natural colours, soft light from the top-left, strong volume"
+  },
+  {
+   "id": "rig_hero_shin",
+   "cat": "rig",
+   "rig": true,
+   "ref": "assets/charref/hero_ref_f.png",
+   "h": 0.5,
+   "desc": "only his shin in dark grey work trousers tucked into a brown leather work boot, perfectly straight and vertical, knee end at the top, the boot at the bottom with the toe pointing to the right. Hand-painted like Project Zomboid, muted natural colours, soft light from the top-left, strong volume"
+  }
+ ]
+}

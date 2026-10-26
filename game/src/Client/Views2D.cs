@@ -120,6 +120,10 @@ namespace Rastvordd.Client
         float _swing;
 
         public static bool HeroSprites;
+        /// <summary>--rigset=hero: игрок собран из своего набора частей (rig/rig_hero_*), масштаб RigScale.</summary>
+        public static string RigName;
+        public static float RigScale = 1.3f;
+        bool _ownRig;
         readonly bool _hero;
         float _deadT, _idleT;
 
@@ -148,10 +152,11 @@ namespace Rastvordd.Client
             AddChild(_held);
             // управляемый персонаж из частей (если части сгенерированы): руки по IK к оружию, ноги шагают, позы
             _isNpc = isNpc;
-            var rigSet = hero ? null : RigSet.Load(isNpc ? "guard" : "naked");
+            var rigSet = hero ? null : isSelf && RigName != null ? RigSet.Load(RigName) ?? RigSet.Load("naked") : RigSet.Load(isNpc ? "guard" : "naked");
             if (rigSet != null)
             {
                 _rig = new RigView(rigSet);
+                if (isSelf && RigName != null) { _rig.Scale = new Vector2(RigScale, RigScale); _ownRig = true; }   // --rigset: свой набор частей, крупнее (рост как у нарисованного героя)
                 AddChild(_rig);
                 _body.Visible = false;
                 _held.Visible = false;
@@ -169,7 +174,7 @@ namespace Rastvordd.Client
         /// <summary>Одежда (D47): риг собирается слоями на голом наборе (охрана без одежды — свой набор guard).</summary>
         public void SetWorn(string[] worn)
         {
-            if (_rig == null) return;
+            if (_rig == null || _ownRig) return;   // свой набор частей (--rigset) уже одет
             string key = worn == null ? "" : string.Join(",", worn);
             if (key == _wornKey) return;
             _wornKey = key;

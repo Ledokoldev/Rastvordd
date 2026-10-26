@@ -122,6 +122,66 @@
    "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, walking while carrying an AK assault rifle at low ready with BOTH hands (right on the grip, left on the handguard, muzzle down-forward), a full realistic walk cycle. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The mannequin holds only a placeholder; paint a real AK held correctly with both hands as described. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
   },
   {
+   "id": "hero_idle_rifle",
+   "cat": "charvar",
+   "anim": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/anim_idle_rifle.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, standing still at ease, holding a long hunting carbine LOWERED at low ready with both hands (right hand on the grip, left hand under the fore-end), muzzle pointing down at the ground a step ahead, relaxed shoulders, subtle breathing — NOT aiming, carbine NOT raised. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The mannequin holds only a placeholder; paint a real AK held correctly with both hands as described. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_idle_pistol",
+   "cat": "charvar",
+   "anim": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/anim_idle_pistol.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, standing still holding a Makarov pistol LOWERED in both hands at waist height, muzzle pointing at the ground ahead, relaxed — NOT aiming. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The grey box in the mannequin's hand marks where the pistol is. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_crouch_idle_rifle",
+   "cat": "charvar",
+   "anim": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/anim_crouch_idle_rifle.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, crouching low and still on bent knees, holding a long hunting carbine with both hands across the body, muzzle down-forward, alert. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The mannequin holds only a placeholder; paint a real AK held correctly with both hands as described. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_crouch_walk_rifle",
+   "cat": "charvar",
+   "anim": [
+    8,
+    2
+   ],
+   "ref": "assets/charref/anim_crouch_walk_rifle.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, sneaking forward in a low crouch holding a long hunting carbine with both hands, muzzle down-forward, a full crouched walk cycle. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The mannequin holds only a placeholder; paint a real AK held correctly with both hands as described. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_crouch_idle_pistol",
+   "cat": "charvar",
+   "anim": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/anim_crouch_idle_pistol.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, crouching low and still on bent knees, holding a Makarov pistol in both hands lowered in front of the chest, alert. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The grey box in the mannequin's hand marks where the pistol is. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_crouch_walk_pistol",
+   "cat": "charvar",
+   "anim": [
+    8,
+    2
+   ],
+   "ref": "assets/charref/anim_crouch_walk_pistol.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, sneaking forward in a low crouch holding a Makarov pistol in both hands lowered in front of the chest, a full crouched walk cycle. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The grey box in the mannequin's hand marks where the pistol is. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
    "id": "hero_melee",
    "cat": "charvar",
    "anim": [

@@ -1,0 +1,25 @@
+{
+ "anim_framing": "A character animation sprite sheet for a 2D top-down survival game: a grid of {cols} columns and {rows} rows of equally spaced frames on a transparent background. Top row: the character facing the camera and to the right (front 3/4 view); bottom row: the same character facing away from the camera and to the right (back 3/4 view). Camera moderately above, about 30 degrees down (not top-down). Identical character, proportions, clothing and lighting in every frame, full body visible in every frame, feet on one baseline per row, frames in time order left to right. No text, no frame, no border, no ground, no cast shadow.",
+ "assets": [
+  {
+   "id": "hero_walk2",
+   "cat": "charvar",
+   "anim": [
+    8,
+    2
+   ],
+   "ref": "assets/charref/anim_walk.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, walking at a calm natural pace, a full realistic walk cycle: heel strike, passing, push-off, arms swinging opposite to the legs. EXACT 8-frame walk cycle, two equal steps, stride length identical on both sides, head height almost constant (tiny bob only): 1) right heel strikes the ground, right foot forward, left foot behind; 2) weight onto right leg; 3) passing — left leg swings past, feet close together; 4) left leg reaching forward; 5) left heel strikes, left foot forward, right foot behind (mirror of frame 1); 6) weight onto left leg; 7) passing — right leg swings past, feet close together; 8) right leg reaching forward. Arms swing opposite to legs. The cycle must loop smoothly from frame 8 back to frame 1. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero_walk_rifle2",
+   "cat": "charvar",
+   "anim": [
+    8,
+    2
+   ],
+   "ref": "assets/charref/anim_walk_rifle.png",
+   "desc": "the same muscular broad-shouldered man (athletic heavy build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket over a dark t-shirt, dark grey work trousers and brown boots, walking while carrying an AK assault rifle at low ready with BOTH hands (right on the grip, left on the handguard, muzzle down-forward), a full realistic walk cycle. EXACT 8-frame walk cycle, two equal steps, stride length identical on both sides, head height almost constant (tiny bob only): 1) right heel strikes the ground, right foot forward, left foot behind; 2) weight onto right leg; 3) passing — left leg swings past, feet close together; 4) left leg reaching forward; 5) left heel strikes, left foot forward, right foot behind (mirror of frame 1); 6) weight onto left leg; 7) passing — right leg swings past, feet close together; 8) right leg reaching forward. Arms swing opposite to legs. The cycle must loop smoothly from frame 8 back to frame 1. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as the pose, timing and camera reference, copy each frame's pose exactly. The mannequin holds only a placeholder; paint a real AK held correctly with both hands as described. RIGHT: the painted character — copy his face, hair, clothes, boots and colours exactly; do not include the reference figure itself. REALISM IS THE PRIORITY: correct human anatomy and joint angles, believable weight and balance, feet actually touching the ground, natural hand grip on objects, consistent body size in every frame; upright confident posture (not hunched). Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  }
+ ]
+}

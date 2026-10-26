@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Godot;
 
 namespace Rastvordd.Client
@@ -57,26 +57,34 @@ namespace Rastvordd.Client
         /// <summary>Кадр и рисуется ли оружие отдельно (false — оружие уже нарисовано в кадре).</summary>
         public static (Texture2D tex, bool showHeld) Pick(in State s)
         {
-            string anim; float t; bool loop = true, held = true;
             string g = s.Gun == Gun.Pistol ? "pistol" : "rifle";
             bool armed = s.Gun is Gun.Pistol or Gun.Long;
-            if (s.Dead) { anim = "death"; t = Mathf.Clamp(s.DeadT / 1.1f, 0, 0.999f); loop = false; held = false; }
-            else if (s.Swing01 > 0) { anim = s.Gun == Gun.Melee ? "melee_tool" : "melee"; t = s.Swing01; loop = false; held = false; }
-            else if (s.Reloading && armed) { anim = "reload_" + g; t = s.Reload01; loop = false; held = false; }
-            else if (s.Kick > 0.05f && armed) { anim = "shoot_" + g; t = 1f - s.Kick; loop = false; held = false; }
-            else if (s.Aim > 0.3f && armed) { anim = "aim_" + g; t = s.Phase / Mathf.Tau; held = false; }
-            else if (s.Crouch) { anim = s.Moving ? "crouch_walk" : "crouch_idle"; t = s.Phase / Mathf.Tau; }
-            else if (s.Moving && s.Gun == Gun.Long) { anim = "walk_rifle"; t = s.Phase / Mathf.Tau; held = false; }
-            else if (s.Moving) { anim = s.Speed > Rastvordd.Sim.World.WalkSpeed + 0.6f ? "run" : "walk"; t = s.Phase / Mathf.Tau; }
-            else if (s.Gun == Gun.Long) { anim = "aim_rifle"; t = 0; held = false; }      // стоя с автоматом — в готовности
-            else { anim = "idle"; t = s.Phase / Mathf.Tau * 0.25f; }
+            // кандидаты по порядку: первый нарисованный лист и берётся (нет кадров «присед с оружием» — обычный присед + ствол отдельно)
+            (string anim, bool loop, float t, bool held)[] c;
+            float cyc = s.Phase / Mathf.Tau;
+            if (s.Dead) c = new[] { ("death", false, Mathf.Clamp(s.DeadT / 1.1f, 0, 0.999f), false) };
+            else if (s.Swing01 > 0) c = new[] { (s.Gun == Gun.Melee ? "melee_tool" : "melee", false, s.Swing01, false) };
+            else if (s.Reloading && armed) c = new[] { ("reload_" + g, false, s.Reload01, false), ("idle_" + g, true, cyc * 0.25f, false) };
+            else if (s.Crouch && armed) c = new[] { ((s.Moving ? "crouch_walk_" : "crouch_idle_") + g, true, s.Moving ? cyc : cyc * 0.25f, false), (s.Moving ? "crouch_walk" : "crouch_idle", true, cyc, true) };
+            else if (s.Kick > 0.05f && armed) c = new[] { ("shoot_" + g, false, 1f - s.Kick, false) };
+            else if (s.Aim > 0.3f && armed) c = new[] { ("aim_" + g, true, cyc * 0.25f, false) };   // к глазу — только по ПКМ
+            else if (s.Crouch) c = new[] { (s.Moving ? "crouch_walk" : "crouch_idle", true, cyc, true) };
+            else if (s.Moving && s.Gun == Gun.Long) c = new[] { ("walk_rifle", true, cyc, false), ("walk", true, cyc, true) };
+            else if (s.Moving) c = new[] { (s.Speed > Rastvordd.Sim.World.WalkSpeed + 0.6f ? "run" : "walk", true, cyc, true), ("walk", true, cyc, true) };
+            else if (armed) c = new[] { ("idle_" + g, true, cyc * 0.25f, false), ("idle", true, cyc * 0.25f, true) };   // стоит — ствол опущен
+            else c = new[] { ("idle", true, cyc * 0.25f, true) };
 
-            var set = Get(anim) ?? Get(s.Moving ? "walk" : "idle") ?? Get("walk");
-            if (set == null) return (null, true);
-            var frames = s.Back ? set.Value.b : set.Value.f;
-            int n = frames.Length;
-            int i = loop ? ((int)(t * n) % n + n) % n : Mathf.Clamp((int)(t * n), 0, n - 1);
-            return (frames[i], held);
+            foreach (var (anim, loop, t, held) in c)
+            {
+                var set = Get(anim);
+                if (set == null) continue;
+                var frames = s.Back ? set.Value.b : set.Value.f;
+                int n = frames.Length;
+                int i = loop ? ((int)(t * n) % n + n) % n : Mathf.Clamp((int)(t * n), 0, n - 1);
+                return (frames[i], held);
+            }
+            var any = Get("idle") ?? Get("walk");
+            return any == null ? (null, true) : ((s.Back ? any.Value.b : any.Value.f)[0], true);
         }
     }
 }

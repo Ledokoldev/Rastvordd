@@ -12,38 +12,93 @@ namespace Rastvordd.Client
     public static class UiTheme
     {
         // ================= ПАЛИТРА =================
-        public static readonly Color Ink = Hex(0xf1f1f1);              // основной текст
-        public static readonly Color Body = Hex(0xbdbdbd);             // описания
-        public static readonly Color Dim = Hex(0x9a9a9a);              // подписи, прописные заголовки
-        public static readonly Color Faint = Hex(0x6a6a6a);            // совсем второстепенное
-        public static readonly Color Accent = Hex(0xf0b357);           // янтарь: прогресс, активное
-        public static readonly Color Good = Hex(0x7bd389);             // хватает, изучено, горит
-        public static readonly Color Bad = Hex(0xe5675f);              // не хватает, гниёт
-        public static readonly Color Info = Hex(0x6cb6ff);             // дом, вода, ссылки
-        public static readonly Color Dark = Hex(0x111111);             // текст на белой кнопке
+        public static Color Ink = Hex(0xf1f1f1);              // основной текст
+        public static Color Body = Hex(0xbdbdbd);             // описания
+        public static Color Dim = Hex(0x9a9a9a);              // подписи, прописные заголовки
+        public static Color Faint = Hex(0x6a6a6a);            // совсем второстепенное
+        public static Color Accent = Hex(0xf0b357);           // янтарь: прогресс, активное
+        public static Color Good = Hex(0x7bd389);             // хватает, изучено, горит
+        public static Color Bad = Hex(0xe5675f);              // не хватает, гниёт
+        public static Color Info = Hex(0x6cb6ff);             // дом, вода, ссылки
+        public static Color Dark = Hex(0x111111);             // текст на белой кнопке
 
-        public static readonly Color HpColor = Hex(0x7bd389);
-        public static readonly Color FoodColor = Hex(0xf0b357);
-        public static readonly Color WaterColor = Hex(0x6cb6ff);
-        public static readonly Color ArmorColor = Hex(0xa8a8a8);
+        public static Color HpColor = Hex(0x7bd389);
+        public static Color FoodColor = Hex(0xf0b357);
+        public static Color WaterColor = Hex(0x6cb6ff);
+        public static Color ArmorColor = Hex(0xa8a8a8);
 
-        public static readonly Color PanelBg = new(20 / 255f, 20 / 255f, 22 / 255f, 0.72f);   // стекло
-        public static readonly Color PanelBorder = new(1, 1, 1, 0.09f);
-        public static readonly Color Shadow = new(0, 0, 0, 0.35f);
-        public static readonly Color Backdrop = new(0, 0, 0, 0.5f);                          // затемнение за большим окном
-        public static readonly Color SlotBg = new(1, 1, 1, 0.07f);
-        public static readonly Color SlotEmpty = new(1, 1, 1, 0.03f);
-        public static readonly Color SlotHover = new(1, 1, 1, 0.12f);
-        public static readonly Color SlotBorder = new(1, 1, 1, 0.08f);
-        public static readonly Color SlotSelBg = new(1, 1, 1, 0.18f);
-        public static readonly Color SlotSelBorder = new(1, 1, 1, 0.75f);
-        public static readonly Color RowBg = new(1, 1, 1, 0.05f);
-        public static readonly Color ChipBg = new(1, 1, 1, 0.08f);
-        public static readonly Color Line = new(1, 1, 1, 0.08f);
-        public static readonly Color BarBack = new(1, 1, 1, 0.12f);
+        public static Color PanelBg = new(20 / 255f, 20 / 255f, 22 / 255f, 0.72f);   // стекло
+        public static Color PanelBorder = new(1, 1, 1, 0.09f);
+        public static Color Shadow = new(0, 0, 0, 0.35f);
+        public static Color Backdrop = new(0, 0, 0, 0.5f);                          // затемнение за большим окном
+        public static Color SlotBg = new(1, 1, 1, 0.07f);
+        public static Color SlotEmpty = new(1, 1, 1, 0.03f);
+        public static Color SlotHover = new(1, 1, 1, 0.12f);
+        public static Color SlotBorder = new(1, 1, 1, 0.08f);
+        public static Color SlotSelBg = new(1, 1, 1, 0.18f);
+        public static Color SlotSelBorder = new(1, 1, 1, 0.75f);
+        public static Color RowBg = new(1, 1, 1, 0.05f);
+        public static Color ChipBg = new(1, 1, 1, 0.08f);
+        public static Color Line = new(1, 1, 1, 0.08f);
+        public static Color BarBack = new(1, 1, 1, 0.12f);
+
+
+        public static Color Tint = Colors.White;   // база полупрозрачных наложений (ячейки, ховер, линии)
+        public static Color Hi = Colors.White;     // выделение: заливка активной кнопки/чипа, ручка ползунка
+        public static Color T(float a) => new(Tint, a);
+        static char _variant = '0';
+        public static char Variant => _variant;
+
+        static UiTheme()
+        {
+            foreach (var arg in OS.GetCmdlineUserArgs())
+                if (arg.StartsWith("--uitheme=") && arg.Length > 10) { Apply(arg[10]); break; }
+        }
+
+        /// <summary>Пресеты внешнего вида: a «Графит», b «Тёплый», c «Контраст»; иначе — исходный.</summary>
+        public static void Apply(char v)
+        {
+            v = char.ToLowerInvariant(v);
+            if (v == 'a')
+            {   // графит: тёмное стекло, холодная тонкая линия, один мягкий акцент
+                Ink = Hex(0xeceef2); Body = Hex(0xb4b9c2); Dim = Hex(0x8b919c); Faint = Hex(0x5c616b);
+                Accent = Hex(0x5fc4d6); Good = Hex(0x76cf9a); Bad = Hex(0xe46f6f); Info = Hex(0x7aa8f0); Dark = Hex(0x0d1014);
+                PanelBg = new(14 / 255f, 17 / 255f, 21 / 255f, 0.86f); PanelBorder = new(1, 1, 1, 0.07f); Shadow = new(0, 0, 0, 0.45f);
+                SlotBg = new(1, 1, 1, 0.05f); SlotEmpty = new(1, 1, 1, 0.02f); SlotHover = new(1, 1, 1, 0.10f); SlotBorder = new(1, 1, 1, 0.06f);
+                SlotSelBg = Accent * new Color(1, 1, 1, 0.16f); SlotSelBorder = Accent;
+                RowBg = new(1, 1, 1, 0.04f); ChipBg = new(1, 1, 1, 0.06f); Line = new(1, 1, 1, 0.06f); BarBack = new(1, 1, 1, 0.09f);
+                Tint = Colors.White; Hi = Accent;
+                PanelRadius = 8; CellRadius = 6; RowRadius = 6; ChipRadius = 6; PanelBorderW = 1; ShadowSize = 24;
+            }
+            else if (v == 'b')
+            {   // тёплый: мягкий кофейный тон, кремовый текст, приглушённая охра
+                Ink = Hex(0xf1e9dc); Body = Hex(0xc4b8a6); Dim = Hex(0x9a8e7d); Faint = Hex(0x6b6254);
+                Accent = Hex(0xd9a35f); Good = Hex(0x9bc47a); Bad = Hex(0xd47a5f); Info = Hex(0x8fb4c2); Dark = Hex(0x2a2218);
+                PanelBg = new(38 / 255f, 31 / 255f, 26 / 255f, 0.88f); PanelBorder = new(1, 0.92f, 0.8f, 0.10f); Shadow = new(0.05f, 0.03f, 0, 0.4f);
+                Tint = Hex(0xfff0d8); Hi = Hex(0xf1e4cc);
+                SlotBg = T(0.06f); SlotEmpty = T(0.025f); SlotHover = T(0.12f); SlotBorder = T(0.08f);
+                SlotSelBg = new(Accent, 0.22f); SlotSelBorder = Accent;
+                RowBg = T(0.05f); ChipBg = T(0.08f); Line = T(0.09f); BarBack = T(0.12f);
+                PanelRadius = 14; CellRadius = 12; RowRadius = 9; ChipRadius = 14; PanelBorderW = 1; ShadowSize = 20;
+            }
+            else if (v == 'c')
+            {   // контраст: почти чёрный, острые углы, белый текст, один сигнальный акцент
+                Ink = Hex(0xffffff); Body = Hex(0xd2d2d2); Dim = Hex(0xa0a0a0); Faint = Hex(0x707070);
+                Accent = Hex(0xffd23f); Good = Hex(0x5fe08a); Bad = Hex(0xff5d52); Info = Hex(0x6cc8ff); Dark = Hex(0x000000);
+                PanelBg = new(0, 0, 0, 0.92f); PanelBorder = new(1, 1, 1, 0.28f); Shadow = new(0, 0, 0, 0.0f);
+                SlotBg = new(1, 1, 1, 0.07f); SlotEmpty = new(1, 1, 1, 0.025f); SlotHover = new(1, 1, 1, 0.16f); SlotBorder = new(1, 1, 1, 0.20f);
+                SlotSelBg = new(Accent, 0.18f); SlotSelBorder = Accent;
+                RowBg = new(1, 1, 1, 0.06f); ChipBg = new(1, 1, 1, 0.10f); Line = new(1, 1, 1, 0.22f); BarBack = new(1, 1, 1, 0.16f);
+                Tint = Colors.White; Hi = Accent;
+                PanelRadius = 0; CellRadius = 0; RowRadius = 0; ChipRadius = 0; PanelBorderW = 1; ShadowSize = 0;
+            }
+            else return;
+            _variant = v; _theme = null;
+        }
 
         // ================= РАЗМЕРЫ =================
-        public const int PanelRadius = 18, CellRadius = 14, RowRadius = 10, ChipRadius = 16;
+        public static int PanelRadius = 18, CellRadius = 14, RowRadius = 10, ChipRadius = 16;
+        public static int PanelBorderW = 1, ShadowSize = 18;
         public const int PanelPad = 22, PanelGap = 28;
         public const int FontTitle = 24, FontBody = 14, FontCaption = 12, FontSmall = 13;
         public const float CellSize = 88, CellGap = 10;          // ячейки рюкзака, пояса, ящиков
@@ -138,15 +193,15 @@ namespace Rastvordd.Client
         }
 
         /// <summary>Стеклянная панель окна: полупрозрачная, рамка 1 px, мягкая тень.</summary>
-        public static StyleBoxFlat Glass(int pad = PanelPad, float alpha = -1, int radius = PanelRadius)
+        public static StyleBoxFlat Glass(int pad = PanelPad, float alpha = -1, int radius = -1)
         {
-            var f = Box(alpha < 0 ? PanelBg : new Color(PanelBg, alpha), radius, PanelBorder, 1, pad);
-            f.ShadowColor = Shadow; f.ShadowSize = 18; f.ShadowOffset = new Vector2(0, 6);
+            var f = Box(alpha < 0 ? PanelBg : new Color(PanelBg, alpha), radius < 0 ? PanelRadius : radius, PanelBorder, PanelBorderW, pad);
+            f.ShadowColor = Shadow; f.ShadowSize = ShadowSize; f.ShadowOffset = new Vector2(0, 6);
             return f;
         }
 
         /// <summary>Мелкая плашка HUD (подсказки, лента, часы): то же стекло, меньше отступы и скругление.</summary>
-        public static StyleBoxFlat Pill(float alpha = 0.62f) => Box(new Color(PanelBg, alpha), 12, PanelBorder, 1, 12, 7);
+        public static StyleBoxFlat Pill(float alpha = 0.62f) => Box(new Color(PanelBg, alpha), Mathf.Min(12, PanelRadius), PanelBorder, 1, 12, 7);
 
         static Theme _theme;
         public static Theme Theme
@@ -160,14 +215,14 @@ namespace Rastvordd.Client
                 t.SetColor("font_color", "Label", Ink);
 
                 // кнопка по умолчанию — вторичная: контур
-                t.SetStylebox("normal", "Button", Box(new Color(1, 1, 1, 0.04f), RowRadius, new Color(1, 1, 1, 0.22f), 1, 16, 9));
-                t.SetStylebox("hover", "Button", Box(new Color(1, 1, 1, 0.12f), RowRadius, new Color(1, 1, 1, 0.4f), 1, 16, 9));
-                t.SetStylebox("pressed", "Button", Box(new Color(1, 1, 1, 0.9f), RowRadius, new Color(1, 1, 1, 0.9f), 1, 16, 9));
-                t.SetStylebox("hover_pressed", "Button", Box(new Color(1, 1, 1, 0.95f), RowRadius, Colors.White, 1, 16, 9));
-                t.SetStylebox("disabled", "Button", Box(new Color(1, 1, 1, 0.02f), RowRadius, new Color(1, 1, 1, 0.08f), 1, 16, 9));
+                t.SetStylebox("normal", "Button", Box(T(0.04f), RowRadius, T(0.22f), 1, 16, 9));
+                t.SetStylebox("hover", "Button", Box(T(0.12f), RowRadius, T(0.4f), 1, 16, 9));
+                t.SetStylebox("pressed", "Button", Box(T(0.9f), RowRadius, T(0.9f), 1, 16, 9));
+                t.SetStylebox("hover_pressed", "Button", Box(T(0.95f), RowRadius, Hi, 1, 16, 9));
+                t.SetStylebox("disabled", "Button", Box(T(0.02f), RowRadius, T(0.08f), 1, 16, 9));
                 t.SetStylebox("focus", "Button", new StyleBoxEmpty());
                 t.SetColor("font_color", "Button", Ink);
-                t.SetColor("font_hover_color", "Button", Colors.White);
+                t.SetColor("font_hover_color", "Button", Hi);
                 t.SetColor("font_pressed_color", "Button", Dark);
                 t.SetColor("font_hover_pressed_color", "Button", Dark);
                 t.SetColor("font_disabled_color", "Button", Faint);
@@ -176,10 +231,10 @@ namespace Rastvordd.Client
 
                 // главная кнопка — белая заливка, тёмный текст
                 t.SetTypeVariation("Primary", "Button");
-                t.SetStylebox("normal", "Primary", Box(new Color(0.95f, 0.95f, 0.95f), RowRadius, null, 0, 18, 10));
-                t.SetStylebox("hover", "Primary", Box(Colors.White, RowRadius, null, 0, 18, 10));
+                t.SetStylebox("normal", "Primary", Box(Hi * 0.95f, RowRadius, null, 0, 18, 10));
+                t.SetStylebox("hover", "Primary", Box(Hi, RowRadius, null, 0, 18, 10));
                 t.SetStylebox("pressed", "Primary", Box(Accent, RowRadius, null, 0, 18, 10));
-                t.SetStylebox("disabled", "Primary", Box(new Color(1, 1, 1, 0.08f), RowRadius, null, 0, 18, 10));
+                t.SetStylebox("disabled", "Primary", Box(T(0.08f), RowRadius, null, 0, 18, 10));
                 t.SetColor("font_color", "Primary", Dark);
                 t.SetColor("font_hover_color", "Primary", Dark);
                 t.SetColor("font_pressed_color", "Primary", Dark);
@@ -188,16 +243,16 @@ namespace Rastvordd.Client
                 // фильтр-«таблетка»: активная — белая
                 t.SetTypeVariation("Chip", "Button");
                 t.SetStylebox("normal", "Chip", Box(ChipBg, ChipRadius, null, 0, 14, 6));
-                t.SetStylebox("hover", "Chip", Box(new Color(1, 1, 1, 0.15f), ChipRadius, null, 0, 14, 6));
-                t.SetStylebox("pressed", "Chip", Box(Colors.White, ChipRadius, null, 0, 14, 6));
-                t.SetStylebox("hover_pressed", "Chip", Box(Colors.White, ChipRadius, null, 0, 14, 6));
+                t.SetStylebox("hover", "Chip", Box(T(0.15f), ChipRadius, null, 0, 14, 6));
+                t.SetStylebox("pressed", "Chip", Box(Hi, ChipRadius, null, 0, 14, 6));
+                t.SetStylebox("hover_pressed", "Chip", Box(Hi, ChipRadius, null, 0, 14, 6));
                 t.SetColor("font_color", "Chip", Hex(0xd0d0d0));
                 t.SetFont("font", "Chip", Text);
                 t.SetFontSize("font_size", "Chip", FontSmall);
 
                 // поле ввода
-                t.SetStylebox("normal", "LineEdit", Box(new Color(1, 1, 1, 0.06f), RowRadius, new Color(1, 1, 1, 0.15f), 1, 12, 8));
-                t.SetStylebox("focus", "LineEdit", Box(new Color(1, 1, 1, 0.0f), RowRadius, new Color(1, 1, 1, 0.6f), 1, 12, 8));
+                t.SetStylebox("normal", "LineEdit", Box(T(0.06f), RowRadius, T(0.15f), 1, 12, 8));
+                t.SetStylebox("focus", "LineEdit", Box(T(0.0f), RowRadius, T(0.6f), 1, 12, 8));
                 t.SetColor("font_color", "LineEdit", Ink);
                 t.SetColor("font_placeholder_color", "LineEdit", Faint);
                 t.SetColor("caret_color", "LineEdit", Accent);
@@ -210,16 +265,16 @@ namespace Rastvordd.Client
                 foreach (var s in new[] { "normal", "hover", "pressed", "hover_pressed", "disabled" }) t.SetStylebox(s, "CheckBox", Box(Colors.Transparent, 0, null, 0, 2, 4));
                 t.SetStylebox("focus", "CheckBox", new StyleBoxEmpty());
                 t.SetStylebox("slider", "HSlider", Box(BarBack, 3, null, 0, 0, 2));
-                t.SetStylebox("grabber_area", "HSlider", Box(new Color(1, 1, 1, 0.75f), 3, null, 0, 0, 2));
-                t.SetStylebox("grabber_area_highlight", "HSlider", Box(Colors.White, 3, null, 0, 0, 2));
-                t.SetIcon("grabber", "HSlider", Dot(14, Colors.White));
-                t.SetIcon("grabber_highlight", "HSlider", Dot(16, Colors.White));
+                t.SetStylebox("grabber_area", "HSlider", Box(T(0.75f), 3, null, 0, 0, 2));
+                t.SetStylebox("grabber_area_highlight", "HSlider", Box(Hi, 3, null, 0, 0, 2));
+                t.SetIcon("grabber", "HSlider", Dot(14, Hi));
+                t.SetIcon("grabber_highlight", "HSlider", Dot(16, Hi));
 
                 // тонкие полосы прокрутки
-                t.SetStylebox("scroll", "VScrollBar", Box(new Color(1, 1, 1, 0.03f), 3, null, 0, 3, 0));
-                t.SetStylebox("grabber", "VScrollBar", Box(new Color(1, 1, 1, 0.22f), 3, null, 0, 3, 0));
-                t.SetStylebox("grabber_highlight", "VScrollBar", Box(new Color(1, 1, 1, 0.4f), 3, null, 0, 3, 0));
-                t.SetStylebox("grabber_pressed", "VScrollBar", Box(new Color(1, 1, 1, 0.5f), 3, null, 0, 3, 0));
+                t.SetStylebox("scroll", "VScrollBar", Box(T(0.03f), 3, null, 0, 3, 0));
+                t.SetStylebox("grabber", "VScrollBar", Box(T(0.22f), 3, null, 0, 3, 0));
+                t.SetStylebox("grabber_highlight", "VScrollBar", Box(T(0.4f), 3, null, 0, 3, 0));
+                t.SetStylebox("grabber_pressed", "VScrollBar", Box(T(0.5f), 3, null, 0, 3, 0));
 
                 // всплывающие подсказки — тоже стекло
                 t.SetStylebox("panel", "TooltipPanel", Glass(12, 0.92f, 12));
@@ -377,6 +432,14 @@ namespace Rastvordd.Client
             var tex = Art.Icon(id);
             if (tex == null) return;
             var m = mod ?? Colors.White;
+            // вписать с сохранением пропорций (не сплющивать картинку в неквадратной рамке)
+            var ts = tex.GetSize();
+            if (ts.X > 0 && ts.Y > 0 && r.Size.X > 0 && r.Size.Y > 0)
+            {
+                float k = Mathf.Min(r.Size.X / ts.X, r.Size.Y / ts.Y);
+                var fit = ts * k;
+                r = new Rect2(r.GetCenter() - fit / 2, fit);
+            }
             if (IconTilt.TryGetValue(id, out var t))
             {
                 var center = r.GetCenter();
@@ -423,7 +486,7 @@ namespace Rastvordd.Client
         {
             var r = new Rect2(Vector2.Zero, Size);
             if (BoxAlpha > 0) UiTheme.DrawRound(this, r, new Color(1, 1, 1, BoxAlpha), Radius);
-            if (Id != null) UiTheme.DrawIcon(this, Id, r.Grow(-Size.X * 0.12f), Mod);
+            if (Id != null) UiTheme.DrawIcon(this, Id, r.Grow(-Mathf.Min(Size.X, Size.Y) * 0.12f), Mod);
         }
     }
 }

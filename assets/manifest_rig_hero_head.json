@@ -1,0 +1,12 @@
+{
+ "assets": [
+  {
+   "id": "rig_hero_head_f",
+   "cat": "rig",
+   "rig": true,
+   "ref": "assets/gen/rigcut/hero_apose_d1.png",
+   "h": 0.5,
+   "desc": "the head and a short thick neck of this man, 3/4 front view facing down-right, HEAD RAISED and looking straight ahead (not looking down): face fully visible, both eyes clearly visible and open, eyebrows above them, short dark hair, stubble, square jaw, calm confident expression. Hand-painted like Project Zomboid, muted natural colours, soft light from the top-left, strong volume"
+  }
+ ]
+}

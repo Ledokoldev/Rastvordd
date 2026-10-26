@@ -682,6 +682,16 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             ground.AddChild(new TerrainView(map, 1337));
         }
 
+        CanvasLayer _rigTuneLayer;
+        /// <summary>F6 (Ctrl+6): окно ручной настройки рига игрока (набор --rigset или «naked»).</summary>
+        void ToggleRigTune()
+        {
+            if (_rigTuneLayer != null) { _rigTuneLayer.QueueFree(); _rigTuneLayer = null; return; }
+            _rigTuneLayer = new CanvasLayer { Layer = 50 };
+            _rigTuneLayer.AddChild(new RigTuneWindow(ActorView2D.RigName ?? "naked"));
+            AddChild(_rigTuneLayer);
+        }
+
         System.Collections.Generic.List<(string, System.Action)> _teleports;
 
         void BuildMap(MapInfo map)
@@ -764,6 +774,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     case Key.Tab: _invOpen = !_invOpen; if (!_invOpen && _cur.Self.Ui != null) _uiReq = (UiOp.Close, null, 0); break;
                     case Key.G: _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw(); break;
                     case Key.F5: SaveWorld(); _hud.Toast("Мир сохранён"); break;
+                    case Key.F6: ToggleRigTune(); break;   // ручная настройка рига (размеры и сдвиги частей)
                     case Key.F12: SaveScreenshot($"user://shot_{Time.GetTicksMsec()}.png"); break;
                     case Key.Escape when _mapView.Visible:
                         _mapView.Visible = false;

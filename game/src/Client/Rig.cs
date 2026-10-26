@@ -6,6 +6,8 @@ namespace Rastvordd.Client
     public sealed class RigSet
     {
         public Texture2D HeadF, HeadB, TorsoF, TorsoB, Pelvis, UpperArm, ForeArm, Thigh, Shin;
+        /// <summary>Имя набора (rig_&lt;имя&gt;_*) — ключ ручной настройки RigTune (F6).</summary>
+        public string Name;
 
         /// <summary>Часть по имени файла (head_f, torso_b, …) — для сборки одежды (WearLook).</summary>
         public Texture2D Part(string p) => p switch
@@ -56,6 +58,7 @@ namespace Rastvordd.Client
             Texture2D T(string p) => Art.Get($"rig/rig_{name}_{p}");
             var s = new RigSet
             {
+                Name = name,
                 HeadF = T("head_f"), HeadB = T("head_b"), TorsoF = ShapeTorso(T("torso_f")), TorsoB = ShapeTorso(T("torso_b")), Pelvis = T("pelvis"),
                 UpperArm = T("upperarm"), ForeArm = T("forearm"), Thigh = T("thigh"), Shin = T("shin"),
             };
@@ -165,9 +168,16 @@ namespace Rastvordd.Client
         bool _mirror;
 
         /// <summary>Рисует часть: позиция в «правом» пространстве (смотрим вправо), поворот, точка крепления в текстуре.</summary>
-        void Part(Texture2D t, Vector2 pos, float rot, Vector2 pivot, float sy = 1f, float sx = 1f)
+        void Part(Texture2D t, Vector2 pos, float rot, Vector2 pivot, float sy = 1f, float sx = 1f, string key = null, bool len = true)
         {
             if (t == null) return;
+            if (key != null)
+            {
+                // ручная настройка (F6): ширина, длина, сдвиг части — сдвиг вдоль осей части, повёрнутых с ней
+                var tu = RigTune.Get(_set.Name, key);
+                sx *= tu.Sx; if (len) sy *= tu.Sy;
+                pos += new Vector2(tu.Ox, tu.Oy).Rotated(rot);
+            }
             var p = pos + RigView.Feet;
             if (_mirror) { p.X = RigView.VW - p.X; rot = -rot; }
             DrawSetTransform(p.Round(), rot, new Vector2(_mirror ? -sx : sx, sy));
@@ -256,7 +266,7 @@ namespace Rastvordd.Client
             // Цикл 2π = два шага. У каждой ноги своя доля цикла u: [0, duty) — опора (стопа на земле, едет назад
             // равномерно, как земля под идущим), [duty, 1) — перенос (стопа поднимается и выносится вперёд).
             // u = 0 — удар пяткой: ровно в этот момент Views2D считает касание и звучит шаг.
-            float lThigh = _set.Thigh.GetHeight() - 1, lShin = _set.Shin.GetHeight() - 1, legL = lThigh + lShin;
+            float lThigh = (_set.Thigh.GetHeight() - 1) * RigTune.Get(_set.Name, "thigh").Sy, lShin = (_set.Shin.GetHeight() - 1) * RigTune.Get(_set.Name, "shin").Sy, legL = lThigh + lShin;
             float cad = s.Cadence > 0 ? s.Cadence : Footsteps.Cadence(s.Speed, s.Crouch);
             float duty = s.Sprint ? 0.4f : 0.6f;     // бег — с фазой полёта, ходьба — с двойной опорой
             // полуразмах шага без проскальзывания: за время опоры стопа проходит 2S = скорость × время опоры.
@@ -285,8 +295,9 @@ namespace Rastvordd.Client
 
             // стоя ноги прямые (таз на полную длину ноги); присед стоя — полуколено, вприсядку на ходу таз чуть выше
             float hipY = -legL + 0.05f + crouch * (12 - 3 * gait) + bob + swingDip;
-            var hipL = new Vector2(-4, hipY);   // ноги шире расставлены: просвет между ними, фигура не «бочкой»
-            var hipR = new Vector2(5, hipY);
+            float hipsX = RigTune.Get(_set.Name, "hips").Ox;
+            var hipL = new Vector2(-4 - hipsX, hipY);   // ноги шире расставлены: просвет между ними, фигура не «бочкой»
+            var hipR = new Vector2(5 + hipsX, hipY);
 
             // стопа ноги с долей цикла u: вдоль взгляда (по земле) + подъём при переносе
             Vector2 Foot(float u, float x)
@@ -315,10 +326,11 @@ namespace Rastvordd.Client
             float lean = (s.Sprint ? 0.18f : 0.06f) * gait + crouch * 0.12f - s.Flinch * 0.3f;
             lean += swingLean * Mathf.Clamp(Mathf.Abs(fwd.X) + 0.3f, 0, 1);   // в профиль наклон виден, анфас — меньше
             var waist = new Vector2(0, hipY - 2 + breath);
-            float torsoH = (back ? _set.TorsoB : _set.TorsoF).GetHeight();
+            float torsoH = (back ? _set.TorsoB : _set.TorsoF).GetHeight() * RigTune.Get(_set.Name, "torso").Sy;
             var torsoTop = waist + new Vector2(Mathf.Sin(lean) * torsoH, -Mathf.Cos(lean) * torsoH);
-            var shNear = torsoTop + new Vector2(6, 3);   // плечи шире (телосложение крепче)
-            var shFar = torsoTop + new Vector2(-6, 3);
+            var shT = RigTune.Get(_set.Name, "shoulders");
+            var shNear = torsoTop + new Vector2(6 + shT.Ox, 3 + shT.Oy);   // плечи шире (телосложение крепче)
+            var shFar = torsoTop + new Vector2(-6 - shT.Ox, 3 + shT.Oy);
             var neck = torsoTop + new Vector2(1, 1);
 
             // ---------- оружие и кисти ----------
@@ -399,7 +411,8 @@ namespace Rastvordd.Client
             if (!hasItem) { grip = shNear + new Vector2(1, 12) + fwd * 1.5f; support = shFar + new Vector2(1, 12) - fwd * 1.5f; }
             if (s.Dead) { grip = shNear + new Vector2(9, -7); support = shFar + new Vector2(-9, -5); }   // руки раскинуты
 
-            float lUp = _set.UpperArm.GetWidth() - 1, lFore = _set.ForeArm.GetWidth() - 2;
+            var upT = RigTune.Get(_set.Name, "upperarm"); var foT = RigTune.Get(_set.Name, "forearm");
+            float lUp = (_set.UpperArm.GetWidth() - 1) * upT.Sy, lFore = (_set.ForeArm.GetWidth() - 2) * foT.Sy;
             var armNear = Ik(shNear, grip, lUp, lFore, 1);
             var armFar = Ik(shFar, support, lUp, lFore, 1);
 
@@ -438,11 +451,11 @@ namespace Rastvordd.Client
                 var up = ArmPal(_set.UpperArm);
                 int hu = _set.UpperArm.GetHeight(), hf = _set.ForeArm.GetHeight();
                 float su = hu < 6 ? ArmThick(hu) : 1f, sf = hf < 5 ? ArmThick(hf) : 1f;   // старые крошечные части — толще
-                Part(_set.UpperArm, sh, arm.a1, new Vector2(0.5f, hu / 2f), su, (lUp + 1) / _set.UpperArm.GetWidth());
+                Part(_set.UpperArm, sh + new Vector2(upT.Ox, upT.Oy), arm.a1, new Vector2(0.5f, hu / 2f), su * upT.Sx, (lUp + 1) / _set.UpperArm.GetWidth());
                 var j = arm.joint + RigView.Feet; if (_mirror) j.X = RigView.VW - j.X;
                 DrawSetTransform(Vector2.Zero, 0, Vector2.One);
                 DrawCircle(j.Round(), Mathf.Max(1.5f, hu * su * 0.42f), up.fill);
-                Part(_set.ForeArm, arm.joint, arm.a2, new Vector2(1f, hf / 2f), sf, (lFore + 2) / _set.ForeArm.GetWidth());
+                Part(_set.ForeArm, arm.joint + new Vector2(foT.Ox, foT.Oy), arm.a2, new Vector2(1f, hf / 2f), sf * foT.Sx, (lFore + 2) / _set.ForeArm.GetWidth());
                 DrawSetTransform(Vector2.Zero, 0, Vector2.One);
             }
 
@@ -456,15 +469,15 @@ namespace Rastvordd.Client
             void DrawLeg(Vector2 hip, Vector2 foot)
             {
                 var leg = Ik(hip, foot, lThigh, lShin, kneeBend);
-                Part(_set.Thigh, hip, leg.a1 - Mathf.Pi / 2, new Vector2(_set.Thigh.GetWidth() / 2f, 1), 1, LegThick(_set.Thigh.GetWidth()));
-                Part(_set.Shin, leg.joint, leg.a2 - Mathf.Pi / 2, new Vector2(_set.Shin.GetWidth() / 2f, 1), 1, LegThick(_set.Shin.GetWidth()));
+                Part(_set.Thigh, hip, leg.a1 - Mathf.Pi / 2, new Vector2(_set.Thigh.GetWidth() / 2f, 1), 1, LegThick(_set.Thigh.GetWidth()), "thigh");
+                Part(_set.Shin, leg.joint, leg.a2 - Mathf.Pi / 2, new Vector2(_set.Shin.GetWidth() / 2f, 1), 1, LegThick(_set.Shin.GetWidth()), "shin");
             }
 
             // звено ноги от a до b: текстура тянется/сжимается — так видно ракурсное сокращение (бедро к камере)
             void Seg(Texture2D t, Vector2 a, Vector2 b, float l)
             {
                 var d = b - a;
-                Part(t, a, Mathf.Atan2(d.Y, d.X) - Mathf.Pi / 2, new Vector2(t.GetWidth() / 2f, 1), Mathf.Max(0.25f, d.Length() / l), LegThick(t.GetWidth()));
+                Part(t, a, Mathf.Atan2(d.Y, d.X) - Mathf.Pi / 2, new Vector2(t.GetWidth() / 2f, 1), Mathf.Max(0.25f, d.Length() / l) * (t == _set.Thigh ? RigTune.Get(_set.Name, "thigh").Sy : RigTune.Get(_set.Name, "shin").Sy), LegThick(t.GetWidth()), t == _set.Thigh ? "thigh" : "shin", false);
             }
 
             void DrawBody()
@@ -487,12 +500,12 @@ namespace Rastvordd.Client
                     DrawLeg(hipL, footFar);
                     DrawLeg(hipR, footNear);
                 }
-                Part(_set.Pelvis, new Vector2(0.5f, hipY - 1), lean * 0.5f, new Vector2(_set.Pelvis.GetWidth() / 2f, _set.Pelvis.GetHeight() * 0.7f), 1, Thick(_set.Pelvis.GetWidth()));
+                Part(_set.Pelvis, new Vector2(0.5f, hipY - 1), lean * 0.5f, new Vector2(_set.Pelvis.GetWidth() / 2f, _set.Pelvis.GetHeight() * 0.7f), 1, Thick(_set.Pelvis.GetWidth()), "pelvis");
                 var torso = back ? _set.TorsoB : _set.TorsoF;
-                Part(torso, waist, lean, new Vector2(torso.GetWidth() / 2f, torso.GetHeight()), 1, TorsoThick(torso.GetWidth()));
+                Part(torso, waist, lean, new Vector2(torso.GetWidth() / 2f, torso.GetHeight()), 1, TorsoThick(torso.GetWidth()), "torso");
                 var head = back ? _set.HeadB : _set.HeadF;
                 float headTilt = s.AimDown * 0.15f + lean * 0.5f - s.Flinch * 0.25f;   // в прицеле голова к прикладу; от удара голова дёргается
-                Part(head, neck, headTilt, new Vector2(head.GetWidth() / 2f, head.GetHeight()), 1, HeadWide(head.GetWidth()));
+                Part(head, neck, headTilt, new Vector2(head.GetWidth() / 2f, head.GetHeight()), 1, HeadWide(head.GetWidth()), "head");
             }
 
             if (back)

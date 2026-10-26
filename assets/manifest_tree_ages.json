@@ -1,0 +1,82 @@
+{
+ "assets": [
+  {
+   "id": "tree_pine_young",
+   "cat": "trees",
+   "h": 3.4,
+   "desc": "a YOUNG Scots pine with orange-brown upper bark and a high umbrella crown of dusty green needle clumps: thin straight trunk, small sparse crown, about a quarter of the size of a mature tree. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_pine_old",
+   "cat": "trees",
+   "h": 8.5,
+   "desc": "a very OLD huge Scots pine with orange-brown upper bark and a high umbrella crown of dusty green needle clumps: thick heavy trunk with deep bark furrows, a few dead branches, massive wide crown, roots visible at the base. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_spruce_young",
+   "cat": "trees",
+   "h": 3.4,
+   "desc": "a YOUNG Siberian spruce with layered drooping branch tiers forming a dark green cone: thin straight trunk, small sparse crown, about a quarter of the size of a mature tree. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_spruce_old",
+   "cat": "trees",
+   "h": 8.5,
+   "desc": "a very OLD huge Siberian spruce with layered drooping branch tiers forming a dark green cone: thick heavy trunk with deep bark furrows, a few dead branches, massive wide crown, roots visible at the base. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_birch_young",
+   "cat": "trees",
+   "h": 3.4,
+   "desc": "a YOUNG birch with white-grey bark with black marks and rounded olive-green leaf clumps: thin straight trunk, small sparse crown, about a quarter of the size of a mature tree. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_birch_old",
+   "cat": "trees",
+   "h": 8.5,
+   "desc": "a very OLD huge birch with white-grey bark with black marks and rounded olive-green leaf clumps: thick heavy trunk with deep bark furrows, a few dead branches, massive wide crown, roots visible at the base. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_oak_young",
+   "cat": "trees",
+   "h": 3.4,
+   "desc": "a YOUNG oak with a gnarled trunk and broad rounded crown of leaf masses: thin straight trunk, small sparse crown, about a quarter of the size of a mature tree. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_oak_old",
+   "cat": "trees",
+   "h": 8.5,
+   "desc": "a very OLD huge oak with a gnarled trunk and broad rounded crown of leaf masses: thick heavy trunk with deep bark furrows, a few dead branches, massive wide crown, roots visible at the base. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_aspen_young",
+   "cat": "trees",
+   "h": 3.4,
+   "desc": "a YOUNG aspen with smooth pale grey-green bark and a narrow crown of trembling round leaves: thin straight trunk, small sparse crown, about a quarter of the size of a mature tree. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_aspen_old",
+   "cat": "trees",
+   "h": 8.5,
+   "desc": "a very OLD huge aspen with smooth pale grey-green bark and a narrow crown of trembling round leaves: thick heavy trunk with deep bark furrows, a few dead branches, massive wide crown, roots visible at the base. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_sapling_1",
+   "cat": "trees",
+   "h": 1.3,
+   "desc": "a tiny spruce sapling knee-high. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_sapling_2",
+   "cat": "trees",
+   "h": 1.3,
+   "desc": "a thin birch sapling with a few leaves. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  },
+  {
+   "id": "tree_sapling_3",
+   "cat": "trees",
+   "h": 1.3,
+   "desc": "a young oak sapling with a handful of leaves. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left for everything, clearly lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps, subtle cool bounce light in the shadows; muted natural colors (not grey, not saturated)"
+  }
+ ]
+}

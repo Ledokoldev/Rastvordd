@@ -1,0 +1,289 @@
+{
+ "assets": [
+  {
+   "id": "clutter_log",
+   "cat": "clutter",
+   "h": 0.45,
+   "desc": "a fallen mossy log lying on the ground. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "clutter_mushrooms",
+   "cat": "clutter",
+   "h": 0.3,
+   "desc": "a cluster of brown and red-capped forest mushrooms. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "clutter_stump",
+   "cat": "clutter",
+   "h": 0.5,
+   "desc": "an old tree stump with roots, moss and an axe mark. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "flowers_chamomile",
+   "cat": "clutter",
+   "h": 0.35,
+   "desc": "a bright patch of white chamomile daisies with yellow centers among grass. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "flowers_heather",
+   "cat": "clutter",
+   "h": 0.4,
+   "desc": "a bright patch of purple heather flowers. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "flowers_lupine",
+   "cat": "clutter",
+   "h": 0.7,
+   "desc": "a clump of tall blue and violet lupine flowers. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "flowers_poppy",
+   "cat": "clutter",
+   "h": 0.45,
+   "desc": "a bright patch of red poppy flowers among green grass. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "flowers_snowdrop",
+   "cat": "clutter",
+   "h": 0.3,
+   "desc": "a small patch of white snowdrop flowers and green leaves poking out of snow. Bold readable silhouette with simple large shapes and strong value contrast so it stays recognizable when shrunk to a tiny pixel-art sprite; no tiny fussy details. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "decal_fern",
+   "cat": "decals",
+   "h": 0.5,
+   "desc": "a small wild fern plant with dark green fronds. Lying flat on the ground seen from the 3/4 top-down game camera, soft contact with the ground, muted natural colours matching olive-green and brown ground, hand-painted like Project Zomboid, gentle light from the top-left"
+  },
+  {
+   "id": "decal_flowers",
+   "cat": "decals",
+   "h": 0.35,
+   "desc": "a small patch of pale wild flowers, faded white and yellow, among grass. Lying flat on the ground seen from the 3/4 top-down game camera, soft contact with the ground, muted natural colours matching olive-green and brown ground, hand-painted like Project Zomboid, gentle light from the top-left"
+  },
+  {
+   "id": "decal_grass_tuft_1",
+   "cat": "decals",
+   "h": 0.5,
+   "desc": "a small tuft of tall wild grass blades, muted green with dry yellow tips. Lying flat on the ground seen from the 3/4 top-down game camera, soft contact with the ground, muted natural colours matching olive-green and brown ground, hand-painted like Project Zomboid, gentle light from the top-left"
+  },
+  {
+   "id": "decal_grass_tuft_2",
+   "cat": "decals",
+   "h": 0.4,
+   "desc": "a small clump of dry yellowed grass and a few weeds. Lying flat on the ground seen from the 3/4 top-down game camera, soft contact with the ground, muted natural colours matching olive-green and brown ground, hand-painted like Project Zomboid, gentle light from the top-left"
+  },
+  {
+   "id": "decal_leaves",
+   "cat": "decals",
+   "h": 0.25,
+   "desc": "a small scatter of dead brown and orange fallen leaves on the ground, seen from above. Lying flat on the ground seen from the 3/4 top-down game camera, soft contact with the ground, muted natural colours matching olive-green and brown ground, hand-painted like Project Zomboid, gentle light from the top-left"
+  },
+  {
+   "id": "decal_leaves_pile",
+   "cat": "decals",
+   "h": 0.6,
+   "w": 1.2,
+   "desc": "a pile of dead brown and yellow fallen leaves, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers. Lying flat on the ground seen from the 3/4 top-down game camera, soft contact with the ground, muted natural colours matching olive-green and brown ground, hand-painted like Project Zomboid, gentle light from the top-left"
+  },
+  {
+   "id": "decal_leaves_scatter",
+   "cat": "decals",
+   "h": 1.0,
+   "w": 2.0,
+   "desc": "a loose scatter of yellow and brown fallen birch and maple leaves, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers. Lying flat on the ground seen from the 3/4 top-down game camera, soft contact with the ground, muted natural colours matching olive-green and brown ground, hand-painted like Project Zomboid, gentle light from the top-left"
+  },
+  {
+   "id": "decal_moss_patch",
+   "cat": "decals",
+   "h": 0.6,
+   "w": 1.2,
+   "desc": "a patch of dark green moss with small weeds, viewed straight down from above, lying flat on the ground, no ground around it, no text, no letters, no numbers. Lying flat on the ground seen from the 3/4 top-down game camera, soft contact with the ground, muted natural colours matching olive-green and brown ground, hand-painted like Project Zomboid, gentle light from the top-left"
+  },
+  {
+   "id": "decal_moss_rocks",
+   "cat": "decals",
+   "h": 1.5,
+   "desc": "small mossy pebbles scattered on the ground, seen from above. Lying flat on the ground seen from the 3/4 top-down game camera, soft contact with the ground, muted natural colours matching olive-green and brown ground, hand-painted like Project Zomboid, gentle light from the top-left"
+  },
+  {
+   "id": "decal_seaweed_pile",
+   "cat": "decals",
+   "view": "top",
+   "w": 1.5,
+   "h": 1.5,
+   "desc": "a heap of washed-up dark brown-green seaweed and kelp on the sand; seen strictly from directly above (orthographic top-down), on transparent background; no text. Lying flat on the ground seen from the 3/4 top-down game camera, soft contact with the ground, muted natural colours matching olive-green and brown ground, hand-painted like Project Zomboid, gentle light from the top-left"
+  },
+  {
+   "id": "bdecay_moss",
+   "cat": "decals",
+   "tile": 3,
+   "desc": "moss, damp stains and grime pattern on a neutral grey background, overlay texture. Lying flat on the ground seen from the 3/4 top-down game camera, soft contact with the ground, muted natural colours matching olive-green and brown ground, hand-painted like Project Zomboid, gentle light from the top-left"
+  },
+  {
+   "id": "weeds_wall",
+   "cat": "grass",
+   "desc": "a low strip of wild weeds, nettles and dry grass growing along the base of a wall, wider than tall. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)",
+   "view": "side",
+   "w": 1.6
+  },
+  {
+   "id": "hay_bales_angled",
+   "cat": "outdoor",
+   "h": 1.0,
+   "desc": "a small stack of rectangular hay bales tied with twine, turned about 30 degrees; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)",
+   "view": "angled",
+   "w": 1.8,
+   "foot": [
+    2.2,
+    1.2,
+    1.0
+   ]
+  },
+  {
+   "id": "haystack",
+   "cat": "outdoor",
+   "h": 3.5,
+   "desc": "a big village haystack (stog) with a pole sticking up from the top, greyish old hay; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)",
+   "view": "front",
+   "w": 3.0,
+   "foot": [
+    3.0,
+    3.0,
+    3.0
+   ]
+  },
+  {
+   "id": "log_pile_side",
+   "cat": "outdoor",
+   "h": 1.0,
+   "desc": "a pile of long felled pine logs stacked on each other, seen in exact side profile; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)",
+   "view": "side",
+   "w": 4.0,
+   "foot": [
+    4.0,
+    1.5,
+    1.0
+   ]
+  },
+  {
+   "id": "stump",
+   "cat": "outdoor",
+   "h": 0.5,
+   "desc": "an old tree stump with rotten bark, moss and a few mushrooms; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; no text, no letters, no numbers, no logos. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)",
+   "view": "front",
+   "w": 0.7,
+   "foot": [
+    0.6,
+    0.6,
+    0.5
+   ]
+  },
+  {
+   "id": "beach_driftwood",
+   "cat": "props",
+   "view": "angled",
+   "w": 2.5,
+   "h": 0.5,
+   "desc": "a large bleached grey driftwood log with broken branches; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, salt crust, rust streaks, flaking paint, seagull droppings; no text, no letters, no numbers. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)",
+   "foot": [
+    2.4,
+    0.6,
+    0.5
+   ]
+  },
+  {
+   "id": "chem_dead_tree",
+   "cat": "props",
+   "view": "front",
+   "w": 2,
+   "h": 4,
+   "desc": "a dead leafless tree bleached white by chemicals; main colours: sky blue and grey plus one accent colour, 2-3 main colours only; wear: partly burnt and sooted; clear readable silhouette, clean shapes, little grunge, Soviet 1970s-1990s; no text, no letters, no numbers, no logos. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)",
+   "foot": [
+    0.6,
+    0.6,
+    4
+   ]
+  },
+  {
+   "id": "hay_bale",
+   "cat": "props",
+   "h": 1,
+   "desc": "a round hay bale, in a fresh summer palette of saturated greens. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "lm_hay_bales",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a stack of rotting rectangular hay bales, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)",
+   "w": 3
+  },
+  {
+   "id": "lm_log_stack",
+   "cat": "props",
+   "h": 2,
+   "desc": "a big stack of felled pine logs, abandoned post-Soviet, weathered, rust, grime, no text, no letters, no numbers, no logos. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)",
+   "w": 6,
+   "view": "side"
+  },
+  {
+   "id": "log_1",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a fallen tree log lying horizontally, mossy bark. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "log_2",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a rotten fallen log with mushrooms, in a murky swamp palette of olive, teal and dark brown. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "log_pile",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a stack of cut firewood logs. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "log_snow",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a fallen log covered with snow. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "quarry_boulders",
+   "cat": "props",
+   "view": "front",
+   "w": 2.2,
+   "desc": "a cluster of three big angular grey granite boulders blasted from a quarry, fresh broken faces; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, rust, flaking paint, dust and dirt; no text, no letters, no numbers, no logos. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)",
+   "foot": [
+    2.0,
+    1.4,
+    1.2
+   ]
+  },
+  {
+   "id": "stump_1",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a sawn tree stump with visible rings and moss. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "stump_2",
+   "cat": "props",
+   "h": 0.7,
+   "desc": "an old rotten broken tree stump with mushrooms. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "stump_burnt",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a charred black tree stump, in a cold winter palette of white, pale blue and dark green. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  },
+  {
+   "id": "stump_snow",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a tree stump covered with snow. Strong readable VOLUME like Project Zomboid sprites: one key light from the top-left, lit top-left surfaces, shaded right and lower parts, dark ambient-occlusion where it meets the ground, rounded masses built from 3-4 value steps; muted natural colours (not grey, not saturated)"
+  }
+ ]
+}

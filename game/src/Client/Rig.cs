@@ -436,11 +436,19 @@ namespace Rastvordd.Client
             (float a1, float a2, Vector2 joint) armNear;
             if (swapGrip)
             {
+                // рука своей длины (как другая): не она тянется к цевью, а оружие придвигается к корпусу,
+                // пока цевьё не окажется на расстоянии почти прямой руки (локоть ~165°)
+                float want = (lUp + lFore) * 0.985f;
+                for (int it = 0; it < 3; it++)
+                {
+                    float excess = (support + new Vector2(0, 1.5f) - shNear).Length() - want;
+                    if (excess <= 0) break;
+                    var pull = -wDir * excess;
+                    grip += pull; support += pull;
+                }
                 var tgt = support + new Vector2(0, 1.5f);   // ладонь под цевьём
-                float reach = (tgt - shNear).Length();
-                nearK = Mathf.Clamp(reach / ((lUp + lFore) * 0.991f), 0.75f, 1.35f);
-                var e1 = Ik(shNear, tgt, lUp * nearK, lFore * nearK, 1);
-                var e2 = Ik(shNear, tgt, lUp * nearK, lFore * nearK, -1);
+                var e1 = Ik(shNear, tgt, lUp, lFore, 1);
+                var e2 = Ik(shNear, tgt, lUp, lFore, -1);
                 armNear = e1.joint.Y >= e2.joint.Y ? e1 : e2;   // локоть вниз
             }
             else armNear = Ik(shNear, grip, lUp, lFore, 1);

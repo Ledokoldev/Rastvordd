@@ -1065,7 +1065,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 Follow = _followId,
                 Move = move,
                 Aim = _aim,
-                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && !_hammerMenu.Visible && !SbBlocksFire && Input.IsMouseButtonPressed(MouseButton.Left)),   // клики по меню крафта не стреляют
+                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && !_hammerMenu.Visible && !SbBlocksFire && _rigTuneLayer == null && Input.IsMouseButtonPressed(MouseButton.Left)),   // при настройке рига (F6) не стреляем   // клики по меню крафта не стреляют
                 Eat = _eatEdge,
                 DebugKit = _debugEdge,
                 Craft = _craftReq,
@@ -1102,7 +1102,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _screenDir = ((screen - vs / 2) / (vs / 2)).Clamp(-Vector2.One, Vector2.One);
 
             // прицеливание на ПКМ: конус уже, видно дальше, камеру можно протянуть к курсору
-            float peekTarget = _forcedPeek ?? (Input.IsMouseButtonPressed(MouseButton.Right) && !(_cur?.Self?.HoldingPlan ?? false) && !(_hammerMenu?.Visible ?? false) ? 1f : 0f);   // с Планом ПКМ — меню
+            float peekTarget = _forcedPeek ?? (_rigTuneLayer != null ? (RigTuneWindow.ForceAim ? 1f : 0f) : 0f) + (_rigTuneLayer == null && Input.IsMouseButtonPressed(MouseButton.Right) && !(_cur?.Self?.HoldingPlan ?? false) && !(_hammerMenu?.Visible ?? false) ? 1f : 0f);   // с Планом ПКМ — меню
             _peek = Mathf.MoveToward(_peek, peekTarget, dt * 5f);
 
             if (_autoAim.HasValue) { _aim = _autoAim.Value; return; }

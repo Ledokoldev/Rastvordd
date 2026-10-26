@@ -176,7 +176,7 @@ namespace Rastvordd.Client
                 // ручная настройка (F6): ширина, длина, сдвиг части — сдвиг вдоль осей части, повёрнутых с ней
                 var tu = RigTune.Get(_set.Name, key);
                 sx *= tu.Sx; if (len) sy *= tu.Sy;
-                pos += new Vector2(tu.Ox, tu.Oy).Rotated(rot);
+                pos += new Vector2(tu.Ox, tu.Oy);   // сдвиг экранный: X — вправо, Y — вниз
             }
             var p = pos + RigView.Feet;
             if (_mirror) { p.X = RigView.VW - p.X; rot = -rot; }
@@ -325,7 +325,8 @@ namespace Rastvordd.Client
             // корпус: наклон вперёд на бегу
             float lean = (s.Sprint ? 0.18f : 0.06f) * gait + crouch * 0.12f - s.Flinch * 0.3f;
             lean += swingLean * Mathf.Clamp(Mathf.Abs(fwd.X) + 0.3f, 0, 1);   // в профиль наклон виден, анфас — меньше
-            var waist = new Vector2(0, hipY - 2 + breath);
+            float upper = RigTune.Get(_set.Name, "upper").Oy;   // F6 «Верх тела ↕»: корпус, голова и руки выше/ниже относительно ног
+            var waist = new Vector2(0, hipY - 2 + breath + upper);
             float torsoH = (back ? _set.TorsoB : _set.TorsoF).GetHeight() * RigTune.Get(_set.Name, "torso").Sy;
             var torsoTop = waist + new Vector2(Mathf.Sin(lean) * torsoH, -Mathf.Cos(lean) * torsoH);
             var shT = RigTune.Get(_set.Name, "shoulders");
@@ -500,7 +501,7 @@ namespace Rastvordd.Client
                     DrawLeg(hipL, footFar);
                     DrawLeg(hipR, footNear);
                 }
-                Part(_set.Pelvis, new Vector2(0.5f, hipY - 1), lean * 0.5f, new Vector2(_set.Pelvis.GetWidth() / 2f, _set.Pelvis.GetHeight() * 0.7f), 1, Thick(_set.Pelvis.GetWidth()), "pelvis");
+                Part(_set.Pelvis, new Vector2(0.5f, hipY - 1 + upper), lean * 0.5f, new Vector2(_set.Pelvis.GetWidth() / 2f, _set.Pelvis.GetHeight() * 0.7f), 1, Thick(_set.Pelvis.GetWidth()), "pelvis");
                 var torso = back ? _set.TorsoB : _set.TorsoF;
                 Part(torso, waist, lean, new Vector2(torso.GetWidth() / 2f, torso.GetHeight()), 1, TorsoThick(torso.GetWidth()), "torso");
                 var head = back ? _set.HeadB : _set.HeadF;

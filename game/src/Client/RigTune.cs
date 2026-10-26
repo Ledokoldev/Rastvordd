@@ -12,10 +12,10 @@ namespace Rastvordd.Client
     {
         public sealed class T { public float Sx = 1, Sy = 1, Ox, Oy; }
 
-        public static readonly string[] Parts = { "head", "torso", "pelvis", "shoulders", "upperarm", "forearm", "hips", "thigh", "shin" };
+        public static readonly string[] Parts = { "upper", "head", "torso", "pelvis", "shoulders", "upperarm", "forearm", "hips", "thigh", "shin" };
         public static readonly Dictionary<string, string> Names = new()
         {
-            ["head"] = "Голова", ["torso"] = "Корпус", ["pelvis"] = "Таз", ["shoulders"] = "Плечи (крепление рук)",
+            ["upper"] = "Верх тела ↕ (Сдвиг Y)", ["head"] = "Голова", ["torso"] = "Корпус", ["pelvis"] = "Таз", ["shoulders"] = "Плечи (крепление рук)",
             ["upperarm"] = "Плечо руки", ["forearm"] = "Предплечье", ["hips"] = "Бёдра (расстановка ног)", ["thigh"] = "Бедро", ["shin"] = "Голень",
         };
 
@@ -102,6 +102,9 @@ namespace Rastvordd.Client
             var reset = new Button { Text = "Сброс части" }; reset.Pressed += () => { RigTune.Reset(_set, Cur); Sync(); };
             var save = new Button { Text = "Сохранить" }; save.Pressed += () => { RigTune.Save(_set); save.Text = "Сохранено ✓"; };
             btns.AddChild(reset); btns.AddChild(save);
+            var aim = new CheckBox { Text = "Поза прицела (вместо ПКМ)" };
+            aim.Toggled += on => ForceAim = on;
+            box.AddChild(aim);
             var slow = new CheckBox { Text = "Замедление ×0,25" };
             slow.Toggled += on => Engine.TimeScale = on ? 0.25 : 1.0;
             box.AddChild(slow);
@@ -128,6 +131,9 @@ namespace Rastvordd.Client
             if (k == 0) t.Sx = val; else if (k == 1) t.Sy = val; else if (k == 2) t.Ox = val; else t.Oy = val;
         }
 
-        public override void _ExitTree() => Engine.TimeScale = 1.0;
+        /// <summary>Галочка «поза прицела»: пока окно открыто, мышь в игру не идёт — прицел включается отсюда.</summary>
+        public static bool ForceAim;
+
+        public override void _ExitTree() { Engine.TimeScale = 1.0; ForceAim = false; }
     }
 }

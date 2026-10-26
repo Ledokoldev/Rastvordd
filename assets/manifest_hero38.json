@@ -1,0 +1,24 @@
+{
+ "assets": [
+  {
+   "id": "hero38_walk",
+   "cat": "charvar",
+   "sheet": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/walk38_ref.png",
+   "desc": "the same muscular broad-shouldered man ('gigachad' build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket, dark grey work trousers and brown boots, walking. The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as pose and camera reference: top row = facing the camera and to the right (front 3/4), bottom row = facing away from the camera and to the right (back 3/4); copy each frame's exact pose, leg and arm positions, proportions and the camera angle (camera only moderately above, about 38 degrees down — NOT a high top-down view). RIGHT: the painted character — copy his face, hair, jacket, trousers, boots and colours exactly. Paint 8 frames of that same person; same size, feet on one baseline per row. Do not include the reference figure itself in the output. Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  },
+  {
+   "id": "hero38_idle",
+   "cat": "charvar",
+   "sheet": [
+    4,
+    2
+   ],
+   "ref": "assets/charref/idle38_ref.png",
+   "desc": "the same muscular broad-shouldered man ('gigachad' build: wide shoulders and chest, thick neck and arms, narrow waist, strong legs, normal-sized boots), short dark hair, stubble, square jaw, wearing a worn quilted khaki telogreika jacket, dark grey work trousers and brown boots, standing relaxed (idle). The attached image has two parts. LEFT: a grey mannequin grid — use it ONLY as pose and camera reference: top row = facing the camera and to the right (front 3/4), bottom row = facing away from the camera and to the right (back 3/4); copy each frame's exact pose, leg and arm positions, proportions and the camera angle (camera only moderately above, about 38 degrees down — NOT a high top-down view). RIGHT: the painted character — copy his face, hair, jacket, trousers, boots and colours exactly. Paint 8 frames of that same person; same size, feet on one baseline per row. Do not include the reference figure itself in the output. Gloomy post-Soviet survival, muted desaturated natural colours (olive, khaki, grey-brown), hand-painted like Project Zomboid and Rust, soft overcast light from the top-left, strong readable volume."
+  }
+ ]
+}

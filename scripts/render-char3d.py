@@ -13,7 +13,7 @@ OUT = args[2] if len(args) > 2 else "C:/Temp/claude/char/sheet.png"
 CELL = 128           # кадр в игре
 SS = 4               # суперсэмплинг: рендер 512 → уменьшение до 128
 PPM = 32             # пикселей на метр, как у всех ассетов мира
-TILT = 53.13         # камера с юга: cos/sin = 0.75 — как в игре (высота ×0,75 от глубины, Iso.HS); по Y лист потом ×1,25
+TILT = float(os.environ.get("CHAR_TILT", "53.13"))  # CHAR_TILT=38 — камера ниже (ближе к ракурсу нарисованных ассетов);         # камера с юга: cos/sin = 0.75 — как в игре (высота ×0,75 от глубины, Iso.HS); по Y лист потом ×1,25
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=GLB)

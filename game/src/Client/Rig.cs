@@ -349,7 +349,8 @@ namespace Rastvordd.Client
             string held = s.Held;
             if (s.Dead) held = null;   // оружие выпало
             bool hasItem = held != null;
-            float len = (hasItem ? HeldLength(held) : 0) * 32f;
+            var wT = RigTune.Get(_set.Name, "weapon");   // F6 «Оружие»: размер (Sx), цевьё ближе/дальше (Sy), сдвиг X/Y
+            float len = (hasItem ? HeldLength(held) : 0) * 32f * wT.Sx;
             float wAng = aim + s.Recoil * (_mirror ? -1 : 1);
             Vector2 grip;
             float down = 0, toolSlide = -1;
@@ -418,7 +419,8 @@ namespace Rastvordd.Client
             bool toolGrip = hasItem && IsTool(held) && held != "weapon_spear";
             float supportAt = toolGrip ? (toolSlide >= 0 ? Mathf.Lerp(0.1f, 0.38f, toolSlide) : 0.25f) : 0.5f;
             // две точки хвата: рукоятка (grip) и цевьё перед магазином (support, 58% длины от рукоятки)
-            Vector2 support = TwoHanded(held ?? "") ? grip + wDir * lenP * (toolGrip ? supportAt : 0.58f) : shFar + new Vector2(1, 12) + fwd * 1.5f;
+            if (hasItem && !toolGrip) grip += new Vector2(wT.Ox, wT.Oy);
+            Vector2 support = TwoHanded(held ?? "") ? grip + wDir * lenP * (toolGrip ? supportAt : 0.58f * wT.Sy) : shFar + new Vector2(1, 12) + fwd * 1.5f;
             if (s.Reload >= 0 && s.Reload > 0.3f && s.Reload < 0.7f)
                 support = grip + wDir * lenP * 0.25f + new Vector2(0, 6);     // вторая кисть за магазином
             if (!hasItem) { grip = shNear + new Vector2(1, 12) + fwd * 1.5f; support = shFar + new Vector2(1, 12) - fwd * 1.5f; }
@@ -557,18 +559,17 @@ namespace Rastvordd.Client
             }
             else if (fwd.Y > 0.35f && hasItem && TwoHanded(held))
             {
-                // к камере: оружие перед грудью, обе руки на нём — поверх корпуса
+                // к камере: оружие перед грудью; рука на цевье подхватывает снизу — под оружием, кисть на рукоятке — поверх
                 DrawBody();
-                DrawWeapon();
-                DrawArm(armFar, shFar);
-                DrawArm(armNear, shNear, nearK);
+                if (swapGrip) { DrawArm(armNear, shNear, nearK); DrawWeapon(); DrawArm(armFar, shFar); }
+                else { DrawWeapon(); DrawArm(armFar, shFar); DrawArm(armNear, shNear, nearK); }
             }
             else
             {
                 DrawArm(armFar, shFar);
                 DrawBody();
-                DrawWeapon();
-                DrawArm(armNear, shNear, nearK);
+                if (swapGrip) { DrawArm(armNear, shNear, nearK); DrawWeapon(); }   // ладонь под цевьём — оружие поверх руки
+                else { DrawWeapon(); DrawArm(armNear, shNear, nearK); }
             }
             DrawSetTransform(Vector2.Zero, 0, Vector2.One);
         }

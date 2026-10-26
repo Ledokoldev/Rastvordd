@@ -12,10 +12,10 @@ namespace Rastvordd.Client
     {
         public sealed class T { public float Sx = 1, Sy = 1, Ox, Oy; }
 
-        public static readonly string[] Parts = { "upper", "head", "torso", "pelvis", "shoulders", "upperarm", "forearm", "hips", "thigh", "shin" };
+        public static readonly string[] Parts = { "weapon", "upper", "head", "torso", "pelvis", "shoulders", "upperarm", "forearm", "hips", "thigh", "shin" };
         public static readonly Dictionary<string, string> Names = new()
         {
-            ["upper"] = "Верх тела ↕ (Сдвиг Y)", ["head"] = "Голова", ["torso"] = "Корпус", ["pelvis"] = "Таз", ["shoulders"] = "Плечи (крепление рук)",
+            ["weapon"] = "Оружие (размер, цевьё, сдвиг)", ["upper"] = "Верх тела ↕ (Сдвиг Y)", ["head"] = "Голова", ["torso"] = "Корпус", ["pelvis"] = "Таз", ["shoulders"] = "Плечи (крепление рук)",
             ["upperarm"] = "Плечо руки", ["forearm"] = "Предплечье", ["hips"] = "Бёдра (расстановка ног)", ["thigh"] = "Бедро", ["shin"] = "Голень",
         };
 
@@ -73,6 +73,7 @@ namespace Rastvordd.Client
         readonly string _set;
         readonly OptionButton _part = new();
         readonly (HSlider s, Label v)[] _sl = new (HSlider, Label)[4];
+        readonly Label[] _names = new Label[4];
         static readonly (string name, float min, float max, float step)[] Ranges =
             { ("Ширина", 0.4f, 2f, 0.05f), ("Длина", 0.4f, 2f, 0.05f), ("Сдвиг X", -8, 8, 0.5f), ("Сдвиг Y", -8, 8, 0.5f) };
         bool _sync;
@@ -91,7 +92,8 @@ namespace Rastvordd.Client
             {
                 int k = i;
                 var row = new HBoxContainer(); box.AddChild(row);
-                row.AddChild(new Label { Text = Ranges[i].name, CustomMinimumSize = new Vector2(70, 0) });
+                _names[i] = new Label { Text = Ranges[i].name, CustomMinimumSize = new Vector2(70, 0) };
+                row.AddChild(_names[i]);
                 var s = new HSlider { MinValue = Ranges[i].min, MaxValue = Ranges[i].max, Step = Ranges[i].step, CustomMinimumSize = new Vector2(150, 0), SizeFlagsHorizontal = SizeFlags.ExpandFill };
                 var v = new Label { CustomMinimumSize = new Vector2(44, 0) };
                 s.ValueChanged += val => Changed(k, (float)val);
@@ -117,6 +119,9 @@ namespace Rastvordd.Client
         void Sync()
         {
             _sync = true;
+            bool w = Cur == "weapon";   // у оружия свои подписи: размер и положение цевья
+            _names[0].Text = w ? "Размер" : Ranges[0].name;
+            _names[1].Text = w ? "Цевьё ⟷" : Ranges[1].name;
             var t = RigTune.Get(_set, Cur);
             float[] v = { t.Sx, t.Sy, t.Ox, t.Oy };
             for (int i = 0; i < 4; i++) { _sl[i].s.Value = v[i]; _sl[i].v.Text = v[i].ToString("0.##"); }

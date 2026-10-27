@@ -37,7 +37,8 @@ namespace Rastvordd.Sim
         public const float WalkSpeed = 4.5f;
         public const float SprintSpeed = 6.8f;
         public const float Accel = 40f;
-        public const float NpcRespawnTime = 45f;
+        public const float NpcRespawnTime = 1200f, GuardAbsentTime = 300f;   // (27.10) охрана: раз в цикл РТ и только если внутри 5 мин никого
+        readonly Dictionary<Monument, float> _rtOccupied = new(); float _rtOccT;
         public const float NpcDamageScale = 0.45f;     // охрана РТ бьёт слабее игрока (≈ в 1,7 раза), чтобы двое-трое не стирали за секунду
         public const float NpcSpreadDeg = 7f;          // и стреляет менее кучно: свой разброс поверх ствола
         public const float InteractRange = 1.9f;
@@ -164,7 +165,7 @@ namespace Rastvordd.Sim
                 AddScrapSpot(NodeKind.Barrel, p);
             AddScrapSpot(NodeKind.Junk, new Vector2(33, -22));
             AddRecycler(new Vector2(20, -6));
-            AddSafe(new Vector2(31, -35.5f));
+            AddSafe(new Vector2(31, -35.5f), false);
             AddScrapSpot(NodeKind.Junk, new Vector2(7, -5));
 
             foreach (var p in new[] { new Vector2(15, -24), new Vector2(28, -30), new Vector2(29, -10),
@@ -410,12 +411,12 @@ namespace Rastvordd.Sim
                 Maybe(0.5, "metal_fragments", 50, 120);
                 Maybe(0.4, "gunpowder", 30, 60);
                 Maybe(0.4, "ammo_762", 10, 30);
-                if (Rng.NextDouble() < 0.15) bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_grach", "weapon_pps43", "weapon_svt40" })));
+                if (Rng.NextDouble() < 0.10) bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_grach", "weapon_pps43", "weapon_svt40" })));   // (27.10) было 15%
                 if (Rng.NextDouble() < 0.12) bag.Items.Add(new ItemSlot(Pick(Weaponry.FactoryAtts), 1));
                 TryTier3(bag, 0.3);
                 if (Rng.NextDouble() < 0.2) bag.Items.Add(Items.NewSlot("expl_satchel"));
                 if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot("expl_c4"));
-                Clothing.Loot(WearRng, bag, "safe");
+                Clothing.Loot(WearRng, bag, "safe", !bag.NoArmy);   // (27.10) армейская только из сейфов тира 2
                 return;
             }
             // общие детали — во всех ящиках; карта доступа — в охраняемых
@@ -607,6 +608,21 @@ namespace Rastvordd.Sim
             return list;
         }
 
+        /// <summary>(27.10) Внутри РТ (с запасом 4 м) кто-то есть или был меньше 5 мин назад — охрана не воскресает.</summary>
+        bool GuardRtBusy(Vector2 home)
+        {
+            if ((_rtOccT -= Dt) <= 0)
+            {
+                _rtOccT = 1f;
+                foreach (var m in Monuments)
+                    foreach (var p in Actors)
+                        if (!p.Dead && !p.Spectator && p.Team == Team.Player && m.Contains(p.Pos, 4)) { _rtOccupied[m] = Time; break; }
+            }
+            foreach (var m in Monuments)
+                if (m.Contains(home) && _rtOccupied.TryGetValue(m, out float t) && Time - t < GuardAbsentTime) return true;
+            return false;
+        }
+
         void RespawnNpc(Actor a)
         {
             a.Pos = NpcHomes[a.Id];
@@ -644,7 +660,7 @@ namespace Rastvordd.Sim
             Dress(a, Clothing.GuardKit(WearRng, kit is "club" or "bow" or "pipe" ? 1 : 2));
             a.Add("scrap", Rng.Next(2, 9));
             if (Rng.NextDouble() < 0.3) a.Add(Economy.Tier1(Rng), 1);
-            if (Rng.NextDouble() < 0.12) a.Add("keycard", 1);
+            if (Rng.NextDouble() < 0.065) a.Add("keycard", 1);   // (27.10) было 12%
             if (Rng.NextDouble() < 0.4) a.Add("bandage", 1);
             if (Rng.NextDouble() < 0.3) a.Add("canned", 1);
         }
@@ -857,7 +873,7 @@ namespace Rastvordd.Sim
                 if (a.Spectator) { StepSpectator(a, cmd); continue; }
                 if (a.Dead)
                 {
-                    if (a.Team == Team.Npc && Time - a.DeadTime > NpcRespawnTime) RespawnNpc(a);
+                    if (a.Team == Team.Npc && Time - a.DeadTime > NpcRespawnTime && !GuardRtBusy(NpcHomes[a.Id])) RespawnNpc(a);
                     else if (a.Team == Team.Player && (cmd.Respawn || cmd.RespawnBag)) RespawnPlayer(a, cmd.RespawnBag);
                     continue;
                 }
@@ -1442,11 +1458,12 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Сейф: ящик высшего уровня под карту доступа.</summary>
-        void AddSafe(Vector2 p)
+        void AddSafe(Vector2 p, bool army = true)
         {
             AddCrate(p, 2);
             var safe = Bags[^1];
             safe.Safe = true;
+            safe.NoArmy = !army;
             FillCrate(safe);
         }
 
@@ -2046,9 +2063,9 @@ namespace Rastvordd.Sim
             void Put(string id, int n) { if (n > 0) bag.Items.Add(new ItemSlot(id, n)); }
             // ствол — редко и только не выше тира 2 (самопал/наган у охраны тира 1); калаши со склада не падают
             foreach (var s in a.Belt)
-                if (s?.State is WeaponState ws && !ws.Def.Melee && ws.Def.Tier is >= 1 and <= 2 && Rng.NextDouble() < 0.1)
+                if (s?.State is WeaponState ws && !ws.Def.Melee && ws.Def.Tier is >= 1 and <= 2 && Rng.NextDouble() < 0.02)   // (27.10) было 10%
                 {
-                    ws.Durability = ws.Def.MaxDurability * (0.2f + 0.4f * (float)Rng.NextDouble());   // потрёпанный
+                    ws.Durability = ws.Def.MaxDurability * (0.10f + 0.15f * (float)Rng.NextDouble());   // (27.10) сильно потрёпанный 10–25%
                     ws.ReloadLeft = 0;
                     bag.Items.Add(s);
                     break;
@@ -2059,8 +2076,7 @@ namespace Rastvordd.Sim
             Put("keycard", a.Count("keycard"));
             if (Rng.NextDouble() < 0.5) Put("bandage", a.Count("bandage"));
             if (Rng.NextDouble() < 0.5) Put("canned", a.Count("canned"));
-            // одежда охраны: каждая вещь — с шансом 25% (свой ГСЧ: основной поток не сдвигается)
-            foreach (var s in a.Worn) if (s != null && WearRng.NextDouble() < 0.25) bag.Items.Add(new ItemSlot(s.Id, 1));
+            // одежда охраны (27.10): не падает совсем (охрана — не игроки)
         }
 
         void StepBags()

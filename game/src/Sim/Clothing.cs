@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Rastvordd.Sim
@@ -40,7 +40,7 @@ namespace Rastvordd.Sim
         /// <summary>Зоны попадания для тела радиусом 0,40 м; у нас радиус Actor.Radius (0,35) — пороги масштабируются (×R/0,40).</summary>
         public const float DocBodyRadius = 0.40f, HeadR = 0.12f, TorsoR = 0.28f;
         public const float HeadMul = 1.8f, TorsoMul = 1f, LimbMul = 0.6f;
-        public static readonly float[] ZoneCap = { 0.70f, 0.75f, 0.60f };   // голова, корпус, конечности
+        public static readonly float[] ZoneCap = { 0.55f, 0.60f, 0.45f };   // голова, корпус, конечности (27.10: было 0.70/0.75/0.60)
         public const float SpeedCap = -0.15f;
         public const float MeleeFactor = 0.5f;          // ближний бой: защита корпуса ×0,5 (пластины не изнашивает)
 
@@ -111,9 +111,9 @@ namespace Rastvordd.Sim
 
             S("leather", "Кожа и дерево", 1, "people", "верстак 1");
             W("leather", "helmet", "Кожаный шлем", WearSlot.Head, 18, 2, 3);
-            W("leather", "chestplate", "Деревянный нагрудник", WearSlot.Armor, 28, 3, 2, -3, desc: "Доски на ремнях: держит нож и картечь на излёте");
+            W("leather", "chestplate", "Деревянный нагрудник", WearSlot.Armor, 12, 3, 2, -3, desc: "Доски на ремнях: держит нож и картечь на излёте");
             W("leather", "bracers", "Кожаные наручи", WearSlot.Arms, 14, 1, 2);
-            W("leather", "pants", "Кожаные штаны", WearSlot.Legs, 12, 3, 6);
+            W("leather", "pants", "Кожаные штаны", WearSlot.Legs, 8, 3, 6);
             W("leather", "shinguards", "Деревянные поножи", WearSlot.Knees, 14, 1, 2, -2);
 
             S("spec", "Спецовка", 2, "env", "верстак 2");
@@ -127,9 +127,9 @@ namespace Rastvordd.Sim
             S("scrap", "Кустарная броня", 2, "people", "верстак 2");
             W("scrap", "pot", "Каска-кастрюля", WearSlot.Head, 30, 3, 1, desc: "Кастрюля на ремне. Звенит от каждой пули", metal: true);
             W("scrap", "balaclava", "Балаклава", WearSlot.Face, 5, 4, 5);
-            W("scrap", "signvest", "Жилет из дорожных знаков", WearSlot.Armor, 38, 5, 0, -4, 1, "Дорожные знаки на проволоке. Карман под 1 пластину (спереди). Гремит на бегу", metal: true);
+            W("scrap", "signvest", "Жилет из дорожных знаков", WearSlot.Armor, 20, 5, 0, -4, 1, "Дорожные знаки на проволоке. Карман под 1 пластину (спереди). Гремит на бегу", metal: true);
             W("scrap", "bracers", "Жестяные наручи", WearSlot.Arms, 18, 2, 1, metal: true);
-            W("scrap", "kneepads", "Наколенники из покрышек", WearSlot.Knees, 18, 2, 2, -2, rubber: true);
+            W("scrap", "kneepads", "Наколенники из покрышек", WearSlot.Knees, 6, 2, 2, -2, rubber: true);
             W("scrap", "kirza", "Кирзачи", WearSlot.Feet, 8, 4, 6);
 
             S("ozk", "ОЗК", 3, "env", "верстак 3 или лут");   // защищённый тир 3: на будущие РТ уровня 4 («Объект 42»)
@@ -141,11 +141,11 @@ namespace Rastvordd.Sim
 
             S("army", "Армейская", 3, "people", "верстак 3");
             W("army", "ssh68", "Шлем СШ-68", WearSlot.Head, 35, 4, 4, desc: "Стальной армейский шлем", metal: true);
-            W("army", "bushlat", "Бушлат", WearSlot.Kofta, 10, 6, 18, desc: "Армейский ватный бушлат: тепло и немного от осколков");
-            W("army", "6b2", "Бронежилет 6Б2", WearSlot.Armor, 42, 4, 2, -5, 2, "Армейский бронежилет: 2 пластины — спереди и сзади", metal: true);
+            W("army", "bushlat", "Бушлат", WearSlot.Kofta, 5, 6, 18, desc: "Армейский ватный бушлат: тепло и немного от осколков");
+            W("army", "6b2", "Бронежилет 6Б2", WearSlot.Armor, 38, 4, 2, -5, 2, "Армейский бронежилет: 2 пластины — спереди и сзади", metal: true);
             W("army", "elbowpads", "Армейские налокотники", WearSlot.Arms, 20, 2, 2);
-            W("army", "kneepads", "Армейские наколенники", WearSlot.Knees, 20, 2, 2);
-            W("army", "pants", "Армейские штаны", WearSlot.Legs, 12, 5, 10);
+            W("army", "kneepads", "Армейские наколенники", WearSlot.Knees, 10, 2, 2);
+            W("army", "pants", "Армейские штаны", WearSlot.Legs, 8, 5, 10);
             W("army", "bertsy", "Берцы", WearSlot.Feet, 8, 4, 8);
             W("army", "gloves", "Тактические перчатки", WearSlot.Gloves, 4, 3, 6);
 
@@ -153,10 +153,10 @@ namespace Rastvordd.Sim
             S("sobr", "СОБР", 3, "people", "только лут");   // элита тира 3: тиров 0–3, четвёртого нет
             W("sobr", "sfera", "Шлем «Сфера»", WearSlot.Head, 45, 4, 4, desc: "Титановый шлем спецназа", metal: true);
             W("sobr", "nomex", "Балаклава Nomex", WearSlot.Face, 8, 4, 6);
-            W("sobr", "kora", "Бронежилет «Кора»", WearSlot.Armor, 45, 4, 2, -7, 2, "Штурмовой бронежилет: 2 пластины — спереди и сзади", metal: true);
+            W("sobr", "kora", "Бронежилет «Кора»", WearSlot.Armor, 42, 4, 2, -7, 2, "Штурмовой бронежилет: 2 пластины — спереди и сзади", metal: true);
             W("sobr", "suit", "Тактический костюм", WearSlot.Kofta, 10, 6, 14);
             W("sobr", "elbowpads", "Налокотники СОБР", WearSlot.Arms, 20, 2, 2);
-            W("sobr", "kneepads", "Наколенники СОБР", WearSlot.Knees, 20, 2, 2);
+            W("sobr", "kneepads", "Наколенники СОБР", WearSlot.Knees, 10, 2, 2);
             W("sobr", "pants", "Тактические брюки", WearSlot.Legs, 10, 4, 10);
             W("sobr", "boots", "Штурмовые ботинки", WearSlot.Feet, 8, 2, 8);
             W("sobr", "gloves", "Штурмовые перчатки", WearSlot.Gloves, 6, 2, 4);
@@ -172,9 +172,9 @@ namespace Rastvordd.Sim
                 add(id, name, ItemCategory.Clothing).Plate = PlateDefs[id];
                 Meta[id] = new Weaponry.Meta { Desc = desc, Rarity = rarity, Value = value, Stack = 1 };
             }
-            P("plate_homemade", "Кустарная пластина", 22, 150, 2, 30, "Жесть и дорожный знак: +20% к корпусу со своей стороны, держит 150 урона. Вставляется в жилет из знаков, 6Б2, «Кору»");
-            P("plate_steel", "Армейская стальная пластина", 34, 400, 3, 80, "+30% к корпусу со своей стороны, держит 400 урона. Только лут РТ тира 2");
-            P("plate_ceramic", "Керамическая пластина", 40, 300, 4, 150, "+40% к корпусу со своей стороны, держит 300 урона. Только вертолёт и «Объект 42»");
+            P("plate_homemade", "Кустарная пластина", 10, 150, 2, 30, "Жесть и дорожный знак: +10% к корпусу со своей стороны, держит 150 урона. Вставляется в жилет из знаков, 6Б2, «Кору»");
+            P("plate_steel", "Армейская стальная пластина", 20, 400, 3, 80, "+20% к корпусу со своей стороны, держит 400 урона. Только лут РТ тира 2");
+            P("plate_ceramic", "Керамическая пластина", 30, 300, 4, 150, "+30% к корпусу со своей стороны, держит 300 урона. Только вертолёт и «Объект 42»");
             P("plate_lead", "Свинцовая пластина", 10, 250, 2, 40, "Антирад: +5 к защите от радиации и +10% к корпусу, держит 250 урона. Две в бронике (6Б2, «Кора») — пустит куда угодно", rad: 5);
         }
 
@@ -366,7 +366,7 @@ namespace Rastvordd.Sim
         /// Одежда и материалы в контейнер. kind: "barrel", "barrel_rt", "crate0/1/2", "safe", "punch", "event".
         /// Свой ГСЧ (World.WearRng): основной поток мира не сдвигается — старые сейвы и карта по зерну те же.
         /// </summary>
-        public static void Loot(Random rng, LootBag bag, string kind)
+        public static void Loot(Random rng, LootBag bag, string kind, bool army = true)
         {
             void Maybe(double ch, string id, int min = 1, int max = 1) { if (rng.NextDouble() < ch) bag.Items.Add(new ItemSlot(id, rng.Next(min, max + 1))); }
             void One(double ch, string[] from) { if (rng.NextDouble() < ch) bag.Items.Add(new ItemSlot(from[rng.Next(from.Length)], 1)); }
@@ -390,7 +390,8 @@ namespace Rastvordd.Sim
                 case "crate2":
                 case "safe":
                     Maybe(0.3, "rubber", 4, 10); Maybe(0.3, "antirad", 1, 3);
-                    One(0.12, Ozk); One(kind == "safe" ? 0.2 : 0.1, Army); Maybe(kind == "safe" ? 0.2 : 0.12, "plate_steel");
+                    One(0.12, Ozk); if (army) One(kind == "safe" ? 0.2 : 0.1, Army);   // (27.10) армейская — только тир 2
+                     Maybe(kind == "safe" ? 0.2 : 0.12, "plate_steel");
                     One(0.02, Sobr); Maybe(0.05, "plate_lead"); Maybe(0.008, "plate_ceramic");
                     break;
                 case "punch":   // крейт РТ тира 1 под перфокарту

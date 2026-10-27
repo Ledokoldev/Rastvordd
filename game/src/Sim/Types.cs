@@ -921,6 +921,7 @@ namespace Rastvordd.Sim
         public Vector2 Pos;
         public bool IsCrate;            // ящик на РТ (респавнится), иначе сумка с трупа
         public bool Corpse;             // вещи с трупа: обыскиваются по ячейке, как ящик РТ; выброшенное — открыто сразу
+        public bool NoArmy;             // (27.10) сейф тира 0–1: без армейской одежды
         public bool Safe;               // сейф на РТ: открывается картой доступа, до следующего наполнения
         public bool Unlocked;
         public string Rt;               // ключ РТ-профиля лута (World.LootProfiles), null — без профиля

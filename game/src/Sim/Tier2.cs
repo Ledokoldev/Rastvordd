@@ -144,6 +144,23 @@ namespace Rastvordd.Sim
                     NpcKit[p] = label.Length > 6 ? label[6..] : "pps";
                 }
 
+            // (27.10) охраны ×1.5: добавочные разбросаны по зонам РТ (клетки 3×3 по очереди), в пределах забора
+            {
+                var kits = new List<string>(); foreach (var (l, q) in marks) if (l.StartsWith("guard")) kits.Add(l.Length > 6 ? l[6..] : "pps");
+                int extra = (kits.Count + 1) / 2;
+                var size = rt.M.Max - rt.M.Min;
+                for (int i = 0, tries = 0; i < extra && tries < 80; tries++)
+                {
+                    int cell = (i * 4 + 1 + tries / 9) % 9;   // шаг 4 по 9 клеткам: разные углы и центр
+                    var lo = rt.M.Min + new Vector2(size.X * (cell % 3) / 3f, size.Y * (cell / 3) / 3f);
+                    var q = lo + new Vector2(Range(2f, MathF.Max(2.5f, size.X / 3f - 2f)), Range(2f, MathF.Max(2.5f, size.Y / 3f - 2f)));
+                    if (!rt.M.Contains(q, -3f) || !IsFree(q, 0.7f)) continue;
+                    NpcHomes[-NpcHomes.Count - 1] = q;
+                    NpcKit[q] = kits.Count > 0 ? kits[i % kits.Count] : "pps";
+                    i++;
+                }
+            }
+
             rt.PadPos = Mark("pad") ?? rt.M.Center;
             rt.FlarePos = Mark("flare") ?? rt.PadPos;
 
@@ -312,14 +329,17 @@ namespace Rastvordd.Sim
             bag.Unlocked = false;
             bag.Src = "вызов «Маяка»";
             bag.Items.Add(new ItemSlot("scrap", Rng.Next(25, 46)));
-            bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));
-            if (Rng.NextDouble() < 0.6) bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));
-            TryTier3(bag, 0.6);
+            // (27.10) главный ящик «Маяка» богаче: 2–3 детали тира 2, сплав, гарантированный ствол тира 2 (40–70%) и 20% детали тира 3
+            for (int i = Rng.Next(1, 4); i > 0; i--) bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));
+            bag.Items.Add(new ItemSlot(Prog.Alloy, Rng.Next(10, 21)));
+            TryTier3(bag, 0.20);
             bag.Items.Add(new ItemSlot("val_radio_tubes", Rng.Next(1, 4)));
             if (Rng.NextDouble() < 0.45) bag.Items.Add(new ItemSlot("val_gold_contacts", Rng.Next(1, 3)));
-            if (Rng.NextDouble() < 0.4) bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_pps43", "weapon_svt40", "weapon_grach", "weapon_mp133" })));
-            else if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_akm", "weapon_ppsh", "weapon_svd" })));
-            bag.Items.Add(new ItemSlot(Rng.Next(2) == 0 ? "ammo_762" : "ammo_9mm", Rng.Next(20, 50)));
+            var gun = Items.NewSlot(Pick(new[] { "weapon_pps43", "weapon_svt40", "weapon_grach", "weapon_mp133" }));
+            if (gun.State is WeaponState gws) { gws.Durability = gws.Def.MaxDurability * (0.4f + 0.3f * (float)Rng.NextDouble()); gws.ReloadLeft = 0; }
+            bag.Items.Add(gun);
+            if (gun.State is WeaponState gw2 && gw2.Def.AmmoId != null) bag.Items.Add(new ItemSlot(gw2.Def.AmmoId, Rng.Next(20, 41)));
+            if (Rng.NextDouble() < 0.6) for (int i = Rng.Next(1, 3); i > 0; i--) bag.Items.Add(new ItemSlot(Pick(Clothing.Sets.Find(x => x.Key == "army").Items.ToArray()), 1));
             if (Rng.NextDouble() < 0.5) bag.Items.Add(new ItemSlot("comp_oil", Rng.Next(1, 3)));
             if (Rng.NextDouble() < 0.35) bag.Items.Add(new ItemSlot(Rng.Next(2) == 0 ? "comp_lens" : "comp_circuit", 1));
             if (Rng.NextDouble() < 0.3) bag.Items.Add(new ItemSlot(Pick(Weaponry.ArmyAtts), 1));

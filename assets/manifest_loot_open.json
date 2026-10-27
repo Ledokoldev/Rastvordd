@@ -1,0 +1,108 @@
+{
+ "assets": [
+  {
+   "id": "loot_wood_crate_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.9,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: lid removed and leaning against the side, empty inside. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_wood_crate.png"
+  },
+  {
+   "id": "loot_toolbox_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.45,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: lid open, trays folded out, empty. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_toolbox.png"
+  },
+  {
+   "id": "loot_weapon_case_open",
+   "cat": "containers",
+   "view": "side",
+   "h": 0.4,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: case lid open showing empty foam cut-outs. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_weapon_case.png"
+  },
+  {
+   "id": "loot_med_cabinet_open",
+   "cat": "containers",
+   "view": "front",
+   "h": 1.0,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: door swung open, empty shelves inside. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_med_cabinet.png"
+  },
+  {
+   "id": "loot_locker_open",
+   "cat": "containers",
+   "view": "front",
+   "h": 1.9,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: door swung wide open, empty inside with a bare hook. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_locker.png"
+  },
+  {
+   "id": "loot_electric_box_open",
+   "cat": "containers",
+   "view": "front",
+   "h": 0.9,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: door hanging open, wires pulled out, empty. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_electric_box.png"
+  },
+  {
+   "id": "loot_safe_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.9,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: heavy door swung open, empty inside. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_safe.png"
+  },
+  {
+   "id": "loot_footlocker_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.5,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: lid flipped open, empty inside. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_footlocker.png"
+  },
+  {
+   "id": "loot_truck_box_open",
+   "cat": "containers",
+   "view": "side",
+   "h": 0.6,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: hinged lid raised, empty inside. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_truck_box.png"
+  },
+  {
+   "id": "loot_bookcase_open",
+   "cat": "containers",
+   "view": "front",
+   "h": 2.0,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: both doors swung open, empty shelves inside. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours, muted desaturated palette, LARGE massive readable silhouette, ONE clear stencilled icon or label hinting at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_bookcase.png"
+  },
+  {
+   "id": "loot_workbench_box_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.9,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: all drawers pulled out, empty. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours, muted desaturated palette, LARGE massive readable silhouette, ONE clear stencilled icon or label hinting at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_workbench_box.png"
+  },
+  {
+   "id": "loot_shelf_boxes_open",
+   "cat": "containers",
+   "view": "front",
+   "h": 2.0,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: the boxes on the shelves torn open and empty, some on the floor. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours, muted desaturated palette, LARGE massive readable silhouette, ONE clear stencilled icon or label hinting at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_shelf_boxes.png"
+  },
+  {
+   "id": "loot_zip_box_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.8,
+   "desc": "EXACTLY the same object as in the attached image (same shape, size, colours, icon, camera angle, lighting), but now OPENED and already looted: lid open, empty compartments inside. Nothing valuable inside. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours, muted desaturated palette, LARGE massive readable silhouette, ONE clear stencilled icon or label hinting at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_zip_box.png"
+  }
+ ]
+}

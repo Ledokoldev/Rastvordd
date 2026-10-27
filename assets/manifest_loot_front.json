@@ -1,0 +1,102 @@
+{
+ "assets": [
+  {
+   "id": "loot_wood_crate_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 0.9,
+   "desc": "a sturdy unpainted pine-plank supply crate with rope handles and dark steel corner plates, with a black stencilled gear (cog) — spare parts and scrap. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_toolbox_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 0.45,
+   "desc": "a red-painted steel two-tier toolbox with a carry handle, chipped paint, with a white stencilled wrench — tools and components. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_weapon_case_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 0.4,
+   "desc": "a long dark-olive army weapon crate lying flat with two latches and stencilled numbers, with a white stencilled rifle silhouette — weapons and parts. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_med_cabinet_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 1.0,
+   "desc": "a small wall-mounted white-enamel medical cabinet with a single door, slightly chipped, with a big RED CROSS on the door — medicine. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_locker_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 1.9,
+   "desc": "a tall single-door grey-green Soviet steel locker with louvre vents, with a white stencilled coat hanger — clothing and personal gear. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_electric_box_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 0.9,
+   "desc": "a grey steel wall electrical switch cabinet with a hinged door, with a yellow-and-black stencilled lightning bolt warning sign — electronics and wires. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_safe_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 0.9,
+   "desc": "a heavy squat dark-green Soviet steel safe with a dial and brass handle, with a brass keyhole plate — valuables. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_footlocker_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 0.5,
+   "desc": "an army-olive military footlocker / trunk with a hasp and stencilled numbers, with a red stencilled star — military supplies. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_truck_box_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 0.6,
+   "desc": "a long grey steel storage box mounted on a truck bed with hinged lid, with a white stencilled jerrycan — fuel and vehicle parts. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_bookcase_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 2.0,
+   "desc": "a tall wooden Soviet bookcase cabinet with two solid closed wooden doors, dark varnish, with a small brass handle and a white paper label on the door — documents and valuables. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours, muted desaturated palette, LARGE massive readable silhouette, ONE clear stencilled icon or label hinting at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_proc_cabinet_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 1.8,
+   "desc": "a tall white-enamel hospital procedure cabinet with glass doors (contents hidden by frosted glass) on a steel frame, with a big red cross on the top panel — medicine. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours, muted desaturated palette, LARGE massive readable silhouette, ONE clear stencilled icon or label hinting at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_workbench_box_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 0.9,
+   "desc": "a heavy steel workbench drawer chest with a padlock hasp, grey-blue paint, oily, with a black stencilled gear — components. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours, muted desaturated palette, LARGE massive readable silhouette, ONE clear stencilled icon or label hinting at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_shelf_boxes_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 2.0,
+   "desc": "a tall grey steel warehouse shelving rack loaded with closed cardboard boxes and wooden crates, with stencilled numbers on the boxes — supplies. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours, muted desaturated palette, LARGE massive readable silhouette, ONE clear stencilled icon or label hinting at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_zip_box_f",
+   "cat": "containers",
+   "view": "front",
+   "h": 0.8,
+   "desc": "a large army-green wooden spare-parts box (ZIP) with steel corners, two latches and white stencil «ЗИП», with the white stencil «ЗИП» — electronics spare parts. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours, muted desaturated palette, LARGE massive readable silhouette, ONE clear stencilled icon or label hinting at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  }
+ ]
+}

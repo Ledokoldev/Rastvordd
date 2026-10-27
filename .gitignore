@@ -1,5 +1,9 @@
-﻿# Steam Audio (godot-steam-audio v0.3.1, github.com/stechyo/godot-steam-audio/releases) — бинарники не храним в git
-game/addons/godot-steam-audio/bin/*.dll
-game/addons/godot-steam-audio/bin/*.lib
-dist/
+﻿dist/
 build/
+
+# сырые звуковые библиотеки (Sonniss и т.п.) — большие, лежат локально / на D:
+audio_src/new_sounds/
+audio_src/footsteps_game_ready/
+# кинематографичные материалы — не для репозитория
+docs/cinematic/
+

@@ -1,0 +1,100 @@
+{
+ "assets": [
+  {
+   "id": "loot_wood_crate_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.9,
+   "desc": "EXACTLY the same container as in the attached image (same shape, size, paint, corners, stencil icon, camera angle and lighting), but now OPENED and already looted: lid removed and leaning against the side, crate empty inside. Nothing inside. Transparent background, no ground, no text. LOOT CONTAINER KIT — every item shares the SAME design language: faded, worn, muted ochre-orange paint (Soviet army/fire-equipment orange, dusty and chipped, not saturated), dark steel corner plates and latches, a small white stencilled number, and ONE clear stencilled icon on the front that hints at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_wood_crate.png"
+  },
+  {
+   "id": "loot_toolbox_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.45,
+   "desc": "EXACTLY the same container as in the attached image (same shape, size, paint, corners, stencil icon, camera angle and lighting), but now OPENED and already looted: lid open, trays folded out, empty. Nothing inside. Transparent background, no ground, no text. LOOT CONTAINER KIT — every item shares the SAME design language: faded, worn, muted ochre-orange paint (Soviet army/fire-equipment orange, dusty and chipped, not saturated), dark steel corner plates and latches, a small white stencilled number, and ONE clear stencilled icon on the front that hints at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_toolbox.png"
+  },
+  {
+   "id": "loot_ammo_tin_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.4,
+   "desc": "EXACTLY the same container as in the attached image (same shape, size, paint, corners, stencil icon, camera angle and lighting), but now OPENED and already looted: clamp lid flipped open, empty inside. Nothing inside. Transparent background, no ground, no text. LOOT CONTAINER KIT — every item shares the SAME design language: faded, worn, muted ochre-orange paint (Soviet army/fire-equipment orange, dusty and chipped, not saturated), dark steel corner plates and latches, a small white stencilled number, and ONE clear stencilled icon on the front that hints at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_ammo_tin.png"
+  },
+  {
+   "id": "loot_weapon_case_open",
+   "cat": "containers",
+   "view": "side",
+   "h": 0.4,
+   "desc": "EXACTLY the same container as in the attached image (same shape, size, paint, corners, stencil icon, camera angle and lighting), but now OPENED and already looted: case lid open showing empty foam cut-outs. Nothing inside. Transparent background, no ground, no text. LOOT CONTAINER KIT — every item shares the SAME design language: faded, worn, muted ochre-orange paint (Soviet army/fire-equipment orange, dusty and chipped, not saturated), dark steel corner plates and latches, a small white stencilled number, and ONE clear stencilled icon on the front that hints at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_weapon_case.png"
+  },
+  {
+   "id": "loot_med_cabinet_open",
+   "cat": "containers",
+   "view": "front",
+   "h": 1.0,
+   "desc": "EXACTLY the same container as in the attached image (same shape, size, paint, corners, stencil icon, camera angle and lighting), but now OPENED and already looted: door swung open, empty shelves inside. Nothing inside. Transparent background, no ground, no text. LOOT CONTAINER KIT — every item shares the SAME design language: faded, worn, muted ochre-orange paint (Soviet army/fire-equipment orange, dusty and chipped, not saturated), dark steel corner plates and latches, a small white stencilled number, and ONE clear stencilled icon on the front that hints at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_med_cabinet.png"
+  },
+  {
+   "id": "loot_med_box_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.45,
+   "desc": "EXACTLY the same container as in the attached image (same shape, size, paint, corners, stencil icon, camera angle and lighting), but now OPENED and already looted: lid open, empty inside. Nothing inside. Transparent background, no ground, no text. LOOT CONTAINER KIT — every item shares the SAME design language: faded, worn, muted ochre-orange paint (Soviet army/fire-equipment orange, dusty and chipped, not saturated), dark steel corner plates and latches, a small white stencilled number, and ONE clear stencilled icon on the front that hints at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_med_box.png"
+  },
+  {
+   "id": "loot_locker_open",
+   "cat": "containers",
+   "view": "front",
+   "h": 1.9,
+   "desc": "EXACTLY the same container as in the attached image (same shape, size, paint, corners, stencil icon, camera angle and lighting), but now OPENED and already looted: door swung wide open, empty inside with a bare hook. Nothing inside. Transparent background, no ground, no text. LOOT CONTAINER KIT — every item shares the SAME design language: faded, worn, muted ochre-orange paint (Soviet army/fire-equipment orange, dusty and chipped, not saturated), dark steel corner plates and latches, a small white stencilled number, and ONE clear stencilled icon on the front that hints at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_locker.png"
+  },
+  {
+   "id": "loot_desk_drawers_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.85,
+   "desc": "EXACTLY the same container as in the attached image (same shape, size, paint, corners, stencil icon, camera angle and lighting), but now OPENED and already looted: all three drawers pulled out, empty. Nothing inside. Transparent background, no ground, no text. LOOT CONTAINER KIT — every item shares the SAME design language: faded, worn, muted ochre-orange paint (Soviet army/fire-equipment orange, dusty and chipped, not saturated), dark steel corner plates and latches, a small white stencilled number, and ONE clear stencilled icon on the front that hints at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_desk_drawers.png"
+  },
+  {
+   "id": "loot_electric_box_open",
+   "cat": "containers",
+   "view": "front",
+   "h": 0.9,
+   "desc": "EXACTLY the same container as in the attached image (same shape, size, paint, corners, stencil icon, camera angle and lighting), but now OPENED and already looted: door hanging open, wires pulled out, empty. Nothing inside. Transparent background, no ground, no text. LOOT CONTAINER KIT — every item shares the SAME design language: faded, worn, muted ochre-orange paint (Soviet army/fire-equipment orange, dusty and chipped, not saturated), dark steel corner plates and latches, a small white stencilled number, and ONE clear stencilled icon on the front that hints at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_electric_box.png"
+  },
+  {
+   "id": "loot_safe_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.9,
+   "desc": "EXACTLY the same container as in the attached image (same shape, size, paint, corners, stencil icon, camera angle and lighting), but now OPENED and already looted: heavy door swung open, empty inside. Nothing inside. Transparent background, no ground, no text. LOOT CONTAINER KIT — every item shares the SAME design language: faded, worn, muted ochre-orange paint (Soviet army/fire-equipment orange, dusty and chipped, not saturated), dark steel corner plates and latches, a small white stencilled number, and ONE clear stencilled icon on the front that hints at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_safe.png"
+  },
+  {
+   "id": "loot_footlocker_open",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.5,
+   "desc": "EXACTLY the same container as in the attached image (same shape, size, paint, corners, stencil icon, camera angle and lighting), but now OPENED and already looted: lid flipped open, empty inside. Nothing inside. Transparent background, no ground, no text. LOOT CONTAINER KIT — every item shares the SAME design language: faded, worn, muted ochre-orange paint (Soviet army/fire-equipment orange, dusty and chipped, not saturated), dark steel corner plates and latches, a small white stencilled number, and ONE clear stencilled icon on the front that hints at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_footlocker.png"
+  },
+  {
+   "id": "loot_truck_box_open",
+   "cat": "containers",
+   "view": "side",
+   "h": 0.6,
+   "desc": "EXACTLY the same container as in the attached image (same shape, size, paint, corners, stencil icon, camera angle and lighting), but now OPENED and already looted: hinged lid raised, empty inside. Nothing inside. Transparent background, no ground, no text. LOOT CONTAINER KIT — every item shares the SAME design language: faded, worn, muted ochre-orange paint (Soviet army/fire-equipment orange, dusty and chipped, not saturated), dark steel corner plates and latches, a small white stencilled number, and ONE clear stencilled icon on the front that hints at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base.",
+   "ref": "assets/gen/containers/loot_truck_box.png"
+  }
+ ]
+}

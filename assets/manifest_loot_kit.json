@@ -1,0 +1,88 @@
+{
+ "assets": [
+  {
+   "id": "loot_wood_crate",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.9,
+   "desc": "a sturdy unpainted pine-plank supply crate with rope handles and dark steel corner plates, with a black stencilled gear (cog) — spare parts and scrap. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_toolbox",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.45,
+   "desc": "a red-painted steel two-tier toolbox with a carry handle, chipped paint, with a white stencilled wrench — tools and components. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_ammo_tin",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.4,
+   "desc": "a protective-green sealed zinc ammunition tin with a clamp lid and yellow stencilled lot numbers, with a yellow stencilled bullet — ammunition. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_weapon_case",
+   "cat": "containers",
+   "view": "side",
+   "h": 0.4,
+   "desc": "a long dark-olive army weapon crate lying flat with two latches and stencilled numbers, with a white stencilled rifle silhouette — weapons and parts. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_med_cabinet",
+   "cat": "containers",
+   "view": "front",
+   "h": 1.0,
+   "desc": "a small wall-mounted white-enamel medical cabinet with a single door, slightly chipped, with a big RED CROSS on the door — medicine. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_med_box",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.45,
+   "desc": "a portable white medic field box with a handle, with a big RED CROSS on the lid — medicine. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_locker",
+   "cat": "containers",
+   "view": "front",
+   "h": 1.9,
+   "desc": "a tall single-door grey-green Soviet steel locker with louvre vents, with a white stencilled coat hanger — clothing and personal gear. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_desk_drawers",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.85,
+   "desc": "a dark varnished wood-veneer office desk pedestal with three drawers and metal handles, with a small white paper label on the top drawer — documents, small valuables. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_electric_box",
+   "cat": "containers",
+   "view": "front",
+   "h": 0.9,
+   "desc": "a grey steel wall electrical switch cabinet with a hinged door, with a yellow-and-black stencilled lightning bolt warning sign — electronics and wires. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_safe",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.9,
+   "desc": "a heavy squat dark-green Soviet steel safe with a dial and brass handle, with a brass keyhole plate — valuables. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_footlocker",
+   "cat": "containers",
+   "view": "angled",
+   "h": 0.5,
+   "desc": "an army-olive military footlocker / trunk with a hasp and stencilled numbers, with a red stencilled star — military supplies. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  },
+  {
+   "id": "loot_truck_box",
+   "cat": "containers",
+   "view": "side",
+   "h": 0.6,
+   "desc": "a long grey steel storage box mounted on a truck bed with hinged lid, with a white stencilled jerrycan — fuel and vehicle parts. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours (not orange), muted desaturated palette, ONE clear stencilled icon on the front hinting at the contents, sturdy readable silhouette. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  }
+ ]
+}

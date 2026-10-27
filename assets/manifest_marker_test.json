@@ -1,0 +1,32 @@
+{
+ "assets": [
+  {
+   "id": "mk_locker_tag",
+   "cat": "containers",
+   "h": 1.9,
+   "view": "front",
+   "desc": "a tall narrow Soviet steel locker (raздевалка cabinet) with a single door, louvre vents at the top, standing against a wall, closed; on the door a small bright YELLOW stamped tin inventory tag with a black number, clearly visible. Strong readable volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base; muted desaturated colours, worn chipped grey-green Soviet paint"
+  },
+  {
+   "id": "mk_locker_latch",
+   "cat": "containers",
+   "h": 1.9,
+   "view": "front",
+   "desc": "a tall narrow Soviet steel locker (raздевалка cabinet) with a single door, louvre vents at the top, standing against a wall, closed; the door has a chunky OCHRE-ORANGE painted latch handle, the only warm-coloured detail, clearly visible. Strong readable volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base; muted desaturated colours, worn chipped grey-green Soviet paint"
+  },
+  {
+   "id": "mk_locker_stripe",
+   "cat": "containers",
+   "h": 1.9,
+   "view": "front",
+   "desc": "a tall narrow Soviet steel locker (raздевалка cabinet) with a single door, louvre vents at the top, standing against a wall, closed; a short RED stencilled stripe with a white arrow painted across the door edge, clearly visible. Strong readable volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base; muted desaturated colours, worn chipped grey-green Soviet paint"
+  },
+  {
+   "id": "mk_locker_decor",
+   "cat": "containers",
+   "h": 1.9,
+   "view": "front",
+   "desc": "a tall narrow Soviet steel locker, badly rusted and dented, door bent and rusted shut, no handle, no tags, plain decoration. Strong readable volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base; muted desaturated colours, worn chipped grey-green Soviet paint"
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+{
+ "assets": [
+  {
+   "id": "loot_proc_cabinet",
+   "cat": "containers",
+   "view": "front",
+   "h": 1.8,
+   "desc": "a tall white-enamel hospital procedure cabinet with glass doors (contents hidden by frosted glass) on a steel frame, with a big red cross on the top panel — medicine. Realistic Soviet 1980s object, worn and dusty, real-life paint/material colours, muted desaturated palette, LARGE massive readable silhouette, ONE clear stencilled icon or label hinting at the contents. Volume like Project Zomboid sprites: light from the top-left, shaded right side, dark contact shadow at the base. Closed."
+  }
+ ]
+}

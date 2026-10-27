@@ -130,7 +130,7 @@ def process(a: dict, src: pathlib.Path) -> tuple[Image.Image, Image.Image]:
     # мелочи на земле — крупнее реальных, иначе в пикселе не читаются
     h_px = max(4, round(a["h"] * PX_PIXEL * (1.9 if a["cat"] == "clutter" and not a.get("w") else 1.0)))   # заданная ширина — реальный размер, без укрупнения
     keep = _global_palette
-    if a["cat"] in OWN_PALETTE_CATS:
+    if a["cat"] in OWN_PALETTE_CATS or a["id"].startswith("loot_"):   # лут-контейнеры: своя палитра — реальные цвета (дерево, зелёная краска, белая эмаль) не серели
         # трава и растения: своя палитра — в общей мало зелёного, и они превращались в тёмные кляксы
         _global_palette = None
         im = ImageEnhance.Brightness(ImageEnhance.Color(im).enhance(1.2)).enhance(1.12)
@@ -327,7 +327,7 @@ def main() -> None:
             # полупрозрачная декаль (пыль, грязь, пятна): ложится на пол, а не клеится сверху
             px.putalpha(px.getchannel("A").point(lambda v, k=a["soft"]: int(v * k)))
         if a["cat"] not in _RESTYLE_SKIP:
-            px = _restyle.cool(px, "V" if a["cat"] in ("trees", "plants", "grass") or a.get("crisp") else "B")   # общий холодный цвет мира (scripts/restyle-assets.py, вариант B): без желтизны
+            px = _restyle.cool(px, "V" if a["cat"] in ("trees", "plants", "grass") or a.get("crisp") or a["id"].startswith("loot_") else "B")   # общий холодный цвет мира (scripts/restyle-assets.py, вариант B): без желтизны
         for base, im in ((ROOT / "assets" / "hd", hd), (ROOT / "game" / "art", px)):
             dst = base / a["cat"] / f"{a['id']}.png"
             dst.parent.mkdir(parents=True, exist_ok=True)

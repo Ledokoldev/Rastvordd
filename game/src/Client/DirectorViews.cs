@@ -19,6 +19,34 @@ namespace Rastvordd.Client
         {
             ZIndex = 5;
             Material = new CanvasItemMaterial { BlendMode = CanvasItemMaterial.BlendModeEnum.Mix };
+            TextureFilter = TextureFilterEnum.Nearest;
+            // самолёт летит выше всего (кроны, крыши): отдельный слой с большим ZIndex
+            _air = new AirOverlay { Owner2 = this, ZIndex = 60, TextureFilter = TextureFilterEnum.Nearest };
+            AddChild(_air);
+        }
+
+        AirOverlay _air;
+        float _vis = -1;            // сглаженное время для анимации самолёта/груза (снимки приходят дискретно)
+        const float PlaneAlt = 14;   // м, условная высота (сжата под камеру сверху)
+        internal (Vector2 p, Vector2 dir)? PlaneNow;
+
+        public override void _Process(double delta)
+        {
+            if (_vis < 0 || System.Math.Abs(_vis - _time) > 1.5f) _vis = _time;
+            else { _vis += (float)delta; _vis += (_time - _vis) * Mathf.Min(1f, (float)delta * 3f); }
+            QueueRedraw(); _air.QueueRedraw();
+        }
+
+        partial class AirOverlay : Node2D
+        {
+            public DirectorLayer Owner2;
+            public override void _Draw() => Owner2.DrawAir(this);
+        }
+
+        void DrawAir(CanvasItem ci)
+        {
+            if (PlaneNow is not { } pl) return;
+            DrawPlaneOn(ci, pl.p - new Vector2(0, Iso.H(PlaneAlt)), pl.dir, Colors.White);
         }
 
         float _smokeAcc;
@@ -48,37 +76,45 @@ namespace Rastvordd.Client
                     for (int i = 0; i < 4; i++) DrawCircle(top, 6 + i * 9, new Color(1f, 0.15f, 0.1f, 0.3f * fade / (i + 1)));
                     DrawCircle(top, 4, new Color(1f, 0.9f, 0.8f, fade));
                 }
+            PlaneNow = null;
             foreach (var m in _markers)
             {
                 var at = Iso.Px(m.Pos);
                 if (m.Kind == "airdrop" && !m.Started)
                 {
                     // самолёт: проходит над точкой за 25 с до приземления груза; парашют — с этого момента вниз
-                    float k = (_time - (m.StartsAt - 45)) / 40f;
+                    float k = (_vis - (m.StartsAt - 45)) / 40f;
                     if (k > 0 && k < 1)
                     {
                         var p = Iso.Px(System.Numerics.Vector2.Lerp(m.PlaneFrom, m.PlaneTo, k));
                         var dir = (Iso.Px(m.PlaneTo) - Iso.Px(m.PlaneFrom)).Normalized();
-                        DrawPlane(p + new Vector2(30, 20), dir, new Color(0, 0, 0, 0.35f));                 // тень на земле
-                        DrawPlane(p - new Vector2(0, Iso.H(14)), dir, Colors.White);   // высота сжата: камера сверху, иначе самолёт за краем экрана                         // сам «кукурузник» Ан-2
+                        PlaneNow = (p, dir);
+                        // тень на земле: смещена по высоте вниз-вправо (как у солнечных теней), мягкая — несколько слоёв
+                        var so = new Vector2(PlaneAlt * 1.6f, PlaneAlt * 1.0f);
+                        for (int i = 0; i < 3; i++) DrawPlaneOn(this, p + so + new Vector2(i - 1, (i - 1) * 0.6f) * 2.5f, dir, new Color(0, 0, 0, 0.12f));
                     }
-                    float fall = (_time - (m.StartsAt - 25)) / 25f;
+                    float fall = (_vis - (m.StartsAt - 25)) / 25f;
                     if (fall > 0 && fall < 1)
                     {
-                        float h = Iso.H(10 * (1 - fall));   // высота сжата под вид сверху
-                        var c = at - new Vector2(Mathf.Sin(_time * 1.3f) * 6, h);
-                        // тень груза — вытянутая по земле, растёт к приземлению
-                        float r = 10 * (0.4f + 0.6f * fall);
-                        DrawSetTransform(at + new Vector2(6, 2), 0, new Vector2(1.6f, 0.6f));
-                        DrawCircle(Vector2.Zero, r, new Color(0, 0, 0, 0.22f));
+                        // падение: быстро теряем высоту от самолёта к земле (парашют раскрывается — замедление), без скачка в начале
+                        float e = 1 - Mathf.Pow(1 - fall, 1.8f);
+                        float hM = PlaneAlt * (1 - e);
+                        float h = Iso.H(hM);
+                        float sway = Mathf.Sin(_vis * 1.3f) * 0.08f * Mathf.Min(1, fall * 4);
+                        var c = at - new Vector2(sway * 60, h);
+                        // тень груза: на земле под ним, смещена по высоте, сходится с грузом к приземлению
+                        float r = 10 * (0.6f + 0.4f * e);
+                        DrawSetTransform(at + new Vector2(hM * 1.6f, hM * 1.0f) + new Vector2(6, 2) * e, 0, new Vector2(1.6f, 0.6f));
+                        DrawCircle(Vector2.Zero, r, new Color(0, 0, 0, 0.12f + 0.14f * e));
                         DrawSetTransform(Vector2.Zero, 0, Vector2.One);
                         var chute = Art.Get("containers/airdrop_descending");
                         if (chute != null)
                         {
-                            // контейнер на парашюте: низ картинки — днище груза; покачивается
-                            float sc = 1.1f, sway = Mathf.Sin(_time * 1.3f) * 0.08f;
-                            DrawSetTransform(c, sway, new Vector2(sc, sc));
-                            DrawTexture(chute, new Vector2(-chute.GetWidth() / 2f, -chute.GetHeight()));
+                            // контейнер на парашюте: низ картинки — днище груза; покачивается; у земли купол опадает и гаснет
+                            float sc = 1.1f;
+                            float land = Mathf.Clamp((fall - 0.9f) / 0.1f, 0, 1);
+                            DrawSetTransform(c, sway, new Vector2(sc, sc * (1 - 0.25f * land)));
+                            DrawTexture(chute, new Vector2(-chute.GetWidth() / 2f, -chute.GetHeight()), new Color(1, 1, 1, 1 - land));
                             DrawSetTransform(Vector2.Zero, 0, Vector2.One);
                         }
                     }
@@ -124,21 +160,21 @@ namespace Rastvordd.Client
             }
         }
 
-        void DrawPlane(Vector2 p, Vector2 dir, Color c)
+        static void DrawPlaneOn(CanvasItem ci, Vector2 p, Vector2 dir, Color c)
         {
             // Ан-2 сверху: нос картинки смотрит вправо, размах крыльев 18 м
             var tex = Art.Get("vehicles/plane_an2_top");
             if (tex == null)
             {
                 var side = new Vector2(-dir.Y, dir.X);
-                DrawColoredPolygon(new[] { p + dir * 26, p + side * 4, p - dir * 22 + side * 3, p - dir * 22 - side * 3, p - side * 4 }, c);
-                DrawColoredPolygon(new[] { p + dir * 8 + side * 34, p + dir * 2 + side * 34, p + dir * 2 - side * 34, p + dir * 8 - side * 34 }, c);
+                ci.DrawColoredPolygon(new[] { p + dir * 26, p + side * 4, p - dir * 22 + side * 3, p - dir * 22 - side * 3, p - side * 4 }, c);
+                ci.DrawColoredPolygon(new[] { p + dir * 8 + side * 34, p + dir * 2 + side * 34, p + dir * 2 - side * 34, p + dir * 8 - side * 34 }, c);
                 return;
             }
             float sc = 18f * Iso.PPM / tex.GetHeight();
-            DrawSetTransform(p, dir.Angle(), new Vector2(sc, sc));
-            DrawTexture(tex, -tex.GetSize() / 2, c);
-            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+            ci.DrawSetTransform(p, dir.Angle(), new Vector2(sc, sc));
+            ci.DrawTexture(tex, -tex.GetSize() / 2, c);
+            ci.DrawSetTransform(Vector2.Zero, 0, Vector2.One);
         }
     }
 

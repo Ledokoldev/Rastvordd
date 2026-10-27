@@ -121,12 +121,13 @@ namespace Rastvordd.Sim
         string DepositDue(float v)
         {
             if (v < 25 && SpareGun() == null) return null;
-            if (v >= 150) return $"несу ≈{v:0} лома";
+            // 2026-10-27 (напарник): не бегать домой после каждого мелкого подлута — пороги 40 → 100 лома, рюкзак 70 → 85 %
+            if (v >= CarryAvoid) return $"несу ≈{v:0} лома";
             int used = 0;
             foreach (var s in _me.Pack) if (s != null) used++;
-            if (used >= Actor.PackSize * 0.7f && v >= 40) return $"рюкзак полон ({used}/{Actor.PackSize})";
-            if (_w.Time < _depositAfter && v >= 40) return "после добычи (РТ, убитый, груз) — сначала в ящик";
-            if (Night && v >= 40 && _rtPhase == RtPhase.None) return "ночь — сортирую дома";
+            if (used >= Actor.PackSize * 0.85f && v >= 60) return $"рюкзак полон ({used}/{Actor.PackSize})";
+            if (_w.Time < _depositAfter && v >= 100) return "после добычи (РТ, убитый, груз) — сначала в ящик";
+            if (Night && v >= 100 && _rtPhase == RtPhase.None) return "ночь — сортирую дома";
             return null;
         }
 

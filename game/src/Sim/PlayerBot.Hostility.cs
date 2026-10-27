@@ -262,7 +262,7 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>Сколько несу — уже «с лутом»: домой, драки не беру (раздел 10: ≈150 лома).</summary>
-        const float CarryAvoid = 150f;
+        const float CarryAvoid = 200f;   // 2026-10-27 (напарник): было 150 — боты сдавались домой и бросали драки слишком рано
 
         /// <summary>Что делать с угрозой: 1 — драться, −1 — уходить, 0 — не трогать (разошлись, слежу). Охрана РТ — по-старому (CanFight).</summary>
         int ThreatMode(Actor t)

@@ -88,8 +88,8 @@ void fragment() {
     // низкий туман: два слоя шума плывут по ветру, лёгкими полосами
     if (fog > 0.005) {
         float n = texture(noise_tex, wp / 900.0 + fog_off / 900.0).r * 0.65 + texture(noise_tex, wp / 330.0 - fog_off * 0.6 / 330.0 + 0.31).r * 0.35;
-        float f = smoothstep(0.38, 0.78, n) * fog;
-        c = mix(c, fog_col, f * 0.42);
+        float f = mix(smoothstep(0.38, 0.78, n), 0.55 + 0.45 * n, smoothstep(0.85, 1.0, fog)) * fog;   // густой туман — сплошная пелена, а не клочья
+        c = mix(c, fog_col, f * mix(0.42, 0.68, smoothstep(0.85, 1.0, fog)));
     }
     // пылинки в солнце: по одной на клетку, медленно дрейфуют и мерцают
     if (motes > 0.005) {
@@ -164,6 +164,7 @@ void fragment() {
             var shadow = new Vector3(-0.004f, 0.004f, 0.03f) * (0.5f + night) + new Vector3(0.02f, -0.005f, -0.02f) * warm;
             float fog = Mathf.Max(night * 0.55f, Bell(day, 0.26f, 0.07f) * 0.85f) + (wet ? 0.25f : 0f) + (snowy ? 0.15f : 0f);
             fog *= 1f - 0.6f * Mathf.Clamp(windStrength, 0, 1);
+            if ((int)sky == 8) fog = Mathf.Max(fog, 0.95f);   // погода «Туман»: густой, по всему экрану (27.10)
             var fogCol = new Vector3(0.62f, 0.68f, 0.76f).Lerp(new Vector3(0.18f, 0.22f, 0.32f), night).Lerp(new Vector3(0.85f, 0.72f, 0.62f), warm * 0.5f);
             float motes = (_q >= 1 ? 1f : 0f) * (1f - night) * (sky is Sky.Clear or Sky.Wind ? 1f : 0f) * (1f + warm);
             var wind = new Vector2(Mathf.Cos(windAngle), Mathf.Sin(windAngle)) * (0.4f + windStrength);
@@ -175,7 +176,7 @@ void fragment() {
             Set(PSunDir, new Vector2(Shade.Skew, -Shade.Flat).Normalized());
             Set(PRays, (1f - night) * (1f - grey) * (0.1f + 0.22f * warm) * (_q >= 3 ? 1.3f : 1f));
             Set(PRayCol, new Vector3(1f, 0.93f, 0.8f).Lerp(new Vector3(1f, 0.75f, 0.5f), warm));
-            Set(PCam, camPx); Set(PZoom, zoom); Set(PFog, Mathf.Min(fog, 0.8f)); Set(PFogCol, fogCol);
+            Set(PCam, camPx); Set(PZoom, zoom); Set(PFog, Mathf.Min(fog, (int)sky == 8 ? 1f : 0.8f)); Set(PFogCol, fogCol);
             Set(PMotes, motes); Set(PWind, wind);
             ulong nowUs = Time.GetTicksUsec(); float fdt = _fogUs == 0 ? 0f : Mathf.Min(0.1f, (nowUs - _fogUs) / 1e6f); _fogUs = nowUs;
             _fogOff += new Vector2(Mathf.Cos(windAngle), Mathf.Sin(windAngle)) * (1f + 5f * windStrength) * fdt;   // туман: 1–6 px/с по ветру

@@ -225,6 +225,15 @@ namespace Rastvordd.Sim
                 if (_w.BotUseStash(_me, ev.Start) && !j.Started) { j.Started = true; Thought("запускаю взлом закрытого ящика — 3 мин, гул на всю округу; охраняю"); LStat("взломов запущено"); }
                 return true;
             }
+            // 2026-10-27 (напарник): сброс груза — замок остыл, но сам не откроется: вскрыть (держи E 10 с, громко). Раньше все ждали вокруг вечно.
+            // Занял другой — жду рядом (встречи решает «бой/бегство»); бросил или убит — пробую сам.
+            if (j.Kind == "airdrop" && !ev.Open && ev.Start != null && !ev.Start.Done && (ev.Start.ActorId == 0 || ev.Start.ActorId == _me.Id))
+            {
+                Doing = "вскрывает контейнер сброса";
+                if (!Reach(ev.Start.Pos, ref cmd)) return true;
+                if (_w.BotUseStash(_me, ev.Start) && !j.Started) { j.Started = true; Thought("вскрываю контейнер сброса — 10 с, слышно далеко; не отхожу"); LStat("сбросов: вскрытие начато"); }
+                return true;
+            }
             if (!ev.Open || crate == null || !crate.Unlocked)
             {
                 // ждать открытия: присесть у ящика, смотреть по сторонам (встречи решает «бой/бегство»)

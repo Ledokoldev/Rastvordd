@@ -1,0 +1,47 @@
+{
+ "normal_framing": "A TANGENT-SPACE NORMAL MAP of the attached reference sprite (OpenGL convention: R = X right, G = Y up, B = Z toward viewer; flat surfaces facing the viewer are #8080FF lavender-blue). EXACTLY the same silhouette, size, proportions and position as the reference, every leaf cluster, branch, plank, bolt and rock facet modelled with correct bumps and rounded volumes (crowns are domed clusters, trunks cylindrical, planks with bevelled edges, rock facets angled). Fully transparent background outside the silhouette. No lighting, no shadows, no colours other than normal-map colours, no text. Square canvas 1024x1024 with the object centred exactly like the reference.",
+ "assets": [
+  {
+   "id": "tree_oak_1_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_oak_1.png",
+   "desc": "a broad leafy oak tree seen from a top-down 3/4 view"
+  },
+  {
+   "id": "tree_birch_old_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_birch_old.png",
+   "desc": "an old birch tree with a big crown, top-down 3/4 view"
+  },
+  {
+   "id": "tree_pine_1_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_pine_1.png",
+   "desc": "a pine/spruce tree, top-down 3/4 view"
+  },
+  {
+   "id": "node_metal_large_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/node_metal_large.png",
+   "desc": "a large rock boulder with metal ore veins"
+  },
+  {
+   "id": "loot_wood_crate_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/loot_wood_crate.png",
+   "desc": "a wooden supply crate"
+  },
+  {
+   "id": "loot_toolbox_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/loot_toolbox.png",
+   "desc": "a large metal toolbox"
+  }
+ ]
+}

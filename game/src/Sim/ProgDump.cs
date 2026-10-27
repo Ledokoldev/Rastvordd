@@ -49,7 +49,7 @@ namespace Rastvordd.Sim
             foreach (var n in Tech.All)
                 tech2.Add(new Dictionary<string, object>
                 {
-                    ["id"] = Id(n.Id), ["name"] = Clothing.TechName(n.Id) ?? Items.Name(n.Id), ["bench"] = n.Bench, ["scrap"] = n.Scrap,
+                    ["id"] = Id(n.Id), ["name"] = Clothing.TechName(n.Id) ?? Items.Name(n.Id), ["bench"] = n.Bench, ["scrap"] = n.Scrap, ["lane"] = n.Lane, ["order"] = n.Order,
                     ["req"] = n.Requires.Select(Id).ToList(), ["req_any"] = n.RequiresAny.Select(Id).ToList(),
                 });
 

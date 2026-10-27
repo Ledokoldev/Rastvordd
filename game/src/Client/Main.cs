@@ -357,6 +357,8 @@ namespace Rastvordd.Client
             DisplayServer.WindowSetTitle("Раствордд — прототип 0 (2D 3/4)");
             // отладка: --seed=N — другой мир для прогонов ботов (обычная игра — 1337; сохранение держит свой)
             var seedArg = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--seed="));
+            // правки баланса со страницы прогрессии (game/data/balance.json) — до создания мира
+            if (FileAccess.FileExists("res://data/balance.json")) try { Rastvordd.Sim.BalanceOverrides.Apply(FileAccess.GetFileAsString("res://data/balance.json")); } catch (System.Exception ex) { GD.PrintErr($"balance.json: {ex.Message}"); }
             _server = new LocalServer(seedArg != null && int.TryParse(seedArg.Substring(7), out int seedN) ? seedN : 1337);
             // сохранение мира игрока — только при обычном запуске: любой отладочный флаг (прогоны ботов, скриншоты,
             // наблюдатель) работает со свежим миром и НЕ трогает сохранение (иначе тест перезапишет мир игрока)
@@ -413,6 +415,11 @@ namespace Rastvordd.Client
             {
                 System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(pd.Substring(11))));
                 System.IO.File.WriteAllText(pd.Substring(11), Rastvordd.Sim.ProgDump.Build(_server.World), new System.Text.UTF8Encoding(false));
+                {   // иконки предметов (пути ресурсов) — для страницы прогрессии
+                    var ic = new Godot.Collections.Dictionary();
+                    foreach (var id in Rastvordd.Sim.Items.AllIds()) if (Art.Icon(id) is Texture2D tx && !string.IsNullOrEmpty(tx.ResourcePath)) ic[id] = tx.ResourcePath;
+                    System.IO.File.WriteAllText(pd.Substring(11).Replace(".json", ".icons.json"), Json.Stringify(ic), new System.Text.UTF8Encoding(false));
+                }
                 GetTree().Quit();
                 return;
             }

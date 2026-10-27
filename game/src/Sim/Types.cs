@@ -182,6 +182,7 @@ namespace Rastvordd.Sim
     public static partial class Items
     {
         static readonly Dictionary<string, ItemDef> Defs = new();
+        public static IEnumerable<string> AllIds() => Defs.Keys;   // все id предметов (выгрузка прогрессии)
 
         static ItemDef Add(string id, string name, ItemCategory cat)
         {

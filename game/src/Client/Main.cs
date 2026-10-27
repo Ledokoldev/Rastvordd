@@ -828,7 +828,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         if (!_mapView.Visible) CloseBigExcept(false, false, true);
                         _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw();
                         break;
-                    case Key.F5: SaveWorld(); _hud.Toast("Мир сохранён"); break;
+                    case Key.F5: _hud.Toast(SaveWorld() ? "Мир сохранён" : _saveEnabled ? "Сохранение НЕ записано: " + _saveError : "Сохранение выключено в этом запуске"); break;
                     case Key.F6: ToggleRigTune(); break;   // ручная настройка рига (размеры и сдвиги частей)
                     case Key.F12: SaveScreenshot($"user://shot_{Time.GetTicksMsec()}.png"); break;
                     case Key.Escape when _hud.AdminOpen:
@@ -1192,16 +1192,25 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         string _awayReport;
         void ToastLoaded() => _hud.Toast(_awayReport ?? "Мир загружен — продолжаем с того же места");
 
-        void SaveWorld()
+        string _saveError = "";
+        bool SaveWorld()
         {
-            if (!_saveEnabled) return;
+            if (!_saveEnabled) return false;
             string path = ProjectSettings.GlobalizePath(SavePath);
             try
             {
                 System.IO.File.WriteAllText(path + ".tmp", _server.SaveJson());
                 System.IO.File.Move(path + ".tmp", path, true);   // атомарно: не оставим полуфайл при вылете
+                return true;
             }
-            catch (System.Exception ex) { GD.PrintErr($"сохранение не записано: {ex.Message}"); }
+            catch (System.Exception ex)
+            {
+                // ошибка видна в тосте F5 и остаётся в user://save_errors.log (логи Godot перетираются прогонами)
+                _saveError = ex.Message;
+                GD.PrintErr($"сохранение не записано: {ex}");
+                try { System.IO.File.AppendAllText(ProjectSettings.GlobalizePath("user://save_errors.log"), $"{System.DateTime.Now:u} {ex}" + System.Environment.NewLine); } catch { }
+                return false;
+            }
         }
 
         public override void _Notification(int what)

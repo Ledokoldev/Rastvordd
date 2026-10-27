@@ -475,6 +475,12 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _miniMap.SetAnchorsPreset(Control.LayoutPreset.TopRight);
             _miniMap.OffsetLeft = -MiniMap.Side - 16; _miniMap.OffsetRight = -16; _miniMap.OffsetTop = 14; _miniMap.OffsetBottom = 14 + MiniMap.Side + 34;
             _hud.AddChild(_miniMap);
+            // счётчик кадров (F10 — скрыть/показать): FPS, худший кадр за полсекунды, вызовы отрисовки
+            _fpsLabel = new Label { AnchorLeft = 1, AnchorRight = 1, OffsetLeft = -MiniMap.Side - 16 - 60, OffsetRight = -16, OffsetTop = 14 + MiniMap.Side + 40, HorizontalAlignment = HorizontalAlignment.Right, MouseFilter = Control.MouseFilterEnum.Ignore };
+            _fpsLabel.AddThemeFontSizeOverride("font_size", 13);
+            _fpsLabel.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.85f));
+            _fpsLabel.AddThemeConstantOverride("outline_size", 4);
+            _hud.AddChild(_fpsLabel);
             _inv = new InventoryWindow();
             _inv.Op += (op, arg) => _uiQ.Enqueue((op, arg, 0));
             _inv.ClickedOutside += () => { _invOpen = false; _uiQ.Clear(); if (_cur?.Self.Ui != null) _uiReq = (UiOp.Close, null, 0); };
@@ -831,6 +837,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         if (!_mapView.Visible) CloseBigExcept(false, false, true);
                         _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw();
                         break;
+                    case Key.F10: if (_fpsLabel != null) _fpsLabel.Visible = !_fpsLabel.Visible; break;
                     case Key.F5: _hud.Toast(SaveWorld() ? "Мир сохранён" : _saveEnabled ? "Сохранение НЕ записано: " + _saveError : "Сохранение выключено в этом запуске"); break;
                     case Key.F6: ToggleRigTune(); break;   // ручная настройка рига (размеры и сдвиги частей)
                     case Key.F12: SaveScreenshot($"user://shot_{Time.GetTicksMsec()}.png"); break;
@@ -1331,10 +1338,26 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _hitchFrames = _hitchBad = 0; _hitchWorst = 0;
         }
 
+        Label _fpsLabel;
+        float _fpsT, _fpsWorst;
+        int _fpsN;
+
+        void UpdateFps(double delta)
+        {
+            if (_fpsLabel == null || !_fpsLabel.Visible) return;
+            _fpsT += (float)delta; _fpsN++; _fpsWorst = Mathf.Max(_fpsWorst, (float)delta * 1000f);
+            if (_fpsT < 0.5f) return;
+            float fps = _fpsN / _fpsT;
+            _fpsLabel.Text = $"{fps:0} FPS · худший {_fpsWorst:0} мс · draw {Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame):0}";
+            _fpsLabel.Modulate = fps >= 55 ? new Color(0.7f, 1f, 0.7f) : fps >= 35 ? new Color(1f, 0.9f, 0.55f) : new Color(1f, 0.55f, 0.5f);
+            _fpsT = 0; _fpsN = 0; _fpsWorst = 0;
+        }
+
         public override void _Process(double delta)
         {
             _procT0 = Time.GetTicksUsec();
             _frame++;
+            UpdateFps(delta);
             RecoilRecover(delta);
             if (_frame == _pressNAt) _timeEdge = true;
             _saveTimer += delta;

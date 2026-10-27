@@ -131,17 +131,24 @@ void vertex() {
     VERTEX.x += round(off);
 }
 uniform float root_dark = 0.0;
+uniform float root_from = 0.45;   // с какой высоты спрайта (доля, 1 — низ) начинается затемнение к земле
 uniform vec3 tint = vec3(1.0);
 void fragment() {
     COLOR.rgb = sun_lit(COLOR.rgb * tint, NORMAL);   // трава под цвет земли (иначе светлые куртины «лежат» на ней)
-    COLOR.rgb *= 1.0 - root_dark * smoothstep(0.45, 1.0, UV.y);   // трава «врастает»: к земле темнее, как травинки в шейдере земли
+    COLOR.rgb *= 1.0 - root_dark * smoothstep(root_from, 1.0, UV.y);   // трава «врастает»: к земле темнее, как травинки в шейдере земли
     COLOR.rgb = vis_env(wx_object(COLOR.rgb, TEXTURE, UV, TEXTURE_PIXEL_SIZE, base_px + UV * 64.0), base_px);
 }
 ";
 
         static ShaderMaterial _treeMat, _grassMat;
         /// <summary>Деревья: видимость + покачивание кроны.</summary>
-        public static ShaderMaterial TreeMat => _treeMat ??= Sway(2.2f, 170f);
+        public static ShaderMaterial TreeMat => _treeMat ??= TreeSway();
+        static ShaderMaterial TreeSway()
+        {
+            var m = Sway(2.2f, 170f);
+            m.SetShaderParameter("root_dark", 0.3f); m.SetShaderParameter("root_from", 0.86f);   // только низ ствола темнеет к земле (корни в почве), без подкраски травы
+            return m;
+        }
         /// <summary>Трава, кусты, цветы: видимость + лёгкое покачивание.</summary>
         public static ShaderMaterial GrassMat => _grassMat ??= Sway(1.3f, 40f, 0.4f);
 

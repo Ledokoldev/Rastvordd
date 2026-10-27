@@ -970,6 +970,25 @@ namespace Rastvordd.Client
             if (Occlusion.Step(ref _alpha, Occlusion.Covers(ScreenRect, Base.Y + 4), dt)) QueueRedraw();
         }
 
+        static readonly System.Collections.Generic.Dictionary<Texture2D, float> RootW = new();
+        /// <summary>Размах корней (px): ширина непрозрачного в нижних 8 строках спрайта (считается один раз на текстуру).</summary>
+        static float RootWidth(Texture2D tex)
+        {
+            if (RootW.TryGetValue(tex, out var w)) return w;
+            var img = tex.GetImage();
+            int minX = int.MaxValue, maxX = -1;
+            if (img != null)
+            {
+                if (img.IsCompressed()) img.Decompress();
+                for (int y = img.GetHeight() - 1; y >= Mathf.Max(0, img.GetHeight() - 8); y--)
+                    for (int x = 0; x < img.GetWidth(); x++)
+                        if (img.GetPixel(x, y).A > 0.5f) { minX = Mathf.Min(minX, x); maxX = Mathf.Max(maxX, x); }
+            }
+            w = maxX >= 0 ? Mathf.Clamp(maxX - minX + 6, 12, tex.GetWidth() * 0.6f) : tex.GetWidth() * 0.25f;
+            RootW[tex] = w;
+            return w;
+        }
+
         public override void _Draw()
         {
             if (_tex != null) Shade.Sprite(this, _tex, _scale, 0.26f);
@@ -982,6 +1001,15 @@ namespace Rastvordd.Client
             if (_tex != null)
             {
                 if (_scale != 1f) DrawSetTransform(Vector2.Zero, 0, new Vector2(_scale, _scale));
+                // контактная тень (28.10): мягкое пятно под корнями по их размаху — дерево стоит в земле, а не «наклеено»
+                float rw = RootWidth(_tex);
+                for (int i = 0; i < 3; i++)
+                {
+                    float k = 1f + i * 0.35f;
+                    DrawSetTransform(new Vector2(0, 1), 0, new Vector2(_scale * k, _scale * k * 0.32f));
+                    DrawCircle(Vector2.Zero, rw * 0.5f, new Color(0.02f, 0.02f, 0.01f, 0.16f * _alpha));
+                }
+                DrawSetTransform(Vector2.Zero, 0, new Vector2(_scale, _scale));
                 DrawTexture(_tex, new Vector2(-_tex.GetWidth() / 2, -_tex.GetHeight() + 2), new Color(1, 1, 1, _alpha));
                 if (_scale != 1f) DrawSetTransform(Vector2.Zero, 0, Vector2.One);
                 // пучки травы у корней — дерево «вросло» в землю

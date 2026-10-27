@@ -15,6 +15,7 @@ namespace Rastvordd.Sim
         public int Seed;
         public float Time, TimeOffset;
         public int NextId;
+        public int WxSky = -1, WxIndex; public float WxLeft = -1, WxWet, WxSnow, WxWindA, WxWindS;   // погода (−1 — старый сейв: цикл начнётся заново)
         public DateTime SavedAtUtc;
         public List<NodeS> Nodes = new();
         public List<(int kind, float left)> NodeRespawns = new();
@@ -100,7 +101,8 @@ namespace Rastvordd.Sim
 
         public WorldSave Save()
         {
-            var w = new WorldSave { Seed = Seed, Time = Time, TimeOffset = TimeOffset, NextId = _nextId, SavedAtUtc = DateTime.UtcNow };
+            var w = new WorldSave { Seed = Seed, Time = Time, TimeOffset = TimeOffset, NextId = _nextId, SavedAtUtc = DateTime.UtcNow,
+                WxSky = (int)Sky, WxIndex = WxIndex, WxLeft = WxLeft, WxWet = Wetness, WxSnow = SnowCover, WxWindA = WindAngle, WxWindS = WindStrength };
             foreach (var n in Nodes) w.Nodes.Add(new WorldSave.NodeS { Id = n.Id, Kind = (int)n.Kind, X = n.Pos.X, Y = n.Pos.Y, R = n.Radius, Amount = n.Amount, Max = n.MaxAmount, Look = n.Look });
             foreach (var (k, left) in _nodeRespawns) w.NodeRespawns.Add(((int)k, left));
             foreach (var s in Structures)
@@ -150,6 +152,7 @@ namespace Rastvordd.Sim
         {
             Time = w.Time;
             TimeOffset = w.TimeOffset;
+            if (w.WxSky >= 0) { SetSky((Sky)w.WxSky); WxIndex = w.WxIndex; WxLeft = w.WxLeft; Wetness = w.WxWet; SnowCover = w.WxSnow; WindAngle = _windTarget = w.WxWindA; WindStrength = w.WxWindS; }
 
             foreach (var n in Nodes) _nodeGrid.Remove(n);
             Nodes.Clear();

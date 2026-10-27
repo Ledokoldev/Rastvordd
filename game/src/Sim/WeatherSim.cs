@@ -15,8 +15,62 @@ namespace Rastvordd.Sim
         float _windTarget, _windTurnT;
         readonly Random _wxRng = new(7171);
 
+        // ---------- цикл погоды: детерминирован от зерна мира и номера смены, сохраняется ----------
+        public float WxLeft = -1f;   // сколько ещё секунд держится текущая погода (<0 — ещё не начат цикл)
+        public int WxIndex;          // номер смены погоды (зерно следующей)
+        public static bool WxLog = true;
+
+        static float WxDur(Sky s, Random r)
+        {
+            var (a, b) = s switch
+            {
+                Sky.Clear => (300f, 720f), Sky.Wind => (180f, 420f), Sky.Rain => (240f, 540f), Sky.Downpour => (150f, 300f),
+                Sky.Storm => (120f, 270f), Sky.Fog => (180f, 420f), Sky.Snow => (240f, 480f), Sky.HeavySnow => (150f, 300f), _ => (90f, 200f),
+            };
+            return a + (float)r.NextDouble() * (b - a);
+        }
+
+        /// <summary>Следующая погода: веса по времени суток (туман — на рассвете и ночью) и по текущей (ливень/гроза — из дождя, буран — из снега).</summary>
+        Sky WxPick(Random r)
+        {
+            float tod = TimeOfDay, night = NightFactorAt(tod);
+            float dawn = MathF.Max(0f, 1f - MathF.Abs(tod - 0.26f) / 0.08f);
+            bool wet = SkyInfo.Wet(Sky), snowy = SkyInfo.Snowy(Sky);
+            float fogW = 3f + 22f * MathF.Max(dawn, night) - (tod > 0.4f && tod < 0.7f ? 2.5f : 0f);
+            bool windy = Sky is Sky.Wind or Sky.Fog;   // «тучи»: дождь обычно после ветра/хмари, гроза — лишь иногда после дождя
+            var w = new (Sky s, float w)[]
+            {
+                (Sky.Clear, snowy ? 10f : 34f), (Sky.Wind, wet ? 8f : 14f), (Sky.Rain, windy ? 22f : wet ? 6f : 3f), (Sky.Downpour, wet || windy ? 5f : 0.5f),
+                (Sky.Storm, wet ? 3f : 0f), (Sky.Fog, snowy ? 0f : fogW),
+                (Sky.Snow, snowy ? 14f : 0.35f), (Sky.HeavySnow, snowy ? 9f : 0f), (Sky.Blizzard, Sky == Sky.HeavySnow ? 5f : 0f),   // снег — редкая зимняя полоса (~1–2 % в сутки), зато надолго
+            };
+            float tot = 0; foreach (var x in w) tot += x.s == Sky ? 0f : x.w;
+            float pick = (float)r.NextDouble() * tot;
+            foreach (var x in w) { pick -= x.s == Sky ? 0f : x.w; if (pick <= 0) return x.s; }
+            return Sky.Clear;
+        }
+
+        void StepWeatherCycle()
+        {
+            if (WxLeft < 0) { var r0 = new Random(unchecked(Seed * 7919 + 17)); WxLeft = WxDur(Sky, r0); return; }
+            if ((WxLeft -= Dt) > 0) return;
+            NextWeather(null, 0f);
+        }
+
+        /// <summary>Сменить погоду: force — на заданную (админка/отладка), иначе — по таблице; dur 0 — обычная длительность.</summary>
+        public void NextWeather(Sky? force, float dur)
+        {
+            var r = new Random(unchecked(Seed * 7919 + ++WxIndex * 104729));
+            var old = Sky;
+            var s = force ?? WxPick(r);
+            SetSky(s);
+            WxLeft = dur > 0 ? dur : WxDur(s, r);
+            if (WxLog) Console.WriteLine($"[погода] {Time,7:0}s сутки {TimeOfDay:0.00}: {SkyInfo.Names[(int)old]} → {SkyInfo.Names[(int)s]} на {WxLeft / 60f:0.0} мин (мокро {Wetness:0.00}, снег {SnowCover:0.00})");
+        }
+
         void StepWeather()
         {
+            StepWeatherCycle();
             float target = SkyInfo.Wind(Sky);
             bool gusty = Sky is Sky.Wind or Sky.Storm or Sky.Blizzard or Sky.HeavySnow;
             // направление: плавно гуляет; в бурю/грозу/ветер — каждые 5–15 с резкий разворот на 40–120°

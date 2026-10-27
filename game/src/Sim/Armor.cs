@@ -171,7 +171,8 @@ namespace Rastvordd.Sim
             float lack = a.RadHere - Clothing.RadProt(a);
             if (lack > 0) a.RadDose = MathF.Min(Clothing.RadMax, a.RadDose + lack * Clothing.RadRate * dt);
             else a.RadDose = MathF.Max(0, a.RadDose - Clothing.RadDecay * dt);
-            float radDmg = a.RadDose >= Clothing.RadHurt3 ? 3f : a.RadDose >= Clothing.RadHurt1 ? 1f : 0f;
+            // урон от дозы плавно с порога тошноты (27.10): 100 → 0, 250 → 1 HP/с, 500 → ~2,7 HP/с (раньше до 250 не било вовсе)
+            float radDmg = a.RadDose > Clothing.RadNausea ? (a.RadDose - Clothing.RadNausea) / 150f : 0f;
 
             // холод: воздух + тепло + огонь/дом − мокрый ≥ +15 — комфортно, иначе копится переохлаждение, на 100 — урон
             float deficit = Clothing.Comfort - a.FeltTemp;

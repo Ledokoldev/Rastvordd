@@ -46,7 +46,7 @@ namespace Rastvordd.Sim
 
         // радиация (ед.) и холод (°C)
         public const float RadRate = 0.1f;              // доза/с = (уровень − защита) × 0,1
-        public const float RadDecay = 0.5f;             // доза/с выводится, когда не облучает
+        public const float RadDecay = 0.08f;            // доза/с выводится, когда не облучает (27.10: было 0,5 — выйти с РТ и забыть; теперь 200 дозы уходят ~40 мин, быстрее — антирадин)
         public const float RadNausea = 100, RadHurt1 = 250, RadHurt3 = 500, RadMax = 1000;
         public const float AntiradDose = 120;           // антирадин: −120 дозы сразу
         // фон РТ по тиру (D53): боевой сет тира N держит РТ тиров 0…N, защищённый — 0…N+1, две свинцовые пластины — любые

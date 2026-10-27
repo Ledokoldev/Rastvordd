@@ -94,7 +94,7 @@ namespace Rastvordd.Client
         {
             var l = new PointLight2D
             {
-                Texture = Art.LightTex, TextureScale = radiusM * Iso.PPM * 2 / 256f, Color = c, Energy = 0, Position = at,
+                Texture = Art.LightTex, TextureScale = radiusM * Iso.PPM * 2 / 256f, Color = c, Energy = 0, Position = at, Height = Mathf.Max(headH, radiusM * Iso.PPM * 0.3f),
                 BlendMode = Light2D.BlendModeEnum.Add, ShadowEnabled = true, ShadowFilter = Light2D.ShadowFilterEnum.Pcf13,
                 ShadowFilterSmooth = 2.5f, ShadowColor = new Color(0, 0, 0, 0.92f), Enabled = false,
             };

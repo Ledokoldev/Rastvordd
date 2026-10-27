@@ -32,7 +32,7 @@ namespace Rastvordd.Client
             var l = new PointLight2D
             {
                 Texture = Art.LightTex, TextureScale = sizeM * Iso.PPM * 2 / 256f, Energy = 0f, Color = col, Position = at,
-                BlendMode = Light2D.BlendModeEnum.Add, Enabled = _k > 0.02f,
+                BlendMode = Light2D.BlendModeEnum.Add, Enabled = false, Height = -at.Y,   // лампа на высоте столба: объём по нормалям
             };
             l.TreeExiting += () => All.Remove(l);
             All.Add(l);
@@ -44,9 +44,28 @@ namespace Rastvordd.Client
         public static void Set(float night)
         {
             float k = Mathf.Clamp((night - 0.25f) / 0.5f, 0f, 1f) * 1.1f;
-            if (Mathf.Abs(k - _k) < 0.01f) return;
-            _k = k;
-            foreach (var l in All) { l.Energy = k; l.Enabled = k > 0.02f; }
+            if (Mathf.Abs(k - _k) >= 0.01f) { _k = k; foreach (var l in All) l.Energy = k; _cullAt = 0; }
+            if (Engine.GetProcessFrames() >= _cullAt) { _cullAt = Engine.GetProcessFrames() + 20; Cull(); }
+        }
+
+        // включены только ближайшие к камере огни (не больше Cap): цена кадра не растёт с числом фонарей на карте
+        const int Cap = 16;
+        static ulong _cullAt;
+        static float[] _d = System.Array.Empty<float>();
+        static PointLight2D[] _l = System.Array.Empty<PointLight2D>();
+
+        static void Cull()
+        {
+            bool on = _k > 0.02f;
+            var cam = (Engine.GetMainLoop() as SceneTree)?.Root?.GetCamera2D();
+            if (!on || cam == null || All.Count <= Cap) { foreach (var l in All) l.Enabled = on; return; }
+            var c = cam.GetScreenCenterPosition();
+            int n = All.Count;
+            if (_d.Length < n) { _d = new float[n * 2]; _l = new PointLight2D[n * 2]; }
+            for (int i = 0; i < n; i++) { _l[i] = All[i]; _d[i] = All[i].GlobalPosition.DistanceSquaredTo(c); }
+            System.Array.Sort(_d, _l, 0, n);
+            for (int i = 0; i < n; i++) _l[i].Enabled = i < Cap;
+            System.Array.Clear(_l, 0, n);
         }
     }
 
@@ -73,7 +92,7 @@ namespace Rastvordd.Client
             Material = VisionFx.ObjectMat;
             SetSprite(d.Sprite);
             if (NightLights.Kind(d.Sprite) is var (size, col, top) && size > 0 && _tex != null)
-                AddChild(NightLights.Make(size, col, new Vector2(0, -_tex.GetHeight() * top - d.Lift * Iso.PPM)));
+                { AddChild(NightLights.Make(size, col, new Vector2(0, -_tex.GetHeight() * top - d.Lift * Iso.PPM)));}
         }
 
         public void SetSprite(string sprite)

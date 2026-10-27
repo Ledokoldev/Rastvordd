@@ -25,10 +25,20 @@ namespace Rastvordd.Client
         public static PointLight2D FireLight(float sizeM, float energy) => new PointLight2D
         {
             Texture = LightTex, TextureScale = sizeM * Iso.PPM * 2 / 256f, Energy = energy,
-            Color = new Color(1f, 0.68f, 0.38f), BlendMode = Light2D.BlendModeEnum.Add,
+            Color = new Color(1f, 0.68f, 0.38f), BlendMode = Light2D.BlendModeEnum.Add, Height = sizeM * Iso.PPM * 0.35f,   // высота — объём по нормалям
             // огонь, факел, вспышка выстрела — с настоящими тенями от стен и техники (LightOccluder2D)
             ShadowEnabled = true, ShadowFilter = Light2D.ShadowFilterEnum.Pcf5, ShadowFilterSmooth = 2f, ShadowColor = new Color(0, 0, 0, 0.9f),
         };
+
+        static Texture2D _white;
+        static Texture2D White => _white ??= ImageTexture.CreateFromImage(Image.CreateFromData(1, 1, false, Image.Format.Rgba8, new byte[] { 255, 255, 255, 255 }));
+
+        static bool Metal(string p)
+        {
+            foreach (var k in MetalKeys) if (p.Contains(k)) return true;
+            return false;
+        }
+        static readonly string[] MetalKeys = { "vehicles/", "containers/", "weapons/", "metal", "pipe", "barrel", "tank", "steel", "iron", "car_", "truck", "rail", "lamp", "streetlight", "fence", "generator", "machine" };
 
         public static Texture2D Get(string path)
         {
@@ -39,7 +49,13 @@ namespace Rastvordd.Client
             // берут NORMAL и сами светят солнцем (VisionFx: lit); фильтр наследуется от узла (nearest)
             var nres = $"res://art/{path}_n.png";
             if (t != null && ResourceLoader.Exists(nres))
-                t = new CanvasTexture { DiffuseTexture = t, NormalTexture = GD.Load<Texture2D>(nres) };
+            {
+                // блик от фонарей/огня (по нормалям): металл слегка блестит, остальное матовое
+                bool metal = Metal(path);
+                t = new CanvasTexture { DiffuseTexture = t, NormalTexture = GD.Load<Texture2D>(nres),
+                    SpecularTexture = metal ? White : null,
+                    SpecularColor = metal ? new Color(0.45f, 0.45f, 0.5f) : Colors.Black, SpecularShininess = metal ? 0.55f : 0f };
+            }
             Cache[path] = t;
             return t;
         }

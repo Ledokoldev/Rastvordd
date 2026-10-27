@@ -33,11 +33,11 @@ namespace Rastvordd.Client
         {
             float s = Mathf.Clamp((t - 0.25f) / 0.55f, 0f, 1f);            // 0 — восход, 1 — закат
             float skew = Mathf.Lerp(-0.95f, 0.95f, s);
-            float flat = 0.22f + 0.55f * Mathf.Abs(2f * s - 1f);          // в полдень короче
+            float flat = 0.22f + 0.5f * Mathf.Abs(2f * s - 1f) + 0.35f * Mathf.Pow(Mathf.Abs(2f * s - 1f), 4f);   // в полдень короче, на закате/рассвете длинные
             float day = 1f - World.NightFactorAt(t);
             float str = 0.18f + 0.82f * day;
             bool changed = Mathf.Abs(skew - Skew) > 0.02f || Mathf.Abs(flat - Flat) > 0.02f || Mathf.Abs(str - Strength) > 0.03f;
-            if (changed) { Skew = skew; Flat = flat; Strength = str; }
+            if (changed) { Skew = skew; Flat = flat; Strength = str; GpuShade.SetSun(Skew, Flat, Strength); }
             if (changed || !_lit)
             {
                 // светотень по нормалям — с той же стороны, откуда падает тень: утром свет справа (восток), вечером слева;
@@ -45,10 +45,8 @@ namespace Rastvordd.Client
                 _lit = true;
                 VisionFx.SetSun(new Vector3(-Skew * 0.9f, -0.12f, 0.45f + 0.25f * (1f - Mathf.Abs(Skew))), 1.15f * day, Mathf.Pow(Mathf.Abs(2f * s - 1f), 1.5f) * day);   // низкое солнце — тёплый свет
             }
-            return changed;
+            return false;   // тени спрайтов и стен — в шейдере (GpuShade), перерисовывать узлы на CPU не нужно
         }
-
-        const int Layers = 3;
 
         /// <summary>
         /// Тень спрайта «как из трассировки»: несколько копий силуэта разной длины и чуть разного наклона (размер солнечного диска).
@@ -58,16 +56,7 @@ namespace Rastvordd.Client
         public static void Sprite(CanvasItem ci, Texture2D tex, float scale = 1f, float alpha = 0.32f, float sink = 2f, Vector2 at = default)
         {
             ContactAo(ci, tex, scale, alpha / 0.32f, sink, at);
-            float a = Mathf.Min(0.3f, alpha * 0.62f * Strength);                   // один слой: конец тени; у основания все три ≈ ×1.5 темнее
-            var col = new Color(0.04f, 0.06f, 0.14f, a);   // тень холодная (небо подсвечивает её синим)
-            var pos = new Vector2(-tex.GetWidth() / 2f, -tex.GetHeight() + sink);
-            for (int i = 0; i < Layers; i++)
-            {
-                float len = 1f - 0.08f * i;                                        // 1, .92, .84 длины
-                float spread = (i == 1 ? 0.025f : i == 2 ? -0.025f : 0f);          // веер полутени
-                ci.DrawSetTransformMatrix(new Transform2D(new Vector2(scale, 0), new Vector2((-Skew * len + spread) * scale, Flat * len * scale), at));
-                ci.DrawTexture(tex, pos, col);
-            }
+            GpuShade.Sprite(ci, tex, scale, alpha, sink, at);   // силуэт по солнцу — шейдер (наклон, длина, сила, качание кроны)
             ci.DrawSetTransform(Vector2.Zero, 0, Vector2.One);
         }
 
@@ -680,6 +669,7 @@ namespace Rastvordd.Client
                     return;
                 }
             }
+            GpuShade.Begin(this);
             if (!_cut) DrawCastShadow();
             // срез: изнутри дома стены перед персонажем рисуются низкими, как в Project Zomboid
             var frontR = _front;
@@ -763,16 +753,7 @@ namespace Rastvordd.Client
         void DrawCastShadow()
         {
             float x0 = _front.Position.X, x1 = _front.End.X, d = _top.Size.Y, hh = _front.Size.Y;
-            var o = new Vector2(Shade.Skew * hh, -Shade.Flat * hh);
-            // выпуклая оболочка основания и его сдвига: при тени влево (утро) или тонкой стене прежний шестиугольник
-            // самопересекался — Godot не мог его разбить на треугольники и на каждую перерисовку стены печатал ошибку
-            // со стеком .NET (~10 мс): тысяча стен — фриз в 13 с при загрузке и рывки при смене солнца
-            var hull = ConvexHull(stackalloc Vector2[]
-            {
-                new Vector2(x0, 0), new Vector2(x1, 0), new Vector2(x1, -d), new Vector2(x0, -d),
-                new Vector2(x0, 0) + o, new Vector2(x1, 0) + o, new Vector2(x1, -d) + o, new Vector2(x0, -d) + o,
-            });
-            if (hull != null) DrawColoredPolygon(hull, new Color(0.03f, 0.04f, 0.03f, 0.3f * _alpha));
+            GpuShade.Wall(this, x0, x1, d, hh, 0.3f * _alpha);   // след стены по солнцу — в шейдере
             for (int i = 0; i < 4; i++)
                 DrawRect(new Rect2(x0 - 1, i, x1 - x0 + 2, 1), new Color(0, 0, 0, (0.32f - i * 0.075f) * _alpha));
         }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -23,9 +23,10 @@ namespace Rastvordd.Sim
             float d = s.Biome switch
             {
                 // лес гуще к середине: опушка → чаща
-                Biome.Forest => s.Depth < 5 ? 1 / 50f : s.Depth < 12 ? 1 / 36f : 1 / 28f,
+                // плавно гуще от опушки к чаще (1/75 → 1/26)
+                Biome.Forest => 1 / 75f + (1 / 26f - 1 / 75f) * Math.Clamp((s.Depth - 2f) / 14f, 0, 1),
                 // поле: одинокие деревья редки; у самого леса — подрост и молодняк (опушка переходит в луг постепенно)
-                Biome.Grassland => s.ForestNear ? 1 / 600f : 1 / 3600f,
+                Biome.Grassland => s.ForestNear ? (s.Depth < 4 ? 1 / 220f : 1 / 650f) : 1 / 3600f,
                 Biome.Swamp => 1 / 100f * (0.5f + s.Wet * 0.6f),
                 Biome.Tundra => 1 / 380f,
                 Biome.Arid => 1 / 2600f,
@@ -98,9 +99,10 @@ namespace Rastvordd.Sim
         {
             float conifer = Terrain.ConiferAt(p);
             var age = AgeFor(r, s);
-            var sp = Ecology.PickTree(r, s, conifer);
+            var sp = StandSpecies(r, p, s) is TreeSpecies d && d != TreeSpecies.Auto && Ecology.TreeSuit(d, s, conifer) > 0.08f
+                ? d : Ecology.PickTree(r, s, conifer);
             var mother = MotherNear(p, 7f);
-            if (mother != null && r.NextDouble() < 0.6)
+            if (mother != null && r.NextDouble() < 0.3)
             {
                 var msp = ResourceNode.SpeciesOf(mother.Look);
                 if (msp != TreeSpecies.Dead && Ecology.TreeSuit(msp, s, conifer) > 0.3f)
@@ -114,6 +116,26 @@ namespace Rastvordd.Sim
             if (!TreeSpotOk(p, Spacing(age))) return false;
             AddTree(r, p, sp, age);
             return true;
+        }
+
+        /// <summary>
+        /// Главная порода древостоя (≈80 %): медленный шум «типа насаждения» + место. Ельник на севере и в сырости, сосняк на сухом и песке,
+        /// березняки и осинники, дубравы на ровной плодородной почве; у реки ивы и тополя. Шум с дрожью — породы на стыке перемешаны.
+        /// Auto — без доминанты (выбор по пригодности места).
+        /// </summary>
+        TreeSpecies StandSpecies(Random r, Vector2 p, in Site s)
+        {
+            float rv = Terrain.RiverNear(p);
+            if (rv < 9 && s.Biome is Biome.Grassland or Biome.Forest or Biome.Beach or Biome.Swamp && r.NextDouble() < 0.85 - rv * 0.05)
+                return r.NextDouble() < 0.72 ? TreeSpecies.Willow : TreeSpecies.Poplar;
+            if (s.Biome is not (Biome.Forest or Biome.Grassland) || r.NextDouble() > 0.8) return TreeSpecies.Auto;
+            float st = Terrain.StandAt(p) + (float)(r.NextDouble() - 0.5) * 0.16f;
+            bool dry = s.Wet < 0.42f || s.SouthSun > 0.4f || s.Height > 0.8f;
+            if (st < 0.3f) return dry && s.SouthSun > -0.2f ? TreeSpecies.Pine : TreeSpecies.Spruce;   // хвойный массив
+            if (st < 0.45f) return TreeSpecies.Birch;                                                      // березняк
+            if (st < 0.55f) return r.NextDouble() < 0.6 ? TreeSpecies.Aspen : TreeSpecies.Birch;          // осинник
+            if (st < 0.72f) return s.Steep < 0.3f && s.Wet > 0.3f && s.Wet < 0.7f ? TreeSpecies.Oak : TreeSpecies.Birch;   // дубрава
+            return dry ? TreeSpecies.Pine : TreeSpecies.Spruce;                                            // бор / ельник
         }
 
         Vector2 RandomIslandPoint(Random r) => new((float)(r.NextDouble() * 2 - 1) * HalfSize, (float)(r.NextDouble() * 2 - 1) * HalfSize);
@@ -130,7 +152,11 @@ namespace Rastvordd.Sim
                 if (b == Biome.Water) continue;
                 if (r.NextDouble() > maxDens * probeArea) continue;
                 var s = Sites.At(p);
-                if (r.NextDouble() * maxDens > TreeDensity(s)) continue;
+                float dens = TreeDensity(s);
+                if (s.Biome == Biome.Forest) dens *= Math.Clamp(Terrain.StandDensity(p), 0.35f, 1.4f);   // редины и куртины внутри массива
+                float rv = Terrain.RiverNear(p);
+                if (rv < 12 && s.Biome is Biome.Grassland or Biome.Beach or Biome.Arid) dens = MathF.Max(dens, (s.Biome == Biome.Arid ? 1 / 160f : 1 / 70f) * (1 - rv / 12f));   // рощи вдоль реки
+                if (r.NextDouble() * maxDens > dens) continue;
                 TryTreeAt(r, p, s);
             }
 

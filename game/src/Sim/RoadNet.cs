@@ -124,7 +124,8 @@ namespace Rastvordd.Sim
                     int i = y * n + x;
                     if (MathF.Abs(c.X) > HalfSize - 22 || MathF.Abs(c.Y) > HalfSize - 22) { cost[i] = -1; continue; }
                     var b = Terrain.BiomeAt(c);
-                    if (b == Biome.Water) { cost[i] = -1; continue; }
+                    if (b == Biome.Water && !Terrain.IsRiver(c)) { cost[i] = -1; continue; }
+                    if (b == Biome.Water) { cost[i] = 40f; continue; }   // река: переход дорогой — только где нужен (мост)
                     float k = b switch { Biome.Swamp => 3f, Biome.Beach => 1.8f, Biome.Forest => 1.35f, Biome.Tundra => 1.15f, _ => 1f };
                     // у воды — дороже (берег размыт), на склонах — дороже
                     for (int d = 0; d < 4; d++)
@@ -504,6 +505,7 @@ namespace Rastvordd.Sim
                 half = Track * 0.5f;
             }
             RoadLines.Add(new RoadLine { P = line, Main = main, Half = half, A = a.M, B = b?.M });
+            EmitBridges(line, half);
             byte mark = main ? (byte)1 : (byte)2;
             foreach (var p in line)
             {
@@ -524,6 +526,26 @@ namespace Rastvordd.Sim
                     }
             }
         }
+
+        /// <summary>Мост там, где дорога пересекает реку: деревянный настил поверх воды, клетки русла под ним — суша.</summary>
+        void EmitBridges(List<Vector2> line, float half)
+        {
+            var len = new float[line.Count];
+            for (int i = 1; i < line.Count; i++) len[i] = len[i - 1] + Vector2.Distance(line[i - 1], line[i]);
+            for (int i = 0; i < line.Count; i++)
+            {
+                if (!Terrain.IsRiver(line[i])) continue;
+                int j = i; while (j + 1 < line.Count && Terrain.IsRiver(line[j + 1])) j++;
+                float from = len[i] - 4.5f, to = len[j] + 4.5f;
+                for (int k = 0; k < line.Count; k++)
+                    if (len[k] >= from && len[k] <= to) Terrain.MarkBridge(line[k], half + 1.2f);
+                EmitStrip(line, _ => half * 2 + 0.6f, MathF.Max(0, from), MathF.Min(len[^1], to), "tiles/bfloor_wood", 0);
+                Bridges.Add((line[i], line[j]));
+                i = j;
+            }
+        }
+
+        public readonly List<(Vector2 a, Vector2 b)> Bridges = new();
 
         // ---------- обочины ----------
 

@@ -261,7 +261,7 @@ void fragment() {
                 mb.SetPixel(mx, my, new Color(acc[(int)Biome.Swamp] * k, dirt, gravel, pad));
                 _hard[my * ms + mx] = (byte)(Mathf.Clamp(dirt + gravel + pad, 0, 1) * 255);
                 float h = map.Heights[y * n + x];
-                mc.SetPixel(mx, my, new Color(acc[(int)Biome.Water], Mathf.Clamp(h * 0.5f + 0.5f, 0, 1), Mathf.Clamp(shore[y * n + x] / 24f, 0, 1), 1));
+                mc.SetPixel(mx, my, new Color(acc[(int)Biome.Water], Mathf.Clamp(h * 0.5f + 0.5f, 0, 1), Mathf.Clamp(Bilerp(shore, n, (mx + 0.5f) / S - 0.5f, (my + 0.5f) / S - 0.5f) / 24f, 0, 1), 1));   // плавно между клетками: без «ступенек» мели у берега
             }
         }
 
@@ -292,6 +292,15 @@ void fragment() {
             }
             for (int i = 0; i < d.Length; i++) d[i] = d[i] >= Inf ? 999 : d[i] * map.Cell;
             return d;
+        }
+
+        static float Bilerp(float[] g, int n, float fx, float fy)
+        {
+            int x0 = Mathf.Clamp((int)Mathf.Floor(fx), 0, n - 1), y0 = Mathf.Clamp((int)Mathf.Floor(fy), 0, n - 1);
+            int x1 = Mathf.Min(x0 + 1, n - 1), y1 = Mathf.Min(y0 + 1, n - 1);
+            float tx = Mathf.Clamp(fx - x0, 0, 1), ty = Mathf.Clamp(fy - y0, 0, 1);
+            float a = Mathf.Min(g[y0 * n + x0], 60), b = Mathf.Min(g[y0 * n + x1], 60), c = Mathf.Min(g[y1 * n + x0], 60), d = Mathf.Min(g[y1 * n + x1], 60);
+            return Mathf.Lerp(Mathf.Lerp(a, b, tx), Mathf.Lerp(c, d, tx), ty);
         }
 
         static float Box(Vector2 p, Vector2 min, Vector2 max, float fade) =>

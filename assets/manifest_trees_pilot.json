@@ -1,0 +1,29 @@
+{
+ "style": "ULTRA-REALISTIC natural look, like a high-resolution photograph of a real tree cut out on transparent background, botanically accurate species anatomy (true bark texture, real leaf/needle shape and density, natural asymmetric branching), true-to-life natural colours (not desaturated, not stylized), soft natural daylight from the top-left, crisp fine detail. NOT cartoon, NOT painterly fantasy, NOT AI-art look, no glow, no outline.",
+ "assets": [
+  {
+   "id": "tree_birch_v01",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a mature silver birch (Betula pendula), tall slender white trunk with black horizontal lenticels and dark fissured base, light airy weeping crown of small bright-green leaves"
+  },
+  {
+   "id": "tree_birch_v02",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a silver birch with a slightly leaning trunk and an asymmetric crown, sparse lower branches, white bark with black marks"
+  },
+  {
+   "id": "tree_birch_v03",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a young silver birch, thin white trunk, narrow open crown of fresh green leaves"
+  },
+  {
+   "id": "tree_birch_v04",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "an old large silver birch, thick trunk with rough black-cracked bark at the base turning white higher up, wide drooping crown"
+  }
+ ]
+}

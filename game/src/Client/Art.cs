@@ -129,7 +129,7 @@ namespace Rastvordd.Client
             {
                 TreeSpecies.Pine => snow ? new[] { "tree_pine_snow" } : new[] { "tree_pine_1", "tree_pine_2", "tree_pine_1_v" },
                 TreeSpecies.Spruce => snow ? new[] { "tree_spruce_snow_1", "tree_spruce_snow_1", "tree_spruce_snow_2" } : new[] { "tree_spruce_1", "tree_spruce_2" },
-                TreeSpecies.Birch => snow ? new[] { "tree_birch_frozen", "tree_birch_snow" } : new[] { "tree_birch", "tree_birch_2", "tree_birch_v" },
+                TreeSpecies.Birch => snow ? new[] { "tree_birch_frozen", "tree_birch_snow" } : new[] { "tree_birch_v01", "tree_birch_v02", "tree_birch_v04" },   // реалистичные варианты (28.10)
                 TreeSpecies.Oak => new[] { "tree_oak_1", "tree_oak_1_v", "tree_leafy" },
                 TreeSpecies.Aspen => new[] { "tree_aspen" },
                 TreeSpecies.Poplar => new[] { "tree_poplar" },
@@ -162,6 +162,7 @@ namespace Rastvordd.Client
                 case TreeAge.Sapling:
                 case TreeAge.Young:
                 {
+                    if (sp == TreeSpecies.Birch && !snow && Get("trees/tree_birch_v03") is Texture2D yb) return (yb, age == TreeAge.Sapling ? 0.55f : 0.8f);   // молодая берёза
                     if (!deadOrSnow && name != null && Get($"trees/tree_{name}_young") is Texture2D t) return (t, 1f);
                     if (sp == TreeSpecies.Pine && !snow && Get("trees/tree_young_pine") is Texture2D yp) return (yp, 1f);
                     if (snow && sp == TreeSpecies.Spruce && Get("trees/tree_spruce_snow_2") is Texture2D ss) return (ss, age == TreeAge.Sapling ? 0.5f : 0.75f);   // карликовая ель
@@ -169,6 +170,7 @@ namespace Rastvordd.Client
                 }
                 case TreeAge.Old:
                 {
+                    if (sp == TreeSpecies.Birch && !snow && Get("trees/tree_birch_v04") is Texture2D ob) return (ob, 1.15f);   // старая берёза
                     if (!deadOrSnow && name != null && Get($"trees/tree_{name}_old") is Texture2D t) return (t, 1f);
                     return (Any(mature), 1.25f);
                 }

@@ -362,7 +362,7 @@ namespace Rastvordd.Client
             _server = new LocalServer(seedArg != null && int.TryParse(seedArg.Substring(7), out int seedN) ? seedN : 1337);
             // сохранение мира игрока — только при обычном запуске: любой отладочный флаг (прогоны ботов, скриншоты,
             // наблюдатель) работает со свежим миром и НЕ трогает сохранение (иначе тест перезапишет мир игрока)
-            _saveEnabled = OS.GetCmdlineUserArgs().All(a => a.StartsWith("--bots="));   // своя игра (в т. ч. с --bots=N) сохраняется, отладочные запуски — нет
+            _saveEnabled = OS.GetCmdlineUserArgs().All(a => a.StartsWith("--bots=") || a.StartsWith("--near="));   // --near — только встать у узла, мир свой   // своя игра (в т. ч. с --bots=N) сохраняется, отладочные запуски — нет
             // отладка сохранений: --savefile=путь — отдельный файл, работает и в прогонах со скриншотами
             var sf = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--savefile="));
             if (sf != null) { SavePath = sf.Substring(11); _saveEnabled = true; }
@@ -755,12 +755,14 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 {
                     // встать рядом с ближайшим узлом вида (tree/stone/metal/sulfur) и смотреть на него: --near=tree[,угол°]
                     var p = arg.Substring(7).Split(',');
-                    var kind = System.Enum.Parse<NodeKind>(p[0], true);
+                    // --near=birch|pine|spruce|oak|aspen… — ближайшее дерево этого вида
+                    TreeSpecies? wantSp = System.Enum.TryParse<TreeSpecies>(p[0], true, out var tsp) ? tsp : null;
+                    var kind = wantSp != null ? NodeKind.Tree : System.Enum.Parse<NodeKind>(p[0], true);
                     float ang = p.Length > 1 ? Mathf.DegToRad(float.Parse(p[1], inv)) : Mathf.Pi;
                     var me = _server.World.Find(_myId);
                     ResourceNode best = null;
                     foreach (var n in _server.World.Nodes)
-                        if (n.Kind == kind && (best == null || SVec.Distance(n.Pos, me.Pos) < SVec.Distance(best.Pos, me.Pos))) best = n;
+                        if (n.Kind == kind && (wantSp == null || (n.Look != 0 && ResourceNode.SpeciesOf(n.Look) == wantSp)) && (best == null || SVec.Distance(n.Pos, me.Pos) < SVec.Distance(best.Pos, me.Pos))) best = n;
                     if (best != null)
                     {
                         me.Pos = best.Pos + new SVec(Mathf.Cos(ang), Mathf.Sin(ang)) * (best.Radius + 0.9f);

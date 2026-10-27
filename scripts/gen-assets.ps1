@@ -22,6 +22,7 @@ if ($extraManifest) {
     $manifest.assets = $extra.assets
     # оформление листов эффектов (fx: [колонки, ряды]) — из того же отдельного манифеста
     if ($extra.fx_framing) { $manifest | Add-Member -NotePropertyName fx_framing -NotePropertyValue $extra.fx_framing -Force }
+    if ($extra.style) { $manifest | Add-Member -NotePropertyName style -NotePropertyValue $extra.style -Force }   # свой стиль набора (напр. реалистичные деревья)
     if ($extra.fx_style) { $manifest | Add-Member -NotePropertyName fx_style -NotePropertyValue $extra.fx_style -Force }
     # листы анимаций персонажа (anim: [колонки, ряды]) — своё оформление кадра из отдельного манифеста
     if ($extra.normal_framing) { $manifest | Add-Member -NotePropertyName normal_framing -NotePropertyValue $extra.normal_framing -Force }   # карты нормалей по образцу

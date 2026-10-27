@@ -1349,6 +1349,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         ulong _profT; int _profFrames;
         void P(int i) { var n = Time.GetTicksUsec(); _prof[i] += (n - _profT) / 1000.0; _profT = n; }
 
+        ChunkCull _cull; long _cullCollected = -1000000;
         long _raysFrame = -100; SVec _raysAt; bool _raysCrouch; float _raysRange;
 
         Label _fpsLabel;
@@ -1458,6 +1459,16 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             Render(alpha, dt);
             P(2);
             UpdateCamera(dt);
+            if (_loading is not { Done: false } && !_overview)
+            {
+                _cull ??= new ChunkCull(_world);
+                if (_frame % 120 == 0 || _frame - _cullCollected > 100000) { _cull.Collect(); _cullCollected = _frame; }
+                if (_frame % 4 == 0)
+                {
+                    var halfV = GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom;
+                    _cull.Update(new Rect2(_cam.Position - halfV, halfV * 2));
+                }
+            }
             P(3);
             ulong decT0 = Time.GetTicksUsec();
             if (!_overview && _loading is not { Done: false }) _decals.Update(_cam.Position);

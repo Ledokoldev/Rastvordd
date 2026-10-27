@@ -569,6 +569,7 @@ namespace Rastvordd.Sim
             new Recipe { Output = "bandage", Cost = new[] { ("cloth", 4) }, Time = 2 },
             new Recipe { Output = "deploy_furnace", Cost = new[] { ("stone", 100), ("wood", 50) }, Time = 8 },
             new Recipe { Output = "deploy_workbench", Cost = new[] { ("wood", 150), ("metal_fragments", 50), ("scrap", 50) }, Time = 10 },
+            new Recipe { Output = "comp_tape", Cost = new[] { ("cloth", 10), ("rubber", 5) }, Time = 4 },   // изолента с руки (27.10)
             new Recipe { Output = "gunpowder", Count = 5, Cost = new[] { ("charcoal", 15), ("sulfur", 10) }, Time = 3, Bench = 1 },
             // верстаки (D49): лом 50 / 150 / 400, третий — ещё платы ×3 и шестерни ×5
             new Recipe { Output = "deploy_workbench2", Cost = new[] { ("metal_fragments", 300), ("scrap", 150), ("bp_frag_basic", 1) }, Time = 15, Bench = 1 },
@@ -920,6 +921,7 @@ namespace Rastvordd.Sim
         public bool Corpse;             // вещи с трупа: обыскиваются по ячейке, как ящик РТ; выброшенное — открыто сразу
         public bool Safe;               // сейф на РТ: открывается картой доступа, до следующего наполнения
         public bool Unlocked;
+        public string Rt;               // ключ РТ-профиля лута (World.LootProfiles), null — без профиля
         public bool Punch;              // крейт РТ под перфокарту: открывает таймер РТ, наполняет обновление РТ
         public int Tier = 2;            // уровень лута ящика: 0 — без охраны, 1 — малая охрана, 2 — крупный РТ
         public string Look;             // вид ивент-ящика: "airdrop" — контейнер сброса, "military" — военный ящик (иначе по тиру)

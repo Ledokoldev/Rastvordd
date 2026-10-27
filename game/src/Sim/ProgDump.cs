@@ -34,6 +34,16 @@ namespace Rastvordd.Sim
                 });
             }
 
+            // токарный станок: рецепты живут в Weaponry.Lathe, не в Recipes.All
+            foreach (var r in Weaponry.Lathe)
+                recipes.Add(new Dictionary<string, object>
+                {
+                    ["out"] = Id(r.Output), ["count"] = 1,
+                    ["cost"] = r.In.Select(c => new object[] { Id(c.id), c.n }).ToList(),
+                    ["bench"] = r.Bench3 ? 3 : 2, ["station"] = "Lathe", ["station_name"] = "Токарный станок",
+                    ["time"] = r.Time, ["tech"] = Tech.Get(r.Output) != null ? r.Output : null,
+                });
+
             // ---- дерево изучения
             var tech2 = new List<object>();
             foreach (var n in Tech.All)
@@ -81,13 +91,15 @@ namespace Rastvordd.Sim
                 loot[key] = new Dictionary<string, object> { ["label"] = label, ["zone"] = zone, ["where"] = where, ["rolls"] = ok, ["items"] = items };
             }
 
-            LootBag Crate(int tier, bool safe = false) { var b = new LootBag { Id = 1, IsCrate = true, Tier = tier, Safe = safe }; fillCrate.Invoke(w, new object[] { b }); return b; }
+            LootBag Crate(int tier, bool safe = false, string rt = null) { var b = new LootBag { Id = 1, IsCrate = true, Tier = tier, Safe = safe, Rt = rt }; fillCrate.Invoke(w, new object[] { b }); return b; }
             LootBag Punch(bool el) { var b = new LootBag { Id = 1, IsCrate = true, Tier = 1, Punch = true }; fillPunch.Invoke(w, new object[] { b, el }); return b; }
             LootBag Event(int ph) { var b = new LootBag { Id = 1, IsCrate = true, Tier = 2, Punch = true, Look = "airdrop" }; fillEvent.Invoke(w, new object[] { b, ph }); return b; }
 
             Late(2, 6 * 3600f);   // поздний вайп: детали тира 3 и элита доступны (в ранней фазе их нет вообще)
             Sample("crate0", "Ящик РТ тира 0 (без охраны)", "world", "Придорожные ящики и мелкие РТ без охраны; респаун 7–10 мин", () => Crate(0));
             Sample("crate1", "Ящик РТ тира 1 (малая охрана)", "rt", "РТ тира 1 с малой охраной (гаражи, АТС и т. п.); респаун 15–21 мин", () => Crate(1));
+            foreach (var (rk, rn, what) in new[] { ("garages", "Гаражи", "пружины, изолента, труба, резина"), ("depot", "Депо", "шестерни, пружины, металл"), ("quarry", "Карьер", "порох, сера, труба"), ("substation", "Подстанция", "медный провод, платы"), ("ats", "АТС", "платы, линзы, радиодетали") })
+                Sample("crate1_" + rk, $"Ящик РТ 1 — {rn}", "rt", $"Ящик на РТ «{rn}»: как обычный тир 1, но чаще ×{World.ProfileBoost}: {what}", () => Crate(1, false, rk));
             Sample("crate2", "Ящик РТ тира 2 (военный, склад)", "rt", "Склад с калашами и Радиоцентр «Маяк» (военные ящики); респаун 20–30 мин", () => Crate(2));
             Sample("safe", "Сейф РТ", "rt", "Сейфы на РТ, открываются картой доступа", () => Crate(2, true));
             Sample("punch_crate", "Крейт перфокарты (РТ тира 1)", "rt", "Главный крейт РТ тира 1 под перфокарту I (гаражи и др.)", () => Punch(false));

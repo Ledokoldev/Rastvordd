@@ -8,6 +8,7 @@ namespace Rastvordd.Sim
     public sealed class Monument
     {
         public string Name;
+        public string Key;   // id РТ тира 1 для профиля лута (garages/depot/quarry/ats/substation), иначе null
         public Vector2 Min, Max;
         public Vector2 Center => (Min + Max) * 0.5f;
         public bool Contains(Vector2 p, float margin = 0) =>

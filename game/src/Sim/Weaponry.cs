@@ -111,13 +111,14 @@ namespace Rastvordd.Sim
         public sealed class LatheRecipe { public string Output; public (string id, int n)[] In; public float Time; public bool Bench3; }
         public static readonly List<LatheRecipe> Lathe = new()
         {
-            new LatheRecipe { Output = "comp_pipe", In = new[] { ("metal_fragments", 40) }, Time = 10 },
-            new LatheRecipe { Output = "comp_tape", In = new[] { ("cloth", 15) }, Time = 6 },
-            new LatheRecipe { Output = "comp_gears", In = new[] { ("metal_fragments", 60), ("scrap", 10) }, Time = 15 },
+            // главная цена — лом: скрафтить деталь ≈ вдвое дороже, чем найти (решение 27.10); изолента — с руки
+            new LatheRecipe { Output = "comp_pipe", In = new[] { ("metal_fragments", 100), ("scrap", 25) }, Time = 30 },
+            new LatheRecipe { Output = "comp_spring", In = new[] { ("metal_fragments", 80), ("scrap", 35), ("charcoal", 10) }, Time = 40 },
+            new LatheRecipe { Output = "comp_gears", In = new[] { ("metal_fragments", 120), ("scrap", 40), ("charcoal", 15) }, Time = 40 },
             new LatheRecipe { Output = "comp_oil", In = new[] { ("charcoal", 20) }, Time = 8 },
-            new LatheRecipe { Output = "comp_trigger", In = new[] { ("comp_spring", 2), ("comp_gears", 1), ("metal_fragments", 50) }, Time = 30 },
-            new LatheRecipe { Output = "comp_bolt_carrier", In = new[] { ("comp_spring", 3), ("comp_gears", 2), ("metal_fragments", 80) }, Time = 40 },
-            new LatheRecipe { Output = "comp_barrel_rifled", In = new[] { ("comp_pipe", 2), ("comp_gears", 1), ("metal_fragments", 100) }, Time = 45 },
+            new LatheRecipe { Output = "comp_trigger", In = new[] { ("comp_spring", 2), ("comp_gears", 1), ("metal_fragments", 50), ("scrap", 60) }, Time = 30 },
+            new LatheRecipe { Output = "comp_bolt_carrier", In = new[] { ("comp_spring", 3), ("comp_gears", 2), ("metal_fragments", 80), ("scrap", 80) }, Time = 40 },
+            new LatheRecipe { Output = "comp_barrel_rifled", In = new[] { ("comp_pipe", 2), ("comp_gears", 1), ("metal_fragments", 100), ("scrap", 70) }, Time = 45 },
             new LatheRecipe { Output = "comp_barrel_chrome", In = new[] { ("comp_barrel_rifled", 2), ("comp_spring", 2), ("metal_fragments", 200) }, Time = 90, Bench3 = true },
             new LatheRecipe { Output = "comp_gas_block", In = new[] { ("comp_trigger", 1), ("comp_spring", 3), ("comp_gears", 2), ("metal_fragments", 150) }, Time = 75, Bench3 = true },
         };
@@ -183,7 +184,7 @@ namespace Rastvordd.Sim
                 add(id, name, ItemCategory.Component);
                 M(id, desc, rarity, value, stack, rec);
             }
-            C("comp_spring", "Пружина", "Витая стальная пружина. Сама не сделаешь — только найти", 2, 12, 50, ("scrap", 8), ("metal_fragments", 10));
+            C("comp_spring", "Пружина", "Витая стальная пружина. Найти или выточить на токарном станке (дорого)", 2, 12, 50, ("scrap", 8), ("metal_fragments", 10));
             C("comp_pipe", "Труба", "Обрезок водопроводной трубы. Ствол для самоделки", 2, 10, 50, ("scrap", 6), ("metal_fragments", 20));
             C("comp_tape", "Изолента", "Синяя изолента. Держит всё, что не должно развалиться", 1, 5, 50, ("scrap", 5), ("cloth", 5));
             C("comp_gears", "Шестерни", "Шестерни от механизмов. Для замков, станков и затворов", 2, 12, 50, ("scrap", 10), ("metal_fragments", 15));

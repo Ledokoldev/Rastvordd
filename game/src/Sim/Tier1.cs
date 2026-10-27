@@ -74,7 +74,7 @@ namespace Rastvordd.Sim
                 var spot = FindPrefabSpot(rng, new Vector2(w, h) + new Vector2(margin * 2), new[] { Biome.Grassland, Biome.Forest, Biome.Arid, Biome.Tundra }, HalfSize * 0.2f, HalfSize * 0.8f, 50);
                 if (spot == null) continue;
                 var rt = new Tier1Rt { Key = key, O = spot.Value + new Vector2(margin) };
-                rt.M = new Monument { Name = name, Min = rt.O, Max = rt.O + new Vector2(w, h) };
+                rt.M = new Monument { Key = key, Name = name, Min = rt.O, Max = rt.O + new Vector2(w, h) };
                 Monuments.Add(rt.M);
                 Prefabs.Add(rt.M);
                 ClearPrefabArea(new Monument { Min = rt.M.Min - new Vector2(margin), Max = rt.M.Max + new Vector2(margin) });
@@ -90,7 +90,10 @@ namespace Rastvordd.Sim
         {
             // земля, стены, крыши, пропсы, лут — общим строителем тира 0 (там же метки перфокарты не трогаются: ключ «t1»)
             var tmp = new Tier0Rt { O = rt.O, M = rt.M };
+            int bagsFrom = Bags.Count;
             BuildFromLayout(tmp, "t1", root, rng);
+            for (int i = bagsFrom; i < Bags.Count; i++)
+                if (Bags[i].IsCrate && !Bags[i].Safe && !Bags[i].Punch) { Bags[i].Rt = rt.Key; FillCrate(Bags[i]); }   // профиль лута РТ
             Vector2 P(JsonElement mk) => rt.O + new Vector2(mk[0].GetSingle(), mk[1].GetSingle());
             var marks = new List<(string label, Vector2 p)>();
             foreach (var mk in root.GetProperty("marks").EnumerateArray())

@@ -366,19 +366,35 @@ namespace Rastvordd.Sim
 
         public float CrateRespawnTime(LootBag bag) => bag.Tier switch { 0 => Range(420, 600), 1 => Range(900, 1260), _ => Range(1200, 1800) };   // тир 0 — 7–10 мин (D49: петля «своя РТ + переработчик» не должна кормить ломом без конца)
 
-        void AddCrate(Vector2 pos, int tier = 2)
+        void AddCrate(Vector2 pos, int tier = 2, string rt = null)
         {
-            var bag = new LootBag { Id = NextId(), Pos = pos, IsCrate = true, Tier = tier };
+            var bag = new LootBag { Id = NextId(), Pos = pos, IsCrate = true, Tier = tier, Rt = rt };
             FillCrate(bag);
             Bags.Add(bag);
         }
+
+        /// <summary>Профили лута РТ тира 1 (ключ — Monument.Key): эти предметы в ящиках и бочках РТ выпадают чаще в ProfileBoost раз. Правится тут.</summary>
+        public static readonly Dictionary<string, string[]> LootProfiles = new()
+        {
+            ["garages"] = new[] { "comp_spring", "comp_tape", "comp_pipe", "rubber" },        // Гаражи
+            ["depot"] = new[] { "comp_gears", "comp_spring", "metal_fragments" },              // Депо
+            ["quarry"] = new[] { "gunpowder", "sulfur", "comp_pipe" },                         // Карьер
+            ["substation"] = new[] { "val_copper_wire", "comp_circuit" },                      // Подстанция
+            ["ats"] = new[] { "comp_circuit", "comp_lens", "val_radio_parts" },                // АТС
+        };
+        public const double ProfileBoost = 1.8;
+        public static string[] LootProfile(string key) => key != null && LootProfiles.TryGetValue(key, out var p) ? p : null;
 
         void FillCrate(LootBag bag)
         {
             bag.Items.Clear();
             bag.Search.Clear();   // новый лут — обыскивать заново
+            var prof = LootProfile(bag.Rt);
+            var rolled = new HashSet<string>();
             void Maybe(double chance, string id, int min, int max)
             {
+                rolled.Add(id);
+                if (prof != null && Array.IndexOf(prof, id) >= 0) chance = Math.Min(0.95, chance * ProfileBoost);   // профиль РТ: свои детали чаще (не исключительно)
                 if (Rng.NextDouble() < chance) bag.Items.Add(new ItemSlot(id, Rng.Next(min, max + 1)));
             }
             // уровень по карточкам Астры: без охраны — бытовое, малая охрана — компоненты и патроны, склад (РТ 2) — детали тира 2–3 (D46)
@@ -406,8 +422,11 @@ namespace Rastvordd.Sim
             // D49: в ящиках мало голого лома — компоненты и ценный лом (в переработчик или на крафт)
             if (bag.Tier == 0)
             {
-                Maybe(0.75, Weaponry.CommonPart(Rng), 1, 1);
-                Maybe(0.3, Weaponry.CommonPart(Rng), 1, 1);
+                // тир 0 (27.10): изолента и труба чаще — на Наган и Самоделку без РТ
+                Maybe(0.4, "comp_spring", 1, 1);
+                Maybe(0.35, "comp_tape", 1, 1);
+                Maybe(0.3, "comp_pipe", 1, 1);
+                Maybe(0.15, "comp_gears", 1, 1);
             }
             else
             {
@@ -477,6 +496,9 @@ namespace Rastvordd.Sim
                     if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot("expl_satchel"));
                     break;
             }
+            if (prof != null)
+                foreach (var id in prof)
+                    if (!rolled.Contains(id)) Maybe(0.14, id, 1, id is "rubber" or "val_copper_wire" ? 3 : 2);   // у предмета профиля нет базовой строки — добавляем свою
             Clothing.Loot(WearRng, bag, $"crate{Math.Clamp(bag.Tier, 0, 2)}");   // одежда, резина, кожа, антирадин (D47)
             if (bag.Empty) bag.Items.Add(new ItemSlot("scrap", 10));
         }
@@ -1445,17 +1467,20 @@ namespace Rastvordd.Sim
             var bag = new LootBag { Id = NextId(), Pos = node.Pos, Despawn = 120f, Src = "бочка" };
             void Put(string id, int n) { if (n > 0) bag.Items.Add(new ItemSlot(id, n)); }
             bool rich = NearMonument(node.Pos, 2);
+            var prof = LootProfile(Monuments.Find(m => m.Key != null && m.Contains(node.Pos, 2))?.Key);
+            double B(double c, string id) => prof != null && Array.IndexOf(prof, id) >= 0 ? Math.Min(0.95, c * ProfileBoost) : c;
+            if (prof != null) foreach (var id in prof) if (id is "comp_spring" or "comp_tape" or "comp_pipe" or "comp_gears" or "comp_circuit" or "comp_lens" or "val_copper_wire" or "val_radio_parts" or "sulfur" or "rubber" && Rng.NextDouble() < 0.08) Put(id, 1);
             Put("scrap", Rng.Next(1, 3));   // D49: голого лома мало — 1–2
             if (Rng.NextDouble() < 0.35) Put(Weaponry.CommonPart(Rng), 1);                       // общий компонент
             if (Rng.NextDouble() < (rich ? 0.25 : 0.2)) Put(Economy.Tier0(Rng), 1);                // ценный лом тира 0
-            if (Rng.NextDouble() < 0.35) Put("metal_fragments", Rng.Next(10, 26));
+            if (Rng.NextDouble() < B(0.35, "metal_fragments")) Put("metal_fragments", Rng.Next(10, 26));
             if (Rng.NextDouble() < 0.25) Put("cloth", Rng.Next(4, 9));
             if (Rng.NextDouble() < (rich ? 0.2 : 0.1)) Put("ammo_9mm", Rng.Next(4, 9));
             if (Rng.NextDouble() < (rich ? 0.1 : 0.04)) Put("ammo_12g", Rng.Next(2, 6));
             if (Rng.NextDouble() < 0.08) Put("comp_oil", 1);
             if (Rng.NextDouble() < (rich ? 0.04 : 0.015)) Put(Rng.Next(2) == 0 ? "comp_lens" : "comp_circuit", 1);
             if (rich && Rng.NextDouble() < 0.01) bag.Items.Add(Items.NewSlot("weapon_pipeshotgun"));
-            if (Rng.NextDouble() < 0.08) Put("gunpowder", Rng.Next(5, 11));
+            if (Rng.NextDouble() < B(0.08, "gunpowder")) Put("gunpowder", Rng.Next(5, 11));
             if (Rng.NextDouble() < 0.05) Put("bandage", 1);
             Clothing.Loot(WearRng, bag, rich ? "barrel_rt" : "barrel");   // резина (покрышки), кожа, редко часы (D47)
             Bags.Add(bag);

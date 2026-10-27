@@ -91,7 +91,7 @@ namespace Rastvordd.Sim
             var spot = FindPrefabSpot(rng, size, new[] { Biome.Grassland, Biome.Forest, Biome.Arid }, HalfSize * 0.25f, HalfSize * 0.7f);
             if (spot == null) return;
             var s = new Substation { O = spot.Value };
-            s.M = new Monument { Name = "Подстанция «Тихая»", Min = s.O, Max = s.O + size };
+            s.M = new Monument { Key = "substation", Name = "Подстанция «Тихая»", Min = s.O, Max = s.O + size };
             Monuments.Add(s.M);
             Prefabs.Add(s.M);
             ClearPrefabArea(s.M);
@@ -234,9 +234,9 @@ namespace Rastvordd.Sim
             // лут: крейт под перфокарту (за роллетой), обычные ящики, бочки и хлам с ломом
             s.CratePos = P(26, 31.8f);
             s.Crate = NewPunchCrate(s.CratePos);
-            AddCrate(P(28, 54), 1);
-            AddCrate(P(60, 47), 1);
-            AddCrate(P(88, 63), 1);
+            AddCrate(P(28, 54), 1, "substation");
+            AddCrate(P(60, 47), 1, "substation");
+            AddCrate(P(88, 63), 1, "substation");
             foreach (var (x, y) in new[] { (36f, 40f), (80f, 49f), (24f, 62f) }) AddScrapSpot(NodeKind.Junk, P(x, y));
             foreach (var (x, y) in new[] { (2f, 40f), (38f, 52f), (90f, 12f), (56f, 70f), (2f, 25f), (88f, 50f) }) AddScrapSpot(NodeKind.Barrel, P(x, y));
             AddPickup(PickupKind.WaterBarrel, P(16.5f, 44.5f));

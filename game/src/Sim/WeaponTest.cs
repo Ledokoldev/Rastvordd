@@ -109,17 +109,18 @@ namespace Rastvordd.Sim
             var lathe = new Deployable { Id = NextId(), Kind = DeployKind.Lathe, Pos = a.Pos + new Vector2(2, 0), OwnerId = a.Id, Radius = 0.7f };
             lathe.Storage = new LootBag { Id = NextId(), Pos = lathe.Pos };
             AddDeployable(lathe);
-            lathe.Storage.Items.Add(new ItemSlot("metal_fragments", 100));
-            lathe.Storage.Items.Add(new ItemSlot("cloth", 15));
+            lathe.Storage.Items.Add(new ItemSlot("metal_fragments", 200));
+            lathe.Storage.Items.Add(new ItemSlot("scrap", 50));
             lathe.On = true;
             for (int t = 0; t < (int)(32 / Dt); t++) Step(noInput);
             string Has(string id) { int n = 0; foreach (var s in lathe.Storage.Items) if (s.Id == id) n += s.Count; return $"{Items.Name(id)} {n}"; }
             int Cnt(string id) { int n = 0; foreach (var s in lathe.Storage.Items) if (s.Id == id) n += s.Count; return n; }
-            Check(Cnt("comp_tape") == 1 && Cnt("comp_pipe") == 2 && Cnt("metal_fragments") == 20, $"станок: металл 100 + ткань 15 → {Has("comp_tape")}, {Has("comp_pipe")}, {Has("metal_fragments")}");
+            Check(Cnt("comp_pipe") == 2 && Cnt("scrap") == 0, $"станок: металл 200 + лом 50 → {Has("comp_pipe")}, {Has("scrap")}");
             lathe.Storage.Items.Clear();
             lathe.Storage.Items.Add(new ItemSlot("comp_spring", 3));
             lathe.Storage.Items.Add(new ItemSlot("comp_gears", 2));
             lathe.Storage.Items.Add(new ItemSlot("metal_fragments", 80));
+            lathe.Storage.Items.Add(new ItemSlot("scrap", 80));
             lathe.On = true;
             for (int t = 0; t < (int)(42 / Dt); t++) Step(noInput);
             Check(Cnt("comp_bolt_carrier") == 1, $"станок: пружины 3 + шестерни 2 + металл 80 → {Has("comp_bolt_carrier")}");

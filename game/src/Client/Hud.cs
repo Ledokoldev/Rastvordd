@@ -110,6 +110,8 @@ namespace Rastvordd.Client
         }
 
         public void ToggleAdmin() => _adminPanel.Visible = !_adminPanel.Visible;
+        /// <summary>Новый вайп (из «Настроек»): то же, что кнопка в админке.</summary>
+        public void Wipe() => WipeRequested?.Invoke();
         HFlowContainer _tpBox;
         /// <summary>Кнопки телепорта к РТ: имя → действие.</summary>
         public void SetTeleports(System.Collections.Generic.List<(string name, System.Action go)> list)

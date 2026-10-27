@@ -60,6 +60,13 @@ namespace Rastvordd.Client
                     ApplyLayout(arg[11] - '0');
                     break;
                 }
+            // без флагов — из окна «Настройки» (user://settings_game.cfg)
+            if (_variant == '0' && System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--uilayout=")) == null)
+            {
+                GameSettings.Load();
+                if (GameSettings.Layout is "1" or "2" or "3") { Apply('a'); ApplyLayout(GameSettings.Layout[0] - '0'); }
+                else if (GameSettings.Theme.Length == 1) Apply(GameSettings.Theme[0]);
+            }
         }
 
         /// <summary>Раскладка интерфейса: 0 — исходная, 1 «Моноблок» (квадрат, единое окно), 2 «Створки» (мягкие листья, док слева и справа),

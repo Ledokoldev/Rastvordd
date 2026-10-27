@@ -59,6 +59,9 @@ namespace Rastvordd.Sim
             public string Kind, Why;
             public float StartAt, ArriveAt = -1;
             public bool Started;       // взлом запущен мной
+            public bool Looting;       // уже лутаю ящик: домой не тянет, пока не выгреб
+            public float Got;          // сколько унёс из ящика (в ломах)
+            public int Idle;           // заходов подряд, когда ничего не влезло
         }
 
         readonly HashSet<Rumor> _rumorsJudged = new();
@@ -147,6 +150,14 @@ namespace Rastvordd.Sim
             _redecide = true;
         }
 
+        /// <summary>Чужой рядом с точкой (видел за последние 5 с) — у ящика лучше не задерживаться.</summary>
+        bool RivalNear(Vector2 p, float r)
+        {
+            foreach (var en in _enc.Values)
+                if (!en.A.Dead && _w.Time - en.LastSeen < 5f && Vector2.Distance(en.SeenPos, p) < r) return true;
+            return false;
+        }
+
         static string RumorJobName(RumorJob j) => j.Kind switch
         {
             "airdrop" => "сброс груза", "locked_crate" => "закрытый ящик", "weak_base" or "rich_loot" => "посмотреть базу из слуха",
@@ -169,7 +180,7 @@ namespace Rastvordd.Sim
             }
             var j = _rj;
             if (_w.Time - j.StartAt > 600) { EndRumorJob("затянулось (10 мин)"); return false; }
-            if (_surplus > LoadLimit + 150) { EndRumorJob($"набрал ≈{_surplus:0} лома — несу домой", 60); return false; }
+            if (!j.Looting && _surplus > LoadLimit + 150) { EndRumorJob($"набрал ≈{_surplus:0} лома — несу домой", 60); return false; }
             if (_me.Hp < 40) { EndRumorJob($"ранен ({_me.Hp:0} HP)"); return false; }
             var gun = Ranged();
             if (gun != null) Hold(gun, ref cmd); else if (Has("weapon_spear")) Hold("weapon_spear", ref cmd);
@@ -246,16 +257,28 @@ namespace Rastvordd.Sim
             if (crate.Empty) { EndRumorJob("пусто — забрали до меня"); return false; }
             Doing = $"лутает {(j.Kind == "airdrop" ? "сброс груза" : "закрытый ящик")}";
             if (!Reach(crate.Pos, ref cmd)) return true;
+            // 2026-10-27 (напарник): выгрести всё, что влезет, а не схватить первое и уйти. Лишний хлам — на землю (MakeRoom).
+            // Рядом соперник — забрал что успел и ухожу; никого — лутаю до конца.
+            j.Looting = true;
             if (MakeRoom(CrateGuess(crate), ref cmd)) return true;
+            if (_w.Time - _lastUse <= 0.4f) return true;
+            _lastUse = _w.Time;
             float before = CarriedValue();
-            if (_w.Time - _lastUse > 0.4f) { _lastUse = _w.Time; _w.BotUse(_me, crate); }
-            if (crate.Empty || CarriedValue() > before)
+            _w.BotUse(_me, crate);
+            float got = CarriedValue() - before;
+            j.Got += MathF.Max(0, got);
+            j.Idle = got > 0 ? 0 : j.Idle + 1;
+            string done = crate.Empty ? "выгреб всё" : j.Got > 0 && RivalNear(crate.Pos, 30) ? "рядом чужой — забрал что успел" : j.Idle >= 3 ? "больше не влезает" : null;
+            if (done != null)
             {
-                LStat(j.Kind == "airdrop" ? "сбросов вскрыто" : "закрытых ящиков вскрыто");
-                _w.Milestone(_me, $"забрал {(j.Kind == "airdrop" ? "сброс груза" : "закрытый ящик")}");
-                EndRumorJob($"забрал (≈{CarriedValue() - before:0} лома) — несу домой", 240);
-                DepositSoon();
-                _stashBlock = 0;
+                if (j.Got > 0)
+                {
+                    LStat(j.Kind == "airdrop" ? "сбросов вскрыто" : "закрытых ящиков вскрыто");
+                    _w.Milestone(_me, $"забрал {(j.Kind == "airdrop" ? "сброс груза" : "закрытый ящик")}");
+                    DepositSoon();
+                    _stashBlock = 0;
+                }
+                EndRumorJob($"{done} (≈{j.Got:0} лома) — несу домой", 240);
             }
             return true;
         }

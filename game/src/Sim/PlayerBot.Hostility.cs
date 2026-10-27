@@ -208,6 +208,20 @@ namespace Rastvordd.Sim
             if (lose != null) return hitMe || en.Rt || d < 25 || armedClose ? (Stance.Flee, lose) : (Stance.Watch, lose);
             if (hitMe) return (Stance.Fight, "он напал первым");
             if (CampJudge(a, edge) is (Stance, string) cj) return cj;   // из засады: с лутом или слабее — бью, сильного пропускаю
+            // 2026-10-27 (напарник): сброс груза и закрытый ящик — делёжки нет, как в Расте: соперник у ящика — выбиваю, а не сижу рядом.
+            // Решаю только когда и я, и он у ящика; заметно слабее — держу на виду и жду, пока они друг друга побьют.
+            // Стоит раньше «несу ценное — обхожу»: иначе бот с рюкзаком бегал от ящика к ящику — подошёл, увидел соперника, отбежал, вернулся.
+            if (_rj?.Ev is DirectorEvent rev && _rj.Kind is "airdrop" or "locked_crate" && !(rev.Open && rev.Crate?.Empty == true))
+            {
+                var cp = rev.Crate?.Pos ?? rev.Pos;
+                string what = _rj.Kind == "airdrop" ? "сброс" : "закрытый ящик";
+                if (Vector2.Distance(cp, _me.Pos) < 45 && Vector2.Distance(cp, a.Pos) < 45)
+                {
+                    if (edge >= -0.1f || (Aggression > 0.6f && edge >= -0.2f)) { LStat("спор за сброс: напал"); return (Stance.Fight, $"{a.Name} тоже пришёл на {what} ({kit}) — выбиваю, делить не буду"); }
+                    LStat("спор за сброс: жду");
+                    return (Stance.Watch, $"{a.Name} у ящика сильнее ({kit}) — жду, пока сцепятся");
+                }
+            }
             // жадность: видел, как он лутал, — у него рюкзак; «лут — самое главное: убить, залутать» (сам не несу — нечего терять)
             var car = CarrierOf(a);
             if (car != null && car.Est >= 40 && !loaded && edge >= -0.05f - 0.12f * Greed && d < 45)
@@ -228,19 +242,6 @@ namespace Rastvordd.Sim
                 if (first && edge >= -0.1f) return (Stance.Fight, $"РТ «{_rt.Short}» — я тут первый, выбиваю");
                 if (edge >= 0.05f || (Aggression > 0.6f && edge >= -0.05f)) return (Stance.Fight, $"РТ «{_rt.Short}» занята {a.Name}, у него {kit} — отбиваю");
                 return (Stance.Camp, $"РТ «{_rt.Short}» занята {a.Name} ({kit}) — жду его на выходе");
-            }
-            // 2026-10-27 (напарник): сброс груза и закрытый ящик — делёжки нет, как в Расте: соперник у ящика — выбиваю, а не сижу рядом.
-            // Решаю только когда и я, и он у ящика; заметно слабее — держу на виду и жду, пока они друг друга побьют.
-            if (_rj?.Ev is DirectorEvent rev && _rj.Kind is "airdrop" or "locked_crate" && !(rev.Open && rev.Crate?.Empty == true))
-            {
-                var cp = rev.Crate?.Pos ?? rev.Pos;
-                string what = _rj.Kind == "airdrop" ? "сброс" : "закрытый ящик";
-                if (Vector2.Distance(cp, _me.Pos) < 45 && Vector2.Distance(cp, a.Pos) < 45)
-                {
-                    if (edge >= -0.1f || (Aggression > 0.6f && edge >= -0.2f)) { LStat("спор за сброс: напал"); return (Stance.Fight, $"{a.Name} тоже пришёл на {what} ({kit}) — выбиваю, делить не буду"); }
-                    LStat("спор за сброс: жду");
-                    return (Stance.Watch, $"{a.Name} у ящика сильнее ({kit}) — жду, пока сцепятся");
-                }
             }
             if (_preyIgnore.TryGetValue(a.Id, out float until) && _w.Time < until) return (Stance.Parted, "недавно бросил за ним погоню");
             // встречный (как в Расте): голым людей обхожу; бью, только если есть явное преимущество и есть что взять

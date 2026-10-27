@@ -212,7 +212,7 @@ namespace Rastvordd.Sim
         public float Cell;
         public Biome[] Biomes;
         public float[] Heights;
-        public byte[] River;   // 1 — русло реки (клиент: тихая вода без прибоя)
+        public byte[] River;   // 1 — русло реки, 3 — озеро (клиент: тихая вода без прибоя)
     }
 
     /// <summary>

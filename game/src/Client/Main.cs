@@ -751,6 +751,14 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     _autoAim = foePos;
                     GD.Print($"occl: я {me.Pos}, противник {foe?.Id} {foe?.Name} {foePos}");
                 }
+                else if (arg.StartsWith("--atxy="))
+                {
+                    // встать в точку: --atxy=x,y | fork (развилка реки) | lake[,N] (берег N-го озера)
+                    var p = arg.Substring(7).Split(','); var t = _server.World.Terrain; var me = _server.World.Find(_myId);
+                    if (p[0] == "fork" && t.RiverLines.Count > 0) me.Pos = t.RiverLines[^1][0].p + new SVec(0, 14);
+                    else if (p[0] == "lake" && t.Lakes.Count > 0) { var l = t.Lakes[System.Math.Min(t.Lakes.Count - 1, p.Length > 1 ? int.Parse(p[1]) : 1)]; me.Pos = l.c + new SVec(0, l.r * 0.5f); }
+                    else me.Pos = new SVec(float.Parse(p[0], inv), float.Parse(p[1], inv));
+                }
                 else if (arg.StartsWith("--near="))
                 {
                     // встать рядом с ближайшим узлом вида (tree/stone/metal/sulfur) и смотреть на него: --near=tree[,угол°]

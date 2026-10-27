@@ -222,6 +222,7 @@ void fragment() {
             var path = new[] { new Vector2(0, 60), new Vector2(8, 30), new Vector2(18, 8), new Vector2(20, 2), new Vector2(20, -6) };
             const int R = 2;   // радиус размытия, клеток
             var shore = ShoreDist(map);   // до берега, м — один раз при загрузке (пена, мель, каустика)
+            var soft = SoftBiomes(map, 3);   // поле долей биомов суши, размытое двумя проходами (~12 м)
             _hard = new byte[ms * ms]; _hardN = ms; _hardStep = step; _hardHalf = map.HalfSize;
 
             for (int my = 0; my < ms; my++)
@@ -238,6 +239,30 @@ void fragment() {
                     cnt++;
                 }
                 for (int i = 0; i < 7; i++) acc[i] /= cnt;
+                {
+                    // суша: широкий мягкий переход между биомами (размытое поле ~12 м, билинейно, с волнистым сдвигом) — без ступенек клеток
+                    float wx = (mx + 0.5f) * step, wy = (my + 0.5f) * step;
+                    float ox = Mathf.Sin(wy * 0.071f + Mathf.Sin(wx * 0.043f) * 2f) * 3f + Mathf.Sin(wx * 0.23f + wy * 0.17f) * 1.2f;
+                    float oy = Mathf.Sin(wx * 0.067f + Mathf.Sin(wy * 0.051f) * 2f) * 3f + Mathf.Sin(wy * 0.21f - wx * 0.19f) * 1.2f;
+                    float fx = Mathf.Clamp((wx + ox) / map.Cell - 0.5f, 0, n - 1.001f), fy = Mathf.Clamp((wy + oy) / map.Cell - 0.5f, 0, n - 1.001f);
+                    int ix = (int)fx, iy = (int)fy; float tx = fx - ix, ty = fy - iy;
+                    int ix1 = Mathf.Min(ix + 1, n - 1), iy1 = Mathf.Min(iy + 1, n - 1);
+                    float land = 1, sum = 0;
+                    var lb = new float[7];
+                    foreach (int bi in SoftSet)
+                    {
+                        var f = soft[bi];
+                        if (bi is (int)Biome.Water or (int)Biome.Beach)   // кромка воды без сдвига — совпадает с физикой берега
+                        {
+                            float gx = Mathf.Clamp(wx / map.Cell - 0.5f, 0, n - 1.001f), gy = Mathf.Clamp(wy / map.Cell - 0.5f, 0, n - 1.001f);
+                            int jx = (int)gx, jy = (int)gy, jx1 = Mathf.Min(jx + 1, n - 1), jy1 = Mathf.Min(jy + 1, n - 1); float ux = gx - jx, uy = gy - jy;
+                            lb[bi] = Mathf.Lerp(Mathf.Lerp(f[jy * n + jx], f[jy * n + jx1], ux), Mathf.Lerp(f[jy1 * n + jx], f[jy1 * n + jx1], ux), uy);
+                        }
+                        else lb[bi] = Mathf.Lerp(Mathf.Lerp(f[iy * n + ix], f[iy * n + ix1], tx), Mathf.Lerp(f[iy1 * n + ix], f[iy1 * n + ix1], tx), ty);
+                        sum += lb[bi];
+                    }
+                    if (sum > 0.001f) foreach (int bi in SoftSet) acc[bi] = lb[bi] / sum * land;
+                }
 
                 var p = new Vector2((mx + 0.5f) * step - map.HalfSize, (my + 0.5f) * step - map.HalfSize);
                 // площадки РТ: бетон внутри забора, гравий по краю
@@ -262,8 +287,29 @@ void fragment() {
                 mb.SetPixel(mx, my, new Color(acc[(int)Biome.Swamp] * k, dirt, gravel, pad));
                 _hard[my * ms + mx] = (byte)(Mathf.Clamp(dirt + gravel + pad, 0, 1) * 255);
                 float h = map.Heights[y * n + x];
-                mc.SetPixel(mx, my, new Color(acc[(int)Biome.Water], Mathf.Clamp(h * 0.5f + 0.5f, 0, 1), Mathf.Clamp(Bilerp(shore, n, (mx + 0.5f) / S - 0.5f, (my + 0.5f) / S - 0.5f) / 24f, 0, 1), map.River != null && map.River[y * n + x] == 1 ? 0.5f : 1f));   // A: 0,5 — река (тихая вода, без прибоя)   // плавно между клетками: без «ступенек» мели у берега
+                mc.SetPixel(mx, my, new Color(acc[(int)Biome.Water], Mathf.Clamp(h * 0.5f + 0.5f, 0, 1), Mathf.Clamp(Bilerp(shore, n, (mx + 0.5f) / S - 0.5f, (my + 0.5f) / S - 0.5f) / 24f, 0, 1), map.River != null && map.River[y * n + x] is 1 or 3 ? 0.5f : 1f));   // A: 0,5 — река и озёра (тихая вода, без прибоя)   // плавно между клетками: без «ступенек» мели у берега
             }
+        }
+
+        static readonly int[] SoftSet = { (int)Biome.Grassland, (int)Biome.Forest, (int)Biome.Arid, (int)Biome.Tundra, (int)Biome.Swamp, (int)Biome.Beach, (int)Biome.Water };
+
+        /// <summary>Доли биомов суши по клеткам, размытые двумя раздельными box-проходами радиуса r (≈ треугольное ядро). Вода/пляж не участвуют.</summary>
+        static float[][] SoftBiomes(MapInfo map, int r0)
+        {
+            int n = map.N; var res = new float[7][]; var tmp = new float[n * n];
+            foreach (int bi in SoftSet)
+            {
+                int r = bi is (int)Biome.Beach or (int)Biome.Water ? 1 : r0;   // пляж/берег и кромка воды — узкие: размываем слабо
+                var f = new float[n * n];
+                for (int i = 0; i < n * n; i++) f[i] = (int)map.Biomes[i] == bi ? 1 : 0;
+                for (int pass = 0; pass < 2; pass++)
+                {
+                    for (int y = 0; y < n; y++) { float acc = 0; int row = y * n; for (int x = -r; x < n; x++) { if (x + r < n) acc += f[row + x + r]; if (x - r - 1 >= 0) acc -= f[row + x - r - 1]; if (x >= 0) tmp[row + x] = acc; } }
+                    for (int x = 0; x < n; x++) { float acc = 0; for (int y = -r; y < n; y++) { if (y + r < n) acc += tmp[(y + r) * n + x]; if (y - r - 1 >= 0) acc -= tmp[(y - r - 1) * n + x]; if (y >= 0) f[y * n + x] = acc; } }
+                }
+                res[bi] = f;
+            }
+            return res;
         }
 
         /// <summary>Расстояние от клетки воды до ближайшей суши, м (двухпроходная фаска 3-4); суша — 0. Отрицательное ±половина клетки, чтобы кромка была на границе.</summary>

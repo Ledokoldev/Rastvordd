@@ -42,7 +42,7 @@ namespace Rastvordd.Sim
 
         public Vector2 CellCenter(int x, int y) => new Vector2((x + 0.5f) * Cell - HalfSize, (y + 0.5f) * Cell - HalfSize);
 
-        /// <summary>Река: 1 — русло (мелкая вода, вброд), 2 — берег (песок/галька). Мосты делают русло сушей (IsLand).</summary>
+        /// <summary>Река: 1 — русло (мелкая вода, вброд), 3 — озеро (тихая вода), 2 — берег (песок/галька). Мосты делают русло сушей (IsLand).</summary>
         public readonly byte[] River;
         public readonly bool[] Bridge;
         readonly byte[] RiverNearM;
@@ -189,35 +189,46 @@ namespace Rastvordd.Sim
             RiverDepth = new float[N * N];
             var rng = new Random(Seed * 613 + 5);
             var mn = new Noise2(Seed * 97 + 13);
-            // исток главной — в 115 м от центра; направление — чтобы река вышла средней длины (~260 м по прямой)
-            float best = float.MinValue; Vector2 src = default, dir0 = default;
-            for (int t = 0; t < 24; t++)
+            // большая река через весь остров: устье A ← исток-озеро у берега A → обход центра → развилка → два устья (дельта)
+            float a0 = (float)(rng.NextDouble() * MathF.Tau), side = rng.Next(2) == 0 ? 1 : -1;
+            Vector2 Dir(float a) => new Vector2(MathF.Cos(a), MathF.Sin(a));
+            Vector2 Coast(float a) { var d = Dir(a); float L = 100; while (L < HalfSize && HeightAt(d * L) >= 0) L += 3; return d * (L + 10); }
+            float ks = HalfSize / 500f;   // масштаб острова
+            var lake0 = Dir(a0) * 150f * ks;
+            var up = TraceTo(Coast(a0 + 0.15f * side), lake0, mn, 11f, 13f);
+            var mid = Dir(a0 + MathF.PI * 0.5f * side) * 125f * ks;
+            var fork = Dir(a0 + MathF.PI) * 165f * ks;
+            var m1 = TraceTo(lake0, mid, mn, 14f, 16f);
+            var m2 = TraceTo(mid, fork, mn, 16f, 18f);
+            if (up != null) RiverLines.Add(up);
+            if (m1 != null && m2 != null)
             {
-                float a = t / 24f * MathF.Tau;
-                var d = new Vector2(MathF.Cos(a), MathF.Sin(a));
-                var s0 = d * 100f;
-                float L = 0, cold = 0; while (L < HalfSize * 1.4f && HeightAt(s0 + d * L) >= 0) { if (BiomeAt(s0 + d * L) == Biome.Tundra) cold += 4; L += 4; }
-                float score = -MathF.Abs(L - 300f) - cold * 1.5f + (float)rng.NextDouble() * 40f;
-                if (score > best) { best = score; src = s0; dir0 = d; }
-            }
-            var main = Trace(src, dir0, mn, 6f, 12f);
-            if (main == null) return;
-            RiverLines.Add(main);
-            // приток: исток сбоку, впадает в главную на 45–65 % длины
-            int join = (int)(main.Length * (0.45f + (float)rng.NextDouble() * 0.2f));
-            var jp = main[join].p; var flow = Vector2.Normalize(main[Math.Min(main.Length - 1, join + 5)].p - main[Math.Max(0, join - 5)].p);
-            for (int sgn = rng.Next(2) == 0 ? 1 : -1, k = 0; k < 2; k++, sgn = -sgn)
-            {
-                var side = new Vector2(-flow.Y, flow.X) * sgn;
-                var tsrc = jp + side * 95f - flow * 60f;
-                if (tsrc.Length() < 100f || HeightAt(tsrc) < 0.2f) continue;
-                var trib = TraceTo(tsrc, jp, mn, 4f, 6f);
-                if (trib != null) { RiverLines.Add(trib); break; }
+                RiverLines.Add(m1); RiverLines.Add(m2);
+                var flow = Dir(a0 + MathF.PI);
+                foreach (float t in new[] { 0.55f, -0.55f })
+                {
+                    var br = Trace(fork, Rotate(flow, t), mn, 9f, 12f);
+                    if (br != null) RiverLines.Add(br);
+                }
             }
             foreach (var line in RiverLines) Stamp(line);
+            // озёра: исток реки + 2–3 отдельных, органичная форма (радиус по шуму от угла)
+            var lakes = new List<(Vector2 c, float r)> { (lake0, 26f + (float)rng.NextDouble() * 12f) };
+            int want = 3 + rng.Next(2);   // 3–4 озера вместе с истоком
+            for (int t = 0; t < 400 && lakes.Count < want; t++)
+            {
+                float ang = (float)(rng.NextDouble() * MathF.Tau), rr = (120f + (float)rng.NextDouble() * 220f) * ks;
+                var c = Dir(ang) * rr; float R = 15f + (float)rng.NextDouble() * 30f;
+                if (HeightAt(c) < 0.25f || RiverDist(c) < R + 30f) continue;
+                bool ok = true; foreach (var l in lakes) ok &= Vector2.Distance(l.c, c) > l.r + R + 60f;
+                for (int k = 0; k < 16 && ok; k++) ok = HeightAt(c + Dir(k / 16f * MathF.Tau) * (R + 12f)) >= 0.12f;
+                if (ok) lakes.Add((c, R));
+            }
+            Lakes.AddRange(lakes);
+            for (int li = 0; li < lakes.Count; li++) StampLake(lakes[li].c, lakes[li].r, mn, li);
             // расстояние до русла (м, до 40) — для прибрежных рощ ив и тополей
             var qq = new Queue<int>();
-            for (int i = 0; i < N * N; i++) { RiverNearM[i] = River[i] == 1 ? (byte)0 : (byte)255; if (River[i] == 1) qq.Enqueue(i); }
+            for (int i = 0; i < N * N; i++) { bool w = River[i] is 1 or 3; RiverNearM[i] = w ? (byte)0 : (byte)255; if (w) qq.Enqueue(i); }
             while (qq.Count > 0)
             {
                 int i = qq.Dequeue(), x = i % N, y = i / N; int nd = RiverNearM[i] + 2;
@@ -233,8 +244,29 @@ namespace Rastvordd.Sim
             // по маске: русло — вода, берег — песок/галька
             for (int i = 0; i < N * N; i++)
             {
-                if (River[i] == 1) { Biomes[i] = Biome.Water; Height[i] = MathF.Min(Height[i], -0.03f - RiverDepth[i] * 0.22f); }
+                if (River[i] is 1 or 3) { Biomes[i] = Biome.Water; Height[i] = MathF.Min(Height[i], -0.03f - RiverDepth[i] * 0.22f); }
                 else if (River[i] == 2 && Biomes[i] != Biome.Water) { Biomes[i] = Biome.Beach; Height[i] = Math.Clamp(Height[i], 0.02f, 0.08f); }
+            }
+        }
+
+        /// <summary>Озёра (центр, средний радиус), м.</summary>
+        public readonly List<(Vector2 c, float r)> Lakes = new();
+
+        /// <summary>Озеро: River = 3 (тихая вода, как река), кольцо берега = 2. Форма — радиус, меняющийся по шуму от угла.</summary>
+        void StampLake(Vector2 c, float R, Noise2 mn, int k)
+        {
+            int r = (int)MathF.Ceiling(R * 1.6f / Cell) + 2;
+            int cx = (int)((c.X + HalfSize) / Cell), cy = (int)((c.Y + HalfSize) / Cell);
+            for (int y = cy - r; y <= cy + r; y++)
+            for (int x = cx - r; x <= cx + r; x++)
+            {
+                if (x < 0 || y < 0 || x >= N || y >= N) continue;
+                var d = CellCenter(x, y) - c; float dist = d.Length(), th = MathF.Atan2(d.Y, d.X);
+                float rad = R * (1f + mn.Fbm(new Vector2(MathF.Cos(th) * 1.3f + k * 17f, MathF.Sin(th) * 1.3f - k * 5f), 3) * 0.7f);
+                rad = MathF.Max(rad, R * 0.45f);
+                int i = y * N + x;
+                if (dist <= rad) { River[i] = 3; RiverDepth[i] = MathF.Max(RiverDepth[i], MathF.Min(1, (1 - dist / rad) * 2.5f)); }
+                else if (dist <= rad + 3f + (_wet.Sample(CellCenter(x, y) / 9f) + 0.5f) * 1.5f && River[i] == 0) River[i] = 2;
             }
         }
 

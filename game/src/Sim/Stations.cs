@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -674,14 +674,14 @@ namespace Rastvordd.Sim
         void PlaceFuelSpots()
         {
             var rng = new Random(Seed * 977 + 41);
-            int oil = 0, cans = 0;
-            for (int tries = 0; tries < 6000 && (oil < Prog.OilBarrelsWorld || cans < Prog.CanisterPilesWorld); tries++)
+            int oil = 0, cans = 0, oilN = (int)(Prog.OilBarrelsWorld * AreaScale), cansN = (int)(Prog.CanisterPilesWorld * AreaScale);
+            for (int tries = 0; tries < 14000 && (oil < oilN || cans < cansN); tries++)
             {
                 var p = new Vector2((float)(rng.NextDouble() * 2 - 1) * HalfSize * 0.95f, (float)(rng.NextDouble() * 2 - 1) * HalfSize * 0.95f);
                 if (!Terrain.IsLand(p) || NearMonument(p, 20) || !IsFree(p, 1.0f)) continue;
                 var b = Terrain.BiomeAt(p);
                 if (b is not (Biome.Beach or Biome.Arid or Biome.Grassland)) continue;
-                if (oil < Prog.OilBarrelsWorld && (cans >= Prog.CanisterPilesWorld || rng.NextDouble() < 0.57)) { AddPickup(PickupKind.OilBarrel, p); oil++; }
+                if (oil < oilN && (cans >= cansN || rng.NextDouble() < 0.57)) { AddPickup(PickupKind.OilBarrel, p); oil++; }
                 else { AddPickup(PickupKind.CanisterPile, p); cans++; }
             }
             // у каждой РТ — пара бочек с мазутом за оградой

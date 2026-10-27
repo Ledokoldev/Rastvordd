@@ -33,7 +33,9 @@ namespace Rastvordd.Sim
     public sealed partial class World
     {
         public const float Dt = 1f / 30f;
-        public const float HalfSize = 500f;   // остров 1×1 км (шаг к 2×2 км, D25)
+        public const float HalfSize = 1000f;   // остров 2×2 км (шаг к 2×2 км, D25)
+        /// <summary>Доля площади относительно острова 1×1 км: фиксированные количества (шины, бочки) масштабируются ею — плотность прежняя.</summary>
+        public const float AreaScale = HalfSize * HalfSize / (500f * 500f);
         public const float WalkSpeed = 4.5f;
         public const float SprintSpeed = 6.8f;
         public const float Accel = 40f;
@@ -1431,7 +1433,7 @@ namespace Rastvordd.Sim
         {
             var rng = new Random(Seed * 613 + 29);
             int placed = 0;
-            for (int tries = 0; tries < 4000 && placed < 90; tries++)
+            for (int tries = 0; tries < 9000 && placed < (int)(90 * AreaScale); tries++)
             {
                 var p = new Vector2((float)(rng.NextDouble() * 2 - 1) * HalfSize * 0.95f, (float)(rng.NextDouble() * 2 - 1) * HalfSize * 0.95f);
                 if (!Terrain.IsLand(p) || NearMonument(p, 25) || !IsFree(p, 1.2f)) continue;

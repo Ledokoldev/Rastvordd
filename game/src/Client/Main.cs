@@ -174,7 +174,10 @@ namespace Rastvordd.Client
                 else if (a == "craftmenu") _hud.ToggleCraft();
                 else if (a == "tech") _hud.OpenTech();
                 else if (a.StartsWith("wb")) _hud.WorkbenchDebug(a[2..]);   // отладка: wb<вкладка 1–4>[f<верстак рядом>][d — демо-избранное]
-                else if (a.StartsWith("scroll") && int.TryParse(a.Substring(6), out var sy)) ScrollAll(this, sy);   // отладка: прокрутить все видимые списки (снимки длинных меню)
+                else if (a.StartsWith("scroll") && int.TryParse(a.Substring(6), out var sy)) ScrollAll(this, sy);
+                else if (a == "drawdump") DrawDump();
+                else if (a.StartsWith("hide")) { var tn = a.Substring(4); void H(Node n) { if (n.GetType().Name == tn && n is CanvasItem c) c.Visible = false; foreach (var ch in n.GetChildren()) H(ch); } H(GetTree().Root); }   // отладка: скрыть все узлы типа (замер, кто ест кадр)
+                else if (a == "nolights") { void Off(Node n) { if (n is Light2D l) l.Enabled = false; foreach (var ch in n.GetChildren()) Off(ch); } Off(GetTree().Root); }   // отладка: выключить весь 2D-свет   // отладка: кто рисуется в кадре (по типам, с учётом вложенности)   // отладка: прокрутить все видимые списки (снимки длинных меню)
                 else if (a == "pathtest")
                 {
                     // отладка: маршрут от игрока до ближайшего чужого шкафа, двери проходимы
@@ -912,6 +915,43 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         }
 
         /// <summary>Наблюдатель: Tab — следующий бот, F — свободная камера, 1–4 — скорость ×1/×2/×4/×8.</summary>
+        void DrawDump()
+        {
+            var cam = GetViewport().GetCamera2D();
+            var screen = GetViewport().GetVisibleRect();
+            var byType = new Dictionary<string, int>(); var byTop = new Dictionary<string, int>();
+            int total = 0;
+            void Walk(Node n, string top, int depth)
+            {
+                if (n is CanvasItem ci && !ci.Visible) return;
+                if (n is CanvasItem c2)
+                {
+                    total++;
+                    var k = n.GetType().Name; byType[k] = byType.GetValueOrDefault(k) + 1;
+                    byTop[top] = byTop.GetValueOrDefault(top) + 1;
+                }
+                foreach (var ch in n.GetChildren()) Walk(ch, depth == 0 ? ch.GetType().Name + ":" + ch.Name : top, depth + 1);
+            }
+            Walk(GetTree().Root, "root", 0);
+            GD.Print($"drawdump: всего видимых CanvasItem {total}, камера {cam?.GlobalPosition}, экран {screen.Size}");
+            int lon = 0, lsh = 0, occ = 0; var lsrc = new Dictionary<string, int>();
+            void WL(Node n) { if (n is PointLight2D pl && pl.Enabled && pl.Energy > 0 && pl.IsVisibleInTree()) { lon++; if (pl.ShadowEnabled) lsh++; var k = pl.GetParent()?.GetType().Name ?? "?"; lsrc[k] = lsrc.GetValueOrDefault(k) + 1; } if (n is LightOccluder2D o && o.IsVisibleInTree()) occ++; foreach (var ch in n.GetChildren()) WL(ch); }
+            WL(GetTree().Root);
+            GD.Print($"  свет: включено {lon}, с тенями {lsh}, окклюдеров {occ}; по родителям: {string.Join(", ", lsrc.Select(x => x.Key + " " + x.Value))}");
+            GD.Print($"  кадр: calls {Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame):0} objs {Performance.GetMonitor(Performance.Monitor.RenderTotalObjectsInFrame):0}");
+            foreach (var kv in byType.OrderByDescending(x => x.Value).Take(15)) GD.Print($"  тип {kv.Key}: {kv.Value}");
+            var top2 = new Dictionary<string, int>();
+            void Walk2(Node n, string path, int depth)
+            {
+                if (n is CanvasItem ci && !ci.Visible) return;
+                if (depth == 3) { top2[path] = top2.GetValueOrDefault(path) + Count(n); return; }
+                foreach (var ch in n.GetChildren()) Walk2(ch, path + "/" + ch.GetType().Name, depth + 1);
+            }
+            int Count(Node n) { int s = n is CanvasItem ? 1 : 0; foreach (var ch in n.GetChildren()) if (!(ch is CanvasItem cc && !cc.Visible)) s += Count(ch); return s; }
+            Walk2(GetTree().Root, "", 0);
+            foreach (var kv in top2.OrderByDescending(x => x.Value).Take(12)) GD.Print($"  ветка {kv.Key}: {kv.Value}");
+        }
+
         static void ScrollAll(Node n, int y)
         {
             if (n is ScrollContainer sc && sc.IsVisibleInTree()) sc.ScrollVertical = y;
@@ -1433,6 +1473,20 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     GD.Print(PlayingSounds() + $" buses {AudioServer.BusCount}");
                     GD.Print($"amb: biome {TerrainView.BiomeAt(_map, new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM))} | {_ambient.Debug}");
                     GD.Print($"perf: {_perfFrames / _perfTime:F0} fps, sim {_simTime / (_perfTime * 30):F2} ms/tick, nodes {_server.World.Nodes.Count}, views {_world.GetChildCount()}, объектов {Performance.GetMonitor(Performance.Monitor.ObjectCount):0}, узлов {Performance.GetMonitor(Performance.Monitor.ObjectNodeCount):0}, ресурсов {Performance.GetMonitor(Performance.Monitor.ObjectResourceCount):0}, куча .NET {System.GC.GetTotalMemory(false) / (1024 * 1024)} МБ, видеопамять {Performance.GetMonitor(Performance.Monitor.RenderVideoMemUsed) / (1024 * 1024):0} МБ");
+                    {
+                        var cnt = new Dictionary<string, (int all, int near, int lit)>();
+                        var vr = GetViewport().GetVisibleRect().Grow(80);
+                        foreach (var ch in _world.GetChildren())
+                        {
+                            var k = ch.GetType().Name; cnt.TryGetValue(k, out var c); c.all++;
+                            if (ch is Node2D n2 && vr.HasPoint(n2.GetGlobalTransformWithCanvas().Origin)) { c.near++; if (n2.Material != null) c.lit++; }
+                            cnt[k] = c;
+                        }
+                        var sb = new System.Text.StringBuilder("perf-views(all/near):");
+                        foreach (var kv in cnt) if (kv.Value.all > 20) sb.Append($" {kv.Key} {kv.Value.all}/{kv.Value.near}");
+                        GD.Print(sb.ToString());
+                        GD.Print($"perf-draw: calls {Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame):0} objs {Performance.GetMonitor(Performance.Monitor.RenderTotalObjectsInFrame):0} prims {Performance.GetMonitor(Performance.Monitor.RenderTotalPrimitivesInFrame):0} lights {GetTree().GetNodesInGroup("night_light").Count}");
+                    }
                     _perfTime = 0; _perfFrames = 0; _simTime = 0;
                 }
             }

@@ -129,10 +129,12 @@ namespace Rastvordd.Client
     public partial class PatchLayer : Node2D
     {
         readonly List<MapPatch> _patches;
+        readonly int _pass;   // дороги: 0 — все проходы, 1 — кромка, 2 — обочина и грунтовки, 3 — асфальт (куски одного прохода идут подряд — порядок слоёв сохраняется)
 
-        public PatchLayer(List<MapPatch> patches)
+        public PatchLayer(List<MapPatch> patches, int pass = 0)
         {
             _patches = patches;
+            _pass = pass;
             TextureFilter = TextureFilterEnum.Nearest;
             TextureRepeat = TextureRepeatEnum.Enabled;
             Material = VisionFx.GroundMat;
@@ -258,6 +260,7 @@ namespace Rastvordd.Client
             foreach (var p in _patches) if (p.Road != 0 && p.Poly != null) { any = true; break; }
             if (!any) return;
             // 1. кромка в траве: вытоптано и темнее
+            if (_pass is 0 or 1)
             foreach (var p in _patches)
                 if (p.Road is 2 or 3 && p.Poly != null)
                 {
@@ -265,7 +268,8 @@ namespace Rastvordd.Client
                     Band(p, 0, 4, new Color(0.1f, 0.08f, 0.05f, 0.22f), 23);
                 }
             // 2. обочина, 3. грунтовки
-            foreach (var p in _patches) if (p.Road == 3 && p.Poly != null) DrawRoadPoly(p);
+            if (_pass is 0 or 2) foreach (var p in _patches) if (p.Road == 3 && p.Poly != null) DrawRoadPoly(p);
+            if (_pass is 0 or 2)
             foreach (var p in _patches)
                 if (p.Road == 2 && p.Poly != null)
                 {
@@ -274,6 +278,7 @@ namespace Rastvordd.Client
                     DrawTrackMarks(p);
                 }
             // 4. асфальт
+            if (_pass is 0 or 3)
             foreach (var p in _patches)
                 if (p.Road == 1 && p.Poly != null)
                 {
@@ -617,10 +622,43 @@ namespace Rastvordd.Client
         bool _linked;
         int _version = -1;
 
+        /// <summary>Дорога-полоса («левый край вперёд, правый назад», k пар) → куски по n пар с общей парой на стыке.</summary>
+        static IEnumerable<MapPatch> SplitRoad(MapPatch p, int n)
+        {
+            if (p.Poly == null || p.Poly.Length < 4) { yield return p; yield break; }
+            int k = p.Poly.Length / 2;
+            if (k <= n) { yield return p; yield break; }
+            for (int s = 0; s < k - 1; s += n)
+            {
+                int e = System.Math.Min(k - 1, s + n);
+                int m = e - s + 1;
+                var poly = new SVec[m * 2];
+                for (int j = 0; j < m; j++) { poly[j] = p.Poly[s + j]; poly[m * 2 - 1 - j] = p.Poly[p.Poly.Length - 1 - (s + j)]; }
+                var q = p; q.Poly = poly;
+                yield return q;
+            }
+        }
+
+        /// <summary>Разложить по клеткам 32 м (порядок внутри клетки сохраняется).</summary>
+        static List<List<T>> ByCell<T>(List<T> items, System.Func<T, SVec> pos)
+        {
+            var cells = new Dictionary<(int, int), List<T>>();
+            var order = new List<List<T>>();
+            foreach (var it in items)
+            {
+                var p = pos(it);
+                var k = ((int)System.MathF.Floor(p.X / 32f), (int)System.MathF.Floor(p.Y / 32f));
+                if (!cells.TryGetValue(k, out var l)) { cells[k] = l = new List<T>(); order.Add(l); }
+                l.Add(it);
+            }
+            return order;
+        }
+
         public PrefabLayer(MapInfo map, Node world, Node root)
         {
-            var flat = map.Decors.FindAll(d => d.Flat);
-            if (flat.Count > 0) root.AddChild(new FlatDecorLayer(flat) { ZIndex = -9 });
+            // слои «на всю карту» режем на куски 32 м: один узел на весь остров не отсекается камерой и рисуется
+            // целиком каждый кадр (в центре острова было ~6,7 тыс. вызовов отрисовки и −50 % FPS) (27.10)
+            foreach (var g in ByCell(map.Decors.FindAll(d => d.Flat), d => d.Pos)) root.AddChild(new FlatDecorLayer(g) { ZIndex = -9 });
             var batch = new Dictionary<(int, int), List<MapDecor>>();
             foreach (var d in map.Decors)
             {
@@ -643,14 +681,23 @@ namespace Rastvordd.Client
                 world.AddChild(row);
                 if (l.Exists(d => d.Lift > 0.3f)) _liftRows.Add(row);
             }
-            if (map.Patches.Count > 0) root.AddChild(new PatchLayer(map.Patches) { ZIndex = -10 });
-            if (map.Rooms.Count > 0) root.AddChild(new WallAoLayer(map) { ZIndex = -9 });
+            if (map.Patches.Count > 0)
+            {
+                var roads = map.Patches.FindAll(p => p.Road != 0);   // дороги — одним слоем: полосы кромка → обочина → асфальт рисуются проходами по всей сети
+                var pieces = new List<MapPatch>();
+                foreach (var r in roads) pieces.AddRange(SplitRoad(r, 12));
+                var rc = ByCell(pieces, p => p.Poly != null ? p.Poly[0] : (p.Min + p.Max) * 0.5f);
+                for (int pass = 1; pass <= 3; pass++) foreach (var g in rc) root.AddChild(new PatchLayer(g, pass) { ZIndex = -10 });
+                foreach (var g in ByCell(map.Patches.FindAll(p => p.Road == 0), p => p.Poly != null ? p.Poly[0] : (p.Min + p.Max) * 0.5f)) root.AddChild(new PatchLayer(g) { ZIndex = -10 });
+            }
+            if (map.Rooms.Count > 0)
+                foreach (var g in ByCell(WallAoLayer.Build(map), b => new SVec(b.r.Position.X / Iso.PPM, b.r.Position.Y / Iso.PPM))) root.AddChild(new WallAoLayer(g) { ZIndex = -9 });
             int seed = 0;
             foreach (var p in map.Pipes)
                 for (int i = 0; i < p.P.Length - 1; i++)
                     world.AddChild(new PipeSegView(p.P[i], p.H[i], p.P[i + 1], p.H[i + 1], seed++));
             if (System.Environment.GetEnvironmentVariable("NOAMB") == null) _ambient = new AmbientLayer(map, world, root);
-            if (map.Entrances.Count > 0) root.AddChild(new EntranceLayer(map.Entrances) { ZIndex = -8 });
+            foreach (var g in ByCell(map.Entrances, e => e.A)) root.AddChild(new EntranceLayer(g) { ZIndex = -8 });
             if (map.Wires.Count > 0) root.AddChild(new WireLayer(map.Wires));
             foreach (var r in map.Roofs)
             {

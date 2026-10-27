@@ -85,11 +85,14 @@ namespace Rastvordd.Client
     /// </summary>
     public partial class WallAoLayer : Node2D
     {
-        readonly List<(Rect2 r, Color c)> _bands = new();
+        readonly List<(Rect2 r, Color c)> _bands;
 
-        public WallAoLayer(MapInfo map)
+        public WallAoLayer(List<(Rect2 r, Color c)> bands) { _bands = bands; Material = VisionFx.GroundMat; }
+
+        /// <summary>Полосы затенения для всей карты (раскладываются по кускам в PrefabLayer).</summary>
+        public static List<(Rect2 r, Color c)> Build(MapInfo map)
         {
-            Material = VisionFx.GroundMat;
+            var bands = new List<(Rect2 r, Color c)>();
             bool Inside(SVec p)
             {
                 foreach (var r in map.Roofs) if (p.X > r.Min.X && p.X < r.Max.X && p.Y > r.Min.Y && p.Y < r.Max.Y) return true;
@@ -126,10 +129,11 @@ namespace Rastvordd.Client
                             case 2: mn = new SVec(w.Max.X + d0, w.Min.Y); mx = new SVec(w.Max.X + d1, w.Max.Y); break;
                             default: mn = new SVec(w.Min.X - d1, w.Min.Y); mx = new SVec(w.Min.X - d0, w.Max.Y); break;
                         }
-                        _bands.Add((new Rect2(Iso.Px(mn), Iso.Px(mx) - Iso.Px(mn)), new Color(col, a)));
+                        bands.Add((new Rect2(Iso.Px(mn), Iso.Px(mx) - Iso.Px(mn)), new Color(col, a)));
                     }
                 }
             }
+            return bands;
         }
 
         public override void _Draw()

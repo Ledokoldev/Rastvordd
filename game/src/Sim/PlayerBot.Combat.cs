@@ -567,8 +567,13 @@ namespace Rastvordd.Sim
             var known = KnownPos(t);
             var dir = d > 0.01f ? (known - _me.Pos) / d : Vector2.UnitX;
             _aimDrift = _aimDrift * 0.95f + ((float)_rng.NextDouble() - 0.5f) * 0.25f;
-            float lead = d / MathF.Max(40f, Items.Get(gun)?.Weapon?.BulletSpeed ?? 110f);
-            cmd.Aim = sees ? t.Pos + t.Vel * lead + new Vector2(-dir.Y, dir.X) * _aimDrift * d * 0.06f : known;
+            float speed = Items.Get(gun)?.Weapon?.BulletSpeed ?? 110f;
+            float lead = d / MathF.Max(40f, speed);
+            // человек видит смену направления с запаздыванием (~0,5 с) и упреждает на глаз: ±30 %, новая оценка на каждый выстрел
+            _leadVel = Vector2.Lerp(_leadVel, t.Vel, 0.07f);
+            if (_rng.NextDouble() < 0.05) _leadErr = 0.7f + 0.6f * (float)_rng.NextDouble();
+            float hand = speed < 80f ? 0.11f : 0.06f;   // лук/арбалет: тетиву держать тяжелее — разброс руки больше
+            cmd.Aim = sees ? t.Pos + _leadVel * lead * _leadErr + new Vector2(-dir.Y, dir.X) * _aimDrift * d * hand : known;
             // гасит отдачу, как человек мышью: прицел против увода ствола (не полностью)
             if (sees && st.Recoil != 0)
             {

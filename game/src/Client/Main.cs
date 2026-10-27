@@ -1546,20 +1546,20 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 Acoustics.Update(me, _cur.Nodes, TerrainView.BiomeAt(_map, me), yard, delta);
                 if (!_overview)
                     _weather.Update(_cam.Position, GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X, TerrainView.BiomeAt(_map, me),
-                                    World.NightFactorAt(_forcedDay ?? _cur.DayTime), _cur.Sky, dt, _cur.WindAngle, _cur.WindStrength);
+                                    World.NightFactorAt(_forcedDay ?? _cur.DayTime), _cur.Sky, dt, _cur.WindAngle, _cur.WindStrength, _cur.WxPrev, _cur.WxBlend);
                 VisionFx.SetWeather(_cur.SnowCover, _cur.Wetness);
                 {
                     // тени облаков: ясно — заметные, в дождь и снег небо сплошное — почти нет; ночью не видно
-                    float ca = _cur.Sky switch { Rastvordd.Sim.Sky.Clear => 0.55f, Rastvordd.Sim.Sky.Wind => 0.6f, Rastvordd.Sim.Sky.Rain or Rastvordd.Sim.Sky.Snow => 0.22f, _ => 0.06f };
+                    float ca = Mathf.Lerp(CloudA(_cur.WxPrev), CloudA(_cur.Sky), Rastvordd.Sim.SkyInfo.CloudW(_cur.WxBlend));   // облачность — плавно
                     ca *= 1f - World.NightFactorAt(_forcedDay ?? _cur.DayTime);
                     var wv = new Vector2(Mathf.Cos(_cur.WindAngle), Mathf.Sin(_cur.WindAngle)) * (1.5f + 6f * _cur.WindStrength);
                     VisionFx.SetClouds(wv, ca, dt); P(6);
                     NightLights.Set(World.NightFactorAt(_forcedDay ?? _cur.DayTime));   // фонари и лампы ночью
-                    _post.Update(_cam.GetScreenCenterPosition(), _cam.Zoom.X, _forcedDay ?? _cur.DayTime, World.NightFactorAt(_forcedDay ?? _cur.DayTime), _cur.Sky, _cur.WindAngle, _cur.WindStrength);
+                    _post.Update(_cam.GetScreenCenterPosition(), _cam.Zoom.X, _forcedDay ?? _cur.DayTime, World.NightFactorAt(_forcedDay ?? _cur.DayTime), _cur.Sky, _cur.WindAngle, _cur.WindStrength, _cur.WxPrev, _cur.WxBlend);
                 }
             }
             _ambient.Update(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _forcedDay ?? _cur.DayTime, dt);
-            _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime) * Weather.Grade(_cur.Sky);   // + цветокор погоды
+            _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime) * Weather.Grade(_cur.WxPrev, _cur.Sky, _cur.WxBlend);   // + цветокор погоды
             if (_sunGain > 0 && !_overview)
             {
                 // солнце светит туда же, куда падают тени; плоские поверхности получают +E·h — гасим это в CanvasModulate,
@@ -1971,6 +1971,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         bool _gaitLog;
         readonly List<float> _gaitTimes = new();
         Rastvordd.Sim.Sky? _wxShown;
+        static float CloudA(Rastvordd.Sim.Sky s) => s switch { Rastvordd.Sim.Sky.Clear => 0.55f, Rastvordd.Sim.Sky.Wind => 0.6f, Rastvordd.Sim.Sky.Rain or Rastvordd.Sim.Sky.Snow => 0.22f, _ => 0.06f };
 
         /// <summary>Отладка (--do=N:gait): сколько касаний (= звуков шага) в секунду за последний отрезок.</summary>
         void GaitReport()
@@ -2439,7 +2440,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             var feetPx = canvas * _selfPx;
             var selfM = new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
             var dir = new Vector2(_aim.X - selfM.X, _aim.Y - selfM.Y);
-            float range = (50 + 30 * _peek) * (1f - 0.4f * World.NightFactorAt(_forcedDay ?? _cur.DayTime)) * SkyInfo.ViewMul(_cur.Sky);   // ливень, снегопад, буран — ближе
+            float range = (50 + 30 * _peek) * (1f - 0.4f * World.NightFactorAt(_forcedDay ?? _cur.DayTime)) * Mathf.Lerp(SkyInfo.ViewMul(_cur.WxPrev), SkyInfo.ViewMul(_cur.Sky), SkyInfo.CloudW(_cur.WxBlend));   // ливень, снегопад, буран — ближе
             if (_rays == null) { _rays = new VisionRays(_map); if (_build != null) _rays.Dynamic.AddRange(_build.Occluders); }
             bool crouched = _cur.Actors.Find(x => x.Id == _myId).Crouching;
             // лучи обзора — только когда что-то поменялось (сдвиг, присед, дальность) или раз в 6 кадров (двери, постройки): в центре острова это ~0,5 мс за кадр

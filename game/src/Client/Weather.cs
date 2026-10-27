@@ -15,7 +15,7 @@ namespace Rastvordd.Client
         readonly GpuParticles2D _rain, _splash, _flakes, _streaks, _debris;
         readonly ColorRect _tint, _flash;
         float _flashA, _nextBolt = 6f, _boltT = -1;
-        Sky _sky = (Sky)(-1);
+        float _storm, _blizz;   // доли грозы и бурана в текущей (смешанной) погоде
         GpuParticles2D[] _all;   // без выделений памяти каждый кадр
         readonly RandomNumberGenerator _rng = new();
 
@@ -38,6 +38,9 @@ namespace Rastvordd.Client
             ((ParticleProcessMaterial)_flakes.ProcessMaterial).TurbulenceEnabled = true;
             ((ParticleProcessMaterial)_flakes.ProcessMaterial).TurbulenceNoiseStrength = 2f;
             _splash.ZIndex = 5;
+            // плавность: Amount задан один раз по максимуму (смена Amount перезапускает систему), густоту меняет AmountRatio
+            foreach (var (p, n) in new[] { (_rain, MaxRain), (_splash, MaxRain / 3), (_flakes, MaxSnow), (_streaks, MaxStreaks), (_debris, MaxDebris) })
+            { p.Amount = n; p.AmountRatio = 0f; p.Lifetime = p == _flakes ? 3.5f : p.Lifetime; p.Preprocess = 0; }
             // экран: тонировка (сумрак дождя / белая мгла снега) и вспышка молнии — между миром и HUD
             var scr = new CanvasLayer { Layer = 0 };
             root.AddChild(scr);
@@ -93,10 +96,10 @@ namespace Rastvordd.Client
         }
 
         /// <param name="viewHalfPx">Половина видимой области в пикселях мира.</param>
-        public void Update(Vector2 cameraPx, Vector2 viewHalfPx, Biome biome, float night, Sky sky = Sky.Clear, float dt = 0.016f, float windAngle = 0, float windStrength = 0)
+        public void Update(Vector2 cameraPx, Vector2 viewHalfPx, Biome biome, float night, Sky sky = Sky.Clear, float dt = 0.016f, float windAngle = 0, float windStrength = 0, Sky prev = Sky.Clear, float blend = 1f)
         {
             var ext = new Vector3(viewHalfPx.X + 60, viewHalfPx.Y + 60, 0);
-            SetSky(sky);
+            SetSky(prev, sky, blend);
             Wind(windAngle, windStrength);
             UpdateSky(dt);
             _all ??= new[] { _leaves, _snow, _dust, _fireflies, _rain, _splash, _flakes, _streaks, _debris };
@@ -107,36 +110,47 @@ namespace Rastvordd.Client
                 p.VisibilityRect = new Rect2(-ext.X - 200, -ext.Y - 200, ext.X * 2 + 400, ext.Y * 2 + 400);
             }
             Set(_leaves, biome is Biome.Forest or Biome.Grassland or Biome.Swamp);
-            Set(_snow, biome == Biome.Tundra && !SkyInfo.Snowy(sky));
+            Set(_snow, biome == Biome.Tundra && !SkyInfo.Snowy(sky) && !SkyInfo.Snowy(prev));
             Set(_dust, biome is Biome.Arid or Biome.Beach);
             Set(_fireflies, night > 0.6f && biome is Biome.Grassland or Biome.Swamp or Biome.Forest);
         }
 
-        /// <summary>Смена погоды: количество и скорость частиц, тонировка (Amount перезапускает систему — только при смене).</summary>
-        void SetSky(Sky sky)
+        const int MaxRain = 1700, MaxSnow = 2200, MaxStreaks = 260, MaxDebris = 160;
+        static float RainN(Sky s) => s switch { Sky.Rain => 500, Sky.Downpour => 1400, Sky.Storm => 1700, _ => 0 };
+        static float SnowN(Sky s) => s switch { Sky.Snow => 380, Sky.HeavySnow => 1100, Sky.Blizzard => 2200, _ => 0 };
+        static float StreakN(Sky s) => s switch { Sky.Wind => 220, Sky.Storm => 120, Sky.HeavySnow => 60, Sky.Blizzard => 260, _ => 0 };
+        static float DebrisN(Sky s) => s switch { Sky.Wind => 160, Sky.Storm => 90, _ => 0 };
+        static float SnowV(Sky s, bool hi) => s == Sky.Blizzard ? (hi ? 640 : 460) : s == Sky.HeavySnow ? (hi ? 190 : 130) : (hi ? 115 : 75);
+        static Color Tint(Sky s) => s switch
         {
-            if (sky == _sky) return;
-            _sky = sky;
-            float wind = SkyInfo.Wind(sky);
-            int rain = sky switch { Sky.Rain => 500, Sky.Downpour => 1400, Sky.Storm => 1700, _ => 0 };
-            int snow = sky switch { Sky.Snow => 380, Sky.HeavySnow => 1100, Sky.Blizzard => 2200, _ => 0 };
-            int streaks = sky switch { Sky.Wind => 220, Sky.Storm => 120, Sky.HeavySnow => 60, Sky.Blizzard => 260, _ => 0 };
-            int debris = sky switch { Sky.Wind => 160, Sky.Storm => 90, _ => 0 };
-            Conf(_rain, rain, new Vector3(wind * 0.45f, 1, 0), 480 + 120 * wind, 600 + 160 * wind);
-            Conf(_splash, rain / 3, new Vector3(0, -1, 0), 4, 10);
-            _flakes.Lifetime = sky == Sky.Blizzard ? 1.6f : sky == Sky.HeavySnow ? 3.5f : 4.5f;
-            ((ParticleProcessMaterial)_flakes.ProcessMaterial).ScaleMax = sky == Sky.Snow ? 1.6f : 2.4f;
-            Conf(_flakes, snow, new Vector3(wind * (sky == Sky.Blizzard ? 4f : 1.2f), 1, 0),
-                 sky == Sky.Blizzard ? 460 : sky == Sky.HeavySnow ? 130 : 75, sky == Sky.Blizzard ? 640 : sky == Sky.HeavySnow ? 190 : 115);
-            Conf(_streaks, streaks, new Vector3(1, 0.05f, 0), 520 + 200 * wind, 720 + 260 * wind);
-            Conf(_debris, debris, new Vector3(1, 0.15f, 0), 260, 380);
-            _tint.Color = sky switch
-            {
-                Sky.Rain => new Color(0.08f, 0.1f, 0.16f, 0.12f), Sky.Downpour => new Color(0.06f, 0.08f, 0.13f, 0.26f),
-                Sky.Storm => new Color(0.04f, 0.05f, 0.1f, 0.34f), Sky.HeavySnow => new Color(0.86f, 0.9f, 0.96f, 0.16f),
-                Sky.Blizzard => new Color(0.88f, 0.91f, 0.96f, 0.42f), Sky.Snow => new Color(0.86f, 0.9f, 0.96f, 0.06f),
-                Sky.Wind => new Color(0.5f, 0.48f, 0.4f, 0.05f), _ => new Color(0, 0, 0, 0),
-            };
+            Sky.Rain => new Color(0.08f, 0.1f, 0.16f, 0.12f), Sky.Downpour => new Color(0.06f, 0.08f, 0.13f, 0.26f),
+            Sky.Storm => new Color(0.04f, 0.05f, 0.1f, 0.34f), Sky.HeavySnow => new Color(0.86f, 0.9f, 0.96f, 0.16f),
+            Sky.Blizzard => new Color(0.88f, 0.91f, 0.96f, 0.42f), Sky.Snow => new Color(0.86f, 0.9f, 0.96f, 0.06f),
+            Sky.Wind => new Color(0.5f, 0.48f, 0.4f, 0.05f), _ => new Color(0, 0, 0, 0),
+        };
+        static Color TintMix(Color a, Color b, float t)   // прозрачный конец не тянет цвет к чёрному
+        {
+            var c = a.A <= 0.001f ? new Color(b, 0) : a; var d = b.A <= 0.001f ? new Color(a, 0) : b;
+            return c.Lerp(d, t);
+        }
+
+        /// <summary>Погода каждый кадр, смешанно: старые осадки стихают, тучи/цвет приходят, затем новые осадки (без перезапуска систем).</summary>
+        void SetSky(Sky prev, Sky sky, float blend)
+        {
+            float cw = SkyInfo.CloudW(blend), pi = SkyInfo.PrecipIn(blend), po = SkyInfo.PrecipOut(blend);
+            float wind = Mathf.Lerp(SkyInfo.Wind(prev), SkyInfo.Wind(sky), cw);
+            float rain = RainN(prev) * po + RainN(sky) * pi, snow = SnowN(prev) * po + SnowN(sky) * pi;
+            float streaks = StreakN(prev) * (1 - cw) + StreakN(sky) * cw, debris = DebrisN(prev) * (1 - cw) + DebrisN(sky) * cw;
+            _storm = (prev == Sky.Storm ? po : 0) + (sky == Sky.Storm ? pi : 0);
+            _blizz = (prev == Sky.Blizzard ? po : 0) + (sky == Sky.Blizzard ? pi : 0);
+            float sw = snow > 1 ? SnowN(sky) * pi / snow : 0;   // доля новой погоды в снегопаде
+            Conf(_rain, rain / MaxRain, 480 + 120 * wind, 600 + 160 * wind);
+            Conf(_splash, rain / MaxRain, 4, 10);
+            ((ParticleProcessMaterial)_flakes.ProcessMaterial).ScaleMax = Mathf.Lerp(prev == Sky.Snow ? 1.6f : 2.4f, sky == Sky.Snow ? 1.6f : 2.4f, sw);
+            Conf(_flakes, snow / MaxSnow, Mathf.Lerp(SnowV(prev, false), SnowV(sky, false), sw), Mathf.Lerp(SnowV(prev, true), SnowV(sky, true), sw));
+            Conf(_streaks, streaks / MaxStreaks, 520 + 200 * wind, 720 + 260 * wind);
+            Conf(_debris, debris / MaxDebris, 260, 380);
+            _tint.Color = TintMix(Tint(prev), Tint(sky), cw);
         }
 
         /// <summary>Частицы — по ветру: дождь косит, снег сносит (в буране — почти горизонтально), полосы и мусор летят по ветру.</summary>
@@ -145,11 +159,12 @@ namespace Rastvordd.Client
             var w = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle) * 0.6f, 0) * strength;   // глубина в виде 3/4 сжата
             void Dir(GpuParticles2D p, Vector3 d) => ((ParticleProcessMaterial)p.ProcessMaterial).Direction = d.Normalized();
             Dir(_rain, new Vector3(w.X * 0.7f, 1 + w.Y * 0.4f, 0));
-            Dir(_flakes, _sky == Sky.Blizzard ? new Vector3(w.X * 4f, 1 + w.Y * 3f, 0) : new Vector3(w.X * 1.6f, 1 + w.Y, 0));
+            Dir(_flakes, new Vector3(w.X * 1.6f, 1 + w.Y, 0).Lerp(new Vector3(w.X * 4f, 1 + w.Y * 3f, 0), _blizz));
             if (strength > 0.05f) { Dir(_streaks, w); Dir(_debris, w + new Vector3(0, 0.1f, 0)); }
         }
 
         /// <summary>Цветокор по погоде: умножается на цвет времени суток (дождь — серо-синий, снег — холодный, ветер — пыльный).</summary>
+        public static Color Grade(Sky prev, Sky sky, float blend) => Grade(prev).Lerp(Grade(sky), SkyInfo.CloudW(blend));
         public static Color Grade(Sky sky) => sky switch
         {
             Sky.Rain => new Color(0.86f, 0.89f, 0.95f), Sky.Downpour => new Color(0.78f, 0.82f, 0.9f), Sky.Storm => new Color(0.7f, 0.74f, 0.84f),
@@ -157,21 +172,21 @@ namespace Rastvordd.Client
             Sky.Wind => new Color(0.97f, 0.96f, 0.92f), _ => Colors.White,
         };
 
-        static void Conf(GpuParticles2D p, int amount, Vector3 dir, float vMin, float vMax)
+        static void Conf(GpuParticles2D p, float ratio, float vMin, float vMax)
         {
             var pm = (ParticleProcessMaterial)p.ProcessMaterial;
-            pm.Direction = dir.Normalized(); pm.InitialVelocityMin = vMin; pm.InitialVelocityMax = vMax;
-            if (amount <= 0) { p.Emitting = false; return; }
-            if (p.Amount != amount) p.Amount = amount;
-            p.Preprocess = p.Lifetime;
-            p.Emitting = true;
+            pm.InitialVelocityMin = vMin; pm.InitialVelocityMax = vMax;
+            ratio = Mathf.Clamp(ratio, 0f, 1f);
+            if (Mathf.Abs(p.AmountRatio - ratio) > 0.002f || (ratio == 0 && p.AmountRatio != 0)) p.AmountRatio = ratio;
+            bool on = ratio > 0.002f;
+            if (p.Emitting != on) p.Emitting = on;   // выключается только на нуле густоты — без щелчка
         }
 
         /// <summary>Гроза: молния раз в 5–14 с — двойная вспышка экрана.</summary>
         void UpdateSky(float dt)
         {
             _flashA = 0;
-            if (_sky == Sky.Storm)
+            if (_storm > 0.5f)
             {
                 if ((_nextBolt -= dt) <= 0) { _nextBolt = _rng.RandfRange(5f, 14f); _boltT = 0; }
                 if (_boltT >= 0)

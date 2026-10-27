@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Numerics;
 
 namespace Rastvordd.Sim
@@ -19,6 +19,9 @@ namespace Rastvordd.Sim
         public float WxLeft = -1f;   // сколько ещё секунд держится текущая погода (<0 — ещё не начат цикл)
         public int WxIndex;          // номер смены погоды (зерно следующей)
         public static bool WxLog = true;
+        /// <summary>Плавность смены: прежняя погода и доля перехода 0..1 (за WxRampSec игровых секунд).</summary>
+        public Sky WxPrev; public float WxBlend = 1f;
+        public const float WxRampSec = 90f;
 
         static float WxDur(Sky s, Random r)
         {
@@ -63,6 +66,7 @@ namespace Rastvordd.Sim
             var r = new Random(unchecked(Seed * 7919 + ++WxIndex * 104729));
             var old = Sky;
             var s = force ?? WxPick(r);
+            if (s != old) { if (WxBlend >= 0.5f) WxPrev = old; WxBlend = 0f; }   // смена посреди смены — уходим от той, что ещё преобладала
             SetSky(s);
             WxLeft = dur > 0 ? dur : WxDur(s, r);
             if (WxLog) Console.WriteLine($"[погода] {Time,7:0}s сутки {TimeOfDay:0.00}: {SkyInfo.Names[(int)old]} → {SkyInfo.Names[(int)s]} на {WxLeft / 60f:0.0} мин (мокро {Wetness:0.00}, снег {SnowCover:0.00})");
@@ -71,8 +75,10 @@ namespace Rastvordd.Sim
         void StepWeather()
         {
             StepWeatherCycle();
-            float target = SkyInfo.Wind(Sky);
-            bool gusty = Sky is Sky.Wind or Sky.Storm or Sky.Blizzard or Sky.HeavySnow;
+            WxBlend = MathF.Min(1f, WxBlend + Dt / WxRampSec);
+            float cw = SkyInfo.CloudW(WxBlend);
+            float target = SkyInfo.Wind(WxPrev) + (SkyInfo.Wind(Sky) - SkyInfo.Wind(WxPrev)) * cw;   // ветер крепнет/стихает вместе с тучами
+            bool gusty = cw > 0.5f && Sky is Sky.Wind or Sky.Storm or Sky.Blizzard or Sky.HeavySnow;
             // направление: плавно гуляет; в бурю/грозу/ветер — каждые 5–15 с резкий разворот на 40–120°
             if ((_windTurnT -= Dt) <= 0)
             {
@@ -88,7 +94,7 @@ namespace Rastvordd.Sim
             float snowRate = Sky switch { Sky.Snow => 1f / 240f, Sky.HeavySnow => 1f / 110f, Sky.Blizzard => 1f / 70f, _ => 0f };
             SnowCover = snowRate > 0 ? MathF.Min(1f, SnowCover + snowRate * Dt) : MathF.Max(0f, SnowCover - (SkyInfo.Wet(Sky) ? 1f / 90f : 1f / 200f) * Dt);
             // мокрота и лужи: дождь мочит, без дождя сохнет за ~4 мин
-            float wetRate = Sky switch { Sky.Rain => 1f / 80f, Sky.Downpour => 1f / 35f, Sky.Storm => 1f / 30f, _ => 0f };
+            float wetRate = Sky switch { Sky.Rain => 1f / 80f, Sky.Downpour => 1f / 35f, Sky.Storm => 1f / 30f, _ => 0f } * SkyInfo.PrecipIn(WxBlend);
             Wetness = wetRate > 0 ? MathF.Min(1f, Wetness + wetRate * Dt) : MathF.Max(0f, Wetness - Dt / 240f);
         }
 

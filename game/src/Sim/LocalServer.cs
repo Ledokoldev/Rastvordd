@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Rastvordd.Sim
@@ -164,6 +164,7 @@ namespace Rastvordd.Sim
         public float Time;
         public float DayTime;      // 0..1, см. World.TimeOfDay
         public Sky Sky;            // погода
+        public Sky WxPrev; public float WxBlend = 1f;   // плавная смена: прежняя погода и доля перехода 0..1
         public float WindAngle, WindStrength, SnowCover, Wetness;
         public SelfInfo Self;
         public List<ActorSnap> Actors = new();
@@ -710,7 +711,7 @@ namespace Rastvordd.Sim
         public Snapshot BuildSnapshot(int clientId)
         {
             var me = World.Find(clientId);
-            var snap = new Snapshot { Tick = World.Tick, Time = World.Time, DayTime = World.TimeOfDay, Sky = World.Sky, WindAngle = World.WindAngle, WindStrength = World.WindStrength, SnowCover = World.SnowCover, Wetness = World.Wetness };
+            var snap = new Snapshot { Tick = World.Tick, Time = World.Time, DayTime = World.TimeOfDay, Sky = World.Sky, WxPrev = World.WxPrev, WxBlend = World.WxBlend, WindAngle = World.WindAngle, WindStrength = World.WindStrength, SnowCover = World.SnowCover, Wetness = World.Wetness };
             snap.Self = BuildSelf(me);
             snap.Self.Place = World.MonumentAt(me.Pos)?.Name;
             snap.Self.Ui = World.BuildUi(me);

@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 using Rastvordd.Sim;
 using Sky = Rastvordd.Sim.Sky;
 
@@ -149,12 +149,15 @@ void fragment() {
         static float Bell(float t, float c, float w) { float d = (t - c) / w; return Mathf.Max(0, 1 - d * d); }
 
         /// <param name="day">Время суток 0..1 (0.25 — рассвет, 0.76 — закат).</param>
-        public void Update(Vector2 camPx, float zoom, float day, float night, Sky sky, float windAngle, float windStrength)
+        static float Grey(Sky s) => s switch { Sky.Rain => 0.55f, Sky.Downpour => 0.8f, Sky.Storm => 1f, Sky.Snow => 0.35f, Sky.HeavySnow => 0.55f, Sky.Blizzard => 0.7f, _ => 0f };
+        public void Update(Vector2 camPx, float zoom, float day, float night, Sky sky, float windAngle, float windStrength, Sky prev = Sky.Clear, float blend = 1f)
         {
             if (!_on) return;
             float warm = Mathf.Max(Bell(day, 0.27f, 0.06f), Bell(day, 0.76f, 0.07f));   // золотой час
-            bool wet = SkyInfo.Wet(sky), snowy = SkyInfo.Snowy(sky);
-            float grey = sky switch { Sky.Rain => 0.55f, Sky.Downpour => 0.8f, Sky.Storm => 1f, Sky.Snow => 0.35f, Sky.HeavySnow => 0.55f, Sky.Blizzard => 0.7f, _ => 0f };
+            float cw = SkyInfo.CloudW(blend);   // плавная смена погоды: всё смешано между прежней и новой
+            float wet = Mathf.Lerp(SkyInfo.Wet(prev) ? 1 : 0, SkyInfo.Wet(sky) ? 1 : 0, cw), snowy = Mathf.Lerp(SkyInfo.Snowy(prev) ? 1 : 0, SkyInfo.Snowy(sky) ? 1 : 0, cw);
+            float grey = Mathf.Lerp(Grey(prev), Grey(sky), cw);
+            float fogW = Mathf.Lerp((int)prev == 8 ? 1 : 0, (int)sky == 8 ? 1 : 0, cw);   // погода «Туман» наползает и рассеивается за время смены
             float sat = 1.06f - 0.1f * night - 0.3f * grey + 0.06f * warm;
             float con = 1.04f - 0.04f * grey - 0.04f * night;
             var g = new Vector3(1, 1, 1);
@@ -162,11 +165,11 @@ void fragment() {
             g = g.Lerp(new Vector3(0.9f, 0.97f, 1.1f), night * 0.6f);
             g = g.Lerp(new Vector3(0.97f, 0.99f, 1.02f), grey);
             var shadow = new Vector3(-0.004f, 0.004f, 0.03f) * (0.5f + night) + new Vector3(0.02f, -0.005f, -0.02f) * warm;
-            float fog = Mathf.Max(night * 0.55f, Bell(day, 0.26f, 0.07f) * 0.85f) + (wet ? 0.25f : 0f) + (snowy ? 0.15f : 0f);
+            float fog = Mathf.Max(night * 0.55f, Bell(day, 0.26f, 0.07f) * 0.85f) + 0.25f * wet + 0.15f * snowy;
             fog *= 1f - 0.6f * Mathf.Clamp(windStrength, 0, 1);
-            if ((int)sky == 8) fog = Mathf.Max(fog, 0.95f);   // погода «Туман»: густой, по всему экрану (27.10)
+            fog = Mathf.Lerp(fog, Mathf.Max(fog, 0.95f), fogW);   // погода «Туман»: густой, по всему экрану (27.10)
             var fogCol = new Vector3(0.62f, 0.68f, 0.76f).Lerp(new Vector3(0.18f, 0.22f, 0.32f), night).Lerp(new Vector3(0.85f, 0.72f, 0.62f), warm * 0.5f);
-            float motes = (_q >= 1 ? 1f : 0f) * (1f - night) * (sky is Sky.Clear or Sky.Wind ? 1f : 0f) * (1f + warm);
+            float motes = (_q >= 1 ? 1f : 0f) * (1f - night) * Mathf.Lerp(prev is Sky.Clear or Sky.Wind ? 1f : 0f, sky is Sky.Clear or Sky.Wind ? 1f : 0f, cw) * (1f + warm);
             var wind = new Vector2(Mathf.Cos(windAngle), Mathf.Sin(windAngle)) * (0.4f + windStrength);
 
             if (_q >= 2) { sat += _q >= 3 ? 0.12f : 0.08f; con += _q >= 3 ? 0.05f : 0.03f; g *= _q >= 3 ? 1.16f : 1.1f; }   // Высокое/Ультра — сочнее и контрастнее
@@ -176,7 +179,7 @@ void fragment() {
             Set(PSunDir, new Vector2(Shade.Skew, -Shade.Flat).Normalized());
             Set(PRays, (1f - night) * (1f - grey) * (0.1f + 0.22f * warm) * (_q >= 3 ? 1.3f : 1f));
             Set(PRayCol, new Vector3(1f, 0.93f, 0.8f).Lerp(new Vector3(1f, 0.75f, 0.5f), warm));
-            Set(PCam, camPx); Set(PZoom, zoom); Set(PFog, Mathf.Min(fog, (int)sky == 8 ? 1f : 0.8f)); Set(PFogCol, fogCol);
+            Set(PCam, camPx); Set(PZoom, zoom); Set(PFog, Mathf.Min(fog, 0.8f + 0.2f * fogW)); Set(PFogCol, fogCol);
             Set(PMotes, motes); Set(PWind, wind);
             ulong nowUs = Time.GetTicksUsec(); float fdt = _fogUs == 0 ? 0f : Mathf.Min(0.1f, (nowUs - _fogUs) / 1e6f); _fogUs = nowUs;
             _fogOff += new Vector2(Mathf.Cos(windAngle), Mathf.Sin(windAngle)) * (1f + 5f * windStrength) * fdt;   // туман: 1–6 px/с по ветру

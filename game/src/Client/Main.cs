@@ -383,6 +383,15 @@ namespace Rastvordd.Client
                 GetTree().Quit();
                 return;
             }
+            // отладка: --progdump=путь — вся прогрессия и экономика (рецепты, дерево, лут по источникам, переработка, добыча) в JSON и выход
+            var pd = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--progdump="));
+            if (pd != null)
+            {
+                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(pd.Substring(11))));
+                System.IO.File.WriteAllText(pd.Substring(11), Rastvordd.Sim.ProgDump.Build(_server.World), new System.Text.UTF8Encoding(false));
+                GetTree().Quit();
+                return;
+            }
             // отладка: --simtest=600[,бот] — прокрутить 600 с мира без отрисовки и встать рядом с ботом
             var st = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--simtest="));
             if (st != null)

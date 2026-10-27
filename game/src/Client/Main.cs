@@ -172,6 +172,7 @@ namespace Rastvordd.Client
                 else if (a == "release") _autoFireFrames = 0;
                 else if (a == "craftmenu") _hud.ToggleCraft();
                 else if (a == "tech") _hud.OpenTech();
+                else if (a.StartsWith("scroll") && int.TryParse(a.Substring(6), out var sy)) ScrollAll(this, sy);   // отладка: прокрутить все видимые списки (снимки длинных меню)
                 else if (a == "pathtest")
                 {
                     // отладка: маршрут от игрока до ближайшего чужого шкафа, двери проходимы
@@ -907,6 +908,12 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         }
 
         /// <summary>Наблюдатель: Tab — следующий бот, F — свободная камера, 1–4 — скорость ×1/×2/×4/×8.</summary>
+        static void ScrollAll(Node n, int y)
+        {
+            if (n is ScrollContainer sc && sc.IsVisibleInTree()) sc.ScrollVertical = y;
+            foreach (var c in n.GetChildren()) ScrollAll(c, y);
+        }
+
         bool SpectatorKey(Key key)
         {
             switch (key)

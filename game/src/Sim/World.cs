@@ -1623,7 +1623,14 @@ namespace Rastvordd.Sim
                     UseBox(a, d);
                     a.Crouching = was;
                     break;
-                case LootBag b when !b.Safe || b.Unlocked: LootBagInto(a, b); break;
+                case LootBag b when !b.Safe || b.Unlocked:
+                {
+                    int open = BotSearch(a, b);
+                    int taken = LootBagInto(a, b, open);
+                    // взятые ячейки из раскрытых — раскрытых стало меньше (порядок в списке держится, как у игрока)
+                    if (open != int.MaxValue && taken > 0) { var st = b.Search[a.Id]; b.Search[a.Id] = (Math.Max(0, st.n - taken), st.t); }
+                    break;
+                }
                 case Pickup p: Collect(a, p); break;
                 default: return false;
             }
@@ -1720,10 +1727,12 @@ namespace Rastvordd.Sim
             LootBagInto(a, box.Storage);
         }
 
-        void LootBagInto(Actor a, LootBag bag)
+        /// <summary>Забрать из сумки всё, что влезет; limit — только первые limit ячеек (обысканные ботом). Возвращает, сколько ячеек опустело.</summary>
+        int LootBagInto(Actor a, LootBag bag, int limit = int.MaxValue)
         {
             var parts = new List<string>();
-            for (int i = bag.Items.Count - 1; i >= 0; i--)
+            int removed = 0;
+            for (int i = Math.Min(limit, bag.Items.Count) - 1; i >= 0; i--)
             {
                 var s = bag.Items[i];
                 var def = s.Def;
@@ -1754,10 +1763,45 @@ namespace Rastvordd.Sim
                     if (s.Count > 0) continue;
                 }
                 bag.Items.RemoveAt(i);
+                removed++;
             }
             if (bag.IsCrate && bag.Empty) bag.RespawnLeft = CrateRespawnTime(bag);
-            Events.Add(new SimEvent { Kind = SimEventKind.Loot, ActorId = a.Id, Pos = bag.Pos, Text = parts.Count > 0 ? string.Join(", ", parts) : "пояс полон" });
+            if (parts.Count > 0 || limit >= bag.Items.Count) Events.Add(new SimEvent { Kind = SimEventKind.Loot, ActorId = a.Id, Pos = bag.Pos, Text = parts.Count > 0 ? string.Join(", ", parts) : "пояс полон" });
+            return removed;
         }
+
+        // ---------- обыск для ботов (2026-10-27, напарник) ----------
+        // Игрок обыскивает ящик РТ и вещи с трупа по ячейке (Items.SearchTime: 0,2–0,8 с) и ещё перетаскивает их мышью.
+        // Бот раньше одним E выгребал всё мгновенно: игрок открыл ящик — бот подбежал и унёс. Теперь у бота тот же обыск
+        // по ячейке плюс BotGrabTime на «перетащить» каждую. Прогресс — в той же bag.Search, что у игрока (по id бота).
+
+        /// <summary>Сверх обыска ячейки: бот «перетаскивает» вещь, как игрок мышью.</summary>
+        public const float BotGrabTime = 0.3f;
+        readonly Dictionary<(int bag, int actor), float> _botSearchAt = new();
+
+        /// <summary>Обыск ботом: продвинуть по времени с прошлого вызова (перерыв больше 1,5 с — отошёл, время не идёт). Сколько ячеек раскрыто.</summary>
+        int BotSearch(Actor a, LootBag b)
+        {
+            if (!(b.IsCrate || b.Corpse)) return int.MaxValue;
+            var st = b.Search.GetValueOrDefault(a.Id);
+            if (st.n >= Searched) return int.MaxValue;
+            var key = (b.Id, a.Id);
+            float dt = _botSearchAt.TryGetValue(key, out float last) && Time - last < 1.5f ? Time - last : 0;
+            _botSearchAt[key] = Time;
+            st.t += dt;
+            while (st.n < b.Items.Count && st.t >= Items.SearchTime(b.Items[st.n].Id) + BotGrabTime)
+            {
+                st.t -= Items.SearchTime(b.Items[st.n].Id) + BotGrabTime;
+                st.n++;
+            }
+            if (st.n >= b.Items.Count) st = (Searched, 0);
+            b.Search[a.Id] = st;
+            if (_botSearchAt.Count > 4000) _botSearchAt.Clear();
+            return st.n >= Searched ? int.MaxValue : st.n;
+        }
+
+        /// <summary>Бот ещё обыскивает эту сумку (не всё раскрыто) — «ничего не взял» не значит «не влезло».</summary>
+        public bool BotSearching(Actor a, LootBag b) => (b.IsCrate || b.Corpse) && b.Items.Count > 0 && b.Search.GetValueOrDefault(a.Id).n < b.Items.Count;
 
         static ItemSlot FindBelt(Actor a, string id)
         {

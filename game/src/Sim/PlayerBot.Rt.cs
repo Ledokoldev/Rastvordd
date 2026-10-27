@@ -516,6 +516,7 @@ namespace Rastvordd.Sim
                     int before = bag.Items.Count;
                     if (_w.Time - _lastUse > 0.4f) { _lastUse = _w.Time; _w.BotUse(_me, bag); }
                     if (bag.Punch && bag.Empty) { _w.Milestone(_me, $"вскрыл крейт РТ «{_rt.Short}» перфокартой"); LStat("крейтов вскрыто"); }
+                    if (!bag.Empty && _w.BotSearching(_me, bag)) { Doing = "обыскивает ящик на РТ"; return true; }   // обыск по ячейке, как у игрока: стою до конца
                     if (!bag.Empty && bag.Items.Count == before) Skip(bag, 60);   // не влезло
                     if (bag.IsCrate && !bag.Punch) { LStat("ящиков РТ"); _rtMine++; }
                     _rtT = null;

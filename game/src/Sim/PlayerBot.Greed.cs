@@ -88,7 +88,7 @@ namespace Rastvordd.Sim
 
         // ---------- цель «лут убитого» ----------
 
-        float _killLootAt = -99;
+        float _killLootAt = -99, _killLootGot;   // сколько уже взял с этого трупа за обыск
 
         (Vector2 pos, float at, int victim, string name)? KillToLoot()
         {
@@ -139,8 +139,10 @@ namespace Rastvordd.Sim
             int n = bag.Items.Count;
             _w.BotUse(_me, bag);
             float got = CarriedValue() - before;
-            if (bag.Empty || bag.Items.Count == n)
+            _killLootGot += MathF.Max(0, got);
+            if (bag.Empty || (bag.Items.Count == n && !_w.BotSearching(_me, bag)))   // ещё обыскиваю (по ячейке, как игрок) — не «всё взял»
             {
+                got = _killLootGot; _killLootGot = 0;
                 _kills.RemoveAll(k => k.at == at);
                 Thought($"залутал убитого {name}{(got > 0 ? $": ≈{got:0} лома" : "")}{(!bag.Empty ? " (всё не влезло)" : "")}");
                 LStat("лут убитого: залутал");

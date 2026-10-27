@@ -301,7 +301,7 @@ namespace Rastvordd.Sim
             _w.BotUse(_me, crate);
             float got = CarriedValue() - before;
             j.Got += MathF.Max(0, got);
-            j.Idle = got > 0 ? 0 : j.Idle + 1;
+            j.Idle = got > 0 || _w.BotSearching(_me, crate) ? 0 : j.Idle + 1;   // обыск по ячейке — не «не влезло»
             string done = crate.Empty ? "выгреб всё" : j.Got > 0 && RivalNear(crate.Pos, 30) ? "рядом чужой — забрал что успел" : j.Idle >= 3 ? "больше не влезает" : null;
             if (done != null)
             {

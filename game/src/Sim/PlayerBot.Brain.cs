@@ -67,7 +67,8 @@ namespace Rastvordd.Sim
                 _valueAt = _w.Time; _load = CarriedValue(); _stash = StashValue(); _surplus = SurplusValue();
                 _kitValue = _load + (BestOwnedGun() is string kg ? Items.Value(kg) : 0);   // что потеряю, если убьют (для обиды «убил с лутом»)
             }
-            Aggression = Archetype == BotArchetype.Roamer ? 0.6f + 0.4f * (1 - _caution) : 0.2f + 0.3f * (1 - _caution);
+            // 2026-10-27 (напарник): драться чаще — фермер 0,38–0,52 (было 0,23–0,35), бродяга 0,73–0,85
+            Aggression = Archetype == BotArchetype.Roamer ? 0.7f + 0.3f * (1 - _caution) : 0.35f + 0.35f * (1 - _caution);
             // слух: выстрелы и взрывы прошлого тика
             foreach (var e in _w.Events)
             {
@@ -144,7 +145,7 @@ namespace Rastvordd.Sim
             int bench = farmer ? MyBenchLevel() : 0;
             return goal switch
             {
-                "охота" => farmer ? (bench >= 2 ? 0.65f : 0.3f) : 1.2f,             // фермер дерётся, когда отстроился
+                "охота" => farmer ? (bench >= 2 ? 0.85f : 0.5f) : 1.3f,             // фермер дерётся, когда отстроился (2026-10-27: чаще)
                 "проверить бой" => (farmer ? 1f : 1.2f) * (Night ? 0.6f : 1f),
                 "бродить" => (farmer ? 0.2f : 1f) * (Night ? 0.3f : 1f),            // раздел 10: ночью меньше бродят
                 "снаряжение" => farmer ? 0.35f : 1f,

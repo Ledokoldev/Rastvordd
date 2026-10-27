@@ -47,6 +47,7 @@ namespace Rastvordd.Client
         SpectatorPanel _specPanel;
         string _researchReq;      // изучить узел дерева (id)
         (UiOp op, string item, int index)? _uiReq;
+        readonly Queue<(UiOp op, string item, int index)> _uiQ = new();   // ховер-лут за кадр проходит несколько ячеек - действия идут по очереди, по одному за такт
         bool UiShown => _inv.Visible;
         bool _uiWasOpen, _modalWas;
 
@@ -60,7 +61,7 @@ namespace Rastvordd.Client
             Input.MouseMode = m ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
         }
         /// <summary>Закрыть инвентарь/контейнер (и сказать серверу).</summary>
-        void CloseInv() { _invOpen = false; if (_cur?.Self?.Ui != null) _uiReq = (UiOp.Close, null, 0); }
+        void CloseInv() { _invOpen = false; _uiQ.Clear(); if (_cur?.Self?.Ui != null) _uiReq = (UiOp.Close, null, 0); }
         /// <summary>Окна на весь экран взаимоисключающи: открывая одно, закрываем остальные.</summary>
         void CloseBigExcept(bool inv, bool craft, bool map)
         {
@@ -243,6 +244,7 @@ namespace Rastvordd.Client
                     Input.ParseInputEvent(new InputEventMouseButton { ButtonIndex = MouseButton.Left, Pressed = true, Position = at, GlobalPosition = at });
                     Input.ParseInputEvent(new InputEventMouseButton { ButtonIndex = MouseButton.Left, Pressed = false, Position = at, GlobalPosition = at });
                 }
+                else if (a.StartsWith("invhover")) _inv.DebugHover(a.Substring(8));   // отладка: invhover<inv>~<i> - навести курсор на ячейку (подсказка)
                 else if (a.StartsWith("invsel")) _inv.DebugSelect(a.Substring(6));   // отладка: invsel<pack|belt>~<i> — карточка этой ячейки
                 else if (a == "admin") _hud.ToggleAdmin();
                 else if (a.StartsWith("drop")) { var w0 = _server.World; (w0.Director ??= new Director(w0.Seed)).DebugAirdrop(w0, w0.Find(_myId).Pos + new SVec(3, 5), a.Length > 4 ? float.Parse(a[4..]) : 30); }   // отладка: сброс груза рядом
@@ -471,8 +473,8 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _miniMap.OffsetLeft = -MiniMap.Side - 16; _miniMap.OffsetRight = -16; _miniMap.OffsetTop = 14; _miniMap.OffsetBottom = 14 + MiniMap.Side + 34;
             _hud.AddChild(_miniMap);
             _inv = new InventoryWindow();
-            _inv.Op += (op, arg) => _uiReq = (op, arg, 0);
-            _inv.ClickedOutside += () => { _invOpen = false; if (_cur?.Self.Ui != null) _uiReq = (UiOp.Close, null, 0); };
+            _inv.Op += (op, arg) => _uiQ.Enqueue((op, arg, 0));
+            _inv.ClickedOutside += () => { _invOpen = false; _uiQ.Clear(); if (_cur?.Self.Ui != null) _uiReq = (UiOp.Close, null, 0); };
             _hud.AddChild(_inv);
             _buildMenu = new BuildMenu();
             _buildMenu.Picked += k => _setPiece = k;
@@ -1310,7 +1312,8 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 {
                     if (_craftReq < 0 && _craftPendLeft > 0) { _craftReq = _craftPendIdx; _craftPendLeft--; }
                     SandboxPreTick();
-                    _server.Submit(_myId, BuildCmd());
+                    if (_uiReq == null && _uiQ.Count > 0) _uiReq = _uiQ.Dequeue();
+                _server.Submit(_myId, BuildCmd());
                     var tf = Time.GetTicksUsec();
                     _server.Tick();
                     _simTime += (Time.GetTicksUsec() - tf) / 1000.0;

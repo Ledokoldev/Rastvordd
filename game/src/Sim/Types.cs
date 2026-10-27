@@ -674,6 +674,8 @@ namespace Rastvordd.Sim
         public bool Spectator;          // наблюдатель: летает, видит всё, мир его не замечает
         public UiKind OpenUi;
         public object OpenTarget;
+        public object UiLayoutFor;                          // контейнер, для которого собрана раскладка
+        public List<ItemSlot> UiLayout = new();             // стабильные позиции предметов в открытом контейнере (null — пустая ячейка)
         public float PendingSwingAt = -1;   // удар инструментом засчитывается с задержкой — когда он опускается на цель
         public WeaponState PendingSwing;
         public int HammerFocus;         // колесо киянки открыто над этой постройкой (не сохраняется)

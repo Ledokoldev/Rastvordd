@@ -12,7 +12,7 @@ namespace Rastvordd.Sim
     /// «fur» (печь: 0 руда, 1 серная руда, 2 топливо, 3–5 готовое), «claim» (шкаф: дерево, камень, металл, лом).
     /// Move — перетаскивание A→B, Quick — «на другую сторону» (Shift+клик, ховер-лут).
     /// </summary>
-    public enum UiOp { None, Close, Move, Quick, TakeAll, PutAll, Toggle, TakeOut, Drop, Detach, Repair, Fill, Empty, Drink }   // Fill/Empty/Drink — ёмкость в карточке: налить у источника, вылить, выпить (D54)   // Detach — снять обвесы со ствола в ячейке, Repair — починить ствол маслом у верстака
+    public enum UiOp { None, Close, Move, Quick, TakeAll, PutAll, Toggle, TakeOut, Drop, Detach, Repair, Fill, Empty, Drink, MoveHalf }   // Fill/Empty/Drink — ёмкость в карточке: налить у источника, вылить, выпить (D54)   // Detach — снять обвесы со ствола в ячейке, Repair — починить ствол маслом у верстака
 
     /// <summary>Ячейка для отрисовки.</summary>
     public struct CellView
@@ -263,11 +263,49 @@ namespace Rastvordd.Sim
 
         // ---------- ячейки ----------
 
+        /// <summary>
+        /// Стабильная раскладка открытого контейнера: предмет остаётся в своей ячейке, взятое оставляет пустую (ничего не «съезжает»).
+        /// Порядок в самом списке не трогаем — на нём держится обыск и остальной код.
+        /// </summary>
+        List<ItemSlot> Layout(Actor a)
+        {
+            var items = UiItems(a);
+            if (items == null) return null;
+            if (!ReferenceEquals(a.UiLayoutFor, a.OpenTarget)) { a.UiLayoutFor = a.OpenTarget; a.UiLayout.Clear(); }
+            var L = a.UiLayout;
+            for (int i = 0; i < L.Count; i++) if (L[i] != null && !items.Contains(L[i])) L[i] = null;
+            foreach (var it in items)
+            {
+                if (L.Contains(it)) continue;
+                int z = L.IndexOf(null);
+                if (z >= 0) L[z] = it; else L.Add(it);
+            }
+            while (L.Count > 0 && L[^1] == null && L.Count > 12) L.RemoveAt(L.Count - 1);
+            return L;
+        }
+
+        /// <summary>Ячейка контейнера занята ещё не обысканным предметом.</summary>
+        bool ContHidden(Actor a, int i)
+        {
+            var L = Layout(a);
+            return L != null && i >= 0 && i < L.Count && L[i] != null && UiItems(a).IndexOf(L[i]) >= Revealed(a);
+        }
+
+        /// <summary>Первая свободная ячейка контейнера (или −1).</summary>
+        int FreeCont(Actor a)
+        {
+            var L = Layout(a);
+            if (L == null) return -1;
+            int n = CellCount(a, "cont");
+            for (int i = 0; i < n; i++) if (i >= L.Count || L[i] == null) return i;
+            return -1;
+        }
+
         int CellCount(Actor a, string inv) => inv switch
         {
             "pack" => Actor.PackSize,
             "belt" => Actor.BeltSize,
-            "cont" => a.OpenTarget is Deployable cd && cd.Storage != null ? StorageCap(cd) : Math.Max(UiItems(a)?.Count ?? 0, 12),
+            "cont" => a.OpenTarget is Deployable cd && cd.Storage != null ? StorageCap(cd) : Math.Max(Layout(a)?.Count ?? 0, 12),
             "tank" => 1,
             "fur" => FurnaceIds.Length,
             "claim" => ClaimIds.Length,
@@ -286,9 +324,9 @@ namespace Rastvordd.Sim
                 case "wear": return a.Worn[i];
                 case "plate": return a.Plates[i];
                 case "cont":
-                    var items = UiItems(a);
-                    if (items == null || i >= items.Count || i >= Revealed(a)) return null;   // не обыскано — не взять
-                    return items[i];
+                    var L = Layout(a);
+                    if (L == null || i >= L.Count || L[i] == null || ContHidden(a, i)) return null;   // не обыскано — не взять
+                    return L[i];
                 case "fur" when a.OpenTarget is Deployable f:
                     int n = i switch { 0 => f.Ore, 1 => f.SulfurOre, 2 => (int)f.Fuel, 3 => f.OutMetal, 4 => f.OutSulfur, _ => f.OutCharcoal };
                     return n > 0 ? new ItemSlot(FurnaceIds[i], n) : null;
@@ -317,9 +355,17 @@ namespace Rastvordd.Sim
                     break;
                 case "cont":
                     var items = UiItems(a);
-                    if (s == null) { if (i < items.Count) { items.RemoveAt(i); Unreveal(a, i); } }
-                    else if (i < items.Count) items[i] = s;
-                    else items.Add(s);
+                    var L = Layout(a);
+                    while (L.Count <= i) L.Add(null);
+                    var old = L[i];
+                    if (ReferenceEquals(old, s)) break;
+                    if (s == null) { int k = items.IndexOf(old); if (k >= 0) { items.RemoveAt(k); Unreveal(a, k); } L[i] = null; }
+                    else
+                    {
+                        if (old != null) { int k = items.IndexOf(old); if (k >= 0) items[k] = s; else items.Add(s); }
+                        else items.Add(s);
+                        L[i] = s;
+                    }
                     break;
                 case "fur" when a.OpenTarget is Deployable f:
                     int n = s?.Count ?? 0;
@@ -359,7 +405,7 @@ namespace Rastvordd.Sim
         int StackLimit(string inv, string id) => inv is "fur" or "claim" ? int.MaxValue : Items.MaxStack(id);
 
         /// <summary>Перетаскивание: положить в пустую, докинуть в такую же стопку или поменять местами.</summary>
-        void MoveCell(Actor a, string src, int si, string dst, int di)
+        void MoveCell(Actor a, string src, int si, string dst, int di, bool half = false)
         {
             if (src == dst && si == di) return;
             var s = GetCell(a, src, si);
@@ -376,25 +422,46 @@ namespace Rastvordd.Sim
             }
             if (LiquidMove(a, src, si, s, dst, di)) return;   // ёмкости: перелить / в бочку / из бочки (D54)
             if (s == null || di < 0 || di >= CellCount(a, dst) || !Accepts(a, dst, di, s)) return;
-            if (dst == "cont" && di >= Revealed(a) && di < (UiItems(a)?.Count ?? 0)) return;   // в необысканную — нельзя
+            if (dst == "cont" && ContHidden(a, di)) return;   // в необысканную — нельзя
             var d = GetCell(a, dst, di);
+            if (half)
+            {   // колёсико: половина стопки в пустую ячейку или в такую же стопку
+                if (s.State != null || s.Count < 2 || s.Liquid != null) return;
+                int h = s.Count / 2;
+                if (d == null)
+                {
+                    var part = new ItemSlot(s.Id, h) { Dur = s.Dur };
+                    s.Count -= h;
+                    SetCell(a, src, si, s);
+                    SetCell(a, dst, di, part);
+                }
+                else if (d.Id == s.Id && d.State == null)
+                {
+                    int n = Math.Min(StackLimit(dst, d.Id) - d.Count, h);
+                    if (n <= 0) return;
+                    d.Count += n; s.Count -= n;
+                    SetCell(a, dst, di, d);
+                    SetCell(a, src, si, s);
+                }
+                return;
+            }
             if (d == null)
             {
-                if (src == "cont" && dst == "cont") { var list = UiItems(a); list.RemoveAt(si); list.Add(s); return; }
+                if (src == "cont" && dst == "cont") { var L = Layout(a); while (L.Count <= di) L.Add(null); L[di] = s; L[si] = null; return; }
                 SetCell(a, dst, di, s);
                 SetCell(a, src, si, null);
             }
-            else if (d.Id == s.Id && d.State == null && s.State == null)
+            else if (d.Id == s.Id && d.State == null && s.State == null && StackLimit(dst, d.Id) - d.Count > 0)
             {
                 int room = StackLimit(dst, d.Id) - d.Count;
                 int n = Math.Min(room, s.Count);
-                if (n <= 0) return;
                 d.Count += n; s.Count -= n;
                 SetCell(a, dst, di, d);
                 SetCell(a, src, si, s.Count > 0 ? s : null);
             }
             else if (Accepts(a, src, si, d) && src is not ("fur" or "claim") && dst is not ("fur" or "claim"))
             {
+                if (src == "cont" && dst == "cont") { var L = Layout(a); L[di] = s; L[si] = d; return; }
                 SetCell(a, dst, di, s);
                 SetCell(a, src, si, d);
             }
@@ -406,7 +473,11 @@ namespace Rastvordd.Sim
             var s = GetCell(a, src, si);
             if (s == null) return;
             // одежда (D47): из рюкзака/пояса — надеть (окно не открыто); из слота одежды — снять в рюкзак (или в открытый контейнер)
-            if (src is "pack" or "belt" && a.OpenUi == UiKind.None && (Clothing.Def(s.Id) != null || Clothing.Plate(s.Id) != null))
+            bool box = a.OpenUi is UiKind.Box or UiKind.Bag;
+            // из ящика — одежда сразу на себя
+            if (src == "cont" && Clothing.Def(s.Id) is WearDef cwd && a.Worn[(int)cwd.Slot] == null) { MoveCell(a, src, si, "wear", (int)cwd.Slot); FixPlates(a); return; }
+            if (src == "cont" && Clothing.Plate(s.Id) != null && Clothing.PlateCap(a) > 0 && Array.FindIndex(a.Plates, 0, Clothing.PlateCap(a), p => p == null) is var cpf && cpf >= 0) { MoveCell(a, src, si, "plate", cpf); return; }
+            if (src is "pack" or "belt" && (a.OpenUi == UiKind.None || (box && Clothing.Def(s.Id) is WearDef bwd && a.Worn[(int)bwd.Slot] == null)) && (Clothing.Def(s.Id) != null || Clothing.Plate(s.Id) != null))
             {
                 if (Clothing.Def(s.Id) is WearDef wd) { MoveCell(a, src, si, "wear", (int)wd.Slot); FixPlates(a); return; }
                 int cap = Clothing.PlateCap(a);
@@ -417,11 +488,12 @@ namespace Rastvordd.Sim
             }
             if (src is "wear" or "plate")
             {
-                string to = a.OpenUi is UiKind.Box or UiKind.Bag ? "cont" : "pack";
-                if (to == "cont" && Accepts(a, "cont", UiItems(a).Count, s)) { MoveCell(a, src, si, "cont", UiItems(a).Count); return; }
+                // снять в рюкзак; рюкзак полон, а ящик открыт — в ящик
                 int empty = Array.FindIndex(a.Pack, p => p == null);
-                if (empty < 0) { Info(a, "Рюкзак полон"); return; }
-                MoveCell(a, src, si, "pack", empty);
+                if (empty >= 0) { MoveCell(a, src, si, "pack", empty); return; }
+                int fc = a.OpenUi is UiKind.Box or UiKind.Bag ? FreeCont(a) : -1;
+                if (fc >= 0 && Accepts(a, "cont", fc, s)) { MoveCell(a, src, si, "cont", fc); return; }
+                Info(a, "Рюкзак полон");
                 return;
             }
             if (src == "tank") { foreach (var dst0 in new[] { "pack", "belt" }) for (int k = 0; k < CellCount(a, dst0); k++) if (Liquids.Fits(GetCell(a, dst0, k), s.Id) && LiquidMove(a, "tank", 0, s, dst0, k)) return; Info(a, "Некуда налить: нужна пустая ёмкость"); return; }
@@ -435,10 +507,10 @@ namespace Rastvordd.Sim
                     for (int i = 0; i < count && GetCell(a, src, si) != null; i++)
                     {
                         var d = GetCell(a, dst, i);
-                        if (pass == 0 ? d != null && d.Id == s.Id : d == null && Accepts(a, dst, i, s) && !(dst == "cont" && i < (UiItems(a)?.Count ?? 0)))
+                        if (pass == 0 ? d != null && d.Id == s.Id : d == null && Accepts(a, dst, i, s) && !(dst == "cont" && ContHidden(a, i)))
                             MoveCell(a, src, si, dst, i);
                     }
-                if (GetCell(a, src, si) != null && dst == "cont" && Accepts(a, "cont", UiItems(a).Count, s)) MoveCell(a, src, si, "cont", UiItems(a).Count);
+                if (GetCell(a, src, si) != null && dst == "cont" && FreeCont(a) is var fcc && fcc >= 0 && Accepts(a, "cont", fcc, s)) MoveCell(a, src, si, "cont", fcc);
                 return;
             }
             // из контейнера — к себе: стопками сколько влезет, оружие — целиком
@@ -461,6 +533,7 @@ namespace Rastvordd.Sim
             if (a.OpenUi == UiKind.None)
             {
                 if (op == UiOp.Move) DoMove(a, cmd.UiItem);
+                else if (op == UiOp.MoveHalf) DoMove(a, cmd.UiItem, true);
                 else if (op == UiOp.Quick) DoQuick(a, cmd.UiItem);
                 else if (op == UiOp.Drop) DoDrop(a, cmd.UiItem);
                 else if (op == UiOp.Detach) DoDetach(a, cmd.UiItem);
@@ -494,6 +567,7 @@ namespace Rastvordd.Sim
             switch (op)
             {
                 case UiOp.Move: DoMove(a, cmd.UiItem); break;
+                case UiOp.MoveHalf: DoMove(a, cmd.UiItem, true); break;
                 case UiOp.Quick: DoQuick(a, cmd.UiItem); break;
                 case UiOp.Drop: DoDrop(a, cmd.UiItem); break;
                 case UiOp.Detach: DoDetach(a, cmd.UiItem); break;
@@ -538,7 +612,7 @@ namespace Rastvordd.Sim
         }
 
         /// <summary>«src#i>dst#j».</summary>
-        void DoMove(Actor a, string arg)
+        void DoMove(Actor a, string arg, bool half = false)
         {
             var parts = arg?.Split('>');
             if (parts == null || parts.Length != 2) return;
@@ -546,7 +620,7 @@ namespace Rastvordd.Sim
             var (dst, di) = ParseCell(parts[1]);
             if (src == null || dst == null) return;
             if (a.OpenUi == UiKind.None && (src is not ("pack" or "belt" or "wear" or "plate") || dst is not ("pack" or "belt" or "wear" or "plate"))) return;
-            MoveCell(a, src, si, dst, di);
+            MoveCell(a, src, si, dst, di, half);
             if (src == "wear" || dst == "wear") FixPlates(a);   // сняли бронежилет — пластины в рюкзак
         }
 
@@ -555,7 +629,7 @@ namespace Rastvordd.Sim
             var (inv, i) = ParseCell(arg);
             if (inv == null || (a.OpenUi == UiKind.None && inv is not ("pack" or "belt" or "wear" or "plate"))) return;
             QuickCell(a, inv, i);
-            if (inv == "wear" || Clothing.Def(GetCell(a, inv, i)?.Id) != null) FixPlates(a);
+            FixPlates(a);
         }
 
         /// <summary>Не влезшее в рюкзак — сумкой под ноги.</summary>
@@ -615,8 +689,12 @@ namespace Rastvordd.Sim
                     var items = UiItems(a);
                     int revealed = Math.Min(Revealed(a), items.Count);
                     int cells = CellCount(a, "cont");
+                    var lay = Layout(a);
                     for (int i = 0; i < cells; i++)
-                        v.Cells.Add(i < items.Count ? (i < revealed ? Cell(items[i]) : new CellView { Hidden = true }) : new CellView());
+                    {
+                        var it = i < lay.Count ? lay[i] : null;
+                        v.Cells.Add(it == null ? new CellView() : items.IndexOf(it) < revealed ? Cell(it) : new CellView { Hidden = true });
+                    }
                     if (SearchBag(a) is LootBag sb && revealed < items.Count)
                     {
                         v.Searching = true;

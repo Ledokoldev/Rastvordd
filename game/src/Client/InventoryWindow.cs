@@ -8,7 +8,8 @@ namespace Rastvordd.Client
 {
     /// <summary>
     /// Ячейка инвентаря: скруглённая плашка, иконка, количество справа внизу, редкость — точка слева вверху.
-    /// Тащи мышкой в другую ячейку; Shift+клик или ПКМ — на другую сторону; Shift и провести курсором — ховер-лут.
+    /// Тащи мышкой в другую ячейку; Shift+клик или ПКМ — на другую сторону; Shift и провести курсором — ховер-лут;
+    /// Ctrl+клик / Ctrl и провести курсором — выбросить; колёсико и тащить — половина стопки.
     /// Скрытая ячейка (ещё не обыскана) — «?», текущая обыскивается: крутится кольцо и идёт полоска.
     /// </summary>
     public partial class SlotCell : Control
@@ -26,7 +27,8 @@ namespace Rastvordd.Client
         public bool ShowTip;           // всплывающая мини-карточка (когда большой карточки нет)
         public bool Backing;           // тёмная подложка (пояс в HUD поверх мира)
         public event Action<string, int, string, int> Moved;   // (откуда, i, куда, j)
-        public event Action<string, int> Quick, Picked, Hovered, Detach;   // Detach — колёсико по стволу: снять обвесы (D46)
+        public event Action<string, int> Quick, Picked, Hovered, Detach, Dropped;   // Dropped — Ctrl+клик / Ctrl+ховер: выбросить
+        public event Action<SlotCell> HalfStart;   // колёсико на стопке: потащить половину   // Detach — колёсико по стволу: снять обвесы (D46)
         float _pop, _spin;
         bool _hover;
 
@@ -35,7 +37,7 @@ namespace Rastvordd.Client
             CustomMinimumSize = new Vector2(_side, _side);
             MouseFilter = MouseFilterEnum.Stop;
             TextureFilter = TextureFilterEnum.Linear;
-            TooltipText = " ";
+            // родная подсказка Godot не используется: у окна своя мгновенная мини-карточка (без задержки и мигания)
         }
 
         public override void _Ready()
@@ -45,8 +47,12 @@ namespace Rastvordd.Client
             {
                 _hover = true; QueueRedraw();
                 Hovered?.Invoke(Inv, Index);
-                // ховер-лут: держишь Shift и ведёшь курсором — вещи перелетают
-                if (Input.IsKeyPressed(Key.Shift) && Cell.Id != null) Quick?.Invoke(Inv, Index);
+                // ховер-лут: держишь Shift и ведёшь курсором — вещи перелетают; держишь Ctrl — вещи выбрасываются
+                if (Cell.Id != null && !Cell.Hidden)
+                {
+                    if (Input.IsKeyPressed(Key.Ctrl)) Dropped?.Invoke(Inv, Index);
+                    else if (Input.IsKeyPressed(Key.Shift)) Quick?.Invoke(Inv, Index);
+                }
             };
         }
 
@@ -147,22 +153,13 @@ namespace Rastvordd.Client
             }
         }
 
-        public override string _GetTooltip(Vector2 atPosition)
-        {
-            if (Cell.Hidden) return ShowTip ? "Обыскивается…" : "";
-            if (!ShowTip || Cell.Id == null) return "";
-            return Cell.Name ?? Cell.Id;
-        }
-
-        public override GodotObject _MakeCustomTooltip(string forText)
-        {
-            if (Cell.Id == null || Cell.Hidden) return null;
-            return ItemCard.Mini(Cell);
-        }
+        /// <summary>Отладка: как будто навели курсор (без клавиш).</summary>
+        public void DebugHover() { _hover = true; QueueRedraw(); Hovered?.Invoke(Inv, Index); }
 
         public override Variant _GetDragData(Vector2 atPosition)
         {
             if (Cell.Id == null || Cell.Hidden) return default;
+            Hovered?.Invoke(Inv, -1);   // подсказка прячется на время переноса
             var icon = new IconView { Id = Cell.Id, BoxAlpha = 0.12f, Radius = 12, Size = new Vector2(64, 64), Modulate = new Color(1, 1, 1, 0.9f) };
             SetDragPreview(icon);
             return $"{Inv}#{Index}";
@@ -181,13 +178,23 @@ namespace Rastvordd.Client
         {
             if (e is InputEventMouseButton mb && mb.Pressed && Cell.Id != null && !Cell.Hidden)
             {
-                if ((mb.ButtonIndex == MouseButton.Left && mb.ShiftPressed) || mb.ButtonIndex == MouseButton.Right)
+                if (mb.ButtonIndex == MouseButton.Left && mb.CtrlPressed)
+                {
+                    Dropped?.Invoke(Inv, Index);
+                    AcceptEvent();
+                }
+                else if ((mb.ButtonIndex == MouseButton.Left && mb.ShiftPressed) || mb.ButtonIndex == MouseButton.Right)
                 {
                     Quick?.Invoke(Inv, Index);
                     AcceptEvent();
                 }
                 else if (mb.ButtonIndex == MouseButton.Left) Picked?.Invoke(Inv, Index);
-                else if (mb.ButtonIndex == MouseButton.Middle) { Detach?.Invoke(Inv, Index); AcceptEvent(); }
+                else if (mb.ButtonIndex == MouseButton.Middle)
+                {
+                    bool stack = Cell.Count > 1 && Cell.Magazine == 0 && Cell.Durability < 0 && Cell.Capacity <= 0;
+                    if (stack) HalfStart?.Invoke(this); else Detach?.Invoke(Inv, Index);
+                    AcceptEvent();
+                }
             }
         }
     }
@@ -490,7 +497,7 @@ namespace Rastvordd.Client
                 box.AddChild(kb);
                 return kb;
             }
-            _keysItem = Keys(new[] { new[] { "Тащи — переложить", "За окно — выбросить" }, new[] { "ПКМ / Shift+клик — на пояс" } });
+            _keysItem = Keys(new[] { new[] { "Тащи — переложить", "Колёсико+тащи — половина" }, new[] { "ПКМ / Shift+клик — на другую сторону", "Ctrl+клик — выбросить" } });
             _keysGun = Keys(new[] { new[] { "Колёсико — снять обвесы", "Обвес — тащи на ствол" }, new[] { "Alt+E у верстака — ремонт маслом" } });
             Show(null);
         }
@@ -659,7 +666,9 @@ namespace Rastvordd.Client
             var t = UiTheme.VBox(0);
             t.AddChild(UiTheme.Strong(c.Name + (c.Count > 1 ? $"  ×{c.Count}" : ""), 15));
             int rar = c.Rarity;
-            t.AddChild(UiTheme.Small($"{UiTheme.RarityName(rar)} · {UiTheme.CategoryName(c.Id)}", rar > 0 ? UiTheme.RarityColor(rar) : UiTheme.Dim, UiTheme.FontCaption));
+            var rl = UiTheme.Small($"{UiTheme.RarityName(rar)} · {UiTheme.CategoryName(c.Id)}", rar > 0 ? UiTheme.RarityColor(rar) : UiTheme.Dim, UiTheme.FontCaption);
+            rl.AutowrapMode = TextServer.AutowrapMode.Off;
+            t.AddChild(rl);
             head.AddChild(t);
             box.AddChild(head);
             string desc = Items.Desc(c.Id);
@@ -756,6 +765,9 @@ namespace Rastvordd.Client
         readonly HBoxContainer _contButtons;
         readonly HBoxContainer _chips;
         readonly Hotbar _hotbar;
+        readonly List<SlotCell> _all = new();
+        PanelContainer _tip; SlotCell _tipFor; string _tipSig; int _tipWait;
+        SlotCell _halfSrc; IconView _halfIcon;
         readonly List<SlotCell> _pack = new(), _cont = new();
         string _contSig, _btnSig, _extraSig;
         int _lastRevealed = -1, _filter;
@@ -855,10 +867,14 @@ namespace Rastvordd.Client
             }
             _packGrid = Grid(p, 6);
             for (int i = 0; i < Actor.PackSize; i++) _pack.Add(AddCell(_packGrid, "pack", i));
+            var hint = UiTheme.Small("Shift + провести - ховер-лут · ПКМ / Shift+клик - на другую сторону · колёсико + тащить - половина стопки · Ctrl+клик / Ctrl + провести - выбросить", UiTheme.Faint, UiTheme.FontCaption);
+            hint.CustomMinimumSize = new Vector2(6 * UiTheme.CellSize + 5 * UiTheme.CellGap, 0);
+            p.AddChild(hint);
 
             // ---- карточка предмета ----
             _card = new ItemCard();
             _card.ContainerOp += op => { if (_sel.inv != null) Op?.Invoke(op, $"{_sel.inv}#{_sel.i}"); };   // кнопки ёмкости (D54)
+            _card.SizeFlagsVertical = SizeFlags.ShrinkBegin;   // высота по содержимому, а не во весь ряд
             Dock(_card, 2);
 
             // ---- контейнер (вместо снаряжения и карточки) ----
@@ -899,6 +915,113 @@ namespace Rastvordd.Client
             foreach (var c in _hotbar.Cells) Wire(c);
         }
 
+
+        // ---------- подсказка: своя, мгновенная, без мигания ----------
+
+        void EnsureTip()
+        {
+            if (_tip != null) return;
+            _tip = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore, Visible = false, ZIndex = 100, TopLevel = true };
+            _tip.AddThemeStyleboxOverride("panel", UiTheme.Glass(12, 0.96f, 12));
+            AddChild(_tip);
+        }
+
+        void HideTip() { if (_tip != null) _tip.Visible = false; _tipFor = null; _tipSig = null; _tipWait = 0; }
+
+        /// <summary>Мини-карточка у ячейки (когда большой карточки нет - открыт контейнер). Собирается за один кадр, пока прозрачна.</summary>
+        void UpdateTip(SlotCell c, bool on)
+        {
+            if (!on || !_cardHidden || c.Cell.Id == null || c.Cell.Hidden) { HideTip(); return; }
+            EnsureTip();
+            string sig = c.Inv + c.Index + "|" + c.Cell.Id + c.Cell.Count + c.Cell.Ammo + c.Cell.Durability.ToString("0.00") + c.Cell.Liters.ToString("0.0");
+            if (_tipFor == c && sig == _tipSig) return;
+            _tipFor = c; _tipSig = sig;
+            foreach (var ch in _tip.GetChildren()) { _tip.RemoveChild(ch); ch.QueueFree(); }
+            _tip.AddChild(ItemCard.Mini(c.Cell));
+            _tip.Modulate = new Color(1, 1, 1, 0);   // прозрачна, пока контейнеры не пересчитали размер (иначе мигнёт кривым размером)
+            _tip.Visible = true;
+            _tip.Size = Vector2.Zero;
+            _tipWait = 2;
+        }
+
+        void PlaceTip()
+        {
+            if (_tip == null || !_tip.Visible || _tipFor == null || !GodotObject.IsInstanceValid(_tipFor)) return;
+            _tip.Size = _tip.GetCombinedMinimumSize();
+            var vp = GetViewportRect().Size;
+            var r = _tipFor.GetGlobalRect();
+            var sz = _tip.Size;
+            float x = r.End.X + 8;
+            if (x + sz.X > vp.X - 4) x = r.Position.X - 8 - sz.X;
+            float y = Mathf.Clamp(r.Position.Y, 4, Mathf.Max(4, vp.Y - sz.Y - 4));
+            _tip.GlobalPosition = new Vector2(Mathf.Max(4, x), y);
+        }
+
+        // ---------- половина стопки (колёсико + тащить) ----------
+
+        void StartHalf(SlotCell c)
+        {
+            EndHalf();
+            _halfSrc = c;
+            HideTip();
+            _halfIcon = new IconView { Id = c.Cell.Id, BoxAlpha = 0.12f, Radius = 12, Size = new Vector2(64, 64), Modulate = new Color(1, 1, 1, 0.9f), MouseFilter = MouseFilterEnum.Ignore, ZIndex = 120, TopLevel = true };
+            AddChild(_halfIcon);
+            _halfIcon.GlobalPosition = GetGlobalMousePosition() - new Vector2(32, 32);
+        }
+
+        void EndHalf()
+        {
+            if (_halfIcon != null && GodotObject.IsInstanceValid(_halfIcon)) _halfIcon.QueueFree();
+            _halfIcon = null; _halfSrc = null;
+        }
+
+        SlotCell CellUnder(Vector2 gp)
+        {
+            _all.RemoveAll(c => !GodotObject.IsInstanceValid(c));
+            foreach (var c in _all)
+                if (c.IsVisibleInTree() && c.MouseFilter != MouseFilterEnum.Ignore && c.GetGlobalRect().HasPoint(gp)) return c;
+            return null;
+        }
+
+        public override void _Process(double delta)
+        {
+            if (!Visible) { if (_halfSrc != null) EndHalf(); return; }
+            if (_halfIcon != null) _halfIcon.GlobalPosition = GetGlobalMousePosition() - new Vector2(32, 32);
+            if (_tip != null && _tip.Visible)
+            {
+                PlaceTip();
+                if (_tipWait > 0 && --_tipWait == 0) _tip.Modulate = Colors.White;
+            }
+        }
+
+        public override void _Input(InputEvent e)
+        {
+            if (!Visible) return;
+            if (e is InputEventMouseButton mb && mb.ButtonIndex == MouseButton.Middle && !mb.Pressed && _halfSrc != null)
+            {
+                var src = _halfSrc;
+                var dst = CellUnder(mb.GlobalPosition);
+                EndHalf();
+                if (dst != null && dst != src)
+                    Op?.Invoke(UiOp.MoveHalf, $"{src.Inv}#{src.Index}>{dst.Inv}#{dst.Index}");
+            }
+            else if (e is InputEventKey k && k.Pressed && !k.Echo && _hov.inv != null && _hov.i >= 0 && CellAt(_hov) is CellView hc && hc.Id != null && !hc.Hidden)
+            {   // клавишу нажали уже над вещью: ховер-лут / бросок сработает сразу
+                if (k.Keycode == Key.Ctrl) { if (_hov.inv is "pack" or "belt" or "wear" or "plate") Op?.Invoke(UiOp.Drop, $"{_hov.inv}#{_hov.i}"); }
+                else if (k.Keycode == Key.Shift) Op?.Invoke(UiOp.Quick, $"{_hov.inv}#{_hov.i}");
+            }
+        }
+
+        bool _cardHidden;
+
+        /// <summary>Отладка: навести курсор на ячейку «pack~3» (для скриншота подсказки).</summary>
+        public void DebugHover(string at)
+        {
+            var p = at.Split('~');
+            if (p.Length != 2 || !int.TryParse(p[1], out int i)) return;
+            foreach (var c in _all) if (GodotObject.IsInstanceValid(c) && c.Inv == p[0] && c.Index == i && c.IsVisibleInTree() && c.Cell.Id != null) { c.DebugHover(); return; }
+        }
+
         void SetFilter(int f)
         {
             _filter = f;
@@ -926,8 +1049,11 @@ namespace Rastvordd.Client
             c.Moved += (s, si, d, di) => Op?.Invoke(UiOp.Move, $"{s}#{si}>{d}#{di}");
             c.Quick += (s, si) => Op?.Invoke(UiOp.Quick, $"{s}#{si}");
             c.Detach += (s, si) => Op?.Invoke(UiOp.Detach, $"{s}#{si}");
+            c.Dropped += (s, si) => { if (s is "pack" or "belt" or "wear" or "plate") Op?.Invoke(UiOp.Drop, $"{s}#{si}"); };
+            c.HalfStart += StartHalf;
+            _all.Add(c);
             c.Picked += (s, si) => { _sel = (s, si); MarkSelected(); };
-            c.Hovered += (s, si) => { if (si >= 0) _hov = (s, si); else if (_hov.inv == s) _hov = (null, -1); };
+            c.Hovered += (s, si) => { if (si >= 0) _hov = (s, si); else if (_hov.inv == s) _hov = (null, -1); UpdateTip(c, si >= 0); };
         }
 
         SlotCell AddCell(Control parent, string inv, int i)
@@ -982,14 +1108,15 @@ namespace Rastvordd.Client
             _hotbar.Refresh(self);
 
             bool cont = ui != null;
-            _gearPanel.Visible = _card.Visible = !cont;
+            _gearPanel.Visible = true;   // одежда видна всегда: с ящиком тоже можно надевать / снимать
+            _card.Visible = !cont;
+            _cardHidden = cont;
+            if (!cont && _tip != null && _tip.Visible) HideTip();
             _contPanel.Visible = cont;
-            foreach (var c in _pack) c.ShowTip = cont;
-            foreach (var c in _hotbar.Cells) c.ShowTip = cont;
+            _equip.Refresh(self);
 
             if (!cont)
             {
-                _equip.Refresh(self);
                 _contSig = null; _lastRevealed = -1;
                 // ничего не выбрано — карточка первой вещи рюкзака
                 if (CellAt(_sel) is not CellView cur || cur.Id == null)

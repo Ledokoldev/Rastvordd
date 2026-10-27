@@ -1322,7 +1322,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     if (_craftReq < 0 && _craftPendLeft > 0) { _craftReq = _craftPendIdx; _craftPendLeft--; }
                     SandboxPreTick();
                     if (_uiReq == null && _uiQ.Count > 0) _uiReq = _uiQ.Dequeue();
-                _server.Submit(_myId, BuildCmd());
+                    _server.Submit(_myId, BuildCmd());
                     var tf = Time.GetTicksUsec();
                     _server.Tick();
                     _simTime += (Time.GetTicksUsec() - tf) / 1000.0;
@@ -1337,6 +1337,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
 
                 if (_craftReq < 0 && _craftPendLeft > 0) { _craftReq = _craftPendIdx; _craftPendLeft--; }
                 SandboxPreTick();
+                if (_uiReq == null && _uiQ.Count > 0) _uiReq = _uiQ.Dequeue();   // действия инвентаря — по одному за такт (и в обычной игре)
                 _server.Submit(_myId, BuildCmd());
                 var t0 = Time.GetTicksUsec();
                 _server.Tick();

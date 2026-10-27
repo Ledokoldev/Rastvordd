@@ -63,6 +63,9 @@ namespace Rastvordd.Sim
         /// <summary>Посадить дерево: возраст задаёт ствол (хитбокс), запас дерева и спрайт.</summary>
         void AddTree(Random r, Vector2 p, TreeSpecies sp, TreeAge age)
         {
+            // не в воде и не у самой кромки (28.10): ни один генератор (ивы у реки, подрост) не сажает дерево в реку/озеро
+            if (!Terrain.IsLand(p)) return;
+            for (int k2 = 0; k2 < 6; k2++) { float a2 = k2 * MathF.PI / 3; if (!Terrain.IsLand(p + new Vector2(MathF.Cos(a2), MathF.Sin(a2)) * 1.6f)) return; }
             float k = (float)r.NextDouble();
             var (radius, wood) = age switch
             {

@@ -9,6 +9,7 @@ namespace Rastvordd.Client
         const string Path = "user://settings_game.cfg";
         public static bool Fullscreen, VSync = true, ShowFps = true, Post = true;
         public static int MaxFps;                  // 0 — без ограничения
+        public static int Quality = 2;             // качество графики: 0 Низкое, 1 Среднее, 2 Высокое, 3 Ультра (--quality=N перекрывает)
         public static float MasterDb;
         public static string Theme = "", Layout = "";   // интерфейс: тема a/b/c, раскладка 1/2/3 ("" — по умолчанию); применяются при следующем запуске
 
@@ -21,9 +22,17 @@ namespace Rastvordd.Client
             MaxFps = (int)c.GetValue("video", "max_fps", MaxFps);
             ShowFps = (bool)c.GetValue("video", "show_fps", ShowFps);
             Post = (bool)c.GetValue("video", "post", Post);
+            Quality = Mathf.Clamp((int)c.GetValue("video", "quality", Quality), 0, 3);
             MasterDb = (float)c.GetValue("audio", "master_db", MasterDb);
             Theme = (string)c.GetValue("ui", "theme", Theme);
             Layout = (string)c.GetValue("ui", "layout", Layout);
+        }
+
+        /// <summary>--quality=0..3 — для сравнения пресетов (не сохраняется, если не трогать настройки).</summary>
+        public static void CmdOverrides()
+        {
+            foreach (var a in OS.GetCmdlineUserArgs())
+                if (a.StartsWith("--quality=") && int.TryParse(a.Substring(10), out int q)) Quality = Mathf.Clamp(q, 0, 3);
         }
 
         public static void Save()
@@ -34,6 +43,7 @@ namespace Rastvordd.Client
             c.SetValue("video", "max_fps", MaxFps);
             c.SetValue("video", "show_fps", ShowFps);
             c.SetValue("video", "post", Post);
+            c.SetValue("video", "quality", Quality);
             c.SetValue("audio", "master_db", MasterDb);
             c.SetValue("ui", "theme", Theme);
             c.SetValue("ui", "layout", Layout);
@@ -55,6 +65,7 @@ namespace Rastvordd.Client
     {
         public event Action WipeRequested, SaveRequested, Closed;
         public event Action<bool> FpsToggled, PostToggled;
+        public event Action<int> QualityChanged;
         Button _wipe;
         bool _wipeArmed;
 
@@ -96,6 +107,7 @@ namespace Rastvordd.Client
 
             // ---- графика ----
             Section(box, "Графика");
+            Options(box, "Качество графики", new[] { "Низкое", "Среднее", "Высокое", "Ультра" }, new[] { 0, 1, 2, 3 }, GameSettings.Quality, v => { GameSettings.Quality = v; QualityChanged?.Invoke(v); });
             Check(box, "Полный экран", GameSettings.Fullscreen, on => { GameSettings.Fullscreen = on; GameSettings.ApplyVideoAudio(); });
             Check(box, "Вертикальная синхронизация (без разрывов кадра)", GameSettings.VSync, on => { GameSettings.VSync = on; GameSettings.ApplyVideoAudio(); });
             Options(box, "Ограничение FPS", new[] { "нет", "60", "120", "144", "240" }, new[] { 0, 60, 120, 144, 240 }, GameSettings.MaxFps, v => { GameSettings.MaxFps = v; GameSettings.ApplyVideoAudio(); });

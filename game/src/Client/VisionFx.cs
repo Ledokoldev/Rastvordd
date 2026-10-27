@@ -26,12 +26,23 @@ global uniform float vol_warm;  // 0..1 — насколько тёплый св
 global uniform sampler2D wx_cloud_tex : filter_linear, repeat_enable;
 global uniform vec2 wx_cloud_off;  // сдвиг облаков, м (плывут по ветру)
 global uniform float wx_cloud_amt; // 0..1 — сила теней от облаков (ясно — заметные, пасмурно — нет)
+global uniform float gfx_q;        // качество графики 0..3 (Низкое..Ультра), GameSettings.Quality
+
+// контактная тень (AO) у подножия стен и техники по SDF заслонов (GPU): sdf — texture_sdf(screen_uv_to_sdf(SCREEN_UV))
+vec3 gfx_ao(vec3 col, float sdf) {
+    if (gfx_q < 1.5) return col;
+    float ao = 1.0 - smoothstep(0.0, gfx_q > 2.5 ? 26.0 : 18.0, sdf);
+    return col * (1.0 - ao * (gfx_q > 2.5 ? 0.34 : 0.24)) * mix(vec3(1.0), vec3(0.94, 0.97, 1.06), ao);
+}
 
 // объём от солнца по карте нормалей (Art: CanvasTexture с _n.png): плоская нормаль (0,0,1) — множитель ровно 1,
 // поэтому спрайты без карты выглядят как раньше; освещённая сторона до +18%, теневая до −28%
 vec3 sun_lit(vec3 col, vec3 n) {
-    float k = 1.0 + vol_amp * (dot(n, vol_sun) - vol_sun.z);
-    k = clamp(k, 0.72, 1.18);
+    float qa = gfx_q < 0.5 ? 0.55 : (gfx_q < 1.5 ? 1.0 : (gfx_q < 2.5 ? 1.6 : 2.0));
+    float dk = dot(n, vol_sun) - vol_sun.z;
+    if (gfx_q > 1.5 && dk < 0.0) qa *= 0.55;   // тень мягче, свет ярче — объём без потемнения картинки   // выше качество — объёмнее
+    float k = 1.0 + vol_amp * qa * dk;
+    k = gfx_q > 1.5 ? clamp(k, 0.74, gfx_q > 2.5 ? 1.5 : 1.36) : clamp(k, 0.72, 1.18);
     // свет тёплый, тень холодная (как в кино): освещённая сторона к жёлто-оранжевому, теневая — в синеву
     vec3 warm = mix(vec3(1.0), vec3(1.07, 1.0, 0.86), vol_warm);
     vec3 cool = vec3(0.9, 0.96, 1.1);
@@ -104,7 +115,7 @@ void fragment() { COLOR.rgb = vis_env(wx_object(sun_lit(COLOR.rgb, NORMAL), TEXT
         const string GroundShader = "shader_type canvas_item;\n" + Lib + @"
 varying vec2 world_px;
 void vertex() { world_px = (MODEL_MATRIX * vec4(VERTEX, 0.0, 1.0)).xy; }
-void fragment() { COLOR.rgb = vis_env(COLOR.rgb, world_px); }
+void fragment() { COLOR.rgb = vis_env(gfx_ao(COLOR.rgb, texture_sdf(screen_uv_to_sdf(SCREEN_UV))), world_px); }
 ";
 
         const string SwayShader = "shader_type canvas_item;\n" + Lib + @"
@@ -196,7 +207,11 @@ void fragment() {
             Add("wx_cloud_tex", RenderingServer.GlobalShaderParameterType.Sampler2D, cloud);
             Add("wx_cloud_off", RenderingServer.GlobalShaderParameterType.Vec2, Vector2.Zero);
             Add("wx_cloud_amt", RenderingServer.GlobalShaderParameterType.Float, 0f);
+            Add("gfx_q", RenderingServer.GlobalShaderParameterType.Float, (float)GameSettings.Quality);
         }
+
+        /// <summary>Качество графики в шейдерах мира (0..3).</summary>
+        public static void SetQuality(int q) { if (_registered) RenderingServer.GlobalShaderParameterSet("gfx_q", (float)q); }
 
         static Vector2 _cloudOff;
         /// <summary>Тени облаков: плывут по ветру (скорость м/с), сила по погоде и дню.</summary>

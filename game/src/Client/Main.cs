@@ -73,6 +73,18 @@ namespace Rastvordd.Client
         }
         string _lastPlace;
         CanvasModulate _daylight;
+        DirectionalLight2D _sun;
+        float _sunGain;   // сила солнечного света по качеству (0 — выкл.)
+
+        /// <summary>Пресет «Качество графики»: шейдеры мира (gfx_q), пост-обработка, солнечный свет по нормалям.</summary>
+        void ApplyQuality(int q)
+        {
+            VisionFx.SetQuality(q);
+            _post?.SetQuality(q);
+            _sunGain = q switch { 2 => 0.22f, 3 => 0.32f, _ => 0f };
+            if (System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--nosun") >= 0) _sunGain = 0f;   // отладка: без солнечного света
+            if (_sun != null) _sun.Enabled = _sunGain > 0;
+        }
         Ambient _ambient;
         bool _overview, _perf, _timeEdge, _forceCrouch, _forceSprint;
         SVec _forceWalk;
@@ -222,7 +234,8 @@ namespace Rastvordd.Client
                 else if (a == "hdone") _hammerMenu.Release();
                 else if (a.StartsWith("snowc")) _server.World.SnowCover = float.Parse(a.Substring(5), System.Globalization.CultureInfo.InvariantCulture);   // отладка: сколько снега лежит
                 else if (a.StartsWith("wetc")) _server.World.Wetness = float.Parse(a.Substring(4), System.Globalization.CultureInfo.InvariantCulture);
-                else if (a.StartsWith("sky")) _server.World.SetSky((Rastvordd.Sim.Sky)int.Parse(a.Substring(3)));   // отладка: погода 0–7
+                else if (a.StartsWith("sky")) _server.World.NextWeather((Rastvordd.Sim.Sky)int.Parse(a.Substring(3)), 0);   // отладка: погода 0–8 (держится обычный срок)
+                else if (a == "wxnext") _server.World.NextWeather(null, 0);   // отладка: пропустить погоду
                 else if (a.StartsWith("sbsub")) SbSetSub(int.Parse(a.Substring(5)));   // отладка: полигон — мишени/боты/дуэль
                 else if (a.StartsWith("hmode")) _hammerMode = int.Parse(a.Substring(5));   // отладка: режим киянки (1–5, 9 — снос)
                 else if (a.StartsWith("hpick")) _hammerMenu.PointAt(int.Parse(a.Substring(5)));
@@ -446,6 +459,9 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _ambient = new Ambient(this, _map);
             _daylight = new CanvasModulate();
             AddChild(_daylight);
+            // солнце (Высокое/Ультра): направленный свет по картам нормалей (_n.png) — объём каждому спрайту на GPU
+            _sun = new DirectionalLight2D { BlendMode = Light2D.BlendModeEnum.Add, Height = 0.8f, Energy = 0f, Enabled = false };
+            AddChild(_sun);
 
             _cam = new Camera2D { Zoom = new Vector2(_zoom, _zoom) };
             AddChild(_cam);
@@ -528,7 +544,9 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
 
             // окно «Настройки» (Esc): игровые настройки без читов и отладки
             GameSettings.Load();
+            GameSettings.CmdOverrides();
             GameSettings.ApplyVideoAudio();
+            ApplyQuality(GameSettings.Quality);
             _fpsLabel.Visible = GameSettings.ShowFps;
             if (!GameSettings.Post && _post != null) _post.Toggle();
             _settings = new SettingsWindow();
@@ -537,6 +555,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _settings.SaveRequested += () => _hud.Toast(SaveWorld() ? "Мир сохранён" : "Сохранение НЕ записано: " + _saveError);
             _settings.WipeRequested += () => _hud.Wipe();
             _settings.FpsToggled += on => _fpsLabel.Visible = on;
+            _settings.QualityChanged += ApplyQuality;
             _settings.PostToggled += on => { if (_post != null && _post.Toggle() != on) _post.Toggle(); };
 
             _ghost = new GhostView2D { Visible = false };
@@ -1452,6 +1471,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _researchReq = null;
                 if (_autoFireFrames > 0) _autoFireFrames--;
                 HandleEvents();
+                if (_cur.Sky != _wxShown) { if (_wxShown != null) _hud.Toast("Погода: " + Rastvordd.Sim.SkyInfo.Names[(int)_cur.Sky]); _wxShown = _cur.Sky; }   // тихое объявление смены погоды
                 _acc -= World.Dt;
                 steps++;
             }
@@ -1516,6 +1536,17 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             }
             _ambient.Update(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _forcedDay ?? _cur.DayTime, dt);
             _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime) * Weather.Grade(_cur.Sky);   // + цветокор погоды
+            if (_sunGain > 0 && !_overview)
+            {
+                // солнце светит туда же, куда падают тени; плоские поверхности получают +E·h — гасим это в CanvasModulate,
+                // чтобы база не выцвела, а грани к солнцу стали светлее, от солнца — темнее
+                float dayK = 1f - World.NightFactorAt(_forcedDay ?? _cur.DayTime);
+                var sd = new Vector2(Shade.Skew, -Shade.Flat);
+                _sun.Rotation = Mathf.Atan2(sd.Y, sd.X) - Mathf.Pi / 2f;
+                _sun.Energy = _sunGain * dayK;
+                _sun.Color = new Color(1f, 0.95f, 0.85f).Lerp(new Color(1f, 0.72f, 0.48f), Mathf.Clamp(Mathf.Abs(Shade.Skew) - 0.4f, 0f, 0.6f) / 0.6f);
+                _daylight.Color = _daylight.Color * (1f / (1f + _sun.Energy));
+            }
             if (Shade.SetSun(_forcedDay ?? _cur.DayTime)) QueueShadeRedraw();   // тени по солнцу
             ShadeRedrawStep();
             P(8);
@@ -1915,6 +1946,8 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
 
         bool _gaitLog;
         readonly List<float> _gaitTimes = new();
+        Rastvordd.Sim.Sky? _wxShown;
+
         /// <summary>Отладка (--do=N:gait): сколько касаний (= звуков шага) в секунду за последний отрезок.</summary>
         void GaitReport()
         {

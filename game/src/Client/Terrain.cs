@@ -89,7 +89,7 @@ void fragment() {
         float foam = max(edge, surf * 0.75);
         col = mix(col, vec3(0.70, 0.74, 0.70) * (0.35 + 0.65 * max(day, 0.15)), step(0.5, foam) * 0.65);
         col = floor(col * 48.0 + 0.5) / 48.0;                     // квантование — пиксельная палитра
-        COLOR = vec4(vis_env(col, (m - vec2(map_size * 0.5)) * px_per_m), 1.0);
+        COLOR = vec4(vis_env(gfx_ao(col, texture_sdf(screen_uv_to_sdf(SCREEN_UV))), (m - vec2(map_size * 0.5)) * px_per_m), 1.0);
     } else {
         if (id == 1) col = mix(texture(t_forest, tuv).rgb, texture(t_forest, vec2(tuv.y, -tuv.x) + vec2(0.53, 0.19)).rgb, smoothstep(0.35, 0.65, texture(macro_noise, m / 21.0 + vec2(0.6, 0.1)).r));
         else if (id == 2) col = texture(t_dry, tuv).rgb;
@@ -168,7 +168,7 @@ void fragment() {
             float cover = smoothstep(1.02 - wx_snow * 1.15, 1.06 - wx_snow * 1.15, sn);
             col = mix(col, texture(t_snow, tuv).rgb * 1.03, cover);
         }
-        COLOR = vec4(vis_env(col, (m - vec2(map_size * 0.5)) * px_per_m), 1.0);
+        COLOR = vec4(vis_env(gfx_ao(col, texture_sdf(screen_uv_to_sdf(SCREEN_UV))), (m - vec2(map_size * 0.5)) * px_per_m), 1.0);
     }
 }";
 

@@ -575,7 +575,7 @@ namespace Rastvordd.Client
                 string v = value;
                 if (label == "Магазин" && cv.Magazine > 0) v = $"{cv.Ammo} / {cv.Magazine}";   // с обвесом магазин больше
                 if (label == "Патроны") v = value.Replace("Патроны ", "");
-                _gunStats.AddChild(TechWindow.Line(label == "Патроны" ? "Калибр" : label, v, UiTheme.Ink));
+                _gunStats.AddChild(UiLines.Line(label == "Патроны" ? "Калибр" : label, v, UiTheme.Ink));
             }
 
             foreach (var c in _gunAtts.GetChildren()) c.QueueFree();

@@ -65,7 +65,7 @@ namespace Rastvordd.Client
         void CloseBigExcept(bool inv, bool craft, bool map)
         {
             if (!inv) CloseInv();
-            if (!craft && _hud.CraftOpen) _hud.ToggleCraft();
+            if (!craft && _hud.CraftOpen) _hud.CloseCraftAll();
             if (!map) _mapView.Visible = false;
         }
         string _lastPlace;
@@ -172,6 +172,7 @@ namespace Rastvordd.Client
                 else if (a == "release") _autoFireFrames = 0;
                 else if (a == "craftmenu") _hud.ToggleCraft();
                 else if (a == "tech") _hud.OpenTech();
+                else if (a.StartsWith("wb")) _hud.WorkbenchDebug(a[2..]);   // отладка: wb<вкладка 1–4>[f<верстак рядом>][d — демо-избранное]
                 else if (a.StartsWith("scroll") && int.TryParse(a.Substring(6), out var sy)) ScrollAll(this, sy);   // отладка: прокрутить все видимые списки (снимки длинных меню)
                 else if (a == "pathtest")
                 {
@@ -785,6 +786,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 }
                 if (SandboxKey(k.PhysicalKeycode)) return;
                 if (_spectate && SpectatorKey(k.PhysicalKeycode)) return;
+                if (_hud.CraftOpen && k.PhysicalKeycode is Key.Key1 or Key.Key2 or Key.Key3 or Key.Key4) { _hud.WorkbenchTab((int)(k.PhysicalKeycode - Key.Key1)); return; }   // окно верстака: 1–4 — вкладки
                 switch (k.PhysicalKeycode)
                 {
                     case Key.R: _reloadEdge = true; break;
@@ -837,7 +839,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         CloseInv();
                         break;
                     case Key.Escape when _hud.CraftOpen:
-                        _hud.ToggleCraft();
+                        _hud.CloseCraftAll();
                         break;
                     case Key.Escape:
                         Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Hidden ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;

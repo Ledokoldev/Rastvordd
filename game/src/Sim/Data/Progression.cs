@@ -289,6 +289,28 @@ namespace Rastvordd.Sim
             ("att_mag_ext_army", 1, 10, 3, DeployKind.GunTable, new[] { ("metal_fragments", 120), ("comp_spring", 3), (Alloy, 5) }),
         };
 
+        /// <summary>Названия линий дерева (как в Расте — ряды слева направо).</summary>
+        public static readonly string[] LaneNames = { "Промышленность", "Оружие", "Медицина и защита", "Разное" };
+
+        /// <summary>
+        /// Линейные ветки дерева по верстакам: (верстак, линия, [(узел, лом)…]) — каждый следующий узел требует предыдущий в той же линии.
+        /// Применяется в Tech после всех AddTech (Tech.ApplyTree); узлы вне таблицы остаются как были.
+        /// </summary>
+        public static readonly (int bench, int lane, (string id, int scrap)[] nodes)[] TechTree =
+        {
+            (1, 0, new[] { ("tool_metal_hatchet", 20), ("tool_metal_pickaxe", 25), ("deploy_box_large", 20), ("deploy_sewing", 25), ("deploy_still", 35) }),
+            (1, 1, new[] { ("gunpowder", 15), ("ammo_12g", 20), ("att_grip_wood", 12), ("att_suppressor_can", 12), ("att_torch", 12), ("ammo_9mm", 25), ("att_mag_twin_crude", 15), ("weapon_crossbow", 30), ("weapon_nagant", 45), ("weapon_homesmg", 75) }),
+            (1, 3, new[] { ("lock_code", 15), ("bars", 25), ("expl_fire", 20) }),
+            (2, 0, new[] { ("deploy_lamp", 20), ("deploy_floodlight", 20), ("deploy_chem", 50), ("deploy_generator", 70), ("tool_chainsaw", 110) }),
+            (2, 1, new[] { ("ammo_762", 50), ("att_reddot", 25), ("att_grip", 25), ("att_flashlight", 20), ("att_compensator", 30), ("att_suppressor", 35), ("att_mag_twin", 30), ("att_laser", 35), ("att_mag_ext", 40), ("att_scope2x", 45), ("att_stock_tac", 40), ("weapon_grach", 90), ("weapon_svt40", 120), ("weapon_pps43", 150) }),
+            (2, 2, new[] { ("wear_spec_robe", 30), ("wear_scrap_signvest", 45) }),
+            (2, 3, new[] { ("expl_satchel", 60) }),
+            (3, 0, new[] { ("deploy_efurnace", 90), ("deploy_conveyor", 110), ("deploy_rectifier", 120), ("tool_jackhammer", 150), ("deploy_drill", 200) }),
+            (3, 1, new[] { ("ammo_545", 70), ("deploy_guntable", 150), ("att_compensator_army", 50), ("att_mag_ext_army", 50), ("att_suppressor_pbs", 70), ("att_scope4x", 80), ("weapon_ppsh", 180), ("weapon_svd", 220), ("weapon_an94", 260), ("weapon_akm", 420) }),
+            (3, 2, new[] { ("deploy_medtable", 80), ("medkit", 80), ("syringe", 90), ("wear_ozk_cape", 70), ("wear_army_6b2", 100) }),
+            (3, 3, new[] { ("expl_c4", 180) }),
+        };
+
         /// <summary>Узлы дерева изучения для новых вещей (лом; станции — из StationDef.Scrap, инструменты — из ToolDef.Scrap).</summary>
         public static readonly (string id, int bench, int scrap, string[] req)[] Tech =
         {

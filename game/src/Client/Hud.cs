@@ -19,8 +19,8 @@ namespace Rastvordd.Client
         Label _promptKey, _promptText, _ammoName, _ammoCount, _ammoReserve;
         PanelContainer _promptKeyCap;
         ColorRect _damageRect, _deathRect, _vision;
-        CraftWindow _craftWin;
-        TechWindow _techWin;
+        WorkbenchWindow _wb;
+        int _lastBench;
         Hotbar _hotbar;
         ConditionView _cond;
         /// <summary>Время суток для часов (0..1) — ставит Main перед UpdateHud.</summary>
@@ -29,7 +29,7 @@ namespace Rastvordd.Client
         float _toastTime, _damageFlash, _hintsTime = HintsShowTime;
 
         public Crosshair Crosshair { get; private set; }
-        public bool CraftOpen => _craftWin.Visible || _techWin.Visible;   // любое окно крафта/изучения: мышь видна, не стреляем
+        public bool CraftOpen => _wb.Visible;   // любое окно крафта/изучения: мышь видна, не стреляем
         /// <summary>Открыт инвентарь — у него свой пояс (с перетаскиванием), HUD-пояс прячем.</summary>
         public bool InventoryOpen;
         /// <summary>Открыта большая карта — прячем мелочь HUD.</summary>
@@ -320,16 +320,11 @@ void fragment() {
 
         void BuildCraftPanel()
         {
-            _craftWin = new CraftWindow();
-            _craftWin.Craft += (i, n) => CraftRequested?.Invoke(i, n);
-            _craftWin.OpenTree += OpenTech;
-            AddChild(_craftWin);
-            _techWin = new TechWindow();
-            _techWin.Research += id => ResearchRequested?.Invoke(id);
-            _techWin.OpenCraft += () => { _techWin.Visible = false; _craftWin.Visible = true; };
-            AddChild(_techWin);
-            _craftWin.ClickedOutside += CloseCraftByClick;
-            _techWin.ClickedOutside += CloseCraftByClick;
+            _wb = new WorkbenchWindow();
+            _wb.Craft += (i, n) => CraftRequested?.Invoke(i, n);
+            _wb.Research += id => ResearchRequested?.Invoke(id);
+            AddChild(_wb);
+            _wb.ClickedOutside += CloseCraftByClick;
         }
 
         ColorRect FullRect(Color c)
@@ -520,21 +515,24 @@ void fragment() {
         }
 
         public void FlashDamage() => _damageFlash = 0.45f;
-        /// <summary>Q: открыть крафт; если открыто любое из окон — закрыть.</summary>
+        /// <summary>Q: «Все рецепты»; уже открыто другое — перейти на «Все рецепты»; на них — закрыть.</summary>
         public void ToggleCraft()
         {
-            bool open = CraftOpen;
-            _craftWin.Visible = !open;
-            _techWin.Visible = false;
+            if (!_wb.Visible) _wb.OpenTab(3);
+            else if (_wb.Tab != 3) _wb.SetTab(3);
+            else _wb.Visible = false;
         }
 
-        public void CloseCraftAll() { _craftWin.Visible = false; _techWin.Visible = false; }
-        public void OpenTech() { _craftWin.Visible = false; _techWin.Visible = true; }
-        public void OpenCraftList() { _techWin.Visible = false; _craftWin.Visible = true; }   // E у станции (D54)
+        public void CloseCraftAll() { _wb.Visible = false; }
+        /// <summary>E у верстака: окно на вкладке уровня ближайшего верстака.</summary>
+        public void OpenTech() { _wb.OpenTab(_lastBench > 0 ? _lastBench - 1 : 0); }
+        public void OpenCraftList() { _wb.OpenTab(3); }   // E у станции (D54)
+        public void WorkbenchTab(int tab) => _wb.SetTab(tab);
+        public void WorkbenchDebug(string spec) { _wb.OpenTab(spec[0] - '1'); if (spec.Length > 1 && spec[1] == 'f') _wb.FakeBench = spec[2] - '0'; if (spec.Contains('d')) _wb.DemoPrefs(); }
 
         /// <summary>Окно закрыли кликом мимо (крафт, изучение, админка) — Main прячет курсор.</summary>
         public event Action MenuClosed;
-        void CloseCraftByClick() { _craftWin.Visible = false; _techWin.Visible = false; MenuClosed?.Invoke(); }
+        void CloseCraftByClick() { _wb.Visible = false; MenuClosed?.Invoke(); }
 
         /// <summary>Админка открыта и клик мимо неё — закрыть. true, если закрыли.</summary>
         public bool CloseAdminIfOutside(Vector2 globalPos)
@@ -605,8 +603,8 @@ void fragment() {
             _buildPanel.Visible = !_spectator && _buildLabel.Text != "";
             Place(_buildPanel, vs, 0.5f, 1, new Vector2(0, promptY - (_promptPanel.Visible ? _promptPanel.Size.Y + 6 : 0)));
 
-            if (_craftWin.Visible) _craftWin.Refresh(s);
-            if (_techWin.Visible) _techWin.Refresh(s);
+            _lastBench = _wb.FakeBench >= 0 ? _wb.FakeBench : s.BenchLevel;
+            if (_wb.Visible) _wb.Refresh(s);
 
             _deathRect.Visible = s.Dead;
             if (s.Dead)

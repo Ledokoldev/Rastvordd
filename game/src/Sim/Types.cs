@@ -586,6 +586,7 @@ namespace Rastvordd.Sim
         public int Scrap;                // цена в металлоломе
         public string[] Requires = System.Array.Empty<string>();
         public string[] RequiresAny = System.Array.Empty<string>();   // хотя бы один из (АКМ — через Грач или СВТ)
+        public int Lane = -1, Order = -1;   // линия дерева (Prog.TechTree) и место в ней слева направо; −1 — вне таблицы
         public int Col = -1, Row = -1;   // место в окне изучения (столбец = верстак − 1); −1 — по умолчанию клиента
     }
 
@@ -602,7 +603,27 @@ namespace Rastvordd.Sim
             new TechNode { Id = "expl_c4", Bench = 3, Scrap = 160, Requires = new[] { "expl_satchel" }, Col = 2, Row = 0 },
         };
 
-        static Tech() { Weaponry.AddTech(All); Clothing.AddTech(All); StationDefs.AddTech(All); }   // ветка оружия и обвесов (D46), комплекты одежды (D47)
+        static Tech() { Weaponry.AddTech(All); Clothing.AddTech(All); StationDefs.AddTech(All); ApplyTree(); }
+
+        /// <summary>Линейные ветки как в Расте (Prog.TechTree): цена, верстак, единственный предок — предыдущий узел линии.</summary>
+        static void ApplyTree()
+        {
+            foreach (var (bench, lane, nodes) in Prog.TechTree)
+            {
+                string prev = null;
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    var (id, scrap) = nodes[i];
+                    var n = All.Find(x => x.Id == id);
+                    if (n == null) { n = new TechNode { Id = id }; All.Add(n); }
+                    n.Bench = bench; n.Scrap = scrap; n.Lane = lane; n.Order = i;
+                    n.Col = bench - 1; n.Row = lane;
+                    n.Requires = prev == null ? System.Array.Empty<string>() : new[] { prev };
+                    n.RequiresAny = System.Array.Empty<string>();
+                    prev = id;
+                }
+            }
+        }   // ветка оружия и обвесов (D46), комплекты одежды (D47)
 
         public static TechNode Get(string id) => All.Find(n => n.Id == id);
 

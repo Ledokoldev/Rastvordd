@@ -730,7 +730,22 @@ namespace Rastvordd.Sim
         static readonly string[] ResearchOrder = { "lock_code", "gunpowder", "ammo_9mm", "weapon_nagant", "weapon_homesmg", "ammo_12g", "weapon_crossbow", "weapon_grach", "ammo_762", "weapon_svt40", "expl_satchel", "deploy_guntable", "weapon_akm", "weapon_svd", "expl_c4" };   // оружейный стол (D54) — до стволов тира 3
         // агрессивные (бродяги и задиристые фермеры) учат бомбы раньше патронов 7,62: рейды — на втором часу, а не «никогда»
         static readonly string[] ResearchOrderRaider = { "lock_code", "gunpowder", "ammo_9mm", "weapon_nagant", "weapon_homesmg", "ammo_12g", "expl_satchel", "weapon_crossbow", "weapon_grach", "ammo_762", "weapon_svt40", "deploy_guntable", "weapon_akm", "expl_c4", "weapon_svd" };
-        string[] MyResearchOrder => Aggression > 0.45f ? ResearchOrderRaider : ResearchOrder;
+        string[] MyResearchOrder => Aggression > 0.45f ? _orderRaider ??= ExpandOrder(ResearchOrderRaider) : _orderNormal ??= ExpandOrder(ResearchOrder);
+        static string[] _orderRaider, _orderNormal;
+        /// <summary>Цели с предками впереди: дерево линейное (Prog.TechTree), чтобы дойти до цели, бот учит всю цепочку.</summary>
+        static string[] ExpandOrder(string[] goals)
+        {
+            var res = new List<string>();
+            void Add(string id)
+            {
+                if (res.Contains(id)) return;
+                var n = Tech.Get(id);
+                if (n != null) foreach (var r in n.Requires) Add(r);
+                res.Add(id);
+            }
+            foreach (var g in goals) Add(g);
+            return res.ToArray();
+        }
         static readonly string[] BenchIds = { "deploy_workbench", "deploy_workbench2", "deploy_workbench3" };
 
         /// <summary>Где в доме стоят верстаки (мастерская мейна) и откуда с ними работать.</summary>
@@ -790,8 +805,7 @@ namespace Rastvordd.Sim
                 if (n == null || _me.Known.Contains(id) || n.Bench > lvl || !Array.TrueForAll(n.Requires, r => _me.Known.Contains(r))) continue;
                 if (n.RequiresAny.Length > 0 && !Array.Exists(n.RequiresAny, r => _me.Known.Contains(r))) continue;
                 // не тратить лом раньше времени: 12 к — когда есть дробовик, арбалет (ступень к СВТ) — с верстака 2
-                if (id == "ammo_12g" && BestOwnedGun() is not ("weapon_pipeshotgun" or "weapon_sawnoff" or "weapon_mp133" or "weapon_saiga12")) continue;
-                if (id == "weapon_crossbow" && lvl < 2) continue;
+                // 12 к и арбалет теперь звенья цепочки к наганам (линейное дерево) — их не откладываем
                 if (scrap < n.Scrap) { WantScrap(n.Scrap - scrap); return GetScrap(n.Scrap - InBox(box, "scrap"), box, ref cmd); }
                 if (TakeFromBox(box, "scrap", n.Scrap, ref cmd)) return true;
                 Doing = $"изучает: {Items.Name(id)}";

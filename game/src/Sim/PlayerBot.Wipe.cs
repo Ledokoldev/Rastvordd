@@ -62,6 +62,39 @@ namespace Rastvordd.Sim
             public bool Looting;       // уже лутаю ящик: домой не тянет, пока не выгреб
             public float Got;          // сколько унёс из ящика (в ломах)
             public int Idle;           // заходов подряд, когда ничего не влезло
+            public bool Spotted;       // увидел сам по пути, а не по радио
+        }
+
+        /// <summary>Сброс, который уже пробовал взять по пути (не дёргаться к нему снова каждые полсекунды): до какого времени.</summary>
+        readonly Dictionary<DirectorEvent, float> _spotTried = new();
+
+        /// <summary>
+        /// 2026-10-27 (напарник): «сброс лежит, мимо ходят боты — и им всё равно». Увидел сброс сам (≤ 45 м, глазами) и ничего ценного
+        /// при себе (лишнего меньше «несу ценное») — бросаю текущее дело и иду лутать. Не в бою, не ранен, не лутаю РТ и не в рейде.
+        /// Закрытый ящик на РТ — только уже открытый (ждать взлом 3 мин по пути никто не станет).
+        /// </summary>
+        void SpotDrop()
+        {
+            if (_rj != null || _w.Director == null || _me.Hp < 50 || _threat != null || _raid != null || _rtPhase == RtPhase.Loot) return;
+            if (_surplus >= CarryAvoid) return;
+            foreach (var ev in _w.Director.Events)
+            {
+                if (ev.Crate == null || !_w.Bags.Contains(ev.Crate) || (ev.Open && ev.Crate.Empty)) continue;
+                if (ev.Kind == "locked_crate" ? !ev.Open : ev.Kind != "airdrop") continue;
+                if (_spotTried.TryGetValue(ev, out float until) && _w.Time < until) continue;
+                if (Vector2.Distance(ev.Crate.Pos, _me.Pos) > 45 || !SeePoint(ev.Crate.Pos, 45)) continue;
+                _spotTried[ev] = _w.Time + 240;
+                var r = new Rumor { Pos = ev.Crate.Pos, Radius = 10, Kind = ev.Kind, Time = _w.Time, Until = _w.Time + 600, Text = "увидел сам" };
+                string what = ev.Kind == "airdrop" ? "сброс груза" : "открытый закрытый ящик";
+                _rj = new RumorJob { R = r, Ev = ev, Kind = ev.Kind, Guess = ev.Crate.Pos, StartAt = _w.Time, Spotted = true, Why = $"вижу {what} в {Vector2.Distance(ev.Crate.Pos, _me.Pos):0} м, при мне ценного ≈{_surplus:0} лома — почему бы не залутать" };
+                _rjPick = null;
+                if (_rtPhase == RtPhase.Travel) EndRun("по пути увидел сброс — РТ подождёт");
+                Thought($"по пути: {_rj.Why}");
+                LStat("сброс: заметил по пути");
+                _w.Milestone(_me, $"заметил по пути: {what}");
+                _redecide = true;
+                return;
+            }
         }
 
         readonly HashSet<Rumor> _rumorsJudged = new();
@@ -120,7 +153,8 @@ namespace Rastvordd.Sim
         /// <summary>Очки «слуха»: начатая задача держится (76), пока не сделана или не отменена с причиной.</summary>
         float RumorScore()
         {
-            if (_rj != null) return 76;
+            SpotDrop();
+            if (_rj != null) return _rj.Spotted ? 88 : 76;   // увидел сам — перебивает хозяйство, походы и сдачу лута
             if (_w.Director == null || _rtPhase != RtPhase.None || _raid != null || _w.Time < _rjCooldown) return 0;
             if (_w.Time - _rjScoreAt < 2) return _rjScore;
             _rjScoreAt = _w.Time; _rjScore = 0; _rjPick = null;

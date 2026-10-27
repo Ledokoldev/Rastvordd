@@ -91,7 +91,7 @@ namespace Rastvordd.Sim
         {
             if (MyBox() is not Deployable box || _site == null || _raid != null || _w.Time < _stashBlock) return 0;
             if (_rtPhase is RtPhase.Travel or RtPhase.Loot) return 0;   // в походе мешок не бросают — несут после
-            if (_rj?.Looting == true) return 0;   // 2026-10-27 (напарник): лутаю сброс — сначала выгрести, домой потом
+            if (_rj?.Looting == true || _rj?.Spotted == true) return 0;   // 2026-10-27 (напарник): лутаю сброс (или увидел его по пути) — сначала выгрести, домой потом
             if (box.Storage.Items.Count >= World.BoxSlots && !TidyBox(box, true) && Surplus().TrueForAll(s => !box.Storage.Items.Exists(x => x.Id == s.id))) return 0;
             float v = _surplus;
             bool guns = SpareGun() != null;

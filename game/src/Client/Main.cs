@@ -965,7 +965,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             Walk(GetTree().Root, "root", 0);
             GD.Print($"drawdump: всего видимых CanvasItem {total}, камера {cam?.GlobalPosition}, экран {screen.Size}");
             int lon = 0, lsh = 0, occ = 0; var lsrc = new Dictionary<string, int>();
-            void WL(Node n) { if (n is PointLight2D pl && pl.Enabled && pl.Energy > 0 && pl.IsVisibleInTree()) { lon++; if (pl.ShadowEnabled) lsh++; var k = pl.GetParent()?.GetType().Name ?? "?"; lsrc[k] = lsrc.GetValueOrDefault(k) + 1; } if (n is LightOccluder2D o && o.IsVisibleInTree()) occ++; foreach (var ch in n.GetChildren()) WL(ch); }
+            void WL(Node n) { if (n is PointLight2D pl && pl.Enabled && pl.Energy > 0 && pl.IsVisibleInTree()) { lon++; GD.Print($"    свет {pl.GetParent()?.GetType().Name} @{pl.GlobalPosition} (я {_selfPx}) энергия {pl.Energy:0.00} масштаб {pl.TextureScale:0.00} цвет {pl.Color} режим {pl.BlendMode} высота {pl.Height} маска {pl.RangeItemCullMask} тени {pl.ShadowEnabled}"); if (pl.ShadowEnabled) lsh++; var k = pl.GetParent()?.GetType().Name ?? "?"; lsrc[k] = lsrc.GetValueOrDefault(k) + 1; } if (n is LightOccluder2D o && o.IsVisibleInTree()) occ++; foreach (var ch in n.GetChildren()) WL(ch); }
             WL(GetTree().Root);
             GD.Print($"  свет: включено {lon}, с тенями {lsh}, окклюдеров {occ}; по родителям: {string.Join(", ", lsrc.Select(x => x.Key + " " + x.Value))}");
             var procBy = new Dictionary<string, int>(); int procAll = 0;
@@ -2328,11 +2328,11 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
         /// <summary>Цвет освещения по времени суток: ночь синяя, рассвет и закат тёплые.</summary>
         static Color DayColor(float t)
         {
-            var night = new Color(0.2f, 0.24f, 0.4f);
+            var night = new Color(0.25f, 0.28f, 0.42f);   // ночь: синеватая, но читаемая
             (float at, Color c)[] keys =
             {
-                (0f, night), (0.2f, night), (0.27f, new Color(0.9f, 0.66f, 0.58f)), (0.34f, new Color(0.97f, 0.94f, 0.9f)),
-                (0.5f, new Color(1f, 1f, 0.98f)), (0.68f, new Color(1f, 0.95f, 0.88f)), (0.76f, new Color(0.92f, 0.6f, 0.5f)),
+                (0f, night), (0.2f, night), (0.27f, new Color(0.93f, 0.8f, 0.72f)), (0.34f, new Color(0.97f, 0.94f, 0.9f)),
+                (0.5f, new Color(1f, 1f, 0.98f)), (0.68f, new Color(1f, 0.95f, 0.88f)), (0.76f, new Color(0.95f, 0.78f, 0.66f)),
                 (0.84f, night), (1f, night),
             };
             for (int i = 0; i < keys.Length - 1; i++)

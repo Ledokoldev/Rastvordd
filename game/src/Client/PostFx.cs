@@ -111,7 +111,7 @@ void fragment() {
             float sat = 1.06f - 0.1f * night - 0.3f * grey + 0.06f * warm;
             float con = 1.04f - 0.04f * grey - 0.04f * night;
             var g = new Vector3(1, 1, 1);
-            g = g.Lerp(new Vector3(1.08f, 0.98f, 0.86f), warm * 0.7f);
+            g = g.Lerp(new Vector3(1.08f, 0.98f, 0.86f), warm * 0.45f);
             g = g.Lerp(new Vector3(0.9f, 0.97f, 1.1f), night * 0.6f);
             g = g.Lerp(new Vector3(0.97f, 0.99f, 1.02f), grey);
             var shadow = new Vector3(-0.004f, 0.004f, 0.03f) * (0.5f + night) + new Vector3(0.02f, -0.005f, -0.02f) * warm;

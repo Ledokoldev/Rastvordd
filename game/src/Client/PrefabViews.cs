@@ -31,7 +31,7 @@ namespace Rastvordd.Client
         {
             var l = new PointLight2D
             {
-                Texture = Art.LightTex, TextureScale = sizeM * Iso.PPM * 2 / 256f, Energy = 0f, Color = col, Position = at,
+                Texture = Art.LightTex, TextureScale = sizeM * Iso.PPM * 2 / 256f, Energy = 0f, Color = col, Position = new Vector2(at.X, Mathf.Min(0, at.Y * 0.08f)),   // пятно света — на земле у основания (вид 3/4), а не на высоте плафона
                 BlendMode = Light2D.BlendModeEnum.Add, Enabled = false, Height = -at.Y,   // лампа на высоте столба: объём по нормалям
             };
             l.TreeExiting += () => All.Remove(l);

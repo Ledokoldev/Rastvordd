@@ -86,6 +86,27 @@ namespace Rastvordd.Sim
             return false;
         }
 
+        /// <summary>Цели, где руки свободны от работы (не рубит, не копает, не строит): в руках — лучшее оружие.</summary>
+        static readonly HashSet<string> ArmedGoals = new()
+        {
+            "бродить", "сейч", "разведка", "проверить бой", "перехват", "кемп", "засада у РТ", "сторож", "после смерти",
+            "лут убитого", "лут трупа", "охота", "месть", "антирейд", "слух", "бегство",
+        };
+
+        /// <summary>
+        /// 2026-10-27 (напарник): «получил нормальное снаряжение — гоняй с лучшим оружием». Раньше бот со СВТ в рюкзаке ходил с булыжником:
+        /// оружие бралось в руки только в бою. Теперь вне работы (и по дороге на РТ и обратно) — лучший ствол с патронами, иначе копьё.
+        /// Действие цели в этот тик важнее (сменила слот, крафт, окно) — не мешаю.
+        /// </summary>
+        void ArmUp(ref InputCmd cmd)
+        {
+            if (_goal == null || cmd.SelectSlot >= 0 || cmd.UiOp != 0 || cmd.Craft >= 0) return;
+            bool free = ArmedGoals.Contains(_goal.Name) || (_goal.Name == "поход на РТ" && _rtPhase is RtPhase.Travel or RtPhase.Leave);
+            if (!free) return;
+            string best = Ranged() ?? (Has("weapon_spear") ? "weapon_spear" : null);
+            if (best != null && _me.Held?.Id != best) Hold(best, ref cmd);
+        }
+
         bool Craft(string output, ref InputCmd cmd)
         {
             int r = Recipe(output);
@@ -694,6 +715,7 @@ namespace Rastvordd.Sim
             SimPerf.End("бот: восприятие", t0);
             t0 = SimPerf.Begin();
             Decide(ref cmd);
+            ArmUp(ref cmd);
             CloseDoorBehind();
             Clothe(ref cmd);
             if ((_w.Tick + (uint)_me.Id) % 300 == 7) TidyPack();   // раз в 10 с: старые ключи и лишнее тряпьё из рюкзака (D49)

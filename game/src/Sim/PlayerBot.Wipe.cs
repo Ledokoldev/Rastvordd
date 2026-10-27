@@ -372,12 +372,31 @@ namespace Rastvordd.Sim
                 if (id.StartsWith("weapon_") && Has(id)) continue;
                 if (_me.Count(id) < KitWant(id) && InBox(box, id) > 0) return id;
             }
-            return null;
+            // 2026-10-27 (напарник): броня и одежда — лучшая из ящика на себя (раньше после смерти брали ствол и бинты, а броню бросали дома)
+            return BetterWearInBox(box);
+        }
+
+        /// <summary>Вещь из своих ящиков, которая лучше надетой в том же слоте (Clothing.BotScore); null — нет.</summary>
+        string BetterWearInBox(Deployable box)
+        {
+            ScanMine();
+            string best = null; float gain = 0;
+            foreach (var b in _mBoxes)
+                foreach (var s in b.Storage.Items)
+                {
+                    if (Clothing.Def(s.Id) is not WearDef d || Has(s.Id)) continue;
+                    var cur = _me.Worn[(int)d.Slot];
+                    float g = Clothing.BotScore(d) - (cur == null ? 0 : Clothing.BotScore(Clothing.Def(cur.Id)));
+                    if (g > gain + 0.01f) { gain = g; best = s.Id; }
+                }
+            return best;
         }
 
         float AfterDeathScore()
         {
-            if (_w.Time - _respawnAt > 300 || MyBox() is not Deployable box) return 0;
+            if (MyBox() is not Deployable box) return 0;
+            // после смерти — 5 мин; потом — когда и так рядом с домом (≤ 20 м): проходил мимо — переоделся и взял лучший ствол
+            if (_w.Time - _respawnAt > 300 && Vector2.Distance(box.Pos, _me.Pos) > 20) return 0;
             return KitWanted(box) != null ? 64 : 0;
         }
 
@@ -387,8 +406,14 @@ namespace Rastvordd.Sim
             var id = KitWanted(box);
             if (id == null) { _respawnAt = -999; return false; }
             int want = KitWant(id);
-            if (_w.Time - _respawnAt < 1) Thought("после смерти: домой за набором (оружие, патроны, бинты)");
-            Doing = $"после смерти — берёт из ящика {Items.Name(id)}";
+            if (_w.Time - _respawnAt < 1) Thought("после смерти: домой за набором (оружие, патроны, бинты, броня)");
+            Doing = $"{(_w.Time - _respawnAt < 300 ? "после смерти — " : "")}берёт из ящика {Items.Name(id)}";
+            if (Clothing.Def(id) != null)
+            {
+                if (!TakeFromBox(box, id, 1, ref cmd)) { _respawnAt = -999; return false; }
+                Say("броня-из-ящика" + id, $"беру из ящика {Items.Name(id)} — лучше того, что на мне", 120);
+                return true;
+            }
             // ствол в ящике лежит целиком (с износом и магазином) — BotTake его не берёт, забрать ячейку (раньше бот стоял у ящика 5 мин)
             if (BoxWith(id, true) is Deployable gb) { if (!TakeGunFromBox(gb, id, ref cmd)) { _respawnAt = -999; return false; } return true; }
             if (!TakeFromBox(box, id, Math.Min(want, _me.Count(id) + InBox(box, id)), ref cmd)) { _respawnAt = -999; return false; }

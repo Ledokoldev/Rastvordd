@@ -1,0 +1,9 @@
+{
+ "style": "Realistic natural look matching photographic realistic trees, desaturated post-Soviet abandoned countryside, crisp fine detail, soft overcast daylight from the top-left, no outline, no glow.",
+ "assets": [
+  {"id": "lm_hunting_tower", "cat": "props", "h": 5.0, "desc": "a weathered wooden hunting tower (hunter's high seat): four grey timber legs with cross braces, a wooden ladder, a small boarded cabin on top with a slit window and a pitched roof of rusty corrugated sheet"},
+  {"id": "lm_pillbox", "cat": "props", "h": 2.2, "desc": "a squat old Soviet concrete pillbox (DOT bunker): low weathered grey hexagonal concrete block half sunk into an earth mound with grass on top, a dark horizontal firing slit facing the viewer, chipped concrete and moss"},
+  {"id": "lm_tarp_shelter", "cat": "props", "h": 1.8, "desc": "a survivor's makeshift tarp shelter: a faded green-blue plastic tarp stretched between two wooden poles and tied with ropes to pegs, sagging, patched, open to the viewer"},
+  {"id": "lm_pylon_fallen", "cat": "props", "h": 1.2, "desc": "a toppled steel lattice power transmission pylon lying flat on the ground horizontally, long grey galvanised lattice tower on its side with bent crossarms and broken insulators, rusty, partly crumpled in the middle"}
+ ]
+}

@@ -688,6 +688,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     if (best != null) { w.Find(_myId).Pos = best.Pos + new SVec(-1.2f, 0.4f); _autoAim = best.Pos; }
                 }
                 else if (arg == "--dressreport") foreach (var line in _server.World.DressReport) GD.Print("DRESS " + line);   // обстановка РТ: плотность до/после
+                else if (arg == "--landmarks") foreach (var l in _server.World.Landmarks) GD.Print($"LANDMARK {l.Kind} {l.Pos.X:0},{l.Pos.Y:0}");   // ориентиры (World.Landmarks.cs)
                 else if (arg == "--overview") _overview = true;
                 else if (arg == "--perf") _perf = true;
                 else if (arg == "--nocover") DecalLayer.CoverOn = false;   // без густой травы (замер)

@@ -1,0 +1,11 @@
+{
+ "style": "Realistic natural look matching photographic realistic trees, desaturated post-Soviet abandoned countryside, crisp fine detail, soft overcast daylight from the top-left, no outline, no glow.",
+ "assets": [
+  {"id": "lm_pumpjack", "cat": "props", "h": 5.0, "desc": "an old rusty oil pumpjack (nodding donkey) seen from the side: walking beam with horsehead, A-frame samson post, counterweights, motor on a concrete pad, faded paint, oil stains"},
+  {"id": "lm_scarecrow", "cat": "props", "h": 2.0, "desc": "a ragged field scarecrow on a wooden cross: old torn quilted jacket, burlap sack head with a faded cap, straw sticking out"},
+  {"id": "lm_log_hut_ruined", "cat": "props", "h": 3.5, "desc": "a small abandoned Russian log hut (izba) with a collapsed roof: dark grey weathered log walls, roof caved in with broken rafters and rotten planks, empty window with broken shutters, moss and weeds"},
+  {"id": "lm_weather_station", "cat": "props", "h": 3.5, "desc": "a small abandoned meteorological station: white louvred wooden Stevenson screen box on legs next to a tall thin mast with a wind vane and cup anemometer, peeling white paint, rust"},
+  {"id": "lm_oak_patriarch", "cat": "trees", "h": 11.0, "desc": "a huge ancient solitary English oak (Quercus robur), enormous gnarled thick trunk, wide spreading broad crown of dense green leaves, a few dead branches, majestic"},
+  {"id": "lm_tree_fallen", "cat": "props", "h": 1.2, "desc": "a large fallen pine tree lying horizontally on the ground: long trunk with rough bark, torn-out root plate with earth on the left end, broken dry branches and a few needles on the right"}
+ ]
+}

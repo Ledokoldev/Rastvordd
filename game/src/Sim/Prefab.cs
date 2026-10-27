@@ -231,6 +231,7 @@ namespace Rastvordd.Sim
             }
             foreach (var t in Tier2) ResetTier2(t);
             ClearRoadsAfterLoad();   // узлы из сохранения на дорогах (RoadNet.cs)
+            ClearLandmarksAfterLoad();   // деревья из сохранения на площадках ориентиров
         }
     }
 }

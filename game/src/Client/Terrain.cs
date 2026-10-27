@@ -307,6 +307,9 @@ void fragment() {
                     for (int y = 0; y < n; y++) { float acc = 0; int row = y * n; for (int x = -r; x < n; x++) { if (x + r < n) acc += f[row + x + r]; if (x - r - 1 >= 0) acc -= f[row + x - r - 1]; if (x >= 0) tmp[row + x] = acc; } }
                     for (int x = 0; x < n; x++) { float acc = 0; for (int y = -r; y < n; y++) { if (y + r < n) acc += tmp[(y + r) * n + x]; if (y - r - 1 >= 0) acc -= tmp[(y - r - 1) * n + x]; if (y >= 0) f[y * n + x] = acc; } }
                 }
+                // в доли 0..1: без нормировки широко размытая суша «весила» в (2r+1)² раз больше узкой воды — узкая река рисовалась травой
+                float norm = 1f / Mathf.Pow(2 * r + 1, 4);
+                for (int i = 0; i < n * n; i++) f[i] *= norm;
                 res[bi] = f;
             }
             return res;

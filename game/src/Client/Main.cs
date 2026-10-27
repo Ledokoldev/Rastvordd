@@ -763,6 +763,13 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 {
                     // встать рядом с ближайшим узлом вида (tree/stone/metal/sulfur) и смотреть на него: --near=tree[,угол°]
                     var p = arg.Substring(7).Split(',');
+                    if (p[0] == "river")
+                    {   // встать у ближайшей клетки реки (проверка воды)
+                        var tm = _server.World.Terrain; var me0 = _server.World.Find(_myId); float bd = 1e9f; SVec bp = me0.Pos;
+                        for (int yy = 0; yy < tm.N; yy++) for (int xx = 0; xx < tm.N; xx++) if (tm.River[yy * tm.N + xx] == 1) { var c = tm.CellCenter(xx, yy); float dd = SVec.Distance(c, me0.Pos); if (dd < bd) { bd = dd; bp = c; } }
+                        me0.Pos = bp + new SVec(0, 0.5f);
+                        continue;
+                    }
                     // --near=birch|pine|spruce|oak|aspen… — ближайшее дерево этого вида
                     TreeSpecies? wantSp = System.Enum.TryParse<TreeSpecies>(p[0], true, out var tsp) ? tsp : null;
                     var kind = wantSp != null ? NodeKind.Tree : System.Enum.Parse<NodeKind>(p[0], true);

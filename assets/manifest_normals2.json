@@ -1,0 +1,525 @@
+{
+ "normal_framing": "A TANGENT-SPACE NORMAL MAP of the attached reference sprite (OpenGL convention: R = X right, G = Y up, B = Z toward viewer; flat surfaces facing the viewer are #8080FF lavender-blue). EXACTLY the same silhouette, size, proportions and position as the reference, every leaf cluster, branch, plank, bolt and rock facet modelled with correct bumps and rounded volumes (crowns are domed clusters, trunks cylindrical, planks with bevelled edges, rock facets angled). Fully transparent background outside the silhouette. No lighting, no shadows, no colours other than normal-map colours, no text. Square canvas 1024x1024 with the object centred exactly like the reference.",
+ "assets": [
+  {
+   "id": "tree_oak_old_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_oak_old.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_aspen_old_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_aspen_old.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_pine_old_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_pine_old.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_spruce_old_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_spruce_old.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_swamp_willow_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_swamp_willow.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_oak_dead_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_oak_dead.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_willow_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_willow.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_spruce_1_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_spruce_1.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_leafy_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_leafy.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_spruce_snow_1_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_spruce_snow_1.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_spruce_2_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_spruce_2.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_pine_snow_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_pine_snow.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_swamp_dead_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_swamp_dead.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_pine_2_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_pine_2.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_pine_coastal_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_pine_coastal.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_dead_dry_1_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_dead_dry_1.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_birch_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_birch.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_birch_frozen_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_birch_frozen.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_birch_2_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_birch_2.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_dead_snow_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_dead_snow.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_birch_snow_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_birch_snow.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_aspen_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_aspen.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_burnt_1_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_burnt_1.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_rowan_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_rowan.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_poplar_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_poplar.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_dead_dry_2_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_dead_dry_2.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_apple_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_apple.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_spruce_snow_2_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_spruce_snow_2.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_birch_dead_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_birch_dead.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_oak_young_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_oak_young.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_burnt_3_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_burnt_3.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_burnt_2_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_burnt_2.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_birch_young_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_birch_young.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_pine_young_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_pine_young.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_spruce_young_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_spruce_young.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "tree_young_pine_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/tree_young_pine.png",
+   "desc": "a tree, top-down 3/4 view",
+   "dir": "trees"
+  },
+  {
+   "id": "cship_mid_stacked_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/cship_mid_stacked.png",
+   "desc": "an abandoned soviet-era vehicle wreck, top-down 3/4 view",
+   "dir": "vehicles"
+  },
+  {
+   "id": "cship_mid_chaos_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/cship_mid_chaos.png",
+   "desc": "an abandoned soviet-era vehicle wreck, top-down 3/4 view",
+   "dir": "vehicles"
+  },
+  {
+   "id": "cship_stern_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/cship_stern.png",
+   "desc": "an abandoned soviet-era vehicle wreck, top-down 3/4 view",
+   "dir": "vehicles"
+  },
+  {
+   "id": "sub_submarine_top_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/sub_submarine_top.png",
+   "desc": "an abandoned soviet-era vehicle wreck, top-down 3/4 view",
+   "dir": "vehicles"
+  },
+  {
+   "id": "cship_bow_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/cship_bow.png",
+   "desc": "an abandoned soviet-era vehicle wreck, top-down 3/4 view",
+   "dir": "vehicles"
+  },
+  {
+   "id": "plane_an2_top_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/plane_an2_top.png",
+   "desc": "an abandoned soviet-era vehicle wreck, top-down 3/4 view",
+   "dir": "vehicles"
+  },
+  {
+   "id": "ship_cargo_stern_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/ship_cargo_stern.png",
+   "desc": "an abandoned soviet-era vehicle wreck, top-down 3/4 view",
+   "dir": "vehicles"
+  },
+  {
+   "id": "ship_cargo_bow_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/ship_cargo_bow.png",
+   "desc": "an abandoned soviet-era vehicle wreck, top-down 3/4 view",
+   "dir": "vehicles"
+  },
+  {
+   "id": "heli_mi8_wreck_top_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/heli_mi8_wreck_top.png",
+   "desc": "an abandoned soviet-era vehicle wreck, top-down 3/4 view",
+   "dir": "vehicles"
+  },
+  {
+   "id": "heli_mi24_wreck_angled_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/heli_mi24_wreck_angled.png",
+   "desc": "an abandoned soviet-era vehicle wreck, top-down 3/4 view",
+   "dir": "vehicles"
+  },
+  {
+   "id": "ship_trawler_wreck_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/ship_trawler_wreck.png",
+   "desc": "an abandoned soviet-era vehicle wreck, top-down 3/4 view",
+   "dir": "vehicles"
+  },
+  {
+   "id": "water_tower_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/water_tower.png",
+   "desc": "a large outdoor object, top-down 3/4 view",
+   "dir": "outdoor"
+  },
+  {
+   "id": "streetlight_concrete_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/streetlight_concrete.png",
+   "desc": "a large outdoor object, top-down 3/4 view",
+   "dir": "outdoor"
+  },
+  {
+   "id": "garage_brick_angled_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/garage_brick_angled.png",
+   "desc": "a large outdoor object, top-down 3/4 view",
+   "dir": "outdoor"
+  },
+  {
+   "id": "concrete_slabs_stack_side_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/concrete_slabs_stack_side.png",
+   "desc": "a large outdoor object, top-down 3/4 view",
+   "dir": "outdoor"
+  },
+  {
+   "id": "well_crane_side_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/well_crane_side.png",
+   "desc": "a large outdoor object, top-down 3/4 view",
+   "dir": "outdoor"
+  },
+  {
+   "id": "gazebo_angled_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/gazebo_angled.png",
+   "desc": "a large outdoor object, top-down 3/4 view",
+   "dir": "outdoor"
+  },
+  {
+   "id": "power_pole_wood_angled_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/power_pole_wood_angled.png",
+   "desc": "a large outdoor object, top-down 3/4 view",
+   "dir": "outdoor"
+  },
+  {
+   "id": "garage_brick_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/garage_brick.png",
+   "desc": "a large outdoor object, top-down 3/4 view",
+   "dir": "outdoor"
+  },
+  {
+   "id": "power_pole_wood_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/power_pole_wood.png",
+   "desc": "a large outdoor object, top-down 3/4 view",
+   "dir": "outdoor"
+  },
+  {
+   "id": "bus_stop_concrete_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/bus_stop_concrete.png",
+   "desc": "a large outdoor object, top-down 3/4 view",
+   "dir": "outdoor"
+  },
+  {
+   "id": "coast_rock_waves_2_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/coast_rock_waves_2.png",
+   "desc": "a rock / ore boulder",
+   "dir": "nodes"
+  },
+  {
+   "id": "coast_rock_waves_1_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/coast_rock_waves_1.png",
+   "desc": "a rock / ore boulder",
+   "dir": "nodes"
+  },
+  {
+   "id": "node_stone_large_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/node_stone_large.png",
+   "desc": "a rock / ore boulder",
+   "dir": "nodes"
+  },
+  {
+   "id": "node_sulfur_large_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/node_sulfur_large.png",
+   "desc": "a rock / ore boulder",
+   "dir": "nodes"
+  },
+  {
+   "id": "node_metal_arid_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/node_metal_arid.png",
+   "desc": "a rock / ore boulder",
+   "dir": "nodes"
+  },
+  {
+   "id": "node_stone_arid_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/node_stone_arid.png",
+   "desc": "a rock / ore boulder",
+   "dir": "nodes"
+  },
+  {
+   "id": "node_stone_1_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/node_stone_1.png",
+   "desc": "a rock / ore boulder",
+   "dir": "nodes"
+  },
+  {
+   "id": "node_metal_1_n",
+   "cat": "normals",
+   "normal": true,
+   "ref": "assets/normref/node_metal_1.png",
+   "desc": "a rock / ore boulder",
+   "dir": "nodes"
+  }
+ ]
+}

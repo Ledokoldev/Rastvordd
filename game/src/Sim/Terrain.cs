@@ -79,6 +79,7 @@ namespace Rastvordd.Sim
                 if (Height[y * N + x] >= 0.09f) cl.Add(_climate.Fbm(Warp(CellCenter(x, y), 160f, 70f) / 300f, 3));
             cl.Sort();
             float tCold = cl.Count > 0 ? cl[(int)(cl.Count * 0.17f)] : -0.14f, tDry = cl.Count > 0 ? cl[(int)(cl.Count * 0.85f)] : 0.15f;
+            float bs = HalfSize / 500f;
             for (int y = 0; y < N; y++)
             for (int x = 0; x < N; x++)
             {
@@ -87,18 +88,18 @@ namespace Rastvordd.Sim
                 float h = Height[i];
                 if (h < 0) { raw[i] = Biome.Water; continue; }
                 if (h < 0.09f) { raw[i] = Biome.Beach; continue; }
-                var q = Warp(p, 160f, 70f);
-                float clim = _climate.Fbm(q / 300f, 3);
+                var q = Warp(p, 160f * bs, 70f * bs);   // масштаб биомов растёт с островом (2×2 км — те же крупные области, не кляксы)
+                float clim = _climate.Fbm(q / (300f * bs), 3);
                 Biome b;
                 if (clim < tCold) b = Biome.Tundra;
                 else if (clim > tDry) b = Biome.Arid;
-                else if (_wet.Fbm(Warp(p, 120f, 45f) / 150f, 3) > 0.1f && h < 0.75f) b = Biome.Swamp;
+                else if (_wet.Fbm(Warp(p, 120f * bs, 45f * bs) / (150f * bs), 3) > 0.1f && h < 0.75f) b = Biome.Swamp;
                 else if (ForestNoise(p) > 0.0f) b = Biome.Forest;
                 else b = Biome.Grassland;
                 raw[i] = b;
             }
             Smooth(raw, 7); Smooth(raw, 5);
-            DropSmall(raw, 900);    // области < 3600 м² — в соседний биом
+            DropSmall(raw, (int)(900 * bs * bs));    // мелкие области — в соседний биом (порог растёт с островом)
             // поляны в лесу: округлые луговые окна 15–35 м в глубине массива
             for (int y = 0; y < N; y++)
             for (int x = 0; x < N; x++)

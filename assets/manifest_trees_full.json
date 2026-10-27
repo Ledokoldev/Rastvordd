@@ -1,0 +1,761 @@
+{
+ "style": "ULTRA-REALISTIC natural look, like a high-resolution photograph of a real tree cut out on transparent background, botanically accurate species anatomy (true bark texture, real leaf/needle shape and density, natural asymmetric branching), true-to-life natural colours (not desaturated, not stylized), soft natural daylight from the top-left, crisp fine detail. NOT cartoon, NOT painterly fantasy, NOT AI-art look, no glow, no outline.",
+ "assets": [
+  {
+   "id": "tree_birch_v05",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, straight and symmetric"
+  },
+  {
+   "id": "tree_birch_v06",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, slightly leaning to the left"
+  },
+  {
+   "id": "tree_birch_v07",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, slightly leaning to the right"
+  },
+  {
+   "id": "tree_birch_v08",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, tall and narrow"
+  },
+  {
+   "id": "tree_birch_v09",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, with a broad spreading crown"
+  },
+  {
+   "id": "tree_birch_v10",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, with an asymmetric crown and a gap on one side"
+  },
+  {
+   "id": "tree_birch_v11",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, with a forked double trunk"
+  },
+  {
+   "id": "tree_birch_v12",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, with a dense full crown"
+  },
+  {
+   "id": "tree_birch_v13",
+   "cat": "trees",
+   "h": 3.3000000000000003,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, a young sapling about 2-3 m tall"
+  },
+  {
+   "id": "tree_birch_v14",
+   "cat": "trees",
+   "h": 3.3000000000000003,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, a young thin tree about 4 m tall"
+  },
+  {
+   "id": "tree_birch_v15",
+   "cat": "trees",
+   "h": 3.3000000000000003,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, a young tree slightly leaning"
+  },
+  {
+   "id": "tree_birch_v16",
+   "cat": "trees",
+   "h": 3.3000000000000003,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, a young tree with a dense small crown"
+  },
+  {
+   "id": "tree_birch_v17",
+   "cat": "trees",
+   "h": 7.199999999999999,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, very old and huge"
+  },
+  {
+   "id": "tree_birch_v18",
+   "cat": "trees",
+   "h": 7.199999999999999,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, old with a thick gnarled trunk and visible roots"
+  },
+  {
+   "id": "tree_birch_v19",
+   "cat": "trees",
+   "h": 7.199999999999999,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, old with some dead bare branches in the crown"
+  },
+  {
+   "id": "tree_birch_v20",
+   "cat": "trees",
+   "h": 7.199999999999999,
+   "desc": "a silver birch (Betula pendula): white bark with black lenticels and dark fissured base, light weeping crown of small leaves, old with a very wide heavy crown"
+  },
+  {
+   "id": "tree_pine_v01",
+   "cat": "trees",
+   "h": 7.5,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, straight and symmetric"
+  },
+  {
+   "id": "tree_pine_v02",
+   "cat": "trees",
+   "h": 7.5,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, slightly leaning to the left"
+  },
+  {
+   "id": "tree_pine_v03",
+   "cat": "trees",
+   "h": 7.5,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, slightly leaning to the right"
+  },
+  {
+   "id": "tree_pine_v04",
+   "cat": "trees",
+   "h": 7.5,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, tall and narrow"
+  },
+  {
+   "id": "tree_pine_v05",
+   "cat": "trees",
+   "h": 7.5,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, with a broad spreading crown"
+  },
+  {
+   "id": "tree_pine_v06",
+   "cat": "trees",
+   "h": 7.5,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, with an asymmetric crown and a gap on one side"
+  },
+  {
+   "id": "tree_pine_v07",
+   "cat": "trees",
+   "h": 7.5,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, with a forked double trunk"
+  },
+  {
+   "id": "tree_pine_v08",
+   "cat": "trees",
+   "h": 7.5,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, with a dense full crown"
+  },
+  {
+   "id": "tree_pine_v09",
+   "cat": "trees",
+   "h": 7.5,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, with a sparse airy crown"
+  },
+  {
+   "id": "tree_pine_v10",
+   "cat": "trees",
+   "h": 7.5,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, with one broken lower branch"
+  },
+  {
+   "id": "tree_pine_v11",
+   "cat": "trees",
+   "h": 7.5,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, tall with a high crown and bare lower trunk"
+  },
+  {
+   "id": "tree_pine_v12",
+   "cat": "trees",
+   "h": 7.5,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, medium-sized and compact"
+  },
+  {
+   "id": "tree_pine_v13",
+   "cat": "trees",
+   "h": 4.125,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, a young sapling about 2-3 m tall"
+  },
+  {
+   "id": "tree_pine_v14",
+   "cat": "trees",
+   "h": 4.125,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, a young thin tree about 4 m tall"
+  },
+  {
+   "id": "tree_pine_v15",
+   "cat": "trees",
+   "h": 4.125,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, a young tree slightly leaning"
+  },
+  {
+   "id": "tree_pine_v16",
+   "cat": "trees",
+   "h": 4.125,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, a young tree with a dense small crown"
+  },
+  {
+   "id": "tree_pine_v17",
+   "cat": "trees",
+   "h": 9.0,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, very old and huge"
+  },
+  {
+   "id": "tree_pine_v18",
+   "cat": "trees",
+   "h": 9.0,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, old with a thick gnarled trunk and visible roots"
+  },
+  {
+   "id": "tree_pine_v19",
+   "cat": "trees",
+   "h": 9.0,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, old with some dead bare branches in the crown"
+  },
+  {
+   "id": "tree_pine_v20",
+   "cat": "trees",
+   "h": 9.0,
+   "desc": "a Scots pine (Pinus sylvestris): straight trunk with orange-red flaky bark in the upper part and grey-brown furrowed bark below, high irregular crown of blue-green needle clumps, old with a very wide heavy crown"
+  },
+  {
+   "id": "tree_spruce_v01",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, straight and symmetric"
+  },
+  {
+   "id": "tree_spruce_v02",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, slightly leaning to the left"
+  },
+  {
+   "id": "tree_spruce_v03",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, slightly leaning to the right"
+  },
+  {
+   "id": "tree_spruce_v04",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, tall and narrow"
+  },
+  {
+   "id": "tree_spruce_v05",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, with a broad spreading crown"
+  },
+  {
+   "id": "tree_spruce_v06",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, with an asymmetric crown and a gap on one side"
+  },
+  {
+   "id": "tree_spruce_v07",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, with a forked double trunk"
+  },
+  {
+   "id": "tree_spruce_v08",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, with a dense full crown"
+  },
+  {
+   "id": "tree_spruce_v09",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, with a sparse airy crown"
+  },
+  {
+   "id": "tree_spruce_v10",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, with one broken lower branch"
+  },
+  {
+   "id": "tree_spruce_v11",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, tall with a high crown and bare lower trunk"
+  },
+  {
+   "id": "tree_spruce_v12",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, medium-sized and compact"
+  },
+  {
+   "id": "tree_spruce_v13",
+   "cat": "trees",
+   "h": 3.8500000000000005,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, a young sapling about 2-3 m tall"
+  },
+  {
+   "id": "tree_spruce_v14",
+   "cat": "trees",
+   "h": 3.8500000000000005,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, a young thin tree about 4 m tall"
+  },
+  {
+   "id": "tree_spruce_v15",
+   "cat": "trees",
+   "h": 3.8500000000000005,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, a young tree slightly leaning"
+  },
+  {
+   "id": "tree_spruce_v16",
+   "cat": "trees",
+   "h": 3.8500000000000005,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, a young tree with a dense small crown"
+  },
+  {
+   "id": "tree_spruce_v17",
+   "cat": "trees",
+   "h": 8.4,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, very old and huge"
+  },
+  {
+   "id": "tree_spruce_v18",
+   "cat": "trees",
+   "h": 8.4,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, old with a thick gnarled trunk and visible roots"
+  },
+  {
+   "id": "tree_spruce_v19",
+   "cat": "trees",
+   "h": 8.4,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, old with some dead bare branches in the crown"
+  },
+  {
+   "id": "tree_spruce_v20",
+   "cat": "trees",
+   "h": 8.4,
+   "desc": "a Norway spruce (Picea abies): dense conical crown of dark green needles with drooping branchlets down to the ground, grey-brown scaly trunk barely visible at the base, old with a very wide heavy crown"
+  },
+  {
+   "id": "tree_oak_v01",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, straight and symmetric"
+  },
+  {
+   "id": "tree_oak_v02",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, slightly leaning to the left"
+  },
+  {
+   "id": "tree_oak_v03",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, slightly leaning to the right"
+  },
+  {
+   "id": "tree_oak_v04",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, tall and narrow"
+  },
+  {
+   "id": "tree_oak_v05",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, with a broad spreading crown"
+  },
+  {
+   "id": "tree_oak_v06",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, with an asymmetric crown and a gap on one side"
+  },
+  {
+   "id": "tree_oak_v07",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, with a forked double trunk"
+  },
+  {
+   "id": "tree_oak_v08",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, with a dense full crown"
+  },
+  {
+   "id": "tree_oak_v09",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, with a sparse airy crown"
+  },
+  {
+   "id": "tree_oak_v10",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, with one broken lower branch"
+  },
+  {
+   "id": "tree_oak_v11",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, tall with a high crown and bare lower trunk"
+  },
+  {
+   "id": "tree_oak_v12",
+   "cat": "trees",
+   "h": 7.0,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, medium-sized and compact"
+  },
+  {
+   "id": "tree_oak_v13",
+   "cat": "trees",
+   "h": 3.8500000000000005,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, a young sapling about 2-3 m tall"
+  },
+  {
+   "id": "tree_oak_v14",
+   "cat": "trees",
+   "h": 3.8500000000000005,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, a young thin tree about 4 m tall"
+  },
+  {
+   "id": "tree_oak_v15",
+   "cat": "trees",
+   "h": 3.8500000000000005,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, a young tree slightly leaning"
+  },
+  {
+   "id": "tree_oak_v16",
+   "cat": "trees",
+   "h": 3.8500000000000005,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, a young tree with a dense small crown"
+  },
+  {
+   "id": "tree_oak_v17",
+   "cat": "trees",
+   "h": 8.4,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, very old and huge"
+  },
+  {
+   "id": "tree_oak_v18",
+   "cat": "trees",
+   "h": 8.4,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, old with a thick gnarled trunk and visible roots"
+  },
+  {
+   "id": "tree_oak_v19",
+   "cat": "trees",
+   "h": 8.4,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, old with some dead bare branches in the crown"
+  },
+  {
+   "id": "tree_oak_v20",
+   "cat": "trees",
+   "h": 8.4,
+   "desc": "an English oak (Quercus robur): thick gnarled trunk with deeply furrowed grey-brown bark, massive broad spreading crown of dark green lobed leaves, old with a very wide heavy crown"
+  },
+  {
+   "id": "tree_aspen_v01",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, straight and symmetric"
+  },
+  {
+   "id": "tree_aspen_v02",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, slightly leaning to the left"
+  },
+  {
+   "id": "tree_aspen_v03",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, slightly leaning to the right"
+  },
+  {
+   "id": "tree_aspen_v04",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, tall and narrow"
+  },
+  {
+   "id": "tree_aspen_v05",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, with a broad spreading crown"
+  },
+  {
+   "id": "tree_aspen_v06",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, with an asymmetric crown and a gap on one side"
+  },
+  {
+   "id": "tree_aspen_v07",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, with a forked double trunk"
+  },
+  {
+   "id": "tree_aspen_v08",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, with a dense full crown"
+  },
+  {
+   "id": "tree_aspen_v09",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, with a sparse airy crown"
+  },
+  {
+   "id": "tree_aspen_v10",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, with one broken lower branch"
+  },
+  {
+   "id": "tree_aspen_v11",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, tall with a high crown and bare lower trunk"
+  },
+  {
+   "id": "tree_aspen_v12",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, medium-sized and compact"
+  },
+  {
+   "id": "tree_aspen_v13",
+   "cat": "trees",
+   "h": 3.575,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, a young sapling about 2-3 m tall"
+  },
+  {
+   "id": "tree_aspen_v14",
+   "cat": "trees",
+   "h": 3.575,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, a young thin tree about 4 m tall"
+  },
+  {
+   "id": "tree_aspen_v15",
+   "cat": "trees",
+   "h": 3.575,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, a young tree slightly leaning"
+  },
+  {
+   "id": "tree_aspen_v16",
+   "cat": "trees",
+   "h": 3.575,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, a young tree with a dense small crown"
+  },
+  {
+   "id": "tree_aspen_v17",
+   "cat": "trees",
+   "h": 7.8,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, very old and huge"
+  },
+  {
+   "id": "tree_aspen_v18",
+   "cat": "trees",
+   "h": 7.8,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, old with a thick gnarled trunk and visible roots"
+  },
+  {
+   "id": "tree_aspen_v19",
+   "cat": "trees",
+   "h": 7.8,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, old with some dead bare branches in the crown"
+  },
+  {
+   "id": "tree_aspen_v20",
+   "cat": "trees",
+   "h": 7.8,
+   "desc": "a common aspen (Populus tremula): slender smooth greenish-grey trunk with dark diamond-shaped marks, rounded crown of round light-green trembling leaves, old with a very wide heavy crown"
+  },
+  {
+   "id": "tree_willow_v01",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a white willow (Salix alba) growing by water: leaning trunk with rough bark, several stems, loose crown of narrow silvery-green leaves, straight and symmetric"
+  },
+  {
+   "id": "tree_willow_v02",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a white willow (Salix alba) growing by water: leaning trunk with rough bark, several stems, loose crown of narrow silvery-green leaves, slightly leaning to the left"
+  },
+  {
+   "id": "tree_willow_v03",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a white willow (Salix alba) growing by water: leaning trunk with rough bark, several stems, loose crown of narrow silvery-green leaves, slightly leaning to the right"
+  },
+  {
+   "id": "tree_willow_v04",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a white willow (Salix alba) growing by water: leaning trunk with rough bark, several stems, loose crown of narrow silvery-green leaves, tall and narrow"
+  },
+  {
+   "id": "tree_willow_v05",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a white willow (Salix alba) growing by water: leaning trunk with rough bark, several stems, loose crown of narrow silvery-green leaves, with a broad spreading crown"
+  },
+  {
+   "id": "tree_willow_v06",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a white willow (Salix alba) growing by water: leaning trunk with rough bark, several stems, loose crown of narrow silvery-green leaves, with an asymmetric crown and a gap on one side"
+  },
+  {
+   "id": "tree_willow_v07",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a white willow (Salix alba) growing by water: leaning trunk with rough bark, several stems, loose crown of narrow silvery-green leaves, with a forked double trunk"
+  },
+  {
+   "id": "tree_willow_v08",
+   "cat": "trees",
+   "h": 6.8999999999999995,
+   "desc": "a white willow (Salix alba) growing by water: leaning trunk with rough bark, several stems, loose crown of narrow silvery-green leaves, very old and huge"
+  },
+  {
+   "id": "tree_willow_v09",
+   "cat": "trees",
+   "h": 6.8999999999999995,
+   "desc": "a white willow (Salix alba) growing by water: leaning trunk with rough bark, several stems, loose crown of narrow silvery-green leaves, old with a thick gnarled trunk and visible roots"
+  },
+  {
+   "id": "tree_willow_v10",
+   "cat": "trees",
+   "h": 6.8999999999999995,
+   "desc": "a white willow (Salix alba) growing by water: leaning trunk with rough bark, several stems, loose crown of narrow silvery-green leaves, old with some dead bare branches in the crown"
+  },
+  {
+   "id": "tree_dead_v01",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a dead standing pine snag, bare grey trunk, broken top, few dry branches, realistic"
+  },
+  {
+   "id": "tree_dead_v02",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a dead birch snag with peeling white bark and a broken top, realistic"
+  },
+  {
+   "id": "tree_dead_v03",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a dead oak with bare twisted grey branches, realistic"
+  },
+  {
+   "id": "tree_dead_v04",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a dead spruce, grey dry branches with a few brown needles, realistic"
+  },
+  {
+   "id": "tree_dead_v05",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a tall dead tree trunk with the crown broken off, realistic"
+  },
+  {
+   "id": "tree_dead_v06",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a dead leaning tree with bare branches, realistic"
+  },
+  {
+   "id": "tree_dead_v07",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a dead swamp tree, dark wet bark, moss at the base, realistic"
+  },
+  {
+   "id": "tree_dead_v08",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a small dead dry tree, realistic"
+  },
+  {
+   "id": "tree_dead_v09",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a dead tree split by lightning, realistic"
+  },
+  {
+   "id": "tree_dead_v10",
+   "cat": "trees",
+   "h": 5.5,
+   "desc": "a dead tree with a hollow trunk, realistic"
+  },
+  {
+   "id": "tree_snow_v01",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a Norway spruce heavily covered with fresh snow on its branches"
+  },
+  {
+   "id": "tree_snow_v02",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a tall snowy Norway spruce, snow on the drooping branches"
+  },
+  {
+   "id": "tree_snow_v03",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a young Norway spruce half buried in snow"
+  },
+  {
+   "id": "tree_snow_v04",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "a narrow snow-laden spruce"
+  },
+  {
+   "id": "tree_snow_v05",
+   "cat": "trees",
+   "h": 6.5,
+   "desc": "an old wide spruce with thick snow caps"
+  },
+  {
+   "id": "tree_snow_v06",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a winter silver birch with bare branches and frost, white bark"
+  },
+  {
+   "id": "tree_snow_v07",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a bare winter birch with snow on branches"
+  },
+  {
+   "id": "tree_snow_v08",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a young bare birch in winter with hoarfrost"
+  },
+  {
+   "id": "tree_snow_v09",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "an old bare birch in winter, snow at the base"
+  },
+  {
+   "id": "tree_snow_v10",
+   "cat": "trees",
+   "h": 6.0,
+   "desc": "a leaning bare birch with frost in winter"
+  }
+ ]
+}

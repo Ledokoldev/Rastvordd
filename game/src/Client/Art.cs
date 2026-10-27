@@ -125,6 +125,8 @@ namespace Rastvordd.Client
             var sp = ResourceNode.SpeciesOf(look);
             var age = ResourceNode.AgeOf(look);
             bool snow = biome == Biome.Tundra;
+            var real = Realistic(sp, age, snow, seed);   // реалистичные варианты Codex (28.10): по 20 на вид, вариант по номеру дерева
+            if (real.tex != null) return real;
             string[] mature = sp switch
             {
                 TreeSpecies.Pine => snow ? new[] { "tree_pine_snow" } : new[] { "tree_pine_1", "tree_pine_2", "tree_pine_1_v" },
@@ -176,6 +178,31 @@ namespace Rastvordd.Client
                 }
                 default: return (Any(mature), 1f);
             }
+        }
+
+        static string[] V(string name, int from, int to) { var l = new string[to - from + 1]; for (int i = from; i <= to; i++) l[i - from] = $"tree_{name}_v{i:00}"; return l; }
+        static string[] Cat(params string[][] parts) { var l = new System.Collections.Generic.List<string>(); foreach (var p in parts) l.AddRange(p); return l.ToArray(); }
+
+        /// <summary>Реалистичное дерево: взрослые v01–12, молодые v13–16, старые v17–20 (у берёзы ещё пилотные v01–04); ива, сухостой, зимние — свои наборы.</summary>
+        static (Texture2D tex, float scale) Realistic(TreeSpecies sp, TreeAge age, bool snow, int seed)
+        {
+            string[] list; float scale = 1f;
+            bool young = age is TreeAge.Sapling or TreeAge.Young, old = age == TreeAge.Old;
+            if (age == TreeAge.Sapling) scale = 0.6f;
+            if (sp == TreeSpecies.Dead) list = V("dead", 1, 10);
+            else if (snow) list = sp is TreeSpecies.Pine or TreeSpecies.Spruce ? V("snow", 1, 5) : V("snow", 6, 10);
+            else switch (sp)
+            {
+                case TreeSpecies.Birch: list = young ? Cat(new[] { "tree_birch_v03" }, V("birch", 13, 16)) : old ? Cat(new[] { "tree_birch_v04" }, V("birch", 17, 20)) : Cat(V("birch", 1, 2), V("birch", 5, 12)); break;
+                case TreeSpecies.Pine: case TreeSpecies.Spruce: case TreeSpecies.Oak: case TreeSpecies.Aspen:
+                    string n = sp.ToString().ToLowerInvariant();
+                    list = young ? V(n, 13, 16) : old ? V(n, 17, 20) : V(n, 1, 12); break;
+                case TreeSpecies.Willow: list = old ? V("willow", 8, 10) : V("willow", 1, 7); if (young) scale = age == TreeAge.Sapling ? 0.45f : 0.7f; break;
+                default: return (null, 0);
+            }
+            uint h = (uint)seed * 2654435761u;
+            for (int i = 0; i < list.Length; i++) if (Get("trees/" + list[(int)((h + (uint)i) % (uint)list.Length)]) is Texture2D t) return (t, scale);
+            return (null, 0);
         }
 
         /// <summary>Вариант по seed; если файла нет — запасной (чтобы в тайге не вылезло лиственное дерево).</summary>

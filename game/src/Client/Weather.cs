@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 using Rastvordd.Sim;
 using Sky = Rastvordd.Sim.Sky;
 
@@ -16,6 +16,7 @@ namespace Rastvordd.Client
         readonly ColorRect _tint, _flash;
         float _flashA, _nextBolt = 6f, _boltT = -1;
         Sky _sky = (Sky)(-1);
+        GpuParticles2D[] _all;   // без выделений памяти каждый кадр
         readonly RandomNumberGenerator _rng = new();
 
         public Weather(Node world, Node root)
@@ -98,7 +99,8 @@ namespace Rastvordd.Client
             SetSky(sky);
             Wind(windAngle, windStrength);
             UpdateSky(dt);
-            foreach (var p in new[] { _leaves, _snow, _dust, _fireflies, _rain, _splash, _flakes, _streaks, _debris })
+            _all ??= new[] { _leaves, _snow, _dust, _fireflies, _rain, _splash, _flakes, _streaks, _debris };
+            foreach (var p in _all)
             {
                 p.GlobalPosition = cameraPx;
                 ((ParticleProcessMaterial)p.ProcessMaterial).EmissionBoxExtents = ext;

@@ -17,6 +17,8 @@ namespace Rastvordd.Client
         DecalLayer _decals;
         float _shake;   // тряска камеры от своих выстрелов
         Weather _weather;
+        PostFx _post;
+        SettingsWindow _settings;
         VisionRays _rays;
         BuildLayer _build;
         BuildGhost2D _bghost;
@@ -51,7 +53,7 @@ namespace Rastvordd.Client
         bool UiShown => _inv.Visible;
         bool _uiWasOpen, _modalWas;
 
-        bool AnyModal => _inv.Visible || _hud.CraftOpen || _hud.AdminOpen || _hud.CodeOpen;
+        bool AnyModal => _inv.Visible || _hud.CraftOpen || _hud.AdminOpen || _hud.CodeOpen || (_settings?.Visible ?? false);
         /// <summary>Курсор: виден, пока открыто любое окно; меняется только на переходе (Esc-«свободная мышь» не затирается).</summary>
         void SyncMouse()
         {
@@ -176,6 +178,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("wb")) _hud.WorkbenchDebug(a[2..]);   // отладка: wb<вкладка 1–4>[f<верстак рядом>][d — демо-избранное]
                 else if (a.StartsWith("scroll") && int.TryParse(a.Substring(6), out var sy)) ScrollAll(this, sy);
                 else if (a == "drawdump") DrawDump();
+                else if (a == "settings") _settings.Open();   // отладка: окно «Настройки» (снимок)
                 else if (a == "cullfar") { int n = 0; foreach (var ch in _world.GetChildren()) if (ch is Node2D c && c.Position.DistanceTo(_cam.Position) > 60 * Iso.PPM) { c.Visible = false; n++; } GD.Print($"cullfar: скрыто {n}"); }   // отладка: замер — что будет, если не обрабатывать далёкое
                 else if (a.StartsWith("hide")) { var tn = a.Substring(4); void H(Node n) { if (n.GetType().Name == tn && n is CanvasItem c) c.Visible = false; foreach (var ch in n.GetChildren()) H(ch); } H(GetTree().Root); }   // отладка: скрыть все узлы типа (замер, кто ест кадр)
                 else if (a == "nolights") { void Off(Node n) { if (n is Light2D l) l.Enabled = false; foreach (var ch in n.GetChildren()) Off(ch); } Off(GetTree().Root); }   // отладка: выключить весь 2D-свет   // отладка: кто рисуется в кадре (по типам, с учётом вложенности)   // отладка: прокрутить все видимые списки (снимки длинных меню)
@@ -438,6 +441,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             Acoustics.Init(this, _map);
             SteamHrtf.Init(this, _map);
             _weather = new Weather(_world, this);
+            _post = new PostFx(this);   // пост-обработка мира (F11, --nopost)
             Tuning.Load();
             _ambient = new Ambient(this, _map);
             _daylight = new CanvasModulate();
@@ -521,6 +525,19 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 Input.MouseMode = Input.MouseModeEnum.Hidden;
                 GetTree().ReloadCurrentScene();
             };
+
+            // окно «Настройки» (Esc): игровые настройки без читов и отладки
+            GameSettings.Load();
+            GameSettings.ApplyVideoAudio();
+            _fpsLabel.Visible = GameSettings.ShowFps;
+            if (!GameSettings.Post && _post != null) _post.Toggle();
+            _settings = new SettingsWindow();
+            _hud.AddChild(_settings);
+            _settings.Closed += SyncMouse;
+            _settings.SaveRequested += () => _hud.Toast(SaveWorld() ? "Мир сохранён" : "Сохранение НЕ записано: " + _saveError);
+            _settings.WipeRequested += () => _hud.Wipe();
+            _settings.FpsToggled += on => _fpsLabel.Visible = on;
+            _settings.PostToggled += on => { if (_post != null && _post.Toggle() != on) _post.Toggle(); };
 
             _ghost = new GhostView2D { Visible = false };
             _world.AddChild(_ghost);
@@ -838,9 +855,10 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         if (!_mapView.Visible) CloseBigExcept(false, false, true);
                         _mapView.Visible = !_mapView.Visible; _mapView.QueueRedraw();
                         break;
-                    case Key.F10: if (_fpsLabel != null) _fpsLabel.Visible = !_fpsLabel.Visible; break;
+                    case Key.F10: if (_fpsLabel != null) { _fpsLabel.Visible = !_fpsLabel.Visible; GameSettings.ShowFps = _fpsLabel.Visible; GameSettings.Save(); } break;
                     case Key.F5: _hud.Toast(SaveWorld() ? "Мир сохранён" : _saveEnabled ? "Сохранение НЕ записано: " + _saveError : "Сохранение выключено в этом запуске"); break;
                     case Key.F6: ToggleRigTune(); break;   // ручная настройка рига (размеры и сдвиги частей)
+                    case Key.F11: _hud.Toast(_post.Toggle() ? "Пост-обработка включена" : "Пост-обработка выключена"); break;
                     case Key.F12: SaveScreenshot($"user://shot_{Time.GetTicksMsec()}.png"); break;
                     case Key.Escape when _hud.AdminOpen:
                         _hud.ToggleAdmin();
@@ -854,8 +872,12 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     case Key.Escape when _hud.CraftOpen:
                         _hud.CloseCraftAll();
                         break;
+                    case Key.Escape when _settings.Visible:
+                        _settings.Close();
+                        break;
                     case Key.Escape:
-                        Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Hidden ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
+                        _settings.Open();   // ничего не открыто — «Настройки»
+                        SyncMouse();
                         break;
                 }
             }
@@ -1184,7 +1206,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 Follow = _followId,
                 Move = move,
                 Aim = _aim,
-                Fire = _autoFireFrames > 0 || (!_hud.CraftOpen && !_hud.CodeOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && !_hammerMenu.Visible && !SbBlocksFire && _rigTuneLayer == null && Input.IsMouseButtonPressed(MouseButton.Left)),   // при настройке рига (F6) не стреляем   // клики по меню крафта не стреляют
+                Fire = _autoFireFrames > 0 || (!_settings.Visible && !_hud.CraftOpen && !_hud.CodeOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && !_hammerMenu.Visible && !SbBlocksFire && _rigTuneLayer == null && Input.IsMouseButtonPressed(MouseButton.Left)),   // при настройке рига (F6) не стреляем   // клики по меню крафта не стреляют
                 Eat = _eatEdge,
                 DebugKit = _debugEdge,
                 Craft = _craftReq,
@@ -1489,6 +1511,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     var wv = new Vector2(Mathf.Cos(_cur.WindAngle), Mathf.Sin(_cur.WindAngle)) * (1.5f + 6f * _cur.WindStrength);
                     VisionFx.SetClouds(wv, ca, dt); P(6);
                     NightLights.Set(World.NightFactorAt(_forcedDay ?? _cur.DayTime));   // фонари и лампы ночью
+                    _post.Update(_cam.GetScreenCenterPosition(), _cam.Zoom.X, _forcedDay ?? _cur.DayTime, World.NightFactorAt(_forcedDay ?? _cur.DayTime), _cur.Sky, _cur.WindAngle, _cur.WindStrength);
                 }
             }
             _ambient.Update(new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM), _forcedDay ?? _cur.DayTime, dt);
@@ -2116,6 +2139,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 // эффекты (Vfx.cs): живут и анимируются, короткие вне кадра не создаются
                 var halfV = GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X;
                 Vfx.Night = _overview ? 0 : World.NightFactorAt(_forcedDay ?? _cur.DayTime);
+                GpuFx.SetWind(_cur.WindAngle, _cur.WindStrength);   // дым и угольки GPU-эффектов сносит ветром
                 Vfx.Update(dt, new Rect2(_cam.Position - halfV, halfV * 2));
                 foreach (var df in _debugFires) df.Tick(dt);
             }

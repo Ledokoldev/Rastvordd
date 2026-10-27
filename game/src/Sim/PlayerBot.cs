@@ -1065,6 +1065,7 @@ namespace Rastvordd.Sim
         // ---------- роумер: охота на слабых, лут трупов, обход РТ ----------
 
         Actor _prey;
+        Vector2 _leadVel; float _leadErr = 1f;   // упреждение по запаздывающей скорости цели и с ошибкой — как у человека (27.10)
         float _preyTimer, _aimDrift, _roamBest = float.MaxValue, _roamStuck;
         Vector2 _roamTo;
 

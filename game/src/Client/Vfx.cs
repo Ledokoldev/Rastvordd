@@ -53,6 +53,7 @@ namespace Rastvordd.Client
         {
             _world = world; _flat = flat;
             Live.Clear(); Free.Clear(); Scorches.Clear();
+            GpuFx.Init(world);   // частицы и искажение воздуха на видеокарте (пулы)
         }
 
         public static Texture2D Tex(string id) => Art.Get("fx/" + id);
@@ -78,6 +79,7 @@ namespace Rastvordd.Client
         /// <summary>Каждый кадр: продвинуть живые эффекты. view — видимая часть мира (px).</summary>
         public static void Update(float dt, Rect2 view)
         {
+            GpuFx.Update(dt);
             _view = view;
             for (int i = Live.Count - 1; i >= 0; i--)
             {
@@ -225,6 +227,7 @@ namespace Rastvordd.Client
             p.S.Offset = new Vector2(p.S.Texture.GetHeight() / 2f - 1, 0);   // левый край кадра — у дула
             p.S.Rotation = dir.Angle();
             if (!noFlash) Light(p, id == "muzzle_shotgun" ? 8f : 7f, 1.8f, new Color(1f, 0.75f, 0.4f));
+            if (!noFlash) GpuFx.Burst(GpuFx.Kind.Sparks, p.Pos + dir * 4, dir, id == "muzzle_shotgun" ? 0.3f : 0.12f);   // пара искр из дула
             // пороховой дымок у дула
             if (id != "muzzle_pistol" || Rng.Randf() < 0.5f)
                 Puff("smoke_puff", muzzleGround + dir * 6, Iso.GunH, 10, id == "muzzle_shotgun" ? 0.55f : 0.3f, 14, 2, dir * 12, 64);
@@ -243,6 +246,8 @@ namespace Rastvordd.Client
             if (p == null) return;
             p.S.FlipH = dir.X < 0 || (dir == Vector2.Zero && Rng.Randf() < 0.5f);
             if (glow) Light(p, 2.5f, 1.2f, new Color(1f, 0.85f, 0.5f), false);
+            if (glow) GpuFx.Burst(GpuFx.Kind.Sparks, ground - new Vector2(0, h), dir == Vector2.Zero ? Vector2.Up : -dir, 0.35f);   // рикошет: искры обратно
+            else if (m is HitMat.Stone or HitMat.Wood) GpuFx.Burst(GpuFx.Kind.Debris, ground - new Vector2(0, h), -dir, 0.15f);
             if (m is HitMat.Stone or HitMat.Wood) Puff("dust_step", ground, Mathf.Max(0, h - 8), 6, 0.6f, 12, 1, default, 64);
         }
 
@@ -278,6 +283,17 @@ namespace Rastvordd.Client
                 p.S.FlipH = Rng.Randf() < 0.5f;
             }
             Scorch(ground, big ? 1.4f : 1f);
+            // видеокарта: ударная волна, жар, искры, обломки, угольки и оседающий дым, который сносит ветром
+            float rr = big ? 120 : 70;
+            GpuFx.Shock(ground, rr, big ? 0.5f : 0.38f, big ? 5f : 3.5f);
+            GpuFx.Haze(ground, rr * 0.55f, big ? 3.5f : 2.2f, 2f);
+            var top = ground - new Vector2(0, Iso.H(big ? 1.0f : 0.6f));
+            GpuFx.Burst(GpuFx.Kind.Sparks, top, Vector2.Up, 1f);
+            GpuFx.Burst(GpuFx.Kind.Sparks, top, Vector2.Right, big ? 1f : 0.5f);
+            GpuFx.Burst(GpuFx.Kind.Sparks, top, Vector2.Left, big ? 1f : 0.5f);
+            GpuFx.Burst(GpuFx.Kind.Debris, ground, Vector2.Up, big ? 1f : 0.6f);
+            GpuFx.Burst(GpuFx.Kind.Embers, top, Vector2.Up, big ? 1f : 0.6f);
+            GpuFx.Burst(GpuFx.Kind.Smoke, ground - new Vector2(0, Iso.H(0.8f)), Vector2.Up, big ? 1f : 0.6f);
         }
 
         /// <summary>Молотов разбился: вспышка огня, осколки бутылки, клуб дыма.</summary>
@@ -287,6 +303,8 @@ namespace Rastvordd.Client
             if (f != null) Light(f, 7f, 2f, new Color(1f, 0.6f, 0.25f));
             Spawn("glass_shards", ground, 6, 18, glow: false, z: 2, margin: 300);
             Puff("smoke_black", ground, Iso.H(0.8f), 16, 0.7f, 3, 4);
+            GpuFx.Haze(ground, 30, 2.5f, 1.5f);
+            GpuFx.Burst(GpuFx.Kind.Embers, ground - new Vector2(0, 6), Vector2.Up, 0.6f);
         }
 
         /// <summary>Тёмное пятно копоти на земле после взрыва; тает за минуту.</summary>

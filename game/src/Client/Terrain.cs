@@ -15,7 +15,7 @@ namespace Rastvordd.Client
 shader_type canvas_item;
 uniform sampler2D mask_a : filter_linear, repeat_disable;   // R лес, G пустошь, B тундра, A пляж
 uniform sampler2D mask_b : filter_linear, repeat_disable;   // R болото, G грязь, B гравий, A бетон
-uniform sampler2D mask_c : filter_linear, repeat_disable;   // R вода, G высота 0..1
+uniform sampler2D mask_c : filter_linear, repeat_disable;   // R вода, G высота 0..1, B до берега /24 м
 uniform sampler2D t_grass : filter_nearest, repeat_enable;
 uniform sampler2D t_forest : filter_nearest, repeat_enable;
 uniform sampler2D t_dry : filter_nearest, repeat_enable;
@@ -56,12 +56,39 @@ void fragment() {
     vec3 col;
     float h = c.g;
     if (id == 9) {
-        // вода: у берега светлее, вдали темнее, лёгкая рябь
-        float depth = clamp((0.5 - h) * 6.0, 0.0, 1.0);
-        col = mix(vec3(0.22, 0.33, 0.33), vec3(0.07, 0.15, 0.21), depth);
-        float rip = texture(detail_noise, m / 3.0 + vec2(TIME * 0.05, TIME * 0.03)).r;
-        col *= 0.92 + floor(rip * 4.0) / 4.0 * 0.14;
-        if (best - second < 0.06) col = mix(col, vec3(0.62, 0.66, 0.6), 0.55);   // пена у кромки
+        // вода (D-gfx): глубина по расстоянию до берега (маска c.b, считана при загрузке) и высоте, рябь двумя слоями,
+        // отражение неба по времени суток (vol_amp/vol_warm), блики по направлению солнца, пена-прибой у кромки, каустика на мели
+        float sd = c.b * 24.0;                                    // до берега, м
+        float depth = clamp(max((0.5 - h) * 5.0, sd / 14.0), 0.0, 1.0);
+        vec3 shallow = vec3(0.24, 0.38, 0.36), deep = vec3(0.05, 0.13, 0.20);
+        col = mix(shallow, deep, smoothstep(0.0, 1.0, depth));
+        vec2 w1 = m / 3.0 + vec2(TIME * 0.045, TIME * 0.02);
+        vec2 w2 = vec2(m.y, -m.x) / 4.7 + vec2(-TIME * 0.03, TIME * 0.038);
+        float n1 = texture(detail_noise, w1).r, n2 = texture(detail_noise, w2).r;
+        float wave = n1 + n2 - 1.0;                               // −1..1
+        // наклон волны по разности соседних выборок — для бликов
+        float gx = texture(detail_noise, w1 + vec2(0.02, 0.0)).r - n1;
+        float day = clamp(vol_amp / 1.15 + vol_warm * 0.5, 0.0, 1.0);
+        vec3 sky = mix(vec3(0.05, 0.07, 0.13), mix(vec3(0.46, 0.58, 0.68), vec3(0.78, 0.52, 0.36), vol_warm), day);
+        float fres = 0.18 + 0.22 * depth;
+        col = mix(col, sky, fres * (0.6 + 0.4 * floor((wave * 0.5 + 0.5) * 4.0) / 4.0));
+        col *= 0.93 + floor((wave * 0.5 + 0.5) * 4.0) / 4.0 * 0.14;
+        // блики: гребни, повёрнутые к солнцу; при низком солнце — длинная тёплая дорожка
+        float facing = clamp(gx * 40.0 * sign(-vol_sun.x + 0.0001) + 0.5, 0.0, 1.0);
+        float crest = n1 * n2;
+        float thr = mix(0.57, 0.42, vol_warm);
+        float glint = step(thr, crest) * facing * day;
+        col += glint * mix(vec3(0.55, 0.6, 0.6), vec3(0.85, 0.55, 0.3), vol_warm) * 0.55;
+        // каустика на мели: тонкие светлые жилки из |шум−0.5|
+        float cz = abs(texture(detail_noise, m / 2.2 + vec2(TIME * 0.06, -TIME * 0.04)).r - texture(detail_noise, m / 1.7 - vec2(TIME * 0.05, 0.02)).r);
+        float shallowK = (1.0 - smoothstep(1.0, 5.0, sd)) * day;
+        col += step(cz, 0.018) * shallowK * vec3(0.10, 0.14, 0.12);
+        // пена: кромка + бегущие к берегу полосы прибоя
+        float edge = 1.0 - smoothstep(0.0, 0.07, best - second);
+        float surf = step(0.8, fract(sd * 0.7 + TIME * 0.35 + wave * 0.35)) * (1.0 - smoothstep(0.6, 2.6, sd));
+        float foam = max(edge, surf * 0.75);
+        col = mix(col, vec3(0.70, 0.74, 0.70) * (0.35 + 0.65 * max(day, 0.15)), step(0.5, foam) * 0.65);
+        col = floor(col * 48.0 + 0.5) / 48.0;                     // квантование — пиксельная палитра
         COLOR = vec4(vis_env(col, (m - vec2(map_size * 0.5)) * px_per_m), 1.0);
     } else {
         if (id == 1) col = mix(texture(t_forest, tuv).rgb, texture(t_forest, vec2(tuv.y, -tuv.x) + vec2(0.53, 0.19)).rgb, smoothstep(0.35, 0.65, texture(macro_noise, m / 21.0 + vec2(0.6, 0.1)).r));
@@ -193,6 +220,7 @@ void fragment() {
             mc = Image.CreateEmpty(ms, ms, false, Image.Format.Rgba8);
             var path = new[] { new Vector2(0, 60), new Vector2(8, 30), new Vector2(18, 8), new Vector2(20, 2), new Vector2(20, -6) };
             const int R = 2;   // радиус размытия, клеток
+            var shore = ShoreDist(map);   // до берега, м — один раз при загрузке (пена, мель, каустика)
             _hard = new byte[ms * ms]; _hardN = ms; _hardStep = step; _hardHalf = map.HalfSize;
 
             for (int my = 0; my < ms; my++)
@@ -233,8 +261,37 @@ void fragment() {
                 mb.SetPixel(mx, my, new Color(acc[(int)Biome.Swamp] * k, dirt, gravel, pad));
                 _hard[my * ms + mx] = (byte)(Mathf.Clamp(dirt + gravel + pad, 0, 1) * 255);
                 float h = map.Heights[y * n + x];
-                mc.SetPixel(mx, my, new Color(acc[(int)Biome.Water], Mathf.Clamp(h * 0.5f + 0.5f, 0, 1), 0, 1));
+                mc.SetPixel(mx, my, new Color(acc[(int)Biome.Water], Mathf.Clamp(h * 0.5f + 0.5f, 0, 1), Mathf.Clamp(shore[y * n + x] / 24f, 0, 1), 1));
             }
+        }
+
+        /// <summary>Расстояние от клетки воды до ближайшей суши, м (двухпроходная фаска 3-4); суша — 0. Отрицательное ±половина клетки, чтобы кромка была на границе.</summary>
+        static float[] ShoreDist(MapInfo map)
+        {
+            int n = map.N;
+            var d = new float[n * n];
+            const float Inf = 1e9f, D1 = 1f, D2 = 1.4142f;
+            for (int i = 0; i < d.Length; i++) d[i] = map.Biomes[i] == Biome.Water ? Inf : 0;
+            for (int y = 0; y < n; y++)
+            for (int x = 0; x < n; x++)
+            {
+                int i = y * n + x; if (d[i] == 0) continue;
+                float v = d[i];
+                if (x > 0) v = Mathf.Min(v, d[i - 1] + D1);
+                if (y > 0) { v = Mathf.Min(v, d[i - n] + D1); if (x > 0) v = Mathf.Min(v, d[i - n - 1] + D2); if (x < n - 1) v = Mathf.Min(v, d[i - n + 1] + D2); }
+                d[i] = v;
+            }
+            for (int y = n - 1; y >= 0; y--)
+            for (int x = n - 1; x >= 0; x--)
+            {
+                int i = y * n + x; if (d[i] == 0) continue;
+                float v = d[i];
+                if (x < n - 1) v = Mathf.Min(v, d[i + 1] + D1);
+                if (y < n - 1) { v = Mathf.Min(v, d[i + n] + D1); if (x < n - 1) v = Mathf.Min(v, d[i + n + 1] + D2); if (x > 0) v = Mathf.Min(v, d[i + n - 1] + D2); }
+                d[i] = v;
+            }
+            for (int i = 0; i < d.Length; i++) d[i] = d[i] >= Inf ? 999 : d[i] * map.Cell;
+            return d;
         }
 
         static float Box(Vector2 p, Vector2 min, Vector2 max, float fade) =>

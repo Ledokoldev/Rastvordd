@@ -212,6 +212,7 @@ namespace Rastvordd.Sim
         public float Cell;
         public Biome[] Biomes;
         public float[] Heights;
+        public byte[] River;   // 1 — русло реки (клиент: тихая вода без прибоя)
     }
 
     /// <summary>
@@ -292,7 +293,7 @@ namespace Rastvordd.Sim
         public MapInfo GetMap()
         {
             var t = World.Terrain;
-            var m = new MapInfo { HalfSize = World.HalfSize, N = t.N, Cell = TerrainMap.Cell, Biomes = t.Biomes, Heights = t.Height };
+            var m = new MapInfo { HalfSize = World.HalfSize, N = t.N, Cell = TerrainMap.Cell, Biomes = t.Biomes, Heights = t.Height, River = t.River };
             foreach (var mon in World.Monuments) { m.Yards.Add((mon.Min, mon.Max)); m.YardNames.Add(mon.Name); m.YardPrefab.Add(World.Prefabs.Contains(mon)); }
             foreach (var w in World.Walls)
                 m.Walls.Add(new WallInfo { Min = w.Wall.Min, Max = w.Wall.Max, Height = w.Wall.Height, Kind = w.Kind, Id = w.Id, Tex = w.Tex, Hidden = w.Hidden });

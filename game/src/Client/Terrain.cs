@@ -85,7 +85,8 @@ void fragment() {
         col += step(cz, 0.018) * shallowK * vec3(0.10, 0.14, 0.12);
         // пена: кромка + бегущие к берегу полосы прибоя
         float edge = 1.0 - smoothstep(0.0, 0.07, best - second);
-        float surf = step(0.8, fract(sd * 0.7 + TIME * 0.35 + wave * 0.35)) * (1.0 - smoothstep(0.6, 2.6, sd));
+        float calm = smoothstep(0.6, 0.9, c.a);   // река — 0: без бегущих полос прибоя, только кромка
+        float surf = step(0.8, fract(sd * 0.7 + TIME * 0.35 + wave * 0.35)) * (1.0 - smoothstep(0.6, 2.6, sd)) * calm;
         float foam = max(edge, surf * 0.75);
         col = mix(col, vec3(0.70, 0.74, 0.70) * (0.35 + 0.65 * max(day, 0.15)), step(0.5, foam) * 0.65);
         col = floor(col * 48.0 + 0.5) / 48.0;                     // квантование — пиксельная палитра
@@ -261,7 +262,7 @@ void fragment() {
                 mb.SetPixel(mx, my, new Color(acc[(int)Biome.Swamp] * k, dirt, gravel, pad));
                 _hard[my * ms + mx] = (byte)(Mathf.Clamp(dirt + gravel + pad, 0, 1) * 255);
                 float h = map.Heights[y * n + x];
-                mc.SetPixel(mx, my, new Color(acc[(int)Biome.Water], Mathf.Clamp(h * 0.5f + 0.5f, 0, 1), Mathf.Clamp(Bilerp(shore, n, (mx + 0.5f) / S - 0.5f, (my + 0.5f) / S - 0.5f) / 24f, 0, 1), 1));   // плавно между клетками: без «ступенек» мели у берега
+                mc.SetPixel(mx, my, new Color(acc[(int)Biome.Water], Mathf.Clamp(h * 0.5f + 0.5f, 0, 1), Mathf.Clamp(Bilerp(shore, n, (mx + 0.5f) / S - 0.5f, (my + 0.5f) / S - 0.5f) / 24f, 0, 1), map.River != null && map.River[y * n + x] == 1 ? 0.5f : 1f));   // A: 0,5 — река (тихая вода, без прибоя)   // плавно между клетками: без «ступенек» мели у берега
             }
         }
 

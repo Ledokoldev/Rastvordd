@@ -176,6 +176,7 @@ namespace Rastvordd.Client
                 else if (a.StartsWith("wb")) _hud.WorkbenchDebug(a[2..]);   // отладка: wb<вкладка 1–4>[f<верстак рядом>][d — демо-избранное]
                 else if (a.StartsWith("scroll") && int.TryParse(a.Substring(6), out var sy)) ScrollAll(this, sy);
                 else if (a == "drawdump") DrawDump();
+                else if (a == "cullfar") { int n = 0; foreach (var ch in _world.GetChildren()) if (ch is Node2D c && c.Position.DistanceTo(_cam.Position) > 60 * Iso.PPM) { c.Visible = false; n++; } GD.Print($"cullfar: скрыто {n}"); }   // отладка: замер — что будет, если не обрабатывать далёкое
                 else if (a.StartsWith("hide")) { var tn = a.Substring(4); void H(Node n) { if (n.GetType().Name == tn && n is CanvasItem c) c.Visible = false; foreach (var ch in n.GetChildren()) H(ch); } H(GetTree().Root); }   // отладка: скрыть все узлы типа (замер, кто ест кадр)
                 else if (a == "nolights") { void Off(Node n) { if (n is Light2D l) l.Enabled = false; foreach (var ch in n.GetChildren()) Off(ch); } Off(GetTree().Root); }   // отладка: выключить весь 2D-свет   // отладка: кто рисуется в кадре (по типам, с учётом вложенности)   // отладка: прокрутить все видимые списки (снимки длинных меню)
                 else if (a == "pathtest")
@@ -945,6 +946,10 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             void WL(Node n) { if (n is PointLight2D pl && pl.Enabled && pl.Energy > 0 && pl.IsVisibleInTree()) { lon++; if (pl.ShadowEnabled) lsh++; var k = pl.GetParent()?.GetType().Name ?? "?"; lsrc[k] = lsrc.GetValueOrDefault(k) + 1; } if (n is LightOccluder2D o && o.IsVisibleInTree()) occ++; foreach (var ch in n.GetChildren()) WL(ch); }
             WL(GetTree().Root);
             GD.Print($"  свет: включено {lon}, с тенями {lsh}, окклюдеров {occ}; по родителям: {string.Join(", ", lsrc.Select(x => x.Key + " " + x.Value))}");
+            var procBy = new Dictionary<string, int>(); int procAll = 0;
+            void WP(Node n) { if (n.IsProcessing() || n.IsPhysicsProcessing()) { procAll++; var k = n.GetType().Name; procBy[k] = procBy.GetValueOrDefault(k) + 1; } foreach (var ch in n.GetChildren()) WP(ch); }
+            WP(GetTree().Root);
+            GD.Print($"  с _Process: {procAll}; " + string.Join(", ", procBy.OrderByDescending(x => x.Value).Take(10).Select(x => x.Key + " " + x.Value)));
             GD.Print($"  кадр: calls {Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame):0} objs {Performance.GetMonitor(Performance.Monitor.RenderTotalObjectsInFrame):0}");
             foreach (var kv in byType.OrderByDescending(x => x.Value).Take(15)) GD.Print($"  тип {kv.Key}: {kv.Value}");
             var top2 = new Dictionary<string, int>();
@@ -1338,6 +1343,14 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _hitchFrames = _hitchBad = 0; _hitchWorst = 0;
         }
 
+        // --perf: средняя стоимость частей кадра (мс), печатается вместе с perf
+        static readonly string[] ProfNames = { "вход", "сим", "виды", "камера", "декор", "звук", "погода", "окружение", "тени", "свет", "HUD" };
+        readonly double[] _prof = new double[11];
+        ulong _profT; int _profFrames;
+        void P(int i) { var n = Time.GetTicksUsec(); _prof[i] += (n - _profT) / 1000.0; _profT = n; }
+
+        long _raysFrame = -100; SVec _raysAt; bool _raysCrouch; float _raysRange;
+
         Label _fpsLabel;
         float _fpsT, _fpsWorst;
         int _fpsN;
@@ -1358,6 +1371,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _procT0 = Time.GetTicksUsec();
             _frame++;
             UpdateFps(delta);
+            _profT = Time.GetTicksUsec(); _profFrames++;
             RecoilRecover(delta);
             if (_frame == _pressNAt) _timeEdge = true;
             _saveTimer += delta;
@@ -1437,13 +1451,17 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _effSpeed = Mathf.Lerp(_effSpeed, (float)(steps * World.Dt / System.Math.Max(delta, 1e-4)), 0.05f);
             if (steps == maxSteps || _acc > World.Dt * maxSteps) _acc = 0;
             if (_spectate) UpdateSpectatorPanel((float)delta);
+            P(1);
 
             float alpha = (float)(_acc / World.Dt);
             float dt = (float)delta;
             Render(alpha, dt);
+            P(2);
             UpdateCamera(dt);
+            P(3);
             ulong decT0 = Time.GetTicksUsec();
             if (!_overview && _loading is not { Done: false }) _decals.Update(_cam.Position);
+            P(4);
             _decalMs = (Time.GetTicksUsec() - decT0) / 1000.0;
             {
                 var me = new SVec(_selfPx.X / Iso.PPM, _selfPx.Y / Iso.PPM);
@@ -1458,7 +1476,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     float ca = _cur.Sky switch { Rastvordd.Sim.Sky.Clear => 0.55f, Rastvordd.Sim.Sky.Wind => 0.6f, Rastvordd.Sim.Sky.Rain or Rastvordd.Sim.Sky.Snow => 0.22f, _ => 0.06f };
                     ca *= 1f - World.NightFactorAt(_forcedDay ?? _cur.DayTime);
                     var wv = new Vector2(Mathf.Cos(_cur.WindAngle), Mathf.Sin(_cur.WindAngle)) * (1.5f + 6f * _cur.WindStrength);
-                    VisionFx.SetClouds(wv, ca, dt);
+                    VisionFx.SetClouds(wv, ca, dt); P(6);
                     NightLights.Set(World.NightFactorAt(_forcedDay ?? _cur.DayTime));   // фонари и лампы ночью
                 }
             }
@@ -1466,6 +1484,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _daylight.Color = _overview ? Colors.White : DayColor(_forcedDay ?? _cur.DayTime) * Weather.Grade(_cur.Sky);   // + цветокор погоды
             if (Shade.SetSun(_forcedDay ?? _cur.DayTime)) QueueShadeRedraw();   // тени по солнцу
             ShadeRedrawStep();
+            P(8);
             if (_artMode)
             {
                 // дев-масштаб: ближайший к курсору объект (по основанию), подсветка мерцанием
@@ -1484,6 +1503,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _lighting.Update(_overview ? 0 : World.NightFactorAt(_forcedDay ?? _cur.DayTime), powered, new Rect2(_cam.Position - halfV, halfV * 2), dt, _cur.RadioPower);
             }
             UpdateHud(dt);
+            P(10);
             SandboxFrame(dt);
 
             if (_hud.AdminOpen && _frame % 15 == 0) _hud.SetAdminSounds(PlayingSounds());
@@ -1508,6 +1528,10 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         var sb = new System.Text.StringBuilder("perf-views(all/near):");
                         foreach (var kv in cnt) if (kv.Value.all > 20) sb.Append($" {kv.Key} {kv.Value.all}/{kv.Value.near}");
                         GD.Print(sb.ToString());
+                        var vrid = GetViewport().GetViewportRid();
+                        RenderingServer.ViewportSetMeasureRenderTime(vrid, true);
+                        GD.Print("perf-кадр: " + string.Join(", ", System.Linq.Enumerable.Range(0, 11).Select(i => $"{ProfNames[i]} {_prof[i] / System.Math.Max(1, _profFrames):F2}"))); System.Array.Clear(_prof); _profFrames = 0;
+                        GD.Print($"perf-time: process {Performance.GetMonitor(Performance.Monitor.TimeProcess) * 1000:F2} мс, physics {Performance.GetMonitor(Performance.Monitor.TimePhysicsProcess) * 1000:F2} мс, render cpu {RenderingServer.ViewportGetMeasuredRenderTimeCpu(vrid) + RenderingServer.GetFrameSetupTimeCpu():F2} мс, gpu {RenderingServer.ViewportGetMeasuredRenderTimeGpu(vrid):F2} мс");
                         GD.Print($"perf-draw: calls {Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame):0} objs {Performance.GetMonitor(Performance.Monitor.RenderTotalObjectsInFrame):0} prims {Performance.GetMonitor(Performance.Monitor.RenderTotalPrimitivesInFrame):0} lights {GetTree().GetNodesInGroup("night_light").Count}");
                     }
                     _perfTime = 0; _perfFrames = 0; _simTime = 0;
@@ -2326,7 +2350,12 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             float range = (50 + 30 * _peek) * (1f - 0.4f * World.NightFactorAt(_forcedDay ?? _cur.DayTime)) * SkyInfo.ViewMul(_cur.Sky);   // ливень, снегопад, буран — ближе
             if (_rays == null) { _rays = new VisionRays(_map); if (_build != null) _rays.Dynamic.AddRange(_build.Occluders); }
             bool crouched = _cur.Actors.Find(x => x.Id == _myId).Crouching;
-            _rays.Update(selfM, range, _cur.Nodes, crouched);   // в приседе низкое укрытие вплотную закрывает обзор
+            // лучи обзора — только когда что-то поменялось (сдвиг, присед, дальность) или раз в 6 кадров (двери, постройки): в центре острова это ~0,5 мс за кадр
+            if (_frame - _raysFrame >= 6 || SVec.DistanceSquared(selfM, _raysAt) > 0.0025f || crouched != _raysCrouch || Mathf.Abs(range - _raysRange) > 0.5f)
+            {
+                _rays.Update(selfM, range, _cur.Nodes, crouched);   // в приседе низкое укрытие вплотную закрывает обзор
+                _raysFrame = _frame; _raysAt = selfM; _raysCrouch = crouched; _raysRange = range;
+            }
             VisionFx.Update(_selfPx, dir.LengthSquared() > 0.01f ? dir.Normalized() : Vector2.Right,
                             Mathf.Cos(Mathf.DegToRad((130 - 70 * _peek) * 0.5f)), range, _rays.Texture, !s.Dead && !_spectate);   // наблюдатель видит всё
 

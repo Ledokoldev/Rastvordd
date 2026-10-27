@@ -480,7 +480,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _feed = new PickupFeed();
             // лента подборов — справа от пояса, низом по низу ячеек (пояс ровно по центру, см. Hotbar)
             _feed.SetAnchorsPreset(Control.LayoutPreset.CenterBottom);
-            _feed.OffsetLeft = Hotbar.BeltWidth / 2 + Hotbar.Gap; _feed.OffsetRight = _feed.OffsetLeft + _feed.CustomMinimumSize.X;
+            _feed.OffsetLeft = UiTheme.Layout == 3 ? -_feed.CustomMinimumSize.X - 20 : Hotbar.BeltWidth / 2 + Hotbar.Gap; _feed.OffsetRight = _feed.OffsetLeft + _feed.CustomMinimumSize.X;
             _feed.OffsetBottom = -28; _feed.OffsetTop = -28 - _feed.CustomMinimumSize.Y;
             _hud.AddChild(_feed);
             _guide = new BuildGuidePanel();

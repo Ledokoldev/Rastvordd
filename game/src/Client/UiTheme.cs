@@ -53,6 +53,58 @@ namespace Rastvordd.Client
         {
             foreach (var arg in OS.GetCmdlineUserArgs())
                 if (arg.StartsWith("--uitheme=") && arg.Length > 10) { Apply(arg[10]); break; }
+            foreach (var arg in OS.GetCmdlineUserArgs())
+                if (arg.StartsWith("--uilayout=") && arg.Length > 11 && arg[11] is >= '1' and <= '3')
+                {
+                    if (_variant == '0') Apply('a');   // раскладки — только на теме «Графит»
+                    ApplyLayout(arg[11] - '0');
+                    break;
+                }
+        }
+
+        /// <summary>Раскладка интерфейса: 0 — исходная, 1 «Моноблок» (квадрат, единое окно), 2 «Створки» (мягкие листья, док слева и справа),
+        /// 3 «Зеркало» (срезанные диагональные углы, пояс справа, карточка слева).</summary>
+        public static int Layout { get; private set; }
+
+        public static void ApplyLayout(int n)
+        {
+            Layout = n;
+            if (n == 1)
+            {   // моноблок: прямые углы, тонкая бирюзовая линия, панели стыкуются без зазоров, шкалы лентой над поясом
+                PanelRadius = 2; CellRadius = 2; RowRadius = 2; ChipRadius = 2; ShadowSize = 0;
+                PanelBorder = new Color(Accent, 0.30f); SlotBorder = new Color(Accent, 0.14f);
+            }
+            else if (n == 2)
+            {   // створки: крупные «листовые» панели (острые углы по диагонали), мягкие ячейки, док слева и справа
+                PanelRadius = 28; CellRadius = 26; RowRadius = 12; ChipRadius = 16; ShadowSize = 28;
+                PanelBorder = new Color(1, 1, 1, 0.09f);
+            }
+            else if (n == 3)
+            {   // зеркало: срезанные углы по диагонали, строгая сетка, акцентная кромка
+                PanelRadius = 18; CellRadius = 12; RowRadius = 4; ChipRadius = 4; ShadowSize = 20;
+                PanelBorder = new Color(Accent, 0.20f); SlotBorder = new Color(1, 1, 1, 0.09f);
+            }
+            _theme = null;
+        }
+
+        /// <summary>Доля экрана по X для пояса: центр / лево / право.</summary>
+        public static float BeltAx => Layout == 2 ? 0f : Layout == 3 ? 1f : 0.5f;
+        /// <summary>Боковой отступ пояса от края экрана.</summary>
+        public static float BeltSideMargin => Layout == 2 ? 24f : Layout == 3 ? -24f : 0f;
+
+        /// <summary>Скругления панели: у раскладок 2 и 3 — по диагонали (лист / срез).</summary>
+        static void Corners(StyleBoxFlat f, int radius)
+        {
+            if (Layout == 2) { f.CornerRadiusTopLeft = radius; f.CornerRadiusBottomRight = radius; f.CornerRadiusTopRight = Mathf.Min(radius, 6); f.CornerRadiusBottomLeft = Mathf.Min(radius, 6); }
+            else if (Layout == 3) { f.CornerRadiusTopLeft = 0; f.CornerRadiusBottomRight = 0; f.CornerRadiusTopRight = radius; f.CornerRadiusBottomLeft = radius; }
+        }
+
+        /// <summary>Форма «вырезанной» плашки для карты и т.п.: учитывает раскладку.</summary>
+        public static void DrawShape(CanvasItem c, Rect2 r, Color bg, int radius, Color? border = null)
+        {
+            var s = Box(bg, radius, border);
+            if (radius < r.Size.X / 2) Corners(s, radius);   // круг остаётся кругом
+            c.DrawStyleBox(s, r);
         }
 
         /// <summary>Пресеты внешнего вида: a «Графит», b «Тёплый», c «Контраст»; иначе — исходный.</summary>
@@ -197,6 +249,7 @@ namespace Rastvordd.Client
         {
             var f = Box(alpha < 0 ? PanelBg : new Color(PanelBg, alpha), radius < 0 ? PanelRadius : radius, PanelBorder, PanelBorderW, pad);
             f.ShadowColor = Shadow; f.ShadowSize = ShadowSize; f.ShadowOffset = new Vector2(0, 6);
+            if (radius < 0) Corners(f, PanelRadius);
             return f;
         }
 
@@ -313,9 +366,11 @@ namespace Rastvordd.Client
         public static Label Title(string text, int size = FontTitle)
         {
             var l = new Label { Text = text };
+            if (size == FontTitle && Layout == 1) { l.Uppercase = true; size = 15; l.AddThemeColorOverride("font_color", Accent); }   // узкая шапка раздела
+            else if (size == FontTitle && Layout == 3) { size = 20; l.AddThemeColorOverride("font_color", Ink); }
+            else l.AddThemeColorOverride("font_color", Ink);
             l.AddThemeFontOverride("font", Semi);
             l.AddThemeFontSizeOverride("font_size", size);
-            l.AddThemeColorOverride("font_color", Ink);
             return l;
         }
 
@@ -411,8 +466,16 @@ namespace Rastvordd.Client
         {
             var bg = selected ? SlotSelBg : hover ? SlotHover : dim || empty ? SlotEmpty : SlotBg;
             var border = selected ? SlotSelBorder : SlotBorder;
-            float rad = Mathf.Min(CellRadius, r.Size.X * 0.18f);
-            DrawRound(c, r, bg, rad, border, selected ? 2 : 1);
+            float rad = Mathf.Min(CellRadius, r.Size.X * (Layout == 2 ? 0.30f : 0.18f));
+            var st = Box(bg, (int)rad, border, selected ? 2 : 1);
+            if (Layout == 3) { st.CornerRadiusTopLeft = 0; st.CornerRadiusBottomRight = 0; st.CornerRadiusTopRight = (int)rad; st.CornerRadiusBottomLeft = (int)rad; }
+            if (hover && !selected && Layout > 0)
+            {   // свечение под курсором
+                var glow = Box(new Color(Accent, 0.07f), (int)rad + 3, new Color(Accent, 0.55f), 1);
+                if (Layout == 3) { glow.CornerRadiusTopLeft = 0; glow.CornerRadiusBottomRight = 0; }
+                c.DrawStyleBox(glow, r.Grow(2));
+            }
+            c.DrawStyleBox(st, r);
         }
 
         public static void DrawDot(CanvasItem c, Vector2 at, float radius, Color col) => c.DrawCircle(at, radius, col, true, -1, true);
@@ -420,7 +483,7 @@ namespace Rastvordd.Client
         /// <summary>Полоска со скруглёнными концами: фон и заполнение 0..1.</summary>
         public static void DrawBar(CanvasItem c, Rect2 r, float frac, Color col, Color? back = null)
         {
-            float rad = r.Size.Y / 2;
+            float rad = Layout is 1 or 3 ? 1 : r.Size.Y / 2;
             DrawRound(c, r, back ?? BarBack, rad);
             frac = Mathf.Clamp(frac, 0, 1);
             if (frac > 0) DrawRound(c, new Rect2(r.Position, new Vector2(Mathf.Max(r.Size.Y, r.Size.X * frac), r.Size.Y)), col, rad);

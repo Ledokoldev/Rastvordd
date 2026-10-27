@@ -39,7 +39,7 @@ namespace Rastvordd.Client
                 int k = (int)Rastvordd.Sim.Building.PieceOrder[slot];
                 var r = new Rect2(slot * (C + Gap), 22, C, C);
                 bool on = k == _sel, gh = k == _ghost;
-                UiTheme.DrawRound(this, r, on ? new Color(1, 1, 1, 0.2f) : new Color(UiTheme.PanelBg, 0.7f), 10, on ? new Color(1, 1, 1, 0.8f) : gh ? new Color(1, 1, 1, 0.35f) : UiTheme.PanelBorder, on ? 2 : 1);
+                UiTheme.DrawRound(this, r, on ? UiTheme.T(0.2f) : new Color(UiTheme.PanelBg, 0.7f), 10, on ? UiTheme.T(0.8f) : gh ? UiTheme.T(0.35f) : UiTheme.PanelBorder, on ? 2 : 1);
                 var icon = Art.Get($"icons/icon_build_{IconIds[k]}");
                 if (icon != null) DrawTextureRect(icon, r.Grow(-6), false, on || gh ? Colors.White : new Color(1, 1, 1, 0.5f));
             }
@@ -217,7 +217,7 @@ namespace Rastvordd.Client
                 var bg = new Color(UiTheme.PanelBg, 0.74f);   // полупрозрачно: подсвеченную цель видно сквозь кольцо
                 var hov = it.Enabled ? new Color(0.30f, 0.30f, 0.32f, 0.92f) : new Color(0.32f, 0.17f, 0.16f, 0.9f);
                 DrawColoredPolygon(seg, bg.Lerp(hov, h));
-                Outline(seg, UiTheme.PanelBorder.Lerp(it.Enabled ? new Color(1, 1, 1, 0.75f) : new Color(UiTheme.Bad, 0.8f), h), 1 + h);
+                Outline(seg, UiTheme.PanelBorder.Lerp(it.Enabled ? UiTheme.T(0.75f) : new Color(UiTheme.Bad, 0.8f), h), 1 + h);
                 if (it.Current) DrawColoredPolygon(Ring(c, r1 - 4, r1, mid - step / 2 + gap + 0.03f, mid + step / 2 - gap - 0.03f), UiTheme.Accent);
                 var ip = c + Vector2.FromAngle(mid) * (IconR + 4 * h);
                 float s = IconSize + 10 * h;
@@ -225,7 +225,7 @@ namespace Rastvordd.Client
                 DrawItemIcon(it.Icon, new Rect2(ip - new Vector2(s, s) / 2, new Vector2(s, s)), mod);
                 // номер для клавиши — у внешнего края сектора
                 var np = c + Vector2.FromAngle(mid) * (r1 - 19) + new Vector2(-4, 5);
-                UiTheme.DrawText(this, np, (k + 1).ToString(), UiTheme.FontCaption, new Color(1, 1, 1, 0.35f + 0.4f * h));
+                UiTheme.DrawText(this, np, (k + 1).ToString(), UiTheme.FontCaption, UiTheme.T(0.35f + 0.4f * h));
             }
 
             // центр: что под курсором (или текущее)
@@ -346,7 +346,7 @@ namespace Rastvordd.Client
                     UiTheme.DrawDot(this, c, 7, UiTheme.Good);
                     DrawPolyline(new[] { c + new Vector2(-3.5f, 0), c + new Vector2(-1, 2.5f), c + new Vector2(3.5f, -2.5f) }, UiTheme.Dark, 1.8f, true);
                 }
-                else DrawArc(c, 6.5f, 0, Mathf.Tau, 24, Next ? UiTheme.Ink : new Color(1, 1, 1, 0.3f), 1.5f, true);
+                else DrawArc(c, 6.5f, 0, Mathf.Tau, 24, Next ? UiTheme.Ink : UiTheme.T(0.3f), 1.5f, true);
             }
         }
     }

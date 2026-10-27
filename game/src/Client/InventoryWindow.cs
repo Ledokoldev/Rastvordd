@@ -72,14 +72,14 @@ namespace Rastvordd.Client
                 if (Searching)
                 {
                     // кольцо-спиннер и полоска обыска
-                    DrawArc(c, s * 0.17f, 0, Mathf.Tau, 32, new Color(1, 1, 1, 0.08f), 2.5f, true);
+                    DrawArc(c, s * 0.17f, 0, Mathf.Tau, 32, UiTheme.T(0.08f), 2.5f, true);
                     DrawArc(c, s * 0.17f, _spin, _spin + 1.8f, 16, UiTheme.Accent, 2.5f, true);
                     UiTheme.DrawBar(this, new Rect2(10, s - 12, s - 20, 4), Progress, UiTheme.Accent);
                 }
                 else
                 {
                     float w = UiTheme.TextWidth("?", 22, UiTheme.Semi);
-                    UiTheme.DrawText(this, c + new Vector2(-w / 2, 8), "?", 22, new Color(1, 1, 1, 0.3f), UiTheme.Semi);
+                    UiTheme.DrawText(this, c + new Vector2(-w / 2, 8), "?", 22, UiTheme.T(0.3f), UiTheme.Semi);
                 }
                 return;
             }
@@ -97,9 +97,9 @@ namespace Rastvordd.Client
                 }
                 bool worn = Cell.Durability >= 0 || Cell.Capacity > 0;
                 if (Cell.Capacity > 0)   // ёмкость (D54): сколько налито — полоска цвета жидкости
-                    UiTheme.DrawBar(this, new Rect2(9, s - 7, s - 18, 3), Cell.Liters / Cell.Capacity, new Color(ItemCard.LiquidColor(Cell.Liquid), a), new Color(1, 1, 1, 0.1f * a));
+                    UiTheme.DrawBar(this, new Rect2(9, s - 7, s - 18, 3), Cell.Liters / Cell.Capacity, new Color(ItemCard.LiquidColor(Cell.Liquid), a), UiTheme.T(0.1f * a));
                 else if (worn)   // износ ствола — тонкая полоска по низу ячейки
-                    UiTheme.DrawBar(this, new Rect2(9, s - 7, s - 18, 3), Cell.Durability, new Color(UiTheme.DurabilityColor(Cell.Durability), a), new Color(1, 1, 1, 0.1f * a));
+                    UiTheme.DrawBar(this, new Rect2(9, s - 7, s - 18, 3), Cell.Durability, new Color(UiTheme.DurabilityColor(Cell.Durability), a), UiTheme.T(0.1f * a));
                 DrawAttPips(this, Cell, new Vector2(12, s - (worn ? 14 : 11)), a);
                 string n = Cell.Magazine > 0 ? $"{Cell.Ammo}/{Cell.Magazine}" : Cell.Count > 1 ? (Cell.Count >= 10000 ? $"{Cell.Count / 1000}k" : Cell.Count.ToString()) : "";
                 if (n != "")
@@ -125,7 +125,7 @@ namespace Rastvordd.Client
                     UiTheme.DrawText(this, new Vector2((s - w) / 2, s / 2 + 4), Cell.Label, 12, UiTheme.Faint);
                 }
             }
-            if (Number != null) UiTheme.DrawText(this, new Vector2(10, 18), Number, 12, Selected ? UiTheme.Ink : new Color(1, 1, 1, 0.55f));
+            if (Number != null) UiTheme.DrawText(this, new Vector2(10, 18), Number, 12, Selected ? UiTheme.Ink : UiTheme.T(0.55f));
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Rastvordd.Client
                 string att = cell.Att != null && k < cell.Att.Length ? cell.Att[k] : null;
                 var p = new Vector2(x, at.Y);
                 if (att != null) UiTheme.DrawDot(c, p, 2.8f, new Color(UiTheme.RarityColor(Items.Rarity(att)), a));
-                else c.DrawArc(p, 2.4f, 0, Mathf.Tau, 12, new Color(1, 1, 1, 0.35f * a), 1f, true);
+                else c.DrawArc(p, 2.4f, 0, Mathf.Tau, 12, UiTheme.T(0.35f * a), 1f, true);
                 x += 7.5f;
             }
         }
@@ -195,10 +195,13 @@ namespace Rastvordd.Client
     /// <summary>Здоровье, еда, вода, броня: значок, полоска, число. Слева от пояса, всегда на экране.</summary>
     public partial class VitalsView : Control
     {
-        public const float W = 220, RowH = 22;
+        public const float RowH = 22;
+        /// <summary>Раскладка 1: шкалы — одна лента во всю ширину пояса; иначе — столбик 220 px.</summary>
+        public static float W => UiTheme.Layout == 1 ? Hotbar.BeltWidth : 220;
+        public static float H => UiTheme.Layout == 1 ? 26 : RowH * 4;
         float _hp, _maxHp = 100, _food, _water, _armor;
 
-        public VitalsView() { CustomMinimumSize = new Vector2(W, RowH * 4); Size = CustomMinimumSize; MouseFilter = MouseFilterEnum.Ignore; }
+        public VitalsView() { CustomMinimumSize = new Vector2(W, H); Size = CustomMinimumSize; MouseFilter = MouseFilterEnum.Ignore; }
 
         public void Set(float hp, float maxHp, float food, float water, float armor)
         {
@@ -217,6 +220,19 @@ namespace Rastvordd.Client
                 (_water, 100, UiTheme.WaterColor, Mathf.CeilToInt(_water).ToString()),
                 (_armor, 1, UiTheme.ArmorColor, $"{Mathf.RoundToInt(_armor * 100)}%"),   // броня: на сколько режет урон пулями в торс
             };
+            if (UiTheme.Layout == 1)
+            {   // лента: четыре секции в ряд - значок, полоска, число
+                float gap = 16, sw = (W - gap * 3) / 4;
+                for (int i = 0; i < rows.Length; i++)
+                {
+                    float x = i * (sw + gap), cy = Size.Y / 2;
+                    UiTheme.DrawVitalIcon(this, i, new Vector2(x + 7, cy), rows[i].c);
+                    UiTheme.DrawBar(this, new Rect2(x + 20, cy - 3, sw - 20 - 38, 6), rows[i].v / rows[i].max, rows[i].c);
+                    float w1 = UiTheme.TextWidth(rows[i].n, UiTheme.FontSmall, UiTheme.Semi);
+                    UiTheme.DrawText(this, new Vector2(x + sw - w1, cy + 5), rows[i].n, UiTheme.FontSmall, UiTheme.Body, UiTheme.Semi);
+                }
+                return;
+            }
             for (int i = 0; i < rows.Length; i++)
             {
                 float cy = y0 + i * RowH + RowH / 2;
@@ -238,6 +254,13 @@ namespace Rastvordd.Client
     {
         public const float Gap = 22;                                   // от шкал / ленты подборов до пояса
         public static float BeltWidth => Actor.BeltSize * UiTheme.CellSize + (Actor.BeltSize - 1) * UiTheme.CellGap;
+        /// <summary>Где шкалы относительно пояса: слева (исходно, 3), лентой над поясом (1), столбиком справа от пояса (2).</summary>
+        public static Vector2 VitalsPos => UiTheme.Layout switch
+        {
+            1 => new Vector2(0, -VitalsView.H - 12),
+            2 => new Vector2(BeltWidth + Gap, UiTheme.CellSize - VitalsView.H),   // справа от пояса, который жмётся к левому краю
+            _ => new Vector2(-VitalsView.W - Gap, UiTheme.CellSize - VitalsView.H),
+        };
         public readonly VitalsView Vitals = new();
         public readonly List<SlotCell> Cells = new();
 
@@ -256,7 +279,7 @@ namespace Rastvordd.Client
                 Cells.Add(c);
             }
             // шкалы — за левым краем пояса, низом по низу ячеек
-            Vitals.Position = new Vector2(-VitalsView.W - Gap, UiTheme.CellSize - VitalsView.RowH * 4);
+            Vitals.Position = VitalsPos;
             AddChild(Vitals);
         }
 
@@ -281,8 +304,8 @@ namespace Rastvordd.Client
         public override void _Draw()
         {
             var r = new Rect2(Vector2.Zero, Size);
-            UiTheme.DrawRound(this, r, new Color(1, 1, 1, 0.04f), UiTheme.CellRadius);
-            DrawDashedRound(this, r.Grow(-0.5f), UiTheme.CellRadius, new Color(1, 1, 1, 0.16f));
+            UiTheme.DrawRound(this, r, UiTheme.T(0.04f), UiTheme.CellRadius);
+            DrawDashedRound(this, r.Grow(-0.5f), UiTheme.CellRadius, UiTheme.T(0.16f));
             var tex = Ghost != null ? Art.Get(Ghost) : null;
             if (tex != null) DrawTextureRect(tex, r.Grow(-12), false, new Color(0.75f, 0.75f, 0.75f, 0.25f));
         }
@@ -318,12 +341,12 @@ namespace Rastvordd.Client
         public override void _Draw()
         {
             var r = new Rect2(Vector2.Zero, Size);
-            UiTheme.DrawRound(this, r, new Color(1, 1, 1, 0.03f), UiTheme.CellRadius);
+            UiTheme.DrawRound(this, r, UiTheme.T(0.03f), UiTheme.CellRadius);
             _glow ??= new GradientTexture2D
             {
                 Width = 128, Height = 128, Fill = GradientTexture2D.FillEnum.Radial,
                 FillFrom = new Vector2(0.5f, 0.5f), FillTo = new Vector2(1f, 0.5f),
-                Gradient = new Gradient { Colors = new[] { Colors.White, new Color(1, 1, 1, 0) } },
+                Gradient = new Gradient { Colors = new[] { Colors.White, UiTheme.T(0) } },
             };
             var glowCol = Rarity > 0 ? UiTheme.RarityColor(Rarity) : new Color(1, 1, 1);
             float gh = Size.Y * 1.1f;
@@ -361,7 +384,7 @@ namespace Rastvordd.Client
         {
             "water_raw" => new Color(0.55f, 0.6f, 0.4f), "water_boiled" => new Color(0.55f, 0.8f, 1f),
             "crude" => new Color(0.6f, 0.45f, 0.3f), "fuel" => new Color(0.85f, 0.65f, 0.25f), "diesel" => new Color(0.9f, 0.3f, 0.25f),
-            _ => new Color(1, 1, 1, 0.3f),
+            _ => UiTheme.T(0.3f),
         };
 
         public ItemCard()
@@ -665,7 +688,7 @@ namespace Rastvordd.Client
         public float Value;
         public Color Fill = Colors.White;
         public ThinBar() { CustomMinimumSize = new Vector2(180, 4); MouseFilter = MouseFilterEnum.Ignore; }
-        public override void _Draw() => UiTheme.DrawBar(this, new Rect2(Vector2.Zero, Size), Value, Fill, new Color(1, 1, 1, 0.15f));
+        public override void _Draw() => UiTheme.DrawBar(this, new Rect2(Vector2.Zero, Size), Value, Fill, UiTheme.T(0.15f));
     }
 
     /// <summary>Значок состояния: точка и подпись («Горит», «Работает», «Гниёт»).</summary>
@@ -766,16 +789,40 @@ namespace Rastvordd.Client
             area.SetAnchorsPreset(LayoutPreset.FullRect);
             area.OffsetTop = 30; area.OffsetBottom = -(28 + UiTheme.CellSize + 16);
             AddChild(area);
-            var row = UiTheme.HBox(UiTheme.PanelGap);
-            area.AddChild(row);
+            var row = UiTheme.HBox(UiTheme.Layout == 1 ? 0 : UiTheme.PanelGap);   // раскладка 1: панели стыкуются в одно окно
+            HBoxContainer dockL = null, dockR = null;
+            if (UiTheme.Layout is 2 or 3)
+            {   // док по краям экрана: 2 - снаряжение+рюкзак слева, карточка/контейнер справа; 3 - зеркально
+                area.Free();
+                var outer = new MarginContainer { MouseFilter = MouseFilterEnum.Ignore };
+                outer.SetAnchorsPreset(LayoutPreset.FullRect);
+                outer.AddThemeConstantOverride("margin_left", 24); outer.AddThemeConstantOverride("margin_right", 24);
+                outer.AddThemeConstantOverride("margin_top", 30); outer.AddThemeConstantOverride("margin_bottom", 28 + (int)UiTheme.CellSize + 16);
+                AddChild(outer);
+                var hb = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+                outer.AddChild(hb);
+                dockL = UiTheme.HBox(UiTheme.PanelGap); dockL.SizeFlagsVertical = SizeFlags.ShrinkBegin; dockL.MouseFilter = MouseFilterEnum.Ignore;
+                dockR = UiTheme.HBox(UiTheme.PanelGap); dockR.SizeFlagsVertical = SizeFlags.ShrinkBegin; dockR.MouseFilter = MouseFilterEnum.Ignore;
+                hb.AddChild(dockL);
+                hb.AddChild(new Control { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore });
+                hb.AddChild(dockR);
+            }
+            else area.AddChild(row);
+            // слот 0 снаряжение, 1 рюкзак, 2 карточка, 3 контейнер
+            void Dock(Control c, int slot)
+            {
+                if (dockL == null) row.AddChild(c);
+                else if (UiTheme.Layout == 2) (slot < 2 ? dockL : dockR).AddChild(c);
+                else (slot < 2 ? dockR : dockL).AddChild(c);
+            }
 
             // ---- снаряжение (D47): риг в одежде, слоты по группам, пластины, итог защиты ----
             _gearPanel = _equip = new EquipmentPanel(Wire);
-            row.AddChild(_gearPanel);
+            Dock(_gearPanel, 0);
 
             // ---- рюкзак ----
             _packPanel = UiTheme.GlassPanel();
-            row.AddChild(_packPanel);
+            Dock(_packPanel, 1);
             var p = UiTheme.VBox(14);
             _packPanel.AddChild(p);
             var top = UiTheme.HBox(12);
@@ -796,6 +843,7 @@ namespace Rastvordd.Client
             used.AddChild(_usedBar);
             top.AddChild(used);
 
+            if (UiTheme.Layout is 1 or 3) p.AddChild(UiTheme.Sep());   // тонкая линия под шапкой раздела
             _chips = UiTheme.HBox(8);
             p.AddChild(_chips);
             for (int i = 0; i < Filters.Length; i++)
@@ -811,12 +859,12 @@ namespace Rastvordd.Client
             // ---- карточка предмета ----
             _card = new ItemCard();
             _card.ContainerOp += op => { if (_sel.inv != null) Op?.Invoke(op, $"{_sel.inv}#{_sel.i}"); };   // кнопки ёмкости (D54)
-            row.AddChild(_card);
+            Dock(_card, 2);
 
             // ---- контейнер (вместо снаряжения и карточки) ----
             _contPanel = UiTheme.GlassPanel();
             _contPanel.CustomMinimumSize = new Vector2(6 * UiTheme.CellSize + 5 * UiTheme.CellGap + 2 * UiTheme.PanelPad, 0);
-            row.AddChild(_contPanel);
+            Dock(_contPanel, 3);
             var k = UiTheme.VBox(14);
             _contPanel.AddChild(k);
             var khead = UiTheme.HBox(12);
@@ -840,6 +888,12 @@ namespace Rastvordd.Client
             _hotbar.SetAnchorsPreset(LayoutPreset.CenterBottom);
             _hotbar.GrowHorizontal = GrowDirection.Both;
             _hotbar.GrowVertical = GrowDirection.Begin;
+            if (UiTheme.BeltAx != 0.5f)
+            {   // пояс у левого / правого края
+                _hotbar.AnchorLeft = _hotbar.AnchorRight = UiTheme.BeltAx;
+                _hotbar.OffsetLeft = UiTheme.BeltAx == 0 ? UiTheme.BeltSideMargin : UiTheme.BeltSideMargin - Hotbar.BeltWidth;
+                _hotbar.OffsetRight = _hotbar.OffsetLeft + Hotbar.BeltWidth;
+            }
             _hotbar.OffsetBottom = -28; _hotbar.OffsetTop = -28 - UiTheme.CellSize;
             AddChild(_hotbar);
             foreach (var c in _hotbar.Cells) Wire(c);
@@ -1099,7 +1153,7 @@ namespace Rastvordd.Client
                 bool enough = can && r.In.All(x => have.GetValueOrDefault(x.id) >= x.n);
                 bool now = r.Output == ui.Making;
                 var p = new PanelContainer { MouseFilter = MouseFilterEnum.Stop, TooltipText = Items.Desc(r.Output) };
-                p.AddThemeStyleboxOverride("panel", UiTheme.Box(now ? new Color(1, 1, 1, 0.12f) : UiTheme.RowBg, UiTheme.RowRadius, now ? new Color(1, 1, 1, 0.6f) : enough ? new Color(UiTheme.Good, 0.35f) : null, 1, 8, 6));
+                p.AddThemeStyleboxOverride("panel", UiTheme.Box(now ? UiTheme.T(0.12f) : UiTheme.RowBg, UiTheme.RowRadius, now ? UiTheme.T(0.6f) : enough ? new Color(UiTheme.Good, 0.35f) : null, 1, 8, 6));
                 p.CustomMinimumSize = new Vector2(285, 0);
                 var row = UiTheme.HBox(8);
                 p.AddChild(row);

@@ -12,6 +12,8 @@ namespace Rastvordd.Client
     public partial class MiniMap : Control
     {
         public const float Side = 200;
+        /// <summary>Скругление карты: раскладка 2 - круг, остальные - по теме.</summary>
+        public static int MapRadius => UiTheme.Layout == 2 ? (int)(Side / 2) : Mathf.Max(0, UiTheme.PanelRadius - 2);
         const float Radius = 40;          // метров от центра до края
         readonly MapView _full;
         SVec _me;
@@ -42,7 +44,7 @@ namespace Rastvordd.Client
 
         partial class RoundMask : Control
         {
-            public override void _Draw() => UiTheme.DrawRound(this, new Rect2(Vector2.Zero, Size), Colors.White, UiTheme.PanelRadius - 2);
+            public override void _Draw() => UiTheme.DrawShape(this, new Rect2(Vector2.Zero, Size), Colors.White, MapRadius);
         }
 
         public void SetState(SVec me, float facing, SVec? home, string place, List<StructSnap> structs, List<DeploySnap> deploys)
@@ -148,7 +150,7 @@ namespace Rastvordd.Client
         {
             var f = _frame;
             var font = UiTheme.Text;
-            UiTheme.DrawRound(f, new Rect2(0, 0, Side, Side), Colors.Transparent, UiTheme.PanelRadius - 2, new Color(1, 1, 1, 0.16f));
+            UiTheme.DrawShape(f, new Rect2(0, 0, Side, Side), Colors.Transparent, MapRadius, UiTheme.T(0.16f));
             // север
             UiTheme.DrawDot(f, new Vector2(Side / 2, 12), 9, new Color(UiTheme.PanelBg, 0.8f));
             float nw = UiTheme.TextWidth("С", 11, UiTheme.Semi);

@@ -276,7 +276,7 @@ void fragment() {
         {
             var row = UiTheme.HBox(8);
             var cap = new PanelContainer();
-            cap.AddThemeStyleboxOverride("panel", UiTheme.Box(new Color(1, 1, 1, 0.92f), 8, null, 0, 10, 4));
+            cap.AddThemeStyleboxOverride("panel", UiTheme.Box(UiTheme.Hi * new Color(1, 1, 1, 0.92f), 8, null, 0, 10, 4));
             cap.AddChild(UiTheme.Strong(key, UiTheme.FontSmall, UiTheme.Dark));
             row.AddChild(cap);
             var l = UiTheme.Small(what, UiTheme.Ink, UiTheme.FontBody);
@@ -290,7 +290,7 @@ void fragment() {
         {
             var row = UiTheme.HBox(5);
             var cap = new PanelContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
-            cap.AddThemeStyleboxOverride("panel", UiTheme.Box(new Color(1, 1, 1, 0.14f), 5, null, 0, 6, 1));
+            cap.AddThemeStyleboxOverride("panel", UiTheme.Box(UiTheme.T(0.14f), 5, null, 0, 6, 1));
             cap.AddChild(UiTheme.Strong(key, UiTheme.FontCaption));
             row.AddChild(cap);
             var l = UiTheme.Small(what, UiTheme.Dim, UiTheme.FontCaption);
@@ -564,11 +564,11 @@ void fragment() {
             // низ: шкалы и пояс
             _hotbar.Visible = !_spectator && !bigWindow && !s.Dead;
             _hotbar.Refresh(s);
-            Place(_hotbar, vs, 0.5f, 1, new Vector2(0, -28));
+            Place(_hotbar, vs, UiTheme.BeltAx, 1, new Vector2(UiTheme.BeltSideMargin, -28));
             // часы и значки — над шкалами слева от пояса (D47)
             _cond.Set(s, DayTime);
             _cond.Visible = !_spectator && !bigWindow && !s.Dead && _cond.HasContent;
-            _cond.Position = _hotbar.Position + new Vector2(-VitalsView.W - Hotbar.Gap, UiTheme.CellSize - VitalsView.RowH * 4 - ConditionView.H - 8);
+            _cond.Position = _hotbar.Position + (UiTheme.Layout is 2 or 3 ? Vector2.Zero : Hotbar.VitalsPos) + new Vector2(0, -ConditionView.H - 8);
 
             // часы и подсказки клавиш
             _clockLabel.Text = modeText;
@@ -587,7 +587,7 @@ void fragment() {
             _ammoCount.Text = s.HoldingGun ? $"{s.Ammo} / {s.Magazine}" : "";
             _ammoReserve.Text = s.HoldingGun ? $"запас {s.Reserve}" : "";
             _ammoCount.AddThemeColorOverride("font_color", s.HoldingGun && s.Ammo == 0 ? UiTheme.Bad : UiTheme.Ink);
-            Place(_ammoPanel, vs, 1, 1, new Vector2(-20, -28));
+            if (UiTheme.Layout == 3) Place(_ammoPanel, vs, 0, 1, new Vector2(20, -28)); else Place(_ammoPanel, vs, 1, 1, new Vector2(-20, -28));
 
             // подсказка действия
             string hint = s.Dead ? "" : s.InteractHint ?? "";
@@ -599,7 +599,7 @@ void fragment() {
             _promptKey.Text = key ?? "";
             _promptText.Text = hint;
             _promptPanel.Visible = !_spectator && hint != "" && !bigWindow;
-            float promptY = -(28 + UiTheme.CellSize + 18);
+            float promptY = -(28 + UiTheme.CellSize + 18) - (UiTheme.Layout == 1 ? VitalsView.H + 12 : 0);
             Place(_promptPanel, vs, 0.5f, 1, new Vector2(0, promptY));
             _buildLabel.Text = s.Dead || bigWindow ? "" : s.BuildStatus ?? "";
             _buildPanel.Visible = !_spectator && _buildLabel.Text != "";

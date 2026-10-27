@@ -10,7 +10,7 @@ namespace Rastvordd.Client
     /// </summary>
     public partial class ConditionView : Control
     {
-        public const float W = VitalsView.W, H = 58, ChipH = 22;
+        public const float W = 220, H = 58, ChipH = 22;
         SelfInfo _s;
         float _day;
         string _sig;

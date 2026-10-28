@@ -70,6 +70,8 @@ namespace Rastvordd.Sim
             FuelStation();
             RiverScenes();
             LakeBoats(2);
+            Place("wreck", 10, 160, p => { float d = RoadDist(p); return Terrain.BiomeAt(p) is Biome.Grassland or Biome.Tundra or Biome.Arid or Biome.Forest && d is > 15 and < 200 ? (Open(p) || ForestEdge(p) ? 1 : .4f) + Rf(0, .5f) : -1; }, 6, p => { Flat("decals/decal_burnt_spot", p + new Vector2(0, -1.5f), 2f, Rf(0, 360)); Wreck(p); });
+            ScatterProps();
             _rdGrid = null;
         }
 
@@ -236,6 +238,20 @@ namespace Rastvordd.Sim
             Decor(sprite, p, flip);
             AddHiddenWall(p.X - w / 2, p.Y - d, p.X + w / 2, p.Y, h);
         }
+        /// <summary>Подбитая бронетехника: разные машины и состояния, чтобы не повторялись одни и те же танки.</summary>
+        static readonly (string Id, float W)[] Wrecks =
+        {
+            ("tank_t55_wreck_angled", 6), ("tank_t55_wreck_side", 6), ("tank_t62_wreck_burnt", 6), ("tank_t72_wreck_turretless", 6), ("tank_t72_wreck_overgrown", 6),
+            ("tank_t55_wreck_sunk", 6), ("tank_t34_wreck", 5.5f), ("tank_t62_wreck_tilted", 6), ("bmp1_wreck", 4.8f), ("bmp2_wreck_overgrown", 4.8f),
+            ("btr70_wreck", 5.4f), ("brdm2_wreck", 4.2f), ("mtlb_wreck", 4.8f), ("sau_2s1_wreck", 5.4f),
+        };
+        int _wreckNext = -1;
+        void Wreck(Vector2 t)
+        {
+            if (_wreckNext < 0) _wreckNext = _lr.Next(Wrecks.Length);
+            var (id, w) = Wrecks[_wreckNext++ % Wrecks.Length];   // по кругу со случайного места: подряд одинаковых нет
+            Solid("vehicles/" + id, t, w, w * .5f, 2.4f, _lr.Next(2) == 0);
+        }
         void Scene(Vector2 p, string sprite, float w, float d, float h) => Solid(sprite, p, w, d, h, _lr.Next(2) == 0);
         Vector2 Around(Vector2 c, float r0, float r1) { float a = Rf(0, 6.283f), r = Rf(r0, r1); return c + new Vector2(MathF.Cos(a), MathF.Sin(a)) * r; }
         void Barrels(Vector2 c, float chance)
@@ -354,7 +370,7 @@ namespace Rastvordd.Sim
             {
                 var t = c + new Vector2(Rf(9, 12), Rf(4, 7));
                 Flat("decals/decal_burnt_spot", t + new Vector2(0, -1.5f), 2f, Rf(0, 360));
-                Solid("vehicles/tank_t55_wreck_angled", t, 6, 3, 2.5f, _lr.Next(2) == 0);
+                Wreck(t);
                 Landmarks.Add(("tank", t));
             }
             Barrels(c + new Vector2(5, -3), 0.4f);

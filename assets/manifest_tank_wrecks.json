@@ -1,0 +1,160 @@
+{
+ "assets": [
+  {
+   "id": "tank_t62_wreck_burnt",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 9,
+   "h": 2.4,
+   "desc": "a burnt-out Soviet T-62 tank hulk, black soot and orange rust, scorched paint, tracks thrown off and lying beside it; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; ULTRA-REALISTIC natural look, true natural colours; no text, no letters, no numbers, no logos",
+   "foot": [
+    9,
+    3.3,
+    2.4
+   ]
+  },
+  {
+   "id": "tank_t72_wreck_turretless",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 9,
+   "h": 1.8,
+   "desc": "a destroyed Soviet T-72 tank hull without turret, turret ring open, twisted metal, track broken; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; ULTRA-REALISTIC natural look, true natural colours; no text, no letters, no numbers, no logos",
+   "foot": [
+    9,
+    3.3,
+    1.8
+   ]
+  },
+  {
+   "id": "tank_t72_wreck_overgrown",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 9,
+   "h": 2.6,
+   "desc": "an abandoned Soviet T-72 tank overgrown with grass, young birch growing through the engine deck, faded green paint, moss; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; ULTRA-REALISTIC natural look, true natural colours; no text, no letters, no numbers, no logos",
+   "foot": [
+    9,
+    3.3,
+    2.6
+   ]
+  },
+  {
+   "id": "tank_t55_wreck_sunk",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 9,
+   "h": 2.0,
+   "desc": "an old Soviet T-55 tank half-sunk into soil and mud, nose down in the ground, rusted, weeds around; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; ULTRA-REALISTIC natural look, true natural colours; no text, no letters, no numbers, no logos",
+   "foot": [
+    9,
+    3.3,
+    2.0
+   ]
+  },
+  {
+   "id": "tank_t34_wreck",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 8,
+   "h": 2.4,
+   "desc": "a WW2 Soviet T-34-85 tank wreck, very old, deep brown rust, road wheels missing, barrel bent down; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; ULTRA-REALISTIC natural look, true natural colours; no text, no letters, no numbers, no logos",
+   "foot": [
+    8,
+    3.3,
+    2.4
+   ]
+  },
+  {
+   "id": "tank_t62_wreck_tilted",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 9,
+   "h": 2.4,
+   "desc": "a Soviet T-62 tank wreck tilted in a shallow ditch, one track broken and unrolled, rusty, camouflage net rags; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; ULTRA-REALISTIC natural look, true natural colours; no text, no letters, no numbers, no logos",
+   "foot": [
+    9,
+    3.3,
+    2.4
+   ]
+  },
+  {
+   "id": "bmp1_wreck",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7,
+   "h": 2.0,
+   "desc": "a destroyed Soviet BMP-1 infantry fighting vehicle, rear doors open, burnt hull, rust, small turret with short gun; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; ULTRA-REALISTIC natural look, true natural colours; no text, no letters, no numbers, no logos",
+   "foot": [
+    7,
+    2.8,
+    2.0
+   ]
+  },
+  {
+   "id": "bmp2_wreck_overgrown",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 7,
+   "h": 2.1,
+   "desc": "an abandoned Soviet BMP-2 infantry fighting vehicle overgrown with bushes, faded green paint, flat tracks; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; ULTRA-REALISTIC natural look, true natural colours; no text, no letters, no numbers, no logos",
+   "foot": [
+    7,
+    2.8,
+    2.1
+   ]
+  },
+  {
+   "id": "btr70_wreck",
+   "cat": "vehicles",
+   "view": "side",
+   "w": 8,
+   "h": 2.2,
+   "desc": "a destroyed Soviet BTR-70 eight-wheeled armoured personnel carrier, flat burnt tyres, rusty hull, open hatches; exact side profile, pointing to the right, wheels on one horizontal line; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; ULTRA-REALISTIC natural look, true natural colours; no text, no letters, no numbers, no logos",
+   "foot": [
+    8,
+    3.3,
+    2.2
+   ]
+  },
+  {
+   "id": "brdm2_wreck",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 6,
+   "h": 2.0,
+   "desc": "an abandoned Soviet BRDM-2 four-wheeled scout car, rusty, flat tyres, hatches open, grass around; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; ULTRA-REALISTIC natural look, true natural colours; no text, no letters, no numbers, no logos",
+   "foot": [
+    6,
+    2.8,
+    2.0
+   ]
+  },
+  {
+   "id": "mtlb_wreck",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 7,
+   "h": 1.8,
+   "desc": "an abandoned Soviet MT-LB tracked armoured tractor, low flat hull, rusty, broken track; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; ULTRA-REALISTIC natural look, true natural colours; no text, no letters, no numbers, no logos",
+   "foot": [
+    7,
+    2.8,
+    1.8
+   ]
+  },
+  {
+   "id": "sau_2s1_wreck",
+   "cat": "vehicles",
+   "view": "angled",
+   "w": 8,
+   "h": 2.4,
+   "desc": "a destroyed Soviet 2S1 Gvozdika self-propelled howitzer, burnt, turret pushed aside, barrel drooping; pointing to the right and turned about 30 degrees toward the viewer: we see its long side plus a foreshortened view of its front end, NOT a 45-degree isometric view; Soviet / post-Soviet Russian, 1970s-1990s, weathered, abandoned for years, dust, dirt, rust, flaking paint; ULTRA-REALISTIC natural look, true natural colours; no text, no letters, no numbers, no logos",
+   "foot": [
+    8,
+    3.3,
+    2.4
+   ]
+  }
+ ]
+}

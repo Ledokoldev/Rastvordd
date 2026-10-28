@@ -771,6 +771,13 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         me0.Pos = bp + new SVec(0, 0.5f);
                         continue;
                     }
+                    if (p[0].StartsWith("decor:"))
+                    {   // --near=decor:<часть имени спрайта> — к ближайшему декору (проверка реквизита)
+                        var key = p[0].Substring(6); var me1 = _server.World.Find(_myId); float bd = 1e9f; SVec bp = me1.Pos;
+                        foreach (var d in _server.World.Decors) if (d.Sprite.Contains(key)) { float dd = SVec.Distance(d.Pos, me1.Pos); if (dd < bd) { bd = dd; bp = d.Pos; } }
+                        me1.Pos = bp + new SVec(0, 3f);
+                        continue;
+                    }
                     // --near=birch|pine|spruce|oak|aspen… — ближайшее дерево этого вида
                     TreeSpecies? wantSp = System.Enum.TryParse<TreeSpecies>(p[0], true, out var tsp) ? tsp : null;
                     var kind = wantSp != null ? NodeKind.Tree : System.Enum.Parse<NodeKind>(p[0], true);

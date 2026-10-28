@@ -35,7 +35,7 @@ namespace Rastvordd.Sim
             ["seeds"] = new[] { ("food", 3), ("medical", 3), ("tools", 1) },                                     // Станция семян
             ["garages"] = new[] { ("tools", 5), ("wood", 2), ("ammo", 1) },                                      // Гаражи
             ["ats"] = new[] { ("electric", 5), ("tools", 1), ("elite", 1) },                                     // АТС
-            ["depot"] = new[] { ("tools", 4), ("wood", 2), ("ammo", 1), ("army", 1) },                           // Депо
+            ["depot"] = new[] { ("tools", 4), ("wood", 2), ("ammo", 1), ("army", 1), ("weapon", 1) },                           // Депо
             ["quarry"] = new[] { ("ammo", 4), ("tools", 3), ("wood", 1) },                                       // Карьер
             ["substation"] = new[] { ("electric", 5), ("tools", 2) },                                            // Подстанция
             ["warehouse"] = new[] { ("army", 4), ("weapon", 3), ("ammo", 2), ("elite", 1), ("medical", 1) },     // Склад «Центральный»
@@ -59,17 +59,24 @@ namespace Rastvordd.Sim
             return list;
         }
 
-        readonly HashSet<string> _rtMainBox = new();   // РТ, где уже стоит ящик основной темы
+        readonly Dictionary<string, int> _rtBoxCount = new();   // сколько ящиков РТ (по тиру) уже получили вид
 
         string PickBox(LootBag bag)
         {
             var list = BoxWeights(bag.Rt, bag.Tier);
-            // первый ящик РТ — всегда основной темы (самый весомый вид), остальные — по весам: тема читается даже при 2–3 ящиках
-            if (bag.Rt != null && RtBoxes.ContainsKey(bag.Rt) && _rtMainBox.Add(bag.Rt + "/" + bag.Tier))
+            // первые два ящика РТ — две главные темы по весу (на Складе — армейский и оружейный), остальные — по весам:
+            // тема читается даже при 2–3 ящиках. Раньше гарантирован был только первый — оружейного не было нигде на карте (28.10)
+            if (bag.Rt != null && RtBoxes.ContainsKey(bag.Rt))
             {
-                var top = list[0];
-                foreach (var x in list) if (x.w > top.w) top = x;
-                return top.box;
+                string key = bag.Rt + "/" + bag.Tier;
+                int k = _rtBoxCount.GetValueOrDefault(key);
+                _rtBoxCount[key] = k + 1;
+                if (k < 2 && k < list.Count)
+                {
+                    var sorted = new List<(string box, int w)>(list);
+                    sorted.Sort((x, y) => y.w.CompareTo(x.w));   // List.Sort не стабилен — при равных весах порядок любой, это ок
+                    return sorted[k].box;
+                }
             }
             int sum = 0; foreach (var (_, w) in list) sum += w;
             int r = Rng.Next(sum);
@@ -86,7 +93,7 @@ namespace Rastvordd.Sim
                 ("comp_spring", .35, .4, .4, 1, 1), ("comp_tape", .3, .35, .35, 1, 1), ("comp_pipe", .3, .3, .3, 1, 1), ("comp_gears", .12, .25, .3, 1, 1),
                 ("canned", .35, .3, .25, 1, 2), ("water_bottle", .35, .3, .25, 1, 2), ("bandage", .25, .3, .3, 1, 2),
                 ("@val0", .45, .4, .3, 1, 2), ("@val1", .1, .3, .4, 1, 1), ("ammo_9mm", .15, .25, .3, 5, 12), ("ammo_12g", .1, .15, .2, 3, 6),
-                ("@part2", .05, .15, .2, 1, 1), ("@crudeatt", .04, .04, .03, 1, 1), ("@gun0", .03, .04, .04, 1, 1),
+                ("@part2", .05, .15, .2, 1, 1), ("@crudeatt", .04, .04, .03, 1, 1), ("@gun0", .06, .05, .04, 1, 1), ("@gun1", 0.0, .04, .05, 1, 1),
             },
             ["food"] = new[]
             {
@@ -114,25 +121,25 @@ namespace Rastvordd.Sim
             },
             ["ammo"] = new[]
             {
-                ("ammo_9mm", .6, .6, .5, 8, 20), ("ammo_12g", .4, .45, .4, 4, 10), ("ammo_762", .05, .3, .55, 8, 16), ("ammo_545", 0.0, .05, .2, 10, 20),
+                ("@gun0", .04, 0, 0, 1, 1), ("@gun1", 0.0, .06, .08, 1, 1), ("ammo_9mm", .6, .6, .5, 8, 20), ("ammo_12g", .4, .45, .4, 4, 10), ("ammo_762", .05, .3, .55, 8, 16), ("ammo_545", 0.0, .05, .2, 10, 20),
                 ("gunpowder", .3, .5, .6, 10, 25), ("sulfur", .15, .2, .2, 10, 25), ("arrow", .2, .1, 0, 4, 10), ("scrap", .4, .45, .5, 3, 6),
             },
             ["army"] = new[]
             {
                 ("ammo_762", 0.0, .5, .5, 8, 18), ("bandage", 0.0, .5, .5, 1, 2), ("gunpowder", 0.0, .45, .45, 12, 25), ("scrap", 0.0, .8, .85, 8, 16),
                 ("metal_fragments", 0.0, .5, .5, 20, 40), ("canned", 0.0, .3, .3, 1, 2), ("@part2", 0.0, .35, .4, 1, 1), ("@val2", 0.0, .4, .6, 1, 1),
-                ("@factatt", 0.0, .08, .1, 1, 1), ("@armyatt", 0.0, .03, .05, 1, 1), ("@satchel", 0.0, .03, .06, 1, 1), ("@tier3", 0.0, 0, .25, 1, 1),
+                ("@factatt", 0.0, .08, .1, 1, 1), ("@armyatt", 0.0, .03, .05, 1, 1), ("@satchel", 0.0, .03, .06, 1, 1), ("@gun1", 0.0, .15, .1, 1, 1), ("@gun2", 0.0, .05, .2, 1, 1), ("@tier3", 0.0, 0, .25, 1, 1),
             },
             ["weapon"] = new[]
             {
                 ("@part2", 0.0, 1, 1, 1, 1), ("@factatt", 0.0, .35, .4, 1, 1), ("@ammo", 0.0, .5, .55, 6, 14), ("comp_oil", 0.0, .3, .3, 1, 1),
-                ("comp_spring", 0.0, .4, .4, 1, 2), ("@crudeatt", 0.0, .05, 0, 1, 1), ("@gun1", 0.0, .06, .08, 1, 1), ("@tier3", 0.0, 0, .25, 1, 1),
+                ("comp_spring", 0.0, .4, .4, 1, 2), ("@crudeatt", 0.0, .05, 0, 1, 1), ("@gun1", 0.0, .45, .15, 1, 1), ("@gun2", 0.0, .1, .45, 1, 1), ("@tier3", 0.0, 0, .25, 1, 1),
                 ("scrap", 0.0, .5, .55, 4, 8),
             },
             ["elite"] = new[]
             {
                 ("@val2", 0.0, .9, .9, 1, 1), ("@high", 0.0, .25, .35, 1, 1), ("alloy", 0.0, .1, .25, 1, 1), ("comp_circuit", 0.0, .3, .3, 1, 1),
-                ("comp_lens", 0.0, .3, .3, 1, 1), ("@gun2", 0.0, .05, .08, 1, 1), ("@tier3", 0.0, .1, .3, 1, 1), ("scrap", 0.0, .8, .8, 8, 15),
+                ("comp_lens", 0.0, .3, .3, 1, 1), ("@gun2", 0.0, .15, .25, 1, 1), ("@tier3", 0.0, .1, .3, 1, 1), ("scrap", 0.0, .8, .8, 8, 15),
             },
         };
 
@@ -163,8 +170,8 @@ namespace Rastvordd.Sim
                     case "@factatt": bag.Items.Add(new ItemSlot(Pick(Weaponry.FactoryAtts), 1)); break;
                     case "@armyatt": bag.Items.Add(new ItemSlot(Pick(Weaponry.ArmyAtts), 1)); break;
                     case "@gun0": bag.Items.Add(Items.NewSlot("weapon_pipeshotgun")); break;
-                    case "@gun1": bag.Items.Add(Items.NewSlot(Rng.Next(2) == 0 ? "weapon_pipeshotgun" : "weapon_sawnoff")); break;
-                    case "@gun2": bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_sawnoff", "weapon_mp133", "weapon_grach" }))); break;
+                    case "@gun1": bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_pipeshotgun", "weapon_sawnoff", "weapon_nagant", "weapon_nagant", "weapon_homesmg", "weapon_crossbow" }))); break;
+                    case "@gun2": bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_mp133", "weapon_grach", "weapon_grach", "weapon_pps43", "weapon_ppsh", "weapon_svt40" }))); break;
                     case "@satchel": bag.Items.Add(Items.NewSlot("expl_satchel")); break;
                     case "@lockcode": bag.Items.Add(Items.NewSlot("lock_code")); break;
                     case "@tier3": TryTier3(bag, 1.0); break;   // шанс уже выпал; режиссёр всё равно дозирует (фаза, лимит в час)

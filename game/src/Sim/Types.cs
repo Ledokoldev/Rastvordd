@@ -618,7 +618,7 @@ namespace Rastvordd.Sim
                     var (id, scrap) = nodes[i];
                     var n = All.Find(x => x.Id == id);
                     if (n == null) { n = new TechNode { Id = id }; All.Add(n); }
-                    n.Bench = bench; n.Scrap = scrap; n.Lane = lane; n.Order = i;
+                    n.Bench = bench; n.Scrap = ScrapCost(bench, scrap); n.Lane = lane; n.Order = i;
                     n.Col = bench - 1; n.Row = lane;
                     n.Requires = prev == null ? System.Array.Empty<string>() : new[] { prev };
                     n.RequiresAny = System.Array.Empty<string>();
@@ -626,6 +626,12 @@ namespace Rastvordd.Sim
                 }
             }
         }   // ветка оружия и обвесов (D46), комплекты одежды (D47)
+
+        /// <summary>
+        /// Цена изучения по верстаку: дерево целиком стоило ≈ 4400 лома при приходе ≈ 75 лома/ч на игрока (прогон 28.10) —
+        /// до верстака 2 добирались 3 бота из 20 за 5,5 ч. Верстак 2 ×0,7, верстак 3 ×0,6, с округлением до 5.
+        /// </summary>
+        static int ScrapCost(int bench, int scrap) => bench <= 1 ? scrap : System.Math.Max(5, (int)System.Math.Round(scrap * (bench == 2 ? 0.7 : 0.6) / 5.0) * 5);
 
         public static TechNode Get(string id) => All.Find(n => n.Id == id);
 

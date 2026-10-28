@@ -71,7 +71,10 @@ namespace Rastvordd.Sim
 
         void BuildSmallMonument(string name, Vector2 min, Vector2 max, int guards, int crates)
         {
-            Monuments.Add(new Monument { Name = name, Min = min, Max = max });
+            var mon = new Monument { Name = name, Min = min, Max = max, Key = SmallRtKey(name) };
+            Monuments.Add(mon);
+            ClearPrefabArea(mon);   // деревья и камни с площадки — вон
+            _prefabMode = true;
             const float t = 0.3f, fh = 2.2f, bh = 2.6f;
             var c = (min + max) * 0.5f;
             float w = max.X - min.X, h = max.Y - min.Y;
@@ -122,6 +125,8 @@ namespace Rastvordd.Sim
             for (int i = 1; i < crates; i++)
                 AddCrate(new Vector2(Range(min.X + 3, max.X - 3), Range(c.Y + 2, max.Y - 3)), tier, rk);
             if (Rng.NextDouble() < 0.7) AddPickup(PickupKind.WaterBarrel, new Vector2(max.X - 3, min.Y + 3));
+
+            _prefabMode = false;
 
             // металлолом без боя: бочки вдоль забора и кучи хлама во дворе (D31)
             int barrels = 3 + guards * 2;

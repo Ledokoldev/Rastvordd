@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Rastvordd.Sim
@@ -127,6 +128,55 @@ namespace Rastvordd.Sim
                 cmd.Craft = r;
                 return;
             }
+        }
+
+        /// <summary>Вся крафтовая одежда и пластины: сначала верстак повыше, внутри — лучшее по BotScore.</summary>
+        static string[] _tailorOrder;
+        static string[] TailorOrder => _tailorOrder ??= Recipes.All.FindAll(r => r.Bench > 0 && Clothing.Def(r.Output) != null)
+            .OrderByDescending(r => r.Bench).ThenByDescending(r => Clothing.BotScore(Clothing.Def(r.Output))).Select(r => r.Output).ToArray();
+        float _tailorNext;
+        string _tailorId;
+
+        /// <summary>
+        /// Шьёт у верстака лучшую вещь, которая надёжнее надетой: сырьё (кожа, резина, ткань) берёт из своего ящика.
+        /// Металл — только из излишка (на прогрессию не меньше 250). Раз в 20 с ищет, что сшить; true — занят этим.
+        /// </summary>
+        bool Tailor(Deployable box, ref InputCmd cmd)
+        {
+            int lvl = MyBenchLevel();
+            if (lvl < 1 || box == null || _threat != null) return false;
+            if (_tailorId == null)
+            {
+                if (_w.Time < _tailorNext) return false;
+                _tailorNext = _w.Time + 20;
+                foreach (var id in TailorOrder)
+                {
+                    int r = Recipe(id);
+                    var rec = Recipes.All[r];
+                    if (rec.Bench > lvl || !Tech.Knows(_me, id) || Stock(id) > 0) continue;
+                    var wd = Clothing.Def(id);
+                    var cur = Clothing.Def(_me.Worn[(int)wd.Slot]?.Id);
+                    if (cur != null && Clothing.BotScore(cur) >= Clothing.BotScore(wd)) continue;
+                    bool ok = true;
+                    foreach (var (cid, n) in rec.Cost)
+                        ok &= cid == "metal_fragments" ? MetalTotal() - n >= 250 : Stock(cid) - n >= (cid == "cloth" ? 8 : 0);
+                    if (ok) { _tailorId = id; break; }
+                }
+                if (_tailorId == null) return false;
+            }
+            var rc = Recipes.All[Recipe(_tailorId)];
+            foreach (var (cid, n) in rc.Cost)
+            {
+                if (_me.Count(cid) >= n) continue;
+                if (Stock(cid) < n) { _tailorId = null; return false; }   // пока шёл — потратил
+                if (TakeFromBox(box, cid, n, ref cmd)) return true;
+            }
+            Doing = $"шьёт {Items.Name(_tailorId)}";
+            if (!GoTo(BenchStand, 0.6f, ref cmd)) return true;
+            cmd.Aim = BenchSpot(lvl);
+            string done = _tailorId;
+            _tailorId = null;
+            return Craft(done, ref cmd);   // надеть — Clothe (BotDress раз в 5 с)
         }
 
         bool _warming;
@@ -534,6 +584,7 @@ namespace Rastvordd.Sim
             {
                 if (id == "metal_fragments") { _metalGoal = Math.Max(_metalGoal, count + 60); SmeltOrMine(ref cmd); return false; }
                 if (id == "scrap") { GetScrap(count, MyBox(), ref cmd); return false; }
+                if (id == "cloth") { Doing = "собирает коноплю"; UsePickup(PickupKind.Hemp, ref cmd); return false; }   // раньше «нет: Ткань» и стоял (прогон 28.10)
                 if (IsOrdered(id)) { _partsWant[id] = Math.Max(_partsWant.GetValueOrDefault(id), count - Stock(id)); _partsWantAt = _w.Time; }
                 Doing = $"нет: {Items.Name(id)}";
                 return false;
@@ -727,9 +778,9 @@ namespace Rastvordd.Sim
 
         int _metalGoal = 300;
         // ветка оружия D46: Наган → Самоделка (тир 1), 7,62 → Грач / СВТ (тир 2), АКМ / СВД (тир 3); дробовики и элиту не учат — их только находят
-        static readonly string[] ResearchOrder = { "lock_code", "gunpowder", "ammo_9mm", "weapon_nagant", "weapon_homesmg", "ammo_12g", "weapon_crossbow", "weapon_grach", "ammo_762", "weapon_svt40", "expl_satchel", "deploy_guntable", "weapon_akm", "weapon_svd", "expl_c4" };   // оружейный стол (D54) — до стволов тира 3
+        static readonly string[] ResearchOrder = { "lock_code", "gunpowder", "ammo_9mm", "weapon_nagant", "weapon_homesmg", "ammo_12g", "weapon_crossbow", "weapon_grach", "wear_scrap_signvest", "wear_spec_robe", "ammo_762", "weapon_svt40", "expl_satchel", "deploy_guntable", "wear_army_6b2", "wear_ozk_cape", "weapon_akm", "weapon_svd", "expl_c4" };   // оружейный стол (D54) — до стволов тира 3
         // агрессивные (бродяги и задиристые фермеры) учат бомбы раньше патронов 7,62: рейды — на втором часу, а не «никогда»
-        static readonly string[] ResearchOrderRaider = { "lock_code", "gunpowder", "ammo_9mm", "weapon_nagant", "weapon_homesmg", "ammo_12g", "expl_satchel", "weapon_crossbow", "weapon_grach", "ammo_762", "weapon_svt40", "deploy_guntable", "weapon_akm", "expl_c4", "weapon_svd" };
+        static readonly string[] ResearchOrderRaider = { "lock_code", "gunpowder", "ammo_9mm", "weapon_nagant", "weapon_homesmg", "ammo_12g", "expl_satchel", "weapon_crossbow", "weapon_grach", "wear_scrap_signvest", "wear_spec_robe", "ammo_762", "weapon_svt40", "deploy_guntable", "wear_army_6b2", "wear_ozk_cape", "weapon_akm", "expl_c4", "weapon_svd" };
         string[] MyResearchOrder => Aggression > 0.45f ? _orderRaider ??= ExpandOrder(ResearchOrderRaider) : _orderNormal ??= ExpandOrder(ResearchOrder);
         static string[] _orderRaider, _orderNormal;
         /// <summary>Цели с предками впереди: дерево линейное (Prog.TechTree), чтобы дойти до цели, бот учит всю цепочку.</summary>
@@ -922,6 +973,7 @@ namespace Rastvordd.Sim
                 _w.Repair(_me, st);
                 return true;
             }
+            if (BackupGun(own, lvl, box, ref cmd)) return true;
             string ammo = st?.Def.AmmoId;
             if (ammo == null || ammo == "arrow" || _me.Count(ammo) >= 20 || !_me.Known.Contains(ammo) && Tech.Get(ammo) != null) return false;
             int ri = Recipe(ammo);
@@ -932,6 +984,30 @@ namespace Rastvordd.Sim
             if (powder == 0 || _me.Count("gunpowder") >= powder) return CraftAtBench(ammo, box, ref cmd);
             if (TakeFromBox(box, "gunpowder", powder, ref cmd)) return true;
             return MakeGunpowder(powder, box, furnace, ref cmd);
+        }
+
+        float _backupNext;
+
+        /// <summary>
+        /// Запасной ствол (D46): дома в ящике нет целого огнестрела — собрать копию своего, если детали уже есть и металла с излишком.
+        /// После смерти бот берёт его из ящика (Wipe.cs). Раньше запаса не было вовсе — прогон 28.10. Проверка раз в 30 с.
+        /// </summary>
+        bool BackupGun(string own, int lvl, Deployable box, ref InputCmd cmd)
+        {
+            if (_w.Time < _backupNext || own == "weapon_bow" || Recipe(own) < 0 || !_me.Known.Contains(own)) return false;
+            var r = Recipes.All[Recipe(own)];
+            if (r.Bench > lvl || r.Station != DeployKind.None && MyStation(r.Station) == null) { _backupNext = _w.Time + 30; return false; }
+            ScanMine();
+            int spare = SpareGun() != null ? 1 : 0;
+            foreach (var b in _mBoxes)
+                foreach (var it in b.Storage.Items)
+                    if (it.State is WeaponState ws && !ws.Def.Melee && !ws.Broken) spare++;
+            bool ok = spare == 0;
+            foreach (var (id, n) in r.Cost)
+                ok &= id == "metal_fragments" ? MetalTotal() - n >= 250 : Stock(id) >= n + (id == "wood" ? 100 : 0);
+            if (!ok) { _backupNext = _w.Time + 30; return false; }
+            Doing = $"собирает запасной {Items.Name(own)}";
+            return CraftAtBench(own, box, ref cmd);
         }
 
         /// <summary>Порох до target: уголь 15 + сера 10 у верстака; сера и уголь — из печи (серная руда + дерево).</summary>

@@ -841,6 +841,24 @@ namespace Rastvordd.Sim
 
         /// <summary>E по двери: открыть/закрыть. Закрыть нельзя, если в проёме кто-то стоит.</summary>
         /// <summary>Бот открывает или закрывает конкретную дверь (рукой: рядом и без стены между).</summary>
+        /// <summary>Бот меняет свой замок на ключе на кодовый у двери (игрок делает то же сносом двери киянкой). Ключ и старый замок — обратно.</summary>
+        public bool BotSwapLock(Actor a, Structure door)
+        {
+            if (!Structures.Contains(door) || !door.Locked || !door.KeyLock || a.Count("lock_code") <= 0) return false;
+            if (door.LockOwner != a.Id && a.Count("key_" + door.Id) <= 0) return false;
+            if (Vector2.Distance(a.Pos, door.Center) > InteractRange + 0.4f) return false;
+            a.Take("lock_code", 1);
+            a.Take("key_" + door.Id, a.Count("key_" + door.Id));
+            a.Add("lock_key", 1);
+            door.KeyLock = false;
+            door.LockOwner = a.Id;
+            door.LockAuth.Clear();
+            door.LockAuth.Add(a.Id);
+            door.Code = Rng.Next(0, 10000);
+            StructVersion++;
+            return true;
+        }
+
         public bool BotToggleDoor(Actor a, Structure door)
         {
             if (!Structures.Contains(door) || Vector2.Distance(a.Pos, door.Center) > InteractRange + 0.4f || !ClearLine(a.Pos, door.Center, door, true)) return false;

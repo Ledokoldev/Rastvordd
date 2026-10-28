@@ -194,6 +194,7 @@ namespace Rastvordd.Sim
             PlaceTier0();
             PlaceTier1();
             PlaceTier2();   // тир 2 (D50): Радиоцентр «Маяк» — большой, свой генератор
+            PlaceSmallMonuments();   // пять малых РТ (Весовая, Раздаточная, Почта, Котельная, Станция семян): после больших, места ищут между ними
             PlaceWorldTires();   // покрышки — резина (после РТ, своим генератором)
             DressAllPrefabs();   // обстановка РТ (Dressing.cs): в самом конце, своим генератором на РТ
             PlaceFuelSpots();    // бочки с мазутом и ржавые канистры (D54): после всего, своим генератором — индексы старых находок не сдвигаются
@@ -1415,7 +1416,7 @@ namespace Rastvordd.Sim
             var prof = LootProfile(Monuments.Find(m => m.Key != null && m.Contains(node.Pos, 2))?.Key);
             double B(double c, string id) => prof != null && Array.IndexOf(prof, id) >= 0 ? Math.Min(0.95, c * ProfileBoost) : c;
             if (prof != null) foreach (var id in prof) if (id is "comp_spring" or "comp_tape" or "comp_pipe" or "comp_gears" or "comp_circuit" or "comp_lens" or "val_copper_wire" or "val_radio_parts" or "sulfur" or "rubber" && Rng.NextDouble() < 0.08) Put(id, 1);
-            Put("scrap", Rng.Next(1, 3));   // D49: голого лома мало — 1–2
+            Put("scrap", Rng.Next(2, 5));   // D49: голого лома мало; было 1–2 — прогон 28.10: лом тормозил всю прогрессию, стало 2–4
             if (Rng.NextDouble() < 0.35) Put(Weaponry.CommonPart(Rng), 1);                       // общий компонент
             if (Rng.NextDouble() < (rich ? 0.25 : 0.2)) Put(Economy.Tier0(Rng), 1);                // ценный лом тира 0
             if (Rng.NextDouble() < B(0.35, "metal_fragments")) Put("metal_fragments", Rng.Next(10, 26));

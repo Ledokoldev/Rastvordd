@@ -529,9 +529,12 @@ namespace Rastvordd.Sim
                     if (Craft("lock_code", ref cmd)) return true;
                     return !Fetch("metal_fragments", 100, box, ref cmd) || true;
                 }
-                if (door.Open) { if (_w.BotToggleDoor(_me, door)) return true; }
-                Doing = "меняет замок на кодовый: ломает старую дверь";
-                return BreakDoor(door, ref cmd);
+                // раньше выламывал дверь — свою дверь под своим шкафом не пробить, бот часами стоял у неё (прогон 28.10: 2700 тиков)
+                Doing = "меняет замок на кодовый";
+                if (!GoStand(DoorStand(door), 0.4f, ref cmd)) return true;
+                cmd.Aim = door.Center;
+                _w.BotSwapLock(_me, door);
+                return true;
             }
             return false;
         }
@@ -744,6 +747,7 @@ namespace Rastvordd.Sim
                 }
                 if (metal < _metalGoal && !furnace.Burning && _me.Count("metal_ore") < 60 && !Need("metal_ore", 60, ref cmd)) return;
             }
+            if (Tailor(box, ref cmd)) return;   // 6б. одежда у верстака: кожа, резина, лом-броня (прогон 28.10 — сетов не шили вовсе)
             // 7. прогрессия, вооружение, рейд; без ствола (или с луком) — сначала ствол, если есть детали (D46)
             if ((Ranged() is not string rg || Weaponry.Power(rg) < 0.7f) && Arm(box, furnace, ref cmd)) return;
             if (Progress(box, metal, ref cmd)) return;

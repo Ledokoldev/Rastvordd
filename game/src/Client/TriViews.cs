@@ -119,6 +119,7 @@ namespace Rastvordd.Client
         public void UpdateOcclusion(float dt) => SetFade(!_cut && Occlusion.Covers(ScreenRect, Position.Y), dt);
 
         public bool Cut => _cut;
+        public bool Mine;   // стена своей базы
         public void SetCut(bool cut) { if (cut != _cut) { _cut = cut; QueueRedraw(); } }
 
         public void SetFade(bool fade, float dt)

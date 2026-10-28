@@ -904,6 +904,7 @@ namespace Rastvordd.Client
 
         bool _cut;
         public bool Cut => _cut;
+        public bool Mine;   // стена своей базы (BuildLayer: изнутри своей базы срезаются все)
         /// <summary>Срезать стену до низкой (персонаж внутри дома, стена перед ним).</summary>
         public void SetCut(bool cut)
         {

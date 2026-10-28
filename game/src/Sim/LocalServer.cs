@@ -42,6 +42,7 @@ namespace Rastvordd.Sim
     {
         public int Id; public StructKind Kind; public int I, J, Dir, Tier; public float Hp; public bool Open; public bool Locked;
         public bool Seen;                // видна сейчас, иначе запомнена
+        public bool Mine;                // своя база (шкаф мой): изнутри срезаются все стены
         public Vector2 A, B, C;          // ребро A–B; треугольник A, B, C
         public Vector2 Center => Building.Center(Kind, I, J, A, B, C);
         public Vector2[] Poly => Kind == StructKind.Foundation ? Building.SquarePoly(I, J) : new[] { A, B, C };
@@ -818,7 +819,7 @@ namespace Rastvordd.Sim
                 if (Vector2.DistanceSquared(st.Center, me.Pos) >= r2) continue;
                 aliveS.Add(st.Id);
                 bool seen = me.Spectator || !me.Dead && (World.IsOwnBase(me, st) || World.SeesStructure(me, st, vr, vc));
-                if (seen) smem[st.Id] = new StructSnap { Id = st.Id, Kind = st.Kind, I = st.I, J = st.J, Dir = st.Dir, Tier = st.Tier, Hp = st.Hp / st.MaxHp, Open = st.Open, Locked = st.Locked, Seen = true, A = st.A, B = st.B, C = st.C };
+                if (seen) smem[st.Id] = new StructSnap { Id = st.Id, Kind = st.Kind, I = st.I, J = st.J, Dir = st.Dir, Tier = st.Tier, Hp = st.Hp / st.MaxHp, Open = st.Open, Locked = st.Locked, Seen = true, Mine = World.IsOwnBase(me, st), A = st.A, B = st.B, C = st.C };
                 else if (smem.TryGetValue(st.Id, out var old)) { old.Seen = false; smem[st.Id] = old; }
             }
             Forget(smem, aliveS, id => smem[id].Center, me, vr, vc);

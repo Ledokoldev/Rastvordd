@@ -35,6 +35,7 @@ namespace Rastvordd.Client
                     {
                         if (Mathf.Abs(cur.snap.Hp - s.Hp) > 0.01f) SetDamage(cur.views, s.Hp);
                         if (cur.snap.Seen != s.Seen) SetFog(cur.views, s.Seen);
+                        if (cur.snap.Mine != s.Mine) foreach (var v in cur.views) { if (v is WallView2D wv) wv.Mine = s.Mine; else if (v is SlantWallView2D sv) sv.Mine = s.Mine; }
                         _items[s.Id] = (s, cur.views);
                         continue;
                     }
@@ -43,6 +44,7 @@ namespace Rastvordd.Client
                 var created = Create(s);
                 SetFog(created, s.Seen);
                 _items[s.Id] = (s, created);
+                foreach (var v in created) { if (v is WallView2D wv) wv.Mine = s.Mine; else if (v is SlantWallView2D sv) sv.Mine = s.Mine; }
                 changed = true;
             }
             List<int> gone = null;
@@ -178,18 +180,24 @@ namespace Rastvordd.Client
         /// <summary>Стены, закрывающие фокусы кадра (свой персонаж, видимые персонажи, курсор — см. Occlusion), полупрозрачны.</summary>
         public void UpdateFade(Vector2 selfPx, float dt)
         {
-            // внутри дома (стоим на фундаменте) — стены ниже по экрану поблизости срезаются
-            bool inside = OnFloor(new SVec(selfPx.X / Iso.PPM, selfPx.Y / Iso.PPM));
+            // внутри дома (стоим на фундаменте) — стены ниже по экрану поблизости срезаются;
+            // на полу своей базы (шкаф мой) — срезаются все стены базы
+            var me = new SVec(selfPx.X / Iso.PPM, selfPx.Y / Iso.PPM);
+            bool inside = OnFloor(me);
+            bool own = false;
+            if (inside)
+                foreach (var (snap, _) in _items.Values)
+                    if (snap.Mine && Building.IsFloor(snap.Kind) && Building.PointInPoly(me, snap.Poly)) { own = true; break; }
             float near = 12f * Iso.PPM;
             foreach (var w in Walls)
             {
-                bool cut = inside && w.Position.Y > selfPx.Y && w.Position.Y - selfPx.Y < near && Mathf.Abs(w.Position.X - selfPx.X) < near;
+                bool cut = own ? w.Mine : inside && w.Position.Y > selfPx.Y && w.Position.Y - selfPx.Y < near && Mathf.Abs(w.Position.X - selfPx.X) < near;
                 w.SetCut(cut);
                 w.UpdateOcclusion(dt);
             }
             foreach (var w in Slants)
             {
-                bool cut = inside && w.Position.Y > selfPx.Y && w.Position.Y - selfPx.Y < near && Mathf.Abs(w.Position.X - selfPx.X) < near;
+                bool cut = own ? w.Mine : inside && w.Position.Y > selfPx.Y && w.Position.Y - selfPx.Y < near && Mathf.Abs(w.Position.X - selfPx.X) < near;
                 w.SetCut(cut);
                 w.UpdateOcclusion(dt);
             }

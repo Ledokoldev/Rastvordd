@@ -169,6 +169,16 @@ namespace Rastvordd.Client
                     }
         }
 
+        /// <summary>Свой персонаж на полу (Inside) / на полу своей базы (Own) — по последнему UpdateFade.</summary>
+        public bool Inside, Own;
+
+        /// <summary>Срежется ли стена с центром в точке (для призрака Плана и подсветок): как в UpdateFade.</summary>
+        public bool WouldCut(Vector2 centerPx, Vector2 selfPx)
+        {
+            float near = 12f * Iso.PPM;
+            return Own || Inside && centerPx.Y > selfPx.Y && centerPx.Y - selfPx.Y < near && Mathf.Abs(centerPx.X - selfPx.X) < near;
+        }
+
         /// <summary>Постройка сейчас срезана (свой персонаж внутри дома, стена перед ним).</summary>
         public bool IsCut(int structId)
         {
@@ -185,9 +195,11 @@ namespace Rastvordd.Client
             var me = new SVec(selfPx.X / Iso.PPM, selfPx.Y / Iso.PPM);
             bool inside = OnFloor(me);
             bool own = false;
+            Inside = inside;
             if (inside)
                 foreach (var (snap, _) in _items.Values)
                     if (snap.Mine && Building.IsFloor(snap.Kind) && Building.PointInPoly(me, snap.Poly)) { own = true; break; }
+            Own = own;
             float near = 12f * Iso.PPM;
             foreach (var w in Walls)
             {

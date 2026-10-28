@@ -2388,7 +2388,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             _mapView.Time = _cur.Time;
             if (_bghost == null) { _bghost = new BuildGhost2D(); _world.AddChild(_bghost); }
             _bghost.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_hud.CraftOpen;
-            if (_bghost.Visible) { _bghost.Set(_cur.Self.GhostPiece, _cur.Self.GhostPoly, _cur.Self.GhostA, _cur.Self.GhostB, _cur.Self.BuildOk); _bghost.SetZone(_cur.Self.HasZone, _cur.Self.ZoneCell); }
+            if (_bghost.Visible) { _bghost.CutH = _build != null && _build.WouldCut(Iso.Px((_cur.Self.GhostA + _cur.Self.GhostB) * 0.5f), _selfPx) ? BuildGhost2D.CutHeight : 0; _bghost.Set(_cur.Self.GhostPiece, _cur.Self.GhostPoly, _cur.Self.GhostA, _cur.Self.GhostB, _cur.Self.BuildOk); _bghost.SetZone(_cur.Self.HasZone, _cur.Self.ZoneCell); }
 
             // призрак установки
             var self = _cur.Self;

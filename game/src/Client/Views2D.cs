@@ -903,6 +903,7 @@ namespace Rastvordd.Client
         public void UpdateOcclusion(float dt) => SetFade(!_cut && Occlusion.Covers(ScreenRect, Position.Y), dt);
 
         bool _cut;
+        public bool Cut => _cut;
         /// <summary>Срезать стену до низкой (персонаж внутри дома, стена перед ним).</summary>
         public void SetCut(bool cut)
         {

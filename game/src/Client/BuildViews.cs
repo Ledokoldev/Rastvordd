@@ -167,6 +167,14 @@ namespace Rastvordd.Client
                     }
         }
 
+        /// <summary>Постройка сейчас срезана (свой персонаж внутри дома, стена перед ним).</summary>
+        public bool IsCut(int structId)
+        {
+            if (!_items.TryGetValue(structId, out var it)) return false;
+            foreach (var v in it.views) if (v is WallView2D { Cut: true } || v is SlantWallView2D { Cut: true }) return true;
+            return false;
+        }
+
         /// <summary>Стены, закрывающие фокусы кадра (свой персонаж, видимые персонажи, курсор — см. Occlusion), полупрозрачны.</summary>
         public void UpdateFade(Vector2 selfPx, float dt)
         {
@@ -235,6 +243,10 @@ namespace Rastvordd.Client
         public BuildGhost2D() { ZIndex = 6; }
 
         public Color? Tint;   // подсветка цели киянки (иначе — цвета призрака: годится / нет)
+        float _cutH;
+        /// <summary>&gt;0 — цель срезана (изнутри дома): рамка той же низкой высоты, а не во всю стену.</summary>
+        public float CutH { get => _cutH; set { if (value != _cutH) { _cutH = value; QueueRedraw(); } } }
+        public static readonly float CutHeight = 0.45f;   // как у WallView2D/SlantWallView2D
 
         bool _zone;
         (int i, int j) _zoneCell;
@@ -263,7 +275,7 @@ namespace Rastvordd.Client
             var fill = _ok ? new Color(0.45f, 0.8f, 1f, 0.28f) : new Color(1f, 0.35f, 0.3f, 0.28f);
             var line = _ok ? new Color(0.6f, 0.9f, 1f, 0.85f) : new Color(1f, 0.45f, 0.4f, 0.85f);
             float lw = Tint != null ? 2.5f : 1;
-            if (Tint is Color tint) { fill = new Color(tint, 0.32f); line = new Color(tint, 0.95f); }
+            if (Tint is Color tint) { fill = new Color(tint, 0.2f); line = new Color(tint, 0.95f); }
             if (_zone)
             {
                 float c = Building.Cell * Iso.PPM;
@@ -299,7 +311,7 @@ namespace Rastvordd.Client
             var boxes = Building.Boxes(_kind, _ea, _eb, false);
             foreach (var (min, max, h, _) in boxes)
             {
-                float x0 = min.X * Iso.PPM, x1 = max.X * Iso.PPM, y0 = min.Y * Iso.PPM, y1 = max.Y * Iso.PPM, hh = Iso.H(h);
+                float x0 = min.X * Iso.PPM, x1 = max.X * Iso.PPM, y0 = min.Y * Iso.PPM, y1 = max.Y * Iso.PPM, hh = Iso.H(CutH > 0 ? Mathf.Min(h, CutH) : h);
                 var front = new Rect2(x0, y1 - hh, x1 - x0, hh);
                 var top = new Rect2(x0, y0 - hh, x1 - x0, y1 - y0);
                 DrawRect(front, fill);
@@ -444,6 +456,8 @@ namespace Rastvordd.Client
     public partial class InteractMark : Node2D
     {
         System.Numerics.Vector2 _at, _half;
+        public Color Col = new(1f, 0.95f, 0.8f);
+        public bool Full;   // сплошная рамка (киянка «забрать»), иначе уголки
 
         public void Set(System.Numerics.Vector2 at, System.Numerics.Vector2 half)
         {
@@ -461,9 +475,10 @@ namespace Rastvordd.Client
                 _at + new System.Numerics.Vector2(_half.X, _half.Y), _at + new System.Numerics.Vector2(-_half.X, _half.Y),
             };
             var pts = System.Array.ConvertAll(c, p => Iso.Px(p));
-            DrawColoredPolygon(pts, new Color(1f, 0.95f, 0.8f, 0.08f));
+            DrawColoredPolygon(pts, new Color(Col, Full ? 0.18f : 0.08f));
+            if (Full) { for (int i = 0; i < 4; i++) DrawLine(pts[i], pts[(i + 1) % 4], new Color(Col, 0.95f), 2.5f, true); return; }
             // уголки, а не сплошная рамка — аккуратнее и не спорит с подсветкой киянки
-            var line = new Color(1f, 0.95f, 0.8f, 0.55f);
+            var line = new Color(Col, 0.55f);
             for (int i = 0; i < 4; i++)
             {
                 Vector2 p = pts[i], prev = pts[(i + 3) % 4], next = pts[(i + 1) % 4];

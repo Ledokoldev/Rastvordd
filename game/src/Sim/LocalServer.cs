@@ -126,6 +126,8 @@ namespace Rastvordd.Sim
         public bool HoldingHammer;      // киянка в руках
         public int HammerTarget;        // постройка под киянкой (или та, над которой открыто колесо), 0 — нет
         public List<WheelItem> HammerWheel = new();   // колесо киянки для HammerTarget
+        public int HammerDeploy;        // режим «забрать»: установленное под киянкой (id), 0 — нет
+        public Vector2 HammerDeployAt, HammerDeployHalf;
         public int InteractDoor;        // дверь/ставни, которые откроет/закроет E (можешь открыть), 0 — нет
         public System.Numerics.Vector2 InteractAt, InteractHalf;   // остальная цель E: центр и полуразмер рамки (Half = 0 — нет)
         public string HammerAction = "";  // что сделает ЛКМ киянкой в текущем режиме по HammerTarget
@@ -986,6 +988,8 @@ namespace Rastvordd.Sim
                 if (string.IsNullOrEmpty(s.InteractHint))
                     s.InteractHint = $"ЛКМ — {Building.KindName(ghost)} · {price}{(s.BuildOk ? "" : " · " + why)}";
             }
+            else if (!me.Dead && held?.Id == "tool_hammer" && me.HammerMode == World.HammerTake)
+                s.InteractHint = (s.HammerAction ?? "") + " · колёсико — режим";   // режим «забрать»: подсказка киянки важнее [E]
             else if (!me.Dead && held?.Id == "tool_hammer" && World.TargetStructure(me, 2f) is Structure t && string.IsNullOrEmpty(s.InteractHint))
             {
                 string state = $"{Building.KindName(t.Kind)} ({Building.TierNames[t.Tier]}) {(int)t.Hp}/{(int)t.MaxHp}";
@@ -1026,6 +1030,16 @@ namespace Rastvordd.Sim
         void FillHammerWheel(SelfInfo s, Actor me)
         {
             s.HoldingHammer = true;
+            if (me.HammerMode == World.HammerTake)
+            {
+                // режим «забрать»: цель — установленное, колеса нет
+                var d = World.TargetDeploy(me, 2f);
+                string why = World.TakeWhy(me, d);
+                s.HammerAction = d == null ? why : why == "" ? $"ЛКМ — забрать: {Items.Name(World.DeployItemId(d))}" : $"{Items.Name(World.DeployItemId(d) ?? "")}: {why}";
+                s.HammerActionOk = why == "";
+                if (d != null) { s.HammerDeploy = d.Id; s.HammerDeployAt = d.Pos; s.HammerDeployHalf = d.Half != default ? d.Half : new Vector2(d.Radius, d.Radius); }
+                return;
+            }
             var t = me.HammerFocus != 0 ? World.StructById(me.HammerFocus) : World.TargetStructure(me, 2f);
             if (t == null) return;
             s.HammerTarget = t.Id;

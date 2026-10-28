@@ -27,13 +27,14 @@ namespace Rastvordd.Client
         InventoryWindow _inv;
         bool _invOpen;
         BuildMenu _buildMenu, _hammerMenu;   // колёса Плана и киянки (ПКМ)
+        InteractMark _takeMark;              // режим киянки «забрать»: рамка вокруг установленного
         BuildGhost2D _hammerMark;            // подсветка постройки, над которой открыто колесо киянки
         BuildGhost2D _doorMark;              // мягкая подсветка двери, которую откроет E
         InteractMark _useMark;               // мягкая рамка остальной цели E (верстак, ящик, печь…)
         int _hammerFocus, _hammerOp, _hammerTarget;
         int _hammerMode = 1;                 // режим киянки (колёсико): индекс в HammerModes
-        static readonly int[] HammerModes = { 1, 2, 3, 4, World.HammerDemolish };   // дерево, камень, металл, сталь, снос
-        static string HammerModeName(int m) => m == World.HammerDemolish ? "снос" : Building.TierNames[m];
+        static readonly int[] HammerModes = { 1, 2, 3, 4, World.HammerDemolish, World.HammerTake };   // дерево, камень, металл, сталь, снос, забрать установленное
+        static string HammerModeName(int m) => m == World.HammerDemolish ? "снос" : m == World.HammerTake ? "забрать (верстаки, печи, ящики)" : Building.TierNames[m];
         BuildBar _buildBar;
         StructTip _structTip;
         PickupFeed _feed;
@@ -358,6 +359,7 @@ namespace Rastvordd.Client
             // отладка: --seed=N — другой мир для прогонов ботов (обычная игра — 1337; сохранение держит свой)
             var seedArg = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--seed="));
             // правки баланса со страницы прогрессии (game/data/balance.json) — до создания мира
+            Rastvordd.Sim.World.NoScatter = System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--noscatter") >= 0;   // замер: мир без мелкого реквизита
             if (FileAccess.FileExists("res://data/balance.json")) try { Rastvordd.Sim.BalanceOverrides.Apply(FileAccess.GetFileAsString("res://data/balance.json")); } catch (System.Exception ex) { GD.PrintErr($"balance.json: {ex.Message}"); }
             _server = new LocalServer(seedArg != null && int.TryParse(seedArg.Substring(7), out int seedN) ? seedN : 1337);
             // сохранение мира игрока — только при обычном запуске: любой отладочный флаг (прогоны ботов, скриншоты,
@@ -992,7 +994,19 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             if (_useMark == null) { _useMark = new InteractMark(); _world.AddChild(_useMark); }
             _useMark.Visible = door == null && target == null && !self.Dead && !UiShown && self.InteractHalf != default;
             if (_useMark.Visible) _useMark.Set(self.InteractAt, self.InteractHalf);
-            if (target is StructSnap ts) _hammerMark.Set(ts.Kind, Building.IsFloor(ts.Kind) ? ts.Poly : null, ts.A, ts.B, true);
+            if (target is StructSnap ts) { _hammerMark.CutH = _build?.IsCut(ts.Id) == true ? BuildGhost2D.CutHeight : 0; _hammerMark.Set(ts.Kind, Building.IsFloor(ts.Kind) ? ts.Poly : null, ts.A, ts.B, true); }
+            if (door is StructSnap dc) _doorMark.CutH = _build?.IsCut(dc.Id) == true ? BuildGhost2D.CutHeight : 0;
+            // режим «забрать»: рамка вокруг установленного (зелёная — можно, серая — нельзя)
+            if (_takeMark == null) { _takeMark = new InteractMark(); _world.AddChild(_takeMark); }
+            _takeMark.Visible = self.HoldingHammer && !self.Dead && !UiShown && self.HammerDeploy != 0;
+            if (_takeMark.Visible)
+            {
+                var tc = self.HammerActionOk ? UiTheme.Accent : UiTheme.Dim;
+                if (_takeMark.Col != tc) { _takeMark.Col = tc; _takeMark.Full = true; _takeMark.QueueRedraw(); }
+                _takeMark.Set(self.HammerDeployAt, self.HammerDeployHalf);
+                _takeMark.Modulate = new Color(1, 1, 1, 0.7f + 0.3f * Mathf.Sin(Time.GetTicksMsec() / 1000f * 6f));
+                _useMark.Visible = false;
+            }
         }
 
         /// <summary>Наблюдатель: Tab — следующий бот, F — свободная камера, 1–4 — скорость ×1/×2/×4/×8.</summary>
@@ -2317,7 +2331,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _feed.Update(_cur.Self, dt);
             _feed.Visible = !_hud.CraftOpen && !_mapView.Visible && !_inv.Visible;   // лента у пояса; пояс спрятан под крафтом и картой
             bool hammerTip = _cur.Self.HoldingHammer && _cur.Self.HammerTarget != 0;
-            _structTip.Action = _cur.Self.HoldingHammer ? $"Режим: {HammerModeName(_hammerMode)} · " + (hammerTip ? _cur.Self.HammerAction : "наведи на постройку") : null;
+            _structTip.Action = _cur.Self.HoldingHammer ? $"Режим: {HammerModeName(_hammerMode)} · " + (hammerTip || _hammerMode == World.HammerTake ? _cur.Self.HammerAction : "наведи на постройку") : null;
             _structTip.ActionOk = _cur.Self.HammerActionOk;
             StructSnap? tipFor = hammerTip ? _cur.Structures.Find(st => st.Id == _cur.Self.HammerTarget) : StructTip.Pick(_cur.Structures, _aim);
             if (hammerTip && tipFor?.Id != _cur.Self.HammerTarget) tipFor = null;

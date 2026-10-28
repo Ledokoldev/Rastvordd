@@ -682,6 +682,63 @@ namespace Rastvordd.Sim
 
         public string HammerModeText(Actor a, Structure s, int mode) => HammerModeInfo(a, s, mode).text;
 
+        // ---------- режим киянки «забрать»: поднять установленное (верстак, печь, ящик…) обратно в инвентарь ----------
+
+        public const int HammerTake = 8;          // режим колёсика: забрать установленное
+
+        /// <summary>Установленное под прицелом киянки (не дальше досягаемости).</summary>
+        public Deployable TargetDeploy(Actor a, float reach)
+        {
+            var toAim = a.LastAim - a.Pos;
+            float dl = toAim.Length();
+            var hit = dl > 0.05f ? a.Pos + toAim / dl * MathF.Min(dl, reach + 0.6f) : a.Pos + a.FacingDir * MathF.Min(reach, 1.3f);
+            Deployable best = null;
+            float bestD = 0.5f, bestC = float.MaxValue;   // от точки прицела до края хитбокса; внутри нескольких — ближайший центр
+            foreach (var d in Deployables)
+            {
+                if (d.Kind == DeployKind.Recycler || Vector2.DistanceSquared(d.Pos, hit) > 9) continue;
+                var half = d.Half != default ? d.Half : new Vector2(d.Radius, d.Radius);
+                float dd = Vector2.Max(Vector2.Abs(hit - d.Pos) - half, Vector2.Zero).Length();
+                float dc = Vector2.DistanceSquared(d.Pos, hit);
+                if (dd < bestD || (dd == bestD && dc < bestC)) { bestD = dd; bestC = dc; best = d; }
+            }
+            return best;
+        }
+
+        /// <summary>Каким предметом станет установленное, если его забрать.</summary>
+        public static string DeployItemId(Deployable d)
+        {
+            foreach (var id in Items.AllIds())
+                if (Items.Get(id) is ItemDef def && def.Deploy == d.Kind && (d.Kind != DeployKind.Workbench || Items.BenchLevel(id) == d.Level)) return id;
+            return null;
+        }
+
+        /// <summary>Почему нельзя забрать ("" — можно): только в зоне своего шкафа (без шкафа — только своё) и пустое.</summary>
+        public string TakeWhy(Actor a, Deployable d)
+        {
+            if (d == null) return "наведи на установленное";
+            if (Vector2.Distance(a.Pos, d.Pos) > HammerWheelRange) return "далеко";
+            if (DeployItemId(d) == null) return "это не забрать";
+            var claim = d.Kind == DeployKind.Claim ? d : ClaimAt(Building.CellOf(d.Pos));
+            if (claim != null ? !claim.Auth.Contains(a.Id) : d.OwnerId != a.Id) return "шкаф не твой";
+            if (d.Kind == DeployKind.Claim)
+                foreach (var s in Structures) if (s.ClaimId == d.Id) return "к шкафу привязаны постройки";
+            if (d.Storage != null && d.Storage.Items.Exists(x => x != null && x.Count > 0)) return "внутри вещи — сначала выложи";
+            if (d.Ore > 0 || d.SulfurOre > 0 || d.Fuel > 0.01f || d.OutMetal > 0 || d.OutSulfur > 0 || d.OutCharcoal > 0) return "внутри что-то осталось — выгреби";
+            return "";
+        }
+
+        /// <summary>Забрать установленное: предмет — в инвентарь, место освобождается (можно переставить).</summary>
+        void TakeDeploy(Actor a, Deployable d)
+        {
+            string why = TakeWhy(a, d);
+            if (why != "") { Info(a, d == null ? why : $"{Items.Name(DeployItemId(d) ?? "")}: {why}"); return; }
+            string id = DeployItemId(d);
+            RemoveDeployable(d);
+            a.Add(id, 1);
+            Info(a, $"Забрано: {Items.Name(id)}");
+        }
+
         /// <summary>Пункт колеса киянки выбран: улучшить постройку сразу до уровня или снести с возвратом половины цены.</summary>
         void HammerWheel(Actor a, int structId, int op)
         {

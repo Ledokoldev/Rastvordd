@@ -118,6 +118,7 @@ namespace Rastvordd.Client
         /// <summary>Прозрачность по фокусам кадра (Occlusion); срезанная стена не растворяется.</summary>
         public void UpdateOcclusion(float dt) => SetFade(!_cut && Occlusion.Covers(ScreenRect, Position.Y), dt);
 
+        public bool Cut => _cut;
         public void SetCut(bool cut) { if (cut != _cut) { _cut = cut; QueueRedraw(); } }
 
         public void SetFade(bool fade, float dt)

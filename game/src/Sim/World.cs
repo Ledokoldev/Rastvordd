@@ -1350,6 +1350,7 @@ namespace Rastvordd.Sim
 
             if (wd.Id == "tool_hammer")
             {
+                if (a.HammerMode == HammerTake) { TakeDeploy(a, TargetDeploy(a, wd.Range)); return; }   // режим «забрать»: только установленное
                 var target = TargetStructure(a, wd.Range);
                 if (target != null) { HammerHit(a, target); return; }
             }

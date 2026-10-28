@@ -13,6 +13,25 @@ namespace Rastvordd.Sim
         const BindingFlags All = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
         const int Samples = 3000;
 
+        static void Stats(Dictionary<string, object> st, string pre, object def)
+        {
+            if (def == null) return;
+            foreach (var f in def.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public))
+            {
+                var v = f.GetValue(def);
+                if (f.Name is "Id" or "Name" or "Weapon" || v == null) continue;
+                switch (v)
+                {
+                    case float x when x != 0: st[pre + f.Name] = Math.Round(x, 3); break;
+                    case double x when x != 0: st[pre + f.Name] = Math.Round(x, 3); break;
+                    case int x when x != 0: st[pre + f.Name] = x; break;
+                    case bool x when x: st[pre + f.Name] = true; break;
+                    case string x when x.Length > 0: st[pre + f.Name] = x; break;
+                    case Enum x: st[pre + f.Name] = x.ToString(); break;
+                }
+            }
+        }
+
         public static string Build(World w)
         {
             var ids = new HashSet<string>();
@@ -211,6 +230,9 @@ namespace Rastvordd.Sim
                 var o = new Dictionary<string, object> { ["name"] = d?.Name ?? id, ["cat"] = d?.Category.ToString() ?? "?" };
                 if (meta.TryGetValue(id, out var mm) && !string.IsNullOrEmpty(mm.Desc)) o["desc"] = mm.Desc;
                 else if (Clothing.TryMeta(id, out var cm) && !string.IsNullOrEmpty(cm.Desc)) o["desc"] = cm.Desc;
+                var st = new Dictionary<string, object>();   // полные статы (ПКМ в «Паутине»): все ненулевые поля определений
+                Stats(st, "", d); Stats(st, "оружие.", d?.Weapon); Stats(st, "одежда.", Clothing.Def(id)); Stats(st, "пластина.", Clothing.Plate(id));
+                if (st.Count > 0) o["stats"] = st;
                 items[id] = o;
             }
 

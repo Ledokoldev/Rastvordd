@@ -1,0 +1,2411 @@
+{
+ "style": "ULTRA-REALISTIC natural look, like a high-resolution photograph of a real object cut out on transparent background, true-to-life materials (worn wood grain, chipped paint, rust, scuffed plastic, dents), true natural colours (not desaturated, not stylized), soft natural daylight from the top-left, crisp fine detail. Post-Soviet everyday objects. NOT cartoon, NOT painterly, NOT AI-art look, no glow, no outline.",
+ "assets": [
+  {
+   "id": "rloot_crate_wood_cheap_01",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "a cheap rough wooden slat crate nailed together "
+  },
+  {
+   "id": "rloot_crate_wood_cheap_02",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "a cheap rough wooden slat crate nailed together seen slightly from the left"
+  },
+  {
+   "id": "rloot_crate_wood_cheap_03",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "a cheap rough wooden slat crate nailed together seen slightly from the right"
+  },
+  {
+   "id": "rloot_crate_wood_cheap_04",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "a cheap rough wooden slat crate nailed together weathered and dented"
+  },
+  {
+   "id": "rloot_crate_wood_plank_01",
+   "cat": "containers",
+   "h": 0.7,
+   "desc": "a plank wooden crate with a lid "
+  },
+  {
+   "id": "rloot_crate_wood_plank_02",
+   "cat": "containers",
+   "h": 0.7,
+   "desc": "a plank wooden crate with a lid seen slightly from the left"
+  },
+  {
+   "id": "rloot_crate_wood_plank_03",
+   "cat": "containers",
+   "h": 0.7,
+   "desc": "a plank wooden crate with a lid seen slightly from the right"
+  },
+  {
+   "id": "rloot_crate_wood_plank_04",
+   "cat": "containers",
+   "h": 0.7,
+   "desc": "a plank wooden crate with a lid weathered and dented"
+  },
+  {
+   "id": "rloot_crate_produce_01",
+   "cat": "containers",
+   "h": 0.4,
+   "desc": "a wooden produce crate with gaps "
+  },
+  {
+   "id": "rloot_crate_produce_02",
+   "cat": "containers",
+   "h": 0.4,
+   "desc": "a wooden produce crate with gaps seen slightly from the left"
+  },
+  {
+   "id": "rloot_crate_produce_03",
+   "cat": "containers",
+   "h": 0.4,
+   "desc": "a wooden produce crate with gaps seen slightly from the right"
+  },
+  {
+   "id": "rloot_crate_produce_04",
+   "cat": "containers",
+   "h": 0.4,
+   "desc": "a wooden produce crate with gaps weathered and dented"
+  },
+  {
+   "id": "rloot_crate_military_01",
+   "cat": "containers",
+   "h": 0.5,
+   "desc": "an olive-green Soviet military ammunition crate with rope handles and stencil "
+  },
+  {
+   "id": "rloot_crate_military_02",
+   "cat": "containers",
+   "h": 0.5,
+   "desc": "an olive-green Soviet military ammunition crate with rope handles and stencil seen slightly from the left"
+  },
+  {
+   "id": "rloot_crate_military_03",
+   "cat": "containers",
+   "h": 0.5,
+   "desc": "an olive-green Soviet military ammunition crate with rope handles and stencil seen slightly from the right"
+  },
+  {
+   "id": "rloot_crate_military_04",
+   "cat": "containers",
+   "h": 0.5,
+   "desc": "an olive-green Soviet military ammunition crate with rope handles and stencil weathered and dented"
+  },
+  {
+   "id": "rloot_crate_military_long_01",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "a long olive-green military weapon crate with metal latches "
+  },
+  {
+   "id": "rloot_crate_military_long_02",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "a long olive-green military weapon crate with metal latches seen slightly from the left"
+  },
+  {
+   "id": "rloot_crate_military_long_03",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "a long olive-green military weapon crate with metal latches seen slightly from the right"
+  },
+  {
+   "id": "rloot_crate_military_long_04",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "a long olive-green military weapon crate with metal latches weathered and dented"
+  },
+  {
+   "id": "rloot_case_weapon_01",
+   "cat": "containers",
+   "h": 0.25,
+   "desc": "a hard black polymer weapon case with latches "
+  },
+  {
+   "id": "rloot_case_weapon_02",
+   "cat": "containers",
+   "h": 0.25,
+   "desc": "a hard black polymer weapon case with latches seen slightly from the left"
+  },
+  {
+   "id": "rloot_case_weapon_03",
+   "cat": "containers",
+   "h": 0.25,
+   "desc": "a hard black polymer weapon case with latches seen slightly from the right"
+  },
+  {
+   "id": "rloot_case_weapon_04",
+   "cat": "containers",
+   "h": 0.25,
+   "desc": "a hard black polymer weapon case with latches weathered and dented"
+  },
+  {
+   "id": "rloot_case_aluminium_01",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "an aluminium flight case with corner protectors "
+  },
+  {
+   "id": "rloot_case_aluminium_02",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "an aluminium flight case with corner protectors seen slightly from the left"
+  },
+  {
+   "id": "rloot_case_aluminium_03",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "an aluminium flight case with corner protectors seen slightly from the right"
+  },
+  {
+   "id": "rloot_case_aluminium_04",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "an aluminium flight case with corner protectors weathered and dented"
+  },
+  {
+   "id": "rloot_box_ammo_metal_01",
+   "cat": "containers",
+   "h": 0.3,
+   "desc": "a metal ammo can (zinc) with a handle "
+  },
+  {
+   "id": "rloot_box_ammo_metal_02",
+   "cat": "containers",
+   "h": 0.3,
+   "desc": "a metal ammo can (zinc) with a handle seen slightly from the left"
+  },
+  {
+   "id": "rloot_box_ammo_metal_03",
+   "cat": "containers",
+   "h": 0.3,
+   "desc": "a metal ammo can (zinc) with a handle seen slightly from the right"
+  },
+  {
+   "id": "rloot_box_ammo_metal_04",
+   "cat": "containers",
+   "h": 0.3,
+   "desc": "a metal ammo can (zinc) with a handle weathered and dented"
+  },
+  {
+   "id": "rloot_box_medical_01",
+   "cat": "containers",
+   "h": 0.35,
+   "desc": "a white metal medical box with a red cross "
+  },
+  {
+   "id": "rloot_box_medical_02",
+   "cat": "containers",
+   "h": 0.35,
+   "desc": "a white metal medical box with a red cross seen slightly from the left"
+  },
+  {
+   "id": "rloot_box_medical_03",
+   "cat": "containers",
+   "h": 0.35,
+   "desc": "a white metal medical box with a red cross seen slightly from the right"
+  },
+  {
+   "id": "rloot_box_medical_04",
+   "cat": "containers",
+   "h": 0.35,
+   "desc": "a white metal medical box with a red cross weathered and dented"
+  },
+  {
+   "id": "rloot_box_tools_01",
+   "cat": "containers",
+   "h": 0.3,
+   "desc": "a red metal toolbox, two-tier, with a handle "
+  },
+  {
+   "id": "rloot_box_tools_02",
+   "cat": "containers",
+   "h": 0.3,
+   "desc": "a red metal toolbox, two-tier, with a handle seen slightly from the left"
+  },
+  {
+   "id": "rloot_box_tools_03",
+   "cat": "containers",
+   "h": 0.3,
+   "desc": "a red metal toolbox, two-tier, with a handle seen slightly from the right"
+  },
+  {
+   "id": "rloot_box_tools_04",
+   "cat": "containers",
+   "h": 0.3,
+   "desc": "a red metal toolbox, two-tier, with a handle weathered and dented"
+  },
+  {
+   "id": "rloot_box_electrical_01",
+   "cat": "containers",
+   "h": 0.4,
+   "desc": "a grey electrical spare-parts box (ZIP) with latches "
+  },
+  {
+   "id": "rloot_box_electrical_02",
+   "cat": "containers",
+   "h": 0.4,
+   "desc": "a grey electrical spare-parts box (ZIP) with latches seen slightly from the left"
+  },
+  {
+   "id": "rloot_box_electrical_03",
+   "cat": "containers",
+   "h": 0.4,
+   "desc": "a grey electrical spare-parts box (ZIP) with latches seen slightly from the right"
+  },
+  {
+   "id": "rloot_box_electrical_04",
+   "cat": "containers",
+   "h": 0.4,
+   "desc": "a grey electrical spare-parts box (ZIP) with latches weathered and dented"
+  },
+  {
+   "id": "rloot_safe_small_01",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "a small heavy steel safe with a dial "
+  },
+  {
+   "id": "rloot_safe_small_02",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "a small heavy steel safe with a dial seen slightly from the left"
+  },
+  {
+   "id": "rloot_safe_small_03",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "a small heavy steel safe with a dial seen slightly from the right"
+  },
+  {
+   "id": "rloot_safe_small_04",
+   "cat": "containers",
+   "h": 0.6,
+   "desc": "a small heavy steel safe with a dial weathered and dented"
+  },
+  {
+   "id": "rloot_safe_large_01",
+   "cat": "containers",
+   "h": 1.3,
+   "desc": "a large old green fireproof safe with a handle wheel "
+  },
+  {
+   "id": "rloot_safe_large_02",
+   "cat": "containers",
+   "h": 1.3,
+   "desc": "a large old green fireproof safe with a handle wheel seen slightly from the left"
+  },
+  {
+   "id": "rloot_safe_large_03",
+   "cat": "containers",
+   "h": 1.3,
+   "desc": "a large old green fireproof safe with a handle wheel seen slightly from the right"
+  },
+  {
+   "id": "rloot_safe_large_04",
+   "cat": "containers",
+   "h": 1.3,
+   "desc": "a large old green fireproof safe with a handle wheel weathered and dented"
+  },
+  {
+   "id": "rloot_locker_metal_01",
+   "cat": "containers",
+   "h": 1.8,
+   "desc": "a grey metal locker with vents "
+  },
+  {
+   "id": "rloot_locker_metal_02",
+   "cat": "containers",
+   "h": 1.8,
+   "desc": "a grey metal locker with vents seen slightly from the left"
+  },
+  {
+   "id": "rloot_locker_metal_03",
+   "cat": "containers",
+   "h": 1.8,
+   "desc": "a grey metal locker with vents seen slightly from the right"
+  },
+  {
+   "id": "rloot_locker_metal_04",
+   "cat": "containers",
+   "h": 1.8,
+   "desc": "a grey metal locker with vents weathered and dented"
+  },
+  {
+   "id": "rloot_cabinet_med_01",
+   "cat": "containers",
+   "h": 1.6,
+   "desc": "a white medical cabinet with glass doors "
+  },
+  {
+   "id": "rloot_cabinet_med_02",
+   "cat": "containers",
+   "h": 1.6,
+   "desc": "a white medical cabinet with glass doors seen slightly from the left"
+  },
+  {
+   "id": "rloot_cabinet_med_03",
+   "cat": "containers",
+   "h": 1.6,
+   "desc": "a white medical cabinet with glass doors seen slightly from the right"
+  },
+  {
+   "id": "rloot_cabinet_med_04",
+   "cat": "containers",
+   "h": 1.6,
+   "desc": "a white medical cabinet with glass doors weathered and dented"
+  },
+  {
+   "id": "rloot_trunk_old_01",
+   "cat": "containers",
+   "h": 0.55,
+   "desc": "an old wooden trunk with iron bands "
+  },
+  {
+   "id": "rloot_trunk_old_02",
+   "cat": "containers",
+   "h": 0.55,
+   "desc": "an old wooden trunk with iron bands seen slightly from the left"
+  },
+  {
+   "id": "rloot_trunk_old_03",
+   "cat": "containers",
+   "h": 0.55,
+   "desc": "an old wooden trunk with iron bands seen slightly from the right"
+  },
+  {
+   "id": "rloot_trunk_old_04",
+   "cat": "containers",
+   "h": 0.55,
+   "desc": "an old wooden trunk with iron bands weathered and dented"
+  },
+  {
+   "id": "rloot_cooler_box_01",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "a plastic cooler box "
+  },
+  {
+   "id": "rloot_cooler_box_02",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "a plastic cooler box seen slightly from the left"
+  },
+  {
+   "id": "rloot_cooler_box_03",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "a plastic cooler box seen slightly from the right"
+  },
+  {
+   "id": "rloot_cooler_box_04",
+   "cat": "containers",
+   "h": 0.45,
+   "desc": "a plastic cooler box weathered and dented"
+  },
+  {
+   "id": "rloot_crate_plastic_01",
+   "cat": "containers",
+   "h": 0.35,
+   "desc": "a stackable plastic crate "
+  },
+  {
+   "id": "rloot_crate_plastic_02",
+   "cat": "containers",
+   "h": 0.35,
+   "desc": "a stackable plastic crate seen slightly from the left"
+  },
+  {
+   "id": "rloot_crate_plastic_03",
+   "cat": "containers",
+   "h": 0.35,
+   "desc": "a stackable plastic crate seen slightly from the right"
+  },
+  {
+   "id": "rloot_crate_plastic_04",
+   "cat": "containers",
+   "h": 0.35,
+   "desc": "a stackable plastic crate weathered and dented"
+  },
+  {
+   "id": "rloot_crate_expensive_01",
+   "cat": "containers",
+   "h": 0.7,
+   "desc": "a sturdy expensive reinforced crate with steel corners and padlock "
+  },
+  {
+   "id": "rloot_crate_expensive_02",
+   "cat": "containers",
+   "h": 0.7,
+   "desc": "a sturdy expensive reinforced crate with steel corners and padlock seen slightly from the left"
+  },
+  {
+   "id": "rloot_crate_expensive_03",
+   "cat": "containers",
+   "h": 0.7,
+   "desc": "a sturdy expensive reinforced crate with steel corners and padlock seen slightly from the right"
+  },
+  {
+   "id": "rloot_crate_expensive_04",
+   "cat": "containers",
+   "h": 0.7,
+   "desc": "a sturdy expensive reinforced crate with steel corners and padlock weathered and dented"
+  },
+  {
+   "id": "rloot_supply_drop_crate_01",
+   "cat": "containers",
+   "h": 1.0,
+   "desc": "a large airdropped supply crate with straps "
+  },
+  {
+   "id": "rloot_supply_drop_crate_02",
+   "cat": "containers",
+   "h": 1.0,
+   "desc": "a large airdropped supply crate with straps seen slightly from the left"
+  },
+  {
+   "id": "rloot_supply_drop_crate_03",
+   "cat": "containers",
+   "h": 1.0,
+   "desc": "a large airdropped supply crate with straps seen slightly from the right"
+  },
+  {
+   "id": "rloot_supply_drop_crate_04",
+   "cat": "containers",
+   "h": 1.0,
+   "desc": "a large airdropped supply crate with straps weathered and dented"
+  },
+  {
+   "id": "rprop_tire_car_01",
+   "cat": "props",
+   "h": 0.25,
+   "desc": "a worn car tire lying flat"
+  },
+  {
+   "id": "rprop_tire_car_02",
+   "cat": "props",
+   "h": 0.25,
+   "desc": "a worn car tire lying flat, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_tire_car_03",
+   "cat": "props",
+   "h": 0.25,
+   "desc": "a worn car tire lying flat, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_tire_stack_01",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a stack of three old tires"
+  },
+  {
+   "id": "rprop_tire_stack_02",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a stack of three old tires, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_tire_stack_03",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a stack of three old tires, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_bucket_metal_01",
+   "cat": "props",
+   "h": 0.35,
+   "desc": "a rusty metal bucket"
+  },
+  {
+   "id": "rprop_bucket_metal_02",
+   "cat": "props",
+   "h": 0.35,
+   "desc": "a rusty metal bucket, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_bucket_metal_03",
+   "cat": "props",
+   "h": 0.35,
+   "desc": "a rusty metal bucket, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_jerrycan_01",
+   "cat": "props",
+   "h": 0.45,
+   "desc": "a metal jerrycan"
+  },
+  {
+   "id": "rprop_jerrycan_02",
+   "cat": "props",
+   "h": 0.45,
+   "desc": "a metal jerrycan, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_jerrycan_03",
+   "cat": "props",
+   "h": 0.45,
+   "desc": "a metal jerrycan, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_gas_cylinder_01",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a red propane gas cylinder"
+  },
+  {
+   "id": "rprop_gas_cylinder_02",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a red propane gas cylinder, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_gas_cylinder_03",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a red propane gas cylinder, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_pallet_01",
+   "cat": "props",
+   "h": 0.15,
+   "desc": "a wooden pallet"
+  },
+  {
+   "id": "rprop_pallet_02",
+   "cat": "props",
+   "h": 0.15,
+   "desc": "a wooden pallet, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_pallet_03",
+   "cat": "props",
+   "h": 0.15,
+   "desc": "a wooden pallet, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_pallet_stack_01",
+   "cat": "props",
+   "h": 0.7,
+   "desc": "a stack of wooden pallets"
+  },
+  {
+   "id": "rprop_pallet_stack_02",
+   "cat": "props",
+   "h": 0.7,
+   "desc": "a stack of wooden pallets, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_pallet_stack_03",
+   "cat": "props",
+   "h": 0.7,
+   "desc": "a stack of wooden pallets, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_cinder_blocks_01",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a few concrete cinder blocks"
+  },
+  {
+   "id": "rprop_cinder_blocks_02",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a few concrete cinder blocks, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_cinder_blocks_03",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a few concrete cinder blocks, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_bricks_pile_01",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a pile of old red bricks"
+  },
+  {
+   "id": "rprop_bricks_pile_02",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a pile of old red bricks, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_bricks_pile_03",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a pile of old red bricks, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_logs_pile_01",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a pile of cut firewood logs"
+  },
+  {
+   "id": "rprop_logs_pile_02",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a pile of cut firewood logs, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_logs_pile_03",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a pile of cut firewood logs, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_stump_01",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a tree stump with roots"
+  },
+  {
+   "id": "rprop_stump_02",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a tree stump with roots, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_stump_03",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a tree stump with roots, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_rock_small_01",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a mossy rock"
+  },
+  {
+   "id": "rprop_rock_small_02",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a mossy rock, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_rock_small_03",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a mossy rock, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_bench_park_01",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "an old Soviet park bench"
+  },
+  {
+   "id": "rprop_bench_park_02",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "an old Soviet park bench, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_bench_park_03",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "an old Soviet park bench, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_trash_bags_01",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a heap of black trash bags"
+  },
+  {
+   "id": "rprop_trash_bags_02",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a heap of black trash bags, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_trash_bags_03",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a heap of black trash bags, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_bicycle_old_01",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "an old rusty bicycle lying on its side"
+  },
+  {
+   "id": "rprop_bicycle_old_02",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "an old rusty bicycle lying on its side, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_bicycle_old_03",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "an old rusty bicycle lying on its side, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_shopping_cart_01",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "an overturned rusty shopping cart"
+  },
+  {
+   "id": "rprop_shopping_cart_02",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "an overturned rusty shopping cart, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_shopping_cart_03",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "an overturned rusty shopping cart, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_washing_machine_01",
+   "cat": "props",
+   "h": 0.85,
+   "desc": "an old Soviet washing machine"
+  },
+  {
+   "id": "rprop_washing_machine_02",
+   "cat": "props",
+   "h": 0.85,
+   "desc": "an old Soviet washing machine, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_washing_machine_03",
+   "cat": "props",
+   "h": 0.85,
+   "desc": "an old Soviet washing machine, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_fridge_old_01",
+   "cat": "props",
+   "h": 0.7,
+   "desc": "an old white fridge lying down"
+  },
+  {
+   "id": "rprop_fridge_old_02",
+   "cat": "props",
+   "h": 0.7,
+   "desc": "an old white fridge lying down, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_fridge_old_03",
+   "cat": "props",
+   "h": 0.7,
+   "desc": "an old white fridge lying down, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_tv_crt_01",
+   "cat": "props",
+   "h": 0.45,
+   "desc": "a broken CRT television"
+  },
+  {
+   "id": "rprop_tv_crt_02",
+   "cat": "props",
+   "h": 0.45,
+   "desc": "a broken CRT television, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_tv_crt_03",
+   "cat": "props",
+   "h": 0.45,
+   "desc": "a broken CRT television, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_chair_wood_01",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a broken wooden chair"
+  },
+  {
+   "id": "rprop_chair_wood_02",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a broken wooden chair, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_chair_wood_03",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a broken wooden chair, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_table_wood_01",
+   "cat": "props",
+   "h": 0.75,
+   "desc": "an old wooden table"
+  },
+  {
+   "id": "rprop_table_wood_02",
+   "cat": "props",
+   "h": 0.75,
+   "desc": "an old wooden table, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_table_wood_03",
+   "cat": "props",
+   "h": 0.75,
+   "desc": "an old wooden table, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_mattress_01",
+   "cat": "props",
+   "h": 0.25,
+   "desc": "a stained old mattress"
+  },
+  {
+   "id": "rprop_mattress_02",
+   "cat": "props",
+   "h": 0.25,
+   "desc": "a stained old mattress, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_mattress_03",
+   "cat": "props",
+   "h": 0.25,
+   "desc": "a stained old mattress, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_cardboard_boxes_01",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a few soggy cardboard boxes"
+  },
+  {
+   "id": "rprop_cardboard_boxes_02",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a few soggy cardboard boxes, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_cardboard_boxes_03",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a few soggy cardboard boxes, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_sandbags_01",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a short wall of sandbags"
+  },
+  {
+   "id": "rprop_sandbags_02",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a short wall of sandbags, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_sandbags_03",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a short wall of sandbags, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_barbed_coil_01",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a coil of barbed wire"
+  },
+  {
+   "id": "rprop_barbed_coil_02",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a coil of barbed wire, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_barbed_coil_03",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a coil of barbed wire, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_road_cone_01",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "an orange traffic cone"
+  },
+  {
+   "id": "rprop_road_cone_02",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "an orange traffic cone, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_road_cone_03",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "an orange traffic cone, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_concrete_ring_01",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a concrete well ring"
+  },
+  {
+   "id": "rprop_concrete_ring_02",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a concrete well ring, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_concrete_ring_03",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a concrete well ring, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_manhole_01",
+   "cat": "props",
+   "h": 0.05,
+   "desc": "a rusty manhole cover in the ground"
+  },
+  {
+   "id": "rprop_manhole_02",
+   "cat": "props",
+   "h": 0.05,
+   "desc": "a rusty manhole cover in the ground, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_manhole_03",
+   "cat": "props",
+   "h": 0.05,
+   "desc": "a rusty manhole cover in the ground, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_pipes_stack_01",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a stack of rusty metal pipes"
+  },
+  {
+   "id": "rprop_pipes_stack_02",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a stack of rusty metal pipes, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_pipes_stack_03",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a stack of rusty metal pipes, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_road_sign_fallen_01",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a fallen Soviet road sign on a bent pole"
+  },
+  {
+   "id": "rprop_road_sign_fallen_02",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a fallen Soviet road sign on a bent pole, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_road_sign_fallen_03",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a fallen Soviet road sign on a bent pole, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_fence_wood_piece_01",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a piece of broken wooden fence"
+  },
+  {
+   "id": "rprop_fence_wood_piece_02",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a piece of broken wooden fence, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_fence_wood_piece_03",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a piece of broken wooden fence, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_fence_mesh_piece_01",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "a piece of chain-link fence on posts"
+  },
+  {
+   "id": "rprop_fence_mesh_piece_02",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "a piece of chain-link fence on posts, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_fence_mesh_piece_03",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "a piece of chain-link fence on posts, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_car_seat_01",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a torn car seat"
+  },
+  {
+   "id": "rprop_car_seat_02",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a torn car seat, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_car_seat_03",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a torn car seat, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_baby_pram_01",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "an old rusty baby pram"
+  },
+  {
+   "id": "rprop_baby_pram_02",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "an old rusty baby pram, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_baby_pram_03",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "an old rusty baby pram, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_toolbench_small_01",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a small workbench with a vice"
+  },
+  {
+   "id": "rprop_toolbench_small_02",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a small workbench with a vice, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_toolbench_small_03",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a small workbench with a vice, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_wheelbarrow_01",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a rusty wheelbarrow"
+  },
+  {
+   "id": "rprop_wheelbarrow_02",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a rusty wheelbarrow, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_wheelbarrow_03",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a rusty wheelbarrow, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_garden_hose_01",
+   "cat": "props",
+   "h": 0.15,
+   "desc": "a coiled garden hose"
+  },
+  {
+   "id": "rprop_garden_hose_02",
+   "cat": "props",
+   "h": 0.15,
+   "desc": "a coiled garden hose, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_garden_hose_03",
+   "cat": "props",
+   "h": 0.15,
+   "desc": "a coiled garden hose, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_watering_can_01",
+   "cat": "props",
+   "h": 0.3,
+   "desc": "a metal watering can"
+  },
+  {
+   "id": "rprop_watering_can_02",
+   "cat": "props",
+   "h": 0.3,
+   "desc": "a metal watering can, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_watering_can_03",
+   "cat": "props",
+   "h": 0.3,
+   "desc": "a metal watering can, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_beehive_01",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a wooden beehive"
+  },
+  {
+   "id": "rprop_beehive_02",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a wooden beehive, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_beehive_03",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a wooden beehive, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_haystack_small_01",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "a small haystack"
+  },
+  {
+   "id": "rprop_haystack_small_02",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "a small haystack, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_haystack_small_03",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "a small haystack, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_scarecrow_01",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a scarecrow on a pole"
+  },
+  {
+   "id": "rprop_scarecrow_02",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a scarecrow on a pole, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_scarecrow_03",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a scarecrow on a pole, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_signpost_01",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a wooden signpost with arrows"
+  },
+  {
+   "id": "rprop_signpost_02",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a wooden signpost with arrows, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_signpost_03",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a wooden signpost with arrows, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_mailbox_01",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a rusty Soviet mailbox"
+  },
+  {
+   "id": "rprop_mailbox_02",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a rusty Soviet mailbox, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_mailbox_03",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a rusty Soviet mailbox, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_phone_booth_01",
+   "cat": "props",
+   "h": 2.1,
+   "desc": "an old Soviet phone booth"
+  },
+  {
+   "id": "rprop_phone_booth_02",
+   "cat": "props",
+   "h": 2.1,
+   "desc": "an old Soviet phone booth, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_phone_booth_03",
+   "cat": "props",
+   "h": 2.1,
+   "desc": "an old Soviet phone booth, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_bus_stop_sign_01",
+   "cat": "props",
+   "h": 2.2,
+   "desc": "a bus stop sign pole"
+  },
+  {
+   "id": "rprop_bus_stop_sign_02",
+   "cat": "props",
+   "h": 2.2,
+   "desc": "a bus stop sign pole, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_bus_stop_sign_03",
+   "cat": "props",
+   "h": 2.2,
+   "desc": "a bus stop sign pole, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_fire_hydrant_01",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a Soviet fire hydrant column"
+  },
+  {
+   "id": "rprop_fire_hydrant_02",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a Soviet fire hydrant column, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_fire_hydrant_03",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a Soviet fire hydrant column, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_electric_box_01",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a grey electrical box on a post"
+  },
+  {
+   "id": "rprop_electric_box_02",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a grey electrical box on a post, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_electric_box_03",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a grey electrical box on a post, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_lamp_post_broken_01",
+   "cat": "props",
+   "h": 3.0,
+   "desc": "a broken street lamp post leaning"
+  },
+  {
+   "id": "rprop_lamp_post_broken_02",
+   "cat": "props",
+   "h": 3.0,
+   "desc": "a broken street lamp post leaning, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_lamp_post_broken_03",
+   "cat": "props",
+   "h": 3.0,
+   "desc": "a broken street lamp post leaning, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_anthill_01",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a large forest anthill"
+  },
+  {
+   "id": "rprop_anthill_02",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a large forest anthill, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_anthill_03",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a large forest anthill, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_fallen_branch_01",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a fallen dry branch"
+  },
+  {
+   "id": "rprop_fallen_branch_02",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a fallen dry branch, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_fallen_branch_03",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a fallen dry branch, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_bush_dry_01",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a dry leafless bush"
+  },
+  {
+   "id": "rprop_bush_dry_02",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a dry leafless bush, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_bush_dry_03",
+   "cat": "props",
+   "h": 0.9,
+   "desc": "a dry leafless bush, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_reeds_01",
+   "cat": "props",
+   "h": 1.3,
+   "desc": "a clump of reeds and cattails"
+  },
+  {
+   "id": "rprop_reeds_02",
+   "cat": "props",
+   "h": 1.3,
+   "desc": "a clump of reeds and cattails, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_reeds_03",
+   "cat": "props",
+   "h": 1.3,
+   "desc": "a clump of reeds and cattails, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_lily_pads_01",
+   "cat": "props",
+   "h": 0.05,
+   "desc": "water lilies on a patch of water surface"
+  },
+  {
+   "id": "rprop_lily_pads_02",
+   "cat": "props",
+   "h": 0.05,
+   "desc": "water lilies on a patch of water surface, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_lily_pads_03",
+   "cat": "props",
+   "h": 0.05,
+   "desc": "water lilies on a patch of water surface, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_boat_small_01",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a small wooden rowing boat pulled ashore"
+  },
+  {
+   "id": "rprop_boat_small_02",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a small wooden rowing boat pulled ashore, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_boat_small_03",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a small wooden rowing boat pulled ashore, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_fishing_rod_stand_01",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a fishing rod on a stand by a bucket"
+  },
+  {
+   "id": "rprop_fishing_rod_stand_02",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a fishing rod on a stand by a bucket, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_fishing_rod_stand_03",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a fishing rod on a stand by a bucket, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_campfire_cold_01",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a cold campfire ring of stones with ash"
+  },
+  {
+   "id": "rprop_campfire_cold_02",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a cold campfire ring of stones with ash, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_campfire_cold_03",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a cold campfire ring of stones with ash, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_tent_small_01",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a small torn camping tent"
+  },
+  {
+   "id": "rprop_tent_small_02",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a small torn camping tent, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_tent_small_03",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a small torn camping tent, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_tarp_shelter_01",
+   "cat": "props",
+   "h": 1.3,
+   "desc": "a tarp shelter on sticks"
+  },
+  {
+   "id": "rprop_tarp_shelter_02",
+   "cat": "props",
+   "h": 1.3,
+   "desc": "a tarp shelter on sticks, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_tarp_shelter_03",
+   "cat": "props",
+   "h": 1.3,
+   "desc": "a tarp shelter on sticks, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_laundry_line_01",
+   "cat": "props",
+   "h": 1.6,
+   "desc": "a laundry line with clothes between two poles"
+  },
+  {
+   "id": "rprop_laundry_line_02",
+   "cat": "props",
+   "h": 1.6,
+   "desc": "a laundry line with clothes between two poles, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_laundry_line_03",
+   "cat": "props",
+   "h": 1.6,
+   "desc": "a laundry line with clothes between two poles, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_road_barrier_01",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a red-white striped road barrier"
+  },
+  {
+   "id": "rprop_road_barrier_02",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a red-white striped road barrier, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_road_barrier_03",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a red-white striped road barrier, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_concrete_barrier_01",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a concrete road barrier block"
+  },
+  {
+   "id": "rprop_concrete_barrier_02",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a concrete road barrier block, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_concrete_barrier_03",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a concrete road barrier block, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_tank_hedgehog_01",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a Czech anti-tank hedgehog of steel beams"
+  },
+  {
+   "id": "rprop_tank_hedgehog_02",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a Czech anti-tank hedgehog of steel beams, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_tank_hedgehog_03",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a Czech anti-tank hedgehog of steel beams, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_kiosk_01",
+   "cat": "props",
+   "h": 2.4,
+   "desc": "a small abandoned street kiosk"
+  },
+  {
+   "id": "rprop_kiosk_02",
+   "cat": "props",
+   "h": 2.4,
+   "desc": "a small abandoned street kiosk, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_kiosk_03",
+   "cat": "props",
+   "h": 2.4,
+   "desc": "a small abandoned street kiosk, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_newspaper_stand_01",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "an old newspaper stand"
+  },
+  {
+   "id": "rprop_newspaper_stand_02",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "an old newspaper stand, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_newspaper_stand_03",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "an old newspaper stand, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_vending_soda_01",
+   "cat": "props",
+   "h": 1.7,
+   "desc": "a Soviet soda water vending machine"
+  },
+  {
+   "id": "rprop_vending_soda_02",
+   "cat": "props",
+   "h": 1.7,
+   "desc": "a Soviet soda water vending machine, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_vending_soda_03",
+   "cat": "props",
+   "h": 1.7,
+   "desc": "a Soviet soda water vending machine, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_ladder_wood_01",
+   "cat": "props",
+   "h": 2.5,
+   "desc": "a wooden ladder leaning"
+  },
+  {
+   "id": "rprop_ladder_wood_02",
+   "cat": "props",
+   "h": 2.5,
+   "desc": "a wooden ladder leaning, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_ladder_wood_03",
+   "cat": "props",
+   "h": 2.5,
+   "desc": "a wooden ladder leaning, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_car_door_01",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a rusty car door lying on the ground"
+  },
+  {
+   "id": "rprop_car_door_02",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a rusty car door lying on the ground, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_car_door_03",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a rusty car door lying on the ground, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_wheel_rim_01",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a rusty car wheel rim"
+  },
+  {
+   "id": "rprop_wheel_rim_02",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a rusty car wheel rim, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_wheel_rim_03",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a rusty car wheel rim, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_engine_block_01",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a rusty car engine block"
+  },
+  {
+   "id": "rprop_engine_block_02",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a rusty car engine block, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_engine_block_03",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a rusty car engine block, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_car_hood_01",
+   "cat": "props",
+   "h": 0.1,
+   "desc": "a dented car hood on the ground"
+  },
+  {
+   "id": "rprop_car_hood_02",
+   "cat": "props",
+   "h": 0.1,
+   "desc": "a dented car hood on the ground, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_car_hood_03",
+   "cat": "props",
+   "h": 0.1,
+   "desc": "a dented car hood on the ground, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_swing_playground_01",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "a rusty playground swing set"
+  },
+  {
+   "id": "rprop_swing_playground_02",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "a rusty playground swing set, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_swing_playground_03",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "a rusty playground swing set, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_slide_playground_01",
+   "cat": "props",
+   "h": 1.6,
+   "desc": "a rusty playground slide"
+  },
+  {
+   "id": "rprop_slide_playground_02",
+   "cat": "props",
+   "h": 1.6,
+   "desc": "a rusty playground slide, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_slide_playground_03",
+   "cat": "props",
+   "h": 1.6,
+   "desc": "a rusty playground slide, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_sandbox_01",
+   "cat": "props",
+   "h": 0.3,
+   "desc": "an old wooden sandbox"
+  },
+  {
+   "id": "rprop_sandbox_02",
+   "cat": "props",
+   "h": 0.3,
+   "desc": "an old wooden sandbox, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_sandbox_03",
+   "cat": "props",
+   "h": 0.3,
+   "desc": "an old wooden sandbox, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_carousel_01",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a small rusty playground carousel"
+  },
+  {
+   "id": "rprop_carousel_02",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a small rusty playground carousel, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_carousel_03",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a small rusty playground carousel, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_well_concrete_01",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a concrete well with a wooden lid"
+  },
+  {
+   "id": "rprop_well_concrete_02",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a concrete well with a wooden lid, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_well_concrete_03",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a concrete well with a wooden lid, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_pump_hand_01",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a cast iron hand water pump"
+  },
+  {
+   "id": "rprop_pump_hand_02",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a cast iron hand water pump, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_pump_hand_03",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a cast iron hand water pump, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_trough_01",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a metal water trough"
+  },
+  {
+   "id": "rprop_trough_02",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a metal water trough, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_trough_03",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a metal water trough, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_hay_bales_01",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "stacked round hay bales"
+  },
+  {
+   "id": "rprop_hay_bales_02",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "stacked round hay bales, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_hay_bales_03",
+   "cat": "props",
+   "h": 1.4,
+   "desc": "stacked round hay bales, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_plough_old_01",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "an old rusty horse plough"
+  },
+  {
+   "id": "rprop_plough_old_02",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "an old rusty horse plough, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_plough_old_03",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "an old rusty horse plough, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_cart_wooden_01",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a broken wooden cart"
+  },
+  {
+   "id": "rprop_cart_wooden_02",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a broken wooden cart, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_cart_wooden_03",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a broken wooden cart, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_milk_cans_01",
+   "cat": "props",
+   "h": 0.7,
+   "desc": "old aluminium milk cans"
+  },
+  {
+   "id": "rprop_milk_cans_02",
+   "cat": "props",
+   "h": 0.7,
+   "desc": "old aluminium milk cans, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_milk_cans_03",
+   "cat": "props",
+   "h": 0.7,
+   "desc": "old aluminium milk cans, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_cable_drum_01",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a large wooden cable drum"
+  },
+  {
+   "id": "rprop_cable_drum_02",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a large wooden cable drum, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_cable_drum_03",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a large wooden cable drum, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_transformer_box_01",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a small rusty transformer box"
+  },
+  {
+   "id": "rprop_transformer_box_02",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a small rusty transformer box, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_transformer_box_03",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a small rusty transformer box, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_pipe_valve_01",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a big rusty pipe valve wheel on a pipe stub"
+  },
+  {
+   "id": "rprop_pipe_valve_02",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a big rusty pipe valve wheel on a pipe stub, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_pipe_valve_03",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a big rusty pipe valve wheel on a pipe stub, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_tank_water_small_01",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "a small rusty water tank on legs"
+  },
+  {
+   "id": "rprop_tank_water_small_02",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "a small rusty water tank on legs, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_tank_water_small_03",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "a small rusty water tank on legs, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_gravestone_01",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "an old gravestone with a fence"
+  },
+  {
+   "id": "rprop_gravestone_02",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "an old gravestone with a fence, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_gravestone_03",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "an old gravestone with a fence, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_cross_wooden_01",
+   "cat": "props",
+   "h": 1.6,
+   "desc": "a wooden roadside cross with a wreath"
+  },
+  {
+   "id": "rprop_cross_wooden_02",
+   "cat": "props",
+   "h": 1.6,
+   "desc": "a wooden roadside cross with a wreath, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_cross_wooden_03",
+   "cat": "props",
+   "h": 1.6,
+   "desc": "a wooden roadside cross with a wreath, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_monument_small_01",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a small Soviet war memorial stone"
+  },
+  {
+   "id": "rprop_monument_small_02",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a small Soviet war memorial stone, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_monument_small_03",
+   "cat": "props",
+   "h": 1.5,
+   "desc": "a small Soviet war memorial stone, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_bunker_door_01",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a heavy steel bunker door in a concrete slope"
+  },
+  {
+   "id": "rprop_bunker_door_02",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a heavy steel bunker door in a concrete slope, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_bunker_door_03",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a heavy steel bunker door in a concrete slope, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_trench_planks_01",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a short trench section with planks"
+  },
+  {
+   "id": "rprop_trench_planks_02",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a short trench section with planks, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_trench_planks_03",
+   "cat": "props",
+   "h": 0.4,
+   "desc": "a short trench section with planks, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_ammo_belts_01",
+   "cat": "props",
+   "h": 0.05,
+   "desc": "scattered spent cartridges and empty ammo belts"
+  },
+  {
+   "id": "rprop_ammo_belts_02",
+   "cat": "props",
+   "h": 0.05,
+   "desc": "scattered spent cartridges and empty ammo belts, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_ammo_belts_03",
+   "cat": "props",
+   "h": 0.05,
+   "desc": "scattered spent cartridges and empty ammo belts, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_helmet_old_01",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "an old rusty soldier helmet on the ground"
+  },
+  {
+   "id": "rprop_helmet_old_02",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "an old rusty soldier helmet on the ground, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_helmet_old_03",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "an old rusty soldier helmet on the ground, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_radio_old_01",
+   "cat": "props",
+   "h": 0.35,
+   "desc": "an old military field radio"
+  },
+  {
+   "id": "rprop_radio_old_02",
+   "cat": "props",
+   "h": 0.35,
+   "desc": "an old military field radio, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_radio_old_03",
+   "cat": "props",
+   "h": 0.35,
+   "desc": "an old military field radio, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_gas_mask_ground_01",
+   "cat": "props",
+   "h": 0.1,
+   "desc": "an old gas mask lying in grass"
+  },
+  {
+   "id": "rprop_gas_mask_ground_02",
+   "cat": "props",
+   "h": 0.1,
+   "desc": "an old gas mask lying in grass, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_gas_mask_ground_03",
+   "cat": "props",
+   "h": 0.1,
+   "desc": "an old gas mask lying in grass, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_deer_skull_01",
+   "cat": "props",
+   "h": 0.3,
+   "desc": "a deer skull with antlers on the ground"
+  },
+  {
+   "id": "rprop_deer_skull_02",
+   "cat": "props",
+   "h": 0.3,
+   "desc": "a deer skull with antlers on the ground, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_deer_skull_03",
+   "cat": "props",
+   "h": 0.3,
+   "desc": "a deer skull with antlers on the ground, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_bones_01",
+   "cat": "props",
+   "h": 0.05,
+   "desc": "scattered animal bones"
+  },
+  {
+   "id": "rprop_bones_02",
+   "cat": "props",
+   "h": 0.05,
+   "desc": "scattered animal bones, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_bones_03",
+   "cat": "props",
+   "h": 0.05,
+   "desc": "scattered animal bones, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_log_fallen_01",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a long fallen mossy log"
+  },
+  {
+   "id": "rprop_log_fallen_02",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a long fallen mossy log, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_log_fallen_03",
+   "cat": "props",
+   "h": 0.6,
+   "desc": "a long fallen mossy log, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_rootball_01",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "an uprooted tree root ball with soil"
+  },
+  {
+   "id": "rprop_rootball_02",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "an uprooted tree root ball with soil, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_rootball_03",
+   "cat": "props",
+   "h": 2.0,
+   "desc": "an uprooted tree root ball with soil, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_mushrooms_01",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a cluster of forest mushrooms"
+  },
+  {
+   "id": "rprop_mushrooms_02",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a cluster of forest mushrooms, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_mushrooms_03",
+   "cat": "props",
+   "h": 0.2,
+   "desc": "a cluster of forest mushrooms, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_berry_bush_01",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a blueberry bush"
+  },
+  {
+   "id": "rprop_berry_bush_02",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a blueberry bush, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_berry_bush_03",
+   "cat": "props",
+   "h": 0.5,
+   "desc": "a blueberry bush, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_fern_01",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a big fern"
+  },
+  {
+   "id": "rprop_fern_02",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a big fern, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_fern_03",
+   "cat": "props",
+   "h": 0.8,
+   "desc": "a big fern, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_rocks_cluster_01",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a cluster of boulders"
+  },
+  {
+   "id": "rprop_rocks_cluster_02",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a cluster of boulders, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_rocks_cluster_03",
+   "cat": "props",
+   "h": 1.0,
+   "desc": "a cluster of boulders, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_boulder_big_01",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a big mossy boulder"
+  },
+  {
+   "id": "rprop_boulder_big_02",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a big mossy boulder, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_boulder_big_03",
+   "cat": "props",
+   "h": 1.8,
+   "desc": "a big mossy boulder, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_puddle_debris_01",
+   "cat": "props",
+   "h": 0.02,
+   "desc": "a puddle with floating debris"
+  },
+  {
+   "id": "rprop_puddle_debris_02",
+   "cat": "props",
+   "h": 0.02,
+   "desc": "a puddle with floating debris, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_puddle_debris_03",
+   "cat": "props",
+   "h": 0.02,
+   "desc": "a puddle with floating debris, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_oil_stain_01",
+   "cat": "props",
+   "h": 0.01,
+   "desc": "an oil stain on the ground"
+  },
+  {
+   "id": "rprop_oil_stain_02",
+   "cat": "props",
+   "h": 0.01,
+   "desc": "an oil stain on the ground, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_oil_stain_03",
+   "cat": "props",
+   "h": 0.01,
+   "desc": "an oil stain on the ground, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_graffiti_slab_01",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a concrete slab with faded graffiti"
+  },
+  {
+   "id": "rprop_graffiti_slab_02",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a concrete slab with faded graffiti, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_graffiti_slab_03",
+   "cat": "props",
+   "h": 1.2,
+   "desc": "a concrete slab with faded graffiti, seen slightly from the right, dirty and more worn"
+  },
+  {
+   "id": "rprop_billboard_broken_01",
+   "cat": "props",
+   "h": 4.0,
+   "desc": "a broken rusty billboard"
+  },
+  {
+   "id": "rprop_billboard_broken_02",
+   "cat": "props",
+   "h": 4.0,
+   "desc": "a broken rusty billboard, seen slightly from the left, weathered faded paint"
+  },
+  {
+   "id": "rprop_billboard_broken_03",
+   "cat": "props",
+   "h": 4.0,
+   "desc": "a broken rusty billboard, seen slightly from the right, dirty and more worn"
+  }
+ ]
+}

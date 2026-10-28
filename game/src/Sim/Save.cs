@@ -40,7 +40,7 @@ namespace Rastvordd.Sim
             public Dictionary<string, float> Store = new();
             public List<SlotS> Storage;
         }
-        public sealed class BagS { public int Id, Tier = 2; public float X, Y, Despawn, RespawnLeft; public bool IsCrate, Corpse, Safe, Unlocked; public List<SlotS> Items = new(); }
+        public sealed class BagS { public int Id, Tier = 2; public float X, Y, Despawn, RespawnLeft; public bool IsCrate, Corpse, Safe, Unlocked; public string Rt, Box; public List<SlotS> Items = new(); }
         public sealed class PlayerS
         {
             public int Id, Current, BuildPiece;
@@ -126,7 +126,7 @@ namespace Rastvordd.Sim
                 w.Deployables.Add(ds);
             }
             foreach (var b in Bags)
-                w.Bags.Add(new WorldSave.BagS { Id = b.Id, X = b.Pos.X, Y = b.Pos.Y, Despawn = b.Despawn, RespawnLeft = b.RespawnLeft, IsCrate = b.IsCrate, Corpse = b.Corpse, Safe = b.Safe, Unlocked = b.Unlocked, Tier = b.Tier, Items = b.Items.ConvertAll(SaveSlot) });
+                w.Bags.Add(new WorldSave.BagS { Id = b.Id, X = b.Pos.X, Y = b.Pos.Y, Despawn = b.Despawn, RespawnLeft = b.RespawnLeft, IsCrate = b.IsCrate, Corpse = b.Corpse, Safe = b.Safe, Unlocked = b.Unlocked, Tier = b.Tier, Rt = b.Rt, Box = b.Box, Items = b.Items.ConvertAll(SaveSlot) });
             foreach (var p in Pickups) w.PickupRespawn.Add(p.RespawnLeft);
             foreach (var a in Actors)
             {
@@ -217,7 +217,7 @@ namespace Rastvordd.Sim
             Bags.Clear();
             foreach (var bs in w.Bags)
             {
-                var b = new LootBag { Id = bs.Id, Pos = new Vector2(bs.X, bs.Y), Despawn = bs.Despawn, RespawnLeft = bs.RespawnLeft, IsCrate = bs.IsCrate, Corpse = bs.Corpse, Safe = bs.Safe, Unlocked = bs.Unlocked, Tier = bs.Tier };
+                var b = new LootBag { Id = bs.Id, Pos = new Vector2(bs.X, bs.Y), Despawn = bs.Despawn, RespawnLeft = bs.RespawnLeft, IsCrate = bs.IsCrate, Corpse = bs.Corpse, Safe = bs.Safe, Unlocked = bs.Unlocked, Tier = bs.Tier, Rt = bs.Rt, Box = bs.Box };
                 foreach (var s in bs.Items) if (LoadSlot(s) is ItemSlot slot) b.Items.Add(slot);
                 Bags.Add(b);
             }

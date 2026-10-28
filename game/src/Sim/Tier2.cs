@@ -124,6 +124,7 @@ namespace Rastvordd.Sim
                 var b = Bags[i];
                 if (!b.IsCrate || b.Safe || b.Punch) continue;
                 b.Tier = military.Exists(q => Vector2.DistanceSquared(q, b.Pos) < 0.25f) ? 2 : 1;
+                b.Rt = rt.Key; b.Box = null;   // тема ящиков РТ (World.RtBoxes)
                 FillCrate(b);
             }
             Vector2 P(JsonElement mk) => rt.O + new Vector2(mk[0].GetSingle(), mk[1].GetSingle());

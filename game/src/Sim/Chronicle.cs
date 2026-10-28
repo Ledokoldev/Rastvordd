@@ -88,6 +88,19 @@ namespace Rastvordd.Sim
                 bool efirst = true;
                 foreach (var (k, v) in Economy.Snapshot()) { if (!efirst) eb.Append(','); efirst = false; eb.Append(S(k)).Append(':').Append(F((float)v)); }
                 Line(t, "econ", eb.Append('}').ToString());
+                // поток предметов (scripts/item-flow.py) и что лежит у ботов: в карманах и в своих ящиках
+                var (fi, fo) = Economy.FlowSnapshot();
+                var held = new Dictionary<string, double>();
+                void Hold(ItemSlot s) { if (s != null && s.Count > 0) held[s.Id] = held.GetValueOrDefault(s.Id) + s.Count; }
+                foreach (var a in w.Actors)
+                {
+                    if (a.Spectator || a.Team != Team.Player) continue;
+                    foreach (var s in a.Belt) Hold(s);
+                    foreach (var s in a.Pack) Hold(s);
+                }
+                foreach (var d in w.Deployables) if (d.Storage != null && d.OwnerId != 0 && d.Kind != DeployKind.Recycler) foreach (var s in d.Storage.Items) Hold(s);
+                string J(Dictionary<string, double> m) { var b = new StringBuilder("{"); bool f1 = true; foreach (var (k, v) in m) { if (!f1) b.Append(','); f1 = false; b.Append(S(k)).Append(':').Append(F((float)v)); } return b.Append('}').ToString(); }
+                Line(t, "items", $"\"in\":{J(fi)},\"out\":{J(fo)},\"held\":{J(held)}");
             }
             var sb = new StringBuilder("\"actors\":[");
             bool first = true;

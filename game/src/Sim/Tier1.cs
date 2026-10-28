@@ -93,7 +93,7 @@ namespace Rastvordd.Sim
             int bagsFrom = Bags.Count;
             BuildFromLayout(tmp, "t1", root, rng);
             for (int i = bagsFrom; i < Bags.Count; i++)
-                if (Bags[i].IsCrate && !Bags[i].Safe && !Bags[i].Punch) { Bags[i].Rt = rt.Key; FillCrate(Bags[i]); }   // профиль лута РТ
+                if (Bags[i].IsCrate && !Bags[i].Safe && !Bags[i].Punch) { Bags[i].Rt = rt.Key; Bags[i].Tier = 1; Bags[i].Box = null; FillCrate(Bags[i]); }   // профиль лута РТ; РТ с охраной — ящики тира 1
             Vector2 P(JsonElement mk) => rt.O + new Vector2(mk[0].GetSingle(), mk[1].GetSingle());
             var marks = new List<(string label, Vector2 p)>();
             foreach (var mk in root.GetProperty("marks").EnumerateArray())

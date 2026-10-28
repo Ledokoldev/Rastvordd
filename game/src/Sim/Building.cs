@@ -376,7 +376,7 @@ namespace Rastvordd.Sim
 
         void Pay(Actor a, (string id, int n)[] cost)
         {
-            foreach (var (id, n) in cost) a.Take(id, n);
+            foreach (var (id, n) in cost) { a.Take(id, n); if (a.Team == Team.Player) Economy.Out("стройка", id, n); }
         }
 
         /// <summary>Клетка столба для элемента на ребре: со стороны пола.</summary>
@@ -993,6 +993,7 @@ namespace Rastvordd.Sim
                 var lacking = new HashSet<string>();
                 foreach (var (id, perHour) in UpkeepPerHourOf(claim))
                 {
+                    Economy.Out("содержание", id, MathF.Min(claim.Store.GetValueOrDefault(id), perHour / 3600f));
                     float left = claim.Store.GetValueOrDefault(id) - perHour / 3600f;
                     if (left < 0) { lacking.Add(id); left = 0; }
                     claim.Store[id] = left;

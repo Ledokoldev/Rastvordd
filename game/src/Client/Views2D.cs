@@ -1340,6 +1340,7 @@ namespace Rastvordd.Client
 
         public bool IsCrate, Empty, Safe, Punch, Unlocked;
         public int Id, Tier;
+        public string Box;    // вид тематического ящика (World.BoxKinds) — свой спрайт loot/loot_crate_<вид>
         public string Look;   // ивент-ящик: "airdrop" — контейнер сброса, "military" — военный ящик
         PointLight2D _aura;
 
@@ -1364,7 +1365,7 @@ namespace Rastvordd.Client
             ["loot_crate_ammo"] = new(1f, 0.85f, 0.3f), ["loot_crate_weapon"] = new(1f, 0.3f, 0.25f), ["loot_crate_elite"] = new(1f, 0.45f, 0.15f),
         };
 
-        string Style => Punch ? "crate_punch" : Safe ? "loot_safe" : !IsCrate ? null : Styles[System.Math.Clamp(Tier, 0, 2)][(int)((uint)Id * 2654435761u % (uint)Styles[System.Math.Clamp(Tier, 0, 2)].Length)];
+        string Style => Punch ? "crate_punch" : Safe ? "loot_safe" : !IsCrate ? null : Box != null ? (Box == "wood" ? "loot_crate_wood" : "loot_crate_" + Box) : Styles[System.Math.Clamp(Tier, 0, 2)][(int)((uint)Id * 2654435761u % (uint)Styles[System.Math.Clamp(Tier, 0, 2)].Length)];
 
         public override void _Ready()
         {

@@ -925,7 +925,8 @@ namespace Rastvordd.Sim
         public bool NoArmy;             // (27.10) сейф тира 0–1: без армейской одежды
         public bool Safe;               // сейф на РТ: открывается картой доступа, до следующего наполнения
         public bool Unlocked;
-        public string Rt;               // ключ РТ-профиля лута (World.LootProfiles), null — без профиля
+        public string Rt;               // ключ РТ-профиля лута (World.LootProfiles) и темы ящиков (World.RtBoxes), null — без профиля
+        public string Box;              // вид тематического ящика (World.BoxKinds: wood, food, medical, tools, electric, ammo, army, weapon, elite), null — выберется при наполнении
         public bool Punch;              // крейт РТ под перфокарту: открывает таймер РТ, наполняет обновление РТ
         public int Tier = 2;            // уровень лута ящика: 0 — без охраны, 1 — малая охрана, 2 — крупный РТ
         public string Look;             // вид ивент-ящика: "airdrop" — контейнер сброса, "military" — военный ящик (иначе по тиру)

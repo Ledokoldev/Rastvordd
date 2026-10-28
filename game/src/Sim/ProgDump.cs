@@ -110,7 +110,7 @@ namespace Rastvordd.Sim
                 loot[key] = new Dictionary<string, object> { ["label"] = label, ["zone"] = zone, ["where"] = where, ["rolls"] = ok, ["items"] = items };
             }
 
-            LootBag Crate(int tier, bool safe = false, string rt = null) { var b = new LootBag { Id = 1, IsCrate = true, Tier = tier, Safe = safe, Rt = rt }; fillCrate.Invoke(w, new object[] { b }); return b; }
+            LootBag Crate(int tier, bool safe = false, string rt = null, string box = null) { var b = new LootBag { Id = 1, IsCrate = true, Tier = tier, Safe = safe, Rt = rt, Box = box }; fillCrate.Invoke(w, new object[] { b }); return b; }
             LootBag Punch(bool el) { var b = new LootBag { Id = 1, IsCrate = true, Tier = 1, Punch = true }; fillPunch.Invoke(w, new object[] { b, el }); return b; }
             LootBag Event(int ph) { var b = new LootBag { Id = 1, IsCrate = true, Tier = 2, Punch = true, Look = "airdrop" }; fillEvent.Invoke(w, new object[] { b, ph }); return b; }
 
@@ -124,6 +124,14 @@ namespace Rastvordd.Sim
             Sample("punch_crate", "Крейт перфокарты (РТ тира 1)", "rt", "Главный крейт РТ тира 1 под перфокарту I (гаражи и др.)", () => Punch(false));
             Sample("punch_crate_electronics", "Крейт перфокарты (электроника: АТС, Подстанция)", "rt", "Главный крейт АТС и Подстанции «Тихая»: больше плат, радиодеталей, моторов", () => Punch(true));
             Sample("event_late", "Ивент режиссёра: аирдроп / закрытый ящик (поздняя фаза)", "other", "Сброс с самолёта и закрытый ящик на РТ; фаза 2, после 5 ч вайпа", () => Event(2));
+            // тематические ящики (LootBoxes.cs): каждый вид на каждом тире, без профиля РТ
+            foreach (var bx in World.BoxKinds)
+                for (int bt = 0; bt <= 2; bt++)
+                    if (bt >= 1 || bx is not ("army" or "weapon" or "elite"))
+                    {
+                        int tt = bt; string bb = bx;
+                        Sample($"box_{bx}_{bt}", $"{World.BoxName(bx)} · тир {bt}", "box", "", () => Crate(tt, false, null, bb));
+                    }
             Late(1, 1.5f * 3600f);
             Sample("event_mid", "Ивент режиссёра: аирдроп / закрытый ящик (средняя фаза)", "other", "Сброс с самолёта и закрытый ящик на РТ; фаза 1", () => Event(1));
             Late(0, 600f);
@@ -240,6 +248,9 @@ namespace Rastvordd.Sim
             {
                 ["items"] = items, ["recipes"] = recipes, ["tech"] = tech2, ["loot"] = loot, ["recycle"] = recycle,
                 ["gather"] = gather, ["smelt"] = smelt, ["notes"] = notes,
+                ["crates"] = w.Bags.Where(b => b.IsCrate).GroupBy(b => (rt: w.MonumentAt(b.Pos)?.Name ?? "вне РТ", b.Tier, box: b.Safe ? "safe" : b.Punch ? "punch" : b.Box ?? "?"))
+                    .Select(g => (object)new object[] { g.Key.rt, g.Key.Tier, g.Key.box, g.Count() }).ToList(),
+                ["rtboxes"] = World.RtBoxes.ToDictionary(kv => kv.Key, kv => (object)kv.Value.Select(x => new object[] { x.box, x.w }).ToList()),
             };
             return JsonSerializer.Serialize(root, new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
         }

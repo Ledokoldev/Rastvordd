@@ -67,7 +67,10 @@ namespace Rastvordd.Sim
                 Prefabs.Add(rt.M);
                 ClearPrefabArea(new Monument { Min = rt.M.Min - new Vector2(margin), Max = rt.M.Max + new Vector2(margin) });
                 _prefabMode = true;
+                int bagsFrom = Bags.Count;
                 BuildFromLayout(rt, key, root, rng);
+                for (int i = bagsFrom; i < Bags.Count; i++)
+                    if (Bags[i].IsCrate && !Bags[i].Safe && !Bags[i].Punch) { Bags[i].Rt = key; Bags[i].Box = null; FillCrate(Bags[i]); }   // тема ящиков РТ (World.RtBoxes)
                 _prefabMode = false;
                 RegisterDress(rt.M, key, rt.O, root);
                 Tier0.Add(rt);

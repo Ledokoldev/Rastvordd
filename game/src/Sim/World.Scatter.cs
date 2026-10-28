@@ -27,8 +27,10 @@ namespace Rastvordd.Sim
             ("cemetery", 4, 6, new[] { "gravestone", "cross_wooden", "gravestone", "cross_wooden", "monument_small", "bush_dry" }),
         };
 
+        public static bool NoScatter;
         void ScatterProps()
         {
+            if (NoScatter) return;
             foreach (var g in ScatterGroups)
             {
                 int placed = 0, groups = 0;

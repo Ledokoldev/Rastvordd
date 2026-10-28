@@ -2198,7 +2198,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 seen.Add(b.Id);
                 if (!_bagViews.TryGetValue(b.Id, out var v))
                 {
-                    v = new BagView2D { IsCrate = b.IsCrate, Safe = b.Safe, Punch = b.Punch, Id = b.Id, Tier = b.Tier, Look = b.Look, Position = Iso.Px(b.Pos) };
+                    v = new BagView2D { IsCrate = b.IsCrate, Safe = b.Safe, Punch = b.Punch, Id = b.Id, Tier = b.Tier, Look = b.Look, Box = b.Box, Position = Iso.Px(b.Pos) };
                     _world.AddChild(v);
                     _bagViews[b.Id] = v;
                 }

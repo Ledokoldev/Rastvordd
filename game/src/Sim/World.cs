@@ -159,9 +159,9 @@ namespace Rastvordd.Sim
             AddWall(21, -31, 23, -30, 1.0f, WallKind.Crate);
             AddWall(8, -12, 10, -11, 1.0f, WallKind.Crate);
 
-            AddCrate(new Vector2(14, -25));
-            AddCrate(new Vector2(31, -31));
-            AddCrate(new Vector2(30, -9));
+            AddCrate(new Vector2(14, -25), 2, "warehouse");
+            AddCrate(new Vector2(31, -31), 2, "warehouse");
+            AddCrate(new Vector2(30, -9), 2, "warehouse");
             AddPickup(PickupKind.WaterBarrel, new Vector2(8, -31));
             foreach (var p in new[] { new Vector2(4, -36), new Vector2(36, -36), new Vector2(36, -2.5f), new Vector2(4, -20), new Vector2(18, -36), new Vector2(36, -18) })
                 AddScrapSpot(NodeKind.Barrel, p);
@@ -422,89 +422,7 @@ namespace Rastvordd.Sim
                 Clothing.Loot(WearRng, bag, "safe", !bag.NoArmy);   // (27.10) армейская только из сейфов тира 2
                 return;
             }
-            // общие детали — во всех ящиках; карта доступа — в охраняемых
-            // D49: в ящиках мало голого лома — компоненты и ценный лом (в переработчик или на крафт)
-            if (bag.Tier == 0)
-            {
-                // тир 0 (27.10): изолента и труба чаще — на Наган и Самоделку без РТ
-                Maybe(0.4, "comp_spring", 1, 1);
-                Maybe(0.35, "comp_tape", 1, 1);
-                Maybe(0.3, "comp_pipe", 1, 1);
-                Maybe(0.15, "comp_gears", 1, 1);
-            }
-            else
-            {
-                Maybe(0.35, "comp_tape", 1, 2);
-                Maybe(0.35, "comp_gears", 1, 2);
-                Maybe(0.45, "comp_spring", 1, 2);
-                Maybe(0.3, "comp_pipe", 1, 2);
-            }
-            if (bag.Tier >= 1) Maybe(0.18, "keycard", 1, 1);
-            switch (bag.Tier)
-            {
-                case 0:
-                    Maybe(0.85, "scrap", 3, 8);
-                    Maybe(0.5, Economy.Tier0(Rng), 1, 2);
-                    Maybe(0.2, Economy.Tier1(Rng), 1, 1);
-                    if (Rng.NextDouble() < 0.1) bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));   // редкая деталь тира 2 (корпуса чаще)
-                    Maybe(0.5, "cloth", 10, 25);
-                    Maybe(0.5, "canned", 1, 2);
-                    Maybe(0.5, "water_bottle", 1, 2);
-                    Maybe(0.35, "bandage", 1, 2);
-                    Maybe(0.3, "metal_fragments", 10, 30);
-                    Maybe(0.2, "ammo_9mm", 5, 15);
-                    Maybe(0.12, "ammo_12g", 3, 8);
-                    Maybe(0.12, "comp_oil", 1, 1);
-                    Maybe(0.05, "comp_lens", 1, 1);
-                    Maybe(0.05, "comp_circuit", 1, 1);
-                    if (Rng.NextDouble() < 0.04) bag.Items.Add(Items.NewSlot("weapon_pipeshotgun"));
-                    if (Rng.NextDouble() < 0.05) bag.Items.Add(new ItemSlot(Pick(new[] { "att_grip_wood", "att_suppressor_can", "att_mag_twin_crude", "att_torch" }), 1));
-                    break;
-                case 1:
-                    Maybe(0.85, "scrap", 10, 20);
-                    Maybe(0.7, Economy.Tier1(Rng), 1, 2);
-                    Maybe(0.3, Economy.Tier2(Rng), 1, 1);
-                    Maybe(0.6, "metal_fragments", 25, 70);
-                    Maybe(0.45, "gunpowder", 15, 35);
-                    Maybe(0.45, "ammo_9mm", 10, 30);
-                    Maybe(0.25, "ammo_12g", 5, 12);
-                    Maybe(0.15, "ammo_762", 5, 15);
-                    Maybe(0.4, "bandage", 1, 3);
-                    Maybe(0.3, "canned", 1, 2);
-                    Maybe(0.2, "comp_oil", 1, 2);
-                    Maybe(0.12, "comp_lens", 1, 1);
-                    Maybe(0.12, "comp_circuit", 1, 1);
-                    if (Rng.NextDouble() < 0.3) bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));
-                    if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot(Rng.Next(2) == 0 ? "weapon_pipeshotgun" : "weapon_sawnoff"));
-                    if (Rng.NextDouble() < 0.12) bag.Items.Add(Items.NewSlot("lock_code"));
-                    break;
-                default:
-                    // РТ 2 (склад с калашами): детали тира 2, редко — тира 3 (режиссёр дозирует), армейские обвесы
-                    Maybe(0.4, "ammo_762", 15, 35);
-                    Maybe(0.5, "ammo_9mm", 10, 30);
-                    Maybe(0.25, "ammo_12g", 6, 14);
-                    Maybe(0.85, "scrap", 20, 40);
-                    Maybe(0.8, Economy.Tier2(Rng), 1, 2);
-                    Maybe(0.4, Economy.Tier1(Rng), 1, 2);
-                    Maybe(0.5, "bandage", 2, 4);
-                    Maybe(0.55, "metal_fragments", 40, 90);
-                    Maybe(0.45, "gunpowder", 25, 50);
-                    Maybe(0.3, "comp_oil", 1, 2);
-                    Maybe(0.15, "comp_lens", 1, 1);
-                    Maybe(0.15, "comp_circuit", 1, 1);
-                    if (Rng.NextDouble() < 0.35) bag.Items.Add(new ItemSlot(Weaponry.Tier2Part(Rng), 1));
-                    if (Rng.NextDouble() < 0.08) bag.Items.Add(new ItemSlot(Pick(Weaponry.FactoryAtts), 1));
-                    if (Rng.NextDouble() < 0.03) bag.Items.Add(new ItemSlot(Pick(Weaponry.ArmyAtts), 1));
-                    if (Rng.NextDouble() < 0.05) bag.Items.Add(Items.NewSlot(Pick(new[] { "weapon_sawnoff", "weapon_mp133", "weapon_grach" })));
-                    TryTier3(bag, 0.25);
-                    if (Rng.NextDouble() < 0.06) bag.Items.Add(Items.NewSlot("expl_satchel"));
-                    break;
-            }
-            if (prof != null)
-                foreach (var id in prof)
-                    if (!rolled.Contains(id)) Maybe(0.14, id, 1, id is "rubber" or "val_copper_wire" ? 3 : 2);   // у предмета профиля нет базовой строки — добавляем свою
-            Clothing.Loot(WearRng, bag, $"crate{Math.Clamp(bag.Tier, 0, 2)}");   // одежда, резина, кожа, антирадин (D47)
-            if (bag.Empty) bag.Items.Add(new ItemSlot("scrap", 10));
+            FillBox(bag, prof);   // тематический ящик: вид по теме РТ, пул по виду и тиру (LootBoxes.cs)
         }
 
         // ---------- актёры ----------
@@ -1044,6 +962,7 @@ namespace Rastvordd.Sim
             if (best == null) { Info(a, "Нечего есть"); return; }
             var def = Items.Get(best);
             a.Take(best, 1);
+            if (a.Team == Team.Player) Economy.Out("еда/вода", best, 1);
             a.Food = MathF.Min(100, a.Food + def.Food);
             a.Water = MathF.Min(100, a.Water + def.Water);
             Info(a, $"Съедено: {def.Name}");
@@ -1058,7 +977,7 @@ namespace Rastvordd.Sim
             if (r.Station == DeployKind.None && r.Bench > 0 && BenchLevel(a.Pos) < r.Bench) { Info(a, $"Нужен верстак {r.Bench} рядом"); return; }
             if (!StationOk(a, r)) { Info(a, $"{Items.Name(r.Output)}: нужен {StationName(r.Station).ToLower()} рядом"); return; }
             if (!CanCraft(a, r)) { Info(a, "Не хватает ресурсов"); return; }
-            foreach (var (id, n) in CraftCost(a, r)) a.Take(id, n);   // как в Расте: ресурсы списываются сразу (у станции — со скидкой, D54)
+            foreach (var (id, n) in CraftCost(a, r)) { a.Take(id, n); if (a.Team == Team.Player) Economy.Out("крафт", id, n); }   // как в Расте: ресурсы списываются сразу (у станции — со скидкой, D54)
             float t = CraftTime(a, r);
             a.CraftQueue.Add(new CraftJob { Recipe = r, Left = t, Total = t });
         }
@@ -1119,6 +1038,7 @@ namespace Rastvordd.Sim
             if (n == null) return;
             if (!CanResearch(a, n, out string why)) { Info(a, $"{Items.Name(id)}: {why}"); return; }
             a.Take("scrap", n.Scrap);
+            if (a.Team == Team.Player) Economy.Out("изучение", "scrap", n.Scrap);
             a.Known.Add(id);
             Info(a, $"Изучено: {Items.Name(id)}");
             Milestone(a, $"изучил: {Items.Name(id)}");
@@ -1132,6 +1052,7 @@ namespace Rastvordd.Sim
             if (job.Left > 0) return;
             a.CraftQueue.RemoveAt(0);
             var r = job.Recipe;
+            if (a.Team == Team.Player) Economy.In("крафт", r.Output, r.Count);
             if (!a.Add(r.Output, r.Count))
             {
                 // пояс полон — кладём к ногам
@@ -1222,7 +1143,9 @@ namespace Rastvordd.Sim
                 if (w.ReloadLeft <= 0)
                 {
                     w.ReloadLeft = 0;
-                    w.Ammo += a.Take(wd.AmmoId, w.MagSize - w.Ammo);
+                    int took = a.Take(wd.AmmoId, w.MagSize - w.Ammo);
+                    w.Ammo += took;
+                    if (a.Team == Team.Player) Economy.Out("стрельба", wd.AmmoId, took);
                 }
             }
             else if (cmd.Reload && w.Ammo < w.MagSize && a.Count(wd.AmmoId) > 0)
@@ -1406,9 +1329,10 @@ namespace Rastvordd.Sim
             if (got > 0)
             {
                 a.Add(node.ResourceId, got);
+                if (a.Team == Team.Player) Economy.In("добыча: " + node.Kind, node.ResourceId, got);
                 // при добыче металла и серы попадается немного камня
-                if (node.Kind is NodeKind.Metal or NodeKind.Sulfur) a.Add("stone", Math.Max(1, got / 3));
-                if (node.Kind == NodeKind.Junk && Rng.NextDouble() < 0.18) a.Add("metal_fragments", Rng.Next(3, 8));
+                if (node.Kind is NodeKind.Metal or NodeKind.Sulfur) { a.Add("stone", Math.Max(1, got / 3)); if (a.Team == Team.Player) Economy.In("добыча: " + node.Kind, "stone", Math.Max(1, got / 3)); }
+                if (node.Kind == NodeKind.Junk && Rng.NextDouble() < 0.18) { int mf = Rng.Next(3, 8); a.Add("metal_fragments", mf); if (a.Team == Team.Player) Economy.In("добыча: Junk", "metal_fragments", mf); }
                 if (node.Kind == NodeKind.Junk && a.Team == Team.Player) Economy.Book("сырой: куча хлама", got);
                 Events.Add(new SimEvent { Kind = SimEventKind.Gather, ActorId = a.Id, OtherId = node.Id, Pos = node.Pos, Value = got, Text = Items.Name(node.ResourceId) });
             }
@@ -1856,8 +1780,8 @@ namespace Rastvordd.Sim
                 while (f.SmeltTimer >= 0.4f && f.Burning)
                 {
                     f.SmeltTimer -= 0.4f;
-                    if (f.Ore > 0) { f.Ore--; f.OutMetal++; }
-                    else { f.SulfurOre--; f.OutSulfur++; }
+                    if (f.Ore > 0) { f.Ore--; f.OutMetal++; Economy.In("печь", "metal_fragments", 1); Economy.Out("печь", "metal_ore", 1); }
+                    else { f.SulfurOre--; f.OutSulfur++; Economy.In("печь", "sulfur", 1); Economy.Out("печь", "sulfur_ore", 1); }
                     f.Fuel -= 0.5f;
                     f.CharcoalAcc += 0.5f;
                     if (f.CharcoalAcc >= 1) { f.CharcoalAcc -= 1; f.OutCharcoal++; }

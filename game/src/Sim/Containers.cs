@@ -71,8 +71,10 @@ namespace Rastvordd.Sim
                 var it = items[idx];
                 var yields = Items.RecycleYield(it.Id);
                 if (it.Count > 1) it.Count--; else items.RemoveAt(idx);
+                Economy.Out("переработка", it.Id, 1);
                 foreach (var (id, n) in yields)
                 {
+                    Economy.In("переработчик", id, n);
                     if (id == "scrap") Economy.Book(Economy.IsValuable(it.Id) ? "переработчик: ценный лом" : it.Id.StartsWith("comp_") ? "переработчик: детали" : "переработчик: прочее", n);
                     var same = items.Find(s => s.Id == id && s.State == null && s.Count + n <= Items.MaxStack(id));
                     if (same != null) same.Count += n;

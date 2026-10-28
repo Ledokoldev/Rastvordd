@@ -115,11 +115,12 @@ namespace Rastvordd.Sim
 
             // ящики: первый всегда в постройке, остальные во дворе
             int tier = guards == 0 ? 0 : 1;   // без охраны — бытовой лут, с охраной — получше
-            AddCrate((b0 + b1) * 0.5f, tier);
+            string rk = SmallRtKey(name);   // тема ящиков (World.RtBoxes)
+            AddCrate((b0 + b1) * 0.5f, tier, rk);
             if (guards > 0) AddSafe(b0 + new Vector2(1.2f, 1.2f), false);                 // сейф в углу постройки — под карту доступа
             if (name.StartsWith("Котельная")) AddRecycler(new Vector2(b1.X + 3, c.Y));
             for (int i = 1; i < crates; i++)
-                AddCrate(new Vector2(Range(min.X + 3, max.X - 3), Range(c.Y + 2, max.Y - 3)), tier);
+                AddCrate(new Vector2(Range(min.X + 3, max.X - 3), Range(c.Y + 2, max.Y - 3)), tier, rk);
             if (Rng.NextDouble() < 0.7) AddPickup(PickupKind.WaterBarrel, new Vector2(max.X - 3, min.Y + 3));
 
             // металлолом без боя: бочки вдоль забора и кучи хлама во дворе (D31)

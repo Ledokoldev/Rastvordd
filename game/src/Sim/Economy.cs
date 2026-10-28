@@ -80,11 +80,18 @@ namespace Rastvordd.Sim
         public static void BookTake(string source, string id, int n)
         {
             if (n <= 0 || source == null) return;
+            In(source.StartsWith("ящик РТ") || source.StartsWith("ящик ") ? "ящики РТ" : source, id, n);
             if (id == "scrap") Book("сырой: " + source, n);
             else if (IsValuable(id)) Book("ценный лом: " + source, ScrapYield(id) * n);
             else if (id.StartsWith("comp_")) Book("детали: " + source, ScrapYield(id) * n);
         }
 
         public static Dictionary<string, double> Snapshot() { lock (Lock) return new Dictionary<string, double>(Ledger); }
+
+        /// <summary>Поток предметов у игроков и ботов (прогоны, scripts/item-flow.py): приход и расход по источнику, ключ «источник|id».</summary>
+        public static readonly Dictionary<string, double> ItemIn = new(), ItemOut = new();
+        public static void In(string src, string id, double n) { if (n > 0 && id != null) lock (Lock) ItemIn[src + "|" + id] = ItemIn.GetValueOrDefault(src + "|" + id) + n; }
+        public static void Out(string src, string id, double n) { if (n > 0 && id != null) lock (Lock) ItemOut[src + "|" + id] = ItemOut.GetValueOrDefault(src + "|" + id) + n; }
+        public static (Dictionary<string, double> i, Dictionary<string, double> o) FlowSnapshot() { lock (Lock) return (new(ItemIn), new(ItemOut)); }
     }
 }

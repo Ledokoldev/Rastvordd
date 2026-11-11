@@ -76,7 +76,7 @@ namespace Rastvordd.Sim
         public readonly List<Monument> Prefabs = new();
 
         /// <summary>Хитбоксы пропсов РТ: ширина, глубина следа и высота укрытия (≥ 2 м — закрывает обзор). Legs — твёрдые только опоры по краям.</summary>
-        static readonly Dictionary<string, (float w, float d, float h, bool legs)> Foot = new()
+        internal static readonly Dictionary<string, (float w, float d, float h, bool legs)> Foot = new()   // internal — размеры пропсов берёт 3D-клиент (Client3D/Decor3D.cs)
         {
             ["subst_transformer"] = (6.6f, 3.4f, 3.5f, false),
             ["subst_portal"] = (10.2f, 1.0f, 1.1f, true),

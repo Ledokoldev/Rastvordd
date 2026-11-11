@@ -51,6 +51,9 @@ namespace Rastvordd.Client
         static readonly Mat SignVest = new(0x2f5fa8, 0xe6e6e6, Pat.Sign);
 
         /// <summary>Мягкая вещь: материал. Жёсткая — материал заглушки-накладки (файл rig_wear_* важнее).</summary>
+        /// <summary>Основной цвет вещи — для 3D-клиента (Client3D/Ents3D.cs: одежда слоями поверх персонажа).</summary>
+        internal static Color? Tint3D(string id) => MatOf(id) is Mat m ? m.A : null;
+
         static Mat? MatOf(string id) => id switch
         {
             "wear_rags_shirt" or "wear_rags_pants" or "wear_rags_wraps" or "wear_rags_mittens" => Burlap,

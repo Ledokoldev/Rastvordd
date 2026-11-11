@@ -210,7 +210,7 @@ void fragment() {
         };
 
         /// <summary>Веса поверхностей по сетке биомов: размытые по соседям (широкие переходы) + тропы, площадка РТ и гравий вокруг.</summary>
-        static void BuildMasks(MapInfo map, out Image ma, out Image mb, out Image mc)
+        internal static void BuildMasks(MapInfo map, out Image ma, out Image mb, out Image mc)   // internal — маски берёт и 3D-клиент (Client3D/World3D.cs)
         {
             int n = map.N;
             const int S = 2;              // маска в 2 раза плотнее сетки биомов (1 м) — ровнее края площадок и троп

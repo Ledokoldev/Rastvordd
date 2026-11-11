@@ -152,12 +152,26 @@ namespace Rastvordd.Client3D
             Occluders.Clear();
             _floors.Clear();
             Version++;
+            _mine.Clear();
+            _mineFloors.Clear();
+            _ownCut = false;
             var lockMat = Mats3D.Solid(new Color(0.85f, 0.70f, 0.25f), 0.4f, 0.6f);
+            // столбы на углах: концы рёбер (стены, проёмы, окна, двери) — чтобы на стыке двух стен не было щели
+            var posts = new Dictionary<(int, int), (SVec at, int tier, bool seen, Node3D owner)>();
             foreach (var st in s.Structures)
             {
                 ById[st.Id] = st;
                 bool floor = Building.IsFloor(st.Kind);
+                var node = new Node3D();
+                AddChild(node);
                 if (floor) _floors.Add((st.Poly, st.Tier));
+                if (st.Mine) { if (floor) _mineFloors.Add(st.Poly); else _mine.Add(node); }
+                if (!floor)
+                    foreach (var end in new[] { st.A, st.B })
+                    {
+                        var k = ((int)System.MathF.Round(end.X * 20), (int)System.MathF.Round(end.Y * 20));
+                        if (!posts.TryGetValue(k, out var p) || st.Tier > p.tier) posts[k] = (end, st.Tier, st.Seen, node);
+                    }
                 else if (st.Kind == StructKind.Wall || (st.Kind == StructKind.Window && st.Open) || (st.Kind == StructKind.Door && !st.Open))
                 {
                     // осевые рёбра — прямоугольником толщины стены; диагональ (треугольник) обзор не режет
@@ -169,13 +183,51 @@ namespace Rastvordd.Client3D
                     }
                 }
                 var mat = Mats3D.Building(st.Tier, st.Seen, floor, st.Kind == StructKind.Door);
-                if (floor) Pieces3D.Floor(this, st.Poly, mat);
+                if (floor) Pieces3D.Floor(node, st.Poly, mat);
                 else
                 {
-                    Pieces3D.Edge(this, st.Kind, st.A, st.B, mat, st.Open);
-                    if (st.Kind == StructKind.Door) Pieces3D.Door(this, st.A, st.B, st.Open, mat, st.Locked ? lockMat : null);
+                    Pieces3D.Edge(node, st.Kind, st.A, st.B, mat, st.Open);
+                    if (st.Kind == StructKind.Door) Pieces3D.Door(node, st.A, st.B, st.Open, mat, st.Locked ? lockMat : null);
                 }
+                // повреждённое темнеет (как в 2D): 100% — как новое, 0% — почти вдвое темнее
+                SetShade(node, 0.55f + 0.45f * Mathf.Clamp(st.Hp, 0f, 1f));
             }
+            foreach (var (at, tier, seen, owner) in posts.Values)
+            {
+                var post = W3.AddBox(owner, W3.V(at, Building.WallH * 0.5f), new Vector3(Building.Thick + 0.02f, Building.WallH + 0.02f, Building.Thick + 0.02f), 0, Mats3D.Building(tier, seen, false));
+                post.SetInstanceShaderParameter("shade", 1f);
+            }
+        }
+
+        readonly List<Node3D> _mine = new();
+        readonly List<SVec[]> _mineFloors = new();
+        bool _ownCut;
+
+        /// <summary>Стою на полу своей базы (шкаф мой) — все её стены срезаны до низа, как в 2D.</summary>
+        public bool OwnCut => _ownCut;
+
+        static void SetShade(Node n, float k)
+        {
+            foreach (var c in n.GetChildren())
+                if (c is GeometryInstance3D g) g.SetInstanceShaderParameter("shade", k);
+        }
+
+        static void SetCutAll(Node n, bool on)
+        {
+            foreach (var c in n.GetChildren())
+                if (c is GeometryInstance3D g) g.SetInstanceShaderParameter("cut_all", on ? 1f : 0f);
+        }
+
+        /// <summary>Каждый кадр: на полу своей базы — срезать все её стены; сошёл — вернуть.</summary>
+        public void UpdateOwnCut(SVec me, bool alive)
+        {
+            bool own = false;
+            if (alive)
+                foreach (var poly in _mineFloors)
+                    if (Inside(poly, me)) { own = true; break; }
+            if (own == _ownCut) return;
+            _ownCut = own;
+            foreach (var n in _mine) SetCutAll(n, own);
         }
     }
 
@@ -189,11 +241,16 @@ namespace Rastvordd.Client3D
         static readonly Color Ok = new(0.35f, 0.95f, 0.55f, 0.45f), Bad = new(1f, 0.35f, 0.3f, 0.45f);
         static readonly Color[] SlotCol = { new(0.35f, 0.95f, 0.55f, 0.35f), new(1f, 0.35f, 0.3f, 0.35f), new(1f, 0.85f, 0.3f, 0.35f), new(0.4f, 0.8f, 1f, 0.5f) };
 
-        public void Sync(SelfInfo self, StructSnap? hammerTarget, bool demolish, bool hammerOk, StructSnap? door)
+        bool _ownCut;
+
+        public void Sync(SelfInfo self, StructSnap? hammerTarget, bool demolish, bool hammerOk, StructSnap? door, bool ownCut = false)
         {
+            _ownCut = ownCut;
             var sb = new System.Text.StringBuilder();
+            if (ownCut) sb.Append('C');
             if (self != null && !self.Dead)
             {
+                if (self.HasZone && (self.HoldingPlan || self.HeldDeploy)) sb.Append($"Z{self.ZoneCell}");
                 if (self.HoldingPlan) sb.Append($"P{(int)self.GhostPiece}{self.BuildOk}{Poly(self.GhostPoly)}{self.GhostA}{self.GhostB}");
                 if (self.HeldDeploy) sb.Append($"D{self.DeployOk}{self.DeployPos}{self.DeployHalf}");
                 if (self.DeploySlots != null) foreach (var (p, st) in self.DeploySlots) sb.Append($"S{st}{Poly(p)}");
@@ -207,6 +264,7 @@ namespace Rastvordd.Client3D
             W3.ClearChildren(this);
             if (key.Length == 0 || self == null) return;
 
+            if (self.HasZone && (self.HoldingPlan || self.HeldDeploy) && !self.Dead) Zone(self.ZoneCell);
             if (self.HoldingPlan && !self.Dead)
             {
                 var m = Mats3D.Glow(self.BuildOk ? Ok : Bad, 1.2f, true);
@@ -248,7 +306,37 @@ namespace Rastvordd.Client3D
             if (Building.IsFloor(t.Kind)) { Pieces3D.Floor(this, t.Poly, m); return; }
             var d = t.B - t.A; float len = d.Length();
             if (len < 1e-3f) return;
-            W3.AddBox(this, W3.V((t.A + t.B) * 0.5f, Building.WallH * 0.5f), new Vector3(len + grow, Building.WallH + grow, Building.Thick + grow * 2), W3.Yaw(d.X, d.Y), m, false);
+            float h = _ownCut && t.Mine ? 0.45f : Building.WallH;   // срезанная стена — рамка той же низкой высоты
+            W3.AddBox(this, W3.V((t.A + t.B) * 0.5f, h * 0.5f), new Vector3(len + grow, h + grow, Building.Thick + grow * 2), W3.Yaw(d.X, d.Y), m, false);
+        }
+
+        /// <summary>Зона шкафа под курсором: пунктир по внешним краям клеток зоны (круг по клеткам, как в 2D).</summary>
+        void Zone((int i, int j) cell)
+        {
+            var m = Mats3D.Glow(new Color(1f, 0.85f, 0.4f, 0.6f), 1.4f, true);
+            float c = Building.Cell, y = Pieces3D.FloorTop + 0.04f;
+            void Dash(SVec p0, SVec p1)
+            {
+                var dir = p1 - p0; float len = dir.Length();
+                if (len < 1e-3f) return;
+                for (float s = 0; s < len; s += 0.5f)
+                {
+                    float e = System.MathF.Min(s + 0.25f, len);
+                    var mid = p0 + dir * ((s + e) * 0.5f / len);
+                    W3.AddBox(this, W3.V(mid, y), new Vector3(e - s, 0.03f, 0.06f), W3.Yaw(dir.X, dir.Y), m, false);
+                }
+            }
+            int R = World.ClaimRadius;
+            for (int di = -R - 1; di <= R + 1; di++)
+                for (int dj = -R - 1; dj <= R + 1; dj++)
+                {
+                    if (!World.InClaimZone(di, dj)) continue;
+                    float x0 = (cell.i + di) * c, y0 = (cell.j + dj) * c;
+                    if (!World.InClaimZone(di, dj - 1)) Dash(new SVec(x0, y0), new SVec(x0 + c, y0));
+                    if (!World.InClaimZone(di, dj + 1)) Dash(new SVec(x0, y0 + c), new SVec(x0 + c, y0 + c));
+                    if (!World.InClaimZone(di - 1, dj)) Dash(new SVec(x0, y0), new SVec(x0, y0 + c));
+                    if (!World.InClaimZone(di + 1, dj)) Dash(new SVec(x0 + c, y0), new SVec(x0 + c, y0 + c));
+                }
         }
 
         static string Poly(SVec[] p)

@@ -68,6 +68,9 @@ uniform float use_tex = 0.0;      // 1 — красить текстурой
 uniform float use_top = 0.0;      // 1 — у верхних граней своя текстура (пол фундамента)
 uniform float tile_m = 3.0;       // метров на плитку
 uniform float top_light = 1.15;   // верх светлее лица — так читается толщина
+// у каждого объекта своё (постройки игрока): затемнение от повреждений и срез «вся своя база» (как в 2D — остаётся низ стены)
+instance uniform float shade = 1.0;
+instance uniform float cut_all = 0.0;
 varying vec3 wpos;
 varying vec3 wnorm;
 
@@ -77,6 +80,7 @@ void vertex() {
 }
 
 void fragment() {
+    if (cut_all > 0.5 && wpos.y > 0.45) discard;
     if (cut_radius > 0.0 && wpos.y > cut_keep) {
         vec3 d = cut_center - cam_pos;
         float len = length(d);
@@ -102,7 +106,7 @@ void fragment() {
         if (tx.a < 0.4) discard;   // сетка-рабица, решётки — прозрачные клетки
         c *= tx.rgb;
     }
-    ALBEDO = c;
+    ALBEDO = c * shade;
     ROUGHNESS = roughness;
     METALLIC = metallic;
 }

@@ -103,6 +103,13 @@ namespace Rastvordd.Client3D
 
             var args = OS.GetCmdlineUserArgs();
             _spectate = Arg("--spectate");
+            // скриншот-прогон, как у 2D: --frames=N --shot=путь.png — снимок на кадре N и выход (отладочный запуск — сохранение не трогается)
+            foreach (var a in args)
+            {
+                if (a.StartsWith("--shot=")) _shotPath = a.Substring(7);
+                else if (a.StartsWith("--frames=") && int.TryParse(a.Substring(9), out int fr)) _shotFrame = fr;
+            }
+            if (_shotFrame > 0 && _shotPath == null) _shotPath = "";
             var seedArg = System.Array.Find(args, a => a.StartsWith("--seed="));
             _server = new LocalServer(seedArg != null && int.TryParse(seedArg.Substring(7), out int seedN) ? seedN : 1337);
             // правило проекта (AGENTS.md): сохранение читается и пишется только в своей игре — без отладочных аргументов
@@ -361,9 +368,18 @@ namespace Rastvordd.Client3D
 
         // ---------- цикл ----------
 
+        string _shotPath;
+        int _shotFrame = -1, _shotCount;
+
         public override void _Process(double delta)
         {
             float dt = (float)delta;
+            if (_shotFrame > 0 && ++_shotCount >= _shotFrame)
+            {
+                if (!string.IsNullOrEmpty(_shotPath)) GetViewport().GetTexture().GetImage().SavePng(_shotPath);
+                GetTree().Quit();
+                _shotFrame = -1;
+            }
             UpdateAim(dt);
 
             _acc += delta * _timeScale;
@@ -455,6 +471,7 @@ namespace Rastvordd.Client3D
             _director.Sync(_cur.Markers, _cur.Time, dt);
 
             _structs.Sync(_cur);
+            _structs.UpdateOwnCut(me, _cur.Self != null && !_cur.Self.Dead);
             _static.SetGone(_cur.GoneWalls);
             _static.UpdateRoofs(me);
             _decor.Step(me);
@@ -618,7 +635,7 @@ namespace Rastvordd.Client3D
             int focus = _hammerMenu.Visible ? _hammerFocus : self.HoldingHammer && !self.Dead && !_inv.Visible ? self.HammerTarget : 0;
             if (focus != 0 && _structs.ById.TryGetValue(focus, out var t)) target = t;
             if (self.InteractDoor != 0 && !self.Dead && !_inv.Visible && _structs.ById.TryGetValue(self.InteractDoor, out var d)) door = d;
-            _ghost.Sync(self, target, _hammerMode == World.HammerDemolish, self.HammerActionOk, target == null ? door : null);
+            _ghost.Sync(self, target, _hammerMode == World.HammerDemolish, self.HammerActionOk, target == null ? door : null, _structs.OwnCut);
         }
 
         // ---------- интерфейс ----------

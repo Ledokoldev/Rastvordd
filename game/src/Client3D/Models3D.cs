@@ -28,9 +28,10 @@ namespace Rastvordd.Client3D
         {
             if (_templates.TryGetValue(key, out var have)) return have;
             Node3D found = null;
-            foreach (var ext in new[] { ".glb", ".gltf", ".tscn" })
+            // сначала hq/ (готовые модели, напр. Poly Haven — scripts/polyhaven_convert.gd), потом свои из генератора
+            foreach (var (sub, ext) in new[] { ("hq/", ".glb"), ("", ".glb"), ("", ".gltf"), ("", ".tscn") })
             {
-                var path = Dir + key + ext;
+                var path = Dir + sub + key + ext;
                 if (ResourceLoader.Exists(path))
                 {
                     found = GD.Load<PackedScene>(path)?.Instantiate() as Node3D;

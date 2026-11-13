@@ -1,0 +1,36 @@
+[
+  { "key": "node_stone_0",   "src": "boulder_01",             "maxTris": 4000 },
+  { "key": "node_stone_1",   "src": "namaqualand_boulder_05", "maxTris": 4000 },
+  { "key": "node_stone_2",   "src": "namaqualand_boulder_04", "maxTris": 4000 },
+  { "key": "node_metal_0",   "src": "boulder_01",             "maxTris": 4000, "tint": [0.78, 0.60, 0.50], "metal": 0.35 },
+  { "key": "node_metal_1",   "src": "namaqualand_boulder_05", "maxTris": 4000, "tint": [0.78, 0.60, 0.50], "metal": 0.35 },
+  { "key": "node_metal_2",   "src": "namaqualand_boulder_04", "maxTris": 4000, "tint": [0.78, 0.60, 0.50], "metal": 0.35 },
+  { "key": "node_sulfur_0",  "src": "boulder_01",             "maxTris": 4000, "tint": [1.00, 0.88, 0.45] },
+  { "key": "node_sulfur_1",  "src": "namaqualand_boulder_05", "maxTris": 4000, "tint": [1.00, 0.88, 0.45] },
+  { "key": "node_sulfur_2",  "src": "namaqualand_boulder_04", "maxTris": 4000, "tint": [1.00, 0.88, 0.45] },
+  { "key": "node_barrel",    "src": "barrel_03" },
+  { "key": "node_tire",      "src": "old_tyre" },
+
+  { "key": "loot_crate_wood",  "src": "wooden_crate_02" },
+  { "key": "loot_crate_army",  "src": "wooden_military_crate", "maxTris": 8000 },
+  { "key": "loot_crate_elite", "src": "metal_tool_chest",      "maxTris": 8000 },
+  { "key": "loot_bag",         "src": "trashbag" },
+
+  { "key": "deploy_box",        "src": "wooden_crate_01" },
+  { "key": "deploy_boxlarge",   "src": "wooden_military_crate", "maxTris": 8000 },
+  { "key": "deploy_barrel",     "src": "Barrel_01" },
+  { "key": "deploy_furnace",    "src": "barrel_stove",        "maxTris": 8000 },
+  { "key": "deploy_campfire",   "src": "stone_fire_pit" },
+  { "key": "deploy_generator",  "src": "portable_generator",  "maxTris": 10000 },
+  { "key": "deploy_floodlight", "src": "portable_searchlight", "maxTris": 8000 },
+  { "key": "deploy_lamp",       "src": "Lantern_01",          "maxTris": 6000 },
+  { "key": "deploy_lathe",      "src": "old_drill_press",     "maxTris": 10000 },
+  { "key": "deploy_workbench",  "src": "metal_office_desk" },
+
+  { "key": "held_tool_hatchet",  "src": "hatchet" },
+  { "key": "held_tool_hammer",   "src": "wooden_hammer_01" },
+  { "key": "held_tool_pickaxe",  "src": "picke_dirty_01" },
+  { "key": "held_weapon_machete","src": "machete" },
+  { "key": "held_weapon_club",   "src": "baseball_bat" },
+  { "key": "held_weapon_mosin",  "src": "bolt_action_rifle_7_62", "maxTris": 10000 }
+]

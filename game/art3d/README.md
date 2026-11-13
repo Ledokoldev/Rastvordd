@@ -17,3 +17,10 @@
 `…_console.exe --headless --path game --script <полный путь>/scripts/polyhaven_convert.gd` (упрощает меш, красит руду,
 кладёт в габариты старой модели, пишет glb с JPEG-текстурами). Превью «старая | новая»: тот же запуск без `--headless` и с `-- --preview=путь.png`.
 Деревья пока свои: у Poly Haven они от 0,3 до 17 млн треугольников, листва карточками при упрощении разваливается.
+
+## own/ — свои модели в стиле игры (Blender)
+Самый высокий приоритет: `own/` → `hq/` → сгенерированная. Стиль — `docs/design/28-3d-style.md` (советский постапок).
+Модель = скрипт `scripts/blender/models/<имя>.py` (функция `build(k)`, набор `scripts/blender/soviet_kit.py`: коробки и цилиндры с фасками,
+материалы из CC0-текстур Poly Haven с оттенком под палитру, развёртка в метрах). Текстуры: `scripts/blender/fetch-textures.ps1` → `tools/textures/`.
+Сборка: `tools/blender/blender-5.2.4-windows-x64/blender.exe -b -P scripts/blender/build.py -- [имя…]` → `own/<имя>.glb` + превью `assets/3d-preview/<имя>.png`.
+Blender — переносной с blender.org в `tools/blender/` (не в git).

@@ -28,8 +28,9 @@ namespace Rastvordd.Client3D
         {
             if (_templates.TryGetValue(key, out var have)) return have;
             Node3D found = null;
-            // сначала hq/ (готовые модели, напр. Poly Haven — scripts/polyhaven_convert.gd), потом свои из генератора
-            foreach (var (sub, ext) in new[] { ("hq/", ".glb"), ("", ".glb"), ("", ".gltf"), ("", ".tscn") })
+            // own/ — свои модели в стиле игры (Blender: scripts/blender/build.py, docs/design/28-3d-style.md),
+            // hq/ — готовые (Poly Haven: scripts/polyhaven_convert.gd), потом сгенерированные заглушки
+            foreach (var (sub, ext) in new[] { ("own/", ".glb"), ("hq/", ".glb"), ("", ".glb"), ("", ".gltf"), ("", ".tscn") })
             {
                 var path = Dir + sub + key + ext;
                 if (ResourceLoader.Exists(path))

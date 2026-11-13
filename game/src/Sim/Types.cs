@@ -34,6 +34,9 @@ namespace Rastvordd.Sim
         public int HammerOp;      // выбор в колесе киянки: 1–4 — улучшить до уровня, World.HammerDemolish — снести (0 — нет)
         public int HammerTarget;  // над какой постройкой выбран пункт колеса киянки
         public int HammerMode;    // режим киянки (колёсико мыши): 1–5 — улучшать до уровня, World.HammerDemolish — сносить; 0 — по-старому (боты)
+        public bool HasAimZ;      // этажи (D60): высота точки прицела задана клиентом (иначе сервер подберёт сам — по человеку у прицела)
+        public float AimZ;        // высота точки прицела, м (пол этажа + высота ствола)
+        public bool DebugFly;     // отладка (D60, задел «воздух»): взлететь/сесть
 
         public static InputCmd Empty => new InputCmd { SelectSlot = -1, Craft = -1, Code = -1, SetPiece = -1 };
     }
@@ -660,6 +663,10 @@ namespace Rastvordd.Sim
         public Team Team;
         public Vector2 Pos;
         public Vector2 Vel;
+        public int Floor;               // этаж (D60): 0 — земля, 1..Building.MaxFloor — перекрытия
+        public float Z;                 // высота ступней, м: этаж × Building.Storey (на лестнице — между этажами; в воздухе — высота полёта)
+        public bool Flying;             // задел «воздух» (D60): летит — без столкновений и падения, на высоте Z
+        public float AimZ;              // высота точки прицела, м (D60): пуля летит к ней (не сохраняется)
         public float Facing;            // радианы, atan2(y, x)
         public float Radius = 0.35f;
         public float Hp = 100, MaxHp = 100;
@@ -874,6 +881,7 @@ namespace Rastvordd.Sim
         public Vector2 Half;            // хитбокс — прямоугольник по осям (D52): половины сторон; 0 — по таблице Footprints
         public int Rot;                 // поворот 0..3: половина — вдоль X (0/2) или Y (1/3), целая — куда «смотрит»
         public int FloorId, Slots;      // пол (id постройки) и занятые слоты (биты); 0 — стоит вне сетки
+        public int Floor;               // этаж (D60): 0 — земля
         public bool Solid => Kind != DeployKind.SleepBag;   // спальник плоский: по нему ходят, пули летят над ним
         public Vector2 Min => Pos - Half;
         public Vector2 Max => Pos + Half;
@@ -914,6 +922,7 @@ namespace Rastvordd.Sim
         public int OwnerId;
         public Vector2 Pos;
         public Vector2 Dir;
+        public float Z, Dz;             // этажи (D60): высота пули, м, и её изменение на метр полёта (0 — летит ровно)
         public float Speed;
         public float RangeLeft;
         public float EffRange, MaxRange;   // для падения урона с дистанцией (D57)
@@ -926,6 +935,7 @@ namespace Rastvordd.Sim
     {
         public int Id;
         public Vector2 Pos;
+        public int Floor;               // этаж (D60): сумка с трупа на перекрытии
         public bool IsCrate;            // ящик на РТ (респавнится), иначе сумка с трупа
         public bool Corpse;             // вещи с трупа: обыскиваются по ячейке, как ящик РТ; выброшенное — открыто сразу
         public bool NoArmy;             // (27.10) сейф тира 0–1: без армейской одежды
@@ -957,5 +967,6 @@ namespace Rastvordd.Sim
         public Vector2 Dir;
         public float Value;     // урон / количество
         public string Text;
+        public float Z;         // высота события, м (D60): клиент сдвигает эффект вверх и глушит звук с другого этажа
     }
 }

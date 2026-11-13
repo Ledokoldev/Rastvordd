@@ -56,7 +56,7 @@ namespace Rastvordd.Client
 
         void Free(List<Node2D> views)
         {
-            foreach (var v in views) { if (v is WallView2D w) Walls.Remove(w); if (v is SlantWallView2D sw) Slants.Remove(sw); v.QueueFree(); }
+            foreach (var v in views) { if (v is WallView2D w) Walls.Remove(w); if (v is SlantWallView2D sw) Slants.Remove(sw); _plates.RemoveAll(p => p.v == v); v.QueueFree(); }
         }
 
         /// <summary>Туман войны: постройка не в обзоре — серая, «как запомнил».</summary>
@@ -77,9 +77,19 @@ namespace Rastvordd.Client
         List<Node2D> Create(StructSnap s)
         {
             var views = new List<Node2D>();
-            if (s.Kind == StructKind.Foundation)
+            if (s.Kind == StructKind.Stairs)
             {
-                var f = new FloorView2D(s.I, s.J, s.Tier);
+                // лестница (D60): ступени от этажа ниже к своему; стоит на нижнем этаже
+                var st = new StairsView2D(s.I, s.J, s.Dir, s.Tier) { Position = Iso.Px(new SVec(s.I * Building.Cell, s.J * Building.Cell)) + Iso.Lift(Building.FloorZ(s.Floor - 1)), ZIndex = Iso.Band(s.Floor - 1) - 7 };
+                _world.AddChild(st);
+                views.Add(st);
+                _plates.Add((st, s.Floor - 1));
+                SetDamage(views, s.Hp);
+                return views;
+            }
+            if (s.Kind is StructKind.Foundation or StructKind.Hatch)
+            {
+                var f = new FloorView2D(s.I, s.J, s.Tier, s.Floor, s.Kind == StructKind.Hatch);
                 _world.AddChild(f);
                 views.Add(f);
             }
@@ -110,9 +120,29 @@ namespace Rastvordd.Client
                     Slants.Add(w);
                 }
             }
+            // этажи (D60): верхний этаж — выше по экрану на высоту этажа и своим слоем поверх нижних
+            foreach (var v in views)
+            {
+                if (s.Floor > 0) { v.Position += Iso.Lift(Building.FloorZ(s.Floor)); v.ZIndex += Iso.Band(s.Floor); }
+                if (v is WallView2D wv) wv.Floor = s.Floor;
+                else if (v is SlantWallView2D sv) sv.Floor = s.Floor;
+                else _plates.Add((v, s.Floor));
+            }
             SetDamage(views, s.Hp);
             return views;
         }
+
+        /// <summary>Полы, лестницы и люки с этажом — для среза верхних этажей.</summary>
+        readonly List<(Node2D v, int floor)> _plates = new();
+        /// <summary>Свой этаж (D60): ставит Main перед UpdateFade.</summary>
+        public int MyFloor;
+        /// <summary>Над головой — перекрытие (стоим под крышей): этажи выше своего срезаны.</summary>
+        public bool Covered;
+        const float HideRadiusPx = 30f * Iso.PPM;
+
+        /// <summary>Срезан ли этаж floor у точки (px на земле): мы под крышей, этаж выше нашего, рядом.</summary>
+        public bool HideFloorAt(int floor, Vector2 groundPx, Vector2 selfPx) =>
+            Covered && floor > MyFloor && groundPx.DistanceTo(selfPx) < HideRadiusPx;
 
         readonly HashSet<(int, int)> _floors = new();
         readonly List<SVec[]> _triFloors = new();
@@ -147,14 +177,39 @@ namespace Rastvordd.Client
             return false;
         }
 
+        // этажи (D60): полы верхних этажей — для среза, прицела по этажу и подсказок
+        readonly HashSet<(int f, int i, int j)> _upSquares = new();
+        readonly List<(int f, SVec[] poly)> _upTris = new();
+        /// <summary>Стены верхних этажей (тени обзора, когда стоишь на этом этаже).</summary>
+        public readonly Dictionary<int, List<WallInfo>> UpperOccluders = new();
+
+        /// <summary>Есть ли пол этажа floor под точкой (0 — фундамент).</summary>
+        public bool HasPlate(int floor, SVec p)
+        {
+            if (floor <= 0) return OnFloor(p);
+            var (i, j) = Building.CellOf(p);
+            if (_upSquares.Contains((floor, i, j))) return true;
+            foreach (var (f, poly) in _upTris) if (f == floor && Building.PointInPoly(p, poly)) return true;
+            return false;
+        }
+
         void RebuildOccluders()
         {
             _floors.Clear();
             _triFloors.Clear();
             _floorTier.Clear();
             _triTier.Clear();
+            _upSquares.Clear();
+            _upTris.Clear();
+            UpperOccluders.Clear();
             foreach (var (snap, _) in _items.Values)
             {
+                if (snap.Floor > 0)
+                {
+                    if (Building.IsSquare(snap.Kind)) _upSquares.Add((snap.Floor, snap.I, snap.J));
+                    else if (snap.Kind == StructKind.TriFoundation) _upTris.Add((snap.Floor, snap.Poly));
+                    continue;
+                }
                 if (snap.Kind == StructKind.Foundation) { _floors.Add((snap.I, snap.J)); _floorTier[(snap.I, snap.J)] = snap.Tier; }
                 else if (snap.Kind == StructKind.TriFoundation) { _triFloors.Add(snap.Poly); _triTier.Add((snap.Poly, snap.Tier)); }
             }
@@ -164,7 +219,14 @@ namespace Rastvordd.Client
                 if (!Building.IsFloor(snap.Kind))
                     foreach (var (min, max, h, pass) in Building.Boxes(snap.Kind, snap.A, snap.B, snap.Open))
                     {
-                        Occluders.Add(new WallInfo { Min = min, Max = max, Height = h, Kind = WallKind.Built });
+                        var wi = new WallInfo { Min = min, Max = max, Height = h, Kind = WallKind.Built };
+                        if (snap.Floor > 0)
+                        {
+                            if (!UpperOccluders.TryGetValue(snap.Floor, out var l)) UpperOccluders[snap.Floor] = l = new List<WallInfo>();
+                            l.Add(wi);
+                            continue;
+                        }
+                        Occluders.Add(wi);
                         if (!pass) Acoustics.DynamicWalls.Add((min, max));
                     }
         }
@@ -192,27 +254,38 @@ namespace Rastvordd.Client
         {
             // внутри дома (стоим на фундаменте) — стены ниже по экрану поблизости срезаются;
             // на полу своей базы (шкаф мой) — срезаются все стены базы
+            // этажи (D60): стены и полы выше своего этажа срезаны целиком, пока над головой перекрытие (как в Zomboid);
+            // свой этаж — как раньше (стены перед собой или все стены своей базы), нижние этажи — не трогаем (они под полом)
             var me = new SVec(selfPx.X / Iso.PPM, selfPx.Y / Iso.PPM);
-            bool inside = OnFloor(me);
+            int mf = MyFloor;
+            bool inside = HasPlate(mf, me);
+            bool covered = false;
+            for (int f = mf + 1; f <= Building.MaxFloor && !covered; f++) covered = HasPlate(f, me);
+            Covered = covered;
             bool own = false;
             Inside = inside;
             if (inside)
                 foreach (var (snap, _) in _items.Values)
-                    if (snap.Mine && Building.IsFloor(snap.Kind) && Building.PointInPoly(me, snap.Poly)) { own = true; break; }
+                    if (snap.Mine && snap.Floor == mf && Building.IsFloor(snap.Kind) && Building.PointInPoly(me, snap.Poly)) { own = true; break; }
             Own = own;
             float near = 12f * Iso.PPM;
+            var selfDrawn = selfPx + Iso.Lift(Building.FloorZ(mf));
+            bool Cut(Node2D w, int floor, bool mine) =>
+                floor == mf && (own ? mine : inside && w.Position.Y > selfDrawn.Y && w.Position.Y - selfDrawn.Y < near && Mathf.Abs(w.Position.X - selfDrawn.X) < near);
+            Vector2 Ground(Node2D w, int floor) => w.Position - Iso.Lift(Building.FloorZ(floor));
             foreach (var w in Walls)
             {
-                bool cut = own ? w.Mine : inside && w.Position.Y > selfPx.Y && w.Position.Y - selfPx.Y < near && Mathf.Abs(w.Position.X - selfPx.X) < near;
-                w.SetCut(cut);
+                w.Visible = !HideFloorAt(w.Floor, Ground(w, w.Floor), selfPx);
+                w.SetCut(Cut(w, w.Floor, w.Mine));
                 w.UpdateOcclusion(dt);
             }
             foreach (var w in Slants)
             {
-                bool cut = own ? w.Mine : inside && w.Position.Y > selfPx.Y && w.Position.Y - selfPx.Y < near && Mathf.Abs(w.Position.X - selfPx.X) < near;
-                w.SetCut(cut);
+                w.Visible = !HideFloorAt(w.Floor, Ground(w, w.Floor), selfPx);
+                w.SetCut(Cut(w, w.Floor, w.Mine));
                 w.UpdateOcclusion(dt);
             }
+            foreach (var (v, floor) in _plates) v.Visible = !HideFloorAt(floor, Ground(v, floor), selfPx);
         }
     }
 
@@ -222,9 +295,14 @@ namespace Rastvordd.Client
         readonly int _tier;
         const float Lip = 4;
 
-        public FloorView2D(int i, int j, int tier)
+        readonly int _floor;
+        readonly bool _hatch;
+
+        public FloorView2D(int i, int j, int tier, int floor = 0, bool hatch = false)
         {
             _tier = tier;
+            _floor = floor;
+            _hatch = hatch;
             ZIndex = -8;   // под людьми и стенами, над землёй и декалями
             Position = new Vector2(i * Building.Cell * Iso.PPM, j * Building.Cell * Iso.PPM);
             Material = VisionFx.ObjectMat;
@@ -249,7 +327,70 @@ namespace Rastvordd.Client
             if (tex != null) DrawTextureRect(tex, top, true, tint);
             else DrawRect(top, new Color(0.5f, 0.4f, 0.3f, tint.A));
             DrawRect(lip, new Color(0, 0, 0, _tier == 0 ? 0.15f : 0.35f));
+            if (_floor > 0)
+            {
+                // перекрытие (D60): видна толщина плиты спереди — читается как «этаж над землёй»
+                DrawRect(new Rect2(0, s - Lip, s, Lip + 5), new Color(0.12f, 0.1f, 0.09f, _tier == 0 ? 0.35f : 0.85f));
+                DrawLine(new Vector2(0, s + 1), new Vector2(s, s + 1), new Color(0, 0, 0, 0.5f), 1);
+            }
+            if (_hatch)
+            {
+                // люк: тёмный проём с крышкой и перекладинами лестницы
+                var hole = new Rect2(s * 0.22f, s * 0.22f - Lip, s * 0.56f, s * 0.56f);
+                DrawRect(hole, new Color(0.05f, 0.05f, 0.06f, 0.9f));
+                for (int k = 1; k <= 3; k++) DrawLine(new Vector2(hole.Position.X + 4, hole.Position.Y + hole.Size.Y * k / 4f), new Vector2(hole.End.X - 4, hole.Position.Y + hole.Size.Y * k / 4f), new Color(0.55f, 0.45f, 0.3f), 2);
+                DrawRect(hole, new Color(0.75f, 0.6f, 0.35f), false, 2);
+            }
             DrawRect(top, _tier == 0 ? new Color(0.6f, 0.8f, 1f, 0.6f) : new Color(0, 0, 0, 0.3f), false, 1);
+        }
+    }
+
+    /// <summary>
+    /// Лестница (D60): ступени поперёк подъёма, каждая выше предыдущей (вид 3/4 — выше по экрану), с боковыми тетивами.
+    /// Начало узла — угол клетки на высоте нижнего этажа.
+    /// </summary>
+    public partial class StairsView2D : Node2D
+    {
+        readonly int _dir, _tier;
+        const int Steps = 8;
+
+        public StairsView2D(int i, int j, int dir, int tier)
+        {
+            _dir = dir; _tier = tier;
+            Material = VisionFx.ObjectMat;
+            TextureFilter = TextureFilterEnum.Nearest;
+        }
+
+        public override void _Draw()
+        {
+            float s = Building.Cell * Iso.PPM;
+            var wood = _tier >= 2 ? new Color(0.62f, 0.62f, 0.6f) : new Color(0.62f, 0.46f, 0.3f);
+            var dark = wood.Darkened(0.45f);
+            // подъём вдоль оси dir: 0 +X, 1 +Y, 2 −X, 3 −Y; ступень k — полоса клетки, поднятая на свою высоту
+            for (int k = 0; k < Steps; k++)
+            {
+                float t0 = (float)k / Steps, t1 = (float)(k + 1) / Steps;
+                float lift = Iso.H((k + 1f) / Steps * Building.Storey);
+                Rect2 r = _dir switch
+                {
+                    0 => new Rect2(t0 * s, 0, (t1 - t0) * s, s),
+                    2 => new Rect2((1 - t1) * s, 0, (t1 - t0) * s, s),
+                    1 => new Rect2(0, t0 * s, s, (t1 - t0) * s),
+                    _ => new Rect2(0, (1 - t1) * s, s, (t1 - t0) * s),
+                };
+                var top = new Rect2(r.Position + new Vector2(0, -lift), r.Size);
+                // подступёнок: от пола до ступени (видна передняя грань)
+                DrawRect(new Rect2(top.Position.X, top.End.Y, top.Size.X, lift), dark);
+                DrawRect(top, wood.Lightened(0.08f * k / Steps));
+                DrawRect(top, new Color(0, 0, 0, 0.35f), false, 1);
+            }
+            // тетивы по бокам
+            float h = Iso.H(Building.Storey);
+            if (_dir is 0 or 2)
+            {
+                DrawLine(new Vector2(_dir == 0 ? 0 : s, 0), new Vector2(_dir == 0 ? s : 0, -h), dark, 3);
+                DrawLine(new Vector2(_dir == 0 ? 0 : s, s), new Vector2(_dir == 0 ? s : 0, s - h), dark, 3);
+            }
         }
     }
 

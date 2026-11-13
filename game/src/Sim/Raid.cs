@@ -25,6 +25,7 @@ namespace Rastvordd.Sim
         public float Flight, FlightTime;   // полёт по дуге
         public float Z;                    // высота над землёй (для картинки)
         public float FuseLeft;
+        public int Floor;                  // этаж, где лежит (D60): брошен с этажа — там и взорвётся
         public bool Dud;
         public bool Landed => Flight >= FlightTime;
     }
@@ -36,6 +37,7 @@ namespace Rastvordd.Sim
         public int OwnerId;
         public Vector2 Pos;
         public float Radius, Left;
+        public int Floor;               // этаж огня (D60)
     }
 
     public sealed partial class World
@@ -53,12 +55,12 @@ namespace Rastvordd.Sim
                 if (f.Left <= 0) { Fires.RemoveAt(i); continue; }
                 foreach (var s in new List<Structure>(Structures))
                 {
-                    if (s.Tier > 1) continue;
+                    if (s.Tier > 1 || s.Floor != f.Floor) continue;
                     float dist = s.IsEdge ? DistToEdge(s, f.Pos) : Vector2.Distance(s.Center, f.Pos) - 0.8f;
                     if (dist < f.Radius) DamageStructure(s, (s.Tier == 0 ? 6f : 9f) * Dt, f.OwnerId);
                 }
                 foreach (var a in Actors)
-                    if (!a.Dead && Vector2.Distance(a.Pos, f.Pos) < f.Radius) Damage(a, 12f * Dt, f.OwnerId, a.Pos);
+                    if (!a.Dead && a.Floor == f.Floor && !a.Flying && Vector2.Distance(a.Pos, f.Pos) < f.Radius) Damage(a, 12f * Dt, f.OwnerId, a.Pos);
             }
         }
 
@@ -83,7 +85,7 @@ namespace Rastvordd.Sim
             Throwns.Add(new Thrown
             {
                 Id = NextId(), ItemId = held.Id, OwnerId = a.Id, Pos = from, From = from, To = to,
-                FlightTime = flight, FuseLeft = ex.Fuse, Dud = Rng.NextDouble() < ex.DudChance,
+                FlightTime = flight, FuseLeft = ex.Fuse, Dud = Rng.NextDouble() < ex.DudChance, Floor = LandFloor(a.Floor, to),
             });
             held.Count--;
             if (held.Count <= 0) a.Belt[a.Current] = null;
@@ -112,7 +114,7 @@ namespace Rastvordd.Sim
                 {
                     // осечка связки: фитиль потух — можно поднять и бросить снова (пока просто лежит как предмет)
                     Events.Add(new SimEvent { Kind = SimEventKind.Info, ActorId = t.OwnerId, Pos = t.Pos, Text = "Осечка: фитиль потух" });
-                    var bag = new LootBag { Id = NextId(), Pos = t.Pos, Despawn = 120 };
+                    var bag = new LootBag { Id = NextId(), Pos = t.Pos, Despawn = 120, Floor = t.Floor };
                     bag.Items.Add(Items.NewSlot(t.ItemId));
                     Bags.Add(bag);
                     continue;
@@ -120,11 +122,11 @@ namespace Rastvordd.Sim
                 var exd = Items.Get(t.ItemId).Explosive;
                 if (exd.FireTime > 0)
                 {
-                    Fires.Add(new FireZone { Id = NextId(), OwnerId = t.OwnerId, Pos = t.Pos, Radius = exd.Radius, Left = exd.FireTime });
-                    Events.Add(new SimEvent { Kind = SimEventKind.Explosion, ActorId = t.OwnerId, Pos = t.Pos, Value = exd.Radius, Text = t.ItemId });
+                    Fires.Add(new FireZone { Id = NextId(), OwnerId = t.OwnerId, Pos = t.Pos, Radius = exd.Radius, Left = exd.FireTime, Floor = t.Floor });
+                    Events.Add(new SimEvent { Kind = SimEventKind.Explosion, ActorId = t.OwnerId, Pos = t.Pos, Z = Building.FloorZ(t.Floor), Value = exd.Radius, Text = t.ItemId });
                     continue;
                 }
-                Explode(t);
+                using (Ctx(t.Floor)) Explode(t);   // стены и укрытия — этажа, где лежит заряд (D60)
             }
         }
 
@@ -135,6 +137,14 @@ namespace Rastvordd.Sim
             return d;
         }
 
+        /// <summary>Куда упадёт брошенное с этажа: на пол этажа в точке, иначе ниже — до земли (D60).</summary>
+        int LandFloor(int from, Vector2 at)
+        {
+            int f = Math.Clamp(from, 0, Building.MaxFloor);
+            while (f > 0 && PlateAt(f, at) == null) f--;
+            return f;
+        }
+
         void Explode(Thrown t)
         {
             var ex = Items.Get(t.ItemId).Explosive;
@@ -142,6 +152,9 @@ namespace Rastvordd.Sim
             // постройки: урон от расстояния до ближайшей точки элемента
             foreach (var s in new List<Structure>(Structures))
             {
+                // этажи (D60): стены и пол своего этажа, перекрытие над зарядом — вполсилы (рейд вверх через потолок)
+                float lvl = s.IsEdge ? (s.Floor == t.Floor ? 1f : 0f) : s.Floor == t.Floor ? 1f : s.Floor == t.Floor + 1 ? 0.6f : 0f;
+                if (lvl <= 0 || !Structures.Contains(s)) continue;
                 float dist;
                 if (s.IsEdge)
                 {
@@ -153,12 +166,12 @@ namespace Rastvordd.Sim
                 else dist = Building.PointInPoly(t.Pos, s.Poly) ? 0.6f : MinPolyDist(t.Pos, s.Poly) + 0.6f;
                 if (dist > r) continue;
                 float fall = 1f - 0.5f * dist / r;
-                DamageStructure(s, ex.Damage * fall * BlastTierMult[Math.Clamp(s.Tier, 0, BlastTierMult.Length - 1)], t.OwnerId);
+                DamageStructure(s, lvl * ex.Damage * fall * BlastTierMult[Math.Clamp(s.Tier, 0, BlastTierMult.Length - 1)], t.OwnerId);
             }
             // установленное: ящик рассыпается лутом, столб падает
             foreach (var d in new List<Deployable>(Deployables))
             {
-                if (d.Kind == DeployKind.Claim) continue;   // шкаф не ломается: приват базы не сносят
+                if (d.Kind == DeployKind.Claim || d.Floor != t.Floor) continue;   // шкаф не ломается: приват базы не сносят
                 float dist = Vector2.Distance(d.Pos, t.Pos);
                 if (dist > r + d.Radius || !HasLineOfSight(t.Pos, d.Pos)) continue;
                 d.Hp -= ex.Damage * (1f - 0.5f * dist / (r + d.Radius));
@@ -166,7 +179,7 @@ namespace Rastvordd.Sim
                 RemoveDeployable(d);
                 if (d.Storage != null && !d.Storage.Empty)
                 {
-                    var spill = new LootBag { Id = NextId(), Pos = d.Pos, Despawn = 600 };
+                    var spill = new LootBag { Id = NextId(), Pos = d.Pos, Despawn = 600, Floor = d.Floor };
                     spill.Items.AddRange(d.Storage.Items);
                     Bags.Add(spill);
                 }
@@ -176,13 +189,13 @@ namespace Rastvordd.Sim
             // люди: только если между взрывом и человеком нет стены
             foreach (var a in Actors)
             {
-                if (a.Dead) continue;
+                if (a.Dead || MathF.Abs(a.Z - Building.FloorZ(t.Floor)) > 1.5f) continue;   // другой этаж — за перекрытием (D60)
                 float dist = Vector2.Distance(a.Pos, t.Pos);
                 if (dist > r * 1.4f || !HasLineOfSight(t.Pos, a.Pos)) continue;
                 Damage(a, ex.Damage * 0.35f * (1f - dist / (r * 1.4f)), t.OwnerId, a.Pos);
             }
             Noises.Add(new Noise { Pos = t.Pos, Radius = 60, SourceId = t.OwnerId, Time = Time });
-            Events.Add(new SimEvent { Kind = SimEventKind.Explosion, ActorId = t.OwnerId, Pos = t.Pos, Value = r, Text = t.ItemId });
+            Events.Add(new SimEvent { Kind = SimEventKind.Explosion, ActorId = t.OwnerId, Pos = t.Pos, Z = Building.FloorZ(t.Floor), Value = r, Text = t.ItemId });
         }
     }
 }

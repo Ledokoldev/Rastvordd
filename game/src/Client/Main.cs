@@ -163,6 +163,9 @@ namespace Rastvordd.Client
         float? _forcedPeek;
         Vector2 _autoScreen = new Vector2(800, 450);
         Vector2 _selfPx;
+        Vector2 _selfLift;      // этажи (D60): свой персонаж нарисован выше на высоту этажа
+        int _selfFloor;
+        float _aimZ = Hitbox.GunH; // высота точки прицела, м (уходит на сервер)
 
         string _shotPath;
         int _shotFrame = -1, _frame;
@@ -181,6 +184,8 @@ namespace Rastvordd.Client
                 if (a.StartsWith("sb:")) SandboxScript(a[3..]);   // полигон (SandboxSound.cs)
                 else if (a == "kit") _debugEdge = true;
                 else if (a == "interact") _interactEdge = true;
+                else if (a == "fly") _flyEdge = true;   // отладка (D60): взлететь/сесть
+                else if (a.StartsWith("floor") && int.TryParse(a[5..], out var fl2)) { var me2 = _server.World.Find(_myId); me2.Floor = fl2; me2.Z = Building.FloorZ(fl2); }   // отладка (D60): встать на этаж
                 else if (a == "eat") _eatEdge = true;
                 else if (a == "reload") _reloadEdge = true;
                 else if (a == "fire") _autoFireFrames = 4;
@@ -679,6 +684,26 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     }
                     me.Belt[0] = Items.NewSlot(mode switch { "tri" or "door" => "deploy_box", "lathe" => "deploy_lathe", _ => "deploy_workbench" });
                     me.Current = 0;
+                }
+                else if (arg.StartsWith("--house2"))
+                {
+                    // отладка этажей (D60): двухэтажный дом Планом рядом с точкой спавна; =N — встать на этаж N (0 — земля),
+                    // =out — встать снаружи к югу (вид на фасад), =roof — на консоль второго этажа снаружи
+                    string mode = arg.Contains('=') ? arg.Split('=')[1] : "0";
+                    var w = _server.World;
+                    var me = w.Find(_myId);
+                    var (hi, hj) = w.FindBuildSpot(me.Pos + new SVec(0, -20), 8, 7);
+                    var b = new Actor { Id = 900001, Name = "Строитель", Team = Team.Player };
+                    w.Actors.Add(b);
+                    w.BuildDemoHouse(hi, hj, 3, 3, b);
+                    w.Actors.Remove(b);
+                    foreach (var s in w.Structures) if (s.OwnerId == b.Id) s.OwnerId = me.Id;
+                    var c = Building.CellCenter(hi + 1, hj + 1);
+                    if (mode == "out") { me.Pos = Building.CellCenter(hi + 1, hj + 4) + new SVec(0, 0.6f); me.Floor = 0; }
+                    else if (int.TryParse(mode, out int fl)) { me.Pos = fl > 0 ? Building.CellCenter(hi + 2, hj + 1) : Building.CellCenter(hi, hj + 1); me.Floor = fl; }
+                    me.Z = Building.FloorZ(me.Floor);
+                    _autoAim = c + new SVec(0, 3);
+                    GD.Print($"HOUSE2 @({hi},{hj}) я {me.Pos} этаж {me.Floor + 1}");
                 }
                 else if (arg == "--atcrate")
                 {
@@ -1271,6 +1296,8 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 Follow = _followId,
                 Move = move,
                 Aim = _aim,
+                HasAimZ = !_autoAim.HasValue, AimZ = _aimZ,
+                DebugFly = _flyEdge,
                 Fire = _autoFireFrames > 0 || (!_settings.Visible && !_hud.CraftOpen && !_hud.CodeOpen && !_hud.AdminOpen && !UiShown && !_buildMenu.Visible && !_hammerMenu.Visible && !SbBlocksFire && _rigTuneLayer == null && Input.IsMouseButtonPressed(MouseButton.Left)),   // при настройке рига (F6) не стреляем   // клики по меню крафта не стреляют
                 Eat = _eatEdge,
                 DebugKit = _debugEdge,
@@ -1313,7 +1340,36 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
 
             if (_autoAim.HasValue) { _aim = _autoAim.Value; return; }
             var m = GetGlobalMousePosition();
-            _aim = new SVec(m.X / Iso.PPM, (m.Y + Iso.GunH) / Iso.PPM);
+            (_aim, _aimZ) = PickAim(m);   // этажи (D60): плоскость прицела — человек под курсором, пол этажа или земля
+        }
+
+        bool _flyEdge;   // отладка (D60): взлететь/сесть (--do=…:fly)
+
+        /// <summary>
+        /// Куда целится курсор с учётом этажей (D60): человек, нарисованный под курсором, — на его высоту; иначе самый
+        /// верхний видимый пол под курсором (перекрытие на своей высоте экрана); иначе земля. Возвращает точку и высоту прицела.
+        /// </summary>
+        (SVec aim, float z) PickAim(Vector2 m)
+        {
+            if (_cur?.Self == null) return (Iso.Unproject(m + new Vector2(0, Iso.GunH), 0), Hitbox.GunH);
+            // человек под курсором: по нарисованной груди
+            float best = 22f;
+            ActorSnap? hit = null;
+            foreach (var a in _cur.Actors)
+            {
+                if (a.Id == _myId || a.Dead) continue;
+                float d = (Iso.PxZ(a.Pos, a.Z) - new Vector2(0, Iso.GunH)).DistanceTo(m);
+                if (d < best) { best = d; hit = a; }
+            }
+            if (hit is ActorSnap h && (h.Z > 0.3f || _selfLift != Vector2.Zero)) return (h.Pos, h.Z + (h.Crouching ? 0.8f : Hitbox.GunH));
+            if (_build != null)
+                for (int f = Building.MaxFloor; f >= 1; f--)
+                {
+                    float fz = Building.FloorZ(f);
+                    var p = Iso.Unproject(m + new Vector2(0, Iso.GunH), fz);
+                    if (_build.HasPlate(f, p) && !_build.HideFloorAt(f, Iso.Px(p), _selfPx)) return (p, fz + Hitbox.GunH);
+                }
+            return (Iso.Unproject(m + new Vector2(0, Iso.GunH), 0), Hitbox.GunH);
         }
 
         bool InYard(SVec p)
@@ -1508,7 +1564,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _server.Tick();
                 _simTime += (Time.GetTicksUsec() - t0) / 1000.0;
                 _cur = _server.BuildSnapshot(_myId);
-                _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = _timeEdge = _bagEdge = false;
+                _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = _timeEdge = _bagEdge = _flyEdge = false;
                 _slot = _craftReq = -1;
                 _codeReq = null;
                 _uiReq = null;
@@ -1528,7 +1584,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _prevProjs.Clear();
                 foreach (var p in _cur.Projectiles) _prevProjs[p.Id] = p;
                 _cur = _server.BuildSnapshot(_myId);
-                _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = _timeEdge = _bagEdge = false;
+                _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = _timeEdge = _bagEdge = _flyEdge = false;
                 _slot = _craftReq = -1;
                 _codeReq = null;
                 _uiReq = null;
@@ -1687,7 +1743,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                         if (e.ActorId == _myId && !_spectate) RecoilKick(e.Text);
                         if (e.ActorId == _myId && e.Text != "weapon_bow") _shake = Mathf.Min(1.5f, _shake + 0.6f);
                         if (e.Text != "weapon_bow") SpawnCasing(e.Pos, e.Dir);
-                        PlayShotSound(e.Text, e.Pos, e.OtherId > 0 ? Mathf.Clamp(e.OtherId / 100f, 0.2f, 1f) : 1f);
+                        PlayShotSound(e.Text, e.Pos, (e.OtherId > 0 ? Mathf.Clamp(e.OtherId / 100f, 0.2f, 1f) : 1f) * (Mathf.Abs(e.Z - Building.FloorZ(_selfFloor)) > 1.5f ? 0.55f : 1f));   // с другого этажа — глуше, через перекрытие (D60)
                         break;
                     case SimEventKind.Reload:
                         if (_actorViews.TryGetValue(e.ActorId, out var reloader)) reloader.StartReload(Items.Get(e.Text)?.Weapon?.ReloadTime ?? 2f);
@@ -2166,7 +2222,11 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 view.SetLabel(a.Label);
                 view.Swimming = a.Swimming;
                 view.SetWorn(a.Worn);   // одежда слоями на риге (D47)
-                view.SetState(Iso.Px(pos), facing, a.Dead, a.Reloading, speed, dt, a.HeldId, a.Crouching);
+                float z = _prevActors.TryGetValue(a.Id, out var pz) && SVec.Distance(pz.Pos, a.Pos) < 3 ? Mathf.Lerp(pz.Z, a.Z, alpha) : a.Z;
+                if (a.Id == _myId) { _selfLift = Iso.Lift(z); _selfFloor = a.Floor; }
+                view.ZIndex = a.Flying ? Iso.Band(Building.MaxFloor + 1) : Iso.Band(a.Floor);   // этажи (D60): свой слой
+                view.SetState(Iso.PxZ(pos, z), facing, a.Dead, a.Reloading, speed, dt, a.HeldId, a.Crouching);
+                if (a.Flying) view.Modulate = new Color(1, 1, 1, 0.95f);
                 if (!a.Dead && !a.Swimming) Footstep(a.Id, pos, speed, view.StepContacts, a.Crouching);
             }
             ReapViews(_actorViews, seen, dt);
@@ -2184,7 +2244,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     _projViews[p.Id] = v;
                 }
                 var pos = _prevProjs.TryGetValue(p.Id, out var prev) ? SVec.Lerp(prev.Pos, p.Pos, alpha) : p.Pos;
-                v.Position = Iso.Px(pos);
+                v.Position = Iso.PxZ(pos, p.Z); v.ZIndex = Iso.Band(Building.FloorOfZ(p.Z + Hitbox.GunH));   // пуля на своей высоте (D60)
             }
             var gone = new List<int>();
             foreach (var kv in _projViews)
@@ -2204,7 +2264,8 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 }
                 v.Visible = true;
                 if (v.Empty != b.Empty || v.Unlocked != b.Unlocked) { v.Empty = b.Empty; v.Unlocked = b.Unlocked; v.QueueRedraw(); }
-                v.Position = Iso.Px(b.Pos);   // крейт едет в вагоне, висит на кране, приходит капсулой
+                v.Position = Iso.PxZ(b.Pos, Building.FloorZ(b.Floor)); v.ZIndex = Iso.Band(b.Floor);   // крейт едет в вагоне, висит на кране, приходит капсулой; сумка на этаже (D60)
+                if (b.Floor > 0 && _build != null && _build.HideFloorAt(b.Floor, Iso.Px(b.Pos), _selfPx)) v.Visible = false;
             }
             ReapViews(_bagViews, seen, dt);
 
@@ -2295,6 +2356,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     _world.AddChild(v);
                     _deployViews[d.Id] = v;
                 }
+                { var hf = d.Half == SVec.Zero ? Footprints.HalfOf(d.Kind, d.Rot) : d.Half; v.Position = Iso.PxZ(d.Pos + new SVec(0, hf.Y), Building.FloorZ(d.Floor)); v.ZIndex = Iso.Band(d.Floor); v.Visible = !(d.Floor > 0 && _build != null && _build.HideFloorAt(d.Floor, Iso.Px(d.Pos), _selfPx)); }   // этаж (D60)
                 if (v.Burning != d.Burning) { v.Burning = d.Burning; v.QueueRedraw(); }
                 v.Modulate = d.Seen ? Colors.White : BuildLayer.FogTint;   // не в обзоре — как запомнил
                 v.Tick(dt);
@@ -2372,6 +2434,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
                 _decals.Blocked ??= _build.OnFloor;
                 _decals.RefreshBlocked(_build.FloorRects());
             }
+            _build.MyFloor = _selfFloor;
             _build.UpdateFade(_selfPx, dt);
             foreach (var w in _mapWalls) w.UpdateOcclusion(dt);
             _prefab.Sync(_cur);
@@ -2388,11 +2451,13 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             _mapView.Time = _cur.Time;
             if (_bghost == null) { _bghost = new BuildGhost2D(); _world.AddChild(_bghost); }
             _bghost.Visible = _cur.Self.HoldingPlan && !_cur.Self.Dead && !_hud.CraftOpen;
+            if (_bghost.Visible) { _bghost.Position = Iso.Lift(Building.FloorZ(_cur.Self.GhostFloor)); _bghost.ZIndex = 6 + Iso.Band(_cur.Self.GhostFloor); }   // этаж призрака (D60)
             if (_bghost.Visible) { _bghost.CutH = _build != null && _build.WouldCut(Iso.Px((_cur.Self.GhostA + _cur.Self.GhostB) * 0.5f), _selfPx) ? BuildGhost2D.CutHeight : 0; _bghost.Set(_cur.Self.GhostPiece, _cur.Self.GhostPoly, _cur.Self.GhostA, _cur.Self.GhostB, _cur.Self.BuildOk); _bghost.SetZone(_cur.Self.HasZone, _cur.Self.ZoneCell); }
 
             // призрак установки
             var self = _cur.Self;
             _ghost.Visible = self.HeldDeploy && !self.Dead && !_hud.CraftOpen;
+            if (_ghost.Visible) { _ghost.Position = Iso.Lift(Building.FloorZ(_selfFloor)); _ghost.ZIndex = 6 + Iso.Band(_selfFloor); }   // этаж (D60)
             if (_ghost.Visible) _ghost.Set(self.DeployOk, self.DeployPos, self.DeployHalf, self.DeploySnapped, self.DeploySlots);   // как посчитал сервер (сетка клеток D52)
         }
 
@@ -2435,7 +2500,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             // смещение зависит от положения курсора на экране (не в мире), поэтому камера не «убегает»
             // сдвиг — доля половины экрана, чтобы персонаж всегда оставался в кадре (не ближе 20% к краю)
             var halfWorld = GetViewport().GetVisibleRect().Size / 2 / _cam.Zoom.X;
-            var target = _selfPx + _screenDir * halfWorld * (0.35f * _peek) + new Vector2(0, -Iso.H(1f));
+            var target = _selfPx + _selfLift + _screenDir * halfWorld * (0.35f * _peek) + new Vector2(0, -Iso.H(1f));   // + высота этажа (D60)
             _cam.Position = _frame <= 2 ? target : _cam.Position.Lerp(target, 1 - Mathf.Exp(-8 * dt));
             _shake = Mathf.MoveToward(_shake, 0, dt * 6f);
             if (_shake > 0.01f) _cam.Offset = new Vector2(_fxRng.RandfRange(-1, 1), _fxRng.RandfRange(-1, 1)) * 2.5f * _shake;
@@ -2453,7 +2518,9 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             float day = _forcedDay ?? _cur.DayTime;
             // часы (D47): время, воздух и радиация — только с часами «Электроника» на запястье (ConditionView над шкалами)
             _hud.DayTime = day;
-            _hud.UpdateHud(s, dt, _peek > 0.05f ? "прицел" : "");
+            var stance = _peek > 0.05f ? "прицел" : "";
+            if (!string.IsNullOrEmpty(s.FloorHint)) stance = stance == "" ? s.FloorHint : stance + " · " + s.FloorHint;   // этаж (D60)
+            _hud.UpdateHud(s, dt, stance);
             _wearSfx.Update(s, dt, _selfPx);
 
             var canvas = GetViewport().GetCanvasTransform();
@@ -2466,16 +2533,17 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
             if (_rays == null) { _rays = new VisionRays(_map); if (_build != null) _rays.Dynamic.AddRange(_build.Occluders); }
             bool crouched = _cur.Actors.Find(x => x.Id == _myId).Crouching;
             // лучи обзора — только когда что-то поменялось (сдвиг, присед, дальность) или раз в 6 кадров (двери, постройки): в центре острова это ~0,5 мс за кадр
-            if (_frame - _raysFrame >= 6 || SVec.DistanceSquared(selfM, _raysAt) > 0.0025f || crouched != _raysCrouch || Mathf.Abs(range - _raysRange) > 0.5f)
+            if (_frame - _raysFrame >= 6 || _rays.Floor != (s.Flying ? 99 : _selfFloor) || SVec.DistanceSquared(selfM, _raysAt) > 0.0025f || crouched != _raysCrouch || Mathf.Abs(range - _raysRange) > 0.5f)
             {
+                _rays.Floor = s.Flying ? 99 : _selfFloor; _rays.Upper = _build != null && _build.UpperOccluders.TryGetValue(_selfFloor, out var uo) ? uo : null;   // этажи (D60): тени — от стен своего этажа
                 _rays.Update(selfM, range, _cur.Nodes, crouched);   // в приседе низкое укрытие вплотную закрывает обзор
                 _raysFrame = _frame; _raysAt = selfM; _raysCrouch = crouched; _raysRange = range;
             }
-            VisionFx.Update(_selfPx, dir.LengthSquared() > 0.01f ? dir.Normalized() : Vector2.Right,
+            VisionFx.Update(_selfPx + _selfLift, dir.LengthSquared() > 0.01f ? dir.Normalized() : Vector2.Right,
                             Mathf.Cos(Mathf.DegToRad((130 - 70 * _peek) * 0.5f)), range, _rays.Texture, !s.Dead && !_spectate);   // наблюдатель видит всё
 
             // прицел: круг = реальный разброс на дистанции до курсора
-            var mouse = _autoAim.HasValue ? canvas * (Iso.Px(_aim) - new Vector2(0, Iso.GunH)) : GetViewport().GetMousePosition();
+            var mouse = _autoAim.HasValue ? canvas * (Iso.PxZ(_aim, _aimZ) - new Vector2(0, 0)) : GetViewport().GetMousePosition();
             _hud.Crosshair.Position = mouse;
             float dist = dir.Length();
             _hud.Crosshair.RadiusPx = Mathf.Tan(Mathf.DegToRad(s.SpreadDeg * 0.5f)) * dist * Iso.PPM * zoom;

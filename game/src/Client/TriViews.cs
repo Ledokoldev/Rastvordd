@@ -120,6 +120,7 @@ namespace Rastvordd.Client
 
         public bool Cut => _cut;
         public bool Mine;   // стена своей базы
+        public int Floor;   // этаж (D60)
         public void SetCut(bool cut) { if (cut != _cut) { _cut = cut; QueueRedraw(); } }
 
         public void SetFade(bool fade, float dt)

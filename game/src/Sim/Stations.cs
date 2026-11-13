@@ -791,7 +791,7 @@ namespace Rastvordd.Sim
             Structure best = null; float bd = range;
             foreach (var s in Structures)
             {
-                if (s.Kind != StructKind.Window || !s.Shutters) continue;
+                if (s.Kind != StructKind.Window || !s.Shutters || s.Floor != _cf) continue;   // этажи (D60): ставни своего этажа
                 float d = Building.SegDist(p, s.A, s.B);
                 if (d < bd) { bd = d; best = s; }
             }

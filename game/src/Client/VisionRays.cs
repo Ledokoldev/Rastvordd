@@ -22,6 +22,10 @@ namespace Rastvordd.Client
         readonly List<WallInfo> _low = new();   // низкие укрытия: в приседе вплотную (≤ 2,5 м) закрывают обзор
         /// <summary>Стены построек (меняются по ходу игры).</summary>
         public readonly List<WallInfo> Dynamic = new();
+        /// <summary>Этаж смотрящего (D60): выше земли — тени только от стен своего этажа (Upper), без стен карты и деревьев.</summary>
+        public int Floor;
+        public List<WallInfo> Upper;
+        static readonly List<WallInfo> NoWalls = new();
 
         public VisionRays(MapInfo map)
         {
@@ -35,19 +39,19 @@ namespace Rastvordd.Client
         {
             // только то, что может попасть в радиус
             var nearWalls = new List<WallInfo>();
-            foreach (var list in new[] { _walls, Dynamic })
+            foreach (var list in Floor > 0 ? new[] { Upper ?? NoWalls } : new[] { _walls, Dynamic })
                 foreach (var w in list)
                 {
                     var c = SVec.Clamp(origin, w.Min, w.Max);
                     if (w.Height >= 2f && SVec.Distance(c, origin) < range) nearWalls.Add(w);
                 }
             var nearLow = new List<WallInfo>();
-            if (crouch)
+            if (crouch && Floor == 0)
                 foreach (var w in _low)
                     if (SVec.Distance(SVec.Clamp(origin, w.Min, w.Max), origin) <= Hitbox.CoverReach) nearLow.Add(w);
             _circles.Clear();
             foreach (var n in nodes)
-                if (n.Kind == NodeKind.Tree && SVec.Distance(n.Pos, origin) < range + 1) _circles.Add((n.Pos, n.Radius * 0.9f));
+                if (Floor == 0 && n.Kind == NodeKind.Tree && SVec.Distance(n.Pos, origin) < range + 1) _circles.Add((n.Pos, n.Radius * 0.9f));
 
             for (int i = 0; i < Count; i++)
             {

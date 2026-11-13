@@ -19,13 +19,16 @@ namespace Rastvordd.Sim
         public bool Swimming;
         public string Label;         // подпись над головой (боты: имя и занятие)
         public string[] Worn;        // одежда по слотам WearSlot (null — голый) — риг рисует слоями (D47)
+        public float Z;              // высота ступней, м (D60): этаж, лестница, полёт
+        public int Floor;            // этаж (D60)
+        public bool Flying;          // в воздухе (задел D60)
     }
 
-    public struct ProjSnap { public int Id; public Vector2 Pos; public Vector2 Dir; public bool Arrow; }
-    public struct BagSnap { public int Id; public Vector2 Pos; public bool IsCrate; public bool Empty; public bool Safe; public bool Punch; public bool Unlocked; public int Tier; public string Look; public string Box; }
+    public struct ProjSnap { public int Id; public Vector2 Pos; public Vector2 Dir; public bool Arrow; public float Z; }   // Z — высота пули над землёй минус высота ствола (D60)
+    public struct BagSnap { public int Id; public int Floor; public Vector2 Pos; public bool IsCrate; public bool Empty; public bool Safe; public bool Punch; public bool Unlocked; public int Tier; public string Look; public string Box; }
     public struct NodeSnap { public int Id; public NodeKind Kind; public Vector2 Pos; public float Radius; public float Fill; public byte Look; }
     public struct PickupSnap { public int Id; public PickupKind Kind; public Vector2 Pos; public bool Available; public string Item; }
-    public struct DeploySnap { public int Id; public DeployKind Kind; public Vector2 Pos; public bool Burning; public int Level; public bool Seen; public int Rot; public Vector2 Half; }
+    public struct DeploySnap { public int Id; public int Floor; public DeployKind Kind; public Vector2 Pos; public bool Burning; public int Level; public bool Seen; public int Rot; public Vector2 Half; }
 
     /// <summary>Узел дерева изучения для окна верстака.</summary>
     public struct TechInfo
@@ -37,15 +40,16 @@ namespace Rastvordd.Sim
         public string Why;          // почему нельзя изучить сейчас
     }
     public struct FireSnap { public int Id; public Vector2 Pos; public float Radius, Left; }
-    public struct ThrownSnap { public int Id; public string ItemId; public Vector2 Pos; public float Z; public float Fuse; }
+    public struct ThrownSnap { public int Id; public int Floor; public string ItemId; public Vector2 Pos; public float Z; public float Fuse; }
     public struct StructSnap
     {
         public int Id; public StructKind Kind; public int I, J, Dir, Tier; public float Hp; public bool Open; public bool Locked;
+        public int Floor;                // этаж (D60): 0 — земля; у лестницы — верхний этаж (Dir — куда поднимается)
         public bool Seen;                // видна сейчас, иначе запомнена
         public bool Mine;                // своя база (шкаф мой): изнутри срезаются все стены
         public Vector2 A, B, C;          // ребро A–B; треугольник A, B, C
         public Vector2 Center => Building.Center(Kind, I, J, A, B, C);
-        public Vector2[] Poly => Kind == StructKind.Foundation ? Building.SquarePoly(I, J) : new[] { A, B, C };
+        public Vector2[] Poly => Building.IsSquare(Kind) ? Building.SquarePoly(I, J) : new[] { A, B, C };
     }
 
     public struct BeltSlotInfo
@@ -114,6 +118,9 @@ namespace Rastvordd.Sim
         public StructKind BuildPiece;    // выбранный элемент
         public StructKind GhostPiece;    // что поставится под курсором (на фундаменте — стена, на проёме — дверь)
         public Vector2[] GhostPoly;      // призрак пола (квадрат или треугольник)
+        public int GhostFloor;           // этаж, на который встанет элемент Плана (D60)
+        public int Floor; public float Z; public bool Flying;   // свой этаж и высота (D60)
+        public string FloorHint;         // подсказка этажа: «2-й этаж», «лестница», «в воздухе»
         public Vector2 GhostA, GhostB;   // призрак ребра
         public bool BuildOk;
         public string Place;            // РТ, на котором стоишь
@@ -385,6 +392,7 @@ namespace Rastvordd.Sim
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--weartest") >= 0) World.WearSelfTest(log);       // самопроверка одежды D47
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--guardtest") >= 0) World.GuardSelfTest(log);     // меткость охраны РТ
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--locktest") >= 0) World.LockSelfTest(log);       // удары и пули сквозь стены, замки
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--floortest") >= 0) World.FloorSelfTest(log);     // этажи (D60): стройка, лестницы, падение, стрельба и обзор между этажами, обрушение, воздух
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--headtest") >= 0) World.HeadshotSelfTest(log);   // шансы в голову (D55)
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--ttktest") >= 0 || System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--ttkquick") >= 0) World.TtkSelfTest(log);       // ТТК: стволы × сеты
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--progtest") >= 0) World.ProgSelfTest(log);       // прогрессия D54: станции, ток, ёмкости, вода
@@ -726,7 +734,7 @@ namespace Rastvordd.Sim
                     bool can = System.Array.TrueForAll(cost, c => me.Count(c.id) >= c.n);
                     snap.Self.BuildPieces.Add(new WheelItem
                     {
-                        Id = (int)pk, Icon = "icons/icon_build_" + PieceIcon(pk), Name = Building.KindName(pk), Hint = PieceHint(pk),
+                        Id = (int)pk, Icon = PieceIcon(pk).StartsWith("@") ? PieceIcon(pk) : "icons/icon_build_" + PieceIcon(pk), Name = Building.KindName(pk), Hint = PieceHint(pk) + (pk is StructKind.Foundation or StructKind.Wall ? " · на занятое — этажом выше" : ""),
                         Enabled = true, Current = pk == me.BuildPiece, Why = can ? "" : "не хватает ресурсов", Costs = CostRows(me, cost),
                     });
                 }
@@ -757,16 +765,17 @@ namespace Rastvordd.Sim
                     Swimming = a.Swimming,
                     Label = BotLabel(a.Id),
                     Worn = WornIds(a),
+                    Z = a.Z, Floor = a.Floor, Flying = a.Flying,
                 });
             }
 
             foreach (var p in World.Projectiles)
                 if (Vector2.DistanceSquared(p.Pos, me.Pos) < EventRadius * EventRadius)
-                    snap.Projectiles.Add(new ProjSnap { Id = p.Id, Pos = p.Pos, Dir = p.Dir, Arrow = p.Arrow });
+                    snap.Projectiles.Add(new ProjSnap { Id = p.Id, Pos = p.Pos, Dir = p.Dir, Arrow = p.Arrow, Z = p.Z - Hitbox.GunH });
 
             foreach (var b in World.Bags)
-                if (Vector2.DistanceSquared(b.Pos, me.Pos) < 60 * 60 && (b.IsCrate || IsPointVisible(me, b.Pos)))
-                    snap.Bags.Add(new BagSnap { Id = b.Id, Pos = b.Pos, IsCrate = b.IsCrate, Empty = b.Empty, Safe = b.Safe, Punch = b.Punch, Unlocked = b.Unlocked, Tier = b.Tier, Look = b.Look, Box = b.Box });
+                if (Vector2.DistanceSquared(b.Pos, me.Pos) < 60 * 60 && (b.IsCrate || IsPointVisible(me, b.Pos, Building.FloorZ(b.Floor))))
+                    snap.Bags.Add(new BagSnap { Id = b.Id, Floor = b.Floor, Pos = b.Pos, IsCrate = b.IsCrate, Empty = b.Empty, Safe = b.Safe, Punch = b.Punch, Unlocked = b.Unlocked, Tier = b.Tier, Look = b.Look, Box = b.Box });
 
             foreach (var n in World.NodesInRadius(me.Pos, WorldViewRadius, _snapNodes))
                 if (Vector2.DistanceSquared(n.Pos, me.Pos) < r2)
@@ -784,8 +793,8 @@ namespace Rastvordd.Sim
             {
                 if (Vector2.DistanceSquared(d.Pos, me.Pos) >= r2) continue;
                 aliveD.Add(d.Id);
-                bool seen = me.Spectator || !me.Dead && (World.IsOwnBase(me, d) || Vector2.Distance(me.Pos, d.Pos) < 1.5f || World.SeesPoint(me, d.Pos, vr, vc));
-                if (seen) dmem[d.Id] = new DeploySnap { Id = d.Id, Kind = d.Kind, Pos = d.Pos, Burning = d.Burning, Level = d.Level, Seen = true, Rot = d.Rot, Half = d.Half };
+                bool seen = me.Spectator || !me.Dead && (World.IsOwnBase(me, d) || Vector2.Distance(me.Pos, d.Pos) < 1.5f || World.SeesPoint(me, d.Pos, vr, vc, null, d.Floor > 0 ? Building.FloorZ(d.Floor) + 0.5f : 0f));
+                if (seen) dmem[d.Id] = new DeploySnap { Id = d.Id, Floor = d.Floor, Kind = d.Kind, Pos = d.Pos, Burning = d.Burning, Level = d.Level, Seen = true, Rot = d.Rot, Half = d.Half };
                 else if (dmem.TryGetValue(d.Id, out var old)) { old.Seen = false; dmem[d.Id] = old; }
             }
             Forget(dmem, aliveD, id => dmem[id].Pos, me, vr, vc);
@@ -794,7 +803,7 @@ namespace Rastvordd.Sim
 
             foreach (var t in World.Throwns)
                 if (Vector2.DistanceSquared(t.Pos, me.Pos) < EventRadius * EventRadius)
-                    snap.Throwns.Add(new ThrownSnap { Id = t.Id, ItemId = t.ItemId, Pos = t.Pos, Z = t.Z, Fuse = t.Landed ? t.FuseLeft : -1 });
+                    snap.Throwns.Add(new ThrownSnap { Id = t.Id, Floor = t.Floor, ItemId = t.ItemId, Pos = t.Pos, Z = t.Z, Fuse = t.Landed ? t.FuseLeft : -1 });
             foreach (var f in World.Fires)
                 if (Vector2.DistanceSquared(f.Pos, me.Pos) < EventRadius * EventRadius)
                     snap.Fires.Add(new FireSnap { Id = f.Id, Pos = f.Pos, Radius = f.Radius, Left = f.Left });
@@ -819,7 +828,7 @@ namespace Rastvordd.Sim
                 if (Vector2.DistanceSquared(st.Center, me.Pos) >= r2) continue;
                 aliveS.Add(st.Id);
                 bool seen = me.Spectator || !me.Dead && (World.IsOwnBase(me, st) || World.SeesStructure(me, st, vr, vc));
-                if (seen) smem[st.Id] = new StructSnap { Id = st.Id, Kind = st.Kind, I = st.I, J = st.J, Dir = st.Dir, Tier = st.Tier, Hp = st.Hp / st.MaxHp, Open = st.Open, Locked = st.Locked, Seen = true, Mine = World.IsOwnBase(me, st), A = st.A, B = st.B, C = st.C };
+                if (seen) smem[st.Id] = new StructSnap { Id = st.Id, Floor = st.Floor, Kind = st.Kind, I = st.I, J = st.J, Dir = st.Dir, Tier = st.Tier, Hp = st.Hp / st.MaxHp, Open = st.Open, Locked = st.Locked, Seen = true, Mine = World.IsOwnBase(me, st), A = st.A, B = st.B, C = st.C };
                 else if (smem.TryGetValue(st.Id, out var old)) { old.Seen = false; smem[st.Id] = old; }
             }
             Forget(smem, aliveS, id => smem[id].Center, me, vr, vc);
@@ -949,6 +958,9 @@ namespace Rastvordd.Sim
 
             s.Armor = World.ArmorReduction(me);
             FillWear(s, me);
+            s.Floor = me.Floor; s.Z = me.Z; s.Flying = me.Flying;
+            s.FloorHint = me.Flying ? $"в воздухе · {me.Z:0} м" : World.StairsAt(me.Pos, me.Floor) != null ? "лестница" : me.Floor > 0 ? $"{me.Floor + 1}-й этаж" : null;
+            using var floorCtx = World.Ctx(me.Floor);   // этажи (D60): подсказки, установка, киянка — своего этажа
             if (!me.Dead)
             {
                 var ni = World.NearestInteract(me);
@@ -982,12 +994,12 @@ namespace Rastvordd.Sim
                 s.BuildPiece = me.BuildPiece;
                 var ghost = World.EffectivePiece(me, me.LastAim);
                 s.GhostPiece = ghost;
-                (s.GhostPoly, s.GhostA, s.GhostB) = World.GhostOf(ghost, me.LastAim);
+                (s.GhostPoly, s.GhostA, s.GhostB, s.GhostFloor) = World.GhostFor(me, ghost, me.LastAim);   // этажи (D60): куда и на какой этаж
                 s.BuildOk = World.CanBuild(me, ghost, me.LastAim, out string why);
                 var cost = Building.Cost(ghost, ghost == StructKind.Door ? 1 : 0);
                 string price = string.Join(", ", System.Array.ConvertAll(cost, c => $"{Items.Name(c.id)} {c.n}"));
                 if (string.IsNullOrEmpty(s.InteractHint))
-                    s.InteractHint = $"ЛКМ — {Building.KindName(ghost)} · {price}{(s.BuildOk ? "" : " · " + why)}";
+                    s.InteractHint = $"ЛКМ — {Building.KindName(ghost, s.GhostFloor)}{(s.GhostFloor > 0 ? $" ({s.GhostFloor + 1}-й эт.)" : "")} · {price}{(s.BuildOk ? "" : " · " + why)}";
             }
             else if (!me.Dead && held?.Id == "tool_hammer" && me.HammerMode == World.HammerTake)
                 s.InteractHint = (s.HammerAction ?? "") + " · колёсико — режим";   // режим «забрать»: подсказка киянки важнее [E]
@@ -1008,7 +1020,8 @@ namespace Rastvordd.Sim
         static string PieceIcon(StructKind k) => k switch
         {
             StructKind.Foundation => "foundation", StructKind.TriFoundation => "triangle", StructKind.Wall => "wall",
-            StructKind.Doorway => "doorway", StructKind.Window => "window", _ => "door",
+            StructKind.Doorway => "doorway", StructKind.Window => "window",
+            StructKind.Stairs => "@stairs", StructKind.Hatch => "@hatch", StructKind.LowWall => "@lowwall", _ => "door",
         };
 
         static string PieceHint(StructKind k) => k switch
@@ -1018,6 +1031,9 @@ namespace Rastvordd.Sim
             StructKind.Wall => "На край фундамента, закрывает обзор",
             StructKind.Doorway => "Стена с проходом — под дверь",
             StructKind.Window => "Видно наружу, можно стрелять",
+            StructKind.Stairs => "На пол: подъём на этаж выше — от тебя вперёд",
+            StructKind.Hatch => "Перекрытие с лазом: E — подняться или спуститься",
+            StructKind.LowWall => "Низкая стена по пояс: укрытие на крыше и балконе",
             _ => "В дверной проём; замок — с пояса",
         };
 
@@ -1090,6 +1106,7 @@ namespace Rastvordd.Sim
             World.InteractKind.Workbench => "[E] Верстак — изучение и крафт" + (me?.Weapon is WeaponState hw && hw.Def.MaxDurability > 0 && hw.Durability < hw.Def.MaxDurability ? $" · Alt+E — починить ({hw.Durability / hw.Def.MaxDurability * 100:0}%)" : ""),
             World.InteractKind.Box => ((Deployable)it.target).Storage.Empty ? "[E] Ящик (пуст)" : $"[E] Ящик ({((Deployable)it.target).Storage.Items.Count} шт.)",
             World.InteractKind.Claim => ClaimHint(World, (Deployable)it.target),
+            World.InteractKind.Hatch => ((Structure)it.target).Floor == me?.Floor ? "[E] Люк — спуститься" : "[E] Люк — подняться",
             World.InteractKind.Door => (((Structure)it.target).Open ? "[E] Закрыть дверь" : "[E] Открыть дверь") + (((Structure)it.target).Locked ? " · замок" : ""),
             _ => "",
         };
@@ -1159,6 +1176,7 @@ namespace Rastvordd.Sim
             if (World.CanSeeActor(viewer, target, World.ViewRange(viewer), World.ViewCone(viewer))) return true;
             // выстрел выдаёт стрелка, если между нами нет стен
             bool shotRecently = World.Time - target.LastShotTime < 0.6f;
+            if (shotRecently && (viewer.Z > 0.3f || target.Z > 0.3f)) return Vector2.Distance(viewer.Pos, target.Pos) < 60 && World.ClearLine3(viewer.Pos, viewer.Z + World.EyeH, target.Pos, target.Z + 1.5f);   // этажи (D60)
             return shotRecently && Vector2.Distance(viewer.Pos, target.Pos) < 60 && World.HasLineOfSight(viewer.Pos, target.Pos) && !World.LowCoverBetween(viewer, target);
         }
 
@@ -1186,7 +1204,7 @@ namespace Rastvordd.Sim
             if (gone != null) foreach (var id in gone) mem.Remove(id);
         }
 
-        bool IsPointVisible(Actor viewer, Vector2 p) => viewer.Spectator ||
-            Vector2.Distance(viewer.Pos, p) < 3 || World.CanSee(viewer, p, World.ViewRange(viewer), World.ViewCone(viewer));
+        bool IsPointVisible(Actor viewer, Vector2 p, float z = 0f) => viewer.Spectator ||
+            Vector2.Distance(viewer.Pos, p) < 3 && System.MathF.Abs(viewer.Z - z) < 1.5f || World.CanSee(viewer, p, World.ViewRange(viewer), World.ViewCone(viewer), z);
     }
 }

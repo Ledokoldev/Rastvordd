@@ -19,6 +19,7 @@ namespace Rastvordd.Sim
         public string Tex;             // текстура лица (стены готовых РТ), иначе по виду
         public bool Hidden;            // только хитбокс пропса: не рисуется
         public bool Prefab;            // часть готовой РТ
+        public int Floor;              // этаж (D60): стены верхних этажей живут в своей сетке (World.GridOf)
     }
 
     public struct Noise
@@ -70,7 +71,8 @@ namespace Rastvordd.Sim
 
         // пространственные сетки: проверки идут по соседним клеткам, а не по всей карте
         const float GridCell = 8f;
-        readonly SpatialHash<MapWall> _wallGrid = new(GridCell);
+        // стены — своя сетка на каждый этаж (D60): _wallGrid — сетка этажа текущего контекста (_cf, World.Floors.cs), по умолчанию земля
+        SpatialHash<MapWall> _wallGrid => _grids[_cf];
         readonly SpatialHash<ResourceNode> _nodeGrid = new(GridCell);
         readonly SpatialHash<Deployable> _deployGrid = new(GridCell);
         readonly List<MapWall> _qWalls = new();
@@ -78,8 +80,8 @@ namespace Rastvordd.Sim
         readonly List<Deployable> _qDeploys = new();
 
         List<MapWall> WallsNear(Vector2 c, float r) => _wallGrid.QueryCircle(c, r, _qWalls);
-        List<ResourceNode> NodesNear(Vector2 c, float r) => _nodeGrid.QueryCircle(c, r + 1f, _qNodes);
-        List<Deployable> DeploysNear(Vector2 c, float r) => _deployGrid.QueryCircle(c, r + 1f, _qDeploys);
+        List<ResourceNode> NodesNear(Vector2 c, float r) => _cf > 0 ? NoNodes() : _nodeGrid.QueryCircle(c, r + 1f, _qNodes);   // деревья и камни — только на земле
+        List<Deployable> DeploysNear(Vector2 c, float r) => OnCtxFloor(_deployGrid.QueryCircle(c, r + 1f, _qDeploys));
         List<MapWall> WallsAlong(Vector2 a, Vector2 b) => _wallGrid.QuerySegment(a, b, _qWalls);
         readonly List<MapWall> _bulletWalls = new();
 
@@ -92,8 +94,8 @@ namespace Rastvordd.Sim
                 w.Mask = PropMask.Get(PropMask.Styled(prop, Terrain.BiomeAt((w.Wall.Min + w.Wall.Max) * 0.5f)));
             return w.Mask;
         }
-        List<ResourceNode> NodesAlong(Vector2 a, Vector2 b) => _nodeGrid.QuerySegment(a, b, _qNodes);
-        List<Deployable> DeploysAlong(Vector2 a, Vector2 b) => _deployGrid.QuerySegment(a, b, _qDeploys);
+        List<ResourceNode> NodesAlong(Vector2 a, Vector2 b) => _cf > 0 ? NoNodes() : _nodeGrid.QuerySegment(a, b, _qNodes);
+        List<Deployable> DeploysAlong(Vector2 a, Vector2 b) => OnCtxFloor(_deployGrid.QuerySegment(a, b, _qDeploys));
 
         /// <summary>Узлы и постройки в радиусе (для снапшотов) — через сетку, в свой список.</summary>
         public List<ResourceNode> NodesInRadius(Vector2 c, float r, List<ResourceNode> into) => _nodeGrid.QueryCircle(c, r, into);
@@ -103,6 +105,7 @@ namespace Rastvordd.Sim
         {
             if (d.Half == Vector2.Zero) d.Half = Footprints.HalfOf(d.Kind, d.Rot);
             d.Radius = MathF.Max(d.Half.X, d.Half.Y);
+            if (d.Floor > 0) _anyUpperDeploy = true;
             Deployables.Add(d);
             InsertDeployGrid(d);
             OccupySlots(d, true);
@@ -503,6 +506,7 @@ namespace Rastvordd.Sim
             if (bag != null && Time < bag.ReadyAt) bag = null;
             a.Pos = bag != null ? bag.Pos + new Vector2(0.9f, 0) : BeachSpawn(a);
             if (bag != null) bag.ReadyAt = Time + BagCooldown;
+            a.Floor = bag?.Floor ?? 0; a.Z = Building.FloorZ(a.Floor); a.Flying = false;   // спальник на этаже — проснуться на этаже (D60)
             a.Vel = Vector2.Zero;
             a.Hp = a.MaxHp;
             a.Food = 60;
@@ -548,7 +552,7 @@ namespace Rastvordd.Sim
         void RespawnNpc(Actor a)
         {
             a.Pos = NpcHomes[a.Id];
-            a.Vel = Vector2.Zero;
+            a.Vel = Vector2.Zero; a.Floor = 0; a.Z = 0; a.Flying = false;
             a.Hp = a.MaxHp;
             a.Dead = false;
             a.ClearAll();
@@ -718,6 +722,7 @@ namespace Rastvordd.Sim
 
         public bool CanSeeActor(Actor viewer, Actor target, float range, float coneDeg)
         {
+            if (Needs3D(viewer, target)) return CanSeeActor3(viewer, target, range, coneDeg);   // другой этаж или воздух (D60)
             if (!CanSee(viewer, target.Pos, range, coneDeg)) return false;
             if (Vector2.Distance(viewer.Pos, target.Pos) < 2.5f) return true;
             return !LowCoverBetween(viewer, target);
@@ -742,14 +747,15 @@ namespace Rastvordd.Sim
             (a.Crouching && LowCoverNear(a.Pos, b.Pos)) || (b.Crouching && LowCoverNear(b.Pos, a.Pos));
 
         /// <summary>Видит ли наблюдатель цель: конус обзора, дальность, стены. Вплотную чувствуется всегда.</summary>
-        public bool CanSee(Actor viewer, Vector2 target, float range = 45f, float coneDeg = 120f)
+        public bool CanSee(Actor viewer, Vector2 target, float range = 45f, float coneDeg = 120f, float targetZ = 0f)
         {
             var d = target - viewer.Pos;
             float dist = d.Length();
             if (dist > range) return false;
-            if (dist < 2.5f) return true;
+            if (dist < 2.5f && MathF.Abs(viewer.Z - targetZ) < 1.5f) return true;
             float ang = MathF.Atan2(d.Y, d.X);
             if (MathF.Abs(Geo.AngleDiff(viewer.Facing, ang)) > coneDeg * 0.5f * MathF.PI / 180f) return false;
+            if (viewer.Z > 0.3f || targetZ > 0.3f) return ClearLine3(viewer.Pos, viewer.Z + EyeH, target, targetZ + 0.3f);   // с этажа или на этаж (D60)
             return HasLineOfSight(viewer.Pos, target);
         }
 
@@ -829,8 +835,18 @@ namespace Rastvordd.Sim
             SimPerf.End("шаг: прочее (печи, РТ, сумки)", t0);
         }
 
+        /// <summary>Шаг персонажа — в контексте его этажа (D60): стены, двери, установленное и стройка — того этажа, где он стоит.</summary>
         void StepActor(Actor a, InputCmd cmd)
         {
+            var ctx = Ctx(a.Floor);
+            try { StepActorCore(a, cmd); }
+            finally { ctx.Dispose(); }
+        }
+
+        void StepActorCore(Actor a, InputCmd cmd)
+        {
+            if (cmd.DebugFly && a.Team == Team.Player && !a.IsBot) ToggleFly(a);
+            a.AimZ = cmd.HasAimZ ? cmd.AimZ : float.NaN;   // NaN — подберёт сервер при выстреле (BulletDz)
             // смена слота пояса
             if (cmd.SelectSlot >= 0 && cmd.SelectSlot < Actor.BeltSize && cmd.SelectSlot != a.Current)
             {
@@ -842,7 +858,7 @@ namespace Rastvordd.Sim
             var move = cmd.Move;
             if (move.LengthSquared() > 1) move = Vector2.Normalize(move);
             a.Peek = Math.Clamp(cmd.Peek, 0f, 1f);
-            a.Swimming = !Terrain.IsLand(a.Pos);
+            a.Swimming = a.Z < 0.5f && !Terrain.IsLand(a.Pos);
             a.Crouching = cmd.Crouch && !a.Swimming;
             float speed = WalkSpeed * (1f - 0.45f * a.Peek) * (a.Crouching ? 0.5f : 1f);   // прицел и присед — медленнее
             if (a.Swimming) { speed = WalkSpeed * 0.45f; cmd.Sprint = false; }              // плавание (D25)
@@ -862,8 +878,11 @@ namespace Rastvordd.Sim
             a.Vel = Geo.MoveToward(a.Vel, move * speed, Accel * Dt);
             var before = a.Pos;
             a.Pos += a.Vel * Dt;
-            ResolveCollisions(a);
-            a.Swimming = !Terrain.IsLand(a.Pos);
+            if (a.Flying) a.Pos = Vector2.Clamp(a.Pos, new Vector2(-HalfSize + 1), new Vector2(HalfSize - 1));   // в воздухе стен нет (D60)
+            else ResolveCollisions(a);
+            StepFloor(a);   // лестница, падение (D60)
+            _cf = Math.Clamp(a.Floor, 0, Building.MaxFloor);
+            a.Swimming = a.Z < 0.5f && !Terrain.IsLand(a.Pos);
 
             // взгляд
             if (toAimDir.LengthSquared() > 0.04f) a.Facing = MathF.Atan2(toAimDir.Y, toAimDir.X);
@@ -896,7 +915,7 @@ namespace Rastvordd.Sim
             if (cmd.Interact) Interact(a);
             StepUi(a, cmd);
             DropOverflow(a);
-            if (cmd.SetPiece >= 0 && cmd.SetPiece <= (int)StructKind.TriFoundation) a.BuildPiece = (StructKind)cmd.SetPiece;
+            if (cmd.SetPiece >= 0 && cmd.SetPiece <= (int)StructKind.LowWall) a.BuildPiece = (StructKind)cmd.SetPiece;
             a.HammerFocus = a.Held?.Id == "tool_hammer" ? cmd.HammerFocus : 0;
             a.HammerMode = a.Held?.Id == "tool_hammer" ? cmd.HammerMode : 0;
             if (cmd.HammerOp != 0 && !a.Dead) HammerWheel(a, cmd.HammerTarget, cmd.HammerOp);
@@ -1226,6 +1245,7 @@ namespace Rastvordd.Sim
             var dir0 = new Vector2(MathF.Cos(baseAng), MathF.Sin(baseAng));
             var muzzle = a.Pos + dir0 * (a.Radius + 0.35f);
             bool arrow = wd.AmmoId is "arrow" or "ammo_bolt";
+            float dz = BulletDz(a, muzzle);
             PelletsFired += Math.Max(1, wd.Pellets);
             for (int p = 0; p < Math.Max(1, wd.Pellets); p++)
             {
@@ -1235,6 +1255,7 @@ namespace Rastvordd.Sim
                 Projectiles.Add(new Projectile
                 {
                     Id = NextId(), OwnerId = a.Id, Pos = muzzle, Dir = dir, Origin = a.Pos, FromCrouch = a.Crouching,
+                    Z = a.Z + Hitbox.GunH, Dz = dz,   // этажи (D60): с высоты стрелка, с наклоном к высоте прицела
                     Speed = wd.BulletSpeed * (wd.Pellets > 1 ? 0.92f + 0.16f * (float)Rng.NextDouble() : 1f),
                     RangeLeft = wd.Range, Arrow = arrow, MaxRange = wd.Range,
                     EffRange = wd.EffRange * (a.Peek > 0.5f ? Gunplay.SightEffMul(w.SightZoom) : 1f),
@@ -1243,7 +1264,7 @@ namespace Rastvordd.Sim
             }
             a.LastShotTime = Time;
             Noises.Add(new Noise { Pos = a.Pos, Radius = w.Noise, SourceId = a.Id, Time = Time });
-            Events.Add(new SimEvent { Kind = SimEventKind.Shot, ActorId = a.Id, Pos = muzzle, Dir = dir0, Text = wd.Id, Value = w.NoFlash ? 1 : 0, OtherId = (int)MathF.Round(100 * w.Noise / MathF.Max(1, wd.NoiseRadius)) });   // OtherId — громкость с глушителем, %
+            Events.Add(new SimEvent { Kind = SimEventKind.Shot, ActorId = a.Id, Pos = muzzle, Z = a.Z, Dir = dir0, Text = wd.Id, Value = w.NoFlash ? 1 : 0, OtherId = (int)MathF.Round(100 * w.Noise / MathF.Max(1, wd.NoiseRadius)) });   // OtherId — громкость с глушителем, %
         }
 
         /// <summary>Удар инструментом: сначала люди в дуге перед собой, потом ресурсы.</summary>
@@ -1283,7 +1304,7 @@ namespace Rastvordd.Sim
             float best = float.MaxValue;
             foreach (var o in Actors)
             {
-                if (o == a || o.Dead || o.Spectator || (a.Team == Team.Npc && o.Team == Team.Npc)) continue;
+                if (o == a || o.Dead || o.Spectator || MathF.Abs(o.Z - a.Z) > 1.2f || (a.Team == Team.Npc && o.Team == Team.Npc)) continue;   // рукой — только на своей высоте (D60)
                 float d = Vector2.Distance(o.Pos, a.Pos);
                 if (d < best && InArc(o.Pos, o.Radius) && ClearLine(a.Pos, o.Pos, null, true)) { best = d; victim = o; }   // сквозь стену, окно, закрытую дверь — не достать
             }
@@ -1442,7 +1463,7 @@ namespace Rastvordd.Sim
             var fit = FitDeploy(a, def.Deploy, at, a.DeployRot);
             if (!fit.Ok) { Info(a, $"{def.Name}: {fit.Why}"); return; }
             at = fit.Pos;
-            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, OwnerId = a.Id, Level = Items.BenchLevel(def.Id) };
+            var dep = new Deployable { Id = NextId(), Kind = def.Deploy, OwnerId = a.Id, Level = Items.BenchLevel(def.Id), Floor = _cf };   // этаж — где стоит игрок (D60)
             ApplyFit(dep, fit);
             if (def.Deploy is DeployKind.Workbench or DeployKind.Claim or DeployKind.Furnace or DeployKind.Lathe) Milestone(a, $"поставил: {def.Name}");   // столб тонкий, спальник плоский, ящик компактный
             if (def.Deploy is DeployKind.Box or DeployKind.Lathe) dep.Storage = new LootBag { Id = NextId(), Pos = at };
@@ -1483,23 +1504,25 @@ namespace Rastvordd.Sim
 
         // ---------- взаимодействие (E) ----------
 
-        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box, Recycler, Panel, Stash, Lathe, Station, Shutter }   // Station — станции D54, Shutter — ставни окна
+        public enum InteractKind { None, Bag, Pickup, Furnace, Workbench, Door, Claim, Box, Recycler, Panel, Stash, Lathe, Station, Shutter, Hatch }   // Station — станции D54, Shutter — ставни окна
 
         /// <summary>Что ближе всего под рукой. Используется и сервером, и подсказкой на экране.</summary>
         public (InteractKind kind, object target) NearestInteract(Actor a)
         {
+            using var ctx = Ctx(a.Floor);   // этажи (D60): под рукой — только своего этажа
+            bool ground = a.Floor == 0 && !a.Flying;
             (InteractKind, object) best = (InteractKind.None, null);
             float bestD = InteractRange;
             foreach (var b in Bags)
             {
-                if (b.Empty) continue;
+                if (b.Empty || b.Floor != a.Floor || a.Flying) continue;
                 float d = Vector2.Distance(a.Pos, b.Pos);
                 // сначала дальность (дёшево), потом стены (луч до каждой сумки на карте стоил дорого)
                 if (d < bestD && ClearLine(a.Pos, b.Pos, null, true)) { bestD = d; best = (InteractKind.Bag, b); }   // сквозь стены и двери не достать
             }
             foreach (var p in Pickups)
             {
-                if (!p.Available) continue;
+                if (!p.Available || !ground) continue;
                 float d = Vector2.Distance(a.Pos, p.Pos);
                 if (d < bestD && ClearLine(a.Pos, p.Pos, null, true)) { bestD = d; best = (InteractKind.Pickup, p); }
             }
@@ -1512,18 +1535,19 @@ namespace Rastvordd.Sim
             foreach (var st in AllStashes())
             {
                 float d = Vector2.Distance(a.Pos, st.Pos);
-                if (!st.Done && d < bestD && ClearLine(a.Pos, st.Pos, null, true)) { bestD = d; best = (InteractKind.Stash, st); }
+                if (ground && !st.Done && d < bestD && ClearLine(a.Pos, st.Pos, null, true)) { bestD = d; best = (InteractKind.Stash, st); }
             }
             foreach (var s in Substations)
             {
                 float d = Vector2.Distance(a.Pos, s.PanelPos);
-                if (d < bestD && ClearLine(a.Pos, s.PanelPos, null, true)) { bestD = d; best = (InteractKind.Panel, s); }
+                if (ground && d < bestD && ClearLine(a.Pos, s.PanelPos, null, true)) { bestD = d; best = (InteractKind.Panel, s); }
             }
             if (NearestShutter(a.Pos, best.Item1 == InteractKind.None ? InteractRange + 0.4f : bestD) is Structure sh) best = (InteractKind.Shutter, sh);   // ставни окна (D54)
             // игрок — дверь по взгляду (AimedDoor), бот — ближайшая
             var door = a.IsBot ? NearestDoor(a.Pos, best.Item1 == InteractKind.None ? InteractRange + 0.4f : bestD) : AimedDoor(a);
             if (door != null && !a.IsBot && best.Item1 != InteractKind.None && Building.SegDist(a.Pos, door.A, door.B) > bestD) door = null;   // остальное ближе
             if (door != null && ClearLine(a.Pos, door.Center, door, true)) best = (InteractKind.Door, door);
+            if (!a.IsBot && HatchNear(a) is Structure hatch && (best.Item1 == InteractKind.None || Vector2.Distance(a.Pos, hatch.Center) < 1.0f)) best = (InteractKind.Hatch, hatch);   // люк (D60)
             return best;
         }
 
@@ -1536,8 +1560,8 @@ namespace Rastvordd.Sim
             Vector2 pos; float r;
             switch (target)
             {
-                case Deployable d when Deployables.Contains(d): pos = d.Pos; r = d.Radius; break;
-                case LootBag b when Bags.Contains(b) && !b.Empty: pos = b.Pos; r = 0.3f; break;
+                case Deployable d when Deployables.Contains(d) && d.Floor == a.Floor: pos = d.Pos; r = d.Radius; break;
+                case LootBag b when Bags.Contains(b) && !b.Empty && b.Floor == a.Floor: pos = b.Pos; r = 0.3f; break;
                 case Pickup p when p.Available: pos = p.Pos; r = 0.3f; break;
                 default: return false;
             }
@@ -1569,6 +1593,7 @@ namespace Rastvordd.Sim
                 case InteractKind.Station when a.Crouching && ((Deployable)target).Kind == DeployKind.GunTable && a.Weapon is WeaponState gw && !gw.Def.Melee: Repair(a, gw); break;   // Alt+E со стволом — починка до 100% (D54)
                 case InteractKind.Station: UseStation(a, (Deployable)target); break;
                 case InteractKind.Shutter: ToggleShutters(a, (Structure)target); break;
+                case InteractKind.Hatch: UseHatch(a, (Structure)target); break;
                 case InteractKind.Stash: UseStash(a, (Stash)target); break;
                 case InteractKind.Bag when ((LootBag)target).Punch && !((LootBag)target).Unlocked && Director?.Events.Find(e => e.Crate == target) is { } dev:
                     Info(a, dev.Kind == "airdrop" ? $"Груз ещё закрыт — {MathF.Ceiling(dev.StartsAt - Time)} с" : dev.StartsAt > 0 ? $"Идёт взлом — {MathF.Ceiling(dev.StartsAt - Time)} с" : "Закрытый ящик: запусти взлом (рядом, держи E)");
@@ -1838,7 +1863,7 @@ namespace Rastvordd.Sim
                 for (int j = i + 1; j < Actors.Count; j++)
                 {
                     var b = Actors[j];
-                    if (b.Dead || b.Spectator) continue;
+                    if (b.Dead || b.Spectator || MathF.Abs(a.Z - b.Z) > 1.2f) continue;   // разные этажи не толкаются (D60)
                     var d = b.Pos - a.Pos;
                     float min = a.Radius + b.Radius;
                     float dist = d.Length();
@@ -1859,6 +1884,7 @@ namespace Rastvordd.Sim
                 var a = p.Pos;
                 var b = p.Pos + p.Dir * stepLen;
                 var owner = Find(p.OwnerId);
+                if (p.Dz != 0 || p.Z > Building.Storey - 0.5f) { if (StepBullet3(p, owner)) Projectiles.RemoveAt(i); continue; }   // этажи и воздух (D60): пуля в объёме
 
                 float bestT = 2;
                 Actor hitActor = null;
@@ -1900,6 +1926,7 @@ namespace Rastvordd.Sim
                 foreach (var act in Actors)
                 {
                     if (act.Dead || act.Spectator || act.Id == p.OwnerId) continue;
+                    if (act.Z > 0.3f && (Hitbox.GunH < act.Z - 0.1f || Hitbox.GunH > act.Z + 1.85f)) continue;   // ровная пуля у земли не достаёт до того, кто выше (D60)
                     if (owner != null && owner.Team == Team.Npc && act.Team == Team.Npc) continue;
                     if (Hitbox.Hit(act, a, b, out float t) && t < bestT)   // по силуэту: голова, корпус с руками, ноги
                     {
@@ -1964,7 +1991,7 @@ namespace Rastvordd.Sim
             a.Hp = 0;
             a.Dead = true;
             a.DeadTime = Time;
-            var bag = new LootBag { Id = NextId(), Pos = a.Pos, Despawn = 300f, Corpse = true };
+            var bag = new LootBag { Id = NextId(), Pos = a.Pos, Despawn = 300f, Corpse = true, Floor = a.Flying ? 0 : a.Floor };   // с этажа — сумка на этаже (D60)
             if (a.Team == Team.Npc) NpcDrop(a, bag);   // охрана РТ — не фулл-лут
             else
             {

@@ -15,6 +15,13 @@ namespace Rastvordd.Client
         public static readonly float GunH = H(1.15f);
         public static Vector2 Px(SVec v) => new Vector2(v.X * PPM, v.Y * PPM);
         public static float H(float meters) => meters * PPM * HS;
+        // этажи (D60): что выше — рисуется выше по экрану (как в Zomboid) и поверх всего, что ниже (свой слой ZIndex)
+        public const int BandStep = 25;
+        public static int Band(int floor) => floor <= 0 ? 0 : floor * BandStep;
+        public static Vector2 Lift(float zMeters) => new Vector2(0, -H(zMeters));
+        public static Vector2 PxZ(SVec v, float zMeters) => new Vector2(v.X * PPM, v.Y * PPM - H(zMeters));
+        /// <summary>Точка на земле (сим-координаты) по экранной точке курсора и высоте плоскости прицела.</summary>
+        public static SVec Unproject(Vector2 px, float zMeters) => new SVec(px.X / PPM, (px.Y + H(zMeters)) / PPM);
     }
 
     /// <summary>
@@ -905,6 +912,7 @@ namespace Rastvordd.Client
         bool _cut;
         public bool Cut => _cut;
         public bool Mine;   // стена своей базы (BuildLayer: изнутри своей базы срезаются все)
+        public int Floor;   // этаж (D60)
         /// <summary>Срезать стену до низкой (персонаж внутри дома, стена перед ним).</summary>
         public void SetCut(bool cut)
         {

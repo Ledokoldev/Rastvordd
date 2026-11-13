@@ -16,7 +16,7 @@ namespace Rastvordd.Client
         {
             MouseFilter = MouseFilterEnum.Ignore;
             TextureFilter = TextureFilterEnum.Linear;
-            CustomMinimumSize = new Vector2(6 * C + 5 * Gap, C + 22);
+            CustomMinimumSize = new Vector2(9 * C + 8 * Gap, C + 22);
         }
 
         public void Set(int selected, int ghost)
@@ -28,7 +28,7 @@ namespace Rastvordd.Client
 
         public override void _Draw()
         {
-            float w = 6 * C + 5 * Gap;
+            float w = 9 * C + 8 * Gap;
             string cap = $"{Rastvordd.Sim.Building.KindName((Rastvordd.Sim.StructKind)_sel)}   ·   зажми ПКМ — колесо";
             float cw = UiTheme.TextWidth(cap, UiTheme.FontCaption);
             var pill = new Rect2((w - cw) / 2 - 10, -4, cw + 20, 20);
@@ -40,6 +40,7 @@ namespace Rastvordd.Client
                 var r = new Rect2(slot * (C + Gap), 22, C, C);
                 bool on = k == _sel, gh = k == _ghost;
                 UiTheme.DrawRound(this, r, on ? UiTheme.T(0.2f) : new Color(UiTheme.PanelBg, 0.7f), 10, on ? UiTheme.T(0.8f) : gh ? UiTheme.T(0.35f) : UiTheme.PanelBorder, on ? 2 : 1);
+                if (k >= IconIds.Length) { BuildMenu.DrawFloorIcon(this, k == 6 ? "@stairs" : k == 7 ? "@hatch" : "@lowwall", r.Grow(-6), on || gh ? Colors.White : new Color(1, 1, 1, 0.5f)); continue; }
                 var icon = Art.Get($"icons/icon_build_{IconIds[k]}");
                 if (icon != null) DrawTextureRect(icon, r.Grow(-6), false, on || gh ? Colors.White : new Color(1, 1, 1, 0.5f));
             }
@@ -173,10 +174,42 @@ namespace Rastvordd.Client
             DrawPolyline(o, col, w, true);
         }
 
+        /// <summary>Векторные значки элементов этажей (D60): лестница, люк, парапет. false — не наш значок.</summary>
+        public static bool DrawFloorIcon(CanvasItem ci, string icon, Rect2 r, Color mod)
+        {
+            var c = r.GetCenter(); float s = r.Size.X / 2;
+            var wood = new Color(0.78f, 0.6f, 0.4f) * mod; var dark = new Color(0.3f, 0.24f, 0.18f) * mod;
+            switch (icon)
+            {
+                case "@stairs":
+                    for (int k = 0; k < 4; k++)
+                    {
+                        var st = new Rect2(c.X - s * 0.9f + k * s * 0.45f, c.Y + s * 0.6f - (k + 1) * s * 0.38f, s * 0.45f, (k + 1) * s * 0.38f);
+                        ci.DrawRect(st, wood); ci.DrawRect(st, dark, false, 1.5f);
+                    }
+                    return true;
+                case "@hatch":
+                    var plate = new Rect2(c.X - s * 0.9f, c.Y - s * 0.7f, s * 1.8f, s * 1.4f);
+                    ci.DrawRect(plate, wood);
+                    var hole = new Rect2(c.X - s * 0.45f, c.Y - s * 0.4f, s * 0.9f, s * 0.8f);
+                    ci.DrawRect(hole, new Color(0.06f, 0.06f, 0.07f) * mod);
+                    for (int k = 1; k <= 3; k++) ci.DrawLine(new Vector2(hole.Position.X + 3, hole.Position.Y + hole.Size.Y * k / 4), new Vector2(hole.End.X - 3, hole.Position.Y + hole.Size.Y * k / 4), wood, 2);
+                    ci.DrawRect(plate, dark, false, 1.5f);
+                    return true;
+                case "@lowwall":
+                    var wall = new Rect2(c.X - s * 0.9f, c.Y, s * 1.8f, s * 0.55f);
+                    ci.DrawRect(wall, wood); ci.DrawRect(wall, dark, false, 1.5f);
+                    ci.DrawLine(new Vector2(c.X - s * 0.9f, c.Y - s * 0.6f), new Vector2(c.X + s * 0.9f, c.Y - s * 0.6f), new Color(1, 1, 1, 0.35f) * mod, 1.5f);   // уровень пояса
+                    return true;
+            }
+            return false;
+        }
+
         void DrawItemIcon(string icon, Rect2 r, Color mod)
         {
             if (string.IsNullOrEmpty(icon)) return;
             if (icon.StartsWith("item:")) { UiTheme.DrawIcon(this, icon.Substring(5), r, mod); return; }
+            if (DrawFloorIcon(this, icon, r, mod)) return;   // лестница, люк, парапет (D60)
             if (icon == "@demolish")
             {
                 // снос: кирпичная кладка с трещиной и обломками

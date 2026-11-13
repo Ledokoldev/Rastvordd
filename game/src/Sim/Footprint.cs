@@ -232,6 +232,7 @@ namespace Rastvordd.Sim
         /// </summary>
         public DeployFit FitDeploy(Actor a, DeployKind kind, Vector2 at, int rot)
         {
+            using var ctx = Ctx(a.Floor);   // этажи (D60): пол своего этажа
             var size = SizeOfDeploy(kind);
             rot &= 3;
             // шкаф на голой земле — тоже по сетке: в центр четверти клетки (клетка 2 м → четверть 1 м)
@@ -248,6 +249,8 @@ namespace Rastvordd.Sim
                 fit.Ok = true;
                 return fit;
             }
+            if (floor != null && floor.Kind is StructKind.Stairs or StructKind.Hatch) { fit.Why = "на лестницу и люк ставить нельзя"; return fit; }
+            if (floor == null && _cf > 0) { fit.Why = "наверху — только на перекрытие"; return fit; }
             if (floor != null)
             {
                 fit.Snapped = true;
@@ -308,6 +311,7 @@ namespace Rastvordd.Sim
         public List<(Vector2[] poly, int state)> SlotHighlight(Actor a, DeployKind kind, Vector2 at, int rot)
         {
             var list = new List<(Vector2[], int)>();
+            using var ctx = Ctx(a.Floor);
             var floor = FloorAt(at);
             if (floor == null) return list;
             var sl = Footprints.Slots(floor);

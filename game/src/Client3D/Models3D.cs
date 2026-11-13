@@ -91,9 +91,25 @@ namespace Rastvordd.Client3D
             _ => "forest",
         };
 
-        public static Node3D ForNode(NodeKind kind, int look, Biome biome)
+        /// <summary>
+        /// Модель ресурса. Деревья: сначала по породе (node_tree_&lt;порода&gt;[_snow|_arid|_swamp]_N, как в 2D Art.Tree),
+        /// вариант — по seed (номер узла); нет породы (старые сейвы) — по биому.
+        /// </summary>
+        public static Node3D ForNode(NodeKind kind, int look, Biome biome, int seed = 0)
         {
-            if (kind == NodeKind.Tree) return Variant("node_tree_" + BiomeKey(biome), look) ?? Variant("node_tree", look);
+            if (kind == NodeKind.Tree)
+            {
+                var sp = ResourceNode.SpeciesOf((byte)look);
+                if (sp != TreeSpecies.Auto)
+                {
+                    string key = "node_tree_" + sp.ToString().ToLowerInvariant();
+                    string sub = biome == Biome.Tundra ? "_snow" : biome == Biome.Arid ? "_arid" : biome == Biome.Swamp ? "_swamp" : "";
+                    int v = (int)(((uint)seed * 2654435761u) >> 8);
+                    var m = (sub != "" ? Variant(key + sub, v) : null) ?? Variant(key, v);
+                    if (m != null) return m;
+                }
+                return Variant("node_tree_" + BiomeKey(biome), look) ?? Variant("node_tree", look);
+            }
             return Variant("node_" + kind.ToString().ToLowerInvariant(), look);
         }
 

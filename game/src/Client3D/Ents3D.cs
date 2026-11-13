@@ -343,13 +343,16 @@ namespace Rastvordd.Client3D
         public static Node3D NodeView(NodeSnap n, Biome biome)
         {
             var root = new Node3D();
-            var model = Models3D.ForNode(n.Kind, n.Look, biome);
+            var model = Models3D.ForNode(n.Kind, n.Look, biome, n.Id);
             float k = 0.6f + 0.4f * Mathf.Clamp(n.Fill, 0, 1);
             if (model != null)
             {
-                // ресурс тает по мере добычи (Fill), поворот — по Look, чтобы одинаковые модели не стояли «под копирку»
-                model.Scale = Vector3.One * (n.Kind == NodeKind.Tree ? 0.85f + 0.3f * (n.Look % 7) / 6f : k);
-                model.Rotation = new Vector3(0, n.Look * 0.9f, 0);
+                // ресурс тает по мере добычи (Fill), поворот — по номеру узла, чтобы одинаковые модели не стояли «под копирку»;
+                // дерево — по возрасту (подрост, молодое, взрослое, старое) и чуть вразброс
+                float jit = 0.9f + 0.2f * ((uint)n.Id * 2246822519u >> 24) / 255f;
+                float age = ResourceNode.AgeOf(n.Look) switch { TreeAge.Sapling => 0.3f, TreeAge.Young => 0.65f, TreeAge.Old => 1.2f, _ => 1f };
+                model.Scale = Vector3.One * (n.Kind == NodeKind.Tree ? age * jit : k);
+                model.Rotation = new Vector3(0, n.Kind == NodeKind.Tree ? n.Id * 2.39996f : n.Look * 0.9f, 0);
                 root.AddChild(model);
                 return root;
             }

@@ -15,3 +15,4 @@ def build(k):
     k.box((0.045, 0.006, 0.16), (-0.25, -W / 2 - 0.004, 0.142), "red", bevel=0.0)
     handles(k, 0.3)
     latches(k, h - 0.15)
+    k.stencil("АПТЕЧКА", (0.14, -W / 2 - 0.006, 0.2), size=0.05, material="red")

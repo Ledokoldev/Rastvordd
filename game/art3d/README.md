@@ -24,3 +24,8 @@
 материалы из CC0-текстур Poly Haven с оттенком под палитру, развёртка в метрах). Текстуры: `scripts/blender/fetch-textures.ps1` → `tools/textures/`.
 Сборка: `tools/blender/blender-5.2.4-windows-x64/blender.exe -b -P scripts/blender/build.py -- [имя…]` → `own/<имя>.glb` + превью `assets/3d-preview/<имя>.png`.
 Blender — переносной с blender.org в `tools/blender/` (не в git).
+Своих моделей ~100 (13.11): все станции и постройки, ящики лута, ресурсы (бочка, хлам, покрышки), кусты и пикапы,
+29 деревьев по породам (`node_tree_<порода>[_snow|_arid|_swamp]_N` — клиент выбирает по породе узла, как 2D, и масштабирует по возрасту),
+36 предметов в руках (`held_<id>`), 4 персонажа на суставах. Каждая — по своему 2D-спрайту (`game/art/…`).
+Проверить в игре: `…_console.exe --path game res://Main3D.tscn -- --showcase[=weapon_svd] --frames=150 --shot=screenshots/x.png`
+(«витрина»: все станции, породы, ящики, ресурсы рядом, ствол в руках; отладочный запуск — сохранение не трогается).

@@ -15,3 +15,4 @@ def build(k):
         k.box((0.2 if z == 0 else 0.02, 0.02, 0.02 if z == 0 else 0.2), (x / 2, fy - 0.05, hz - (0.1 if z != 0 else 0.01)), "steel", bevel=0.003)
     k.box((0.04, 0.012, 0.06), (-0.22, fy - 0.017, hz + 0.08), "black", bevel=0.003)   # скважина
     k.box((L - 0.06, W + 0.02, 0.04), (0, 0, 0), "rust_dark", bevel=0.006)              # цоколь
+    k.stencil("СШ-2", (0.22, fy - 0.015, hz + 0.13), size=0.035)

@@ -21,3 +21,5 @@ def build(k):
     k.cyl(0.018, 0.02, (0.54, -0.15, 0.83), "steel", segments=8, axis="X", bevel=0.002)
     k.cyl(0.035, 0.55, (-0.42, 0.2, 0.5), "rust", segments=10, bevel=0)        # выхлоп
     k.cyl(0.045, 0.06, (-0.42, 0.2, 1.02), "rust_dark", segments=10, bevel=0.003)
+    k.stencil("ДГ-4", (0.36, -0.26, 0.42), size=0.07)
+    k.stencil("220 В", (0.36, -0.26, 0.3), size=0.035)

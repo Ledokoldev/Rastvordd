@@ -11,3 +11,4 @@ def build(k):
         k.cyl(r + 0.01, 0.03, (0, 0, z), "paint_green", segments=20, bevel=0.006)
     k.cyl(0.035, 0.02, (0.16, 0.06, h), "steel", segments=10, bevel=0.003)   # пробки
     k.cyl(0.022, 0.02, (-0.16, -0.08, h), "steel", segments=8, bevel=0.003)
+    k.stencil("ОГНЕОПАСНО", (0, -r - 0.004, h * 0.5), size=0.045, wrap=r + 0.004)

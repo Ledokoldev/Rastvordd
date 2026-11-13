@@ -33,5 +33,5 @@ for name in names:
     path, tris = k.export(name, out_dir)
     print(f"МОДЕЛЬ {name}: {tris} тр., {os.path.getsize(path) // 1024} КБ → {path}")
     if preview:
-        k.render_preview(os.path.join(prev_dir, name + ".png"))
+        k.render_preview(os.path.join(prev_dir, name + ".png"), side=name.startswith("held_"))
         print(f"ПРЕВЬЮ {name}")

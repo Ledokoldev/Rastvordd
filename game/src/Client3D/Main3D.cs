@@ -118,6 +118,10 @@ namespace Rastvordd.Client3D
                 try { _server.LoadSave(FileAccess.GetFileAsString(SavePath), out _); }
                 catch (System.Exception ex) { GD.PrintErr($"сохранение не прочитано: {ex.Message}"); }
             _myId = _spectate ? _server.ConnectSpectator() : _server.Connect("Игрок");
+            // витрина моделей (отладка): --showcase[=id предмета в руки] — все станции, породы деревьев, ящики, ресурсы рядом
+            var showArg = System.Array.Find(args, a => a.StartsWith("--showcase"));
+            if (showArg != null && !_spectate && _server.World.Find(_myId) is Actor showMe)
+                _server.World.DebugShowcase(showMe, showArg.Contains('=') ? showArg.Substring(showArg.IndexOf('=') + 1) : "weapon_akm");
             _map = _server.GetMap();
 
             BuildWorld();

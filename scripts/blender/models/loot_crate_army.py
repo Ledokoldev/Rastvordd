@@ -16,3 +16,5 @@ def build(k):
     latches(k, h - 0.13)
     for x in (-0.22, -0.12):
         k.box((0.05, W + 0.014, 0.004), (x, 0, h), "yellow", bevel=0.0)
+    k.stencil("НЕ КАНТОВАТЬ", (0.0, -W / 2, 0.2), size=0.04)
+    k.stencil("52-К", (0.2, 0, h), size=0.09, facing="+Z")

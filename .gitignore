@@ -7,3 +7,4 @@ audio_src/footsteps_game_ready/
 # кинематографичные материалы — не для репозитория
 docs/cinematic/
 
+__pycache__/

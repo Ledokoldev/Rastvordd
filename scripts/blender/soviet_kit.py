@@ -7,6 +7,7 @@
 """
 import math
 import os
+import shutil
 
 import bmesh
 import bpy
@@ -106,7 +107,22 @@ def _tinted_image(tex_id, tint):
         img.file_format = "JPEG"
         img.save()
         bpy.data.images.remove(img)
-    return bpy.data.images.load(out, check_existing=True)
+    return _img(out)
+
+
+def _img(path):
+    """Картинка с уникальным именем (green_metal_rust_rough, worn_red_0.55_v1): экспорт кладёт её в общую
+    папку own/tex под этим именем — одна копия на все модели, без затирания разных rough.jpg друг другом."""
+    stem = os.path.splitext(os.path.basename(path))[0]
+    if stem in ("diff", "rough", "nor"):                 # экспорт называет файл по имени исходника — копия с уникальным
+        uniq = os.path.join(TINTED, f"{os.path.basename(os.path.dirname(path))}_{stem}.jpg")
+        if not os.path.exists(uniq):
+            os.makedirs(TINTED, exist_ok=True)
+            shutil.copyfile(path, uniq)
+        path, stem = uniq, os.path.splitext(os.path.basename(uniq))[0]
+    img = bpy.data.images.load(path, check_existing=True)
+    img.name = stem
+    return img
 
 
 def _fbm(n, beta, seed, low=0):
@@ -149,7 +165,7 @@ def _worn_image(name, col, wear, n=1024):
         res.file_format = "JPEG"
         res.save()
         bpy.data.images.remove(res)
-    return bpy.data.images.load(out, check_existing=True)
+    return _img(out)
 
 
 def mat(name):
@@ -175,7 +191,7 @@ def mat(name):
         diff.image = _worn_image(name, col, wear)
         nt.links.new(diff.outputs["Color"], bsdf.inputs["Base Color"])
         nor = nt.nodes.new("ShaderNodeTexImage")       # рельеф сколов — от ржавого металла
-        nor.image = bpy.data.images.load(os.path.join(TEX, "rusty_metal_02", "nor.jpg"), check_existing=True)
+        nor.image = _img(os.path.join(TEX, "rusty_metal_02", "nor.jpg"))
         nor.image.colorspace_settings.name = "Non-Color"
         nmap = nt.nodes.new("ShaderNodeNormalMap")
         nmap.inputs["Strength"].default_value = 0.5
@@ -188,11 +204,11 @@ def mat(name):
     diff.image = _tinted_image(tex_id, tint)
     nt.links.new(diff.outputs["Color"], bsdf.inputs["Base Color"])
     rough = nt.nodes.new("ShaderNodeTexImage")
-    rough.image = bpy.data.images.load(os.path.join(TEX, tex_id, "rough.jpg"), check_existing=True)
+    rough.image = _img(os.path.join(TEX, tex_id, "rough.jpg"))
     rough.image.colorspace_settings.name = "Non-Color"
     nt.links.new(rough.outputs["Color"], bsdf.inputs["Roughness"])
     nor = nt.nodes.new("ShaderNodeTexImage")
-    nor.image = bpy.data.images.load(os.path.join(TEX, tex_id, "nor.jpg"), check_existing=True)
+    nor.image = _img(os.path.join(TEX, tex_id, "nor.jpg"))
     nor.image.colorspace_settings.name = "Non-Color"
     nmap = nt.nodes.new("ShaderNodeNormalMap")
     nt.links.new(nor.outputs["Color"], nmap.inputs["Color"])
@@ -444,10 +460,10 @@ def export(name, out_dir):
     objs = [o for o in bpy.context.scene.objects if o.type == "MESH"]
     uv_world(objs)
     os.makedirs(out_dir, exist_ok=True)
-    path = os.path.join(out_dir, name + ".glb")
+    path = os.path.join(out_dir, name + ".gltf")   # текстуры — общие в own/tex (одна копия на всю игру)
     for o in bpy.context.scene.objects:
         o.select_set(o.type in ("MESH", "EMPTY"))         # пустые — суставы персонажей
-    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=True,
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLTF_SEPARATE", export_texture_dir="tex", use_selection=True, export_apply=True,
                               export_yup=True, export_image_format="JPEG", export_jpeg_quality=85)
     return path, tris(objs)
 

@@ -22,7 +22,7 @@
 Самый высокий приоритет: `own/` → `hq/` → сгенерированная. Стиль — `docs/design/28-3d-style.md` (советский постапок).
 Модель = скрипт `scripts/blender/models/<имя>.py` (функция `build(k)`, набор `scripts/blender/soviet_kit.py`: коробки и цилиндры с фасками,
 материалы из CC0-текстур Poly Haven с оттенком под палитру, развёртка в метрах). Текстуры: `scripts/blender/fetch-textures.ps1` → `tools/textures/`.
-Сборка: `tools/blender/blender-5.2.4-windows-x64/blender.exe -b -P scripts/blender/build.py -- [имя…]` → `own/<имя>.glb` + превью `assets/3d-preview/<имя>.png`.
+Сборка: `tools/blender/blender-5.2.4-windows-x64/blender.exe -b -P scripts/blender/build.py -- [имя…]` → `own/<имя>.gltf` (+ `.bin`; текстуры общие в `own/tex/` — одна копия на все модели) + превью `assets/3d-preview/<имя>.png`.
 Blender — переносной с blender.org в `tools/blender/` (не в git).
 Своих моделей ~100 (13.11): все станции и постройки, ящики лута, ресурсы (бочка, хлам, покрышки), кусты и пикапы,
 29 деревьев по породам (`node_tree_<порода>[_snow|_arid|_swamp]_N` — клиент выбирает по породе узла, как 2D, и масштабирует по возрасту),

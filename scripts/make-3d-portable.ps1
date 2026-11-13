@@ -40,6 +40,20 @@ $g = Join-Path $root 'game'
 robocopy $g (Join-Path $out 'game') @rc /XD (Join-Path $g 'screenshots') (Join-Path $g '.godot\editor') (Join-Path $g '.godot\shader_cache') (Join-Path $g 'obj') | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "robocopy: ошибка копирования ($LASTEXITCODE)" }
 if (-not (Test-Path (Join-Path $out 'game\.godot\mono\temp\bin\Debug\Rastvordd.dll'))) { throw 'В сборке нет Rastvordd.dll' }
+# исходники картинок и моделей игре не нужны: она читает импортированные копии из .godot/imported по файлу .import.
+# Убираем исходник, только если его импорт на месте (иначе оставляем — подгрузится как есть)
+$freed = 0
+foreach ($imp in Get-ChildItem (Join-Path $out 'game') -Recurse -Filter *.import -File | Where-Object { $_.FullName -notmatch '\\\.godot\\' }) {
+    $src = $imp.FullName.Substring(0, $imp.FullName.Length - 7)
+    if (-not (Test-Path -LiteralPath $src) -or $src -notmatch '\.(png|jpg|jpeg|glb|gltf|bin)$') { continue }
+    $dest = Select-String -LiteralPath $imp.FullName -Pattern '^dest_files=\["(res://[^"]+)"' | Select-Object -First 1
+    if (-not $dest) { continue }
+    $d = Join-Path (Join-Path $out 'game') ($dest.Matches[0].Groups[1].Value.Substring(6) -replace '/', '\')
+    if (-not (Test-Path -LiteralPath $d)) { continue }
+    $freed += (Get-Item -LiteralPath $src).Length
+    Remove-Item -LiteralPath $src -Force
+}
+Write-Host ("  исходники картинок и моделей убраны: {0:N0} МБ" -f ($freed / 1MB))
 
 # батники: только ASCII внутри (cmd читает их в кодировке консоли)
 $exe = 'engine\Godot_v4.7.2-stable_mono_win64.exe'

@@ -219,7 +219,7 @@ namespace Rastvordd.Client3D
             };
             var root = new Node3D { Position = W3.V(c) };
             var size = new Vector3(s.X, Mathf.Max(0.4f, w.Height), s.Y);
-            if (!Glb(root, IdOf(sprite), size)) Family(root, IdOf(sprite), size, ColorsOf(sprite), w.Id);
+            if (!Glb(root, IdOf(sprite), size, ColorsOf(sprite).main)) Family(root, IdOf(sprite), size, ColorsOf(sprite), w.Id);
             return root;
         }
 
@@ -239,10 +239,13 @@ namespace Rastvordd.Client3D
                 float tw = tex != null ? tex.GetWidth() / Client.Iso.PPM * d.Scale : 1f, th = tex != null ? tex.GetHeight() / Client.Iso.PPM * d.Scale : 1f;
                 float dd = Mathf.Clamp(tw * 0.5f, 0.2f, 1.2f);
                 f = (tw, dd, Mathf.Clamp((th - dd) / Client.Iso.HS, 0.1f, 12f), false);
+                // техника без записи следа (подбитые танки и БТР РТ): глубина как у машины, а не «до метра» —
+                // иначе равномерная подгонка сожмёт танк до игрушки
+                if (Models3D.VehicleKey(id) != null) f = (tw, id.Contains("_top") ? th : tw * 0.45f, 2.4f, false);
             }
             var root = new Node3D { Position = W3.V(new SVec(d.Pos.X, d.Pos.Y - f.d * 0.5f), baseH + d.Lift) };
             var size = new Vector3(Mathf.Max(0.05f, f.w), Mathf.Max(0.05f, f.h), Mathf.Max(0.05f, f.d));
-            if (Glb(root, id, size)) return root;
+            if (Glb(root, id, size, ColorsOf(d.Sprite).main)) return root;
             if (Family(root, id, size, ColorsOf(d.Sprite), d.Id)) return root;
             if (tex == null) return null;
             if (hasFoot) { Block(root, size, ColorsOf(d.Sprite).main); return root; }
@@ -263,12 +266,22 @@ namespace Rastvordd.Client3D
             return root;
         }
 
-        static bool Glb(Node3D root, string id, Vector3 size)
+        static bool Glb(Node3D root, string id, Vector3 size, Color paint)
         {
             var m = Models3D.Decor(id);
+            if (m != null)
+            {
+                root.AddChild(m);
+                Models3D.Fit(m, size, false);
+                return true;
+            }
+            // техника: модель по типу машины, вписана без искажений, кузов — в цвет спрайта, обгоревшие — тёмные
+            m = Models3D.Vehicle(id);
             if (m == null) return false;
             root.AddChild(m);
-            Models3D.Fit(m, size, false);
+            Models3D.FitKeep(m, size);
+            bool military = Models3D.VehicleKey(id) is string k && (k.Contains("tank") || k.Contains("btr") || k.Contains("brdm") || k.Contains("bmp") || k.Contains("mtlb") || k.Contains("sau") || k.Contains("heli"));
+            Models3D.Paint(m, paint, !military && (id.Contains("wreck") || id.Contains("burnt") || id.Contains("burning")));
             return true;
         }
 

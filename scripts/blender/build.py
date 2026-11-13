@@ -30,8 +30,8 @@ for name in names:
     spec.loader.exec_module(mod)
     k.reset()
     mod.build(k)
-    path, tris = k.export(name, out_dir)
+    path, tris = k.export(name, os.path.join(out_dir, "decor") if name.startswith("veh_") else out_dir)   # техника РТ — decor/
     print(f"МОДЕЛЬ {name}: {tris} тр., {os.path.getsize(path) // 1024} КБ → {path}")
     if preview:
-        k.render_preview(os.path.join(prev_dir, name + ".png"), side=name.startswith("held_"))
+        k.render_preview(os.path.join(prev_dir, name + ".png"), side=name.startswith(("held_", "veh_")))
         print(f"ПРЕВЬЮ {name}")

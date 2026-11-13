@@ -28,6 +28,20 @@ namespace Rastvordd.Sim
             for (int i = 0; i < boxes.Length; i++)
                 Bags.Add(new LootBag { Id = NextId(), Pos = a.Pos + new Vector2(-6.5f, -1f + i * 1.4f), IsCrate = true, Tier = i, Box = boxes[i] });
             Bags.Add(new LootBag { Id = NextId(), Pos = a.Pos + new Vector2(-6.5f, 4.6f), IsCrate = true, Safe = true, Tier = 2 });
+            // стоянка техники РТ (все типы моделей) — ряды к югу от деревьев
+            string[] veh = { "car_vaz2106_red_side", "car_vaz2109_grey_side", "car_zaz968_beige_side", "car_volga24_black_side", "wreck_burnt_sedan_side",
+                             "jeep_uaz469_side", "van_uaz452_side", "van_gazelle_side", "bus_paz672_side", "truck_zil130_side", "truck_kamaz_dump_side",
+                             "radio_relay_truck", "tractor_belarus_side", "trailer_2pts_side", "moto_ural_sidecar_side", "tank_t55_wreck_side",
+                             "tank_t34_wreck", "tank_t72_wreck_turretless", "btr70_wreck", "brdm2_wreck", "bmp1_wreck", "mtlb_wreck", "sau_2s1_wreck",
+                             "wagon_boxcar_green_side", "wagon_gondola_coal_side" };
+            float vx = -24, vy = 16;
+            foreach (var id in veh)
+            {
+                float w = id.StartsWith("wagon") ? 14 : id.Contains("tank") || id.Contains("bus") || id.Contains("truck") || id.Contains("kamaz") || id.Contains("relay") ? 7 : id.Contains("btr") || id.Contains("bmp") || id.Contains("sau") || id.Contains("mtlb") ? 6.5f : 4.4f;
+                if (vx + w > 26) { vx = -24; vy += 5f; }
+                Solid("vehicles/" + id, a.Pos + new Vector2(vx + w / 2, vy), w, w * 0.45f, 2.4f);
+                vx += w + 1.2f;
+            }
             for (int i = 0; i < Actor.BeltSize; i++) a.Belt[i] = null;
             if (Items.Get(held) != null) a.Add(held, 1);
             a.Current = 0;

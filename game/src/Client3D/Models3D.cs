@@ -136,6 +136,112 @@ namespace Rastvordd.Client3D
 
         public static Node3D Decor(string spriteId) => string.IsNullOrEmpty(spriteId) ? null : Make("decor/" + spriteId);
 
+        /// <summary>
+        /// Техника РТ: id спрайта (vehicles/…) → своя модель типа decor/veh_* (scripts/blender/models/_veh.py).
+        /// Одна модель на тип машины, цвет кузова — из спрайта (<see cref="Paint"/>).
+        /// </summary>
+        public static string VehicleKey(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            bool H(params string[] p) { foreach (var s in p) if (id.Contains(s)) return true; return false; }
+            if (H("heli_")) return "veh_heli_wreck";
+            if (H("plane_an2", "plane_")) return "veh_plane";
+            if (H("radar")) return "veh_radar";
+            if (H("radio_relay", "kung", "zil131")) return "veh_truck_kung";
+            if (H("tanker", "fuel_truck")) return "veh_truck_tanker";
+            if (H("kamaz", "dump")) return "veh_dump";
+            if (H("tank_t34")) return "veh_tank_old";
+            if (H("turretless")) return "veh_tank_turretless";
+            if (H("tank_t")) return "veh_tank";
+            if (H("btr")) return "veh_btr";
+            if (H("brdm")) return "veh_brdm";
+            if (H("bmp")) return "veh_bmp";
+            if (H("mtlb")) return "veh_mtlb";
+            if (H("sau_")) return "veh_sau";
+            if (H("gazelle")) return "veh_van_truck";
+            if (H("uaz452", "bukhanka", "rafik")) return "veh_van";
+            if (H("liaz", "ikarus", "bus_", "paz")) return "veh_bus";
+            if (H("truck_", "gaz53", "gaz66", "zil130", "ural4320", "maz_")) return "veh_truck";
+            if (H("uaz469", "jeep", "niva", "uaz_")) return "veh_jeep";
+            if (H("moto_", "sidecar")) return "veh_moto";
+            if (H("tractor")) return "veh_tractor";
+            if (H("trailer_2pts")) return "veh_trailer";
+            if (H("wagon_gondola")) return "veh_wagon_gondola";
+            if (H("wagon_flatcar")) return "veh_wagon_flat";
+            if (H("wagon_boxcar", "wagon_freight")) return "veh_wagon_box";
+            if (H("vaz2109")) return "veh_sedan_hatch";
+            if (H("zaz", "zaporozhets")) return "veh_sedan_small";
+            if (H("volga")) return "veh_sedan_long";
+            if (H("car_", "sedan", "moskvich", "vaz")) return "veh_sedan";
+            return null;
+        }
+
+        public static Node3D Vehicle(string id) => VehicleKey(id) is string k ? Make("decor/" + k) : null;
+
+        /// <summary>
+        /// Вписать машину в след без искажения пропорций: равный масштаб по меньшей стороне, поворот на 90°,
+        /// если длинная сторона модели не совпадает с длинной стороной следа. Высота — пропорционально.
+        /// </summary>
+        public static void FitKeep(Node3D model, Vector3 size)
+        {
+            var b = Bounds(model).Size;
+            bool turn = (b.X >= b.Z) != (size.X >= size.Z);
+            float bx = turn ? b.Z : b.X, bz = turn ? b.X : b.Z;
+            float s = Mathf.Min(size.X / Mathf.Max(0.01f, bx), size.Z / Mathf.Max(0.01f, bz));
+            var pivot = new Node3D { Rotation = new Vector3(0, turn ? Mathf.Pi / 2 : 0, 0), Scale = Vector3.One * s };
+            var parent = model.GetParent();
+            parent?.RemoveChild(model);
+            pivot.AddChild(model);
+            parent?.AddChild(pivot);
+            var bb = Bounds(model);
+            var c = bb.GetCenter();
+            model.Position = new Vector3(-c.X, -bb.Position.Y, -c.Z);
+        }
+
+        static readonly Dictionary<(Color, bool), (Material paint, Material glass)> _paints = new();
+
+        /// <summary>Перекрасить кузов (материал car_paint) в цвет спрайта; burnt — обгоревший: темнее, стёкла чёрные.</summary>
+        public static void Paint(Node3D model, Color col, bool burnt)
+        {
+            if (!_paints.TryGetValue((col, burnt), out var m))
+            {
+                var tint = burnt ? col.Darkened(0.55f).Lerp(new Color(0.22f, 0.11f, 0.05f), 0.5f) : col;
+                m = (null, null);
+                _paints[(col, burnt)] = m = (Recolor(tint), burnt ? new StandardMaterial3D { AlbedoColor = new Color(0.02f, 0.02f, 0.02f), Roughness = 1f } : null);
+            }
+            void Walk(Node n)
+            {
+                if (n is MeshInstance3D mi && mi.Mesh != null)
+                    for (int i = 0; i < mi.Mesh.GetSurfaceCount(); i++)
+                    {
+                        var name = mi.Mesh.SurfaceGetMaterial(i)?.ResourceName ?? "";
+                        if (name == "car_paint") mi.SetSurfaceOverrideMaterial(i, Bind(m.paint, mi.Mesh.SurfaceGetMaterial(i)));
+                        else if (burnt && name == "glass_dark") mi.SetSurfaceOverrideMaterial(i, m.glass);
+                    }
+                foreach (var c in n.GetChildren()) Walk(c);
+            }
+            Walk(model);
+        }
+
+        static Material Recolor(Color tint) => new StandardMaterial3D { AlbedoColor = tint, ResourceName = "car_paint_tinted" };
+
+        // кузову нужна своя текстура износа (сколы, грязь) — берём её из материала модели, цвет — от спрайта
+        static readonly Dictionary<(Material, Material), Material> _bound = new();
+        static Material Bind(Material tinted, Material src)
+        {
+            if (_bound.TryGetValue((tinted, src), out var r)) return r;
+            if (src is BaseMaterial3D b && tinted is BaseMaterial3D t)
+            {
+                var d = (BaseMaterial3D)b.Duplicate();
+                var c = t.AlbedoColor;
+                d.AlbedoColor = new Color(c.R * 1.6f, c.G * 1.6f, c.B * 1.6f);   // текстура светлая (≈0,55): ×1,6 — цвет спрайта как есть
+                r = d;
+            }
+            else r = tinted;
+            _bound[(tinted, src)] = r;
+            return r;
+        }
+
         /// <summary>Границы всех мешей модели в координатах узла root.</summary>
         public static Aabb Bounds(Node3D root)
         {

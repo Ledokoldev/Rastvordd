@@ -121,7 +121,14 @@ namespace Rastvordd.Client3D
             // витрина моделей (отладка): --showcase[=id предмета в руки] — все станции, породы деревьев, ящики, ресурсы рядом
             var showArg = System.Array.Find(args, a => a.StartsWith("--showcase"));
             if (showArg != null && !_spectate && _server.World.Find(_myId) is Actor showMe)
+            {
                 _server.World.DebugShowcase(showMe, showArg.Contains('=') ? showArg.Substring(showArg.IndexOf('=') + 1) : "weapon_akm");
+                // --showlook=dx,dy — сдвинуть игрока (и камеру) к нужной части витрины, например к стоянке техники (0,22)
+                var look = System.Array.Find(args, a => a.StartsWith("--showlook="))?.Substring(11).Split(',');
+                if (look?.Length == 2 && float.TryParse(look[0], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float lx)
+                    && float.TryParse(look[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float ly))
+                    showMe.Pos += new System.Numerics.Vector2(lx, ly);
+            }
             _map = _server.GetMap();
 
             BuildWorld();

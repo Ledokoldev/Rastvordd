@@ -69,6 +69,9 @@ FLAT = {
     "leather": ((0.12, 0.06, 0.03), 0.8, 0.0, 0.2),
     "bone": ((0.55, 0.50, 0.40), 0.6, 0.0, 0.1),
     "blueprint": ((0.04, 0.12, 0.35), 0.8, 0.0, 0.1),
+    # техника РТ: кузов светлый — клиент умножает на цвет спрайта (Decor3D), стёкла тёмные
+    "car_paint": ((0.55, 0.55, 0.53), 0.55, 0.0, 0.6),
+    "glass_dark": ((0.02, 0.025, 0.03), 0.08, 0.0, 0.0),
     # персонажи
     "skin": ((0.50, 0.32, 0.22), 0.6, 0.0, 0.0),
     "hair": ((0.05, 0.035, 0.025), 0.8, 0.0, 0.0),
@@ -463,7 +466,7 @@ def export(name, out_dir):
     path = os.path.join(out_dir, name + ".gltf")   # текстуры — общие в own/tex (одна копия на всю игру)
     for o in bpy.context.scene.objects:
         o.select_set(o.type in ("MESH", "EMPTY"))         # пустые — суставы персонажей
-    bpy.ops.export_scene.gltf(filepath=path, export_format="GLTF_SEPARATE", export_texture_dir="tex", use_selection=True, export_apply=True,
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLTF_SEPARATE", export_texture_dir=os.path.relpath(os.path.join(ROOT, "game", "art3d", "own", "tex"), out_dir).replace(os.sep, "/"), use_selection=True, export_apply=True,
                               export_yup=True, export_image_format="JPEG", export_jpeg_quality=85)
     return path, tris(objs)
 
@@ -471,6 +474,15 @@ def export(name, out_dir):
 def render_preview(path_png, size=(720, 540), side=False):
     """Превью под углом камеры игры (наклон 58°, почти изометрия), Cycles на процессоре."""
     sc = bpy.context.scene
+    if "car_paint" in bpy.data.materials:                     # как в игре: кузов умножается на цвет спрайта
+        nt = bpy.data.materials["car_paint"].node_tree
+        tex = next(n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image and "car_paint" in n.image.name)
+        mix = nt.nodes.new("ShaderNodeMix")
+        mix.data_type, mix.blend_type = "RGBA", "MULTIPLY"
+        mix.inputs["Factor"].default_value = 1.0
+        mix.inputs[7].default_value = (0.75, 0.22, 0.12, 1)
+        nt.links.new(tex.outputs["Color"], mix.inputs[6])
+        nt.links.new(mix.outputs[2], nt.nodes["Principled BSDF"].inputs["Base Color"])
     objs = [o for o in sc.objects if o.type == "MESH"]
     lo = np.min([np.min([o.matrix_world @ v.co for v in o.data.vertices], axis=0) for o in objs], axis=0)
     hi = np.max([np.max([o.matrix_world @ v.co for v in o.data.vertices], axis=0) for o in objs], axis=0)

@@ -79,8 +79,10 @@ Write-Host ("Папка готова: {0:N0} МБ" -f $size)
 if (-not $NoZip) {
     Write-Host '5/5 Архив...'
     $zip = "$out.zip"
-    if (Test-Path $zip) { Remove-Item $zip -Force }
+    $tmp = "$out.zip.part"   # пишем во временный: оборванная запись не оставит битый архив под настоящим именем
+    if (Test-Path $tmp) { Remove-Item $tmp -Force }
     Add-Type -AssemblyName System.IO.Compression.FileSystem
-    [IO.Compression.ZipFile]::CreateFromDirectory($out, $zip, [IO.Compression.CompressionLevel]::Optimal, $true)
+    [IO.Compression.ZipFile]::CreateFromDirectory($out, $tmp, [IO.Compression.CompressionLevel]::Optimal, $true)
+    Move-Item $tmp $zip -Force
     Write-Host ("Архив: {0} ({1:N0} МБ)" -f $zip, ((Get-Item $zip).Length / 1MB))
 }

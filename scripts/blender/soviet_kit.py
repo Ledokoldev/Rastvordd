@@ -23,6 +23,7 @@ MATS = {
     "rust":        ("rusty_metal_02", (0.62, 0.52, 0.46), 1.0, 0.25),       # приглушённая, не рыжая
     "rust_dark":   ("rust_coarse_01", (0.55, 0.50, 0.48), 0.8, 0.3),         # печной чёрный металл с ржавчиной
     "steel":       ("metal_plate", (0.80, 0.80, 0.78), 1.0, 0.6),
+
     "planks":      ("weathered_planks", (0.95, 0.92, 0.88), 1.6, 0.0),
     "planks_green":("green_rough_planks", (0.68, 0.78, 0.58), 1.2, 0.0),    # армейский ящик, в хаки
     "plywood":     ("plywood", (0.85, 0.80, 0.72), 1.2, 0.0),
@@ -31,7 +32,8 @@ MATS = {
 }
 # акцент — гладкая краска без текстуры (не больше одного на модель)
 FLAT = {
-    "red": ((0.42, 0.10, 0.08), 0.6, 0.0),
+    "red": ((0.30, 0.04, 0.03), 0.6, 0.0),
+    "white": ((0.40, 0.40, 0.36), 0.7, 0.0),    # светлая краска (медицина), грязная
     "black": ((0.04, 0.04, 0.04), 0.7, 0.2),
     "yellow": ((0.55, 0.40, 0.06), 0.6, 0.0),
 }
@@ -120,7 +122,7 @@ def box(size, at=(0, 0, 0), material="steel", rot_z=0.0, bevel=0.012, name="box"
 def cyl(radius, height, at=(0, 0, 0), material="steel", segments=16, axis="Z", bevel=0.008, name="cyl", radius_top=None):
     """Цилиндр (или усечённый конус): at — центр нижнего торца; axis — вдоль какой оси стоит."""
     bm = bmesh.new()
-    bmesh.ops.create_cone(bm, cap_ends=True, segments=segments, radius1=radius,
+    bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=True, segments=segments, radius1=radius,   # крышка веером: n-угольник с фаской даёт чёрные пятна
                           radius2=radius if radius_top is None else radius_top, depth=height)
     bmesh.ops.translate(bm, vec=(0, 0, height / 2), verts=bm.verts)
     ob = _obj_from_bm(bm, name, material)

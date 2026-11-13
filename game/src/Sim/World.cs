@@ -204,6 +204,7 @@ namespace Rastvordd.Sim
             BuildRoads();        // дорожная сеть между РТ (RoadNet.cs): своим генератором
             PlaceLandmarks();    // одиночные ориентиры (World.Landmarks.cs): после дорог, своим генератором
             OvergrowMonuments(); // заросли молодых берёз у оград РТ (World.Trees.cs): после дорог, своим генератором
+            PlaceTier3();        // РТ тира 3 «РЛС „Дуга“» (D61): после всего, своим генератором — старая раскладка мира не сдвигается
         }
 
         // площадь на один объект (м²) и веса: дерево, камень, металл, сера, конопля, ягоды, бочка воды, ящик-укрытие, руины
@@ -577,13 +578,23 @@ namespace Rastvordd.Sim
                 a.Add(kit == "svt" ? "ammo_762" : "ammo_9mm", Rng.Next(30, 70));
                 if (Rng.NextDouble() < 0.3) a.Add(Economy.Tier2(Rng), 1);
             }
+            else if (kit == "svd")
+            {
+                // тир 3 («Дуга», D61): снайпер на галерее антенны
+                var svd = Items.NewSlot("weapon_svd");
+                a.AddSlot(svd);
+                if (svd.State is WeaponState sw) a.Add(sw.Def.AmmoId, Rng.Next(20, 40));
+            }
             else
             {
                 a.AddSlot(Items.NewSlot("weapon_akm", 30));
                 a.Add("ammo_762", Rng.Next(30, 75));
             }
-            // одежда по тиру РТ (D47): тир 1 (дубина, лук, самопал) — ватник или кожа, склад с калашами — армейская
-            Dress(a, Clothing.GuardKit(WearRng, kit is "club" or "bow" or "pipe" ? 1 : 2));
+            // этаж дома (D61): охрана на 2-м этаже и галерее «Дуги»
+            if (NpcHomeFloor.TryGetValue(NpcHomes[a.Id], out int hf)) { a.Floor = hf; a.Z = Building.FloorZ(hf); }
+            // одежда по тиру РТ (D47): тир 1 (дубина, лук, самопал) — ватник или кожа, склад с калашами — армейская, тир 3 — СОБР
+            bool t3 = Duga != null && Duga.M.Contains(NpcHomes[a.Id]);
+            Dress(a, Clothing.GuardKit(WearRng, kit is "club" or "bow" or "pipe" ? 1 : t3 ? 4 : 2));
             a.Add("scrap", Rng.Next(2, 9));
             if (Rng.NextDouble() < 0.3) a.Add(Economy.Tier1(Rng), 1);
             if (Rng.NextDouble() < 0.065) a.Add("keycard", 1);   // (27.10) было 12%
@@ -830,6 +841,7 @@ namespace Rastvordd.Sim
             StepTier0();
             StepTier1();
             StepTier2();
+            StepTier3();   // «Дуга» (D61)
             foreach (var s in DirectorStashes.ToArray()) StepStash(s);
             (Director ??= new Director(Seed)).Step(this);
             SimPerf.End("шаг: прочее (печи, РТ, сумки)", t0);
@@ -1535,7 +1547,7 @@ namespace Rastvordd.Sim
             foreach (var st in AllStashes())
             {
                 float d = Vector2.Distance(a.Pos, st.Pos);
-                if (ground && !st.Done && d < bestD && ClearLine(a.Pos, st.Pos, null, true)) { bestD = d; best = (InteractKind.Stash, st); }
+                if (st.Floor == a.Floor && !a.Flying && !st.Done && d < bestD && ClearLine(a.Pos, st.Pos, null, true)) { bestD = d; best = (InteractKind.Stash, st); }
             }
             foreach (var s in Substations)
             {
@@ -1595,6 +1607,7 @@ namespace Rastvordd.Sim
                 case InteractKind.Shutter: ToggleShutters(a, (Structure)target); break;
                 case InteractKind.Hatch: UseHatch(a, (Structure)target); break;
                 case InteractKind.Stash: UseStash(a, (Stash)target); break;
+                case InteractKind.Bag when DugaCrateWhy((LootBag)target) is string dw: Info(a, dw); break;   // крейт пульта «Дуги» (D61)
                 case InteractKind.Bag when ((LootBag)target).Punch && !((LootBag)target).Unlocked && Director?.Events.Find(e => e.Crate == target) is { } dev:
                     Info(a, dev.Kind == "airdrop" ? $"Груз ещё закрыт — {MathF.Ceiling(dev.StartsAt - Time)} с" : dev.StartsAt > 0 ? $"Идёт взлом — {MathF.Ceiling(dev.StartsAt - Time)} с" : "Закрытый ящик: запусти взлом (рядом, держи E)");
                     break;

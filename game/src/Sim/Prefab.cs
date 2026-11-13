@@ -16,6 +16,7 @@ namespace Rastvordd.Sim
         public bool Pivot;             // стрела крана: вращается вокруг левого края (точка опоры — Pos)
         public float Lift;             // поднята над землёй, м (стрела крана; на стене — плакат, на столе — мелочь)
         public bool Batch;             // обстановка (Dressing.cs): мелочь без хитбокса — клиент рисует пачками по рядам
+        public int Floor;              // этаж (D61): стоит на перекрытии РТ — клиент рисует слоем этажа и срезает вместе с ним
     }
 
     /// <summary>Участок земли другой текстурой (гравий ОРУ, асфальт, кафель в корпусе) — под всеми объектами.</summary>
@@ -222,6 +223,7 @@ namespace Rastvordd.Sim
                     if (m.Contains(Nodes[i].Pos, 3)) { _nodeGrid.Remove(Nodes[i]); Nodes.RemoveAt(i); }
             foreach (var s in Substations) { s.Relink(this); ResetSubstation(s); }   // состояние РТ не сохраняется: после загрузки — свежая
             foreach (var t in Tier0) ResetTier0(t);
+            if (Duga != null) ResetTier3(Duga);   // «Дуга»: цепочка и крейт пульта — свежие (D61)
             foreach (var t in Tier1)
             {
                 // крейт тира 1 в сохранении — обычная сумка без признака «под перфокарту»: убрать копии, вернуть свой

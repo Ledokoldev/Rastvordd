@@ -1,0 +1,10 @@
+{
+ "assets": [
+  {"id": "duga_antenna_wall", "cat": "props", "h": 9.0, "view": "front", "desc": "one section of a giant Soviet over-the-horizon radar antenna wall (like the Duga radar): a tall rusty steel lattice frame of vertical masts and horizontal girders forming a dense grid, rows of big cylindrical dipole radiator elements mounted in front, thin cables, faded red-and-white paint on the top, small red aircraft warning lamps; seen straight from the front, the section is wider than tall, bottom edge resting on concrete footings; post-Soviet, abandoned, weathered"},
+  {"id": "duga_breaker", "cat": "props", "h": 2.2, "view": "front", "desc": "a large Soviet high-voltage knife switch (disconnector lever) mounted on a concrete post: grey steel box with a long red lever handle in the down position, ceramic insulators on top, danger sign with a lightning bolt (no text), rust streaks"},
+  {"id": "duga_shield", "cat": "props", "h": 1.7, "view": "front", "desc": "an outdoor Soviet antenna distribution cabinet: tall grey-green steel electrical cabinet with a half-open door, rows of knife switches and old dials inside, thick cables going down into the floor, rust and peeling paint"},
+  {"id": "duga_console", "cat": "props", "h": 1.4, "view": "front", "desc": "a Soviet radar operator control console: a long sloped grey desk with a round green CRT radar screen in the middle, rows of toggle switches, round analog gauges and lamps, a heavy telephone handset, 1970s military electronics, dusty"},
+  {"id": "duga_rack", "cat": "props", "h": 2.0, "view": "front", "desc": "a tall Soviet military electronics rack cabinet: dark grey steel cabinet with the front panel removed showing glowing vacuum tubes, circuit boards, cable bundles and a row of small gauges, dust and rust"},
+  {"id": "duga_stairs", "cat": "props", "h": 2.6, "view": "front", "desc": "a straight industrial steel staircase seen from the side going up from left to right: perforated steel steps, a simple pipe handrail on both sides, painted dull green with rust on the edges, open underneath"}
+ ]
+}

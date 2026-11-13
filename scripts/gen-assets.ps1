@@ -6,13 +6,15 @@ param(
     [int]$Parallel = 3,
     [string[]]$Only = @(),
     [switch]$Force,
-    [Alias("Manifest")][string]$ExtraManifest = ""   # не $Manifest: переменные PowerShell без учёта регистра, совпало бы с $manifest ниже
+    [Alias("Manifest")][string]$ExtraManifest = "",   # не $Manifest: переменные PowerShell без учёта регистра, совпало бы с $manifest ниже
+    [string]$Model = ""   # модель Codex (например gpt-6.1-sol); пусто — по умолчанию
 )
 
 $root = Split-Path -Parent $PSScriptRoot
 $codex = Get-ChildItem "C:\Program Files\WindowsApps" -Directory -Filter "OpenAI.Codex_*" -ErrorAction SilentlyContinue |
     Sort-Object Name -Descending | ForEach-Object { Join-Path $_.FullName "app\resources\codex.exe" } |
     Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $codex) { $codex = Get-ChildItem "$env:LOCALAPPDATA\OpenAI\Codex\bin" -Recurse -Filter codex.exe -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName }
 if (-not $codex) { throw "codex.exe не найден" }
 
 $manifest = Get-Content -Raw -Encoding UTF8 (Join-Path $root "assets\manifest.json") | ConvertFrom-Json
@@ -55,6 +57,7 @@ foreach ($t in $todo) {
     Set-Content -Path $pf -Value $t.Prompt -Encoding UTF8
     $log = Join-Path $logDir "$($t.Id).log"
     $args2 = @("exec", "-C", "`"$root`"", "-s", "workspace-write", "-c", "model_reasoning_effort=`"medium`"")
+    if ($Model) { $args2 += @("-m", $Model) }
     $args2 += "-"   # промпт из stdin; -i ставим после, т.к. он принимает несколько файлов
     if ($t.Ref) { $args2 += @("-i", "`"$($t.Ref)`"") }   # образец (например, персонаж для частей тела)
     $p = Start-Process -FilePath $codex -ArgumentList $args2 `

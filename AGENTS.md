@@ -28,7 +28,7 @@
 - Язык документации: русский.
 - Код игры: C# (Godot 4 .NET), см. `docs/design/09-tech.md`.
 - Логику симуляции держать отдельно от отображения (сервер-авторитарная архитектура, даже в одиночной игре).
-- Творческие задачи можно отдавать Codex («Астра», приложение OpenAI Codex уже залогинено): `scripts/gen-assets.ps1` (картинки), `scripts/gpt-tasks.ps1` (тексты). Усилие Codex — не выше `medium` (`-c model_reasoning_effort="medium"`).
+- Творческие задачи можно отдавать Codex («Астра», приложение OpenAI Codex уже залогинено): `scripts/gen-assets.ps1` (картинки), `scripts/gpt-tasks.ps1` (тексты). Модель — `gpt-6.1-sol` (`-Model gpt-6.1-sol`), усилие — `medium`. Обработка картинок (`scripts/process-assets.py`) — Python из рантайма Codex: `%USERPROFILE%.cachedex-runtimesdex-primary-runtimedependenciespythonpython.exe` (в нём есть PIL), если системного Python нет.
 
 ## Как собирать, запускать и проверять
 - Сборка: `dotnet build game -v q -nologo` (из корня репозитория).

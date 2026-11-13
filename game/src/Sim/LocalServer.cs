@@ -393,6 +393,7 @@ namespace Rastvordd.Sim
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--guardtest") >= 0) World.GuardSelfTest(log);     // меткость охраны РТ
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--locktest") >= 0) World.LockSelfTest(log);       // удары и пули сквозь стены, замки
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--floortest") >= 0) World.FloorSelfTest(log);     // этажи (D60): стройка, лестницы, падение, стрельба и обзор между этажами, обрушение, воздух
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--dugatest") >= 0) World.DugaSelfTest(log);       // РТ тира 3 «Дуга» (D61)
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--headtest") >= 0) World.HeadshotSelfTest(log);   // шансы в голову (D55)
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--ttktest") >= 0 || System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--ttkquick") >= 0) World.TtkSelfTest(log);       // ТТК: стволы × сеты
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--progtest") >= 0) World.ProgSelfTest(log);       // прогрессия D54: станции, ток, ёмкости, вода
@@ -1085,6 +1086,7 @@ namespace Rastvordd.Sim
             World.InteractKind.Stash => "[E] " + ((Stash)it.target).Verb,
             World.InteractKind.Bag when World.Director?.Events.Find(e => e.Crate == it.target) is { } ev && !ev.Open => ev.Kind == "airdrop" ? $"Сброс груза — откроется через {System.MathF.Ceiling(ev.StartsAt - World.Time)} с" : ev.StartsAt > 0 ? $"Закрытый ящик — взлом, {System.MathF.Ceiling(ev.StartsAt - World.Time)} с" : "Закрытый ящик — запусти взлом рядом [E]",
             World.InteractKind.Panel => ((Substation)it.target).Powered ? "Главный щиток — включён" : $"[E] Главный щиток — вставить пробку ({((Substation)it.target).FusesIn}/2)",
+            World.InteractKind.Bag when World.Duga?.Crate == it.target && !((LootBag)it.target).Unlocked => World.Duga.WarmLeft > 0 ? $"Ящик пульта — прогрев, {System.MathF.Ceiling(World.Duga.WarmLeft)} с" : "[E] Ящик пульта «Дуги» — заперт",
             World.InteractKind.Bag when ((LootBag)it.target).Punch && !((LootBag)it.target).Unlocked => "[E] Крейт — перфокарта I",
             World.InteractKind.Bag => ((LootBag)it.target) is var lb && lb.Safe && !lb.Unlocked ? "[E] Сейф — нужна карта доступа" : lb.Safe ? "[E] Открыть сейф" : lb.IsCrate ? "[E] Открыть ящик" : lb.Corpse ? "[E] Обыскать рюкзак" : "[E] Подобрать вещи",
             World.InteractKind.Recycler => "[E] Переработчик — детали в лом",

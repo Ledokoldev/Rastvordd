@@ -110,6 +110,7 @@ namespace Rastvordd.Sim
             foreach (var (k, left) in _nodeRespawns) w.NodeRespawns.Add(((int)k, left));
             foreach (var s in Structures)
             {
+                if (s.Static) continue;   // постройки РТ (D61) строит генератор мира
                 var ss = new WorldSave.StructS { Id = s.Id, Kind = (int)s.Kind, I = s.I, J = s.J, Dir = s.Dir, Tier = s.Tier, OwnerId = s.OwnerId, ClaimId = s.ClaimId, Hp = s.Hp, Open = s.Open, Locked = s.Locked, KeyLock = s.KeyLock, Shutters = s.Shutters, Code = s.Code, LockOwner = s.LockOwner, Ax = s.A.X, Ay = s.A.Y, Bx = s.B.X, By = s.B.Y, Cx = s.C.X, Cy = s.C.Y, Floor = s.Floor };
                 ss.LockAuth.AddRange(s.LockAuth);
                 w.Structures.Add(ss);

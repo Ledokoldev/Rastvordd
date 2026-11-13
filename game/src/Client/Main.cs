@@ -685,6 +685,19 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                     me.Belt[0] = Items.NewSlot(mode switch { "tri" or "door" => "deploy_box", "lathe" => "deploy_lathe", _ => "deploy_workbench" });
                     me.Current = 0;
                 }
+                else if (arg.StartsWith("--atduga"))
+                {
+                    // отладка «Дуги» (D61): =0 — двор у КПП, =1 — аппаратная 2-го этажа, =2 — галерея антенны, =out — перед КПП
+                    string mode = arg.Contains('=') ? arg.Split('=')[1] : "0";
+                    var w = _server.World; var me = w.Find(_myId);
+                    if (w.Duga is Tier3Rt rt)
+                    {
+                        (me.Pos, me.Floor) = mode switch { "1" => (rt.Cell(2, 5.5f), 1), "2" => (rt.Cell(5, -1), 2), "out" => (rt.At(50, 86), 0), _ => (rt.At(50, 68), 0) };
+                        me.Z = Building.FloorZ(me.Floor);
+                        _autoAim = me.Pos + new SVec(0, -6);
+                        GD.Print($"ATDUGA {rt.O} этаж {me.Floor + 1}");
+                    }
+                }
                 else if (arg.StartsWith("--house2"))
                 {
                     // отладка этажей (D60): двухэтажный дом Планом рядом с точкой спавна; =N — встать на этаж N (0 — земля),
@@ -2435,6 +2448,7 @@ if (_build.Sync(_cur.Structures, _cur.StructVersion))
                 _decals.RefreshBlocked(_build.FloorRects());
             }
             _build.MyFloor = _selfFloor;
+            DecorView2D.HideFloor ??= (f, px) => _build.HideFloorAt(f, px, _selfPx);
             _build.UpdateFade(_selfPx, dt);
             foreach (var w in _mapWalls) w.UpdateOcclusion(dt);
             _prefab.Sync(_cur);

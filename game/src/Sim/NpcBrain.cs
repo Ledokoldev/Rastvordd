@@ -30,6 +30,9 @@ namespace Rastvordd.Sim
         bool _provoked;      // в него стреляли — реагирует сразу
 
         const float SightRange = 26f, SightCone = 110f, MaxFireRange = 30f;
+        bool Sniper => _me.Held?.Id == "weapon_svd";
+        /// <summary>Дальность замечать: снайпер (тир 3, D61) — 45 м, наверху — 36 м, остальные — 26 м.</summary>
+        float Sight => Sniper ? 45f : _me.Floor > 0 ? 36f : SightRange;
 
         public NpcBrain(Actor me, World w, int seed)
         {
@@ -76,7 +79,7 @@ namespace Rastvordd.Sim
 
                 case State.Combat:
                     target ??= _w.Find(_targetId);
-                    bool visible = target != null && !target.Dead && _w.CanSee(_me, target.Pos, 50, 200);
+                    bool visible = target != null && !target.Dead && _w.CanSeeActor(_me, target, 50, 200);   // этажи (D60): объёмная линия
                     if (!visible)
                     {
                         _state = State.Search;
@@ -101,6 +104,7 @@ namespace Rastvordd.Sim
                     if (_me.Weapon != null && _me.Weapon.Ammo < _me.Weapon.Def.Magazine / 2) cmd.Reload = true;
                     break;
             }
+            cmd.Move = KeepOnFloor(cmd.Move);   // наверху не шагать за край перекрытия (D61)
             return cmd;
         }
 
@@ -138,8 +142,8 @@ namespace Rastvordd.Sim
                 if (a.Dead || a.Spectator || a.Team == Team.Npc) continue;
                 bool shotAtMe = _me.LastAttacker == a.Id && _w.Time - _me.LastDamagedTime < 1.5f;
                 if (shotAtMe) _provoked = true;
-                if (!shotAtMe && !_w.CanSeeActor(_me, a, a.Crouching ? SightRange * 0.7f : SightRange, SightCone)) continue;
-                if (shotAtMe && !_w.HasLineOfSight(_me.Pos, a.Pos)) { _lastKnown = a.Pos; continue; }
+                if (!shotAtMe && !_w.CanSeeActor(_me, a, (a.Crouching ? 0.7f : 1f) * Sight, SightCone)) continue;
+                if (shotAtMe && !_w.CanSeeActor(_me, a, 80, 360)) { _lastKnown = a.Pos; continue; }
                 float d = Vector2.Distance(_me.Pos, a.Pos);
                 if (d < bestD) { bestD = d; best = a; }
             }
@@ -174,7 +178,7 @@ namespace Rastvordd.Sim
             if (_strafeTimer <= 0) { _strafeSign = _rng.Next(2) == 0 ? -1 : 1; _strafeTimer = R(0.6f, 1.8f); }
             var side = new Vector2(-dir.Y, dir.X) * _strafeSign;
             Vector2 move = side * 0.7f;
-            float fireRange = MathF.Min(MaxFireRange, (_me.Weapon?.Def.Range ?? MaxFireRange) * 0.95f);   // самопал (12 к) бьёт на 14 м — подходит ближе
+            float fireRange = MathF.Min(Sniper ? 45f : MaxFireRange, (_me.Weapon?.Def.Range ?? MaxFireRange) * 0.95f);   // самопал (12 к) бьёт на 14 м — подходит ближе
             if (dist > MathF.Min(18, fireRange * 0.8f)) move += dir;
             else if (dist < 8) move -= dir * 0.8f;
             if (_me.Hp < 35 && dist < 20) move -= dir * 0.6f;
@@ -203,6 +207,15 @@ namespace Rastvordd.Sim
             _burstTimer += World.Dt;
             cmd.Fire = true;
             if (_burstTimer > R(0.25f, 0.5f)) { _burstTimer = 0; _pauseTimer = R(0.5f, 1.0f); }
+        }
+
+        /// <summary>Охрана на этаже не сходит с перекрытия и не лезет на лестницу (D61).</summary>
+        Vector2 KeepOnFloor(Vector2 move)
+        {
+            if (_me.Floor <= 0 || move.LengthSquared() < 0.01f) return move;
+            var next = _me.Pos + Vector2.Normalize(move) * 0.7f;
+            var pl = _w.PlateAt(_me.Floor, next);
+            return pl != null && pl.Kind != StructKind.Stairs && pl.Kind != StructKind.Hatch ? move : Vector2.Zero;
         }
 
         Vector2 Steer(Vector2 to)

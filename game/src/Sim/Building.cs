@@ -30,6 +30,7 @@ namespace Rastvordd.Sim
         public int ClaimId;            // к какому столбу привязан (бюджет и содержание)
         public readonly List<MapWall> Boxes = new();
         public int Floor;              // этаж (D60): 0 — земля (фундамент), 1.. — перекрытие и всё, что на нём; у лестницы — верхний этаж
+        public bool Static;            // часть РТ (D61): неразрушима, не сохраняется (строится генератором мира), к ней не пристроиться
         public float MaxHp => Building.MaxHp(Kind, Tier);
         public bool IsFloor => Building.IsFloor(Kind);
         public bool IsEdge => !IsFloor;
@@ -414,6 +415,7 @@ namespace Rastvordd.Sim
         {
             why = "";
             if (Vector2.Distance(a.Pos, at) > Building.BuildRange) { why = "далеко"; return false; }
+            if (NearMonument(at, 2)) { why = "на РТ строить нельзя"; return false; }
             // этажи (D60): боты строят только на земле; игрок — на свой этаж или этажом выше (BuildLevel)
             int level = a.IsBot ? 0 : BuildLevel(a, kind, at);
             if (level > Building.MaxFloor) { why = $"выше {Building.MaxFloor + 1} этажей нельзя"; return false; }
@@ -585,7 +587,7 @@ namespace Rastvordd.Sim
         /// <summary>Урон постройке. Возвращает реально нанесённый урон (0 — уровень слишком прочный для этого оружия).</summary>
         public float DamageStructure(Structure s, float dmg, int attackerId)
         {
-            if (dmg <= 0 || !Structures.Contains(s)) return 0;
+            if (dmg <= 0 || s.Static || !Structures.Contains(s)) return 0;   // постройки РТ не ломаются (D61)
             s.Hp -= dmg;
             // столб помнит рейд: боты-хозяева решают — прятаться или идти чинить
             if (attackerId >= 0 && s.ClaimId != 0)
@@ -689,6 +691,7 @@ namespace Rastvordd.Sim
         public string HammerWhy(Actor a, Structure s, int op)
         {
             if (s == null || !Structures.Contains(s)) return "постройки нет";
+            if (s.Static) return "это РТ — не твоя постройка";
             if (Vector2.Distance(a.Pos, s.Center) > HammerWheelRange) return "далеко";
             using var ctx = Ctx(s.Floor);
             if (!HasBuildPrivilege(a, s)) return "чужой шкаф — впишись в него";

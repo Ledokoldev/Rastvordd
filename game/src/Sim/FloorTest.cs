@@ -88,7 +88,7 @@ namespace Rastvordd.Sim
             const int W = 3, H = 3;
             BuildDemoHouse(i0, j0, W, H, bld);
             foreach (var bf in BuildFails) log("ЭТАЖ-ТЕСТ отказ: " + bf);
-            int up = 0; foreach (var s in Structures) if (s.Floor == 1) up++;
+            int up = 0; foreach (var s in Structures) if (s.Floor == 1 && !s.Static) up++;
             Check($"дом построен Планом: элементов второго этажа {up}", up >= 8 + 12);
             var ceil = PlateAt(1, C(i0 + 1, j0));
             Check("перекрытие на стенах: устойчивость 90 %", ceil != null && MathF.Abs(StabilityOf(ceil) - 0.9f) < 0.01f);
@@ -192,7 +192,7 @@ namespace Rastvordd.Sim
             Check("бомба на втором этаже: человек под перекрытием цел", low.Hp >= low.MaxHp);
 
             // ---- обрушение: без стен первого этажа перекрытие падает ----
-            int before = 0; foreach (var s in Structures) if (s.Floor == 1) before++;
+            int before = 0; foreach (var s in Structures) if (s.Floor == 1 && !s.Static) before++;
             var walls0 = new List<Structure>();
             foreach (var s in Structures) if (s.Floor == 0 && s.IsEdge && s.OwnerId == bld.Id) walls0.Add(s);
             var demol = walls0.Count > 0 ? HammerWhy(bld, walls0[0], HammerDemolish) : "";
@@ -200,7 +200,7 @@ namespace Rastvordd.Sim
             demol = walls0.Count > 0 ? HammerWhy(bld, walls0[0], HammerDemolish) : "";
             log($"ЭТАЖ-ТЕСТ (снос стены киянкой: «{demol}»)");
             foreach (var s in walls0) DamageStructure(s, 1e6f, top.Id);
-            int after = 0; foreach (var s in Structures) if (s.Floor == 1 && s.Kind != StructKind.Stairs) after++;
+            int after = 0; foreach (var s in Structures) if (s.Floor == 1 && !s.Static && s.Kind != StructKind.Stairs) after++;
             Check($"обрушение: второй этаж {before} → {after}", after < before / 2);
 
             // ---- воздух: летящего достаёт пуля с земли ----

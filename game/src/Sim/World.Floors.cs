@@ -149,7 +149,7 @@ namespace Rastvordd.Sim
                     if (p == exclude) continue;
                     plates.Add(p);
                     foreach (var k in EdgeKeysOf(p.Poly)) { if (!byEdge.TryGetValue(k, out var l)) byEdge[k] = l = new List<Structure>(2); l.Add(p); }
-                    st[p.Id] = f == 0 ? 1f : BelowSupport(p.Kind, p.Poly, p.I, p.J, f, st, exclude);
+                    st[p.Id] = f == 0 || p.Static ? 1f : BelowSupport(p.Kind, p.Poly, p.I, p.J, f, st, exclude);   // РТ (D61) держится сама
                 }
                 if (f > 0)
                     for (int it = 0; it < 24; it++)
@@ -200,7 +200,7 @@ namespace Rastvordd.Sim
             ComputeStab(st, s);
             for (int f = 1; f <= Building.MaxFloor; f++)
                 foreach (var p in PlatesOf(f))
-                    if (p != s && st.GetValueOrDefault(p.Id) < MinStab) return p;
+                    if (p != s && !p.Static && st.GetValueOrDefault(p.Id) < MinStab) return p;
             return null;
         }
 
@@ -221,7 +221,7 @@ namespace Rastvordd.Sim
                     Structure weak = null;
                     for (int f = 1; f <= Building.MaxFloor && weak == null; f++)
                         foreach (var p in PlatesOf(f))
-                            if (_stab.GetValueOrDefault(p.Id) < MinStab) { weak = p; break; }
+                            if (!p.Static && _stab.GetValueOrDefault(p.Id) < MinStab) { weak = p; break; }
                     if (weak == null) break;
                     Events.Add(new SimEvent { Kind = SimEventKind.Info, Pos = weak.Center, Z = Building.FloorZ(weak.Floor), Text = "обрушение" });
                     RemoveStructure(weak);

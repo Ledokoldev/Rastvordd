@@ -26,6 +26,7 @@ namespace Rastvordd.Sim
         public bool Repeatable;         // после окончания снова доступно (рычаги, ворота, пробки)
         public bool KeepProgress;       // отошёл — прогресс не сбрасывается (кабина крана)
         public float Range = 1.8f;      // насколько можно отойти, не сорвав
+        public int Floor;               // этаж (D60/D61): «держи E» только со своего этажа
     }
 
     /// <summary>РТ тира 0 (docs/design/11-monuments.md): без охраны, перфокарта I за маленьким локальным действием.</summary>
@@ -208,7 +209,7 @@ namespace Rastvordd.Sim
         {
             if (s.ActorId == 0) return null;
             var a = Find(s.ActorId);
-            if (a == null || a.Dead || Vector2.Distance(a.Pos, s.Pos) > s.Range)
+            if (a == null || a.Dead || a.Floor != s.Floor || Vector2.Distance(a.Pos, s.Pos) > s.Range)
             {
                 if (a != null && !a.Dead) Info(a, s.KeepProgress ? "Отошёл — дело стоит, вернись и продолжи" : "Сорвалось — отошёл");
                 s.ActorId = 0;
@@ -235,6 +236,7 @@ namespace Rastvordd.Sim
             foreach (var rt in Tier0) foreach (var s in rt.Stashes) yield return s;
             foreach (var rt in Tier1) foreach (var s in rt.Stashes) yield return s;
             foreach (var rt in Tier2) foreach (var s in rt.Stashes) yield return s;
+            if (Duga != null) foreach (var s in Duga.Stashes) yield return s;
             foreach (var s in DirectorStashes) yield return s;
         }
 

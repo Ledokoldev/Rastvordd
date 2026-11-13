@@ -76,6 +76,9 @@ namespace Rastvordd.Client
         string _sprite;
         readonly bool _flip, _pivot;
         readonly float _lift;
+        public int Floor;   // этаж (D61)
+        /// <summary>Срезан ли этаж у точки (BuildLayer.HideFloorAt): ставит Main.</summary>
+        public static System.Func<int, Vector2, bool> HideFloor;
         float _rot;
         float _alpha = 1;
         Texture2D _tex;
@@ -90,6 +93,7 @@ namespace Rastvordd.Client
             _rot = d.Rot;
             TextureFilter = TextureFilterEnum.Nearest;
             Material = VisionFx.ObjectMat;
+            if (d.Floor > 0) { Position += Iso.Lift(Building.FloorZ(d.Floor)); ZIndex = Iso.Band(d.Floor); Floor = d.Floor; }   // на этаже РТ (D61)
             SetSprite(d.Sprite);
             if (NightLights.Kind(d.Sprite) is var (size, col, top) && size > 0 && _tex != null)
                 { AddChild(NightLights.Make(size, col, new Vector2(0, -_tex.GetHeight() * top - d.Lift * Iso.PPM)));}
@@ -638,6 +642,7 @@ namespace Rastvordd.Client
         readonly List<RoofView2D> _roofs = new();
         AmbientLayer _ambient;
         readonly List<DecorRow> _liftRows = new();
+        readonly List<DecorView2D> _floorDecors = new();   // декор на этажах РТ (D61)
         bool _linked;
         int _version = -1;
 
@@ -691,6 +696,7 @@ namespace Rastvordd.Client
                     continue;
                 }
                 var v = new DecorView2D(d);
+                if (d.Floor > 0) _floorDecors.Add(v);
                 world.AddChild(v);
                 _decors[d.Id] = v;
             }
@@ -740,6 +746,7 @@ namespace Rastvordd.Client
 
         public void Update(Vector2 selfPx, float dt, float night = 0)
         {
+            if (DecorView2D.HideFloor != null) foreach (var v in _floorDecors) v.Visible = !DecorView2D.HideFloor(v.Floor, v.Position - Iso.Lift(Building.FloorZ(v.Floor)));   // этажи РТ под крышей срезаны (D61)
             _ambient?.Update(selfPx, dt, night);
             if (!_linked)
             {

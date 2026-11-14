@@ -328,6 +328,7 @@ namespace Rastvordd.Sim
                 float dist = nearFav ? _fav.Radius + 48 + (float)_rng.NextDouble() * 60 : 15 + (float)_rng.NextDouble() * 45;
                 var p = (nearFav ? _fav.M.Center : home) + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * dist;
                 if (!_w.Terrain.IsLand(p) || OtherBaseNear(p, tries < 100 ? 80 : 55)) continue;   // раздел 10: соседи вплотную резали друг друга часами
+                if (_badSites.Exists(b => Vector2.Distance(b, p) < 14)) continue;   // D64: тут шкаф не встал
                 var (ci, cj) = Building.CellOf(p);
                 bool ok = true;
                 // весь план с соседями (треугольники выступают на клетку): мейн — строки −1..0, кибитка — 1, двор у входа — 2..3
@@ -661,6 +662,8 @@ namespace Rastvordd.Sim
         /// <summary>Хозяйство фермера: инструменты → место и шкаф → база по чертежу → содержание → печь → прогрессия → вооружение → рейд → сейч → фарм.</summary>
         float _upkeepAt = -99;
         bool _upkeepLow;
+        float _claimTryAt = -1;   // D64: когда начал ставить шкаф (не вышло за 45 с — другое место)
+        readonly List<Vector2> _badSites = new();
 
         void Plan(ref InputCmd cmd)
         {
@@ -692,6 +695,16 @@ namespace Rastvordd.Sim
             {
                 if (!Has("deploy_claim")) { if (!Craft("deploy_claim", ref cmd)) Gather(NodeKind.Tree, ref cmd); return; }
                 Doing = "ставит шкаф";
+                if (_claimTryAt < 0) _claimTryAt = _w.Time;
+                if (_w.Time - _claimTryAt > 45)
+                {
+                    // D64: шкаф на этом месте не встаёт (чужая зона, РТ, вода) — раньше бот стоял тут по 20 мин; другое место
+                    Thought($"шкаф тут не встаёт ({_w.LastInfo.GetValueOrDefault(_me.Id) ?? "?"}) — ищу другое место");
+                    LStat("шкаф: смена места");
+                    _badSites.Add(_site.Value);
+                    _site = null; _claimTryAt = -1;
+                    return;
+                }
                 var spot = AtPlan(_plan.Claim);
                 if (_w.FloorAt(spot) != null && PlaceDeploy("deploy_claim", spot, ref cmd)) return;   // база уже стоит (шкаф сломали) — в слот
                 if (!Reach(spot, ref cmd, 1.1f)) return;
@@ -705,12 +718,14 @@ namespace Rastvordd.Sim
 
             // 4. содержание: запас на ~2 часа (раньше стройки — база не должна гнить)
             // запас шкафа — раз в 2 с (перебор всех построек мира на каждый тик)
-            if (_w.Time - _upkeepAt > 2f) { _upkeepAt = _w.Time; _upkeepLow = _w.ClaimHoursLeft(claim) < 1.0f && _w.ClaimLoad(claim).b > 0; }
+            // D64: запас на 1 ч, пополнять при < 25 мин (раньше — 2 ч при < 1 ч: всё добытое уходило в шкаф, бот не копил и бегал за камнем за 700 м)
+            _claimTryAt = -1;
+            if (_w.Time - _upkeepAt > 2f) { _upkeepAt = _w.Time; _upkeepLow = _w.ClaimHoursLeft(claim) < 0.42f && _w.ClaimLoad(claim).b > 0; }
             if (_upkeepLow)
             {
                 bool have = true;
                 foreach (var (id, perHour) in _w.UpkeepPerHourOf(claim))
-                    if (!Need(id, (int)MathF.Ceiling(perHour * 2), ref cmd)) { have = false; break; }
+                    if (!Need(id, (int)MathF.Ceiling(perHour * 1.0f), ref cmd)) { have = false; Doing = $"добывает {Items.Name(id).ToLower()} на содержание шкафа"; break; }
                 if (!have) return;
                 Doing = "кормит шкаф";
                 Use(claim, claim.Pos, ref cmd);

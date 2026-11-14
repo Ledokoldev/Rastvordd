@@ -371,7 +371,7 @@ namespace Rastvordd.Sim
                 string name = BotNames[i] + " (бот)";
                 var a = World.FindPlayer(name) ?? World.SpawnPlayer(name);
                 a.IsBot = true;
-                var bot = new PlayerBot(a, World, _seed * 17 + i) { Archetype = i % 3 == 2 ? BotArchetype.Roamer : BotArchetype.Farmer };
+                var bot = new PlayerBot(a, World, _seed * 17 + i) { Archetype = i % 2 == 1 ? BotArchetype.Roamer : BotArchetype.Farmer };
                 _bots[a.Id] = bot;
                 _brains.Add(bot);
             }

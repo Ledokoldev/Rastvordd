@@ -189,6 +189,7 @@ namespace Rastvordd.Sim
                 new() { Name = "разведка", Score = ScoutScore, Act = Scout },
                 new() { Name = "снаряжение", Score = () => !GearMissing() ? 0 : !Has("weapon_spear") ? 55 : 50 * W("снаряжение"), Act = GearUp },
                 new() { Name = "хозяйство", Score = () => 40 * W("хозяйство"), Act = (ref InputCmd c) => { Plan(ref c); return true; } },
+                new() { Name = "роум", Score = PvpRoamScore, Act = PvpRoamAct },   // D63: вооружённый идёт искать драку
                 new() { Name = "бродить", Score = () => 20 * W("бродить"), Act = RoamMove },
             };
         }
@@ -286,10 +287,10 @@ namespace Rastvordd.Sim
                 float d = Vector2.Distance(h.Pos, _me.Pos);
                 float power = WeaponPower(h.Weapon), mine = MyPower;
                 float risk = Math.Clamp((power - mine + 0.25f) / 0.9f, 0, 1);
-                float near = Math.Clamp(1 - d / 220f, 0, 1);
+                float near = Math.Clamp(1 - d / 320f, 0, 1);   // D63: на выстрелы — дальше (было 220 м)
                 float burden = Math.Clamp((_load + (Archetype == BotArchetype.Farmer ? _stash * 0.3f : 0)) / 600f, 0, 1);
                 float hp = _me.Hp / _me.MaxHp;
-                float score = mine < 0.35f ? 0 : 75 * MathF.Min(1f, Aggression + 0.2f * Greed) * near * (1 - risk) * (1 - 0.7f * burden) * hp * (_w.Time - h.Time < 45 ? 1 : 0.5f);
+                float score = mine < 0.35f ? 0 : 75 * MathF.Min(1f, 0.45f + Aggression + 0.2f * Greed) * near * (1 - risk) * (1 - 0.7f * burden) * hp * (_w.Time - h.Time < 45 ? 1 : 0.5f);
                 if (!h.Judged)
                 {
                     h.Judged = true;

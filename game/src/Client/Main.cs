@@ -369,7 +369,8 @@ namespace Rastvordd.Client
             _server = new LocalServer(seedArg != null && int.TryParse(seedArg.Substring(7), out int seedN) ? seedN : 1337);
             // сохранение мира игрока — только при обычном запуске: любой отладочный флаг (прогоны ботов, скриншоты,
             // наблюдатель) работает со свежим миром и НЕ трогает сохранение (иначе тест перезапишет мир игрока)
-            _saveEnabled = OS.GetCmdlineUserArgs().All(a => a.StartsWith("--bots=") || a.StartsWith("--near="));   // --near — только встать у узла, мир свой   // своя игра (в т. ч. с --bots=N) сохраняется, отладочные запуски — нет
+            _saveEnabled = OS.GetCmdlineUserArgs().All(a => a.StartsWith("--bots=") || a.StartsWith("--near=") || a.StartsWith("--save="));   // --near — только встать у узла, мир свой   // своя игра (в т. ч. с --bots=N) сохраняется, отладочные запуски — нет
+            if (OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--save=")) is string sv && sv.Length > 7) SavePath = $"user://world_save_{sv[7..]}.json";   // отдельный мир (например, 60 ботов): основной сейв не трогается
             // отладка сохранений: --savefile=путь — отдельный файл, работает и в прогонах со скриншотами
             var sf = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--savefile="));
             if (sf != null) { SavePath = sf.Substring(11); _saveEnabled = true; }

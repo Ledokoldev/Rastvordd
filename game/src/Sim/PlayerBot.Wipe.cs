@@ -72,18 +72,23 @@ namespace Rastvordd.Sim
             var gun = Ranged();
             int ammo = gun != null ? AmmoLeft(gun) : 0;
             why = null;
-            if (_me.Hp < 70) { why = $"ранен ({_me.Hp:0} HP)"; return 0; }
+            if (_me.Hp < (r.Kind == "airdrop" ? 45 : 70)) { why = $"ранен ({_me.Hp:0} HP)"; return 0; }
             if (_surplus > LoadLimit) { why = $"несу ≈{_surplus:0} лома — сначала домой"; return 0; }
             switch (r.Kind)
             {
                 case "airdrop":
                 case "locked_crate":
                 {
-                    if (_stage5 < WipeStage.Tools) { why = "я ещё голый — там будет мясорубка"; return 0; }
-                    if (gun == null && Aggression < 0.6f) { why = "нечем стрелять — за грузом пойдут со стволами"; return 0; }
-                    if (gun != null && ammo < 12) { why = "мало патронов"; return 0; }
-                    if (d > 320 + 200 * Aggression) { why = $"далеко ({d:0} м)"; return 0; }
-                    float s = (r.Kind == "airdrop" ? 80 : 74) * (0.55f + Aggression * 0.7f + (gun != null ? GunPower(gun) * 0.3f : 0)) * MathF.Max(0.35f, 1 - d / 600f);
+                    // сброс груза — магнит для всех, даже голых (D63: «в начале игры это абсолютная имба для любого игрока»);
+                    // закрытый ящик — как раньше, со стволом
+                    bool drop = r.Kind == "airdrop";
+                    if (!drop && _stage5 < WipeStage.Tools) { why = "я ещё голый — там будет мясорубка"; return 0; }
+                    if (!drop && gun == null && Aggression < 0.6f) { why = "нечем стрелять — за грузом пойдут со стволами"; return 0; }
+                    if (gun != null && ammo < 12 && !drop) { why = "мало патронов"; return 0; }
+                    if (d > (drop ? 650 : 320 + 200 * Aggression)) { why = $"далеко ({d:0} м)"; return 0; }
+                    float s = drop
+                        ? 92 * (0.75f + Aggression * 0.5f + (gun != null ? GunPower(gun) * 0.2f : 0)) * MathF.Max(0.55f, 1 - d / 900f)
+                        : 74 * (0.55f + Aggression * 0.7f + (gun != null ? GunPower(gun) * 0.3f : 0)) * MathF.Max(0.35f, 1 - d / 600f);
                     why = $"{(r.Kind == "airdrop" ? "сброс груза" : "закрытый ящик")} в {d:0} м, у меня {(gun != null ? $"{Items.Name(gun)} ({ammo})" : "только " + Items.Name(Has("weapon_spear") ? "weapon_spear" : "tool_rock"))}";
                     return s;
                 }
@@ -118,7 +123,7 @@ namespace Rastvordd.Sim
         float RumorScore()
         {
             if (_rj != null) return 76;
-            if (_w.Director == null || _rtPhase != RtPhase.None || _raid != null || _w.Time < _rjCooldown) return 0;
+            if (_w.Director == null || _rtPhase == RtPhase.Loot || _raid != null || _w.Time < _rjCooldown) return 0;   // сброс перебивает сборы и дорогу на РТ (D63)
             if (_w.Time - _rjScoreAt < 2) return _rjScore;
             _rjScoreAt = _w.Time; _rjScore = 0; _rjPick = null;
             foreach (var r in _w.Director.Rumors)
@@ -163,6 +168,7 @@ namespace Rastvordd.Sim
                 if (_rjPick == null) return false;
                 _rj = _rjPick; _rjPick = null;
                 _rj.StartAt = _w.Time;
+                if (_rtPhase != RtPhase.None) EndRun($"бросаю поход на РТ: {RumorJobName(_rj)}");   // РТ подождёт, сброс — нет
                 Thought($"беру задачу «{RumorJobName(_rj)}»: {_rj.Why}");
                 LStat("задач по слухам");
                 _w.Milestone(_me, $"идёт по слуху: {RumorJobName(_rj)}");

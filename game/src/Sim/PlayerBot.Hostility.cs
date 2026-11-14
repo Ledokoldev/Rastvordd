@@ -226,19 +226,24 @@ namespace Rastvordd.Sim
             {
                 bool first = _rtPhase == RtPhase.Loot && _rtLootAt < en.FirstSeen - 1;
                 if (first && edge >= -0.1f) return (Stance.Fight, $"РТ «{_rt.Short}» — я тут первый, выбиваю");
-                if (edge >= 0.05f || (Aggression > 0.6f && edge >= -0.05f)) return (Stance.Fight, $"РТ «{_rt.Short}» занята {a.Name}, у него {kit} — отбиваю");
+                if (edge >= -0.05f || (Aggression > 0.4f && edge >= -0.15f)) return (Stance.Fight, $"РТ «{_rt.Short}» занята {a.Name}, у него {kit} — отбиваю");
                 return (Stance.Camp, $"РТ «{_rt.Short}» занята {a.Name} ({kit}) — жду его на выходе");
             }
             if (_preyIgnore.TryGetValue(a.Id, out float until) && _w.Time < until) return (Stance.Parted, "недавно бросил за ним погоню");
-            // встречный (как в Расте): голым людей обхожу; бью, только если есть явное преимущество и есть что взять
+            // встречный (D63, пользователь: «боты не дерутся… должна быть движуха вечно»): как в Расте — «стреляю первым».
+            // Голый на голого — камнем и копьём; со стволом — бью всех, кто не явно сильнее; без ствола против ствола — ухожу.
+            bool armedMe = Ranged() != null;
             if (nakedMe && !(hurt && edge >= 0))
-                return d < 12 && !empty ? (Stance.Flee, $"я голый — обхожу ({kit})") : (Stance.Watch, "я голый — обхожу людей");
-            bool worth = !empty || hurt;
-            float need = 0.14f - 0.16f * Aggression - 0.04f * Greed;
-            if (Ranged() == null) need += 0.1f;   // драка в упор — монетка: без ствола нужен запас
+            {
+                bool foeArmed = a.Weapon != null && !a.Weapon.Def.Melee;
+                if (!foeArmed && edge >= -0.12f && (Aggression > 0.3f || d < 9)) return (Stance.Fight, $"голый на голого ({kit}) — бью первым");
+                return d < 12 && foeArmed ? (Stance.Flee, $"я голый, а у него {kit}") : (Stance.Watch, "я голый — он сильнее");
+            }
+            bool worth = !empty || hurt || armedMe || Aggression > 0.45f;
+            float need = armedMe ? -0.12f - 0.12f * Aggression - 0.04f * Greed : 0.02f - 0.15f * Aggression;
             // у своего дома он сильнее (двери, ящик, спальник рядом) — не лезу, если он сам не нападёт
             if (AtHisBase(a)) { worth = false; Say("у-его-базы" + a.Id, $"{a.Name} у своей базы — не лезу", 120); }
-            if (worth && edge >= need && d < 18 + 22 * Aggression)
+            if (worth && edge >= need && d < (armedMe ? 28 + 27 * Aggression : 12 + 14 * Aggression))
                 return (Stance.Fight, $"я сильнее ({Items.Name(Ranged() ?? (Has("weapon_spear") ? "weapon_spear" : "tool_rock"))} против {kit}){(hurt ? ", он ранен" : "")}");
             if (armedClose) return edge >= 0.05f ? (Stance.Fight, $"он со стволом рядом ({kit}) — бью первым") : (Stance.Flee, $"он со стволом рядом ({kit})");
             if (d < 6 && edge >= 0.05f && worth) return (Stance.Fight, "подошёл вплотную");

@@ -66,7 +66,7 @@ namespace Rastvordd.Sim
             Heat[k] = (Heat.TryGetValue(k, out var h) ? h : 0) + v;
         }
         public float Tension;               // 0..1: что-то недавно происходило
-        float _nextAirdrop = 11 * 60, _nextCrate = 24 * 60, _nextRumor = 4 * 60, _quiet;
+        float _nextAirdrop = 5 * 60, _nextCrate = 24 * 60, _nextRumor = 4 * 60, _quiet;
         int _radioN, _eventId;
         bool _substationPowered;
         readonly Random _rng;
@@ -149,7 +149,7 @@ namespace Rastvordd.Sim
 
             // расписание: сброс груза, закрытый ящик (со средней фазы), слухи; тишина ускоряет
             float hurry = _quiet > 6 * 60 ? 3f : 1f;
-            if ((_nextAirdrop -= World.Dt * hurry) <= 0) { _nextAirdrop = R(15, 24) * 60; StartAirdrop(w); }
+            if ((_nextAirdrop -= World.Dt * hurry) <= 0) { _nextAirdrop = R(8, 12) * 60; StartAirdrop(w); }   // D63: первый на 5-й мин, дальше каждые 8–12 мин — повод сойтись
             if (Phase >= 1 && (_nextCrate -= World.Dt * hurry) <= 0) { _nextCrate = R(25, 35) * 60; StartLockedCrate(w); }
             if ((_nextRumor -= World.Dt * hurry) <= 0) { _nextRumor = R(3, 6) * 60; MakeRumor(w); }
         }

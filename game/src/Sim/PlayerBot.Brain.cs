@@ -22,10 +22,12 @@ namespace Rastvordd.Sim
             public string Weapon;
             public int SourceId;
             public bool Explosion;
+            public bool Activity;   // шум деятельности, не выстрел
             public bool Judged;     // решение по нему уже принято (и записано в мысли)
         }
 
         readonly List<Heard> _heard = new();
+        readonly List<(Vector2 pos, float until)> _hushed = new();
         float _valueAt = -99;
         Actor _threat;
         float _load, _stash, _kitValue;
@@ -77,13 +79,33 @@ namespace Rastvordd.Sim
                 if (Vector2.Distance(e.Pos, _me.Pos) > HearRange(e.Text, expl)) continue;
                 // одна запись на место боя: очередь выстрелов не плодит новые
                 int i = _heard.FindIndex(h => Vector2.DistanceSquared(h.Pos, e.Pos) < 30 * 30);
-                if (i >= 0) { var h = _heard[i]; h.Time = _w.Time; h.Pos = e.Pos; if (WeaponPower(e.Text) > WeaponPower(h.Weapon)) h.Weapon = e.Text; _heard[i] = h; }
+                if (i >= 0)
+                {
+                    var h = _heard[i]; h.Time = _w.Time; h.Pos = e.Pos;
+                    if (h.Activity)
+                    {
+                        h.Weapon = e.Text; h.SourceId = e.ActorId; h.Explosion = expl;
+                        h.Activity = false; h.Judged = false;
+                    }
+                    else if (WeaponPower(e.Text) > WeaponPower(h.Weapon)) h.Weapon = e.Text;
+                    _heard[i] = h;
+                }
                 else _heard.Add(new Heard { Pos = e.Pos, Time = _w.Time, Weapon = e.Text, SourceId = e.ActorId, Explosion = expl });
+            }
+            // шум деятельности: взлом, вскрытие контейнеров и механизмы
+            foreach (var n in _w.Noises)
+            {
+                if (n.SourceId == _me.Id || _w.Time - n.Time >= 0.1f || n.Radius < 30) continue;
+                if (Vector2.Distance(n.Pos, _me.Pos) > n.Radius * 1.5f || NearMyBase(n.Pos)) continue;
+                if (_hushed.Exists(x => x.until > _w.Time && Vector2.DistanceSquared(x.pos, n.Pos) < 30 * 30)) continue;   // уже ходил — там пусто (генератор гудит вечно)
+                int i = _heard.FindIndex(h => Vector2.DistanceSquared(h.Pos, n.Pos) < 30 * 30);
+                if (i >= 0) { var h = _heard[i]; h.Time = _w.Time; h.Pos = n.Pos; _heard[i] = h; }
+                else _heard.Add(new Heard { Pos = n.Pos, Time = _w.Time, Weapon = null, SourceId = n.SourceId, Activity = true });
             }
             _heard.RemoveAll(h => _w.Time - h.Time > 90);
             // этап 4: опасность рядом, чужие базы, рейд по моей базе, что лишнего несу
             if (_threat != null || _w.Time - _me.LastDamagedTime < 5) _lastDanger = _w.Time;
-            foreach (var h in _heard) if (!h.Explosion && _w.Time - h.Time < 2 && Vector2.Distance(h.Pos, _me.Pos) < 80) _lastDanger = _w.Time;
+            foreach (var h in _heard) if (!h.Explosion && !h.Activity && _w.Time - h.Time < 2 && Vector2.Distance(h.Pos, _me.Pos) < 80) _lastDanger = _w.Time;
             PerceiveBases();
             PerceiveDeaths();
             PerceiveRaid();
@@ -157,6 +179,15 @@ namespace Rastvordd.Sim
             };
         }
 
+        /// <summary>D65: темп и затишье поверх весов — хозяйство в затишье, выходы в темпе.</summary>
+        float GoalMul(string goal) => goal switch
+        {
+            "хозяйство" => HouseMul(),
+            "поход на РТ" or "слух" or "роум" or "проверить бой" or "сейч" or "разведка" or "перехват" => OutMul(),
+            "бродить" => _lull ? 1f : 0.7f,
+            _ => 1f,
+        };
+
         /// <summary>Бродяга строит минимум: кибитку — в первую очередь, потом хозяйство урывками (окно 4 мин из 10).</summary>
         float RoamerHousework()
         {
@@ -199,6 +230,7 @@ namespace Rastvordd.Sim
         {
             if (_goals == null) BuildGoals();
             CountHealth();
+            StepTempo();   // D65: темп и затишье
             // непогода (буран, гроза): не в бою и не на РТ/рейде — домой, переждать у шкафа (обзор мал, ходьба тяжёлая, холодно)
             if (_w.Sky is Sky.Blizzard or Sky.Storm && _w.Time - _foeSeenAt > 10 && _w.Time - _me.LastDamagedTime > 10
                 && _rtPhase == RtPhase.None && _raid == null && MyClaim() is Deployable home && Vector2.Distance(home.Pos, _me.Pos) > 6)
@@ -225,7 +257,7 @@ namespace Rastvordd.Sim
             foreach (var g in _goals)
             {
                 long tq = SimPerf.Begin();
-                float s = g.Score();
+                float s = g.Score() * GoalMul(g.Name);
                 SimPerf.End("очки: " + g.Name, tq);
                 if (g == _goal) s *= 1.25f;
                 if (s > bestScore) { bestScore = s; best = g; }
@@ -285,19 +317,22 @@ namespace Rastvordd.Sim
                 var h = _heard[i];
                 if (h.Explosion && NearMyBase(h.Pos)) continue;   // взрывы у дома — это антирейд
                 float d = Vector2.Distance(h.Pos, _me.Pos);
-                float power = WeaponPower(h.Weapon), mine = MyPower;
+                bool activity = h.Activity && h.Weapon == null;
+                float power = activity ? 0.5f : WeaponPower(h.Weapon), mine = MyPower;
                 float risk = Math.Clamp((power - mine + 0.25f) / 0.9f, 0, 1);
-                float near = Math.Clamp(1 - d / 320f, 0, 1);   // D63: на выстрелы — дальше (было 220 м)
+                float near = Math.Clamp(1 - d / (activity ? 260f : 320f), 0, 1);   // D63: на выстрелы — дальше
                 float burden = Math.Clamp((_load + (Archetype == BotArchetype.Farmer ? _stash * 0.3f : 0)) / 600f, 0, 1);
                 float hp = _me.Hp / _me.MaxHp;
-                float score = mine < 0.35f ? 0 : 75 * MathF.Min(1f, 0.45f + Aggression + 0.2f * Greed) * near * (1 - risk) * (1 - 0.7f * burden) * hp * (_w.Time - h.Time < 45 ? 1 : 0.5f);
+                float armed = mine < 0.35f ? (activity ? 0.5f : 0) : 1;
+                float score = 75 * MathF.Min(1f, 0.45f + Aggression + 0.2f * Greed) * near * (1 - risk) * (1 - 0.7f * burden) * hp * (_w.Time - h.Time < 45 ? 1 : 0.5f) * armed;
                 if (!h.Judged)
                 {
                     h.Judged = true;
                     _heard[i] = h;
-                    string what = h.Explosion ? $"взрыв ({Items.Name(h.Weapon)})" : $"выстрелы ({Items.Name(h.Weapon)})";
-                    string why = mine < 0.35f ? "нечем драться"
-                        : risk > 0.7f ? $"у них оружие сильнее ({Items.Name(h.Weapon)} против {Items.Name(Ranged() ?? "weapon_spear")})"
+                    string weapon = h.Activity ? "шум" : Items.Name(h.Weapon);
+                    string what = h.Activity ? "шум (взлом/механизм)" : h.Explosion ? $"взрыв ({weapon})" : $"выстрелы ({weapon})";
+                    string why = mine < 0.35f ? (activity ? "с копьём, но там лут" : "нечем драться")
+                        : risk > 0.7f ? $"у них оружие сильнее ({weapon} против {Items.Name(Ranged() ?? "weapon_spear")})"
                         : burden > 0.6f ? $"несу ценное (≈{_load:0} лома) — не рискую"
                         : hp < 0.5f ? "ранен"
                         : near < 0.3f ? "далеко"
@@ -314,7 +349,7 @@ namespace Rastvordd.Sim
         {
             if (_target is not Heard h) return false;
             float d = Vector2.Distance(h.Pos, _me.Pos);
-            Doing = $"идёт на звук боя ({Items.Name(h.Weapon)}, {d:0} м)";
+            Doing = h.Activity ? $"идёт на шум ({d:0} м)" : $"идёт на звук боя ({Items.Name(h.Weapon)}, {d:0} м)";
             var gun = Ranged();
             if (gun != null) Hold(gun, ref cmd);
             if (d < 25) cmd.Crouch = true;   // последние метры — тихо
@@ -322,6 +357,8 @@ namespace Rastvordd.Sim
             {
                 // пришёл, никого — бой кончился: забыть это место
                 _heard.RemoveAll(x => Vector2.DistanceSquared(x.Pos, h.Pos) < 30 * 30);
+                _hushed.RemoveAll(x => x.until < _w.Time);
+                _hushed.Add((h.Pos, _w.Time + 300));   // D65: шум отсюда 5 мин не слушать
                 Thought("на месте боя пусто — ухожу");
             }
             return true;

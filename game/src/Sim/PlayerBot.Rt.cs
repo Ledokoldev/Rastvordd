@@ -198,7 +198,7 @@ namespace Rastvordd.Sim
             if (Night && Aggression < 0.75f) return 0;   // раздел 10: ночью на РТ не ходят (кроме самых отчаянных) — крафт, сортировка, фарм у дома            if (_w.Time - _rtScoreAt < 3) return _rtScore;
             _rtScoreAt = _w.Time;
             _rtScore = 0;
-            if (_me.Hp < 75 || _me.Food < 15 || _me.Water < 15) return 0;   // поесть и попить — на сборах
+            if (_me.Hp < 75 - 20 * _tempo || _me.Food < 15 || _me.Water < 15) return 0;   // D65: в темпе рискуем и с неполным HP   // поесть и попить — на сборах
             if (Archetype == BotArchetype.Farmer && MyBenchLevel() < 1) return 0;   // фермер сначала отстраивает мейн с верстаком
             float need = 0;
             var why = new List<string>();
@@ -214,6 +214,7 @@ namespace Rastvordd.Sim
             float since = _w.Time - LastRunEnd;
             if (since > 1200) { need += 0.35f; why.Add("давно не был на РТ"); }
             if (Archetype == BotArchetype.Roamer) { need += 0.3f; why.Add("лут РТ — мой хлеб"); }
+            if (_tempo > 0.4f) { need += 0.35f * _tempo; why.Add($"темп: {_tempoWhy}"); }   // D65: рашим, пока другие не обогнали
             if (need < 0.3f) return 0;
 
             // лучшая РТ: ценность для меня против риска (с поправкой на мой аппетит) и дороги

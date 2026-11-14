@@ -104,6 +104,7 @@ namespace Rastvordd.Sim
             foreach (var s in Substations) if (s.M.Contains(p)) lvl = MathF.Max(lvl, Clothing.RtRad[1]);
             foreach (var rt in Tier1) if (rt.M.Contains(p)) lvl = MathF.Max(lvl, Clothing.RtRad[1]);
             foreach (var rt in Tier2) if (rt.M.Contains(p)) lvl = MathF.Max(lvl, Clothing.RtRad[2]);
+            if (Duga != null && Duga.M.Contains(p)) lvl = MathF.Max(lvl, p.Y < Duga.O.Y + 30 ? 45f : Clothing.RtRad[3]);   // «Дуга» (D61): тир 3, у антенны и на галерее — 45
             if (RadWarehouse > 0 && MonumentAt(p)?.Name == "Склад «Центральный»") lvl = MathF.Max(lvl, RadWarehouse);
             foreach (var (c, r, l) in RadSpots) if (Vector2.Distance(p, c) < r) lvl = MathF.Max(lvl, l);
             return lvl;

@@ -24,6 +24,9 @@ namespace Rastvordd.Client
             if (sprite.Contains("red_lamp")) return (4f, new Color(1f, 0.25f, 0.18f), 0.5f);           // аварийка
             if (sprite.Contains("lamp_wall") || sprite.Contains("lantern")) return (5f, new Color(1f, 0.8f, 0.55f), 0.5f);
             if (sprite.Contains("top_lamp")) return (3f, new Color(1f, 0.85f, 0.6f), 0.6f);
+            if (sprite.Contains("duga_antenna_wall")) return (7f, new Color(1f, 0.2f, 0.15f), 0.97f);   // «Дуга» (D61): заградительные огни антенны
+            if (sprite.Contains("duga_console")) return (3f, new Color(0.45f, 1f, 0.55f), 0.7f);        // зелёный экран пульта
+            if (sprite.Contains("duga_rack")) return (2.5f, new Color(1f, 0.6f, 0.3f), 0.6f);           // лампы стойки
             return (0, default, 0);
         }
 

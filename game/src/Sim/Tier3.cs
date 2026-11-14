@@ -183,6 +183,14 @@ namespace Rastvordd.Sim
             AddWall(o.X + 1, ty0 - 0.3f, bi * C - 0.1f, ty0, 1.0f, WallKind.Concrete);
             AddWall(o.X + 1, ty1, bi * C - 0.1f, ty1 + 0.3f, 1.0f, WallKind.Concrete);
 
+            // ---- свет (ночью): фонари двора и у КПП, аварийные лампы в машзале (D61) ----
+            foreach (var (x, y) in new[] { (30f, 62f), (62f, 62f), (40f, 76f), (60f, 76f), (70f, 46f), (94f, 30f) })
+            {
+                Decor("outdoor/streetlight_concrete", rt.At(x, y));
+                AddHiddenWall(rt.At(x, y).X - 0.2f, rt.At(x, y).Y - 0.4f, rt.At(x, y).X + 0.2f, rt.At(x, y).Y, 8f);
+            }
+            foreach (var (ci, cj) in new[] { (5f, 3f), (10.5f, 6.5f), (2f, 1f) }) Decor("props/obj_m_red_lamp_ceiling", rt.Cell(ci, cj));
+
             // ---- трансформаторный двор (восток) ----
             Prop("props/subst_transformer", rt.At(72, 36));
             Prop("props/subst_transformer", rt.At(84, 36));
@@ -283,6 +291,7 @@ namespace Rastvordd.Sim
                 PrefabVersion++;
                 Events.Add(new SimEvent { Kind = SimEventKind.Machine, ActorId = a.Id, Pos = p, Text = "power" });
                 Noises.Add(new Noise { Pos = p, Radius = 90, SourceId = a.Id, Time = Time });   // сирена: охрана идёт на звук
+                Events.Add(new SimEvent { Kind = SimEventKind.Machine, ActorId = a.Id, Pos = rt.At(50, 60), Text = "alarm" });   // сирена во дворе
                 Info(a, rt.Powered ? "Оба рубильника включены — ток пошёл, гудит сирена. Дальше — щиток на галерее антенны" : "Рубильник включён — нужен второй (во дворе)");
             };
             rt.Stashes.Add(s);
@@ -418,6 +427,7 @@ namespace Rastvordd.Sim
             Check("стена РТ не ломается", Structures.Contains(wall) && wall.Hp == hp);
             p.Floor = 0; p.Z = 0; p.Pos = rt.Cell(-2, 3); p.BuildPiece = StructKind.Foundation;
             Check("рядом строить нельзя", !CanBuild(p, StructKind.Foundation, rt.Cell(-1, 3), out _));
+            Check($"радиация: двор {RadLevelAt(rt.At(50, 60)):0}, галерея {RadLevelAt(rt.Cell(5, -1)):0}", RadLevelAt(rt.At(50, 60)) >= 30 && RadLevelAt(rt.Cell(5, -1)) >= 45);
             Actors.Remove(p);
             ResetTier3(rt);
             log($"ДУГА-ТЕСТ итог: {(fails == 0 ? "всё OK" : $"провалов {fails}")}");

@@ -35,6 +35,7 @@ namespace Rastvordd.Sim
         {
             ("Склад", 2, 1.2f, 1.2f),            // крупный РТ: шесть калашей в упор, лучший лут
             ("Радиоцентр", 2, 1.3f, 1.3f),       // тир 2 (D50): 9 охранников с ППС/Грачом/СВТ, радиация 30
+            ("РЛС", 3, 1.6f, 1.5f),              // тир 3 (D61): 9 охранников в СОБР, снайпер, радиация 30–45; боты лутают первый этаж
         };
 
         List<RtInfo> _rts;
@@ -49,7 +50,7 @@ namespace Rastvordd.Sim
             {
                 var r = new RtInfo { M = m, Sub = _w.Substations.Find(s => s.M == m), T0 = _w.Tier0.Find(t => t.M == m) };
                 foreach (var b in _w.Bags)
-                    if (b.IsCrate && m.Contains(b.Pos, 1)) { if (b.Safe) r.Safes.Add(b); else if (!b.Punch) r.Crates.Add(b); }
+                    if (b.IsCrate && b.Floor == 0 && m.Contains(b.Pos, 1)) { if (b.Safe) r.Safes.Add(b); else if (!b.Punch) r.Crates.Add(b); }   // этажи (D60): боты пока только на земле
                 foreach (var d in _w.Deployables) if (d.Kind == DeployKind.Recycler && m.Contains(d.Pos, 1)) r.Recycler = d;
                 foreach (var h in _w.NpcHomes.Values) if (m.Contains(h, 2)) r.Guards++;
                 foreach (var n in _w.NodesInRadius(m.Center, r.Radius + 2, _nodeBuf)) if (n.Kind is NodeKind.Barrel or NodeKind.Junk && m.Contains(n.Pos, 2)) r.ScrapSpots++;
@@ -421,7 +422,7 @@ namespace Rastvordd.Sim
                     if (!st.Done && (st.ActorId == 0 || st.ActorId == _me.Id)) Consider(RtTk.Stash, st, st.Pos, st.GivesCard ? 30 : 12);
             foreach (var sf in _rt.Safes) if ((sf.Unlocked && !sf.Empty) || (!sf.Unlocked && _me.Count("keycard") > 0)) Consider(RtTk.Safe, sf, sf.Pos, 20);
             foreach (var b in _w.Bags)
-                if (!b.IsCrate && !b.Empty && _rt.M.Contains(b.Pos, 4) && !MyDrop(b)) Consider(RtTk.Bag, b, b.Pos, 10);
+                if (!b.IsCrate && !b.Empty && b.Floor == 0 && _rt.M.Contains(b.Pos, 4) && !MyDrop(b)) Consider(RtTk.Bag, b, b.Pos, 10);
             foreach (var n in _w.NodesInRadius(_rt.M.Center, _rt.Radius + 3, _nodeBuf))
                 if (n.Kind is NodeKind.Barrel or NodeKind.Junk && _rt.M.Contains(n.Pos, 3)) Consider(RtTk.Node, n, n.Pos, n.Kind == NodeKind.Junk ? 4 : 0);
             if (_rt.Recycler != null && (World.BotRecyclable(_me, CompKeepPocket) > 0 || _recycleSince > 0)) Consider(RtTk.Recycler, _rt.Recycler, _rt.Recycler.Pos, 15);

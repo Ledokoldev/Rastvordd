@@ -664,6 +664,7 @@ namespace Rastvordd.Sim
         bool _upkeepLow;
         float _claimTryAt = -1;   // D64: когда начал ставить шкаф (не вышло за 45 с — другое место)
         readonly List<Vector2> _badSites = new();
+        float _upkeepSkipUntil = -1;
 
         void Plan(ref InputCmd cmd)
         {
@@ -721,7 +722,7 @@ namespace Rastvordd.Sim
             // запас шкафа — раз в 2 с (перебор всех построек мира на каждый тик)
             // D64: запас на 1 ч, пополнять при < 25 мин (раньше — 2 ч при < 1 ч: всё добытое уходило в шкаф, бот не копил и бегал за камнем за 700 м)
             _claimTryAt = -1;
-            if (_w.Time - _upkeepAt > 2f) { _upkeepAt = _w.Time; _upkeepLow = _w.ClaimHoursLeft(claim) < 0.42f && _w.ClaimLoad(claim).b > 0; }
+            if (_w.Time - _upkeepAt > 2f) { _upkeepAt = _w.Time; _upkeepLow = _w.Time > _upkeepSkipUntil && _w.ClaimHoursLeft(claim) < 0.42f && _w.ClaimLoad(claim).b > 0; }
             if (_upkeepLow)
             {
                 bool have = true;
@@ -729,6 +730,7 @@ namespace Rastvordd.Sim
                     if (!Need(id, (int)MathF.Ceiling(perHour * 1.0f), ref cmd)) { have = false; Doing = $"добывает {Items.Name(id).ToLower()} на содержание шкафа"; break; }
                 if (!have) return;
                 Doing = "кормит шкаф";
+                if (NoReach(claim.Pos)) { _upkeepSkipUntil = _w.Time + 300; Thought("к шкафу не подойти (зажат) — кормлю позже, пока делом займусь"); LStat("шкаф: не подойти"); return; }   // D64: раньше стоял часами
                 Use(claim, claim.Pos, ref cmd);
                 return;
             }
@@ -774,6 +776,7 @@ namespace Rastvordd.Sim
             // 8. сейч — отдельная цель директора (PlayerBot.Loot.cs): излишек относится выборочно, рабочий запас остаётся при себе
 
             // 9. фарм: чего меньше — то и добываем
+            if (FarmByDeficit(ref cmd)) return;   // D64: копить к цели этапа — чего меньше всего (дерево, камень, металл, сера)
             Gather(stone < wood * 0.6f ? NodeKind.Stone : NodeKind.Tree, ref cmd);
         }
     }

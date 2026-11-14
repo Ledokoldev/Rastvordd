@@ -94,6 +94,8 @@ namespace Rastvordd.Sim
             if (box.Storage.Items.Count >= World.BoxSlots && !TidyBox(box, true) && Surplus().TrueForAll(s => !box.Storage.Items.Exists(x => x.Id == s.id))) return 0;
             float v = _surplus;
             bool guns = SpareGun() != null;
+            int raw = RawSurplusCount();
+            if (raw >= 700) v = MathF.Max(v, 60);   // D64: сырьё копится в ящике по количеству (дерево и камень дёшевы в ломе)
             if (v < 25 && !guns) return 0;
             float home = Vector2.Distance(_me.Pos, box.Pos);
             // раздел 10, правило сдачи: ≥ 150 лома при себе, рюкзак на 70 %, после похода на РТ или лута убитого, ночью — домой и сложить всё,

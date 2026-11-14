@@ -76,6 +76,31 @@ namespace Rastvordd.Sim
             return b;
         }
 
+        /// <summary>Проверка (--doorwaytest): улучшить дверной проём колесом киянки и ударом — как игрок.</summary>
+        public void DoorwaySelfTest(Action<string> log)
+        {
+            var a = new Actor { Id = NextId(), Name = "Тест-киянка", Team = Team.Player };
+            Actors.Add(a);
+            var (i0, j0) = FindBuildSpot(PlayerSpawns[0] + new Vector2(0, -30), 7, 6);
+            BuildDemoHouse(i0, j0, 3, 3, a, false);
+            a.Add("stone", 3000); a.Add("metal_fragments", 3000); a.Add("wood", 3000);
+            var dw = Structures.Find(s => s.Kind == StructKind.Doorway && s.OwnerId == a.Id && s.Floor == 0);
+            log($"ПРОЁМ-ТЕСТ проём найден: {dw != null}, уровень {dw?.Tier}");
+            if (dw == null) return;
+            a.Belt[0] = Items.NewSlot("tool_hammer"); a.Current = 0;
+            a.Pos = dw.Center + new Vector2(0, -1.0f); a.Floor = 0; a.Z = 0;
+            a.LastAim = dw.Center; a.Facing = MathF.Atan2(dw.Center.Y - a.Pos.Y, dw.Center.X - a.Pos.X);
+            var t = TargetStructure(a, 2f);
+            log($"ПРОЁМ-ТЕСТ под прицелом: {(t == null ? "ничего" : $"{t.Kind} эт.{t.Floor + 1}")}");
+            log($"ПРОЁМ-ТЕСТ колесо «камень»: «{HammerWhy(a, dw, 2)}»");
+            HammerWheel(a, dw.Id, 2);
+            log($"ПРОЁМ-ТЕСТ после колеса: уровень {dw.Tier}");
+            a.HammerMode = 3;
+            if (t != null) HammerHit(a, t);
+            log($"ПРОЁМ-ТЕСТ после удара (режим «металл»): уровень {dw.Tier}, {LastInfo.GetValueOrDefault(a.Id)}");
+            Actors.Remove(a);
+        }
+
         public void FloorSelfTest(Action<string> log)
         {
             int fails = 0;

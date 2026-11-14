@@ -164,6 +164,7 @@ namespace Rastvordd.Sim
                 return foeKit >= 0.6f ? $"у него {Items.Name(_foeKitId)}, а мне нечем стрелять" : "нечем драться";
             }
             if (AmmoLeft(gun) < (gun == "weapon_bow" ? 2 : 4) && !(foeKit < 0.5f && _me.Hp >= 35)) return "кончаются патроны";   // против ближника — врукопашную (D63)
+            if (hitMe && _me.Hp >= 22 && AmmoLeft(gun) >= 2) return null;   // D64: по мне стреляют — отвечаю, а не бегу спиной
             if (Committed() && t == _foe)
             {
                 // уже сцепились: бежать спиной под огнём — верная смерть; отход только почти мёртвым против целого

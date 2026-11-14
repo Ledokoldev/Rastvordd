@@ -610,7 +610,7 @@ namespace Rastvordd.Sim
             Structure best = null;
             float bestD = 0.75f;   // дальше от ребра — значит целимся в пол (фундамент)
             foreach (var d in _doors.Values)
-                if (Vector2.DistanceSquared(d.Center, hit) < 9 && DistToEdge(d, hit) < 0.85f) return d;   // дверь — только если целимся почти в неё
+                if (Vector2.DistanceSquared(d.Center, hit) < 9 && DistToEdge(d, hit) < 0.85f && EdgeT(d, hit) is > 0.27f and < 0.73f) return d;   // дверь — только по полотну; по косякам — сам проём (как в Rust: улучшать проём с дверью)
             if (FloorAt(hit) != null) bestD = 0.45f;   // целимся в пол (у треугольника всё близко к рёбрам) — стена только вплотную
             foreach (var e in _edges.Values)
             {
@@ -624,6 +624,8 @@ namespace Rastvordd.Sim
         }
 
         internal static float DistToEdge(Structure e, Vector2 p) => Building.SegDist(p, e.A, e.B);
+        /// <summary>Где вдоль ребра точка: 0 — у A, 1 — у B.</summary>
+        internal static float EdgeT(Structure e, Vector2 p) { var ab = e.B - e.A; return Math.Clamp(Vector2.Dot(p - e.A, ab) / MathF.Max(1e-4f, ab.LengthSquared()), 0f, 1f); }
 
         /// <summary>Молоток: улучшить на уровень или починить.</summary>
         void HammerHit(Actor a, Structure s)

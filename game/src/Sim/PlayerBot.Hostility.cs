@@ -142,7 +142,7 @@ namespace Rastvordd.Sim
             bool expired = _w.Time >= en.Until || en.S == Stance.None;
             if (!expired)
             {
-                if (hitMe && en.S is Stance.Watch or Stance.Parted or Stance.Camp && LosingReason(a) == null) Set(en, Stance.Fight, "он напал — отвечаю");
+                if (hitMe && en.S != Stance.Fight && Retaliate(a, d) is string rw) Set(en, Stance.Fight, rw);   // напал — отвечаю (D64), даже если решил уходить
                 else if (hitMe && en.S is Stance.Watch or Stance.Parted or Stance.Camp) Set(en, Stance.Flee, $"он напал, а мне не выстоять: {LosingReason(a)}");
                 else if (en.S == Stance.Fight && Critical() is string c) Set(en, Stance.Flee, c);
                 return;
@@ -174,6 +174,7 @@ namespace Rastvordd.Sim
             en.Why = why;
             en.Until = _w.Time + 15f + (float)_rng.NextDouble() * 5f;
             if (s == Stance.Parted) en.Until = _w.Time + 120f;
+            if (s == Stance.Fight && _fleeFrom == en.A) { _fleeFrom = null; _fleeEnd = -99; _retreating = false; _hasEscape = false; }   // D64: решил драться — отход отменён (раньше таймер отхода перебивал бой)
             if (!changed) return;
             string what = s switch { Stance.Fight => "нападаю", Stance.Flee => "ухожу", Stance.Camp => "караулю выход с РТ", Stance.Parted => "разошлись", _ => "держу на виду" };
             Thought($"встреча: {en.A.Name} ({Items.Name(en.A.Held?.Id ?? "tool_rock")}, {Vector2.Distance(en.A.Pos, _me.Pos):0} м) → {what}: {why}");
@@ -205,6 +206,7 @@ namespace Rastvordd.Sim
             bool hurt = a.Hp < 45;                 // видно по крови и хромоте
             bool nakedMe = MyPower <= 0.15f;       // у меня только камень или инструмент
 
+            if (hitMe && Retaliate(a, d) is string rw) return (Stance.Fight, rw);   // D64: на удар — ответ
             if (lose != null) return hitMe || en.Rt || d < 25 || armedClose ? (Stance.Flee, lose) : (Stance.Watch, lose);
             if (hitMe) return (Stance.Fight, "он напал первым");
             if (CampJudge(a, edge) is (Stance, string) cj) return cj;   // из засады: с лутом или слабее — бью, сильного пропускаю
@@ -255,6 +257,25 @@ namespace Rastvordd.Sim
             if (d < 6 && edge >= 0.05f && worth) return (Stance.Fight, "подошёл вплотную");
             if (edge < -0.1f && d < 15) return (Stance.Flee, $"он сильнее ({kit})");
             return (Stance.Watch, empty ? "голый — не стоит патронов" : "держу на виду");
+        }
+
+        /// <summary>
+        /// Отвечать ли на удар (D64, пользователь: «боты не отбиваются, если их атакуют»): да, кроме «почти мёртв» и «врукопашную
+        /// против ствола издалека» (не добежать). Со стволом — отвечаю, даже если его ствол сильнее: спиной под огнём — верная смерть.
+        /// </summary>
+        string Retaliate(Actor a, float d)
+        {
+            if (_me.Hp < 22) return null;
+            bool foeRanged = a.Weapon != null && !a.Weapon.Def.Melee;
+            if (Ranged() is string g)
+            {
+                if (AmmoLeft(g) >= 2) return $"он напал — отвечаю из {Items.Name(g)}";
+                if (!foeRanged && d < 14) return "он напал — патронов нет, врукопашную";
+                return null;
+            }
+            if (!foeRanged) return $"он напал — бьюсь ({Items.Name(Has("weapon_spear") ? "weapon_spear" : "tool_rock")})";
+            if (d < 9) return "он со стволом вплотную — бросаюсь на него";
+            return null;
         }
 
         bool AtHisBase(Actor a)

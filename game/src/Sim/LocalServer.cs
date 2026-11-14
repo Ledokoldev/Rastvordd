@@ -396,6 +396,8 @@ namespace Rastvordd.Sim
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--locktest") >= 0) World.LockSelfTest(log);       // удары и пули сквозь стены, замки
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--floortest") >= 0) World.FloorSelfTest(log);     // этажи (D60): стройка, лестницы, падение, стрельба и обзор между этажами, обрушение, воздух
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--dugatest") >= 0) World.DugaSelfTest(log);       // РТ тира 3 «Дуга» (D61)
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--doorwaytest") >= 0) World.DoorwaySelfTest(log);
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--botbraintest") >= 0) World.BotBrainSelfTest(log);   // D64: боты отвечают на удар
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--headtest") >= 0) World.HeadshotSelfTest(log);   // шансы в голову (D55)
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--ttktest") >= 0 || System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--ttkquick") >= 0) World.TtkSelfTest(log);       // ТТК: стволы × сеты
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--progtest") >= 0) World.ProgSelfTest(log);       // прогрессия D54: станции, ток, ёмкости, вода

@@ -184,7 +184,13 @@ namespace Rastvordd.Sim
         /// <summary>Рецепты одежды (D47). СОБР, армейская/керамическая пластины, часы — только лут; ОЗК — верстак 3 и лут.</summary>
         internal static void AddRecipes(List<Recipe> all)
         {
-            Recipe R(string output, float time, int bench, params (string, int)[] cost) => new Recipe { Output = output, Time = time, Bench = bench, Count = 1, Cost = cost };
+            // D68: хороший сет под уровень — дорого и долго (пользователь): верстак 1 — сырьё ×2, время ×3; 2 — ×2,5 и ×5; 3 — ×3 и ×6
+            Recipe R(string output, float time, int bench, params (string, int)[] cost)
+            {
+                float km = bench switch { 1 => 2f, 2 => 2.5f, >= 3 => 3f, _ => 1f }, kt = bench switch { 1 => 3f, 2 => 5f, >= 3 => 6f, _ => 1f };
+                var c = Array.ConvertAll(cost, x => (x.Item1, (int)MathF.Ceiling(x.Item2 * km)));
+                return new Recipe { Output = output, Time = time * kt, Bench = bench, Count = 1, Cost = c };
+            }
             all.AddRange(new[]
             {
                 // тир 0 — в руках, из ткани (конопля)
@@ -349,6 +355,18 @@ namespace Rastvordd.Sim
         public static string EquipSound(string id) => Def(id) is WearDef d ? (d.Metal ? "wear_metal" : d.Rubber ? "wear_rubber" : "wear_cloth") : Plate(id) != null ? "wear_metal" : "wear_cloth";
 
         /// <summary>Очки вещи для ботов: пули важнее всего, потом радиация и тепло.</summary>
+        /// <summary>D68: уровень сета — наибольший тир, вещей которого (и выше) надето не меньше 4.</summary>
+        public static int SetTier(Actor a)
+        {
+            for (int t = 3; t >= 1; t--)
+            {
+                int n = 0;
+                foreach (var s in a.Worn) if (Def(s?.Id) is WearDef d && d.Tier >= t) n++;
+                if (n >= 4) return t;
+            }
+            return 0;
+        }
+
         public static float BotScore(WearDef d) => d == null ? 0 : d.Bullet * 100 + d.Rad * 0.6f + d.Warm * 0.4f + d.Speed * 60 + (d.Slot == WearSlot.Wrist ? 5 : 0);
 
         // ---------- лут ----------

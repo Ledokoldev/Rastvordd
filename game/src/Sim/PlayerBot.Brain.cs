@@ -223,6 +223,7 @@ namespace Rastvordd.Sim
                 new() { Name = "поход на РТ", Score = RtScore, Act = RtRun },
                 new() { Name = "сейч", Score = StashScore, Act = StashAct },
                 new() { Name = "разведка", Score = ScoutScore, Act = Scout },
+                new() { Name = "сет", Score = SetScore, Act = SetAct },   // D68: сет под тир РТ
                 new() { Name = "снаряжение", Score = () => !GearMissing() ? 0 : !Has("weapon_spear") ? 55 : 50 * W("снаряжение"), Act = GearUp },
                 new() { Name = "хозяйство", Score = () => 40 * W("хозяйство"), Act = (ref InputCmd c) => { Plan(ref c); return true; } },
                 new() { Name = "роум", Score = PvpRoamScore, Act = PvpRoamAct },   // D63: вооружённый идёт искать драку
@@ -417,6 +418,23 @@ namespace Rastvordd.Sim
             return _gearMiss = GearMissingNow();
         }
         float _gearAt = -99; bool _gearMiss;
+        int _setWant; float _setWantAt = -999;
+
+        /// <summary>D68: РТ закрыта без сета — шить сет у верстака (материалы из ящика). Нечего шить — фарм идёт хозяйством.</summary>
+        float SetScore()
+        {
+            if (_w.Time - _setWantAt > 120 || Clothing.SetTier(_me) >= _setWant || MyBox() == null || MyBenchLevel() < _setWant || _threat != null) return 0;
+            return 62 * OutMul();
+        }
+
+        bool SetAct(ref InputCmd cmd)
+        {
+            if (MyBox() is not Deployable box) return false;
+            if (Tailor(box, ref cmd)) { Doing = $"сет на тир {_setWant}: {Doing}"; return true; }
+            _setWantAt = -999;   // шить нечего/не из чего — пусть копит хозяйство
+            return false;
+        }
+
         bool GearMissingNow() => Has("tool_hatchet") && (!Has("weapon_spear") || (!Has("weapon_bow") && (_me.Count("cloth") >= 50 || NearestPickup(PickupKind.Hemp) != null)) || (Has("weapon_bow") && _me.Count("arrow") < 12));
 
         bool GearUp(ref InputCmd cmd)

@@ -247,9 +247,11 @@ namespace Rastvordd.Sim
             switch (cat)
             {
                 case 0: break;   // деревья ставит PlaceTrees (лес массивами, возраст, породы); вес в BiomeFill — только для доли прочего
-                case 1: AddNode(NodeKind.Stone, p); break;
-                case 2: AddNode(NodeKind.Metal, p); break;
-                case 3: AddNode(NodeKind.Sulfur, p); break;
+                // D68: камней и руды втрое меньше, но каждый богаче (×2,7) — ресы на дом надо искать по карте (пользователь)
+                case 1: case 2: case 3:
+                    if (RareNodeSkip(p)) break;
+                    AddNode(cat == 1 ? NodeKind.Stone : cat == 2 ? NodeKind.Metal : NodeKind.Sulfur, p);
+                    break;
                 case 4: AddPickup(PickupKind.Hemp, p); break;
                 case 5: AddPickup(PickupKind.Berries, p); break;
                 case 6: AddPickup(PickupKind.WaterBarrel, p); break;
@@ -266,6 +268,14 @@ namespace Rastvordd.Sim
                     AddProp(r8 < 3 ? WallKind.Car : r8 < 8 ? WallKind.Barrier : WallKind.Junk, p);
                     break;
             }
+        }
+
+        /// <summary>D68: детерминированно (по месту, без расхода Rng — раскладка остального мира не сдвигается) оставить треть узлов.</summary>
+        static bool RareNodeSkip(Vector2 p)
+        {
+            uint h = (uint)((int)MathF.Floor(p.X * 4.1f) * 73856093) ^ (uint)((int)MathF.Floor(p.Y * 3.7f) * 19349663);
+            h ^= h >> 13; h *= 0x5bd1e995; h ^= h >> 15;
+            return h % 3 != 0;
         }
 
         /// <summary>Пропс-укрытие: размер «следа» на земле под спрайт, высота ниже 2 м — обзор не закрывает.</summary>
@@ -314,13 +324,13 @@ namespace Rastvordd.Sim
             float amount = kind switch
             {
                 NodeKind.Tree => Range(120, 200),
-                NodeKind.Stone => 150,
-                NodeKind.Metal => 90,
+                NodeKind.Stone => 400,               // D68: было 150 (узлов втрое меньше)
+                NodeKind.Metal => 240,               // было 90
                 NodeKind.Barrel => 30,               // прочность бочки
                 NodeKind.Junk => Rng.Next(1, 3),     // лома в куче (D49: голого лома мало — 1–2)
                 NodeKind.Tire => Rng.Next(2, 5),     // резины в покрышке
                 NodeKind.TireStack => Rng.Next(6, 11),
-                _ => 60,
+                _ => 160,                            // сера, D68: было 60
             };
             var node = new ResourceNode
             {
@@ -1435,7 +1445,7 @@ namespace Rastvordd.Sim
             _nodeGrid.Remove(node);
             if (node.Kind is NodeKind.Barrel or NodeKind.Junk) _spotRespawns.Add((node.Kind, node.Pos, Range(180, 300)));
             else if (node.Kind is NodeKind.Tire or NodeKind.TireStack) _spotRespawns.Add((node.Kind, node.Pos, NearMonument(node.Pos, 2) ? Range(900, 1260) : Range(1200, 1800)));   // покрышки: на РТ — с обновлением РТ, в мире — 20–30 мин
-            else _nodeRespawns.Add((node.Kind, Range(90, 180)));
+            else _nodeRespawns.Add((node.Kind, node.Kind == NodeKind.Tree ? Range(90, 180) : Range(240, 420)));   // D68: богатый камень/руда отрастает дольше
         }
 
         /// <summary>Удар или пуля по бочке; разбита — под ней сумка с хламом (открывается сразу).</summary>

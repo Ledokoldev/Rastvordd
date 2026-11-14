@@ -179,6 +179,9 @@ namespace Rastvordd.Sim
             // World.EnterConsoleCode) → ждать на площадке, отбивать контейнер. Пока боты только обходят ящики, сейф и стойки (BotUseStash).
             float rad = _w.RadLevelAt(r.M.Center);
             if (rad > 0 && Clothing.RadProt(_me) < rad - 5) { why = $"там радиация {rad:0} — нечем защититься"; return false; }
+            // D68: на тир выше нулевого — сет под уровень (тир 1 — ватник/кожа, тир 2+ — лом-броня/спецовка); иначе сначала сет
+            int needSet = Math.Min(r.Tier, 2);
+            if (Clothing.SetTier(_me) < needSet) { why = $"на тир {r.Tier} нужен сет тира {needSet} (у меня {Clothing.SetTier(_me)})"; _setWant = Math.Max(_setWant, needSet); _setWantAt = _w.Time; return false; }
             if (r.Guards == 0) return deaths < 3 || (why = "там уже умирал") == null;
             if (gun == null) { why = "охрана, а у меня нет ствола"; return false; }
             if (AmmoLeft(gun) < 20) { why = "мало патронов"; return false; }

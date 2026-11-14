@@ -350,6 +350,7 @@ namespace Rastvordd.Sim
             return MathF.Abs(d.X) >= MathF.Abs(d.Y) ? (d.X >= 0 ? 0 : 2) : (d.Y >= 0 ? 1 : 3);
         }
 
+        public static Vector2 StairDir(int dir) => DirVec(dir);
         static Vector2 DirVec(int dir) => dir switch { 0 => new Vector2(1, 0), 1 => new Vector2(0, 1), 2 => new Vector2(-1, 0), _ => new Vector2(0, -1) };
 
         /// <summary>Где на лестнице точка: 0 — низ (вход снизу), 1 — верх.</summary>
@@ -399,7 +400,7 @@ namespace Rastvordd.Sim
         {
             if (a.Flying) return;
             if (a.Floor == 0 && a.Z == 0 && !AnyUpper) return;
-            if (!a.IsBot && StairsAt(a.Pos, a.Floor) is Structure st)
+            if ((!a.IsBot || a.StairsOk) && StairsAt(a.Pos, a.Floor) is Structure st)   // бот — только когда сам решил идти по лестнице (D62)
             {
                 float t = Math.Clamp(StairT(st, a.Pos), 0f, 1f);
                 int lo = st.Floor - 1;

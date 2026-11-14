@@ -667,6 +667,7 @@ namespace Rastvordd.Sim
         public float Z;                 // высота ступней, м: этаж × Building.Storey (на лестнице — между этажами; в воздухе — высота полёта)
         public bool Flying;             // задел «воздух» (D60): летит — без столкновений и падения, на высоте Z
         public float AimZ;              // высота точки прицела, м (D60): пуля летит к ней (не сохраняется)
+        public bool StairsOk;           // бот идёт по лестнице (D62): только тогда лестница его поднимает/опускает
         public float Facing;            // радианы, atan2(y, x)
         public float Radius = 0.35f;
         public float Hp = 100, MaxHp = 100;

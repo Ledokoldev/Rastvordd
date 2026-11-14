@@ -35,7 +35,7 @@ namespace Rastvordd.Sim
         {
             ("Склад", 2, 1.2f, 1.2f),            // крупный РТ: шесть калашей в упор, лучший лут
             ("Радиоцентр", 2, 1.3f, 1.3f),       // тир 2 (D50): 9 охранников с ППС/Грачом/СВТ, радиация 30
-            ("РЛС", 3, 1.6f, 1.5f),              // тир 3 (D61): 9 охранников в СОБР, снайпер, радиация 30–45; боты лутают первый этаж
+            ("РЛС", 3, 1.6f, 1.8f),              // тир 3 (D61): 9 охранников в СОБР, снайпер, радиация 30–45; цепочка и крейт пульта (D62)
         };
 
         List<RtInfo> _rts;
@@ -50,7 +50,7 @@ namespace Rastvordd.Sim
             {
                 var r = new RtInfo { M = m, Sub = _w.Substations.Find(s => s.M == m), T0 = _w.Tier0.Find(t => t.M == m) };
                 foreach (var b in _w.Bags)
-                    if (b.IsCrate && b.Floor == 0 && m.Contains(b.Pos, 1)) { if (b.Safe) r.Safes.Add(b); else if (!b.Punch) r.Crates.Add(b); }   // этажи (D60): боты пока только на земле
+                    if (b.IsCrate && m.Contains(b.Pos, 1)) { if (b.Safe) r.Safes.Add(b); else if (!b.Punch) r.Crates.Add(b); }   // любой этаж: наверх — по лестнице (D62)
                 foreach (var d in _w.Deployables) if (d.Kind == DeployKind.Recycler && m.Contains(d.Pos, 1)) r.Recycler = d;
                 foreach (var h in _w.NpcHomes.Values) if (m.Contains(h, 2)) r.Guards++;
                 foreach (var n in _w.NodesInRadius(m.Center, r.Radius + 2, _nodeBuf)) if (n.Kind is NodeKind.Barrel or NodeKind.Junk && m.Contains(n.Pos, 2)) r.ScrapSpots++;
@@ -403,6 +403,8 @@ namespace Rastvordd.Sim
                 if (card && s.Powered && s.Crate != null && !s.Crate.Unlocked && s.CrateTimer <= 0 && !Skipped(s.Crate)) return (RtTk.Punch, s.Crate, s.Crate.Pos);
             }
             // тир 0: перфокарта лежит — взять; тайник «держи E» — делать, стоя рядом (шумно); начатый — не бросать
+            if (_w.Duga is Tier3Rt dgh && dgh.M == _rt.M)
+                foreach (var st in dgh.Stashes) if (st.ActorId == _me.Id) return (RtTk.Stash, st, st.Pos);   // начатое «держи E» не бросать
             if (_rt.T0 is Tier0Rt t0)
             {
                 foreach (var st in t0.Stashes) if (st.ActorId == _me.Id && !st.Done) return (RtTk.Stash, st, st.Pos);
@@ -413,16 +415,27 @@ namespace Rastvordd.Sim
             void Consider(RtTk k, object o, Vector2 p, float bonus)
             {
                 if (Skipped(o) || NoReach(p)) return;
-                float c = Vector2.Distance(p, _me.Pos) - bonus;
+                float c = Vector2.Distance(p, _me.Pos) - bonus + Math.Abs(FloorOf(o) - _me.Floor) * 30f;   // другой этаж — дальше: лестница туда и обратно (D62)
                 if (c < bestCost) { bestCost = c; best = (k, o, p); }
             }
             foreach (var c in _rt.Crates) if (!(c.Empty && SeePoint(c.Pos))) Consider(RtTk.Crate, c, c.Pos, 8);
+            // «Дуга» (D62): рубильники → щиток на галерее → прогрев пульта → крейт; на цепочку — только с огнестрелом
+            if (_w.Duga is Tier3Rt dg && dg.M == _rt.M)
+            {
+                if (dg.Crate.Unlocked && !dg.Crate.Empty) Consider(RtTk.Crate, dg.Crate, dg.Crate.Pos, 60);
+                else if (dg.WarmLeft > 0 && _dugaMine) return (RtTk.Guard, dg, dg.CratePos);   // мой прогрев — держу пультовую (D62)
+                else if (dg.WarmLeft <= 0 && Ranged() != null)
+                {
+                    var next = !dg.Power1 ? dg.Switch1 : !dg.Power2 ? dg.Switch2 : !dg.ShieldOn ? dg.Shield : dg.Console;
+                    if (next.ActorId == 0 || next.ActorId == _me.Id) Consider(RtTk.Stash, next, next.Pos, 40);
+                }
+            }
             if (_rt.T0 != null)
                 foreach (var st in _rt.T0.Stashes)
                     if (!st.Done && (st.ActorId == 0 || st.ActorId == _me.Id)) Consider(RtTk.Stash, st, st.Pos, st.GivesCard ? 30 : 12);
             foreach (var sf in _rt.Safes) if ((sf.Unlocked && !sf.Empty) || (!sf.Unlocked && _me.Count("keycard") > 0)) Consider(RtTk.Safe, sf, sf.Pos, 20);
             foreach (var b in _w.Bags)
-                if (!b.IsCrate && !b.Empty && b.Floor == 0 && _rt.M.Contains(b.Pos, 4) && !MyDrop(b)) Consider(RtTk.Bag, b, b.Pos, 10);
+                if (!b.IsCrate && !b.Empty && _rt.M.Contains(b.Pos, 4) && !MyDrop(b)) Consider(RtTk.Bag, b, b.Pos, 10);
             foreach (var n in _w.NodesInRadius(_rt.M.Center, _rt.Radius + 3, _nodeBuf))
                 if (n.Kind is NodeKind.Barrel or NodeKind.Junk && _rt.M.Contains(n.Pos, 3)) Consider(RtTk.Node, n, n.Pos, n.Kind == NodeKind.Junk ? 4 : 0);
             if (_rt.Recycler != null && (World.BotRecyclable(_me, CompKeepPocket) > 0 || _recycleSince > 0)) Consider(RtTk.Recycler, _rt.Recycler, _rt.Recycler.Pos, 15);
@@ -475,9 +488,10 @@ namespace Rastvordd.Sim
             if (RtDanger(out string why)) { LeaveRt(why); return true; }
             if (got >= limit) { LeaveRt($"набрал ≈{got:0} лома — несу домой, пока не отобрали"); return true; }
             if (FreePack() == 0) { LeaveRt("рюкзак полон"); return true; }
-            if (_w.Time - _rtLootAt > (_rt.Sub != null && _me.Count("punchcard_1") > 0 ? 480 : 300) && !(_rt.Sub?.CrateTimer > 0)) { LeaveRt("долго торчу на РТ"); return true; }
+            if (_w.Duga is Tier3Rt dgl && dgl.M == _rt.M && (dgl.Powered || dgl.WarmLeft > 0 || (dgl.Crate.Unlocked && !dgl.Crate.Empty)) && _w.Time - _rtLootAt < 600) { }   // цепочка «Дуги» идёт — не уходить по таймеру
+            else if (_w.Time - _rtLootAt > (_rt.Sub != null && _me.Count("punchcard_1") > 0 ? 480 : 300) && !(_rt.Sub?.CrateTimer > 0)) { LeaveRt("долго торчу на РТ"); return true; }
 
-            if (_rtT == null || _w.Time - _rtTPick > 1.5f)
+            if (_rtT == null || (_w.Time - _rtTPick > 1.5f && _me.Floor == FloorOf(_rtT.Value.obj) && !InStairCell(_stair)))   // по пути на другой этаж цель не меняю — иначе качели по лестнице (D62)
             {
                 var t = PickRtTarget();
                 if (t == null) { LeaveRt(_rtMine > 0 || _rtValue0 + 30 < CarriedValue() ? "на РТ больше нечего брать" : OnLootedRt()); return true; }
@@ -486,10 +500,11 @@ namespace Rastvordd.Sim
                 _rtTPick = _w.Time;
             }
             var (kind, obj, pos) = _rtT.Value;
+            _wantFloor = FloorOf(obj);   // цель на этаже — MoveTo сам поведёт по лестнице (D62)
             // не подойти 12 с — пропустить цель. Прогресс — по каждой цели отдельно: раньше две бочки за стеной чередовались
             // каждые 1,5 с, таймер сбрасывался, и бот упирался в стену заправки по 2 минуты
             float d = Vector2.Distance(_me.Pos, pos);
-            bool special = kind == RtTk.Guard || kind == RtTk.Recycler || (obj is Stash hs && hs.ActorId == _me.Id);
+            bool special = kind == RtTk.Guard || kind == RtTk.Recycler || (obj is Stash hs && hs.ActorId == _me.Id) || _me.Floor != _wantFloor;   // в пути по лестнице — не застревание
             if (!special && NoReach(pos)) { Skip(obj, 180); _rtT = null; Say("рт-недост", "до цели на РТ не дойти (за стеной без прохода) — пропускаю", 20); return true; }
             var pr = _rtProg.TryGetValue(obj, out var pv) ? pv : (best: float.MaxValue, since: _w.Time);
             if (d < pr.best - 0.3f) pr = (d, _w.Time);
@@ -561,7 +576,7 @@ namespace Rastvordd.Sim
                         if (_w.Time - _lastUse > 0.5f)
                         {
                             _lastUse = _w.Time;
-                            if (_w.BotUseStash(_me, st)) Thought($"{st.Verb.ToLower()} — {st.Seconds:0} с шума, не отхожу");
+                            if (_w.BotUseStash(_me, st)) { Thought($"{st.Verb.ToLower()} — {st.Seconds:0} с шума, не отхожу"); if (st == _w.Duga?.Console) _dugaMine = true; }
                             else Skip(st, 60);
                         }
                         return true;
@@ -601,6 +616,17 @@ namespace Rastvordd.Sim
                         }
                         else Skip(bag, 20);
                     }
+                    return true;
+                }
+                case RtTk.Guard when obj is Tier3Rt dgw:
+                {
+                    // «Дуга»: пульт греется — сижу в пультовой у крейта, пригнувшись, лицом к проёму из коридора (D62)
+                    Doing = $"держит пультовую «Дуги»: прогрев {dgw.WarmLeft:0} с";
+                    var spot = dgw.Cell(9.5f, 1.2f);
+                    if (!MoveTo(spot, 0.6f, ref cmd)) return true;
+                    cmd.Crouch = true;
+                    cmd.Aim = dgw.Cell(5f, 2.5f);
+                    if (gun != null) Hold(gun, ref cmd);
                     return true;
                 }
                 case RtTk.Guard:
@@ -679,6 +705,7 @@ namespace Rastvordd.Sim
         /// <summary>Итог похода: что принёс (по сравнению с началом обхода) — в мысли и счётчики.</summary>
         void EndRun(string why, bool died = false)
         {
+            _dugaMine = false;
             if (_rt == null) { _rtPhase = RtPhase.None; return; }
             var parts = new List<string>();
             if (!died && _rtHad.Count > 0)

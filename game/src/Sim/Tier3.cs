@@ -430,6 +430,36 @@ namespace Rastvordd.Sim
             Check($"радиация: двор {RadLevelAt(rt.At(50, 60)):0}, галерея {RadLevelAt(rt.Cell(5, -1)):0}", RadLevelAt(rt.At(50, 60)) >= 30 && RadLevelAt(rt.Cell(5, -1)) >= 45);
             Actors.Remove(p);
             ResetTier3(rt);
+
+            // ---- бот-игрок проходит «Дугу» сам (D62): охрана спит, у бота АКМ ----
+            foreach (var g in Actors) if (g.Team == Team.Npc && rt.M.Contains(g.Pos, 6)) { g.Dead = true; g.DeadTime = Time + 1e5f; }
+            var ba = new Actor { Id = NextId(), Name = "Тест-бот", Team = Team.Player, IsBot = true, Pos = rt.At(50, 70) };
+            Actors.Add(ba);
+            ba.AddSlot(Items.NewSlot("weapon_akm", 30)); ba.Add("ammo_762", 120); ba.Add("bandage", 4);
+            var bot = new PlayerBot(ba, this, 4242);
+            bot.DebugRunRt(rt.M);
+            int maxFloor = 0, crateN = -1, traceN = 0; float t0 = Time; string lastDoing = "";
+            var seen = new List<string>();
+            for (int k = 0; k < (int)(420 / Dt) && !(rt.Crate.Unlocked && (rt.Crate.Empty || crateN - rt.Crate.Items.Count >= Math.Max(1, crateN / 2))); k++)
+            {
+                InputCmd c;
+                using (Ctx(ba.Floor)) c = bot.Think();
+                Step(new Dictionary<int, InputCmd> { [ba.Id] = c });
+                ba.Hp = ba.MaxHp; ba.RadDose = 0; ba.Food = ba.Water = 80; ba.Dead = false;
+                maxFloor = Math.Max(maxFloor, ba.Floor);
+                if (rt.Power2 && k % 60 == 0 && traceN++ < 45) log($"ДУГА-ТРАССА {Time - t0:0} эт.{ba.Floor + 1} @{ba.Pos.X - rt.O.X:0.0};{ba.Pos.Y - rt.O.Y:0.0} {bot.DebugDoing} · {bot.DebugTrace}");
+                string dn = bot.DebugDoing; int cut = dn.IndexOf('('); if (cut < 0) cut = dn.IndexOf(':'); if (cut > 0) dn = dn[..cut].Trim();
+                if (dn != lastDoing) { lastDoing = dn; if (seen.Count < 60 && (seen.Count == 0 || seen[^1] != dn)) seen.Add(dn); }
+                if (rt.Crate.Unlocked && crateN < 0) crateN = rt.Crate.Items.Count;
+                if (!bot.DebugOnRt && !(rt.Crate.Unlocked && !rt.Crate.Empty)) bot.DebugRunRt(rt.M);   // ушёл раньше времени — вернуть (проверяем путь, а не решение)
+            }
+            log($"ДУГА-ТЕСТ бот делал: {string.Join(" · ", seen)}");
+            Check($"бот: рубильники {(rt.Power1 ? 1 : 0) + (rt.Power2 ? 1 : 0)}/2, щиток {rt.ShieldOn}, выше всего — этаж {maxFloor + 1}", rt.Powered && rt.ShieldOn && maxFloor >= 2);
+            int took = crateN < 0 ? 0 : crateN - rt.Crate.Items.Count, free = 0; foreach (var sl in ba.Pack) if (sl == null) free++;
+            Check($"бот открыл крейт пульта и взял {took} из {crateN} за {Time - t0:0} с (свободных ячеек {free}, сталь {ba.Count(Prog.Alloy)})", rt.Crate.Unlocked && took >= Math.Max(1, crateN / 2));
+            Actors.Remove(ba);
+            ResetTier3(rt);
+            foreach (var g in Actors) if (g.Team == Team.Npc && rt.M.Contains(g.Pos, 6)) g.DeadTime = Time - 1e5f;
             log($"ДУГА-ТЕСТ итог: {(fails == 0 ? "всё OK" : $"провалов {fails}")}");
         }
 }

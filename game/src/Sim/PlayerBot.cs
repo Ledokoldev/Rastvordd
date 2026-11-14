@@ -230,6 +230,7 @@ namespace Rastvordd.Sim
 
         bool MoveTo(Vector2 p, float tol, ref InputCmd cmd)
         {
+            if (FloorDetour(p, ref cmd)) return false;   // цель на другом этаже — к лестнице (D62)
             var d = p - _me.Pos;
             CloseDoorBehind();
             if (d.Length() <= tol) { _path = null; return true; }
@@ -714,6 +715,7 @@ namespace Rastvordd.Sim
         {
             var cmd = InputCmd.Empty;
             cmd.Aim = _me.Pos + _me.FacingDir * 3;
+            _wantFloor = 0;   // по умолчанию — земля; поход на РТ ставит этаж цели (D62)
             CountBump();
             StepDeath();
             if (_me.Dead)

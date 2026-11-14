@@ -271,6 +271,7 @@ namespace Rastvordd.Sim
         /// <summary>Подойти к цели так, чтобы достать рукой; true — на месте (прицел — на цель).</summary>
         bool Reach(Vector2 target, ref InputCmd cmd, float r = 0.95f)
         {
+            if (_me.Floor != _wantFloor || InStairCell(_stair)) { MoveTo(target, r, ref cmd); return false; }   // цель на другом этаже — сначала лестница (D62)
             bool near = Vector2.Distance(_me.Pos, target) < MathF.Min(World.InteractRange - 0.1f, r + 0.75f) && _w.ClearLine(_me.Pos, target, null, true);
             if (!near)
             {

@@ -9,6 +9,12 @@ namespace Rastvordd.Sim
         /// <summary>Займёт ли круг (человек) эту точку: стены, глыбы и стволы, установленное — как при движении.</summary>
         public bool WalkBlocked(Vector2 p, float r, Func<MapWall, bool> passable = null)
         {
+            if (_cf > 0 && PlateAt(_cf, p) == null) return true;   // наверху ходят только по полу (D62)
+            return WalkBlockedFlat(p, r, passable);
+        }
+
+        bool WalkBlockedFlat(Vector2 p, float r, Func<MapWall, bool> passable)
+        {
             foreach (var w in WallsNear(p, r + 0.5f))
                 if (Geo.CircleBox(p, r, w.Wall.Min, w.Wall.Max) && (passable == null || !passable(w))) return true;
             foreach (var n in NodesNear(p, r + 1f))

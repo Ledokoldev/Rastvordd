@@ -690,7 +690,7 @@ namespace Rastvordd.Sim
             foreach (var b in _brains)
             {
                 long tb = SimPerf.Begin();
-                _inputs[b.Me.Id] = b.Think();
+                using (World.Ctx(b.Me.Floor)) _inputs[b.Me.Id] = b.Think();   // мозг думает на своём этаже (D62): стены, поиск пути, «рукой»
                 SimPerf.End(b is PlayerBot ? "мозг бота" : "мозг охраны", tb);
             }
             SimPerf.End("мозги всего", t0);

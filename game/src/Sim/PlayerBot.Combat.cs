@@ -159,11 +159,11 @@ namespace Rastvordd.Sim
             if (gun == null)
             {
                 // ближник против ближника не сильнее — драться (раньше нужно было «заметно сильнее»: двое с камнями разбегались оба)
-                if (foeKit < 0.5f && edge > -0.08f && _me.Hp >= 40) return null;
+                if (foeKit < 0.5f && edge > -0.3f && _me.Hp >= 35) return null;   // D63: копьё против камня и наоборот — дерёмся (было −0,08)
                 if (foeKit < 0.5f && hitMe && edge > -0.2f && _me.Hp >= 30) return null;   // напал — отмахиваюсь
                 return foeKit >= 0.6f ? $"у него {Items.Name(_foeKitId)}, а мне нечем стрелять" : "нечем драться";
             }
-            if (AmmoLeft(gun) < (gun == "weapon_bow" ? 2 : 4)) return "кончаются патроны";
+            if (AmmoLeft(gun) < (gun == "weapon_bow" ? 2 : 4) && !(foeKit < 0.5f && _me.Hp >= 35)) return "кончаются патроны";   // против ближника — врукопашную (D63)
             if (Committed() && t == _foe)
             {
                 // уже сцепились: бежать спиной под огнём — верная смерть; отход только почти мёртвым против целого

@@ -229,6 +229,12 @@ namespace Rastvordd.Sim
                 if (edge >= -0.05f || (Aggression > 0.4f && edge >= -0.15f)) return (Stance.Fight, $"РТ «{_rt.Short}» занята {a.Name}, у него {kit} — отбиваю");
                 return (Stance.Camp, $"РТ «{_rt.Short}» занята {a.Name} ({kit}) — жду его на выходе");
             }
+            // спор за сброс груза / закрытый ящик (D63): у контейнера — бью всех, кого могу (там не делятся)
+            if (_rj != null && _rj.Kind is "airdrop" or "locked_crate" && _rj.Ev != null && Vector2.Distance(a.Pos, _rj.Ev.Pos) < 45 && Vector2.Distance(_me.Pos, _rj.Ev.Pos) < 70)
+            {
+                LStat("сброс: спор");
+                return (Stance.Fight, $"{(_rj.Kind == "airdrop" ? "сброс груза" : "закрытый ящик")} мой — {a.Name} ({kit}) лишний");
+            }
             if (_preyIgnore.TryGetValue(a.Id, out float until) && _w.Time < until) return (Stance.Parted, "недавно бросил за ним погоню");
             // встречный (D63, пользователь: «боты не дерутся… должна быть движуха вечно»): как в Расте — «стреляю первым».
             // Голый на голого — камнем и копьём; со стволом — бью всех, кто не явно сильнее; без ствола против ствола — ухожу.

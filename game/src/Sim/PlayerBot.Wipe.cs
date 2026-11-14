@@ -176,7 +176,7 @@ namespace Rastvordd.Sim
             var j = _rj;
             if (_w.Time - j.StartAt > 600) { EndRumorJob("затянулось (10 мин)"); return false; }
             if (_surplus > LoadLimit + 150) { EndRumorJob($"набрал ≈{_surplus:0} лома — несу домой", 60); return false; }
-            if (_me.Hp < 40) { EndRumorJob($"ранен ({_me.Hp:0} HP)"); return false; }
+            if (_me.Hp < 25) { EndRumorJob($"ранен ({_me.Hp:0} HP)"); return false; }   // D63: за сброс держусь до последнего (было 40)
             var gun = Ranged();
             if (gun != null) Hold(gun, ref cmd); else if (Has("weapon_spear")) Hold("weapon_spear", ref cmd);
             float d = Vector2.Distance(_me.Pos, j.Guess);
@@ -223,12 +223,21 @@ namespace Rastvordd.Sim
                 return true;
             }
             if (j.ArriveAt < 0) { j.ArriveAt = _w.Time; Thought($"вижу {(j.Kind == "airdrop" ? "сброс груза" : "закрытый ящик")} — {(ev.Open ? "открыт" : "ещё закрыт")}"); }
-            // закрытый ящик ещё не взламывают — запустить взлом (держи E, шумно), потом охранять
-            if (j.Kind == "locked_crate" && ev.StartsAt <= 0 && ev.Start != null && !ev.Start.Done)
+            // закрытый ящик ещё не взламывают — запустить взлом (держи E, шумно), потом охранять;
+            // сброс груза: замок остыл — вскрыть, держа E 10 с (D63: раньше боты этого не умели и ждали у сброса вечно)
+            bool dropReady = j.Kind == "airdrop" && ev.Start != null && !ev.Open && _w.Time >= ev.StartsAt;
+            if (ev.Start != null && !ev.Start.Done && (dropReady || (j.Kind == "locked_crate" && ev.StartsAt <= 0)))
             {
-                Doing = "запускает взлом закрытого ящика";
+                Doing = j.Kind == "airdrop" ? $"вскрывает контейнер сброса ({ev.Start.Progress:0}/{ev.Start.Seconds:0} с)" : "запускает взлом закрытого ящика";
                 if (!Reach(ev.Start.Pos, ref cmd)) return true;
-                if (_w.BotUseStash(_me, ev.Start) && !j.Started) { j.Started = true; Thought("запускаю взлом закрытого ящика — 3 мин, гул на всю округу; охраняю"); LStat("взломов запущено"); }
+                if (ev.Start.ActorId == _me.Id) { cmd.Aim = _me.Pos + Geo.Rotate(Vector2.UnitX, _w.Time * 0.8f + _me.Id) * 5; return true; }   // держу E, кручу головой
+                if (ev.Start.ActorId != 0) { Doing = "кто-то вскрывает сброс — отбиваю"; return true; }   // встречу с ним решит «бой»
+                if (_w.BotUseStash(_me, ev.Start) && !j.Started)
+                {
+                    j.Started = true;
+                    Thought(j.Kind == "airdrop" ? "вскрываю контейнер сброса — 10 с, слышно далеко" : "запускаю взлом закрытого ящика — 3 мин, гул на всю округу; охраняю");
+                    LStat(j.Kind == "airdrop" ? "сбросов: вскрываю" : "взломов запущено");
+                }
                 return true;
             }
             if (!ev.Open || crate == null || !crate.Unlocked)

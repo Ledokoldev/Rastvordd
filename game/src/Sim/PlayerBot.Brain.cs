@@ -23,6 +23,8 @@ namespace Rastvordd.Sim
             public int SourceId;
             public bool Explosion;
             public bool Activity;   // шум деятельности, не выстрел
+            public bool Pvp;        // D66: стреляют двое игроков — перестрелка, третий лишний может забрать всё
+            public bool Guards;     // D66: стреляет охрана РТ — кто-то лутает РТ
             public bool Judged;     // решение по нему уже принято (и записано в мысли)
         }
 
@@ -88,9 +90,12 @@ namespace Rastvordd.Sim
                         h.Activity = false; h.Judged = false;
                     }
                     else if (WeaponPower(e.Text) > WeaponPower(h.Weapon)) h.Weapon = e.Text;
+                    if (e.ActorId != h.SourceId && !h.Pvp && _w.Find(e.ActorId) is Actor sa && sa.Team == Team.Player && _w.Find(h.SourceId)?.Team == Team.Player)
+                    { h.Pvp = true; h.Judged = false; }   // перестрелка: решить заново
+                    if (_w.Find(e.ActorId) is Actor ga && ga.Team != Team.Player) h.Guards = true;
                     _heard[i] = h;
                 }
-                else _heard.Add(new Heard { Pos = e.Pos, Time = _w.Time, Weapon = e.Text, SourceId = e.ActorId, Explosion = expl });
+                else _heard.Add(new Heard { Pos = e.Pos, Time = _w.Time, Weapon = e.Text, SourceId = e.ActorId, Explosion = expl, Guards = _w.Find(e.ActorId) is Actor na && na.Team != Team.Player });
             }
             // шум деятельности: взлом, вскрытие контейнеров и механизмы
             foreach (var n in _w.Noises)
@@ -320,29 +325,32 @@ namespace Rastvordd.Sim
                 bool activity = h.Activity && h.Weapon == null;
                 float power = activity ? 0.5f : WeaponPower(h.Weapon), mine = MyPower;
                 float risk = Math.Clamp((power - mine + 0.25f) / 0.9f, 0, 1);
-                float near = Math.Clamp(1 - d / (activity ? 260f : 320f), 0, 1);   // D63: на выстрелы — дальше
+                // D66: третий лишний — в перестрелке оба ранены и смотрят друг на друга; охрана не гонится далеко
+                if (h.Pvp) risk *= 0.55f; else if (h.Guards) risk *= 0.7f;
+                float near = Math.Clamp(1 - d / (activity ? 260f : 400f), 0, 1);   // D66: на выстрелы — до 400 м
                 float burden = Math.Clamp((_load + (Archetype == BotArchetype.Farmer ? _stash * 0.3f : 0)) / 600f, 0, 1);
                 float hp = _me.Hp / _me.MaxHp;
-                float armed = mine < 0.35f ? (activity ? 0.5f : 0) : 1;
-                float score = 75 * MathF.Min(1f, 0.45f + Aggression + 0.2f * Greed) * near * (1 - risk) * (1 - 0.7f * burden) * hp * (_w.Time - h.Time < 45 ? 1 : 0.5f) * armed;
+                float armed = mine < 0.35f ? (activity ? 0.5f : h.Pvp && Aggression > 0.5f ? 0.4f : 0) : 1;   // с копьём — за трупами перестрелки
+                float score = 90 * MathF.Min(1f, 0.45f + Aggression + 0.2f * Greed) * near * (1 - risk) * (1 - 0.7f * burden) * hp * (_w.Time - h.Time < 45 ? 1 : 0.5f) * armed;
                 if (!h.Judged)
                 {
                     h.Judged = true;
                     _heard[i] = h;
                     string weapon = h.Activity ? "шум" : Items.Name(h.Weapon);
-                    string what = h.Activity ? "шум (взлом/механизм)" : h.Explosion ? $"взрыв ({weapon})" : $"выстрелы ({weapon})";
-                    string why = mine < 0.35f ? (activity ? "с копьём, но там лут" : "нечем драться")
+                    string what = h.Activity ? "шум (взлом/механизм)" : h.Explosion ? $"взрыв ({weapon})" : h.Pvp ? $"перестрелку ({weapon})" : h.Guards ? $"бой с охраной РТ ({weapon})" : $"выстрелы ({weapon})";
+                    string why = mine < 0.35f ? (activity ? "с копьём, но там лут" : armed > 0 ? "с копьём — за трупами" : "нечем драться")
                         : risk > 0.7f ? $"у них оружие сильнее ({weapon} против {Items.Name(Ranged() ?? "weapon_spear")})"
                         : burden > 0.6f ? $"несу ценное (≈{_load:0} лома) — не рискую"
                         : hp < 0.5f ? "ранен"
                         : near < 0.3f ? "далеко"
-                        : score > 25 ? "можно поживиться" : "не стоит";
-                    Thought($"слышу {what} в {d:0} м на {Dir(_me.Pos, h.Pos)} → {(score > 25 ? "иду" : "не иду")}: {why}");
+                        : score > 20 ? (h.Pvp ? "третий лишний — добью и залутаю" : "можно поживиться") : "не стоит";
+                    Thought($"слышу {what} в {d:0} м на {Dir(_me.Pos, h.Pos)} → {(score > 20 ? "иду" : "не иду")}: {why}");
                 }
                 if (score > best) { best = score; pick = h; }
             }
             _target = pick;
-            return best > 25 ? best : 0;
+            if (best > 20 && _goal?.Name == "проверить бой") best = MathF.Max(best, 72);   // D66: пошёл — дойти, а не свернуть на РТ на полпути
+            return best > 20 ? best : 0;
         }
 
         bool Investigate(ref InputCmd cmd)

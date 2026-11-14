@@ -477,7 +477,7 @@ namespace Rastvordd.Sim
             else
                 foreach (var h in _heard)
                     if (!h.Explosion && _w.Time - h.Time < 8 && h.SourceId != _foe?.Id && _w.Find(h.SourceId) is Actor src && src.Team != Team.Npc
-                        && Vector2.Distance(h.Pos, _me.Pos) < 70 && WeaponPower(h.Weapon) > MyPower + 0.05f)
+                        && !h.Activity && Vector2.Distance(h.Pos, _me.Pos) < 70 && WeaponPower(h.Weapon) > MyPower + 0.05f)
                     { why = $"рядом стреляют из {Items.Name(h.Weapon)} — сильнее моего"; break; }
             return why != null;
         }

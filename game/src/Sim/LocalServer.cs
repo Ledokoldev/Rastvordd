@@ -511,6 +511,8 @@ namespace Rastvordd.Sim
             float tf = 0, th = 0, ta = 0;
             foreach (var b in _bots.Values) { tf += b.TotFlee; th += b.TotFight; ta += b.TotAll; }
             if (ta > 0) log($"ЗДОРОВЬЕ итог: в бегстве {tf / ta:P1}, в бою/охоте {th / ta:P1} времени живых ботов");
+            var gt = new Dictionary<string, float>(); foreach (var b in _bots.Values) foreach (var (g, t) in b.GoalTime) gt[g] = gt.GetValueOrDefault(g) + t;
+            if (ta > 0) { var gl = new List<KeyValuePair<string, float>>(gt); gl.Sort((x, y) => y.Value.CompareTo(x.Value)); log("ДЕЛА итог: " + string.Join(" · ", gl.ConvertAll(x => $"{x.Key} {x.Value / ta:P0}"))); }   // доли времени по делам (D64)
             // итог баз: полы, установленное по видам (для сравнения прогонов, D52)
             foreach (var b in _bots.Values)
             {

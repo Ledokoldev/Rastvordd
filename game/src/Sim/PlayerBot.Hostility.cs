@@ -545,11 +545,13 @@ namespace Rastvordd.Sim
         // доля времени в бегстве и в бою/охоте (метрика здоровья мозга; > 30 % за 10 мин — тревога)
         float _hFlee, _hFight, _hAll;
         public float TotFlee, TotFight, TotAll;
+        public readonly Dictionary<string, float> GoalTime = new();
 
         void CountHealth()
         {
             if (_me.Dead || _goal == null) return;
             _hAll += World.Dt; TotAll += World.Dt;
+            GoalTime[_goal.Name] = GoalTime.GetValueOrDefault(_goal.Name) + World.Dt;   // доли по делам (D64)
             if (_goal.Name == "бегство") { _hFlee += World.Dt; TotFlee += World.Dt; }
             else if (_goal.Name is "бой" or "охота" or "месть" or "засада у РТ" or "перехват") { _hFight += World.Dt; TotFight += World.Dt; }
         }

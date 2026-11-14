@@ -695,8 +695,9 @@ namespace Rastvordd.Sim
             {
                 if (!Has("deploy_claim")) { if (!Craft("deploy_claim", ref cmd)) Gather(NodeKind.Tree, ref cmd); return; }
                 Doing = "ставит шкаф";
-                if (_claimTryAt < 0) _claimTryAt = _w.Time;
-                if (_w.Time - _claimTryAt > 45)
+                if (Vector2.Distance(_me.Pos, AtPlan(_plan.Claim)) > 8) _claimTryAt = -1;   // ещё иду к месту — не считается
+                else if (_claimTryAt < 0) _claimTryAt = _w.Time;
+                if (_claimTryAt > 0 && _w.Time - _claimTryAt > 45)
                 {
                     // D64: шкаф на этом месте не встаёт (чужая зона, РТ, вода) — раньше бот стоял тут по 20 мин; другое место
                     Thought($"шкаф тут не встаёт ({_w.LastInfo.GetValueOrDefault(_me.Id) ?? "?"}) — ищу другое место");

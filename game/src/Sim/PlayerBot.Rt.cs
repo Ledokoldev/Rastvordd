@@ -91,7 +91,8 @@ namespace Rastvordd.Sim
                 // тесно: у этой РТ уже строятся другие — каждая чужая база минус 0,22 (все 12 ботов садились у двух РТ)
                 int crowd = 0;
                 lock (Sites) foreach (var (w, q) in Sites) if (w == _w && Vector2.Distance(q, r.M.Center) < r.Radius + 130) crowd++;
-                float s = a * r.Reward / maxRew - (1 - a) * 1.4f * r.Risk / riskUnit - Vector2.Distance(_me.Pos, r.M.Center) / 3000f + (float)_rng.NextDouble() * 0.08f - 0.22f * crowd;
+                if (Vector2.Distance(_me.Pos, r.M.Center) > 450 && rts.Exists(x => Vector2.Distance(_me.Pos, x.M.Center) <= 450)) continue;   // D64: не строиться за 800 м от пляжа — минуты пустой дороги
+                float s = a * r.Reward / maxRew - (1 - a) * 1.4f * r.Risk / riskUnit - Vector2.Distance(_me.Pos, r.M.Center) / 600f + (float)_rng.NextDouble() * 0.08f - 0.22f * crowd;
                 if (s > best) { best = s; pick = r; _favCrowd = crowd; }
             }
             why = (_favCrowd > 0 ? $"рядом уже {_favCrowd} баз, но " : "") + (pick.Guards == 0 ? "тихо, охраны нет — мне хватит"

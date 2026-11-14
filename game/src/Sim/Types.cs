@@ -225,7 +225,7 @@ namespace Rastvordd.Sim
             Defs["berries"].Water = 4;
             Add("canned", "Консервы", ItemCategory.Food).Food = 35;
             Add("water_bottle", "Бутылка воды", ItemCategory.Food).Water = 35;
-            Add("bandage", "Бинт", ItemCategory.Medical).Heal = 25;
+            Add("bandage", "Бинт", ItemCategory.Medical).Heal = 12;   // D67: было 25 за 4 ткани — фулл-хил почти даром
 
             // инструменты: урон, интервал, дальность, добыча дерево/камень/металл/сера
             Add("tool_rock", "Булыжник", ItemCategory.Tool).Weapon = WeaponDef.MeleeTool("tool_rock", 8, 0.7f, 1.7f, 6, 6, 4, 4);
@@ -454,7 +454,7 @@ namespace Rastvordd.Sim
             "berries" => "Еда: F — съесть",
             "canned" => "Еда: F — съесть",
             "water_bottle" => "Вода: F — выпить",
-            "bandage" => "Лечит: H",
+            "bandage" => "Лечит 12 (раз в 4 с): H",
             "tool_rock" => "Бей деревья и камни. Слабый, но всегда с тобой",
             "tool_hatchet" => "Рубит деревья быстрее",
             "tool_pickaxe" => "Добывает камень и руду быстрее",
@@ -570,7 +570,7 @@ namespace Rastvordd.Sim
             new Recipe { Output = "weapon_torch", Cost = new[] { ("wood", 30), ("cloth", 5) }, Time = 2 },
             new Recipe { Output = "weapon_bow", Cost = new[] { ("wood", 100), ("cloth", 30) }, Time = 8 },
             new Recipe { Output = "arrow", Count = 2, Cost = new[] { ("wood", 25), ("stone", 10) }, Time = 2 },
-            new Recipe { Output = "bandage", Cost = new[] { ("cloth", 4) }, Time = 2 },
+            new Recipe { Output = "bandage", Cost = new[] { ("cloth", 6) }, Time = 3 },   // D67
             new Recipe { Output = "deploy_furnace", Cost = new[] { ("stone", 100), ("wood", 50) }, Time = 8 },
             new Recipe { Output = "deploy_workbench", Cost = new[] { ("wood", 150), ("metal_fragments", 50), ("scrap", 50) }, Time = 10 },
             new Recipe { Output = "comp_tape", Cost = new[] { ("cloth", 10), ("rubber", 5) }, Time = 4 },   // изолента с руки (27.10)

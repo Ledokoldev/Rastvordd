@@ -660,7 +660,7 @@ namespace Rastvordd.Sim
                 a.Take(id, 1);
                 a.Hp = MathF.Min(a.MaxHp, a.Hp + def.Heal * HealMul(a));
                 if (def.CuresPoison) a.Poison = 0;
-                float cd = 2f;
+                float cd = id == "bandage" ? 4f : 2f;   // D67: бинт раз в 4 с (было 2)
                 foreach (var m in Prog.Meds) if (m.id == id) cd = m.cooldown;
                 a.HealCooldown = cd;
                 if (id != "bandage") Info(a, $"{def.Name}: +{def.Heal:0}");

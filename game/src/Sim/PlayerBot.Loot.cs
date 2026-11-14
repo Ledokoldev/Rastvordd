@@ -32,10 +32,10 @@ namespace Rastvordd.Sim
             if (def.Holdable) return int.MaxValue;                       // инструменты, оружие, план, замки, установка — при себе
             int keep = id switch
             {
-                "wood" => 700,
-                "stone" => 500,
+                "wood" => 300,                                            // D67 гирфир: рабочий набор, остальное — в ящик (было 700/500/150)
+                "stone" => 200,
                 "metal_ore" or "sulfur_ore" => int.MaxValue / 2,          // руда — в печь, а не в ящик
-                "metal_fragments" => 150,
+                "metal_fragments" => 60,
                 "cloth" => 80,
                 "ammo_762" or "ammo_545" => 120,
                 "ammo_9mm" or "ammo_12g" => 60,
@@ -95,7 +95,7 @@ namespace Rastvordd.Sim
             float v = _surplus;
             bool guns = SpareGun() != null;
             int raw = RawSurplusCount();
-            if (raw >= 700) v = MathF.Max(v, 60);   // D64: сырьё копится в ящике по количеству (дерево и камень дёшевы в ломе)
+            if (raw >= 300) v = MathF.Max(v, 60);   // D67: было 700   // D64: сырьё копится в ящике по количеству (дерево и камень дёшевы в ломе)
             if (v < 25 && !guns) return 0;
             float home = Vector2.Distance(_me.Pos, box.Pos);
             // раздел 10, правило сдачи: ≥ 150 лома при себе, рюкзак на 70 %, после похода на РТ или лута убитого, ночью — домой и сложить всё,
@@ -129,6 +129,8 @@ namespace Rastvordd.Sim
             if (used >= Actor.PackSize * 0.7f && v >= 40) return $"рюкзак полон ({used}/{Actor.PackSize})";
             if (_w.Time < _depositAfter && v >= 40) return "после добычи (РТ, убитый, груз) — сначала в ящик";
             if (Night && v >= 40 && _rtPhase == RtPhase.None) return "ночь — сортирую дома";
+            // D67 гирфир (пользователь: «никто не ходит в рейд с фулл инвентарем»): дом рядом — лут не ношу, сейвлю и иду дальше
+            if (v >= 40 && _rtPhase == RtPhase.None && MyBox() is Deployable gb && Vector2.Distance(_me.Pos, gb.Pos) < 200) return $"гирфир: ≈{v:0} лома при себе, дом рядом — сейвлю";
             return null;
         }
 

@@ -304,7 +304,8 @@ namespace Rastvordd.Sim
                     if (want <= 0 || _me.Count(id) >= Math.Min(want, _me.Count(id) + InBox(box, id)) || InBox(box, id) == 0) continue;
                     if (TakeFromBox(box, id, Math.Min(want, _me.Count(id) + InBox(box, id)), ref cmd)) { Doing = $"собирается на РТ: берёт {Items.Name(id)}"; return true; }
                 }
-                if (_me.Count("bandage") < 2 && _me.Count("cloth") >= 4 && Craft("bandage", ref cmd)) return true;
+                if (_me.Count("bandage") < 3 && _me.Count("cloth") >= 6 && Craft("bandage", ref cmd)) return true;
+                if (Tailor(box, ref cmd)) { Doing = $"собирается на РТ: {Doing}"; return true; }   // D67: сет перед выходом
             }
             // поесть и попить перед дорогой
             if (_w.Time - _rtStartAt < 240)

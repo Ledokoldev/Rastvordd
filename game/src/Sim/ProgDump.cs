@@ -196,10 +196,11 @@ namespace Rastvordd.Sim
             }
             gather["metal|bonus"] = new List<object> { new object[] { Id("stone"), "1/3 от добытого за удар (минимум 1)" } };
             gather["sulfur|bonus"] = new List<object> { new object[] { "stone", "1/3 от добытого за удар (минимум 1)" } };
+            // D68: числа узлов — как в World.AddNode (камень 400, металл 240, сера 160; узлов втрое меньше)
             gather["tree|node"] = new List<object> { new object[] { "wood", "120–200 за дерево" } };
-            gather["stone|node"] = new List<object> { new object[] { "stone", 150 } };
-            gather["metal|node"] = new List<object> { new object[] { "metal_ore", 90 } };
-            gather["sulfur|node"] = new List<object> { new object[] { "sulfur_ore", 60 } };
+            gather["stone|node"] = new List<object> { new object[] { "stone", 400 } };
+            gather["metal|node"] = new List<object> { new object[] { "metal_ore", 240 } };
+            gather["sulfur|node"] = new List<object> { new object[] { "sulfur_ore", 160 } };
             gather["junk_pile"] = new List<object> { new object[] { "scrap", "1–2 за кучу (по 1–2 за удар)" }, new object[] { "metal_fragments", "18% шанс 3–7 за удар" } };
             gather["tire"] = new List<object> { new object[] { "rubber", "2–4 за покрышку (топор/копьё — по 2 за удар)" } };
             gather["tire_stack"] = new List<object> { new object[] { "rubber", "6–10 за стопку" } };
@@ -251,6 +252,17 @@ namespace Rastvordd.Sim
                 ["crates"] = w.Bags.Where(b => b.IsCrate).GroupBy(b => (rt: w.MonumentAt(b.Pos)?.Name ?? "вне РТ", b.Tier, box: b.Safe ? "safe" : b.Punch ? "punch" : b.Box ?? "?"))
                     .Select(g => (object)new object[] { g.Key.rt, g.Key.Tier, g.Key.box, g.Count() }).ToList(),
                 ["rtboxes"] = World.RtBoxes.ToDictionary(kv => kv.Key, kv => (object)kv.Value.Select(x => new object[] { x.box, x.w }).ToList()),
+                // стройка (справочник крафтов): цена установки/улучшения каждого элемента по уровням, прочность
+                ["build"] = Enum.GetValues<StructKind>().Select(k => (object)new Dictionary<string, object>
+                {
+                    ["kind"] = k.ToString(), ["name"] = Building.KindName(k),
+                    ["tiers"] = Enumerable.Range(0, Building.MaxTier + 1).Select(t => (object)new Dictionary<string, object>
+                    {
+                        ["tier"] = t, ["tier_name"] = Building.TierNames[Math.Min(t, Building.TierNames.Length - 1)],
+                        ["cost"] = Building.Cost(k, t).Select(c => (object)new object[] { Id(c.id), c.n }).ToList(),
+                        ["hp"] = Math.Round(Building.MaxHp(k, t)),
+                    }).ToList(),
+                }).ToList(),
             };
             return JsonSerializer.Serialize(root, new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
         }

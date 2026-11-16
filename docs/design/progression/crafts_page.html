@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Крафты Раствордда</title>
+<style>
+:root {
+  --bg: #0e1116; --panel: rgba(28,33,41,.82); --panel2: rgba(38,44,54,.9); --line: rgba(255,255,255,.08);
+  --text: #e6e9ee; --dim: #9aa3af; --faint: #6b7380; --acc: #e0a84a; --acc2: #5aa9e6; --ok: #6cc07a; --bad: #e06a5a;
+  --r: 12px; --cell: 44px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 "Segoe UI", system-ui, sans-serif; }
+body { background: radial-gradient(1200px 600px at 20% -10%, #1b2230 0, var(--bg) 60%) fixed; min-height: 100vh; }
+a { color: var(--acc2); text-decoration: none; cursor: pointer; }
+header { position: sticky; top: 0; z-index: 5; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 10px 16px;
+  background: rgba(14,17,22,.88); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+header h1 { font-size: 16px; margin: 0 8px 0 0; font-weight: 600; letter-spacing: .3px; }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.tab { padding: 6px 12px; border-radius: 999px; color: var(--dim); cursor: pointer; border: 1px solid transparent; user-select: none; }
+.tab:hover { color: var(--text); }
+.tab.on { background: var(--panel2); color: var(--text); border-color: var(--line); }
+.basketbadge { background: var(--acc); color: #1a1205; border-radius: 999px; padding: 0 7px; font-size: 12px; margin-left: 4px; font-weight: 600; }
+main { padding: 16px; max-width: 1400px; margin: 0 auto; }
+.view { display: none; } .view.on { display: block; }
+.cols { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); } .side { position: static !important; max-height: none !important; } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; backdrop-filter: blur(6px); }
+.side { position: sticky; top: 64px; max-height: calc(100vh - 80px); display: flex; flex-direction: column; gap: 10px; }
+input[type=search], input[type=number], select { background: rgba(0,0,0,.35); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font: inherit; }
+input[type=search] { width: 100%; }
+input[type=number] { width: 80px; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { padding: 3px 9px; border-radius: 999px; background: rgba(255,255,255,.05); color: var(--dim); cursor: pointer; font-size: 12.5px; border: 1px solid transparent; user-select: none; }
+.chip.on { background: rgba(224,168,74,.16); color: var(--acc); border-color: rgba(224,168,74,.35); }
+.list { overflow: auto; display: flex; flex-direction: column; gap: 2px; margin: 0 -6px; padding: 0 6px; min-height: 120px; }
+@media (max-width: 860px) { .list { max-height: 50vh; } }
+.row { display: flex; align-items: center; gap: 9px; padding: 4px 6px; border-radius: 8px; cursor: pointer; }
+.row:hover { background: rgba(255,255,255,.05); } .row.on { background: rgba(90,169,230,.14); }
+.row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .tg { color: var(--faint); font-size: 12px; white-space: nowrap; }
+.ic { width: 32px; height: 32px; flex: none; border-radius: 8px; background: rgba(255,255,255,.05); display: grid; place-items: center; overflow: hidden; }
+.ic img { width: 28px; height: 28px; image-rendering: auto; }
+.ic.big { width: 64px; height: 64px; border-radius: 12px; } .ic.big img { width: 56px; height: 56px; }
+.ic .l { color: var(--dim); font-weight: 600; }
+.card h2 { margin: 0; font-size: 20px; }
+.head { display: flex; gap: 14px; align-items: center; margin-bottom: 10px; }
+.sub { color: var(--dim); font-size: 13px; }
+.desc { color: var(--text); opacity: .9; margin: 6px 0 4px; }
+.sec { margin-top: 16px; }
+.sec h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .8px; color: var(--dim); margin: 0 0 8px; font-weight: 600; }
+.ings { display: flex; flex-wrap: wrap; gap: 8px; }
+.ing { display: flex; align-items: center; gap: 7px; padding: 5px 9px 5px 5px; background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.ing:hover { border-color: rgba(90,169,230,.5); }
+.ing b { font-weight: 600; }
+.recipe { padding: 10px 12px; border-radius: 10px; background: rgba(0,0,0,.18); border: 1px solid var(--line); margin-bottom: 8px; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pill { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.06); color: var(--dim); }
+.pill.acc { background: rgba(224,168,74,.14); color: var(--acc); }
+.pill.blue { background: rgba(90,169,230,.14); color: var(--acc2); }
+.pill.ok { background: rgba(108,192,122,.14); color: var(--ok); }
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.stat { background: rgba(0,0,0,.18); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; }
+.stat .k { color: var(--dim); font-size: 12px; } .stat .v { font-weight: 600; }
+.tree ul { list-style: none; margin: 0; padding-left: 18px; border-left: 1px dashed rgba(255,255,255,.12); }
+.tree > ul { padding-left: 0; border: 0; }
+.tree li { margin: 3px 0; }
+.node { display: inline-flex; align-items: center; gap: 7px; padding: 2px 8px 2px 2px; border-radius: 8px; cursor: pointer; }
+.node:hover { background: rgba(255,255,255,.05); }
+.node .ic { width: 26px; height: 26px; } .node .ic img { width: 22px; height: 22px; }
+.node .x { color: var(--acc); font-weight: 600; }
+.node .why { color: var(--faint); font-size: 12px; }
+.tog { display: inline-block; width: 16px; color: var(--faint); cursor: pointer; user-select: none; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--dim); font-weight: 600; font-size: 12.5px; }
+.tablewrap { overflow-x: auto; }
+.src { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px dashed var(--line); }
+.src .w { color: var(--dim); font-size: 12px; }
+.bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,.07); width: 70px; flex: none; margin-top: 7px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--acc2); }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; background: var(--acc); color: #1a1205; font-weight: 600; cursor: pointer; border: 0; font: inherit; }
+.btn.ghost { background: rgba(255,255,255,.07); color: var(--text); font-weight: 500; }
+.btn.sm { padding: 3px 9px; font-size: 12.5px; }
+.empty { color: var(--faint); padding: 20px 0; text-align: center; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.brow { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--line); }
+.brow .nm { flex: 1; min-width: 0; }
+.totals { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; }
+.tot { display: flex; align-items: center; gap: 8px; padding: 5px 8px; background: rgba(0,0,0,.18); border: 1px solid var(--line); border-radius: 9px; cursor: pointer; }
+.tot b { color: var(--acc); }
+.benchcol h3 { margin: 0 0 6px; }
+.note { color: var(--dim); font-size: 13px; margin: 6px 0; }
+.kpi { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.kpi div { background: rgba(0,0,0,.2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+.kpi .k { color: var(--dim); font-size: 12px; } .kpi .v { font-size: 18px; font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Крафты Раствордда</h1>
+  <div class="tabs" id="tabs">
+    <span class="tab on" data-v="cat">Каталог</span>
+    <span class="tab" data-v="con">Конструктор <span class="basketbadge" id="bcount">0</span></span>
+    <span class="tab" data-v="bench">По верстакам</span>
+    <span class="tab" data-v="build">Стройка</span>
+    <span class="tab" data-v="notes">Заметки</span>
+  </div>
+</header>
+<main>
+  <section class="view on" id="v-cat">
+    <div class="cols">
+      <div class="panel side">
+        <input type="search" id="q" placeholder="Поиск: АКМ, пружина, ватник…">
+        <div class="chips" id="cats"></div>
+        <div class="chips" id="benches"></div>
+        <div class="list" id="list"></div>
+      </div>
+      <div class="panel card" id="card"></div>
+    </div>
+  </section>
+  <section class="view" id="v-con">
+    <div class="cols">
+      <div class="panel side">
+        <input type="search" id="cq" placeholder="Добавить: имя предмета…">
+        <div class="list" id="clist"></div>
+        <div class="sec"><h3>Готовые наборы</h3><div class="chips" id="presets"></div></div>
+      </div>
+      <div class="panel" id="con"></div>
+    </div>
+  </section>
+  <section class="view" id="v-bench"><div class="panel" id="bench"></div></section>
+  <section class="view" id="v-build"><div class="panel" id="build"></div></section>
+  <section class="view" id="v-notes"><div class="panel" id="notes"></div></section>
+</main>
+<script>
+const D = /*__DATA__*/null;
+const I = D.items;
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const nm = id => I[id]?.name || id;
+const fmt = n => typeof n === 'number' ? (Math.round(n * 100) / 100).toLocaleString('ru-RU') : esc(n);
+const icon = (id, big) => `<span class="ic${big ? ' big' : ''}">${D.icons[id] ? `<img alt="" src="${D.icons[id]}">` : `<span class="l">${esc((nm(id) || '?')[0])}</span>`}</span>`;
+const st = id => I[id]?.stats || {};
+
+// ---------- индексы ----------
+const R = {}; D.recipes.forEach(r => (R[r.out] ||= []).push(r));
+const T = {}; D.tech.forEach(t => T[t.id] = t);
+const USED = {}; D.recipes.forEach(r => r.cost.forEach(([c]) => { (USED[c] ||= []); if (!USED[c].includes(r)) USED[c].push(r); }));
+const USEDB = {}; (D.build || []).forEach(b => b.tiers.forEach(t => t.cost.forEach(([c, n]) => (USEDB[c] ||= []).push({ b, t, n }))));
+const LOOT = {}; for (const s of Object.values(D.loot)) for (const [id, v] of Object.entries(s.items)) (LOOT[id] ||= []).push({ s, p: v.p, avg: v.avg });
+const RECFROM = {}; for (const [from, outs] of Object.entries(D.recycle)) for (const [o, n] of outs) (RECFROM[o] ||= []).push({ from, n });
+const GNAME = { tree: 'Дерево', stone: 'Каменный узел', metal: 'Рудный узел', sulfur: 'Серный узел' };
+const GOTH = { junk_pile: 'Куча хлама', tire: 'Покрышка', tire_stack: 'Стопка шин', hemp: 'Конопля', berries: 'Куст ягод', water_barrel: 'Бочка с водой', oil_barrel: 'Бочка с мазутом', canister_pile: 'Груда канистр', fuel_pump: 'Насос Заправки' };
+const GATH = {};
+for (const [k, outs] of Object.entries(D.gather)) {
+  let label;
+  if (k.includes('|')) { const [n, t] = k.split('|'); label = t === 'node' ? `${GNAME[n]}: всего в узле` : t === 'bonus' ? `${GNAME[n]}: бонус камня` : `${GNAME[n]} — ${nm(t)}, за удар`; }
+  else label = GOTH[k] || k;
+  for (const [res, amt] of outs) (GATH[res] ||= []).push({ label, amt });
+}
+const SMELT = {}; (D.smelt || []).forEach(([a, b, n, w]) => (SMELT[b] ||= []).push({ a, n, w }));
+const SMELTIN = {}; (D.smelt || []).forEach(([a, b, n, w]) => (SMELTIN[a] ||= []).push({ b, n, w }));
+
+// ---------- категории ----------
+const CATS = [['all', 'Все'], ['res', 'Ресурсы'], ['comp', 'Компоненты'], ['val', 'Ценный лом'], ['gun', 'Оружие'], ['ammo', 'Патроны'], ['att', 'Обвесы'],
+  ['wear', 'Одежда и броня'], ['med', 'Медицина и еда'], ['tool', 'Инструменты'], ['deploy', 'Станки и установка'], ['boom', 'Взрывчатка и замки'],
+  ['keys', 'Карты и чертежи'], ['fuel', 'Топливо и вода'], ['other', 'Прочее']];
+const CATNAME = Object.fromEntries(CATS);
+function cat(id) {
+  const c = I[id]?.cat;
+  if (/^(crude|diesel|fuel|water_|canister_|flask_)/.test(id)) return 'fuel';
+  if (id.startsWith('comp_')) return 'comp';
+  if (id.startsWith('val_')) return 'val';
+  if (id.startsWith('att_')) return 'att';
+  if (id.startsWith('wear_') || id.startsWith('plate_')) return 'wear';
+  if (id.startsWith('expl_') || id.startsWith('lock_')) return 'boom';
+  if (id.startsWith('punchcard') || id === 'keycard' || id.startsWith('bp_')) return 'keys';
+  if (id === 'arrow' || c === 'Ammo') return 'ammo';
+  return { Resource: 'res', Weapon: 'gun', Medical: 'med', Food: 'med', Deployable: 'deploy', Tool: 'tool', Clothing: 'wear', Component: 'comp' }[c] || 'other';
+}
+const mainRecipe = id => (R[id] || []).find(r => r.station !== 'Lathe') || null;
+function benchOf(id) { const rs = R[id]; if (!rs) return null; return Math.min(...rs.map(r => r.bench)); }
+function tierOf(id) { const s = st(id); return s['оружие.Tier'] ?? s['одежда.Tier'] ?? null; }
+const SETNAME = { rags: 'Тряпьё', vatnik: 'Ватник', leather: 'Кожа', scrap: 'Лом-броня', spec: 'Спецовка', army: 'Армейский', ozk: 'ОЗК', sobr: 'СОБР' };
+const setName = s => SETNAME[s] || s;
+const SLOT = { Head: 'Голова', Face: 'Лицо', Kofta: 'Торс', Armor: 'Бронежилет', Arms: 'Руки', Gloves: 'Перчатки', Legs: 'Ноги', Knees: 'Колени', Feet: 'Обувь', Wrist: 'Запястье' };
+const benchName = b => b === 0 ? 'в руках' : `верстак ${b}`;
+
+// ---------- раскрытие до сырья ----------
+function expand(id, n, acc, path = new Set()) {
+  const r = mainRecipe(id);
+  if (!r || path.has(id)) { acc.raw[id] = (acc.raw[id] || 0) + n; return; }
+  const crafts = Math.ceil(n / r.count);
+  acc.time += crafts * r.time; acc.bench = Math.max(acc.bench, r.bench);
+  if (r.station_name) acc.stations.add(r.station_name);
+  if (r.tech) acc.tech.add(r.tech);
+  acc.crafted[id] = (acc.crafted[id] || 0) + crafts * r.count;
+  path.add(id);
+  for (const [c, k] of r.cost) expand(c, k * crafts, acc, path);
+  path.delete(id);
+}
+const newAcc = () => ({ raw: {}, crafted: {}, time: 0, bench: 0, stations: new Set(), tech: new Set() });
+function techChain(id, set) {
+  const t = T[id]; if (!t || set.has(id)) return;
+  set.add(id); (t.req || []).forEach(r => techChain(r, set)); if (t.req_any?.length) techChain(t.req_any[0], set);
+}
+function researchOf(techs) { const all = new Set(); techs.forEach(t => techChain(t, all)); let s = 0; all.forEach(t => s += T[t].scrap || 0); return { all, scrap: s }; }
+
+// ---------- каталог ----------
+let curCat = 'all', curBench = 'all', curId = null;
+const ALL = Object.keys(I).sort((a, b) => nm(a).localeCompare(nm(b), 'ru'));
+const catsEl = document.getElementById('cats');
+catsEl.innerHTML = CATS.filter(([k]) => k === 'all' || ALL.some(id => cat(id) === k)).map(([k, l]) => `<span class="chip${k === 'all' ? ' on' : ''}" data-c="${k}">${l}</span>`).join('');
+catsEl.onclick = e => { const c = e.target.closest('.chip'); if (!c) return; curCat = c.dataset.c; catsEl.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c)); renderList(); };
+const benchEl = document.getElementById('benches');
+benchEl.innerHTML = [['all', 'Любой верстак'], ['0', 'В руках'], ['1', 'Верстак 1'], ['2', 'Верстак 2'], ['3', 'Верстак 3'], ['none', 'Не крафтится']].map(([k, l]) => `<span class="chip${k === 'all' ? ' on' : ''}" data-b="${k}">${l}</span>`).join('');
+benchEl.onclick = e => { const c = e.target.closest('.chip'); if (!c) return; curBench = c.dataset.b; benchEl.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c)); renderList(); };
+const qEl = document.getElementById('q'); qEl.oninput = renderList;
+const norm = s => s.toLowerCase().replace(/ё/g, 'е');
+function renderList() {
+  const q = norm(qEl.value.trim());
+  const ids = ALL.filter(id => {
+    if (curCat !== 'all' && cat(id) !== curCat) return false;
+    const b = benchOf(id);
+    if (curBench === 'none' ? b !== null : curBench !== 'all' && b !== +curBench) return false;
+    return !q || norm(nm(id)).includes(q) || id.includes(q);
+  });
+  const el = document.getElementById('list');
+  el.innerHTML = ids.length ? ids.map(id => {
+    const b = benchOf(id), t = tierOf(id);
+    return `<div class="row${id === curId ? ' on' : ''}" data-id="${id}">${icon(id)}<span class="nm">${esc(nm(id))}</span><span class="tg">${t != null ? 'тир ' + t + ' · ' : ''}${b == null ? (GATH[id] ? 'добыча' : LOOT[id] ? 'лут' : SMELT[id] ? 'плавка' : RECFROM[id] ? 'переработка' : '—') : b === 0 ? 'руки' : 'в' + b}</span></div>`;
+  }).join('') : '<div class="empty">Ничего не нашлось</div>';
+}
+document.getElementById('list').onclick = e => { const r = e.target.closest('.row'); if (r) go('i/' + r.dataset.id); };
+
+function statBlock(id) {
+  const s = st(id), out = [];
+  const add = (k, v) => { if (v !== undefined && v !== null && v !== '' && v !== false) out.push([k, v]); };
+  if (s['оружие.Damage'] !== undefined) {
+    const p = s['оружие.Pellets'] || 1;
+    add('Урон', p > 1 ? `${s['оружие.Damage']} × ${p}` : s['оружие.Damage']);
+    if (s['оружие.FireInterval']) add('Темп', `${fmt(1 / s['оружие.FireInterval'])} в с`);
+    add('Магазин', s['оружие.Magazine']); add('Перезарядка', s['оружие.ReloadTime'] && s['оружие.ReloadTime'] + ' с');
+    add('Дальность', s['оружие.EffRange'] ? `${s['оружие.EffRange']} / ${s['оружие.Range']} м` : s['оружие.Range'] && s['оружие.Range'] + ' м');
+    add('Патрон', s['оружие.AmmoId'] && nm(s['оружие.AmmoId'])); add('Режим', s['оружие.Mode']);
+    add('Прочность', s['оружие.MaxDurability'] && s['оружие.MaxDurability'] + ' выстр.'); add('Шум', s['оружие.NoiseRadius'] && s['оружие.NoiseRadius'] + ' м');
+    add('Тир', s['оружие.Tier']);
+    for (const [k, l] of [['GatherTree', 'Дерево за удар'], ['GatherStone', 'Камень за удар'], ['GatherMetal', 'Руда за удар'], ['GatherSulfur', 'Сера за удар']]) add(l, s['оружие.' + k]);
+  }
+  if (s['одежда.Slot'] !== undefined) {
+    add('Слот', SLOT[s['одежда.Slot']] || s['одежда.Slot']); add('Набор', s['одежда.Set'] && setName(s['одежда.Set'])); add('Тир', s['одежда.Tier']);
+    add('От пуль', s['одежда.Bullet'] && Math.round(s['одежда.Bullet'] * 100) + ' %'); add('Радиация', s['одежда.Rad']); add('Тепло', s['одежда.Warm']);
+    add('Скорость', s['одежда.Speed'] && Math.round(s['одежда.Speed'] * 100) + ' %'); add('Пластин', s['одежда.Plates']);
+  }
+  if (s['пластина.Bonus'] !== undefined) { add('К корпусу', s['пластина.Bonus'] + ' %'); add('Держит урона', s['пластина.Durability']); add('Радиация', s['пластина.Rad']); }
+  add('Лечит', s.Heal); add('Еда', s.Food); add('Вода', s.Water); add('Снимает отравление', s.CuresPoison && 'да');
+  add('Объём', s.Capacity && s.Capacity + ' л'); add('В стаке', s.Stack > 1 && s.Stack);
+  return out.length ? `<div class="sec"><h3>Характеристики</h3><div class="stats">${out.map(([k, v]) => `<div class="stat"><div class="k">${k}</div><div class="v">${esc(v)}</div></div>`).join('')}</div></div>` : '';
+}
+const ingHtml = (id, n) => `<span class="ing" data-go="${id}">${icon(id)}<span>${esc(nm(id))} <b>${fmt(n)}</b></span></span>`;
+function recipeHtml(r) {
+  const t = r.tech && T[r.tech];
+  return `<div class="recipe"><div class="ings">${r.cost.map(([c, n]) => ingHtml(c, n)).join('')}</div>
+    <div class="meta"><span class="pill acc">${benchName(r.bench)}</span>${r.station_name ? `<span class="pill blue">${esc(r.station_name)}</span>` : ''}
+    <span class="pill">${fmt(r.time)} с</span>${r.count > 1 ? `<span class="pill ok">выход ×${r.count}</span>` : ''}
+    ${t ? `<span class="pill acc">изучить: ${t.scrap} лома на верстаке ${t.bench}</span>` : ''}</div></div>`;
+}
+function treeHtml(id, n, path = new Set(), depth = 0) {
+  const r = mainRecipe(id);
+  const leaf = !r || path.has(id);
+  const why = leaf ? (I[id]?.cat === 'Resource' ? 'сырьё' : R[id] ? 'станок' : 'лут/добыча') : `${benchName(r.bench)}${r.station_name ? ', ' + r.station_name : ''}${r.count > 1 ? ', выход ×' + r.count : ''}`;
+  let h = `<li>${leaf ? '<span class="tog"></span>' : `<span class="tog" data-t>${depth < 2 ? '▾' : '▸'}</span>`}<span class="node" data-go="${id}">${icon(id)}<span>${esc(nm(id))}</span><span class="x">×${fmt(n)}</span><span class="why">${why}</span></span>`;
+  if (!leaf) {
+    const crafts = Math.ceil(n / r.count);
+    path.add(id);
+    h += `<ul${depth >= 2 ? ' hidden' : ''}>${r.cost.map(([c, k]) => treeHtml(c, k * crafts, path, depth + 1)).join('')}</ul>`;
+    path.delete(id);
+  }
+  return h + '</li>';
+}
+function totalsHtml(map, max = 99) {
+  const e = Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, max);
+  return `<div class="totals">${e.map(([id, n]) => `<span class="tot" data-go="${id}">${icon(id)}<span>${esc(nm(id))} <b>${fmt(n)}</b></span></span>`).join('')}</div>`;
+}
+function whereHtml(id) {
+  const parts = [];
+  const loot = (LOOT[id] || []).slice().sort((a, b) => b.p - a.p);
+  if (loot.length) parts.push(`<div class="note">Лут (доля ящиков с предметом · в среднем, если выпал):</div>` + loot.slice(0, 14).map(x =>
+    `<div class="src"><span>${esc(x.s.label)}<br><span class="w">${esc(x.s.where || '')}</span></span><span style="display:flex;gap:8px;white-space:nowrap"><span>${fmt(Math.round(x.p * 1000) / 10)} % · ${fmt(x.avg)}</span><span class="bar"><i style="width:${Math.min(100, x.p * 100)}%"></i></span></span></div>`).join('')
+    + (loot.length > 14 ? `<div class="note">…и ещё ${loot.length - 14} источников</div>` : ''));
+  if (GATH[id]) parts.push(`<div class="note">Добыча:</div>` + GATH[id].map(g => `<div class="src"><span>${esc(g.label)}</span><span>${fmt(g.amt)}</span></div>`).join(''));
+  if (SMELT[id]) parts.push(`<div class="note">Плавка:</div>` + SMELT[id].map(s => `<div class="src"><span>${ingHtml(s.a, 1)}</span><span>→ ${s.n} · ${esc(s.w)}</span></div>`).join(''));
+  if (RECFROM[id]) parts.push(`<div class="note">Переработка — из этих вещей получается:</div><div class="ings">` + RECFROM[id].sort((a, b) => b.n - a.n).slice(0, 30).map(x => ingHtml(x.from, x.n)).join('') + '</div>' + (RECFROM[id].length > 30 ? `<div class="note">…и ещё ${RECFROM[id].length - 30}</div>` : ''));
+  return parts.join('');
+}
+function usedHtml(id) {
+  const parts = [];
+  const u = (USED[id] || []).slice().sort((a, b) => a.bench - b.bench || nm(a.out).localeCompare(nm(b.out), 'ru'));
+  if (u.length) parts.push(`<div class="ings">${u.map(r => { const n = r.cost.find(c => c[0] === id)[1]; return `<span class="ing" data-go="${r.out}">${icon(r.out)}<span>${esc(nm(r.out))} <span class="sub">(${n} шт.${r.station === 'Lathe' ? ', станок' : ''})</span></span></span>`; }).join('')}</div>`);
+  const b = USEDB[id];
+  if (b) { const seen = new Set(); parts.push(`<div class="note">Стройка: ${b.filter(x => { const k = x.b.name + x.t.tier_name; if (seen.has(k)) return false; seen.add(k); return true; }).map(x => `${esc(x.b.name)} (${esc(x.t.tier_name)}) — ${x.n}`).join(' · ')}</div>`); }
+  return parts.join('');
+}
+function setOf(id) { const s = st(id)['одежда.Set']; if (!s) return null; return ALL.filter(x => st(x)['одежда.Set'] === s); }
+function renderCard(id) {
+  curId = id; renderList();
+  const it = I[id], el = document.getElementById('card');
+  if (!it) { el.innerHTML = '<div class="empty">Выбери предмет слева — увидишь, как он крафтится, из чего и где его взять.</div>'; return; }
+  const rs = R[id] || [], t = T[id];
+  let h = `<div class="head">${icon(id, true)}<div style="flex:1;min-width:0"><h2>${esc(nm(id))}</h2><div class="sub">${CATNAME[cat(id)]}${tierOf(id) != null ? ' · тир ' + tierOf(id) : ''} · <code>${esc(id)}</code></div></div>
+    <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><input type="number" id="addn" value="1" min="1"><span class="btn" id="addb">+ в конструктор</span></span></div>`;
+  if (it.desc) h += `<div class="desc">${esc(it.desc)}</div>`;
+  const set = setOf(id);
+  if (set && set.length > 1) h += `<div class="meta"><span class="pill blue">набор «${esc(setName(st(id)['одежда.Set']))}»: ${set.length} вещей</span><span class="btn sm ghost" id="addset">весь набор в конструктор</span></div>`;
+  h += statBlock(id);
+  if (rs.length) {
+    h += `<div class="sec"><h3>Как сделать</h3>${rs.map(recipeHtml).join('')}</div>`;
+    const acc = newAcc(); expand(id, 1, acc);
+    const res = researchOf([...acc.tech]);
+    if (mainRecipe(id)) {
+      h += `<div class="sec"><h3>Дерево до сырья</h3><div class="tree"><ul>${treeHtml(id, 1)}</ul></div></div>`;
+      h += `<div class="sec"><h3>Итого сырья на 1 шт.</h3>${totalsHtml(acc.raw)}<div class="meta"><span class="pill acc">нужен ${benchName(acc.bench)}</span>${[...acc.stations].map(s => `<span class="pill blue">${esc(s)}</span>`).join('')}<span class="pill">крафт ≈ ${fmt(acc.time)} с</span>${res.scrap ? `<span class="pill acc">изучение всей цепочки: ${res.scrap} лома</span>` : ''}</div></div>`;
+    }
+  } else h += `<div class="sec"><h3>Как сделать</h3><div class="note">Не крафтится — только лут, добыча или переработка.</div></div>`;
+  if (t) {
+    const all = new Set(); techChain(id, all);
+    const chain = [...all].map(x => T[x]).sort((a, b) => a.bench - b.bench || a.order - b.order);
+    h += `<div class="sec"><h3>Путь изучения</h3><div class="ings">${chain.map(x => `<span class="ing" data-go="${x.id}">${icon(x.id)}<span>${esc(x.name)} <span class="sub">в${x.bench} · ${x.scrap} лома</span></span></span>`).join('')}</div>
+      <div class="meta"><span class="pill acc">всего: ${chain.reduce((s, x) => s + x.scrap, 0)} лома</span>${t.req_any?.length ? `<span class="pill">или вместо одного из: ${t.req_any.map(nm).join(', ')}</span>` : ''}</div></div>`;
+  }
+  const wh = whereHtml(id); if (wh) h += `<div class="sec"><h3>Где взять</h3>${wh}</div>`;
+  if (D.recycle[id]) h += `<div class="sec"><h3>Если переработать</h3><div class="ings">${D.recycle[id].map(([c, n]) => ingHtml(c, n)).join('')}</div></div>`;
+  if (SMELTIN[id]) h += `<div class="sec"><h3>Плавится в</h3><div class="ings">${SMELTIN[id].map(s => ingHtml(s.b, s.n)).join('')}</div><div class="note">${esc(SMELTIN[id][0].w)}</div></div>`;
+  const uh = usedHtml(id); if (uh) h += `<div class="sec"><h3>Используется в</h3>${uh}</div>`;
+  el.innerHTML = h;
+  document.getElementById('addb').onclick = () => { addB(id, Math.max(1, +document.getElementById('addn').value || 1)); };
+  const as = document.getElementById('addset'); if (as) as.onclick = () => set.forEach(x => addB(x, 1));
+  if (matchMedia('(max-width: 860px)').matches) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 60 }); else window.scrollTo({ top: 0 });
+}
+document.addEventListener('click', e => {
+  const tg = e.target.closest('[data-t]');
+  if (tg) { const ul = tg.parentElement.querySelector(':scope > ul'); if (ul) { ul.hidden = !ul.hidden; tg.textContent = ul.hidden ? '▸' : '▾'; } return; }
+  const g = e.target.closest('[data-go]'); if (g) go('i/' + g.dataset.go);
+});
+
+// ---------- конструктор ----------
+let B = {};
+function addB(id, n) { B[id] = (B[id] || 0) + n; saveB(); flash(); }
+function saveB() { document.getElementById('bcount').textContent = Object.keys(B).length; try { localStorage.setItem('rast_basket', JSON.stringify(B)); } catch (e) { } if (location.hash.startsWith('#c/')) setHashB(); renderCon(); }
+function setHashB() { history.replaceState(null, '', '#c/' + Object.entries(B).map(([k, v]) => k + ':' + v).join(',')); }
+function flash() { const b = document.getElementById('bcount'); b.animate([{ transform: 'scale(1.5)' }, { transform: 'scale(1)' }], 300); }
+const SETS = {}; ALL.forEach(id => { const s = st(id)['одежда.Set']; if (s) (SETS[s] ||= []).push(id); });
+const PRESETS = [
+  ...Object.entries(SETS).filter(([, ids]) => ids.length > 1 && ids.some(x => R[x])).sort((a, b) => (st(a[1][0])['одежда.Tier'] || 0) - (st(b[1][0])['одежда.Tier'] || 0))
+    .map(([s, ids]) => ({ label: `Набор «${setName(s)}» (тир ${st(ids[0])['одежда.Tier'] ?? 0})`, items: Object.fromEntries(ids.filter(x => R[x]).map(x => [x, 1])) })),
+  ...['deploy_workbench', 'deploy_workbench2', 'deploy_workbench3'].filter(x => I[x]).map(x => ({ label: nm(x), items: { [x]: 1 } })),
+];
+document.getElementById('presets').innerHTML = PRESETS.map((p, i) => `<span class="chip" data-p="${i}">${esc(p.label)}</span>`).join('');
+document.getElementById('presets').onclick = e => { const c = e.target.closest('[data-p]'); if (!c) return; for (const [k, v] of Object.entries(PRESETS[+c.dataset.p].items)) addB(k, v); };
+const cqEl = document.getElementById('cq');
+cqEl.oninput = () => {
+  const q = norm(cqEl.value.trim());
+  const ids = q ? ALL.filter(id => norm(nm(id)).includes(q)).slice(0, 40) : [];
+  document.getElementById('clist').innerHTML = ids.map(id => `<div class="row" data-add="${id}">${icon(id)}<span class="nm">${esc(nm(id))}</span><span class="tg">+ добавить</span></div>`).join('') || (q ? '<div class="empty">Нет такого</div>' : '<div class="note">Ищи предмет и добавляй, или кнопка «+ в конструктор» в каталоге.</div>');
+};
+document.getElementById('clist').onclick = e => { const r = e.target.closest('[data-add]'); if (r) addB(r.dataset.add, 1); };
+function renderCon() {
+  const el = document.getElementById('con'), ids = Object.keys(B);
+  if (!ids.length) { el.innerHTML = '<div class="empty">Корзина пуста. Добавь предметы — увидишь всё сырьё, лом на изучение, нужные верстаки и время крафта.</div>'; return; }
+  const acc = newAcc(); ids.forEach(id => expand(id, B[id], acc));
+  const res = researchOf([...acc.tech]);
+  const notCraft = ids.filter(id => !mainRecipe(id));
+  let h = `<div class="kpi"><div><div class="k">Верстак</div><div class="v">${acc.bench ? 'уровень ' + acc.bench : 'не нужен'}</div></div>
+    <div><div class="k">Лом на изучение</div><div class="v">${res.scrap}</div></div><div><div class="k">Время крафта</div><div class="v">${acc.time >= 60 ? fmt(acc.time / 60) + ' мин' : fmt(acc.time) + ' с'}</div></div>
+    <div><div class="k">Станции</div><div class="v" style="font-size:14px">${[...acc.stations].map(esc).join(', ') || '—'}</div></div></div>`;
+  h += `<div class="sec"><h3>Корзина</h3>${ids.map(id => `<div class="brow">${icon(id)}<span class="nm"><a data-go="${id}">${esc(nm(id))}</a>${mainRecipe(id) ? '' : ' <span class="pill">не крафтится — нужно найти</span>'}</span>
+    <input type="number" min="0" value="${B[id]}" data-bn="${id}"><span class="btn sm ghost" data-del="${id}">убрать</span></div>`).join('')}
+    <div class="meta"><span class="btn sm ghost" id="bshare">ссылка на набор</span><span class="btn sm ghost" id="bclear">очистить</span></div></div>`;
+  h += `<div class="sec"><h3>Сырьё и находки (всё вместе)</h3>${totalsHtml(acc.raw)}<div class="note">Сюда попадает всё, что не крафтится обычным рецептом: ресурсы, компоненты и детали из лута. Детали, которые можно выточить на токарном станке, не раскрываются — смотри их карточку.</div></div>`;
+  const inter = Object.fromEntries(Object.entries(acc.crafted).filter(([k]) => !B[k]));
+  if (Object.keys(inter).length) h += `<div class="sec"><h3>Что скрафтить по пути</h3>${totalsHtml(inter)}</div>`;
+  if (res.all.size) h += `<div class="sec"><h3>Что изучить</h3><div class="ings">${[...res.all].map(x => T[x]).sort((a, b) => a.bench - b.bench || a.order - b.order).map(x => `<span class="ing" data-go="${x.id}">${icon(x.id)}<span>${esc(x.name)} <span class="sub">в${x.bench} · ${x.scrap}</span></span></span>`).join('')}</div></div>`;
+  el.innerHTML = h;
+  el.querySelectorAll('[data-bn]').forEach(inp => inp.onchange = () => { const v = Math.max(0, +inp.value || 0); if (v) B[inp.dataset.bn] = v; else delete B[inp.dataset.bn]; saveB(); });
+  el.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { delete B[b.dataset.del]; saveB(); });
+  document.getElementById('bclear').onclick = () => { B = {}; saveB(); };
+  document.getElementById('bshare').onclick = () => { setHashB(); navigator.clipboard?.writeText(location.href); document.getElementById('bshare').textContent = 'ссылка в адресной строке (и скопирована)'; };
+}
+
+// ---------- по верстакам ----------
+function renderBench() {
+  let h = '<div class="note">Что открывается на каждом верстаке: всё, что крафтится на этом уровне, и сколько лома стоит изучение. «Изучение» — сумма по дереву технологий этого верстака.</div><div class="grid2">';
+  for (const b of [0, 1, 2, 3]) {
+    const items = ALL.filter(id => benchOf(id) === b);
+    const techs = D.tech.filter(t => t.bench === b);
+    const groups = {};
+    items.forEach(id => (groups[cat(id)] ||= []).push(id));
+    h += `<div class="benchcol"><h3>${b === 0 ? 'В руках' : 'Верстак ' + b}</h3><div class="meta" style="margin:0 0 8px"><span class="pill">${items.length} рецептов</span>${techs.length ? `<span class="pill acc">изучить всё: ${techs.reduce((s, t) => s + t.scrap, 0)} лома</span>` : ''}</div>`;
+    for (const [c, l] of CATS) if (groups[c]) h += `<div class="note">${l}</div><div class="ings" style="margin-bottom:8px">${groups[c].map(id => `<span class="ing" data-go="${id}">${icon(id)}<span>${esc(nm(id))}${T[id] ? ` <span class="sub">${T[id].scrap}</span>` : ''}</span></span>`).join('')}</div>`;
+    h += '</div>';
+  }
+  h += '</div>';
+  const bt = ALL.filter(id => benchOf(id) === null && ['gun', 'wear', 'comp', 'att'].includes(cat(id)));
+  if (bt.length) h += `<div class="sec"><h3>Не крафтится — только найти</h3><div class="ings">${bt.map(id => `<span class="ing" data-go="${id}">${icon(id)}<span>${esc(nm(id))}</span></span>`).join('')}</div></div>`;
+  document.getElementById('bench').innerHTML = h;
+}
+
+// ---------- стройка ----------
+function renderBuild() {
+  const b = D.build || [];
+  if (!b.length) { document.getElementById('build').innerHTML = '<div class="empty">Нет данных стройки (пересобери prog.json свежим --progdump).</div>'; return; }
+  const tiers = b[0].tiers.map(t => t.tier_name);
+  let h = `<div class="note">Цена установки (каркас) и улучшения до каждого уровня, прочность. Улучшают киянкой; цена — за один элемент.</div><div class="tablewrap"><table><tr><th>Элемент</th>${tiers.map(t => `<th>${esc(t)}</th>`).join('')}</tr>`;
+  for (const k of b) h += `<tr><td><b>${esc(k.name)}</b></td>${k.tiers.map(t => `<td>${t.cost.map(([c, n]) => `<a data-go="${c}">${esc(nm(c))}</a> ${n}`).join('<br>')}<div class="sub">${t.hp} HP</div></td>`).join('')}</tr>`;
+  h += '</table></div>';
+  document.getElementById('build').innerHTML = h;
+}
+function renderNotes() {
+  document.getElementById('notes').innerHTML = `<div class="sec" style="margin-top:0"><h3>Как читать</h3><div class="note">Все числа взяты из кода игры (выгрузка <code>--progdump</code>), лут — 3000 сэмплов на источник. Пересобрать: см. <code>docs/design/progression/crafts_build.py</code>.</div></div>
+    <div class="sec"><h3>Заметки выгрузки</h3>${(D.notes || []).map(n => `<div class="note">• ${esc(n)}</div>`).join('')}</div>`;
+}
+
+// ---------- навигация ----------
+function show(v) { document.querySelectorAll('.view').forEach(x => x.classList.toggle('on', x.id === 'v-' + v)); document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x.dataset.v === v)); }
+function go(h) { location.hash = h; }
+function route() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h.startsWith('i/')) { show('cat'); renderCard(h.slice(2)); }
+  else if (h.startsWith('c/')) { if (h.length > 2) { B = {}; h.slice(2).split(',').forEach(p => { const [k, v] = p.split(':'); if (I[k]) B[k] = +v || 1; }); document.getElementById('bcount').textContent = Object.keys(B).length; } show('con'); renderCon(); }
+  else if (h === 'c') { show('con'); renderCon(); }
+  else if (h === 'bench') { show('bench'); renderBench(); }
+  else if (h === 'build') { show('build'); renderBuild(); }
+  else if (h === 'notes') { show('notes'); renderNotes(); }
+  else { show('cat'); renderCard(curId); }
+}
+document.getElementById('tabs').onclick = e => { const t = e.target.closest('.tab'); if (!t) return; const v = t.dataset.v; go(v === 'cat' ? (curId ? 'i/' + curId : '') : v === 'con' ? 'c' : v); };
+window.addEventListener('hashchange', route);
+try { B = JSON.parse(localStorage.getItem('rast_basket') || '{}') || {}; for (const k of Object.keys(B)) if (!I[k]) delete B[k]; } catch (e) { B = {}; }
+document.getElementById('bcount').textContent = Object.keys(B).length;
+renderList(); route();
+</script>
+</body>
+</html>

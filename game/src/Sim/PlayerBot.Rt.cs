@@ -476,7 +476,7 @@ namespace Rastvordd.Sim
         bool RtDanger(out string why)
         {
             why = null;
-            if (_me.Hp < 30 || (_me.Hp < 50 && _me.Count("bandage") == 0)) why = $"ранен ({_me.Hp:0} HP)";
+            if (_me.Hp < 30 || (_me.Hp < 50 && Heals == 0)) why = $"ранен ({_me.Hp:0} HP)";
             else if (_rt.Guards > 0 && Ranged() is string g && AmmoLeft(g) < 6) why = "кончаются патроны";
             else
                 foreach (var h in _heard)

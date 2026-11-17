@@ -215,6 +215,7 @@ namespace Rastvordd.Sim
                 new() { Name = "слух", Score = RumorScore, Act = RumorAct },
                 new() { Name = "после смерти", Score = AfterDeathScore, Act = AfterDeathAct },
                 new() { Name = "кит из ящика", Score = GearKitScore, Act = GearKitAct },   // D71: выход только в гире
+                new() { Name = "пополнение", Score = ResupplyScore, Act = ResupplyAct },   // D72: патроны и хил по ходу игры
                 new() { Name = "охота", Score = EncFightScore, Act = EncFightAct },
                 new() { Name = "месть", Score = RevengeScore, Act = RevengeAct },
                 new() { Name = "нужды", Score = () => NeedsUrgency() * 70, Act = Needs },
@@ -298,10 +299,10 @@ namespace Rastvordd.Sim
         {
             bool hurt = _me.Hp < _me.MaxHp - 5;
             float u = 0;
-            if (_me.Hp < 60 && _me.Count("bandage") == 0) u = MathF.Max(u, 0.9f);
+            if (_me.Hp < 60 && Heals == 0) u = MathF.Max(u, 0.9f);
             if (_me.Water < (hurt ? 50 : 30)) u = MathF.Max(u, _me.Water < 15 ? 1f : 0.8f);
             if (_me.Food < (hurt ? 45 : 30) && _me.Count("berries") == 0) u = MathF.Max(u, _me.Food < 15 ? 1f : 0.7f);
-            if (_me.Hp < 70 && _me.Count("bandage") > 0) u = MathF.Max(u, 0.6f);
+            if (_me.Hp < 70 && Heals > 0) u = MathF.Max(u, 0.6f);
             if (_warming || (_me.Cold >= 60 && _me.FeltTemp < Clothing.Comfort && _w.Time >= _warmNoTry)) u = MathF.Max(u, 0.75f);   // замёрз (D47)
             if (NeedClothesCloth) u = MathF.Max(u, 0.5f);                                                                              // мёрзнет голым — конопля на рубаху
             return u;

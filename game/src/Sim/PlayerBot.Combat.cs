@@ -263,7 +263,7 @@ namespace Rastvordd.Sim
             if (!seen)
             {
                 Say("оторвался", "оторвался — укрылся, перевожу дух", 15);
-                if (_me.Hp < 75 && _me.Count("bandage") > 0 && _w.Time - _me.LastDamagedTime > 2f) { cmd.Heal = true; if (_me.HealCooldown <= 0) { Say("бинт-отход", $"бинтуюсь в укрытии ({_me.Hp:0} HP)", 10); Stat("бинт в укрытии"); } }
+                if (_me.Hp < 75 && Heals > 0 && _w.Time - _me.LastDamagedTime > 2f) { cmd.Heal = true; if (_me.HealCooldown <= 0) { Say("бинт-отход", $"бинтуюсь в укрытии ({_me.Hp:0} HP)", 10); Stat("бинт в укрытии"); } }
                 if (Ranged() is string g && GunState(g) is WeaponState st && st.Ammo < st.MagSize && st.ReloadLeft <= 0 && _me.Count(WeaponAmmo(g)) > 0 && Hold(g, ref cmd))
                 { cmd.Reload = true; if (st.MagSize > 1) { Stat("перезарядка в укрытии"); Say("перезарядка-отход", "перезаряжаюсь, пока он меня не видит", 10); } }
                 // и уходим домой, когда он потерян
@@ -499,7 +499,7 @@ namespace Rastvordd.Sim
                     if (mag > 1) { Stat("перезарядка в укрытии"); Say("перезарядка", $"перезаряжаюсь за {_coverName}", 6); }
                     return;
                 }
-                if (_me.Hp < 65 && _me.Count("bandage") > 0 && _w.Time - _me.LastDamagedTime > 2f && _me.HealCooldown <= 0)
+                if (_me.Hp < 65 && Heals > 0 && _w.Time - _me.LastDamagedTime > 2f && _me.HealCooldown <= 0)
                 {
                     cmd.Heal = true;
                     Stat("бинт в укрытии");

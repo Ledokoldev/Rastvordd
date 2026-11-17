@@ -766,12 +766,12 @@ namespace Rastvordd.Sim
             if (WarmUp(ref cmd)) return true;   // замёрз — греться (D47)
             bool hurt = _me.Hp < _me.MaxHp - 5;
             // ранен и нечем лечиться — бинт из ткани (конопля)
-            if (_me.Hp < 60 && _me.Count("bandage") == 0)
+            if (_me.Hp < 60 && Heals == 0)
             {
                 if (_me.Count("cloth") >= 4) { if (Craft("bandage", ref cmd)) return true; }
                 else { Doing = "ищет коноплю на бинт"; if (UsePickup(PickupKind.Hemp, ref cmd)) return true; }
             }
-            if (_me.Hp < 70 && _me.Count("bandage") > 0) cmd.Heal = true;
+            if (_me.Hp < 70 && Heals > 0) cmd.Heal = true;
             if (_me.Food < (hurt ? 60 : 35) && (_me.Count("berries") > 0 || _me.Count("canned") > 0)) cmd.Eat = true;
             if (_me.Water < (hurt ? 50 : 30)) { Doing = "идёт пить"; if (UsePickup(PickupKind.WaterBarrel, ref cmd)) return true; }
             if (_me.Food < (hurt ? 45 : 30) && _me.Count("berries") == 0) { Doing = "ищет ягоды"; if (UsePickup(PickupKind.Berries, ref cmd)) return true; }

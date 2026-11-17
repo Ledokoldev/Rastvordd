@@ -149,19 +149,24 @@ namespace Rastvordd.Sim
             {
                 if (_w.Time < _tailorNext) return false;
                 _tailorNext = _w.Time + 20;
-                foreach (var id in TailorOrder)
-                {
-                    int r = Recipe(id);
-                    var rec = Recipes.All[r];
-                    if (rec.Bench > lvl || !Tech.Knows(_me, id) || Stock(id) > 0) continue;
-                    var wd = Clothing.Def(id);
-                    var cur = Clothing.Def(_me.Worn[(int)wd.Slot]?.Id);
-                    if (cur != null && Clothing.BotScore(cur) >= Clothing.BotScore(wd)) continue;
-                    bool ok = true;
-                    foreach (var (cid, n) in rec.Cost)
-                        ok &= cid == "metal_fragments" ? MetalTotal() - n >= 250 : Stock(cid) - n >= (cid == "cloth" ? 8 : 0);
-                    if (ok) { _tailorId = id; break; }
-                }
+                // проход 0 — то, что лучше надетого; проход 1 (D71) — запасной сет в ящик: голова и корпус того, что сейчас на мне,
+                // чтобы после смерти и перед каждым выходом было во что одеться (пользователь: «выйти с базы всегда в гире»)
+                for (int pass = 0; pass < 2 && _tailorId == null; pass++)
+                    foreach (var id in TailorOrder)
+                    {
+                        int r = Recipe(id);
+                        var rec = Recipes.All[r];
+                        if (rec.Bench > lvl || !Tech.Knows(_me, id) || Stock(id) > 0) continue;
+                        var wd = Clothing.Def(id);
+                        var cur = Clothing.Def(_me.Worn[(int)wd.Slot]?.Id);
+                        if (pass == 0 && cur != null && Clothing.BotScore(cur) >= Clothing.BotScore(wd)) continue;
+                        if (pass == 1 && (_me.Worn[(int)wd.Slot]?.Id != id || Clothing.SlotZone[(int)wd.Slot] is not (HitZone.Head or HitZone.Torso))) continue;
+                        int metalKeep = pass == 0 ? 250 : 400;   // запас — только из настоящего излишка
+                        bool ok = true;
+                        foreach (var (cid, n) in rec.Cost)
+                            ok &= cid == "metal_fragments" ? MetalTotal() - n >= metalKeep : Stock(cid) - n >= (cid == "cloth" ? 8 : 0);
+                        if (ok) { _tailorId = id; if (pass == 1) { Thought($"шью запасной {Items.Name(id)} в ящик — выйти в гире после смерти"); LStat("кит: запасная одежда"); } break; }
+                    }
                 if (_tailorId == null) return false;
             }
             var rc = Recipes.All[Recipe(_tailorId)];
@@ -977,10 +982,11 @@ namespace Rastvordd.Sim
             }
             if (BackupGun(own, lvl, box, ref cmd)) return true;
             string ammo = st?.Def.AmmoId;
-            if (ammo == null || ammo == "arrow" || _me.Count(ammo) >= 20 || !_me.Known.Contains(ammo) && Tech.Get(ammo) != null) return false;
+            if (ammo == null || ammo == "arrow" || _me.Count(ammo) >= 60 ||   // D71: кит — 60 патронов (было 20)
+                !_me.Known.Contains(ammo) && Tech.Get(ammo) != null) return false;
             int ri = Recipe(ammo);
             if (ri < 0 || Recipes.All[ri].Bench > lvl) return false;
-            if (TakeFromBox(box, ammo, 20, ref cmd)) return true;
+            if (TakeFromBox(box, ammo, 60, ref cmd)) return true;
             int powder = 0;
             foreach (var (id, n) in Recipes.All[ri].Cost) if (id == "gunpowder") powder = n;
             if (powder == 0 || _me.Count("gunpowder") >= powder) return CraftAtBench(ammo, box, ref cmd);

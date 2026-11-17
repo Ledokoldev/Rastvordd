@@ -38,10 +38,10 @@ namespace Rastvordd.Sim
                 "metal_fragments" => 60,
                 "cloth" => 80,
                 "ammo_762" or "ammo_545" => 120,
-                "ammo_9mm" or "ammo_12g" => 60,
+                "ammo_9mm" or "ammo_12g" => 90,
                 "ammo_bolt" => 40,
                 "comp_oil" => 2,
-                "arrow" => 40,
+                "arrow" => 60,
                 "bandage" => 4,
                 "berries" or "canned" or "water_bottle" => 10,
                 _ => 0,                                                   // лом, детали, карты, порох, сера, уголь — в ящик

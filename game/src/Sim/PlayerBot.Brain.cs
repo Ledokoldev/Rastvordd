@@ -214,6 +214,7 @@ namespace Rastvordd.Sim
                 new() { Name = "антирейд", Score = () => AntiRaidScore() * W("антирейд"), Act = AntiRaid },
                 new() { Name = "слух", Score = RumorScore, Act = RumorAct },
                 new() { Name = "после смерти", Score = AfterDeathScore, Act = AfterDeathAct },
+                new() { Name = "кит из ящика", Score = GearKitScore, Act = GearKitAct },   // D71: выход только в гире
                 new() { Name = "охота", Score = EncFightScore, Act = EncFightAct },
                 new() { Name = "месть", Score = RevengeScore, Act = RevengeAct },
                 new() { Name = "нужды", Score = () => NeedsUrgency() * 70, Act = Needs },
@@ -435,7 +436,7 @@ namespace Rastvordd.Sim
             return false;
         }
 
-        bool GearMissingNow() => Has("tool_hatchet") && (!Has("weapon_spear") || (!Has("weapon_bow") && (_me.Count("cloth") >= 50 || NearestPickup(PickupKind.Hemp) != null)) || (Has("weapon_bow") && _me.Count("arrow") < 12));
+        bool GearMissingNow() => Has("tool_hatchet") && (!Has("weapon_spear") || (!Has("weapon_bow") && (_me.Count("cloth") >= 50 || NearestPickup(PickupKind.Hemp) != null)) || (Has("weapon_bow") && _me.Count("arrow") < (Ranged() == "weapon_bow" ? 30 : 12)));
 
         bool GearUp(ref InputCmd cmd)
         {

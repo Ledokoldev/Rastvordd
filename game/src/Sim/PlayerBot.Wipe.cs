@@ -294,7 +294,7 @@ namespace Rastvordd.Sim
 
         static readonly string[] KitIds = { "weapon_spear", "bandage", "tool_hatchet", "tool_pickaxe" };
 
-        static int KitWant(string id) => id switch { "ammo_762" or "ammo_545" => 60, "arrow" or "ammo_bolt" => 20, "ammo_12g" => 24, "bandage" => 3, _ when id.StartsWith("ammo_") => 40, _ => 1 };
+        static int KitWant(string id) => id switch { "ammo_762" or "ammo_545" => 60, "arrow" or "ammo_bolt" => 30, "ammo_12g" => 30, "bandage" => 4, _ when id.StartsWith("ammo_") => 60, _ => 1 };
 
         /// <summary>Что забрать из ящика после смерти: лучший ствол, патроны к своим стволам, копьё, бинты, инструменты.</summary>
         string KitWanted(Deployable box)
@@ -321,7 +321,48 @@ namespace Rastvordd.Sim
                 if (id.StartsWith("weapon_") && Has(id)) continue;
                 if (_me.Count(id) < KitWant(id) && InBox(box, id) > 0) return id;
             }
+            // D71: одежда — в каждый слот лучшее из ящика, если оно надёжнее надетого (наденет BotDress)
+            foreach (var s in box.Storage.Items)
+            {
+                if (s == null || Clothing.Def(s.Id) is not WearDef wd || _me.Count(s.Id) > 0) continue;
+                var cur = Clothing.Def(_me.Worn[(int)wd.Slot]?.Id);
+                if (cur == null || Clothing.BotScore(wd) > Clothing.BotScore(cur) + 0.5f) return s.Id;
+            }
             return null;
+        }
+
+        string _kitCache; float _kitCacheAt = -99;
+        /// <summary>KitWanted раз в 2 с (перебор ящика).</summary>
+        string KitWantedCached(Deployable box)
+        {
+            if (_w.Time - _kitCacheAt < 2f) return _kitCache;
+            _kitCacheAt = _w.Time;
+            return _kitCache = KitWanted(box);
+        }
+
+        /// <summary>
+        /// D71 (пользователь: «сеты делать обязательно и чтобы всегда была возможность выйти с базы в гире — на РТ, дроп»):
+        /// у дома и чего-то из кита не хватает (сет, ствол, патроны, бинты в ящике) — сначала одеться, потом выход.
+        /// </summary>
+        float GearKitScore()
+        {
+            if (_threat != null || _raid != null || MyBox() is not Deployable box) return 0;
+            float d = Vector2.Distance(_me.Pos, box.Pos);
+            if (d > 120 || KitWantedCached(box) == null) return 0;
+            return d < 60 ? 91 : 80;
+        }
+
+        bool GearKitAct(ref InputCmd cmd)
+        {
+            var box = MyBox();
+            var id = KitWanted(box);
+            if (id == null) { _kitCacheAt = -99; return false; }
+            Doing = $"собирается на выход: берёт из ящика {Items.Name(id)}";
+            LStat("кит: беру из ящика");
+            if (BoxWith(id, true) is Deployable gb) { if (!TakeGunFromBox(gb, id, ref cmd)) { _kitCacheAt = _w.Time + 30; _kitCache = null; return false; } return true; }
+            int want = Clothing.Def(id) != null ? 1 : KitWant(id);
+            if (!TakeFromBox(box, id, Math.Min(want, _me.Count(id) + InBox(box, id)), ref cmd)) { if (Clothing.Def(id) != null) _w.BotDress(_me); _kitCacheAt = -99; return false; }   // взял (или нечего) — пересчитать
+            return true;
         }
 
         float AfterDeathScore()

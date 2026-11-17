@@ -7,3 +7,6 @@ audio_src/footsteps_game_ready/
 # кинематографичные материалы — не для репозитория
 docs/cinematic/
 
+
+# проброс через VPS (D73): frpc.exe и конфиг с токеном — только локально
+/tools/frp/

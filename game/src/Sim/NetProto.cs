@@ -9,7 +9,7 @@ using System.Text.Json;
 namespace Rastvordd.Sim
 {
     /// <summary>
-    /// Сетевой протокол (D73) без Godot: кодирование ввода и снимков. Транспорт (ENet) — в клиентской части.
+    /// Сетевой протокол (D73) без Godot: кодирование ввода и снимков. Транспорт (TCP, NetLink) — в клиентской части.
     /// Снимок шлётся каждый тик надёжным упорядоченным каналом, но только изменившиеся поля
     /// (поле Snapshot или SelfInfo целиком), сжатый Brotli. Первый снимок — полный.
     /// </summary>
@@ -25,6 +25,7 @@ namespace Rastvordd.Sim
         public const byte Snap = 3;      // сервер → клиент: снимок (дельта)
         public const byte Input = 4;     // клиент → сервер: InputCmd
         public const byte Reject = 5;    // сервер → клиент: отказ (текст)
+        public const byte Ready = 6;     // клиент → сервер: карта построена — слать снимки (до этого копились бы минуты устаревшего мира)
 
         public sealed class HelloMsg { public int Version; public string Name; }
         public sealed class WelcomeMsg { public int Version; public int Id; public int Seed; public bool NoScatter; public long MapHash; }

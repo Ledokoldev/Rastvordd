@@ -36,11 +36,11 @@ namespace Rastvordd.Client
             _liveHost?.Stop();
             _host = new NetHost(_server) { HostActorId = _myId };
             var err = _host.Start(port);
-            if (err != Error.Ok) { _hud.Toast($"Сервер не открылся на порту {port}: {err}"); _host = null; NetHostPort = 0; return; }
+            if (err != null) { _hud.Toast($"Сервер не открылся на порту {port}: {err}"); _host = null; NetHostPort = 0; return; }
             _liveHost = _host;
             NetHostPort = port;
             _host.Notice += s => _hud.Toast(s);
-            _hud.Toast($"Сервер открыт: UDP {port}. Друзья — Esc → «Сеть» → адрес → «Подключиться»");
+            _hud.Toast($"Сервер открыт: TCP {port}. Друзья — Esc → «Сеть» → адрес → «Подключиться»");
             NetStatus();
         }
 
@@ -54,7 +54,7 @@ namespace Rastvordd.Client
 
         void NetMenuSetup()
         {
-            if (_net != null) { _liveClient?.Close(); _liveClient = _net; }
+            if (_net != null) { _liveClient?.Close(); _liveClient = _net; _net.SendReady(); }
             _settings.HostToggled += () => { if (_host != null) StopHost(); else StartHost(NetProto.DefaultPort); };
             _settings.JoinRequested += (addr, name) =>
             {
@@ -82,7 +82,7 @@ namespace Rastvordd.Client
         void NetStatus()
         {
             string s = _net != null ? $"В игре у {NetConnectTo} · принято {_net.BytesIn / 1024} КБ"
-                : _host != null ? $"Сервер открыт на UDP {_host.Port} · друзей: {_host.Players}" + (_host.Players > 0 ? " — " + string.Join(", ", _host.Names()) : "") + $" · отдано {_host.BytesOut / 1024} КБ"
+                : _host != null ? $"Сервер открыт на TCP {_host.Port} · друзей: {_host.Players}" + (_host.Players > 0 ? " — " + string.Join(", ", _host.Names()) : "") + $" · отдано {_host.BytesOut / 1024} КБ"
                 : "Своя игра. Хочешь играть с друзьями — открой сервер (порт 7777) или подключись к другу.";
             _settings?.SetNet(_host != null, _net != null, s);
         }

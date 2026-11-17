@@ -95,7 +95,7 @@ namespace Rastvordd.Client
             _hostBtn.Pressed += () => HostToggled?.Invoke();
             box.AddChild(_hostBtn);
             var row = UiTheme.HBox(10);
-            _addr = new LineEdit { PlaceholderText = "адрес:порт, например 81.7.13.136:7777", Text = (string)cfg.GetValue("net", "addr", ""), SizeFlagsHorizontal = SizeFlags.ExpandFill };
+            _addr = new LineEdit { PlaceholderText = "адрес:порт, например 1.2.3.4:7777", Text = (string)cfg.GetValue("net", "addr", ""), SizeFlagsHorizontal = SizeFlags.ExpandFill };
             _name = new LineEdit { PlaceholderText = "твоё имя", Text = (string)cfg.GetValue("net", "name", ""), CustomMinimumSize = new Vector2(150, 0) };
             row.AddChild(_addr);
             row.AddChild(_name);

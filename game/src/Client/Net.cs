@@ -1,9 +1,105 @@
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 using Godot;
 using Rastvordd.Sim;
 
 namespace Rastvordd.Client
 {
+    /// <summary>
+    /// Одно TCP-соединение с кадрами «длина (4 байта) + пакет», неблокирующее (D73).
+    /// TCP, а не ENet/UDP: через VPS и VPN большие UDP-датаграммы режутся (MTU), а TCP сам подбирает размер.
+    /// Канал у нас и так надёжный и упорядоченный — по сути то же, что было.
+    /// </summary>
+    public sealed class NetLink
+    {
+        readonly Socket _s;
+        readonly byte[] _buf = new byte[64 * 1024];
+        byte[] _rx = new byte[64 * 1024];
+        int _rxLen;
+        readonly Queue<byte[]> _tx = new();
+        int _txOff;
+        public long Pending;          // байт ждёт отправки (друг завис — копится)
+        public bool Closed { get; private set; }
+        public string Remote;
+
+        public NetLink(Socket s)
+        {
+            _s = s;
+            _s.Blocking = false;
+            _s.NoDelay = true;   // без задержки Нейгла: ввод и снимки — сразу
+            Remote = (s.RemoteEndPoint as IPEndPoint)?.ToString();
+        }
+
+        public void Send(byte[] data)
+        {
+            if (Closed) return;
+            var f = new byte[data.Length + 4];
+            System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(f, data.Length);
+            System.Buffer.BlockCopy(data, 0, f, 4, data.Length);
+            _tx.Enqueue(f);
+            Pending += f.Length;
+            Flush();
+        }
+
+        void Flush()
+        {
+            try
+            {
+                while (_tx.Count > 0)
+                {
+                    var f = _tx.Peek();
+                    int n = _s.Send(f, _txOff, f.Length - _txOff, SocketFlags.None, out var err);
+                    if (err == SocketError.WouldBlock) return;
+                    if (err != SocketError.Success) { Close(); return; }
+                    _txOff += n; Pending -= n;
+                    if (_txOff >= f.Length) { _tx.Dequeue(); _txOff = 0; }
+                }
+            }
+            catch { Close(); }
+        }
+
+        /// <summary>Раз в кадр: дослать, принять, разрезать на пакеты.</summary>
+        public void Poll(List<byte[]> into)
+        {
+            if (Closed) return;
+            Flush();
+            try
+            {
+                while (true)
+                {
+                    int n = _s.Receive(_buf, 0, _buf.Length, SocketFlags.None, out var err);
+                    if (err == SocketError.WouldBlock) break;
+                    if (err != SocketError.Success || n == 0) { Close(); break; }
+                    if (_rxLen + n > _rx.Length) System.Array.Resize(ref _rx, System.Math.Max(_rx.Length * 2, _rxLen + n));
+                    System.Buffer.BlockCopy(_buf, 0, _rx, _rxLen, n);
+                    _rxLen += n;
+                }
+            }
+            catch { Close(); }
+            int off = 0;
+            while (_rxLen - off >= 4)
+            {
+                int len = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(new System.ReadOnlySpan<byte>(_rx, off, 4));
+                if (len < 0 || len > 64 * 1024 * 1024) { Close(); return; }
+                if (_rxLen - off - 4 < len) break;
+                var p = new byte[len];
+                System.Buffer.BlockCopy(_rx, off + 4, p, 0, len);
+                into.Add(p);
+                off += 4 + len;
+            }
+            if (off > 0) { System.Buffer.BlockCopy(_rx, off, _rx, 0, _rxLen - off); _rxLen -= off; }
+        }
+
+        public void Close()
+        {
+            if (Closed) return;
+            Closed = true;
+            try { _s.Shutdown(SocketShutdown.Both); } catch { }
+            try { _s.Close(); } catch { }
+        }
+    }
+
     /// <summary>
     /// Хост (D73): игра этого ПК — сервер. Мир с ботами считает только он; друзья шлют ввод и получают снимки.
     /// Живёт поверх LocalServer: PreTick — ввод друзей в очередь мира, PostTick — каждому его снимок.
@@ -12,67 +108,89 @@ namespace Rastvordd.Client
     {
         sealed class Remote
         {
-            public int Peer, ActorId;
+            public NetLink Link;
+            public int ActorId;
             public string Name;
             public readonly List<InputCmd> Queue = new();
             public InputCmd Last = InputCmd.Empty;
-            public readonly NetProto.SnapEncoder Enc = new();
+            public NetProto.SnapEncoder Enc = new();
+            public bool Ready;   // клиент построил карту — шлём снимки
         }
 
+        const long MaxBacklog = 16 * 1024 * 1024;   // друг не принимает снимки (завис) — отключаем
+
         readonly LocalServer _server;
-        readonly ENetMultiplayerPeer _peer = new();
-        readonly Dictionary<int, Remote> _remotes = new();
+        TcpListener _listen;
+        readonly List<Remote> _remotes = new();
+        readonly List<byte[]> _in = new();
         public int Port { get; private set; }
-        public int Players { get { int n = 0; foreach (var r in _remotes.Values) if (r.ActorId != 0) n++; return n; } }
+        public int Players { get { int n = 0; foreach (var r in _remotes) if (r.ActorId != 0) n++; return n; } }
         public event System.Action<string> Notice;   // «Вася зашёл» — тост хосту
         public long BytesOut;
         public int HostActorId;   // персонаж самого хоста (для отладки --netnear)
-        public const int LongTimeoutMs = 60000;   // ENet: сколько молчания терпеть (клиент строит мир ~десятки секунд)
 
         public NetHost(LocalServer server) => _server = server;
 
-        public Error Start(int port)
+        public string Start(int port)
         {
             Port = port;
-            var err = _peer.CreateServer(port, NetProto.MaxPlayers);
-            if (err != Error.Ok) return err;
-            _peer.PeerConnected += id =>
+            try
             {
-                _remotes[(int)id] = new Remote { Peer = (int)id };
-                _peer.GetPeer((int)id)?.SetTimeout(32, LongTimeoutMs, LongTimeoutMs * 2);   // клиент долго строит карту и не отвечает — не рвём
-            };
-            _peer.PeerDisconnected += id =>
-            {
-                if (_remotes.Remove((int)id, out var r) && r.ActorId != 0) { Notice?.Invoke($"{r.Name} вышел"); GD.Print($"сеть: {r.Name} отключился"); }
-            };
-            GD.Print($"сеть: сервер слушает UDP {port}");
-            return Error.Ok;
+                _listen = new TcpListener(IPAddress.Any, port);
+                _listen.Start();
+            }
+            catch (System.Exception ex) { _listen = null; return ex.Message; }
+            GD.Print($"сеть: сервер слушает TCP {port}");
+            return null;
         }
 
-        public void Stop() { _peer.Close(); _remotes.Clear(); }
+        public void Stop()
+        {
+            foreach (var r in _remotes) r.Link.Close();
+            _remotes.Clear();
+            try { _listen?.Stop(); } catch { }
+            _listen = null;
+        }
 
-        public IEnumerable<string> Names() { foreach (var r in _remotes.Values) if (r.ActorId != 0) yield return r.Name; }
+        public IEnumerable<string> Names() { foreach (var r in _remotes) if (r.ActorId != 0) yield return r.Name; }
 
-        /// <summary>Раз в кадр: приём пакетов.</summary>
+        /// <summary>Раз в кадр: новые подключения, приём пакетов, отвалившиеся.</summary>
         public void Poll()
         {
-            _peer.Poll();
-            while (_peer.GetAvailablePacketCount() > 0)
+            if (_listen == null) return;
+            while (_listen.Pending())
             {
-                int from = _peer.GetPacketPeer();
-                var pkt = _peer.GetPacket();
-                if (pkt == null || pkt.Length < 1 || !_remotes.TryGetValue(from, out var r)) continue;
-                try
+                var s = _listen.AcceptSocket();
+                if (_remotes.Count >= NetProto.MaxPlayers) { s.Close(); continue; }
+                _remotes.Add(new Remote { Link = new NetLink(s) });
+            }
+            for (int i = _remotes.Count - 1; i >= 0; i--)
+            {
+                var r = _remotes[i];
+                _in.Clear();
+                r.Link.Poll(_in);
+                foreach (var pkt in _in)
                 {
-                    if (pkt[0] == NetProto.Hello && r.ActorId == 0) OnHello(r, NetProto.Decode<NetProto.HelloMsg>(pkt));
-                    else if (pkt[0] == NetProto.Input && r.ActorId != 0)
+                    if (pkt.Length < 1) continue;
+                    try
                     {
-                        var c = NetProto.DecodeInput(pkt);
-                        c.DebugKit = c.ToggleTime = c.DebugFly = false; c.Follow = 0;   // читы — только у хоста
-                        r.Queue.Add(c);
+                        if (pkt[0] == NetProto.Hello && r.ActorId == 0) OnHello(r, NetProto.Decode<NetProto.HelloMsg>(pkt));
+                        else if (pkt[0] == NetProto.Ready && r.ActorId != 0 && !r.Ready) { r.Ready = true; r.Enc = new NetProto.SnapEncoder(); }   // заново с полного снимка
+                        else if (pkt[0] == NetProto.Input && r.ActorId != 0)
+                        {
+                            var c = NetProto.DecodeInput(pkt);
+                            c.DebugKit = c.ToggleTime = c.DebugFly = false; c.Follow = 0;   // читы — только у хоста
+                            r.Queue.Add(c);
+                        }
                     }
+                    catch (System.Exception ex) { GD.PrintErr($"сеть: плохой пакет от {r.Link.Remote}: {ex.Message}"); }
                 }
-                catch (System.Exception ex) { GD.PrintErr($"сеть: плохой пакет от {from}: {ex.Message}"); }
+                if (r.Link.Pending > MaxBacklog) r.Link.Close();
+                if (r.Link.Closed)
+                {
+                    _remotes.RemoveAt(i);
+                    if (r.ActorId != 0) { Notice?.Invoke($"{r.Name} вышел"); GD.Print($"сеть: {r.Name} отключился"); }
+                }
             }
         }
 
@@ -83,22 +201,22 @@ namespace Rastvordd.Client
                 : name.Length < 2 || name.Length > 20 ? "имя — от 2 до 20 букв"
                 : name == "Игрок" || name.EndsWith("(бот)") ? "это имя занято"
                 : System.Linq.Enumerable.Contains(Names(), name) ? "игрок с таким именем уже в игре" : null;
-            if (why != null) { Send(r.Peer, NetProto.Pack(NetProto.Reject, why)); _peer.DisconnectPeer(r.Peer); return; }
+            if (why != null) { r.Link.Send(NetProto.Pack(NetProto.Reject, why)); return; }
             r.Name = name;
             r.ActorId = _server.Connect(name);
             // отладка: --netnear — друг появляется в 3 м от хоста (проверка «видят друг друга»)
             if (HostActorId != 0 && System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--netnear") >= 0 && _server.World.Find(HostActorId) is Actor ha && _server.World.Find(r.ActorId) is Actor f)
                 f.Pos = ha.Pos + new System.Numerics.Vector2(3, 0);
-            Send(r.Peer, NetProto.EncodeWelcome(new NetProto.WelcomeMsg { Version = NetProto.Version, Id = r.ActorId, Seed = _server.World.Seed, NoScatter = World.NoScatter, MapHash = NetProto.MapHash(_server.World) }));
-            Send(r.Peer, r.Enc.Encode(_server.BuildSnapshot(r.ActorId)));   // сразу — даже если мир хоста стоит (экран загрузки)
+            r.Link.Send(NetProto.EncodeWelcome(new NetProto.WelcomeMsg { Version = NetProto.Version, Id = r.ActorId, Seed = _server.World.Seed, NoScatter = World.NoScatter, MapHash = NetProto.MapHash(_server.World) }));
+            r.Link.Send(r.Enc.Encode(_server.BuildSnapshot(r.ActorId)));   // сразу — даже если мир хоста стоит (экран загрузки)
             Notice?.Invoke($"{name} зашёл");
-            GD.Print($"сеть: {name} (peer {r.Peer}) → персонаж {r.ActorId}");
+            GD.Print($"сеть: {name} ({r.Link.Remote}) → персонаж {r.ActorId}");
         }
 
         /// <summary>Перед тиком мира: по команде от каждого друга (очередь сглаживает рывки сети).</summary>
         public void PreTick()
         {
-            foreach (var r in _remotes.Values)
+            foreach (var r in _remotes)
             {
                 if (r.ActorId == 0) continue;
                 // отстали — догоняем: лишние команды сливаем, разовые нажатия не теряем
@@ -137,21 +255,13 @@ namespace Rastvordd.Client
         /// <summary>После тика мира: каждому другу — его снимок.</summary>
         public void PostTick()
         {
-            foreach (var r in _remotes.Values)
+            foreach (var r in _remotes)
             {
-                if (r.ActorId == 0) continue;
+                if (r.ActorId == 0 || !r.Ready || r.Link.Closed) continue;
                 var bytes = r.Enc.Encode(_server.BuildSnapshot(r.ActorId));
                 BytesOut += bytes.Length;
-                Send(r.Peer, bytes);
+                r.Link.Send(bytes);
             }
-        }
-
-        void Send(int peer, byte[] data)
-        {
-            _peer.TransferMode = MultiplayerPeer.TransferModeEnum.Reliable;
-            _peer.TransferChannel = 0;
-            _peer.SetTargetPeer(peer);
-            _peer.PutPacket(data);
         }
     }
 
@@ -160,9 +270,10 @@ namespace Rastvordd.Client
     /// </summary>
     public sealed class NetClient
     {
-        readonly ENetMultiplayerPeer _peer = new();
+        NetLink _link;
         readonly NetProto.SnapDecoder _dec = new();
         readonly Queue<byte[]> _snaps = new();
+        readonly List<byte[]> _in = new();
         public NetProto.WelcomeMsg Info;
         public string Error;
         public bool Lost;
@@ -172,52 +283,63 @@ namespace Rastvordd.Client
         /// <summary>Подключиться и дождаться приветствия и первого снимка (блокирует до timeoutMs).</summary>
         public Snapshot ConnectBlocking(string host, int port, string name, int timeoutMs = 30000)
         {
-            var err = _peer.CreateClient(host, port);
-            if (err != Godot.Error.Ok) { Error = $"не удалось открыть соединение ({err})"; return null; }
             ulong t0 = Time.GetTicksMsec();
-            bool hello = false;
+            Socket s;
+            try
+            {
+                s = new Socket(SocketType.Stream, ProtocolType.Tcp);
+                var task = s.ConnectAsync(host, port);
+                if (!task.Wait(8000) || !s.Connected) { s.Close(); Error = "нет ответа от сервера (адрес, порт, проброс?)"; return null; }
+            }
+            catch (System.Exception ex) { Error = "нет связи: " + (ex.InnerException ?? ex).Message; return null; }
+            _link = new NetLink(s);
+            _link.Send(NetProto.EncodeHello(name));
             while (Time.GetTicksMsec() - t0 < (ulong)timeoutMs)
             {
-                _peer.Poll();
-                var st = _peer.GetConnectionStatus();
-                if (st == MultiplayerPeer.ConnectionStatus.Connected && !hello)
+                _in.Clear();
+                _link.Poll(_in);
+                foreach (var pkt in _in)
                 {
-                    _peer.GetPeer(1)?.SetTimeout(32, NetHost.LongTimeoutMs, NetHost.LongTimeoutMs * 2);
-                    Send(NetProto.EncodeHello(name)); hello = true;
-                }
-                if (st == MultiplayerPeer.ConnectionStatus.Disconnected) { Error ??= "сервер не отвечает"; return null; }
-                while (_peer.GetAvailablePacketCount() > 0)
-                {
-                    var pkt = _peer.GetPacket();
                     if (pkt.Length < 1) continue;
-                    if (pkt[0] == NetProto.Reject) { Error = NetProto.Text(pkt); _peer.Close(); return null; }
+                    if (pkt[0] == NetProto.Reject) { Error = NetProto.Text(pkt); _link.Close(); return null; }
                     if (pkt[0] == NetProto.Welcome) Info = NetProto.Decode<NetProto.WelcomeMsg>(pkt);
-                    else if (pkt[0] == NetProto.Snap && Info != null) { BytesIn += pkt.Length; return _dec.Decode(pkt); }
+                    else if (pkt[0] == NetProto.Snap && Info != null)
+                    {
+                        BytesIn += pkt.Length;
+                        var first = _dec.Decode(pkt);
+                        GD.Print($"сеть: мир получен за {Time.GetTicksMsec() - t0} мс ({pkt.Length / 1024} КБ)");
+                        return first;
+                    }
                 }
+                if (_link.Closed) { Error ??= "сервер закрыл соединение"; return null; }
                 OS.DelayMsec(5);
             }
-            Error = hello ? "сервер не прислал мир" : "нет ответа от сервера (адрес, порт, проброс?)";
-            _peer.Close();
+            Error = "сервер не прислал мир";
+            _link.Close();
             return null;
         }
 
-        public void Close() => _peer.Close();
+        public void Close() => _link?.Close();
 
         /// <summary>Раз в кадр: приём снимков.</summary>
         public void Poll()
         {
-            _peer.Poll();
-            if (_peer.GetConnectionStatus() == MultiplayerPeer.ConnectionStatus.Disconnected) Lost = true;
-            while (_peer.GetAvailablePacketCount() > 0)
+            if (_link == null) return;
+            _in.Clear();
+            _link.Poll(_in);
+            foreach (var pkt in _in)
             {
-                var pkt = _peer.GetPacket();
                 if (pkt.Length < 1) continue;
                 if (pkt[0] == NetProto.Snap) { _snaps.Enqueue(pkt); BytesIn += pkt.Length; }
                 else if (pkt[0] == NetProto.Reject) { Error = NetProto.Text(pkt); Lost = true; }
             }
+            if (_link.Closed) Lost = true;
         }
 
-        public void SendInput(InputCmd c) => Send(NetProto.EncodeInput(c));
+        public void SendInput(InputCmd c) => _link?.Send(NetProto.EncodeInput(c));
+
+        /// <summary>Карта построена: сервер начинает слать снимки (первый — полный).</summary>
+        public void SendReady() { _link?.Send(new[] { NetProto.Ready }); }
 
         /// <summary>Тик клиента: следующий снимок (null — нового нет, держим прежний). Отстали — проматываем, события копим.</summary>
         public Snapshot Take()
@@ -230,18 +352,11 @@ namespace Rastvordd.Client
             {
                 var old = _dec.Decode(_snaps.Dequeue());
                 (skipped ??= new()).AddRange(old.Events);
+                if (skipped.Count > 300) skipped.Clear();   // долго стояли (клиент строил мир) — старые выстрелы и шаги не проигрываем
             }
             var s = _dec.Decode(_snaps.Dequeue());
             if (skipped != null) { skipped.AddRange(s.Events); s.Events = skipped; }
             return s;
-        }
-
-        void Send(byte[] data)
-        {
-            _peer.TransferMode = MultiplayerPeer.TransferModeEnum.Reliable;
-            _peer.TransferChannel = 0;
-            _peer.SetTargetPeer(1);
-            _peer.PutPacket(data);
         }
     }
 }

@@ -95,13 +95,27 @@ th { color: var(--dim); font-weight: 600; font-size: 12.5px; }
 .kpi { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
 .kpi div { background: rgba(0,0,0,.2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
 .kpi .k { color: var(--dim); font-size: 12px; } .kpi .v { font-size: 18px; font-weight: 600; }
+.tiersv { display: flex; flex-direction: column; gap: 16px; }
+.tierbox h2 { margin: 0; font-size: 20px; } .tierbox h2 .sub { font-weight: 400; margin-left: 6px; }
+table.bal td, table.bal th { padding: 5px 7px; white-space: nowrap; }
+table.bal .num { text-align: right; font-variant-numeric: tabular-nums; }
+table.bal th .ic { width: 26px; height: 26px; margin-left: auto; } table.bal th .ic img { width: 22px; height: 22px; }
+table.bal tr.grp td { border-top: 1px solid rgba(255,255,255,.16); }
+table.bal td.items { display: flex; gap: 3px; flex-wrap: nowrap; } table.bal td.items .ic { width: 28px; height: 28px; cursor: pointer; } table.bal td.items .ic img { width: 24px; height: 24px; }
+table.bal td.finds { white-space: normal; min-width: 160px; font-size: 12.5px; color: var(--dim); }
+.faint { color: var(--faint); } .okc { color: var(--ok); } .badc { color: var(--bad); }
+.kitgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.kitgrid label { display: flex; flex-direction: column; gap: 3px; color: var(--dim); font-size: 12.5px; }
+.kitgrid select, .kitgrid input { width: 100%; }
+.kaddlist { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 </style>
 </head>
 <body>
 <header>
   <h1>Крафты Раствордда</h1>
   <div class="tabs" id="tabs">
-    <span class="tab on" data-v="cat">Каталог</span>
+    <span class="tab on" data-v="tiers">По тирам</span>
+    <span class="tab" data-v="cat">Каталог</span>
     <span class="tab" data-v="con">Конструктор <span class="basketbadge" id="bcount">0</span></span>
     <span class="tab" data-v="bench">По верстакам</span>
     <span class="tab" data-v="build">Стройка</span>
@@ -109,7 +123,8 @@ th { color: var(--dim); font-weight: 600; font-size: 12.5px; }
   </div>
 </header>
 <main>
-  <section class="view on" id="v-cat">
+  <section class="view on" id="v-tiers"><div id="tiers" class="tiersv"></div></section>
+  <section class="view" id="v-cat">
     <div class="cols">
       <div class="panel side">
         <input type="search" id="q" placeholder="Поиск: АКМ, пружина, ватник…">
@@ -421,6 +436,146 @@ function renderNotes() {
     <div class="sec"><h3>Заметки выгрузки</h3>${(D.notes || []).map(n => `<div class="note">• ${esc(n)}</div>`).join('')}</div>`;
 }
 
+// ---------- по тирам (баланс): сеты полный/экономный, оружие, шкафчик ----------
+const RES_ORDER = ['wood', 'stone', 'metal_fragments', 'sulfur', 'charcoal', 'cloth', 'leather', 'rubber', 'scrap', 'alloy', 'fuel', 'medspirt'];
+const isBasic = id => I[id]?.cat === 'Resource' || id === 'scrap' || RES_ORDER.includes(id);
+const ft = s => s >= 3600 ? fmt(Math.round(s / 360) / 10) + ' ч' : s >= 60 ? fmt(Math.round(s / 6) / 10) + ' мин' : fmt(s) + ' с';
+const ZONE = { Head: 'h', Face: 'h', Kofta: 't', Armor: 't', Arms: 'l', Gloves: 'l', Legs: 'l', Knees: 'l', Feet: 'l' };
+const ZCAP = { h: .7, t: .75, l: .6 };
+const SETROLE = { rags: 'стартовый', vatnik: 'тепло', leather: 'броня', scrap: 'броня', spec: 'радиация', army: 'броня', ozk: 'радиация', sobr: 'броня · только лут' };
+const SLOTORD = ['Head', 'Face', 'Kofta', 'Armor', 'Arms', 'Gloves', 'Legs', 'Knees', 'Feet'];
+const setTier = s => st(SETS[s][0])['одежда.Tier'] ?? 0;
+function setVariants(s) {
+  const ids = SETS[s].filter(x => ZONE[st(x)['одежда.Slot']]).sort((a, b) => SLOTORD.indexOf(st(a)['одежда.Slot']) - SLOTORD.indexOf(st(b)['одежда.Slot']));
+  const econ = ids.filter(x => ZONE[st(x)['одежда.Slot']] !== 'l');
+  return { econ: { label: 'экономный (голова + корпус)', ids: econ }, full: { label: 'полный', ids } };
+}
+function protOf(ids) {
+  const p = { h: 0, t: 0, l: 0 }; let warm = 0, rad = 0, spd = 0;
+  ids.forEach(x => { const s = st(x), z = ZONE[s['одежда.Slot']]; if (z) p[z] = 1 - (1 - p[z]) * (1 - (s['одежда.Bullet'] || 0)); warm += s['одежда.Warm'] || 0; rad += s['одежда.Rad'] || 0; spd += s['одежда.Speed'] || 0; });
+  for (const z in p) p[z] = Math.min(p[z], ZCAP[z]);
+  return { ...p, warm, rad, spd };
+}
+// стройка: ставится каркасом и улучшается по шагу — цена складывается (дверь ставится сразу деревянной)
+function buildRaw(kind, tier, n, raw) {
+  const b = (D.build || []).find(x => x.kind === kind); if (!b || n <= 0) return;
+  for (const t of b.tiers) if (t.tier <= tier && !(kind === 'Door' && t.tier === 0)) for (const [c, m] of t.cost) raw[c] = (raw[c] || 0) + m * n;
+}
+function costOf(items, builds = []) {
+  const acc = newAcc();
+  for (const [id, n] of Object.entries(items)) if (n > 0) expand(id, n, acc);
+  for (const [k, t, n] of builds) buildRaw(k, t, n, acc.raw);
+  acc.res = researchOf([...acc.tech]);
+  acc.loot = Object.keys(items).filter(id => items[id] > 0 && !mainRecipe(id));
+  return acc;
+}
+const ofItems = ids => Object.fromEntries(ids.map(x => [x, 1]));
+function wTier(id) { const t = st(id)['оружие.Tier']; return t != null ? Math.min(t, 3) : benchOf(id); }
+const WEAP = ALL.filter(id => id.startsWith('weapon_') && id !== 'weapon_torch');
+const BT_NAME = t => (D.build?.[0]?.tiers.find(x => x.tier === t) || {}).tier_name || t;
+const KIT_DEF = {
+  0: { w: 'weapon_bow', ammo: 30, extra: { weapon_spear: 1, bandage: 5, deploy_box: 1 }, set: 'rags', v: 'full', walls: 4, doors: 1, bt: 1 },
+  1: { w: 'weapon_homesmg', ammo: 90, extra: { bandage: 8, deploy_box: 1, lock_code: 1 }, set: 'leather', v: 'econ', walls: 4, doors: 1, bt: 2 },
+  2: { w: 'weapon_pps43', ammo: 120, extra: { bandage: 10, deploy_box: 1 }, set: 'scrap', v: 'econ', walls: 4, doors: 1, bt: 3 },
+  3: { w: 'weapon_akm', ammo: 150, extra: { medkit: 2, bandage: 5, deploy_box: 1 }, set: 'army', v: 'econ', walls: 4, doors: 1, bt: 4 },
+};
+let KIT = JSON.parse(JSON.stringify(KIT_DEF));
+try { const s = JSON.parse(localStorage.getItem('rast_kits') || 'null'); if (s) for (const t in KIT) Object.assign(KIT[t], s[t] || {}); } catch (e) { }
+const saveKit = () => { try { localStorage.setItem('rast_kits', JSON.stringify(KIT)); } catch (e) { } };
+function kitParts(t) {
+  const k = KIT[t], items = {}, add = (id, n) => { if (I[id] && n > 0) items[id] = (items[id] || 0) + n; };
+  add(k.w, 1); const am = st(k.w)['оружие.AmmoId']; if (am) add(am, k.ammo);
+  for (const [id, n] of Object.entries(k.extra)) add(id, n);
+  if (SETS[k.set]) setVariants(k.set)[k.v].ids.forEach(x => add(x, 1));
+  return { items, builds: [['Wall', k.bt, k.walls], ['Door', k.bt, k.doors]] };
+}
+function kitCost(t) { const p = kitParts(t); return costOf(p.items, p.builds); }
+// колонки ресурсов — общий порядок, чтобы тиры сравнивались глазами
+function resCols(accs) { const keys = new Set(); accs.forEach(a => Object.keys(a.raw).forEach(k => isBasic(k) && keys.add(k))); return [...keys].sort((a, b) => (RES_ORDER.indexOf(a) + 1 || 99) - (RES_ORDER.indexOf(b) + 1 || 99)); }
+const RSHORT = { wood: 'Дерево', stone: 'Камень', metal_fragments: 'Металл', sulfur: 'Сера', charcoal: 'Уголь', cloth: 'Ткань', leather: 'Кожа', rubber: 'Резина', scrap: 'Лом', alloy: 'Сплав', fuel: 'Топливо', medspirt: 'Спирт' };
+const thRes = cols => cols.map(c => `<th class="num" title="${esc(nm(c))}">${esc(RSHORT[c] || nm(c))}</th>`).join('');
+const tdRes = (cols, a) => cols.map(c => `<td class="num">${a.raw[c] ? fmt(Math.round(a.raw[c])) : '<span class="faint">·</span>'}</td>`).join('');
+const findsTd = a => { const f = Object.entries(a.raw).filter(([k]) => !isBasic(k) && !a.loot.includes(k)); return `<td class="finds">${a.loot.length ? `<span class="pill">только лут: ${a.loot.length} шт.</span> ` : ''}${f.map(([k, n]) => `<a data-go="${k}">${esc(nm(k))}</a> ${fmt(n)}`).join(', ') || (a.loot.length ? '' : '<span class="faint">—</span>')}</td>`; };
+const pct = v => Math.round(v * 100) + '%';
+function renderTiers() {
+  const tiers = [0, 1, 2, 3];
+  const kits = tiers.map(kitCost), cols0 = resCols(kits);
+  let h = `<div class="panel"><h2 style="margin:0 0 4px">Сводка по тирам</h2><div class="note">Шкафчик — всё на один выход и оборону на этом тире: ствол, патроны, хил, сет, стенки, дверь, ящик (состав правится ниже, в каждом тире; запоминается в браузере). Сырьё — с раскрытием всех рецептов до ресурсов; стройка — каркас и все улучшения до выбранного уровня. Клик по названию — карточка предмета.</div>
+  <div class="tablewrap"><table class="bal"><tr><th>Тир</th>${thRes(cols0)}<th>Находки</th><th class="num">Лом изуч.</th><th class="num">Крафт</th></tr>
+  ${tiers.map((t, i) => `<tr><td><a data-tj="${t}"><b>Тир ${t}</b></a></td>${tdRes(cols0, kits[i])}${findsTd(kits[i])}<td class="num">${kits[i].res.scrap}</td><td class="num">${ft(kits[i].time)}</td></tr>`).join('')}</table></div></div>`;
+  for (const t of tiers) {
+    h += `<div class="panel tierbox" id="tier${t}"><h2>Тир ${t} <span class="sub">${t === 0 ? 'в руках' : 'верстак ' + t}</span></h2>`;
+    // сеты
+    const sets = Object.keys(SETS).filter(s => SETS[s].length > 1 && setTier(s) === t).sort((a, b) => (SETROLE[a] || '').localeCompare(SETROLE[b] || '', 'ru'));
+    if (sets.length) {
+      const rows = [];
+      sets.forEach(s => { const v = setVariants(s); for (const key of ['econ', 'full']) { const ids = v[key].ids; rows.push({ s, key, ids, a: costOf(ofItems(ids)), p: protOf(ids) }); } });
+      const cols = resCols(rows.map(r => r.a));
+      h += `<div class="sec"><h3>Сеты</h3><div class="tablewrap"><table class="bal"><tr><th>Набор</th><th>Вариант</th><th>Вещи</th><th class="num">Голова</th><th class="num">Корпус</th><th class="num">Конечн.</th><th class="num">Тепло</th><th class="num">Рад.</th>${thRes(cols)}<th>Находки</th><th class="num">Лом изуч.</th><th class="num">Крафт</th></tr>`;
+      rows.forEach((r, i) => {
+        const first = i % 2 === 0, need = r.ids.length >= 4;
+        h += `<tr class="${first ? 'grp' : ''}">${first ? `<td rowspan="2"><b>${esc(setName(r.s))}</b><div class="sub">${esc(SETROLE[r.s] || '')}</div></td>` : ''}
+        <td>${r.key === 'econ' ? 'экономный' : 'полный'}${t > 0 ? `<div class="sub ${need ? 'okc' : 'badc'}" title="Для допуска на РТ своего тира нужно носить 4+ вещи этого тира (D68)">${need ? 'годен для РТ' : 'мало для РТ (нужно 4)'}</div>` : ''}</td>
+        <td class="items">${r.ids.map(x => `<span data-go="${x}" title="${esc(nm(x))} · ${SLOT[st(x)['одежда.Slot']] || ''}">${icon(x)}</span>`).join('')}</td>
+        <td class="num">${pct(r.p.h)}</td><td class="num">${pct(r.p.t)}</td><td class="num">${pct(r.p.l)}</td><td class="num">${fmt(r.p.warm)}</td><td class="num">${fmt(r.p.rad)}</td>
+        ${tdRes(cols, r.a)}${findsTd(r.a)}<td class="num">${r.a.res.scrap}</td><td class="num">${ft(r.a.time)}</td></tr>`;
+      });
+      h += `</table></div><div class="note">Защита — от пуль, по зонам: 1 − Π(1 − rᵢ), потолок голова 70 %, корпус 75 %, конечности 60 % (без пластин). «Экономный» — только голова и корпус.</div></div>`;
+    }
+    // оружие
+    const ws = WEAP.filter(w => wTier(w) === t).sort((a, b) => (benchOf(a) ?? 9) - (benchOf(b) ?? 9) || nm(a).localeCompare(nm(b), 'ru'));
+    if (ws.length) {
+      const rows = ws.map(w => { const am = st(w)['оружие.AmmoId']; return { w, am, a: costOf({ [w]: 1 }), b: am && mainRecipe(am) ? costOf({ [am]: 100 }) : null }; });
+      const cols = resCols(rows.flatMap(r => [r.a, r.b].filter(Boolean)));
+      h += `<div class="sec"><h3>Оружие и патроны</h3><div class="tablewrap"><table class="bal"><tr><th>Ствол</th><th>Что</th>${thRes(cols)}<th>Находки</th><th class="num">Лом изуч.</th><th class="num">Крафт</th></tr>`;
+      rows.forEach(r => {
+        const s = st(r.w), craft = !!mainRecipe(r.w);
+        h += `<tr class="grp"><td rowspan="${r.b ? 2 : 1}"><span style="display:inline-flex;gap:6px;align-items:center">${icon(r.w)}<a data-go="${r.w}"><b>${esc(nm(r.w))}</b></a></span><div class="sub">${s['оружие.Magazine'] ? `урон ${s['оружие.Damage']}${(s['оружие.Pellets'] || 1) > 1 ? '×' + s['оружие.Pellets'] : ''} · маг. ${s['оружие.Magazine']}` : 'ближний бой'}${s['оружие.Tier'] > 3 ? ' · тир ' + s['оружие.Tier'] : ''}</div></td>
+          <td>${craft ? 'ствол' : '<span class="pill">только лут</span>'}</td>${craft ? tdRes(cols, r.a) + findsTd(r.a) + `<td class="num">${r.a.res.scrap}</td><td class="num">${ft(r.a.time)}</td>` : `<td colspan="${cols.length + 3}"></td>`}</tr>`;
+        if (r.b) h += `<tr><td>100 × <a data-go="${r.am}">${esc(nm(r.am))}</a></td>${tdRes(cols, r.b)}${findsTd(r.b)}<td class="num">${r.b.res.scrap}</td><td class="num">${ft(r.b.time)}</td></tr>`;
+      });
+      h += `</table></div></div>`;
+    }
+    // шкафчик
+    const k = KIT[t], parts = kitParts(t), a = costOf(parts.items, parts.builds);
+    const opt = (v, l, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(l)}</option>`;
+    const allSets = Object.keys(SETS).filter(s => SETS[s].length > 1).sort((x, y) => setTier(x) - setTier(y));
+    h += `<div class="sec"><h3>Шкафчик тира ${t}</h3><div class="kitgrid">
+      <label>Ствол <select data-kw="${t}">${WEAP.slice().sort((x, y) => (wTier(x) ?? 9) - (wTier(y) ?? 9)).map(w => opt(w, `${nm(w)} (т${wTier(w) ?? '?'}${mainRecipe(w) ? '' : ', лут'})`, k.w)).join('')}</select></label>
+      <label>Патроны <input type="number" min="0" data-kn="${t}|ammo" value="${k.ammo}"></label>
+      <label>Сет <select data-ks="${t}">${allSets.map(s => opt(s, `${setName(s)} (т${setTier(s)})`, k.set)).join('')}</select></label>
+      <label>Вариант <select data-kv="${t}">${opt('econ', 'экономный', k.v)}${opt('full', 'полный', k.v)}</select></label>
+      <label>Стены <input type="number" min="0" data-kn="${t}|walls" value="${k.walls}"></label>
+      <label>Двери <input type="number" min="0" data-kn="${t}|doors" value="${k.doors}"></label>
+      <label>Уровень стройки <select data-kb="${t}">${[1, 2, 3, 4, 5].map(b => opt(String(b), BT_NAME(b), String(k.bt))).join('')}</select></label>
+      ${Object.entries(k.extra).map(([id, n]) => `<label>${esc(nm(id))} <input type="number" min="0" data-kx="${t}|${id}" value="${n}"></label>`).join('')}
+      </div>
+      <div class="meta"><input type="search" data-kadd="${t}" placeholder="+ добавить в шкафчик: хил, бомбы, станок…" style="max-width:320px;width:100%"><span class="btn sm ghost" data-kreset="${t}">сбросить</span><span class="btn sm ghost" data-kbasket="${t}">в конструктор</span></div>
+      <div class="kaddlist" id="kadd${t}"></div>
+      <div class="kpi" style="margin-top:10px"><div><div class="k">Верстак</div><div class="v">${a.bench ? 'уровень ' + a.bench : 'не нужен'}</div></div><div><div class="k">Лом на изучение</div><div class="v">${a.res.scrap}</div></div><div><div class="k">Время крафта</div><div class="v">${ft(a.time)}</div></div><div><div class="k">Станции</div><div class="v" style="font-size:14px">${[...a.stations].map(esc).join(', ') || '—'}</div></div></div>
+      ${totalsHtml(a.raw)}${a.loot.length ? `<div class="note">Не крафтится, только найти: ${a.loot.map(x => `<a data-go="${x}">${esc(nm(x))}</a>`).join(', ')}</div>` : ''}</div>`;
+    h += '</div>';
+  }
+  const el = document.getElementById('tiers'); el.innerHTML = h;
+  const upd = () => { saveKit(); const y = scrollY; renderTiers(); scrollTo(0, y); };
+  el.querySelectorAll('[data-kw]').forEach(s => s.onchange = () => { KIT[s.dataset.kw].w = s.value; upd(); });
+  el.querySelectorAll('[data-ks]').forEach(s => s.onchange = () => { KIT[s.dataset.ks].set = s.value; upd(); });
+  el.querySelectorAll('[data-kv]').forEach(s => s.onchange = () => { KIT[s.dataset.kv].v = s.value; upd(); });
+  el.querySelectorAll('[data-kb]').forEach(s => s.onchange = () => { KIT[s.dataset.kb].bt = +s.value; upd(); });
+  el.querySelectorAll('[data-kn]').forEach(s => s.onchange = () => { const [t, f] = s.dataset.kn.split('|'); KIT[t][f] = Math.max(0, +s.value || 0); upd(); });
+  el.querySelectorAll('[data-kx]').forEach(s => s.onchange = () => { const [t, id] = s.dataset.kx.split('|'); const v = Math.max(0, +s.value || 0); if (v) KIT[t].extra[id] = v; else delete KIT[t].extra[id]; upd(); });
+  el.querySelectorAll('[data-kreset]').forEach(b => b.onclick = () => { KIT[b.dataset.kreset] = JSON.parse(JSON.stringify(KIT_DEF[b.dataset.kreset])); upd(); });
+  el.querySelectorAll('[data-kbasket]').forEach(b => b.onclick = () => { for (const [id, n] of Object.entries(kitParts(b.dataset.kbasket).items)) addB(id, n); b.textContent = 'добавлено (без стройки)'; });
+  el.querySelectorAll('[data-kadd]').forEach(inp => inp.oninput = () => {
+    const t = inp.dataset.kadd, q = norm(inp.value.trim());
+    const ids = q ? ALL.filter(id => norm(nm(id)).includes(q)).slice(0, 12) : [];
+    const box = document.getElementById('kadd' + t);
+    box.innerHTML = ids.map(id => `<span class="ing" data-kpick="${t}|${id}">${icon(id)}<span>${esc(nm(id))}</span></span>`).join('');
+    box.querySelectorAll('[data-kpick]').forEach(p => p.onclick = e => { e.stopPropagation(); const [tt, id] = p.dataset.kpick.split('|'); KIT[tt].extra[id] = (KIT[tt].extra[id] || 0) + 1; upd(); });
+  });
+  el.querySelectorAll('[data-tj]').forEach(a => a.onclick = () => document.getElementById('tier' + a.dataset.tj).scrollIntoView({ behavior: 'smooth' }));
+}
+
 // ---------- навигация ----------
 function show(v) { document.querySelectorAll('.view').forEach(x => x.classList.toggle('on', x.id === 'v-' + v)); document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x.dataset.v === v)); }
 function go(h) { location.hash = h; }
@@ -432,9 +587,10 @@ function route() {
   else if (h === 'bench') { show('bench'); renderBench(); }
   else if (h === 'build') { show('build'); renderBuild(); }
   else if (h === 'notes') { show('notes'); renderNotes(); }
-  else { show('cat'); renderCard(curId); }
+  else if (h === 'cat') { show('cat'); renderCard(curId); }
+  else { show('tiers'); renderTiers(); }
 }
-document.getElementById('tabs').onclick = e => { const t = e.target.closest('.tab'); if (!t) return; const v = t.dataset.v; go(v === 'cat' ? (curId ? 'i/' + curId : '') : v === 'con' ? 'c' : v); };
+document.getElementById('tabs').onclick = e => { const t = e.target.closest('.tab'); if (!t) return; const v = t.dataset.v; go(v === 'cat' ? (curId ? 'i/' + curId : 'cat') : v === 'con' ? 'c' : v === 'tiers' ? '' : v); };
 window.addEventListener('hashchange', route);
 try { B = JSON.parse(localStorage.getItem('rast_basket') || '{}') || {}; for (const k of Object.keys(B)) if (!I[k]) delete B[k]; } catch (e) { B = {}; }
 document.getElementById('bcount').textContent = Object.keys(B).length;

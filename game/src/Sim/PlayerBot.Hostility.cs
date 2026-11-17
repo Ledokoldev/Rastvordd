@@ -173,7 +173,8 @@ namespace Rastvordd.Sim
             en.S = s;
             en.Why = why;
             en.Until = _w.Time + 15f + (float)_rng.NextDouble() * 5f;
-            if (s == Stance.Parted) en.Until = _w.Time + 120f;
+            if (s == Stance.Parted) en.Until = _w.Time + (Ranged() != null ? 30f : 120f);   // D70: со стволом «разошлись» ненадолго
+            if (s == Stance.Watch) en.Until = _w.Time + 4f;                                   // D70: «держу на виду» — пересмотр через 4 с
             if (s == Stance.Fight && _fleeFrom == en.A) { _fleeFrom = null; _fleeEnd = -99; _retreating = false; _hasEscape = false; }   // D64: решил драться — отход отменён (раньше таймер отхода перебивал бой)
             if (!changed) return;
             string what = s switch { Stance.Fight => "нападаю", Stance.Flee => "ухожу", Stance.Camp => "караулю выход с РТ", Stance.Parted => "разошлись", _ => "держу на виду" };
@@ -207,6 +208,7 @@ namespace Rastvordd.Sim
             bool nakedMe = MyPower <= 0.15f;       // у меня только камень или инструмент
 
             if (hitMe && Retaliate(a, d) is string rw) return (Stance.Fight, rw);   // D64: на удар — ответ
+            if (ArmedRule(a, d, edge, kit, loaded) is (Stance, string) ar) return ar;   // D70: со стволом мимо не проходят
             if (lose != null) return hitMe || en.Rt || d < 25 || armedClose ? (Stance.Flee, lose) : (Stance.Watch, lose);
             if (hitMe) return (Stance.Fight, "он напал первым");
             if (CampJudge(a, edge) is (Stance, string) cj) return cj;   // из засады: с лутом или слабее — бью, сильного пропускаю
@@ -257,6 +259,27 @@ namespace Rastvordd.Sim
             if (d < 6 && edge >= 0.05f && worth) return (Stance.Fight, "подошёл вплотную");
             if (edge < -0.1f && d < 15) return (Stance.Flee, $"он сильнее ({kit})");
             return (Stance.Watch, empty ? "голый — не стоит патронов" : "держу на виду");
+        }
+
+        /// <summary>
+        /// D70 (пользователь: «если у тебя есть оружие — ты не будешь проходить мимо, ты будешь его ебашить или умирать сам;
+        /// на РТ вместе лутаются, на дропе ждут вдесятером — так не должно быть»): со стволом и патронами любой встречный
+        /// в 60 м — бой. Исключения: при смерти/без патронов; несу лут и он без ствола далеко — ухожу; он намного сильнее
+        /// и ещё далеко — ухожу из вида (не «держу на виду» и не «разошлись»). У дропа, на РТ и у дома — бой всегда.
+        /// </summary>
+        (Stance, string)? ArmedRule(Actor a, float d, float edge, string kit, bool loaded)
+        {
+            if (Ranged() is not string g || AmmoLeft(g) < (g == "weapon_bow" ? 3 : 6)) return null;
+            if (Critical() is string c) return (Stance.Flee, c);
+            if (d > 60) return null;
+            bool foeArmed = a.Weapon != null && !a.Weapon.Def.Melee;
+            bool contest = (_rj != null && _rj.Ev != null && Vector2.Distance(_me.Pos, _rj.Ev.Pos) < 80)
+                || (_rt != null && _rtPhase != RtPhase.None && Vector2.Distance(_me.Pos, _rt.M.Center) < _rt.Radius + 50)
+                || (MyClaim() is Deployable cl && Vector2.Distance(cl.Pos, a.Pos) < 40);
+            if (!contest && edge < -0.45f && d > 22) { LStat("D70: ушёл от сильного"); return (Stance.Flee, $"у него {kit} — намного сильнее, ухожу из вида"); }
+            if (loaded && !contest && !foeArmed && d > 25) return (Stance.Flee, $"несу ≈{_surplus:0} лома, он без ствола — ухожу");
+            LStat(contest ? "D70: бой за точку" : "D70: вижу — стреляю");
+            return (Stance.Fight, contest ? $"у точки делиться не буду — {a.Name} ({kit}) лишний" : $"вижу {a.Name} ({kit}) — стреляю первым");
         }
 
         /// <summary>
@@ -367,7 +390,8 @@ namespace Rastvordd.Sim
 
         // ---------- охота на встречного и месть ----------
 
-        float EncFightScore() => _encFight != null && _encFight != _threat && _me.Hp >= 35 ? 88 : 0;
+        // D70: со стволом бой выше любых дел (слух, РТ, сброс, сторож), кроме бегства
+        float EncFightScore() => _encFight != null && _encFight != _threat && _me.Hp >= 35 ? (Ranged() != null ? 94 : 88) : 0;
 
         bool EncFightAct(ref InputCmd cmd)
         {

@@ -278,6 +278,9 @@ namespace Rastvordd.Sim
                 || (MyClaim() is Deployable cl && Vector2.Distance(cl.Pos, a.Pos) < 40);
             if (!contest && edge < -0.45f && d > 22) { LStat("D70: ушёл от сильного"); return (Stance.Flee, $"у него {kit} — намного сильнее, ухожу из вида"); }
             if (loaded && !contest && !foeArmed && d > 25) return (Stance.Flee, $"несу ≈{_surplus:0} лома, он без ствола — ухожу");
+            // пользователь: «после того как дроп слутал или убил жирного — сейвил ресы домой»: с добычей бой только вплотную или у дома
+            if (Hauling && d > 20 && !(MyClaim() is Deployable hc && Vector2.Distance(hc.Pos, a.Pos) < 40))
+            { LStat("D71: несу добычу — обхожу"); return (Stance.Flee, $"несу добычу (≈{_surplus:0} лома) домой — не до драки"); }
             LStat(contest ? "D70: бой за точку" : "D70: вижу — стреляю");
             return (Stance.Fight, contest ? $"у точки делиться не буду — {a.Name} ({kit}) лишний" : $"вижу {a.Name} ({kit}) — стреляю первым");
         }
@@ -391,7 +394,10 @@ namespace Rastvordd.Sim
         // ---------- охота на встречного и месть ----------
 
         // D70: со стволом бой выше любых дел (слух, РТ, сброс, сторож), кроме бегства
-        float EncFightScore() => _encFight != null && _encFight != _threat && _me.Hp >= 35 ? (Ranged() != null ? 94 : 88) : 0;
+        float EncFightScore() => _encFight != null && _encFight != _threat && _me.Hp >= 35 ? (Ranged() != null && !Hauling ? 94 : 86) : 0;   // с добычей — ниже сдачи (89)
+
+        /// <summary>Несу добычу домой: после дропа, РТ или убитого (10 мин) и при себе ≥ 100 лома, или просто ≥ 250.</summary>
+        bool Hauling => _surplus >= 250 || (_surplus >= 100 && _w.Time < _depositAfter);
 
         bool EncFightAct(ref InputCmd cmd)
         {

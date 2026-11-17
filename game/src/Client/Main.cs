@@ -338,7 +338,7 @@ namespace Rastvordd.Client
                 {
                     // прицел относительно себя, метры: at1.5;-2
                     var p = a.Substring(2).Split(';');
-                    var me = _server.World.Find(_myId).Pos;
+                    var me = _net != null ? _cur.Actors.Find(x => x.Id == _myId).Pos : _server.World.Find(_myId).Pos;
                     _autoAim = me + new SVec(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture));
                 }
             }
@@ -366,14 +366,28 @@ namespace Rastvordd.Client
             // правки баланса со страницы прогрессии (game/data/balance.json) — до создания мира
             Rastvordd.Sim.World.NoScatter = System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--noscatter") >= 0;   // замер: мир без мелкого реквизита
             if (FileAccess.FileExists("res://data/balance.json")) try { Rastvordd.Sim.BalanceOverrides.Apply(FileAccess.GetFileAsString("res://data/balance.json")); } catch (System.Exception ex) { GD.PrintErr($"balance.json: {ex.Message}"); }
-            _server = new LocalServer(seedArg != null && int.TryParse(seedArg.Substring(7), out int seedN) ? seedN : 1337);
+            // сеть (D73): клиент — мир не считает, строит карту по зерну сервера и проигрывает его снимки
+            var conArg = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--connect="));
+            var nameArg = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--name="));
+            if (conArg != null) { NetConnectTo = conArg.Substring(10); NetName = nameArg?.Substring(7) ?? NetName; }
+            Snapshot netFirst = null;
+            if (NetConnectTo != null)
+            {
+                var (nh, np) = SplitAddr(NetConnectTo);
+                var nc = new NetClient();
+                netFirst = nc.ConnectBlocking(nh, np, NetName ?? "Гость");
+                if (netFirst == null) { _netError = $"Не подключиться к {NetConnectTo}: {nc.Error}"; GD.PrintErr("сеть: " + _netError); NetConnectTo = null; }
+                else { _net = nc; Rastvordd.Sim.World.NoScatter = nc.Info.NoScatter; GD.Print($"сеть: подключён к {nh}:{np}, персонаж {nc.Info.Id}"); }
+            }
+            _server = new LocalServer(_net != null ? _net.Info.Seed : seedArg != null && int.TryParse(seedArg.Substring(7), out int seedN) ? seedN : 1337);
             // сохранение мира игрока — только при обычном запуске: любой отладочный флаг (прогоны ботов, скриншоты,
             // наблюдатель) работает со свежим миром и НЕ трогает сохранение (иначе тест перезапишет мир игрока)
-            _saveEnabled = OS.GetCmdlineUserArgs().All(a => a.StartsWith("--bots=") || a.StartsWith("--near=") || a.StartsWith("--save="));   // --near — только встать у узла, мир свой   // своя игра (в т. ч. с --bots=N) сохраняется, отладочные запуски — нет
+            _saveEnabled = OS.GetCmdlineUserArgs().All(a => a.StartsWith("--bots=") || a.StartsWith("--near=") || a.StartsWith("--save=") || a == "--host" || a.StartsWith("--host="));   // --host (D73): своя игра, открытая друзьям   // --near — только встать у узла, мир свой   // своя игра (в т. ч. с --bots=N) сохраняется, отладочные запуски — нет
             if (OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--save=")) is string sv && sv.Length > 7) SavePath = $"user://world_save_{sv[7..]}.json";   // отдельный мир (например, 60 ботов): основной сейв не трогается
             // отладка сохранений: --savefile=путь — отдельный файл, работает и в прогонах со скриншотами
             var sf = System.Array.Find(OS.GetCmdlineUserArgs(), a => a.StartsWith("--savefile="));
             if (sf != null) { SavePath = sf.Substring(11); _saveEnabled = true; }
+            if (_net != null) _saveEnabled = false;   // клиент НИКОГДА не пишет сохранение — иначе затрёт свой мир пустым
             bool loaded = false;
             if (_saveEnabled && FileAccess.FileExists(SavePath))
             {
@@ -385,7 +399,13 @@ namespace Rastvordd.Client
             _autoCam = _spectate && System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--autocam") >= 0;
             var spd = System.Array.Find(OS.GetCmdlineUserArgs(), x => x.StartsWith("--speed="));
             if (spd != null && int.TryParse(spd[8..], out int ts)) _timeScale = System.Math.Clamp(ts, 1, 60);   // скорость мира с самого старта
-            _myId = _spectate ? _server.ConnectSpectator() : _server.Connect("Игрок");
+            if (_net != null)
+            {
+                _spectate = false; _timeScale = 1;
+                _myId = _net.Info.Id;
+                if (NetProto.MapHash(_server.World) != _net.Info.MapHash) _netError = "Карта сервера не совпала с местной (разные версии игры?) — возможны странности";
+            }
+            else _myId = _spectate ? _server.ConnectSpectator() : _server.Connect("Игрок");
             if (!_spectate && System.Array.IndexOf(OS.GetCmdlineUserArgs(), "--rtkit") >= 0 && _server.World.Find(_myId) is Rastvordd.Sim.Actor kit)
             {
                 // отладка: набор для пробежки по РТ — АКМ и наган с патронами, перфокарты I/II, дизель для «Маяка», хил, карты доступа
@@ -550,6 +570,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _hud.WipeRequested += () =>
             {
                 // игрок сам попросил новый вайп: стираем сохранение и перезапускаем сцену
+                if (_net != null) { _hud.Toast("В чужой игре вайп делает хост"); return; }
                 _saveEnabled = false;
                 string path = ProjectSettings.GlobalizePath(SavePath);
                 if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
@@ -572,13 +593,17 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             _settings.FpsToggled += on => _fpsLabel.Visible = on;
             _settings.QualityChanged += ApplyQuality;
             _settings.PostToggled += on => { if (_post != null && _post.Toggle() != on) _post.Toggle(); };
+            NetMenuSetup();
 
             _ghost = new GhostView2D { Visible = false };
             _world.AddChild(_ghost);
 
-            _cur = _server.BuildSnapshot(_myId);
+            _cur = _net != null ? netFirst : _server.BuildSnapshot(_myId);
             Input.MouseMode = Input.MouseModeEnum.Hidden;
-            _hud.Toast("Вайп начался. Ты голый на пляже с булыжником. Бей деревья и камни, Q — крафт.");
+            _hud.Toast(_net != null ? $"Ты в игре у {NetConnectTo}. Esc → «Сеть» — отключиться." : "Вайп начался. Ты голый на пляже с булыжником. Бей деревья и камни, Q — крафт.");
+            if (_netError != null) _hud.Toast(_netError);
+            var hostArg = System.Array.Find(OS.GetCmdlineUserArgs(), a => a == "--host" || a.StartsWith("--host="));
+            if (_net == null && (hostArg != null || NetHostPort > 0)) StartHost(hostArg != null && hostArg.Length > 7 && int.TryParse(hostArg[7..], out int hp) ? hp : NetHostPort > 0 ? NetHostPort : NetProto.DefaultPort);
             if (OS.GetCmdlineUserArgs().Contains("--kit")) _debugEdge = true;
             if (OS.GetCmdlineUserArgs().Contains("--craft")) _hud.ToggleCraft();
             SandboxReady();
@@ -1299,7 +1324,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
 
         InputCmd BuildCmd()
         {
-            bool typing = _hud.CodeOpen;
+            bool typing = _hud.CodeOpen || GetViewport().GuiGetFocusOwner() is LineEdit;   // пишешь адрес в «Сети» — не ходим
             var move = typing ? SVec.Zero : WasdVector();
             if (_cur?.Self != null && _cur.Self.Dead) _autoRun = SVec.Zero;
             bool auto = move == SVec.Zero && _autoRun != SVec.Zero;
@@ -1404,7 +1429,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
         string _saveError = "";
         bool SaveWorld()
         {
-            if (!_saveEnabled) return false;
+            if (!_saveEnabled || _net != null) return false;
             string path = ProjectSettings.GlobalizePath(SavePath);
             try
             {
@@ -1537,6 +1562,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
             RunScript();
             UpdateAim((float)delta);
 
+            if (_net != null || _host != null) { _timeScale = 1; NetPoll(); }   // по сети мир идёт только с обычной скоростью
             _acc += delta * _timeScale;
             if (_loading != null)
             {
@@ -1573,11 +1599,24 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 if (_craftReq < 0 && _craftPendLeft > 0) { _craftReq = _craftPendIdx; _craftPendLeft--; }
                 SandboxPreTick();
                 if (_uiReq == null && _uiQ.Count > 0) _uiReq = _uiQ.Dequeue();   // действия инвентаря — по одному за такт (и в обычной игре)
-                _server.Submit(_myId, BuildCmd());
-                var t0 = Time.GetTicksUsec();
-                _server.Tick();
-                _simTime += (Time.GetTicksUsec() - t0) / 1000.0;
-                _cur = _server.BuildSnapshot(_myId);
+                bool fresh = true;
+                if (_net != null)
+                {
+                    // клиент (D73): ввод — серверу, картинка — его снимки
+                    _net.SendInput(BuildCmd());
+                    var ns = _net.Take();
+                    if (ns != null) _cur = ns; else fresh = false;
+                }
+                else
+                {
+                    _server.Submit(_myId, BuildCmd());
+                    _host?.PreTick();
+                    var t0 = Time.GetTicksUsec();
+                    _server.Tick();
+                    _simTime += (Time.GetTicksUsec() - t0) / 1000.0;
+                    _host?.PostTick();
+                    _cur = _server.BuildSnapshot(_myId);
+                }
                 _reloadEdge = _interactEdge = _healEdge = _respawnEdge = _eatEdge = _debugEdge = _timeEdge = _bagEdge = _flyEdge = false;
                 _slot = _craftReq = -1;
                 _codeReq = null;
@@ -1586,7 +1625,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
                 _hammerOp = 0;
                 _researchReq = null;
                 if (_autoFireFrames > 0) _autoFireFrames--;
-                HandleEvents();
+                if (fresh) HandleEvents();
                 if (_cur.Sky != _wxShown) { if (_wxShown != null) _hud.Toast("Погода: " + Rastvordd.Sim.SkyInfo.Names[(int)_cur.Sky]); _wxShown = _cur.Sky; }   // тихое объявление смены погоды
                 _acc -= World.Dt;
                 steps++;

@@ -770,7 +770,7 @@ namespace Rastvordd.Sim
                     Sprinting = a.Vel.Length() > World.WalkSpeed + 0.3f,
                     Crouching = a.Crouching,
                     Swimming = a.Swimming,
-                    Label = BotLabel(a.Id),
+                    Label = BotLabel(a.Id) ?? (a.Team == Team.Player && !a.IsBot && !a.Spectator && a.Id != me.Id ? a.Name : null),   // сеть (D73): над другими людьми — имя
                     Worn = WornIds(a),
                     Z = a.Z, Floor = a.Floor, Flying = a.Flying,
                 });

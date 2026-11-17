@@ -66,8 +66,54 @@ namespace Rastvordd.Client
         public event Action WipeRequested, SaveRequested, Closed;
         public event Action<bool> FpsToggled, PostToggled;
         public event Action<int> QualityChanged;
+        public event Action HostToggled, LeaveRequested;          // сеть (D73)
+        public event Action<string, string> JoinRequested;        // адрес, имя
         Button _wipe;
         bool _wipeArmed;
+        LineEdit _addr, _name;
+        Button _hostBtn, _joinBtn;
+        Label _netStatus;
+
+        /// <summary>Сеть: хост ли этот ПК, в чужой ли игре, что показать строкой состояния.</summary>
+        public void SetNet(bool hosting, bool client, string status)
+        {
+            if (_hostBtn == null) return;
+            _hostBtn.Text = hosting ? "Закрыть сервер" : "Открыть сервер (друзья зайдут к тебе)";
+            _hostBtn.Visible = !client;
+            _joinBtn.Text = client ? "Отключиться" : "Подключиться";
+            _joinBtn.Disabled = hosting && !client;
+            _addr.Editable = _name.Editable = !client;
+            _netStatus.Text = status;
+        }
+
+        void NetSection(VBoxContainer box)
+        {
+            Section(box, "Сеть — игра с друзьями");
+            var cfg = new ConfigFile();
+            cfg.Load("user://net.cfg");
+            _hostBtn = UiTheme.Btn("Открыть сервер (друзья зайдут к тебе)");
+            _hostBtn.Pressed += () => HostToggled?.Invoke();
+            box.AddChild(_hostBtn);
+            var row = UiTheme.HBox(10);
+            _addr = new LineEdit { PlaceholderText = "адрес:порт, например 81.7.13.136:7777", Text = (string)cfg.GetValue("net", "addr", ""), SizeFlagsHorizontal = SizeFlags.ExpandFill };
+            _name = new LineEdit { PlaceholderText = "твоё имя", Text = (string)cfg.GetValue("net", "name", ""), CustomMinimumSize = new Vector2(150, 0) };
+            row.AddChild(_addr);
+            row.AddChild(_name);
+            _joinBtn = UiTheme.Btn("Подключиться");
+            _joinBtn.Pressed += () =>
+            {
+                if (_joinBtn.Text == "Отключиться") { LeaveRequested?.Invoke(); return; }
+                cfg.SetValue("net", "addr", _addr.Text.Trim());
+                cfg.SetValue("net", "name", _name.Text.Trim());
+                cfg.Save("user://net.cfg");
+                JoinRequested?.Invoke(_addr.Text.Trim(), _name.Text.Trim());
+            };
+            row.AddChild(_joinBtn);
+            box.AddChild(row);
+            _netStatus = UiTheme.Caption("");
+            _netStatus.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+            box.AddChild(_netStatus);
+        }
 
         public SettingsWindow()
         {
@@ -104,6 +150,7 @@ namespace Rastvordd.Client
             };
             row.AddChild(_wipe);
             box.AddChild(row);
+            NetSection(box);
 
             // ---- графика ----
             Section(box, "Графика");

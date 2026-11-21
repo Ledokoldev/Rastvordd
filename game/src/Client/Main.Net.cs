@@ -10,10 +10,13 @@ namespace Rastvordd.Client
     public partial class Main
     {
         /// <summary>Куда подключиться при старте сцены (адрес:порт), null — своя игра.</summary>
-        static string NetConnectTo;
-        static string NetName;
+        internal static string NetConnectTo;
+        internal static string NetName;
         /// <summary>Хост был открыт — после перезапуска сцены (вайп) открыть снова.</summary>
-        static int NetHostPort;
+        internal static int NetHostPort;
+        /// <summary>Сколько ботов (главное меню D74: 20), 0 — по аргументам.</summary>
+        internal static int MenuBots;
+        bool _bail;   // не подключились из меню — уходим обратно в меню, игру не строим
         static NetHost _liveHost;
         static NetClient _liveClient;
 
@@ -76,7 +79,8 @@ namespace Rastvordd.Client
             _liveClient = null;
             NetConnectTo = null;
             Input.MouseMode = Input.MouseModeEnum.Hidden;
-            GetTree().ReloadCurrentScene();   // обратно в свой мир (сохранение читается заново)
+            if (_net?.Error != null || _lostT >= 0) MainMenu.Message = "Связь с сервером потеряна" + (_net?.Error != null ? ": " + _net.Error : "");
+            GetTree().ChangeSceneToFile(MainMenu.MenuScene);   // в главное меню (D74); оттуда — своя игра или снова к другу
         }
 
         void NetStatus()
@@ -94,7 +98,7 @@ namespace Rastvordd.Client
             if (_net != null)
             {
                 _net.Poll();
-                if (_net.Lost && _lostT < 0) { _lostT = 0; _hud.Toast("Связь с сервером потеряна" + (_net.Error != null ? ": " + _net.Error : "") + " — возвращаемся в свой мир"); }
+                if (_net.Lost && _lostT < 0) { _lostT = 0; _hud.Toast("Связь с сервером потеряна" + (_net.Error != null ? ": " + _net.Error : "") + " — возвращаемся в меню"); }
                 if (_lostT >= 0 && (_lostT += GetProcessDeltaTime()) > 3) LeaveNet();
             }
             if ((_netStatusT += (float)GetProcessDeltaTime()) > 1)

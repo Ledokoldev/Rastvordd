@@ -10,3 +10,4 @@ docs/cinematic/
 
 # проброс через VPS (D73): frpc.exe и конфиг с токеном — только локально
 /tools/frp/
+/server.txt

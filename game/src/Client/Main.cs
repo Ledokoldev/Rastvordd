@@ -376,10 +376,15 @@ namespace Rastvordd.Client
                 var (nh, np) = SplitAddr(NetConnectTo);
                 var nc = new NetClient();
                 netFirst = nc.ConnectBlocking(nh, np, NetName ?? "Гость");
-                if (netFirst == null) { _netError = $"Не подключиться к {NetConnectTo}: {nc.Error}"; GD.PrintErr("сеть: " + _netError); NetConnectTo = null; }
+                if (netFirst == null)
+                {
+                    _netError = $"Не подключиться к {NetConnectTo}: {nc.Error}"; GD.PrintErr("сеть: " + _netError); NetConnectTo = null;
+                    if (conArg == null) { MainMenu.Message = _netError; _bail = true; GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, MainMenu.MenuScene); return; }   // из меню — обратно в меню
+                }
                 else { _net = nc; Rastvordd.Sim.World.NoScatter = nc.Info.NoScatter; GD.Print($"сеть: подключён к {nh}:{np}, персонаж {nc.Info.Id}"); }
             }
             _server = new LocalServer(_net != null ? _net.Info.Seed : seedArg != null && int.TryParse(seedArg.Substring(7), out int seedN) ? seedN : 1337);
+            if (MenuBots > 0 && _net == null) _server.BotCount = MenuBots;   // главное меню (D74): своя игра — 20 ботов
             // сохранение мира игрока — только при обычном запуске: любой отладочный флаг (прогоны ботов, скриншоты,
             // наблюдатель) работает со свежим миром и НЕ трогает сохранение (иначе тест перезапишет мир игрока)
             _saveEnabled = OS.GetCmdlineUserArgs().All(a => a.StartsWith("--bots=") || a.StartsWith("--near=") || a.StartsWith("--save=") || a == "--host" || a.StartsWith("--host="));   // --host (D73): своя игра, открытая друзьям   // --near — только встать у узла, мир свой   // своя игра (в т. ч. с --bots=N) сохраняется, отладочные запуски — нет
@@ -1449,7 +1454,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
 
         public override void _Notification(int what)
         {
-            if (what == NotificationWMCloseRequest) SaveWorld();
+            if (what == NotificationWMCloseRequest) { SaveWorld(); MainMenu.StopFrpc(); }
         }
 
         // ---------- цикл ----------
@@ -1551,6 +1556,7 @@ int bi = p.Length > 1 ? int.Parse(p[1]) : 0;
 
         public override void _Process(double delta)
         {
+            if (_bail) return;
             _procT0 = Time.GetTicksUsec();
             _frame++;
             UpdateFps(delta);
